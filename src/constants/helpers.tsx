@@ -476,7 +476,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         ? string()
           .min(10, "Mobile number is too short")
           .required(`${input.fieldLabel} is required`)
-        : string();
+        : string().min(10, "Mobile number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
         ? array().required(`${input.fieldLabel} is required`)
@@ -530,6 +530,14 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? array().required(`${input.fieldLabel} is required`)
         : array();
+    } else if (input.type === "colorPicker") {
+      schema[input.fieldName] = input.required
+        ? string().required(`${input.fieldLabel} is required`).nullable()
+        : string().nullable()
+    } else if (input.type === "multiImageUpload") {
+      schema[input.fieldName] = input.required
+        ? array().required(`${input.fieldLabel} is required`).nullable()
+        : array().nullable()
     } else {
       schema[input.fieldName] = input.required
         ? string().required(`${input.fieldLabel} is required`)
@@ -804,11 +812,9 @@ export const simplifyValues = (obj, fields) => {
   if (obj) {
     for (const fieldData of fields) {
       // if (fieldData.type === "multiSelect") {
-      //     if (Array.isArray(newObj[fieldData.fieldName])) {
-      //         newObj[fieldData.fieldName] = obj[fieldData.fieldName].join(", ");
-      //     } else {
-      //         newObj[fieldData.fieldName] = "";
-      //     }
+      //     if (Array.isArray(obj[fieldData.fieldName])) {
+      //         newObj[fieldData.fieldName] = obj[fieldData.fieldName].reduce
+      //     } 
       // } else if (
       if (fieldData.type === "switch" || fieldData.type === "checkBox") {
         newObj[fieldData.fieldName] = obj[fieldData.fieldName]

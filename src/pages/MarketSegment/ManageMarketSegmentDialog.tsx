@@ -28,6 +28,7 @@ const ManageMarketSegmentDialog = (props) => {
     const [formsData, setFormsData] = useState([]);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
+
     useEffect(() => {
         if (initialData.fields.length > 0) {
             setFormsData(setFieldsInAscendingOrder(initialData.fields));
@@ -113,7 +114,14 @@ const ManageMarketSegmentDialog = (props) => {
                 }) => (
                     <Fragment>
                         <CustomDialogHeader title={marketSegmentId ? "Update " + routes.marketSegment.title : "Create " + routes.marketSegment.title}
-                            onClose={() => setShowConfirmDialog(true)}
+                            onClose={() => {
+                                if (isFieldNotTouched({
+                                    fields: initialData.fields,
+                                    initialValues: initialData.values
+                                }, values)) onClose()
+                                else setShowConfirmDialog(true)
+                            }}
+
                         ></CustomDialogHeader>
                         <CustomDialogContent>
 
@@ -180,7 +188,10 @@ const ManageMarketSegmentDialog = (props) => {
                         <CustomDialogFooter>
                             <Button size="small" color="primary"
                                 onClick={() => {
-                                    if (isFieldNotTouched(initialData, values)) onClose()
+                                    if (isFieldNotTouched({
+                                        fields: initialData.fields,
+                                        initialValues: initialData.values
+                                    }, values)) onClose()
                                     else setShowConfirmDialog(true)
                                 }}
                             >Cancel</Button>
@@ -214,7 +225,7 @@ const ManageMarketSegmentDialog = (props) => {
             <Box p={2} height={500} bgcolor="white">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>}
-    </Dialog>
+    </Dialog >
     );
 }
 

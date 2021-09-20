@@ -50,7 +50,7 @@ export const SearchFilter = ({
   ];
 
   useEffect(() => {
-    setValue(filter);
+    setValue(filter.filter(d => allSearch.some(obj => obj.type === d.type)));
   }, [filter]);
 
   useEffect(() => {
@@ -64,7 +64,7 @@ export const SearchFilter = ({
       SearchActivity(inputValue)
         .then(({ data }) => {
           setLoading(false);
-          setOptions(data);
+          setOptions(data.filter(d => allSearch.some(obj => obj.type === d.type) || activityName ? d.type === activityName : d.type === "note"));
         })
         .catch((err) => {
           setLoading(false);
@@ -73,7 +73,7 @@ export const SearchFilter = ({
   }, [inputValue]);
 
   const handleChangeValue = (newValue) => {
-    setValue(newValue);
+    setValue(newValue.filter(d => allSearch.some(obj => obj.type === d.type)));
     handleChangeFilter(newValue);
   };
 

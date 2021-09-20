@@ -14,6 +14,7 @@ import { DeleteOutline } from "@material-ui/icons";
 
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import ConfirmationDialog from "../../Helpers/ConfirmationDialog";
 
 const useStyles = makeStyles(() => ({
   marginLeft: {
@@ -42,6 +43,8 @@ export const SubTask = ({
   const [isSubmitting, setSubmitting] = useState(false);
   const [taskName, setTaskName] = useState("");
   const [isError, setError] = useState(false);
+  const [deleteTaskId, setDeleteTaskId] = useState(null);
+  const [showConfirmBox, setShowConfirmBox] = useState(false);
 
   const handleSave = () => {
     if (taskName && taskName.length >= 3) {
@@ -72,19 +75,21 @@ export const SubTask = ({
     setId(id);
   };
 
-  const deleteTask = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
+  const deleteTask = () => {
 
-    if (!id) return;
+    if (!deleteTaskId) return;
 
     setTimeout(() => {
-      const updTasks = childTasks?.filter((t) => t._id !== id);
+      const updTasks = childTasks?.filter((t) => t._id !== deleteTaskId);
       setChildTasks(updTasks);
     }, 500);
 
     axiosInstance()
-      .delete(`/task/${id}`)
-      .then(() => { })
+      .delete(`/task/${deleteTaskId}`)
+      .then(() => {
+        setShowConfirmBox(false);
+        setDeleteTaskId(null)
+       })
       .catch((err) => {
         setToastConfig(err);
       });
@@ -93,99 +98,118 @@ export const SubTask = ({
   const classes = useStyles();
 
   return (
-    <Box>
-      {((childTasks && childTasks.length > 0) || openAddSub === true) && (
-        <Box mb={1}>
-          <div className="position-relative">
-            <h4
-              className="form-label-style"
-              title="Add Terms & Conditions"
-            >
-              Child Task
-            </h4>
-          </div>
-        </Box>
-      )}
-      {childTasks &&
-        childTasks.map((element, index) => (
-          <Box
-            key={index}
-            border={1}
-            onClick={() => handleOpenActivity(element._id)}
-            borderColor="grey.300"
-            p={1.5}
-            mb={1}
-            boxShadow={1}
-            borderRadius={4}
-            style={{ cursor: "pointer" }}
-          >
-            <Grid container spacing={1}>
-              <Grid item xs={6}>
-                <Typography variant="body1" color="primary">
-                  {element.name}
-                </Typography>
-              </Grid>
-              <Grid
-                item
-                xs={6}
-                container
-                justify="flex-end"
-                alignItems="center"
+    <>
+      <Box>
+        {((childTasks && childTasks.length > 0) || openAddSub === true) && (
+          <Box mb={1}>
+            <div className="position-relative">
+              <h4
+                className="form-label-style"
+                title="Add Terms & Conditions"
               >
-                <Chip size="small" label={element.status} color="primary" />
-                <Box mr={1} />
-                <IconButton
-                  size="small"
-                  color="default"
-                  onClick={(e) => deleteTask(e, element._id)}
+                Child Task
+              </h4>
+            </div>
+          </Box>
+        )}
+        {childTasks &&
+          childTasks.map((element, index) => (
+            <Box
+              key={index}
+              border={1}
+              onClick={() => handleOpenActivity(element._id)}
+              borderColor="grey.300"
+              p={1.5}
+              mb={1}
+              boxShadow={1}
+              borderRadius={4}
+              style={{ cursor: "pointer" }}
+            >
+              <Grid container spacing={1}>
+                <Grid item xs={6}>
+                  <Typography variant="body1" color="primary">
+                    {element.name}
+                  </Typography>
+                </Grid>
+                <Grid
+                  item
+                  xs={6}
+                  container
+                  justify="flex-end"
+                  alignItems="center"
                 >
-                  <DeleteOutline color="error" />
-                </IconButton>
+                  <Chip size="small" label={element.status} color="primary" />
+                  <Box mr={1} />
+                  <IconButton
+                    size="small"
+                    color="default"
+                    onClick={(e) => {
+                    setShowConfirmBox(true)
+                    setDeleteTaskId(element._id)
+                    e.stopPropagation();
+                      // deleteTask(e, element._id)
+                    }}
+                  >
+                    <DeleteOutline color="error" />
+                  </IconButton>
+                </Grid>
               </Grid>
-            </Grid>
+            </Box>
+          ))}
+        {openAddSub && (
+          <Box>
+            <TextField
+              variant="outlined"
+              type="text"
+              label="Task Name"
+              required={true}
+              name="name"
+              fullWidth
+              margin="dense"
+              onChange={(e) => setTaskName(e.target.value)}
+              error={isError && taskName.length < 3}
+              helperText={
+                isError &&
+                taskName.length < 3 &&
+                "Task name must be at least 3 letters"
+              }
+            />
+            <Box mt={1}>
+              <Button
+                color="primary"
+                size="small"
+                variant="contained"
+                disabled={!taskName || isSubmitting}
+                onClick={handleSave}
+              >
+                {isSubmitting ? <CircularProgress size={18} /> : "Create"}
+              </Button>
+              <Button
+                variant="contained"
+                size="small"
+                className={classes.marginLeft}
+                disableElevation
+                onClick={() => setOpenAddSub(false)}
+              >
+                {" "}
+                Cancel
+              </Button>
+            </Box>
           </Box>
-        ))}
-      {openAddSub && (
-        <Box>
-          <TextField
-            variant="outlined"
-            type="text"
-            label="Task Name"
-            required={true}
-            name="name"
-            fullWidth
-            margin="dense"
-            onChange={(e) => setTaskName(e.target.value)}
-            error={isError && taskName.length < 3}
-            helperText={
-              isError &&
-              taskName.length < 3 &&
-              "Task name must be at least 3 letters"
-            }
+        )}
+      </Box>
+      {
+        showConfirmBox && (
+          <ConfirmationDialog
+            open={showConfirmBox}
+            message={ `Are you sure you want to delete ${childTasks?.find((t) => t._id === deleteTaskId).name} ?` }
+            onClose={() => {
+              setShowConfirmBox(false);
+            }}
+            onOk={deleteTask}
           />
-          <Box mt={1}>
-            <Button
-              color="primary"
-              size="small"
-              variant="contained"
-              disabled={!taskName || isSubmitting}
-              onClick={handleSave}
-            >
-              {isSubmitting ? <CircularProgress size={18} /> : "Create"}
-            </Button>
-            <Button
-              variant="contained"
-              size="small"
-              className={classes.marginLeft}
-              disableElevation
-              onClick={() => setOpenAddSub(false)}
-            >
-              {" "}
-              Cancel
-            </Button>
-          </Box>
-        </Box>
-      )}
-    </Box>
+        )
+      }
+    </>
   );
 };

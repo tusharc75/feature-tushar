@@ -117,7 +117,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.addAdditionalOption = false;
       }
 
-      if (!values.addManualOptionInExcel && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown')) {
+      if (!values.addManualOptionInExcel && fieldData.type === 'dropDown') {
         values.addManualOptionInExcel = false;
       }
 
@@ -221,7 +221,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.addManualOptionInExcel = values.addManualOptionInExcel;
             ele.addAdditionalOption = values.addAdditionalOption;
             ele.lookup = values.lookup || false;
-            ele.lookupResource = values.lookup ? values.lookupResource : "" ;
+            ele.lookupResource = values.lookup ? values.lookupResource : "";
+            ele.isDropdown = values.isDropdown || false;
 
             if (values.hasOwnProperty('isWarningTooltip')) {
               ele.isWarningTooltip = values.isWarningTooltip;
@@ -238,7 +239,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             //   ele.fieldName = camelCase(ele.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''))
             // }
 
-            if (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect' || fieldData.type === 'radio' || fieldData.type === 'process') {
+            if (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect' || fieldData.type === 'radio' || fieldData.type === 'process' || ele.isDropdown) {
               if (fieldData.type === 'dropDown') {
                 ele.isDependentDropdown = values.isDependentDropdown;
                 ele.dropdowDependentOn = values.dropdowDependentOn;
@@ -260,7 +261,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             if (fieldData.type === 'decimal' || fieldData.type === 'converter' || fieldData.type === 'currencyAmount') {
               ele.decimalPlaces = values.decimalPlaces;
             }
-           
             if (fieldData.type === 'formula' || values.isFormula === true) {
               ele.formula = values.formula;
               ele.inputFields = values.inputFields;
@@ -298,6 +298,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               ele.formulaFields = values.formulaFields;
               ele.formulainputFields = values.formulainputFields;
               ele.formulaoption = values.formulaoption;
+            }
+            if (ele.isDropdown) {
+              ele.dropdownOnConverter = values.dropdownOnConverter;
             }
           }
         });
@@ -387,8 +390,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`}
         onClose={() => setShowConfirmDialog(true)}
       ></CustomDialogHeader>
-
-
       <Formik enableReinitialize={true} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} validate={validate}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <>
@@ -409,7 +410,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     helperText={touched['fieldLabel'] && errors['fieldLabel']}
                     onChange={(e) => setFieldValue('fieldLabel', e.target.value.trimStart())}
                   />
-
                   {(module === 'product-template' || module === 'price-template') && (
                     <Box mb={1}>
                       <TextField
@@ -519,10 +519,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'process') &&
                     !values['lookup'] &&
                     <Option
-                    values={values}
-                    setFieldValue={setFieldValue}
-                    fields={fields}
-                    _id={fieldData._id} />
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      fields={fields}
+                      _id={fieldData._id} />
                   }
                   {(values['type'] === 'currencyAmount' ||
                     values['type'] === 'decimal' ||
@@ -628,7 +628,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'decimal' ||
                     values['type'] === 'percent' ||
                     values['type'] === 'converter') &&
-                    module !== 'form-builder' && (
+                    module !== 'form-builder' &&
+                   (
                       <>
                         <br></br>
                         <FormControlLabel
@@ -638,6 +639,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                               checked={values['isVlookup']}
                               onChange={(e) => {
                                 setFieldValue('isVlookup', e.target.checked);
+                                setFieldValue('isDropdown', false);
                               }}
                               color="primary"
                             />
@@ -649,7 +651,32 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   {(values['isVlookup'] || values['type'] === 'vlookupDropdown') && (
                     <Vlookup fields={fields} values={values} setFieldValue={setFieldValue} touched={touched} errors={errors} _id={fieldData._id} />
                   )}
-
+                  {values['type'] === 'converter' && module !== 'form-builder' && (
+                    <>
+                      <br></br>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="isDropdown"
+                            checked={values['isDropdown']}
+                            onChange={(e) => {
+                              setFieldValue('isDropdown', e.target.checked);
+                              setFieldValue('isVlookup', false);
+                            }}
+                            color="primary"
+                          />
+                        }
+                        label="Dropdown"
+                      />
+                    </>
+                  )}
+                  {values['isDropdown'] &&
+                    <Option
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      fields={fields}
+                      _id={fieldData._id} />
+                  }
                   <Box pt={1} pb={1}>
                     <FormControlLabel
                       control={
@@ -781,6 +808,17 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         setFieldValue={setFieldValue}
                         isTooltip={false}
                       />
+                    ) : fieldData.type === 'colorPicker' && values['isDefaultValue'] ? (
+                      <Box>
+                        <input  
+                          value={values["defaultValue"]}
+                          type="color" 
+                          onChange={(e) => {
+                          setFieldValue("defaultValue", e.target.value)
+                          }} 
+                        />
+                        <Box component="span" ml={2}>{values["defaultValue"]}</Box>
+                      </Box> 
                     ) : values['isDefaultValue'] ? (
                       <Box display="block">
                         {module === 'pdf-template' &&
@@ -873,7 +911,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         label="Hidden Field"
                       />
                     ) : null}
-                    {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') ? (
+                    {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && (
                       <FormControlLabel
                         control={
                           <Checkbox
@@ -886,8 +924,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         }
                         label="Add Additional Option"
                       />
-                    ) : null}
-                    {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') ? (
+                    )}
+                    {fieldData.type === 'dropDown' && (
                       <FormControlLabel
                         control={
                           <Checkbox
@@ -900,7 +938,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         }
                         label="Add Manual Option In Excel"
                       />
-                    ) : null}
+                    )}
                     {fieldData.type === 'process' && (
                       <FormControlLabel
                         control={

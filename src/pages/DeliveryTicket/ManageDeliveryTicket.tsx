@@ -23,6 +23,7 @@ const ManageDeliveryTicket = (props) => {
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [formsData, setFormsData] = useState([]);
     const [isSubmitting, setSubmitting] = useState(false);
+    const [formValues, setFormValues] = useState({})
 
     useEffect(() => {
         if (initialData.fields.length > 0) {
@@ -41,6 +42,7 @@ const ManageDeliveryTicket = (props) => {
                         fields: fieldsDataForUpdate,
                         values: getObjKeysWithValues(data, fieldsDataForUpdate),
                     });
+                    setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate))
                 }).catch((error) => {
                     toastConfig.setToastConfig(error);
                 });
@@ -59,12 +61,14 @@ const ManageDeliveryTicket = (props) => {
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
                         values: tempInitialData,
                     });
+                    setFormValues(tempInitialData)
                 }
                 else {
                     setInitialData({
                         fields: fieldsDataForCreate,
                         values: getObjKeys("", fieldsDataForCreate),
                     });
+                    setFormValues(getObjKeys("", fieldsDataForCreate))
                 }
             }
         })
@@ -114,6 +118,13 @@ const ManageDeliveryTicket = (props) => {
         }
     };
 
+    const handleValuesChange = (data) => {
+        setFormValues((prevState) => ({
+            ...prevState,
+            ...data
+        }))
+    }
+
     return (<Dialog
         maxWidth="md"
         fullScreen={isMobile || isTablet}
@@ -128,7 +139,13 @@ const ManageDeliveryTicket = (props) => {
         }}
     >
         <CustomDialogHeader
-            onClose={() => setShowConfirmDialog(true)}
+            onClose={() => {
+                if (isFieldNotTouched({
+                    initialValues: initialData.values,
+                    fields: initialData.fields
+                }, formValues)) onClose()
+                else setShowConfirmDialog(true)
+            }}
             title={`${deliveryTicketId ? `Update  ` : "Create Loading Ticket"}`} />
 
         {loading || !initialData.fields.length ? (
@@ -185,7 +202,10 @@ const ManageDeliveryTicket = (props) => {
                                                                         name={field.fieldName}
                                                                         type={field.type}
                                                                         options={field.option}
-                                                                        setFieldValue={setFieldValue}
+                                                                        setFieldValue={(name, value) => {
+                                                                            handleValuesChange({ [name]: value })
+                                                                            setFieldValue(name, value)
+                                                                        }}
                                                                         required={field.required}
                                                                         fullWidth
                                                                         isTooltip={field?.isTooltip || false}
@@ -203,7 +223,10 @@ const ManageDeliveryTicket = (props) => {
                                                                     name={field.fieldName}
                                                                     type={field.type}
                                                                     options={field.option}
-                                                                    setFieldValue={setFieldValue}
+                                                                    setFieldValue={(name, value) => {
+                                                                        handleValuesChange({ [name]: value })
+                                                                        setFieldValue(name, value)
+                                                                    }}
                                                                     required={field.required}
                                                                     fullWidth
                                                                     isTooltip={field?.isTooltip || false}
@@ -231,7 +254,10 @@ const ManageDeliveryTicket = (props) => {
                                                     name={field.fieldName}
                                                     type={field.type}
                                                     options={field.option}
-                                                    setFieldValue={setFieldValue}
+                                                    setFieldValue={(name, value) => {
+                                                        handleValuesChange({ [name]: value })
+                                                        setFieldValue(name, value)
+                                                    }}
                                                     required={field.required}
                                                     fullWidth
                                                     isTooltip={field?.isTooltip || false}
@@ -251,7 +277,10 @@ const ManageDeliveryTicket = (props) => {
                                 size="small"
                                 disabled={isSubmitting || loading}
                                 onClick={() => {
-                                    if (isFieldNotTouched(initialData, values)) onClose()
+                                    if (isFieldNotTouched({
+                                        initialValues: initialData.values,
+                                        fields: initialData.fields
+                                    }, values)) onClose()
                                     else setShowConfirmDialog(true)
                                 }}
                             >

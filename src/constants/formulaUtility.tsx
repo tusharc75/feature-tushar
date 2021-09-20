@@ -102,7 +102,7 @@ const formatDecimal = (value, decimalPlaces) => {
 };
 
 export const handleAutoCalculation = (fieldData, fields, values, name, currency, unit, value) => {
-    let resultValues: any = { }
+    let resultValues: any = {}
     resultValues[name] = value;
     try {
         loop_count = 0;
@@ -153,7 +153,7 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
 const handleMulitFormula = (fieldData, fields, values, resultValues) => {
     fieldData.formulaFields.forEach((_field: any) => {
         if (resultValues[_field] === undefined) {
-            let formulainputFields: any = { };
+            let formulainputFields: any = {};
             fieldData.formulainputFields.forEach((_input: any) => {
                 formulainputFields[_input] = resultValues[_input] || resultValues[_input] === 0 ? resultValues[_input] : values[_input] ? values[_input] : 0;
             });
@@ -188,7 +188,7 @@ const handleFormula = (fieldData, fields, values, name, value, resultValues, isO
                 if (loop_count > 100) {
                     return resultValues
                 }
-                let inputFields = { };
+                let inputFields = {};
                 _data.inputFields.forEach((_input) => {
                     if (name === _input) {
                         inputFields[_input] = value;
@@ -353,6 +353,7 @@ const handleConverter = (fieldData, fields, values, name, _unit, value, resultVa
                 let fieldName = (name + "_" + x_unit.toLowerCase());
                 resultValues[fieldName] = calValue;
                 resultValues = handleFormula(fieldData, fields, values, fieldName, calValue, resultValues, true);
+                resultValues = handleCheckVlookupReverse(fieldData, fields, values, fieldName, calValue, resultValues);
             }
         }
     }
@@ -456,7 +457,7 @@ export const autoCalculate = (values: any, fieldList: any) => {
         if (ele.lookup || ele.isUneditable) {
         }
         else {
-            let calValues: any = { };
+            let calValues: any = {};
             if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
                 if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
                     ele.displayUnits && ele.displayUnits.forEach((_unit: any) => {
@@ -586,19 +587,19 @@ export const checkFormulaLoop = (fields) => {
             if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
                 if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
                     let fieldName = ele.fieldName + "_" + ele.displayUnits[0].toLowerCase();
-                    handleAutoCalculation(ele, fields, { }, fieldName, "", ele.displayUnits[0], 1)
+                    handleAutoCalculation(ele, fields, {}, fieldName, "", ele.displayUnits[0], 1)
                 }
                 else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
                     let fieldName = ele.fieldName + "_" + ele.displayCurrency[0].toLowerCase() + "_" + ele.displayUnits[0].toLowerCase();
-                    handleAutoCalculation(ele, fields, { }, fieldName, ele.displayCurrency[0], ele.displayUnits[0], 1)
+                    handleAutoCalculation(ele, fields, {}, fieldName, ele.displayCurrency[0], ele.displayUnits[0], 1)
                 }
                 else if (ele.type === 'currencyAmount') {
                     let fieldName = ele.fieldName + "_" + ele.displayCurrency[0].toLowerCase();
-                    handleAutoCalculation(ele, fields, { }, fieldName, ele.displayCurrency[0], "", 1)
+                    handleAutoCalculation(ele, fields, {}, fieldName, ele.displayCurrency[0], "", 1)
                 }
             }
             else {
-                handleAutoCalculation(ele, fields, { }, ele.fieldName, "", "", 1)
+                handleAutoCalculation(ele, fields, {}, ele.fieldName, "", "", 1)
             }
             if (loop_count > 100) {
                 is_loop = true
@@ -661,7 +662,7 @@ export const checkUniqueValidation = (checkinFields, checkfromFields) => {
 
 export const checkFieldDependency = (fieldId, sectionId, section) => {
     try {
-        var fieldData: any = { }
+        var fieldData: any = {}
         section.forEach((row) => {
             if (row.sectionId.toString() === sectionId.toString()) {
                 if (row.field.filter(i => i._id.toString() === fieldId.toString()).length) {
@@ -722,6 +723,19 @@ export const checkFieldDependency = (fieldId, sectionId, section) => {
     catch (e) {
         return { error: true, message: "Error in Delete" }
     }
+}
+
+export const optionConverter = (option, units, unitoption, dropdownOnConverter, _unit) => {
+    const result = JSON.parse(JSON.stringify(option))
+    let indexConverter = units.indexOf(dropdownOnConverter);
+    if (indexConverter >= 0 && unitoption) {
+        result.forEach((ele) => {
+            const calValue = (ele.optionValue * unitoption[indexConverter][_unit]).toString()
+            ele.optionLabel = calValue
+            ele.optionValue = calValue
+        })
+    }
+    return result;
 }
 
 // export const checkFormula = (formula) => {

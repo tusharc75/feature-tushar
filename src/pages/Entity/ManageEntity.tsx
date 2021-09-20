@@ -41,6 +41,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {} }) => {
 
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [formValues, setFormValues] = useState({})
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -81,6 +82,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {} }) => {
           fields: fieldsData,
           values: isNew ? getObjKeys("", fieldsData) : getObjKeysWithValues(values, fieldsData),
         });
+        setFormValues(isNew ? getObjKeys("", fieldsData) : getObjKeysWithValues(values, fieldsData))
         setLoading(false);
       })
       .catch((err) => {
@@ -131,6 +133,13 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {} }) => {
     }
   };
 
+  const handleValuesChange = (data) => {
+    setFormValues((prevState) => ({
+      ...prevState,
+      ...data
+    }))
+  }
+
   return (
     <Dialog
       open={open}
@@ -144,7 +153,13 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {} }) => {
       fullScreen={isMobile}
     >
       <CustomDialogHeader title={isNew ? "Create New Entities" : "Update Entity"}
-        onClose={() => setShowConfirmDialog(true)} />
+        onClose={() => {
+          if (isFieldNotTouched({
+            ...initialData,
+            initialValues: initialData.values,
+          }, formValues)) close()
+          else setShowConfirmDialog(true)
+        }} />
 
       {loading || !initialData.fields.length ? (
         <>
@@ -199,7 +214,10 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {} }) => {
                                       name={field.fieldName}
                                       type={field.type}
                                       options={parentEntityDataSource}
-                                      setFieldValue={setFieldValue}
+                                      setFieldValue={(name, value) => {
+                                        handleValuesChange({ [name]: value })
+                                        setFieldValue(name, value)
+                                      }}
                                       required={field.required}
                                       fullWidth
                                       isTooltip={field?.isTooltip || false}
@@ -217,7 +235,10 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {} }) => {
                                       name={field.fieldName}
                                       type={field.type}
                                       options={field.option}
-                                      setFieldValue={setFieldValue}
+                                      setFieldValue={(name, value) => {
+                                        handleValuesChange({ [name]: value })
+                                        setFieldValue(name, value)
+                                      }}
                                       required={field.required}
                                       fullWidth
                                       isTooltip={field?.isTooltip || false}
@@ -253,7 +274,10 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {} }) => {
                   disabled={isSubmitting || loading}
 
                   onClick={() => {
-                    if (isFieldNotTouched(initialData, values)) close()
+                    if (isFieldNotTouched({
+                      ...initialData,
+                      initialValues: initialData.values
+                    }, values)) close()
                     else setShowConfirmDialog(true)
                   }}
                 >

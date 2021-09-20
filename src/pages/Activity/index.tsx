@@ -12,6 +12,7 @@ import CustomContainer from "../../components/CustomContainer";
 
 import routes from "../../components/Helpers/Routes";
 import "./style.scss";
+import ActivityModelHandler from "../../components/Activity/ActivityModelHandler";
 
 const capitalize = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -36,6 +37,7 @@ const Activity = ({ type }) => {
 
   const [viewType, setViewType] = useState(0);
   const [filter, setFilter] = useState([]);
+  const [selectedActivityId, setSelectedActivityId] = useState(null);
 
   useEffect(() => {
     if (referenceType) {
@@ -51,11 +53,20 @@ const Activity = ({ type }) => {
 
   const tabs = ["Board", "Roadmap"];
   const handleChangeFilter = (value) => {
-    setFilter(value);
+    setFilter(value.filter(d => d.type !== type));
+    let tempActivity = value.filter(d => d.type === type && d._id !== undefined)
+    if (tempActivity.length === 1) {
+      setSelectedActivityId(tempActivity[0]._id)
+    }
+    else {
+      setSelectedActivityId(null)
+    }
     history.replace({
       search: "",
     });
   };
+
+
 
   return (
     <Fragment>
@@ -92,7 +103,14 @@ const Activity = ({ type }) => {
           {viewType === 1 && <Roadmap type={type} filter={filter} />}
         </Box>
       </CustomContainer>
-
+      {selectedActivityId && (
+        <ActivityModelHandler
+          setActivityData={setSelectedActivityId}
+          activityType={type}
+          fetchBoard={() => { }}
+          activityId={selectedActivityId}
+        />
+      )}
     </Fragment>
   );
 };

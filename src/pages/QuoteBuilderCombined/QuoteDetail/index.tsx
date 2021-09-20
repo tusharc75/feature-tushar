@@ -99,7 +99,7 @@ export default function QuoteDetail() {
   const [reopenReasonDialog, setReopenReasonDialog] = useState(false);
   const [reopenReason, setReopenReason] = useState("");
   const [quoteReOpening, setQuoteReOpening] = useState(false);
-
+  const [editCurrency, setEditCurrency] = useState(false);
   const [showActivity, setActivityShow] = useState(true);
   const [tabValue, setTabValue] = useState(0);
   const [relatedTo, setRelatedTo] = useState({});
@@ -215,7 +215,12 @@ export default function QuoteDetail() {
   };
 
   const handleOpenUpdateDialog = () => {
-    setOpenUpdateDialog(true);
+    axiosInstance()
+      .get(`/quote-builder/can-update-currency/${id}`)
+      .then(({ data: { data } }) => {
+        setEditCurrency(data)
+        setOpenUpdateDialog(true);
+      })
   };
 
   const handleOpenCloneDialog = () => {
@@ -722,6 +727,7 @@ export default function QuoteDetail() {
               setIsQuoteClone(false)
               setOpenUpdateDialog(false);
               fetchQuoteData(currentVersion);
+              fetchRelatedTo()
             }}
             onClose={() => {
               setOpenUpdateDialog(false);
@@ -735,7 +741,7 @@ export default function QuoteDetail() {
             contactId={null}
             opportunityId={null}
             disableOwnerDropDown={true}
-            disableCurrency={true}
+            editCurrency={editCurrency}
             quoteApproved={isQuoteClone ? false : ifQuoteApproved.approved}
             cloneQuoteWithVersionNumber={cloneQuoteWithVersionNumber}
             doaCollaboratorResources={user.user?.doa?.map(obj => obj.user)}

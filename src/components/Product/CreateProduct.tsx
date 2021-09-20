@@ -18,11 +18,12 @@ import IconButton from '@material-ui/core/IconButton';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { AddField } from '../FormBuilder/AddField';
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition } from "./../../constants/helpers";
+import { CustomDialogTransition, isFieldNotTouched } from "./../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import CreateProductCategory from "../../pages/ProductCategory/CreateProductCategory";
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { autoCalculateSpecificFields } from "../../constants/formulaUtility";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog";
 
 const ignoreField = ["priceTemplate"]
 
@@ -47,7 +48,8 @@ const CreateProduct = (props) => {
     const [productCategoryDataSource, setProductCategoryDataSource] = useState([]);
     const [newProductCategoryId, setNewProductCategoryId] = useState(null);
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
-
+    const [formValues, setFormValues] = useState({})
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [currencySymbol, setCurrencySymbol] = useState(null);
 
     useEffect(() => {
@@ -92,6 +94,7 @@ const CreateProduct = (props) => {
                         fields: newField,
                         values: data.productData
                     });
+                    setFormValues(data.productData)
                     EvaluteproductFields(newField)
                     handleChangeCategory(data.productData.productCategory, "", false, null)
                 }).catch((error) => {
@@ -103,6 +106,7 @@ const CreateProduct = (props) => {
                     fields: _fields,
                     values: getObjKeys('', _fields),
                 });
+                setFormValues(getObjKeys('', _fields))
                 EvaluteproductFields(_fields)
             }
 
@@ -155,6 +159,7 @@ const CreateProduct = (props) => {
                     delete data.fields
                     data.productId = data._id
                     delete data._id
+                    data.isEditable = true
                     addProductInBuilder([data])
                 }
             }).catch((error) => {
@@ -212,6 +217,10 @@ const CreateProduct = (props) => {
                                         productTemplate: defaultproductTemplate, priceTemplate: defaultpriceTemplate
                                     },
                                 });
+                                setFormValues({
+                                    ...getObjKeys('', newField), ...ref.current.values,
+                                    productTemplate: defaultproductTemplate, priceTemplate: defaultpriceTemplate
+                                })
                                 EvaluteproductFields(newField)
                             });
                         });
@@ -240,6 +249,7 @@ const CreateProduct = (props) => {
                             fields: newField,
                             values: { ...getObjKeys('', newField), ...ref.current.values, productTemplate: result[0].optionValue, priceTemplate: defaultpriceTemplate },
                         });
+                        setFormValues({ ...getObjKeys('', newField), ...ref.current.values, productTemplate: result[0].optionValue, priceTemplate: defaultpriceTemplate })
                         EvaluteproductFields(newField)
                     });
                 });
@@ -276,6 +286,7 @@ const CreateProduct = (props) => {
             fields: newField,
             values: { ...getObjKeys('', newField), ...ref.current.values, ...extraCalculatedValue },
         });
+        setFormValues({ ...getObjKeys('', newField), ...ref.current.values, ...extraCalculatedValue })
         EvaluteproductFields(newField)
         setSectionName("")
         setIsAddField(false)
@@ -287,6 +298,7 @@ const CreateProduct = (props) => {
             fields: newField,
             values: { ...getObjKeys('', newField), ...ref.current.values },
         });
+        setFormValues({ ...getObjKeys('', newField), ...ref.current.values })
         setFields(fields.filter((_f) => _f._id !== field._id))
         EvaluteproductFields(newField)
     }
@@ -303,6 +315,12 @@ const CreateProduct = (props) => {
         }
         return values;
     };
+    const handleValuesChange = (data) => {
+        setFormValues((prevState) => ({
+            ...prevState,
+            ...data
+        }))
+    }
 
     return (<Dialog
         maxWidth="md"
@@ -310,6 +328,11 @@ const CreateProduct = (props) => {
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
+        onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+                setShowConfirmDialog(true)
+            }
+        }}
         fullWidth
     >
         {initialData && initialData.fields.length ?
@@ -327,7 +350,14 @@ const CreateProduct = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={`${(productId && !isClone) ? "Edit" : "New"} Product`} onClose={handleClose}></CustomDialogHeader>
+                        <CustomDialogHeader title={`${(productId && !isClone) ? "Edit" : "New"} Product`}
+                            onClose={() => {
+                                if (isFieldNotTouched({
+                                    initialValues: initialData.values,
+                                    fields: initialData.fields
+                                }, formValues)) handleClose()
+                                else setShowConfirmDialog(true)
+                            }}></CustomDialogHeader>
                         <CustomDialogContent>
                             <Box>
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
@@ -371,7 +401,10 @@ const CreateProduct = (props) => {
                                                                             label={field.fieldLabel}
                                                                             name={field.fieldName}
                                                                             type={field.type}
-                                                                            setFieldValue={setFieldValue}
+                                                                            setFieldValue={(name, value) => {
+                                                                                handleValuesChange({ [name]: value })
+                                                                                setFieldValue(name, value)
+                                                                            }}
                                                                             required={field.required}
                                                                             fullWidth
                                                                             isTooltip={field.isTooltip}
@@ -382,6 +415,7 @@ const CreateProduct = (props) => {
                                                                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
                                                                                 handleChangeCategory(val && val.optionValue ? val.optionValue : "",
                                                                                     val && val.optionLabel ? val.optionLabel : "", true, null)
+                                                                                handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
                                                                             }}
                                                                             size="small"
                                                                             values={
@@ -440,7 +474,10 @@ const CreateProduct = (props) => {
                                                                         name={field.fieldName}
                                                                         type={field.type}
                                                                         options={field.option}
-                                                                        setFieldValue={setFieldValue}
+                                                                        setFieldValue={(name, value) => {
+                                                                            handleValuesChange({ [name]: value })
+                                                                            setFieldValue(name, value)
+                                                                        }}
                                                                         required={field.required}
                                                                         fullWidth
                                                                         isTooltip={field?.isTooltip || false}
@@ -452,9 +489,11 @@ const CreateProduct = (props) => {
                                                                                     field.fieldName,
                                                                                     val.currencyCode
                                                                                 );
+                                                                                handleValuesChange({ [field.fieldName]: val.currencyCode })
                                                                                 setCurrencySymbol(val.symbolNative);
                                                                             } else {
                                                                                 setFieldValue(field.fieldName, "");
+                                                                                handleValuesChange({ [field.fieldName]: "" })
                                                                                 setCurrencySymbol(null);
                                                                             }
                                                                         }}
@@ -483,7 +522,10 @@ const CreateProduct = (props) => {
                                                                         name={field.fieldName}
                                                                         type={field.type}
                                                                         options={field.option}
-                                                                        setFieldValue={setFieldValue}
+                                                                        setFieldValue={(name, value) => {
+                                                                            handleValuesChange({ [name]: value })
+                                                                            setFieldValue(name, value)
+                                                                        }}
                                                                         required={field.required}
                                                                         fullWidth
                                                                         isTooltip={field?.isTooltip || false}
@@ -514,6 +556,7 @@ const CreateProduct = (props) => {
                                                                                 field.fieldName,
                                                                                 value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
                                                                             );
+                                                                            handleValuesChange({ [field.fieldName]: value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [] })
                                                                             handleChangeCategory(values.productCategory, "", true,
                                                                                 value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [])
                                                                         }}
@@ -533,7 +576,10 @@ const CreateProduct = (props) => {
                                                                             name={field.fieldName}
                                                                             type={field.type}
                                                                             options={productTemplate}
-                                                                            setFieldValue={setFieldValue}
+                                                                            setFieldValue={(name, value) => {
+                                                                                handleValuesChange({ [name]: value })
+                                                                                setFieldValue(name, value)
+                                                                            }}
                                                                             required={field.required}
                                                                             fullWidth
                                                                             isTooltip={field.isTooltip}
@@ -541,6 +587,7 @@ const CreateProduct = (props) => {
                                                                             disableClearable
                                                                             onChange={(e, val) => {
                                                                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                                handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
                                                                                 handleChangeProductTemplate(val && val.optionValue ? val.optionValue : "")
                                                                             }}
                                                                             size="small"
@@ -560,7 +607,10 @@ const CreateProduct = (props) => {
                                                                                 name={field.fieldName}
                                                                                 type={field.type}
                                                                                 options={priceTemplate}
-                                                                                setFieldValue={setFieldValue}
+                                                                                setFieldValue={(name, value) => {
+                                                                                    handleValuesChange({ [name]: value })
+                                                                                    setFieldValue(name, value)
+                                                                                }}
                                                                                 required={field.required}
                                                                                 fullWidth
                                                                                 isTooltip={field.isTooltip}
@@ -568,6 +618,7 @@ const CreateProduct = (props) => {
                                                                                 disableClearable
                                                                                 onChange={(e, val) => {
                                                                                     setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                                    handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
                                                                                 }}
                                                                                 size="small"
                                                                             />
@@ -585,7 +636,10 @@ const CreateProduct = (props) => {
                                                                                 name={field.fieldName}
                                                                                 type={field.type}
                                                                                 options={field.option}
-                                                                                setFieldValue={setFieldValue}
+                                                                                setFieldValue={(name, value) => {
+                                                                                    handleValuesChange({ [name]: value })
+                                                                                    setFieldValue(name, value)
+                                                                                }}
                                                                                 required={field.required}
                                                                                 fullWidth
                                                                                 isTooltip={field.isTooltip}
@@ -611,7 +665,10 @@ const CreateProduct = (props) => {
                                                                                             name={field.fieldName}
                                                                                             type={field.type}
                                                                                             options={field.option}
-                                                                                            setFieldValue={setFieldValue}
+                                                                                            setFieldValue={(name, value) => {
+                                                                                                handleValuesChange({ [name]: value })
+                                                                                                setFieldValue(name, value)
+                                                                                            }}
                                                                                             required={field.required}
                                                                                             fullWidth
                                                                                             isTooltip={field.isTooltip}
@@ -642,7 +699,13 @@ const CreateProduct = (props) => {
                             </Box>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
+                            <Button size="small" color="primary" onClick={() => {
+                                if (isFieldNotTouched({
+                                    initialValues: initialData.values,
+                                    fields: initialData.fields
+                                }, values)) handleClose()
+                                else setShowConfirmDialog(true)
+                            }}>Cancel</Button>
                             <CustomButton
                                 loading={loading}
                                 variant="contained"
@@ -654,6 +717,20 @@ const CreateProduct = (props) => {
                                 onClick={submitForm}
                             > Save</CustomButton>
                         </CustomDialogFooter>
+                        {
+                            showConfirmDialog ?
+                                <ConfirmCancelDialog
+                                    open={showConfirmDialog}
+                                    onSave={() => {
+                                        setShowConfirmDialog(false)
+                                        submitForm()
+                                    }}
+                                    onClose={() => {
+                                        setShowConfirmDialog(false)
+                                        handleClose()
+                                    }}
+                                /> : null
+                        }
                     </Fragment>
                 )}
             </Formik> :

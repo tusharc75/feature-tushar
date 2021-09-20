@@ -10,11 +10,11 @@ import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import CreateProduct from "../../components/Product/CreateProduct";
-import { GiAbstract055 } from 'react-icons/gi';
+import { RiShoppingBag3Fill } from 'react-icons/ri';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { ExpandMore } from "@material-ui/icons";
-import { Box, Menu, MenuItem } from "@material-ui/core";
+import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
@@ -42,13 +42,6 @@ var levalOrderBy = [
     "price-builder-custom",
 ];
 
-const mappedProductCategoryColor = {
-    Iron: "#D9E1C1",
-    Block: "#F2EAE0",
-    Paloma: "#EDE0E7",
-    FB: "#EDE0E7",
-    Valves: "#BED8E2"
-}
 const Product = () => {
 
     const toastConfig = useContext(CustomToastContext)
@@ -66,15 +59,6 @@ const Product = () => {
     const {
         state: { permissions, selectedEntity },
     }: any = useData();
-
-    const getRowStyleScheduled = (params) => {
-        if (params?.data?.productCategory && mappedProductCategoryColor[params?.data?.productCategory]) {
-            return {
-                'background-color': `${mappedProductCategoryColor[params?.data?.productCategory]}`,
-            }
-        }
-        return null;
-    };
 
     useEffect(() => {
         fetchProduct()
@@ -114,6 +98,7 @@ const Product = () => {
                     updatedByDate: u.updatedBy?.date,
                     entity: firstEntity?.optionLabel,
                     entityId: firstEntity?.optionValue,
+                    productCategoryChipColor: u.productCategory.chipColour,
                     restEntity: restEntity,
                 }
                 for (let col in res) {
@@ -187,11 +172,15 @@ const Product = () => {
                             col.headerName = ele.fieldLabel;
                             col.width = 180;
                             col.show = true
+                            col.cellRenderer = "commonRenderer"
                             if (ele.fieldName === "productName") {
                                 col.cellRenderer = "productNameRenderer"
                             }
                             if (ele.fieldName === "entity") {
                                 col.cellRenderer = "entityRenderer"
+                            }
+                            if (ele.fieldName === "productCategory") {
+                                col.cellRenderer = "productCategoryRenderer"
                             }
                             col.order = ele.order;
                             col.leval = ele.leval;
@@ -209,9 +198,7 @@ const Product = () => {
                     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer", leval: "price-builder-custom" },
                 )
             }
-
             const columnState = JSON.parse(localStorage.getItem("productPage"));
-
             if (columnState) {
                 column.forEach((item) => {
                     columnState.forEach((d) => {
@@ -221,14 +208,11 @@ const Product = () => {
                     });
                 });
             }
-
             setColumns(column);
-
             dispatch({ type: "initialize", data: data.data, count: data.count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
-
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
@@ -304,6 +288,21 @@ const Product = () => {
             <NoDataCell />
         );
 
+    const ProductCategoryRenderer = (params) => (
+        <> {params.data.productCategory !== undefined && params.data.productCategoryChipColor !== null ?
+            (
+                <Chip
+                    className="ml-3"
+                    style={{ backgroundColor: `${params.data.productCategoryChipColor}` }}
+                    label={`${params.data.productCategory}`}
+                />
+            )
+            : (
+                <NoDataCell />
+            )}
+        </>
+    );
+
     const ActionsRenderer = params => (
         <>
             {productPermissions.isCreate &&
@@ -359,6 +358,7 @@ const Product = () => {
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer,
         entityRenderer: EntityNameRenderer,
+        productCategoryRenderer: ProductCategoryRenderer,
         commonRenderer: CommonRenderer,
     };
 
@@ -398,7 +398,7 @@ const Product = () => {
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <GiAbstract055 className="headerLogo" /> <span className="listingHeader">{routes.product.title} </span>
+                        <RiShoppingBag3Fill size={22} style={{ paddingBottom: "3px" }} className="headerLogo" /> <span className="listingHeader">{routes.product.title} </span>
                     </Grid>
                     <Grid xs={6} container className={styles.filter_side} >
                         <Box className={styles.filter_side_header} component="div" >
@@ -457,7 +457,6 @@ const Product = () => {
                     actionWidth={150}
                     loading={loading}
                     renderedFrom="productPage"
-                    customGridOptions={{ getRowStyle: getRowStyleScheduled }}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>

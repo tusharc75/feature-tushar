@@ -15,10 +15,12 @@ import {
   RadioGroup,
   Switch,
   TextField,
-  Tooltip,
   Typography,
   useTheme,
   Dialog,
+  ImageList,
+  ImageListItem,
+  ImageListItemBar,
 } from '@material-ui/core';
 import { result, find, throttle } from 'lodash';
 import DateUtils from '@date-io/date-fns';
@@ -32,7 +34,7 @@ import parse from 'autosuggest-highlight/parse';
 import { withStyles } from '@material-ui/core/styles';
 import { green, red } from '@material-ui/core/colors';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import { handleAutoCalculation } from '../../constants/formulaUtility';
+import { handleAutoCalculation, optionConverter } from '../../constants/formulaUtility';
 import NumberFormat from 'react-number-format';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
@@ -52,6 +54,9 @@ import CreditCardIcon from '@material-ui/icons/CreditCard';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
+import HtmlTooltip from '../CustomTooltipTitle';
+import ImageCropTool from '../ImageCropTool';
+
 
 const filter = createFilterOptions();
 
@@ -89,9 +94,9 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
         </Box>}
       </Grid>
       <Grid item xs={1} sm={1} md={1}>
-        <Tooltip title={info}>
+        <HtmlTooltip title={<Typography>{info}</Typography>}>
           <InfoIcon color="disabled" />
-        </Tooltip>
+        </HtmlTooltip>
       </Grid>
     </Grid>
   ) : doNotShowInfoTooltip ? (
@@ -146,58 +151,59 @@ const GreenSwitch = withStyles({
 })(Switch);
 
 const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen }) => {
-  const [values, setValues] = React.useState([]);
+  //const [values, setValues] = React.useState([]);
   const [inputVal, setInputVal] = React.useState("")
+  const [error, setError] = React.useState(null)
 
   const handleChange = (val) => {
-    setValues(val)
+    val = val.trimStart()
+    setInputVal(val)
 
+    if (error) {
+      setError(null)
+    }
   }
 
   const onSave = () => {
-    const order = options.length
-    const filteredArr = values.filter(val => options.filter(op => op.optionValue === val).length === 0)
-    const newOptions = filteredArr.map((val, i) => ({ order: order + i, default: false, optionLabel: val, optionValue: val }))
-    addFieldOption(filteredArr.map((val, i) => ({ order: order + i, default: false, optionLabel: val, optionValue: val })))
-    setOptions([...options, ...newOptions])
-    setOpen(false)
+    const val = inputVal.trimEnd().toLowerCase()
 
+    const foundSame = options.find(o => o.optionLabel.toLowerCase() === val) || null;
+    if (foundSame) {
+      setError(`"${val}" already exists in the options`)
+    } else {
+      setError(null)
+      const order = options.length
+      const newOption = { order: order, default: false, optionLabel: inputVal, optionValue: inputVal }
+      addFieldOption([newOption])
+      setOptions([...options, newOption])
+      setOpen(false)
+    }
   }
 
   return (
     <div>
       <Dialog fullWidth maxWidth="sm" open keepMounted onClose={() => setOpen(false)}>
-        <CustomDialogHeader onClose={() => setOpen(false)} title="Add New Options" />
+        <CustomDialogHeader onClose={() => setOpen(false)} title="Add New Option" />
         <CustomDialogContent>
-          <Autocomplete
-            multiple
-            disableCloseOnSelect={true}
+          <TextField
             size="small"
             fullWidth
-            freeSolo
-            value={values}
-            options={[]}
-            renderTags={(value: string[], getTagProps) =>
-              value.map((option: string, index: number) =>
-                <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
-            }
-            onChange={(_, val) => handleChange(val)}
-            onInputChange={((_, val) => setInputVal(val))}
-            renderInput={(params) => <TextField {...params}
-              variant="outlined"
-              label="Options"
-              style={{ whiteSpace: 'nowrap' }}
-              margin="dense"
-              placeholder="New Option" />
-            }
+            value={inputVal}
+            onChange={(event) => handleChange(event.target.value)}
+            variant="outlined"
+            label="Options"
+            style={{ whiteSpace: 'nowrap' }}
+            margin="dense"
+            placeholder="New Option"
+            error={Boolean(error)}
+            helperText={error}
           />
-          <Typography variant="caption" color="textSecondary">Press "Enter" to save an option</Typography>
         </CustomDialogContent>
         <CustomDialogFooter>
           <Button variant="outlined" color="primary" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button variant="contained" disabled={!Boolean(values.length)} color="primary" onClick={onSave}>
+          <Button variant="contained" disabled={!Boolean(inputVal)} color="primary" onClick={onSave}>
             Save
           </Button>
         </CustomDialogFooter>
@@ -251,6 +257,9 @@ const FormTypes = (props) => {
     ...rest
   } = props;
 
+  const [image, setImage] = React.useState<any>("");
+  const [imageFileName, setImageFileName] = React.useState<any>("");
+  const [readingImage, setReadingImage] = React.useState<any>(false);
   const [optionsList, setOptions] = React.useState([]);
   const [option, setOptionsList] = React.useState([]);
   const [optionSaveDialog, setOptionSaveDialog] = React.useState(false);
@@ -372,7 +381,7 @@ const FormTypes = (props) => {
   };
 
   // For public upload
-  const getImageUrl = (file) => {
+  const getImageUrl = (file, multiple=null) => {
     setImageUploadProgress(0);
     let formData = new FormData();
     formData.append('file', file);
@@ -400,10 +409,20 @@ const FormTypes = (props) => {
         }
       })
       .then(({ data }) => {
-        setFieldValue(name, data.fileUrl);
+        if (!multiple) {
+          setFieldValue(name, data.fileUrl);
+        } else {
+          setImage("")
+          setFieldValue(name, [...values[name], data.fileUrl]);
+          setImageFileName("")
+        }
         setImgUploading(false);
       })
       .catch((err) => {
+        if (multiple) {
+          setImage("")
+          setImageFileName("")
+        }
         setImgUploading(false);
         setToastConfig(err);
         setImageUploadProgress(0);
@@ -475,6 +494,29 @@ const FormTypes = (props) => {
 
     axiosInstance().post('field/add-field-option', data);
   };
+
+  const readImageFile = (e) => {
+    setReadingImage(true)
+    const file = e.target.files[0];
+    setImageFileName(file.name.toString().split('.')[0])
+    let reader = new FileReader();
+
+    
+    reader.onload = async (e) => {
+      const result = await e.target?.result
+      setImage(result);
+      setReadingImage(false)
+    };
+
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  } 
+
+    const removeImage = (img) => {
+      const updatedArr = values[name].filter((i) => i !== img);
+      setFieldValue(name, updatedArr);
+    };
 
   const handleChange = (name, value) => {
     const result = handleAutoCalculation(fieldData, fields, values, name, '', '', value);
@@ -1019,28 +1061,55 @@ const FormTypes = (props) => {
         <Box display="flex">
           <Box flexGrow={1}>
             <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
-              <TextField
-                {...rest}
-                variant="outlined"
-                type="number"
-                label={label + ' ' + _unit}
-                name={name + '_' + _unit.toLowerCase()}
-                required={required}
-                value={values[name + '_' + _unit.toLowerCase()]}
-                error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
-                helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
-                ref={inputNumberRef}
-                onChange={onChange ? onChange : (e) => handleConverterChange(name, _unit, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))}
-                InputProps={{
-                  inputProps: { min: 0 },
-                  readOnly: fieldData && fieldData.isUneditable ? true : false
-                }}
-              />
+              {fieldData.isDropdown ?
+                <Autocomplete
+                  {...rest}
+                  options={optionConverter(option, fieldData.units, fieldData.unitoption, fieldData.dropdownOnConverter, _unit)}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  value={
+                    optionConverter(option, fieldData.units, fieldData.unitoption, fieldData.dropdownOnConverter, _unit)
+                      .filter((data) => data.optionValue.toString() === values[name + '_' + _unit.toLowerCase()]?.toString()).length
+                      ? optionConverter(option, fieldData.units, fieldData.unitoption, fieldData.dropdownOnConverter, _unit)
+                        .filter((data) => data.optionValue.toString() === values[name + '_' + _unit.toLowerCase()]?.toString())[0] : ''
+                  }
+                  onChange={onChange ? onChange : (e, val) =>
+                    handleConverterChange(name, _unit, val && parseFloat(val.optionValue))}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      name={name + '_' + _unit.toLowerCase()}
+                      label={label + ' ' + _unit}
+                      variant="outlined"
+                      error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
+                      helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
+                      required={required}
+                    />
+                  )}
+                />
+                : <TextField
+                  {...rest}
+                  variant="outlined"
+                  type="number"
+                  label={label + ' ' + _unit}
+                  name={name + '_' + _unit.toLowerCase()}
+                  required={required}
+                  value={values[name + '_' + _unit.toLowerCase()]}
+                  error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
+                  helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
+                  ref={inputNumberRef}
+                  onChange={onChange ? onChange : (e) => handleConverterChange(name, _unit, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))}
+                  InputProps={{
+                    inputProps: { min: 0 },
+                    readOnly: fieldData && fieldData.isUneditable ? true : false
+                  }}
+                />
+              }
             </InfoLabel>
           </Box>
           {i === 0 && fieldData.displayUnits.length !== fieldData.units.length && (
             <Box>
-              <Tooltip title="Add Converter" className="formActionButton">
+              <HtmlTooltip title="Add Converter" className="formActionButton">
                 <IconButton
                   onClick={() => {
                     setIsExtraDispayType(true);
@@ -1050,15 +1119,15 @@ const FormTypes = (props) => {
                 >
                   <SwapHorizIcon />
                 </IconButton>
-              </Tooltip>
+              </HtmlTooltip>
               {(fieldData.leval === 'product-custom' ||
                 fieldData.leval === 'product-builder-custom' ||
                 fieldData.leval === 'price-builder-custom') && (
-                  <Tooltip title="Remove">
+                  <HtmlTooltip title="Remove">
                     <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
                       <HighlightOffIcon color="error" />
                     </IconButton>
-                  </Tooltip>
+                  </HtmlTooltip>
                 )}
               {isExtraDispayType && (
                 <AddDisplayTypeDialog
@@ -1072,11 +1141,11 @@ const FormTypes = (props) => {
           )}
           {fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit) && (
             <Box>
-              <Tooltip title="Remove" className="formActionButton">
+              <HtmlTooltip title="Remove" className="formActionButton">
                 <IconButton onClick={() => handleRemoveDisplayType('converter', fieldData, _unit)} color="primary" size="small">
                   <HighlightOffIcon color="error" />
                 </IconButton>
-              </Tooltip>
+              </HtmlTooltip>
             </Box>
           )}
         </Box>
@@ -1150,7 +1219,7 @@ const FormTypes = (props) => {
               </Box>
               {i === 0 && j === 0 && (
                 <Box>
-                  <Tooltip title="Add Currency" className="formActionButton">
+                  <HtmlTooltip title="Add Currency" className="formActionButton">
                     <IconButton
                       onClick={() => {
                         setIsExtraDispayType(true);
@@ -1161,18 +1230,18 @@ const FormTypes = (props) => {
                     >
                       <CreditCardIcon />
                     </IconButton>
-                  </Tooltip>
+                  </HtmlTooltip>
                   {(fieldData.leval === 'product-custom' ||
                     fieldData.leval === 'product-builder-custom' ||
                     fieldData.leval === 'price-builder-custom') && (
-                      <Tooltip title="Remove">
+                      <HtmlTooltip title="Remove">
                         <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
                           <HighlightOffIcon color="error" />
                         </IconButton>
-                      </Tooltip>
+                      </HtmlTooltip>
                     )}
                   {fieldData.displayUnits.length !== fieldData.units.length && (
-                    <Tooltip title="Add Converter" className="formActionButton">
+                    <HtmlTooltip title="Add Converter" className="formActionButton">
                       <IconButton
                         onClick={() => {
                           setIsExtraDispayType(true);
@@ -1183,7 +1252,7 @@ const FormTypes = (props) => {
                       >
                         <SwapHorizIcon />
                       </IconButton>
-                    </Tooltip>
+                    </HtmlTooltip>
                   )}
                   {isExtraDispayType && (
                     <AddDisplayTypeDialog
@@ -1200,11 +1269,11 @@ const FormTypes = (props) => {
               )}
               {i === 0 && fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit) && (
                 <Box>
-                  <Tooltip title="Remove" className="formActionButton">
+                  <HtmlTooltip title="Remove" className="formActionButton">
                     <IconButton onClick={() => handleRemoveDisplayType('converter', fieldData, _unit)} color="primary" size="small">
                       <HighlightOffIcon color="error" />
                     </IconButton>
-                  </Tooltip>
+                  </HtmlTooltip>
                 </Box>
               )}
               {j === 0 &&
@@ -1212,11 +1281,11 @@ const FormTypes = (props) => {
                 fieldData.fieldChanges.displayCurrency &&
                 fieldData.fieldChanges.displayCurrency.includes(_currency) && (
                   <Box>
-                    <Tooltip title="Remove" className="formActionButton">
+                    <HtmlTooltip title="Remove" className="formActionButton">
                       <IconButton onClick={() => handleRemoveDisplayType('currency', fieldData, _currency)} color="primary" size="small">
                         <HighlightOffIcon color="error" />
                       </IconButton>
-                    </Tooltip>
+                    </HtmlTooltip>
                   </Box>
                 )}
             </Box>
@@ -1289,7 +1358,7 @@ const FormTypes = (props) => {
             </Box>
             {i === 0 && (
               <Box>
-                <Tooltip title="Add Currency" className="formActionButton">
+                <HtmlTooltip title="Add Currency" className="formActionButton">
                   <IconButton
                     onClick={() => {
                       setIsExtraDispayType(true);
@@ -1299,15 +1368,15 @@ const FormTypes = (props) => {
                   >
                     <CreditCardIcon />
                   </IconButton>
-                </Tooltip>
+                </HtmlTooltip>
                 {(fieldData.leval === 'product-custom' ||
                   fieldData.leval === 'product-builder-custom' ||
                   fieldData.leval === 'price-builder-custom') && (
-                    <Tooltip title="Remove">
+                    <HtmlTooltip title="Remove">
                       <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
                         <HighlightOffIcon color="error" />
                       </IconButton>
-                    </Tooltip>
+                    </HtmlTooltip>
                   )}
                 {isExtraDispayType && (
                   <AddDisplayTypeDialog
@@ -1321,11 +1390,11 @@ const FormTypes = (props) => {
             )}
             {fieldData.fieldChanges && fieldData.fieldChanges.displayCurrency && fieldData.fieldChanges.displayCurrency.includes(_currency) && (
               <Box>
-                <Tooltip title="Remove" className="formActionButton">
+                <HtmlTooltip title="Remove" className="formActionButton">
                   <IconButton onClick={() => handleRemoveDisplayType('currency', fieldData, _currency)} color="primary" size="small">
                     <HighlightOffIcon color="error" />
                   </IconButton>
-                </Tooltip>
+                </HtmlTooltip>
               </Box>
             )}
           </Box>
@@ -1697,9 +1766,9 @@ const FormTypes = (props) => {
           </IconButton>
           {isTooltip && Boolean(tooltipMessage) && (
             <IconButton size="small">
-              <Tooltip title={tooltipMessage}>
+              <HtmlTooltip title={tooltipMessage}>
                 <InfoIcon color="disabled" />
-              </Tooltip>
+              </HtmlTooltip>
             </IconButton>
           )}
           <Box flex="1">
@@ -1724,9 +1793,9 @@ const FormTypes = (props) => {
         {/* <Typography color="textSecondary">{label}</Typography> */}
         {isTooltip && Boolean(tooltipMessage) && (
           <IconButton size="small">
-            <Tooltip title={tooltipMessage}>
+            <HtmlTooltip title={tooltipMessage}>
               <InfoIcon color="disabled" />
-            </Tooltip>
+            </HtmlTooltip>
           </IconButton>
         )}
         <Box mr={1} />
@@ -1882,6 +1951,78 @@ const FormTypes = (props) => {
         />
       </MuiPickersUtilsProvider>
     </InfoLabel>
+  ) : type === 'colorPicker' ? (
+      <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
+        <Box display="flex" alignItems="center">
+          <Typography color="textSecondary">{label}</Typography>
+          <Box ml={2} display='flex' alignContent="center">
+            <input type="color" name={name} value={values[name]} onChange={(e) => setFieldValue(name, e.target.value)} />
+          </Box>
+        </Box>
+        { touched[name] && Boolean(errors[name]) && (
+          <Typography variant="caption" color='error'>
+            {errors[name]}
+          </Typography>)
+        }
+      </InfoLabel>
+  ) : type === 'multiImageUpload' ? (
+      <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
+        <Typography color="textSecondary">{label}</Typography>
+        <input
+          accept="image/*"
+          style={{display: "none"}}
+          id="multiple-images-button"
+          multiple
+          type="file"
+          onChange={readImageFile}
+        />
+        <label htmlFor="multiple-images-button">
+          <Button disabled={readingImage} variant="contained" color="primary" component="span">
+            Upload
+          </Button>
+        </label>
+        <Box mt={1}>
+          <Typography color="textSecondary">{values[name].length > 0 ? "Images Preview" : "No Images"}</Typography>
+          <Box display="flex" flexWrap="wrap" justifyContent="space-arounf" overflow="hidden">
+          <ImageList style={{flexWrap: "nowrap", transform: 'translateZ(0)'}}>
+            {values[name]? values[name].map((item, i) => (
+              <ImageListItem style={{height: '100px', width: "33.3%"}} key={item}> 
+                <img src={item} alt={`demo ${i + 1}`} />
+                <ImageListItemBar
+                  title={''}
+                  actionIcon={
+                    <IconButton onClick={() => removeImage(item)} aria-label={`demo ${i + 1}`}>
+                      <DeleteIcon color="error" />
+                    </IconButton>
+                  }
+                />
+              </ImageListItem>
+            )) : null}
+          </ImageList>
+          </Box>
+        </Box>
+        <Dialog fullWidth maxWidth="md" open={Boolean(image) || isImgUploading} onClose={() => {
+           if(!isImgUploading) {
+             setImage("")
+           }
+          }}>
+         <CustomDialogHeader onClose={() => {
+           if(!isImgUploading) {
+            setImage("")
+          }
+         }} title="Edit Image"/>
+         <CustomDialogContent>
+           <ImageCropTool 
+              image={image} 
+              setImage={setImage} 
+              getImageUrl={getImageUrl} 
+              isImgUploading={isImgUploading} 
+              imageUploadProgress={imageUploadProgress}
+              imageFileName={imageFileName}
+            />
+         </CustomDialogContent>
+        </Dialog>
+      </InfoLabel>
   ) : null;
 };
 

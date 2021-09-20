@@ -56,7 +56,7 @@ const Board = ({ type, filter }) => {
     if (!resource) return;
     setLoadingResources(true);
     axiosInstance()
-      .get(`${kebabCase(resource)}?limit=100`)
+      .get(`${getApi(resource)}?limit=100`)
       .then(({ data: { data } }) => {
         if (data.length) {
           const mappedData = data.map((_d) => getData(resource, _d));
@@ -107,8 +107,8 @@ const Board = ({ type, filter }) => {
   const updateStatus = (id: string, updatedData: any) => {
     axiosInstance()
       .put(`${type}/${id}`, { status: updatedData.status })
-      .then(({ data }) => {})
-      .catch((err) => {});
+      .then(({ data }) => { })
+      .catch((err) => { });
   };
 
   const resourceOptions = [
@@ -118,7 +118,22 @@ const Board = ({ type, filter }) => {
     "Supplier Contact",
     "Lead",
     "Opportunity",
+    "Quote",
+    "Rental Management",
+    "Loading Ticket",
+    "Project Sales",
   ];
+
+  const getApi = (resource: string) => {
+    switch (kebabCase(resource)) {
+      case "loading-ticket":
+        return "delivery-ticket";
+        case "quote":
+          return "quote-builder";
+      default:
+        return kebabCase(resource);
+    }
+  };
 
   const getData = (resource: string, data: any) => {
     switch (kebabCase(resource)) {
@@ -150,6 +165,26 @@ const Board = ({ type, filter }) => {
       case "supplier-contact":
         return {
           name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+          id: data._id,
+        };
+      case "loading-ticket":
+        return {
+          name: `${data.deliveryJobName}`,
+          id: data._id,
+        };
+      case "quote":
+        return {
+          name: `${data.quoteName}`,
+          id: data._id,
+        };
+      case "rental-management":
+        return {
+          name: `${data.rentalJobName}`,
+          id: data._id,
+        };
+      case "project-sales":
+        return {
+          name: `${data.projectName}`,
           id: data._id,
         };
       default:

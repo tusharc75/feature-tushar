@@ -189,7 +189,7 @@ const AssignRolesDialog = ({
           size="small"
           variant="contained"
         >
-          {isAssigning ? <CircularProgress size={22} /> : isRenderedFromUserSetUp ? "Save & Continue" : "Save"}
+          {isAssigning ? <CircularProgress size={22} /> : isRenderedFromUserSetUp ? "Save & Finish" : "Save"}
         </Button>
       </CustomDialogFooter>
       

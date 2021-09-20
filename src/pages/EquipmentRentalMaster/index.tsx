@@ -3,7 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-import { GiAbstract055 } from 'react-icons/gi';
+import { DiRequirejs } from 'react-icons/di';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { Box } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
@@ -171,7 +171,7 @@ const EquipmentRentalMaster = () => {
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <GiAbstract055 className="headerLogo" /> <span className="listingHeader">{routes.equiptmentRentalMaster.title} </span>
+                        <DiRequirejs size={25} style={{paddingBottom: "3px"}} className="headerLogo" /> <span className="listingHeader">{routes.equiptmentRentalMaster.title} </span>
                     </Grid>
                     <Grid xs={6} container className={styles.filter_side} >
                         <Box className={styles.filter_side_header} component="div" >

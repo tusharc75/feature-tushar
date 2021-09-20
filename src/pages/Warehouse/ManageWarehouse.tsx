@@ -102,7 +102,13 @@ const ManageWarehouse = (props) => {
                     <Fragment>
                         <CustomDialogHeader
                             title={addressResourceId ? "Update " + routes.address.title : "Create " + routes.address.title}
-                            onClose={() => setShowConfirmDialog(true)}></CustomDialogHeader>
+                            onClose={() => {
+                                if (isFieldNotTouched({
+                                    initialValues: initialData.values,
+                                    fields: initialData.fields
+                                }, values)) onClose()
+                                else setShowConfirmDialog(true)
+                            }}></CustomDialogHeader>
                         <CustomDialogContent>
                             <Form autoComplete="off" autoCorrect="off" noValidate >
                                 <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
@@ -120,7 +126,10 @@ const ManageWarehouse = (props) => {
                         <CustomDialogFooter>
                             <Button size="small" color="primary"
                                 onClick={() => {
-                                    if (isFieldNotTouched(initialData, values)) onClose()
+                                    if (isFieldNotTouched({
+                                        initialValues: initialData.values,
+                                        fields: initialData.fields
+                                    }, values)) onClose()
                                     else setShowConfirmDialog(true)
                                 }}
                             >Cancel</Button>

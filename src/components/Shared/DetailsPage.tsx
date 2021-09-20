@@ -4,11 +4,12 @@ import {
   makeStyles,
   Typography,
   Box,
-  Tooltip,
   Avatar,
   IconButton,
   CircularProgress,
   Link as MuiLink,
+  ImageList,
+  ImageListItem
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { GetApp, InfoOutlined, InsertDriveFile } from "@material-ui/icons";
@@ -21,6 +22,8 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { useData } from "../../StateProvider/Provider";
 import CopyToClipboard from "../Helpers/CopyToClipboard";
 import { displayDate, getUniqueCurrencies } from "../../constants/helpers";
+import HtmlTooltip from "../CustomTooltipTitle";
+import CarouselDialog from "../CarouselDialog";
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -37,6 +40,22 @@ const useStyles = makeStyles((theme) => ({
       whiteSpace: "nowrap",
       width: "250px"
     },
+  },
+  imageListContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    overflow: 'hidden',
+    backgroundColor: theme.palette.background.paper,
+  },
+  imageListItem: {
+    height: "50px !important",
+    width: "33.33% !important"
+  },
+  imageList: {
+    flexWrap: 'nowrap',
+    // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
+    transform: 'translateZ(0)',
   },
   popoverText: {
     textOverflow: "ellipsis",
@@ -76,6 +95,7 @@ const Details = (props: DetailProps) => {
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
+  const [dialogData, setDialogData] = useState<any>(null);
 
   useEffect(() => {
     sortArray();
@@ -215,7 +235,7 @@ const Details = (props: DetailProps) => {
    * Render Link  or Typography component
    */
   const renderData = (val: any, fieldData: any) => {
-
+    
     const value = normalizeValues(val, fieldData);
     if (fieldData.hasOwnProperty("lookup") && fieldData.lookup && permissions[camelCase(fieldData.lookupResource)]?.isRead && !unlinkFields.includes(fieldData.lookupResource)) {
       if (fieldData.type === "multiSelect" || fieldData.type === "dropDown") {
@@ -277,7 +297,31 @@ const Details = (props: DetailProps) => {
         );
       }
     } else {
-      return (
+      return fieldData.type === "multiImageUpload" ? 
+       
+      <div className={classes.imageListContainer}>
+        <ImageList className={classes.imageList} cols={2.5}>
+          {val[fieldData.fieldName].map((item, i) => (
+            <ImageListItem className={classes.imageListItem} key={item}>
+              <img 
+                className="cursor-pointer"
+                onClick={() => {
+                  setDialogData({index: i, open: true, images: val[fieldData.fieldName]})
+                }} 
+                src={item} alt={item}
+              />
+            </ImageListItem>
+          ))}
+        </ImageList>
+      </div>
+      
+      : fieldData.type === "colorPicker" ?
+        <Box display="flex" alignItems="center">
+          <Box width={16} height={16} borderRadius={"50%"} bgcolor={value} />
+          <Typography variant="body2" className={classes.fieldText}>{value}</Typography>
+        </Box>
+      
+      : (
         <Typography
           title={value === "-" ? "" : value}
           className={classes.fieldText}
@@ -345,12 +389,12 @@ const Details = (props: DetailProps) => {
                             </h4>
                             <Box marginX="2px" />
                             {field.fieldData.isTooltip && (
-                              <Tooltip title={field.fieldData.tooltipMessage}>
+                              <HtmlTooltip title={field.fieldData.tooltipMessage}>
                                 <InfoOutlined
                                   style={{ width: 18, height: 18 }}
                                   color="disabled"
                                 />
-                              </Tooltip>
+                              </HtmlTooltip>
                             )}
                           </Box>
                         </Grid>
@@ -442,6 +486,11 @@ const Details = (props: DetailProps) => {
           )
         );
       })}
+      {dialogData && dialogData.open && <CarouselDialog
+        index={dialogData.index}
+        close={() => setDialogData(null)}
+        images={dialogData.images}
+      />}
     </div>
   );
 };

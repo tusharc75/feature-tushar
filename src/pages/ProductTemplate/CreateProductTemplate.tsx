@@ -8,7 +8,7 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { FormBuilder } from "../../components/FormBuilder";
 import { Formik, Form } from "formik";
 import { object, string } from "yup";
-import { camelCase } from "../../constants/helpers";
+import { camelCase, isFieldNotTouched } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -54,6 +54,7 @@ const ProductTemplate = () => {
     const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(true)
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
+    const [formValues, setFormValues] = useState({})
 
     const {
         state: { user, permissions },
@@ -69,7 +70,13 @@ const ProductTemplate = () => {
         if (hasPermissionToUpdate) {
             e.preventDefault();
             window.history.pushState(null, null, window.location.pathname);
-            setShowConfirmDialog(true)
+            if (isFieldNotTouched({
+                initialValues: initialValues,
+                fields: productField
+            }, formValues)) {
+                history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : "/product-Template" })
+            }
+            else setShowConfirmDialog(true)
         }
     }
 
@@ -100,7 +107,9 @@ const ProductTemplate = () => {
 
     const fetchOneProductTemplate = () => {
         if (id === "0") {
-            setInitialValues({ name: "", productCategory: "", entity: [], owner: user.user._id, collaborator: [], isStandard: false });
+            let initialData = { name: "", productCategory: "", entity: [], owner: user.user._id, collaborator: [], isStandard: false }
+            setInitialValues(initialData);
+            setFormValues(initialData)
             axiosInstance().get(`/product-template/default-field`).then(({ data: { data } }) => {
                 const _data = []
                 const _section = uniq(map(data.fields, 'sectionName'));
@@ -125,6 +134,7 @@ const ProductTemplate = () => {
                     data.owner = user.user._id
                 }
                 setInitialValues(data);
+                setFormValues(data)
                 setSection(data.section);
                 if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator.some(d => d === user.user._id)) {
                     setHasPermissionToUpdate(false)
@@ -261,7 +271,12 @@ const ProductTemplate = () => {
         reader.readAsBinaryString(f)
     }
 
-
+    const handleValuesChange = (data) => {
+        setFormValues((prevState) => ({
+            ...prevState,
+            ...data
+        }))
+    }
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
@@ -319,7 +334,10 @@ const ProductTemplate = () => {
                                             value={values["name"]}
                                             error={touched["name"] && Boolean(errors["name"])}
                                             helperText={touched["name"] && errors["name"]}
-                                            onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
+                                            onChange={(e) => {
+                                                handleValuesChange({ name: e.target.value.trimStart() })
+                                                setFieldValue("name", e.target.value.trimStart())
+                                            }}
                                         />
                                     </Grid>
                                     <Grid item xs={12} sm={1}>
@@ -331,6 +349,7 @@ const ProductTemplate = () => {
                                                         name="isStandard"
                                                         checked={values["isStandard"]}
                                                         onChange={(e) => {
+                                                            handleValuesChange({ isStandard: e.target.checked })
                                                             setFieldValue("isStandard", e.target.checked)
                                                         }}
                                                         color="primary"
@@ -351,8 +370,10 @@ const ProductTemplate = () => {
                                                 : ""
                                             }
                                             onChange={(e, val) => {
+                                                handleValuesChange({ productCategory: val && val._id ? val._id : "" })
                                                 setFieldValue("productCategory", val && val._id ? val._id : "")
                                                 if (val && val.name) {
+                                                    handleValuesChange({ name: val.name })
                                                     setFieldValue("name", val.name);
                                                 }
                                             }}
@@ -404,6 +425,7 @@ const ProductTemplate = () => {
                                                 ? user?.entity.filter((data) => values["entity"]?.some(d => d === data._id))
                                                 : []}
                                             onChange={(e, val) => {
+                                                handleValuesChange({ entity: val && val?.map(d => d._id) })
                                                 setFieldValue("entity", val && val?.map(d => d._id))
                                                 val && val.length !== 0 ?
                                                     setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => val?.some(d => data.entities?.some(e => e.entity === d._id))))
@@ -432,6 +454,7 @@ const ProductTemplate = () => {
                                                 : ""}
                                             options={ownerCollaboratorData.filter(user => !values["collaborator"]?.some((d) => (user._id === d)))}
                                             onChange={(e, val) => {
+                                                handleValuesChange({ owner: val && val._id ? val._id : "" })
                                                 setFieldValue("owner", val && val._id ? val._id : "");
                                             }}
                                             onOpen={() =>
@@ -464,8 +487,10 @@ const ProductTemplate = () => {
                                                 ? ownerCollaboratorData.filter((data) => values["collaborator"]?.some(d => d === data._id))
                                                 : []}
                                             onChange={(e, val) => {
+                                                handleValuesChange({ collaborator: val && val?.map(d => d._id) })
                                                 setFieldValue("collaborator", val && val?.map(d => d._id))
                                             }}
+
                                             onOpen={() =>
                                                 values["entity"] && values["entity"].length !== 0 ?
                                                     setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d))))

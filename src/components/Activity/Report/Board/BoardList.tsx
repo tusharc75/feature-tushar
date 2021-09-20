@@ -53,7 +53,7 @@ export const BoardList = ({
     [subActivity]
   );
 
-  const [{}, drop] = useDrop({
+  const [{ }, drop] = useDrop({
     accept: "move",
     drop: (data: any) => {
       handleChangeStatus(data.id, status, data.index);

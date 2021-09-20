@@ -10,6 +10,7 @@ import { Button } from "@material-ui/core";
 import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDeliveryTicketDialog, rentalManagementId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -72,9 +73,13 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
   );
 
   const TicketRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
-      {params.value}
-    </Link>
+    params?.value ? (
+      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
+        {params.value}
+      </Link>
+    ) : (
+      <NoDataCell />
+    )
   );
 
   const frameworkComponents = {
@@ -94,6 +99,18 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
     { field: "dueDate", headerName: "End Date", show: true, cellRenderer: "dateRenderer" },
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
   ];
+
+  const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageDeliveryTicket"));
+  if (columnState) {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
+        if (d.colId === item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
+
   return (<>
 
     <Box display="flex" justifyContent="flex-end">
@@ -182,7 +199,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
           page={page}
           allowAction={false}
           loading={loading}
-          renderedFrom="deliveryTicket"
+          renderedFrom="rentalManagementDetailsPageDeliveryTicket"
         />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
 

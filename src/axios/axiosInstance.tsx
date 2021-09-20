@@ -69,11 +69,11 @@ export default (history = null, passedHeaders = null) => {
                     reject({ open: true, type: "error", message: err.error });
                 })
             }
-            if(error.request.responseType === "arraybuffer"){
+            if (error.request.responseType === "arraybuffer") {
                 const enc = new TextDecoder("utf-8");
                 const data = enc.decode(error.response.data);
                 const err = JSON.parse(data);
-                return new Promise((resolve, reject) => reject({ open: true, type: "error", message: err.error }));
+                return new Promise((resolve, reject) => reject({ open: true, type: "error", message: err.error, }));
             }
 
             if (error.message == "Network Error") {
@@ -89,10 +89,16 @@ export default (history = null, passedHeaders = null) => {
             }
 
             if (error.response.data && error.response.data.code && Object.values(ERROR_CODE).some(s => s === error.response.data.code)) {
+                localStorage.removeItem("selectedEntity");
+
                 if (window.confirm((`${error.response.data.error}\n\nPress Ok to redirect to home\nPress Cancel to stay here`))) {
                     //@ts-ignore
                     window.location = "/";
                 }
+            } else if (error.response.data && error.response.data.code && error.response.data.code === "1005") {
+                return new Promise((resolve, reject) => {
+                    reject({ open: true, type: "notFoundError", message: "" });
+                });
             }
             else {
                 if (error.response.status === 401) {

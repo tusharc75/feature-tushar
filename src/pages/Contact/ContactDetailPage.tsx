@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom';
 import contactClass from './contact.module.scss';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { useData } from '../../StateProvider/Provider';
-import { contactPage } from '../../routes/Contacts';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import axiosInstance from './../../axios/axiosInstance';
 import Activity from '../../components/Activity';
@@ -35,6 +34,7 @@ import ProcessFlow from '../../components/ProcessFlow';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import routes from '../../components/Helpers/Routes';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -326,10 +326,9 @@ const ContactDetailsPage = (props) => {
       setShowConfirmBox(false);
     }
   };
+
   const goBackToListing = () => {
-    history.push({
-      pathname: contactPage.path
-    });
+    history.push(`/${contactRoute}`);
   };
 
   const handleAllowToEditList = (contactDetails) => {

@@ -71,14 +71,14 @@ export default function ManageQuoteDialog({
   currency = null,
   estimatedAmount = null,
   doaCollaboratorResources = null,
-  disableCurrency = false,
+  editCurrency = false,
   quoteApproved = false,
   isRenderedFromProjectSales = false,
   cloneQuoteWithVersionNumber = 0,
   isCreateQuoteFromCart = false,
   onHandleSubmit = null,
   isFromProjectSales = false,
-  projectSalesTeam = []
+  projectSalesTeam = [],
 }) {
   const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
@@ -92,6 +92,8 @@ export default function ManageQuoteDialog({
     fields: [],
     initialValues: {},
   });
+
+  const [formValues, setFormValues] = useState({})
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [formsData, setFormsData] = useState([]);
@@ -477,6 +479,7 @@ export default function ManageQuoteDialog({
             fields: newFields,
             initialValues: getObjKeysWithValues(rest, newFields),
           })
+          setFormValues(getObjKeysWithValues(rest, newFields))
         }
         else {
           setEntityData({
@@ -485,6 +488,7 @@ export default function ManageQuoteDialog({
               ? initialData
               : getObjKeysWithValues(dataToUpdate, newFields),
           })
+          setFormValues(isNew ? initialData : getObjKeysWithValues(dataToUpdate, newFields))
         }
       });
   };
@@ -756,7 +760,12 @@ export default function ManageQuoteDialog({
         simplifyValues(values, entityData.fields)
       ).toString()
   }
-
+  const handleValuesChange = (data) => {
+    setFormValues((prevState) => ({
+      ...prevState,
+      ...data
+    }))
+  }
   return (
     <>
       <Dialog
@@ -774,7 +783,8 @@ export default function ManageQuoteDialog({
         <CustomDialogHeader
           title={isNew ? "Create Quote" : isClone ? `Clone ${dataToUpdate.quoteName}` : `Editing ${dataToUpdate.quoteName}`}
           onClose={(e, reason) => {
-            setShowConfirmDialog(true)
+            if (isFieldNotTouched(entityData, formValues)) onClose()
+            else setShowConfirmDialog(true)
           }}
         />
 
@@ -826,7 +836,10 @@ export default function ManageQuoteDialog({
                                         type={field.type}
                                         disabled={!isClone ? (isRenderedFromOpportunity || (!isNew && field.disableOnEdit)) : false}
                                         options={field.option}
-                                        setFieldValue={setFieldValue}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange({ [name]: value })
+                                          setFieldValue(name, value)
+                                        }}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
@@ -873,7 +886,10 @@ export default function ManageQuoteDialog({
                                             type={field.type}
                                             options={accountData}
                                             disabled={!isClone ? (accountFieldDisable || (!isNew && field.disableOnEdit)) : false}
-                                            // setFieldValue={setFieldValue}
+                                            // setFieldValue={(name, value) => {
+                                            //   handleValuesChange({ [name]: value })
+                                            //   setFieldValue(name, value)
+                                            // }}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={
@@ -900,6 +916,12 @@ export default function ManageQuoteDialog({
                                                 ""
                                               );
                                               setFieldValue("opportunity", "");
+                                              handleValuesChange({
+                                                [field.fieldName]: value && value.optionValue ? value.optionValue : "",
+                                                "customerContactName": [],
+                                                "projectSales": "",
+                                                "opportunity": ""
+                                              })
                                             }}
                                           />
                                         </Grid>
@@ -968,7 +990,10 @@ export default function ManageQuoteDialog({
                                             type={field.type}
                                             options={customerContactDataSource}
                                             doNotShowInfoTooltip={true}
-                                            setFieldValue={setFieldValue}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange({ [name]: value })
+                                              setFieldValue(name, value)
+                                            }}
                                             disabled={!isClone ? (contactId ? true : false || (!isNew && field.disableOnEdit)) : false}
                                             required={field.required}
                                             fullWidth
@@ -1052,7 +1077,10 @@ export default function ManageQuoteDialog({
                                             type={field.type}
                                             options={opportunityDataSource}
                                             disabled={!isClone ? (isRenderedFromOpportunity || (!isNew && field.disableOnEdit)) : false}
-                                            setFieldValue={setFieldValue}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange({ [name]: value })
+                                              setFieldValue(name, value)
+                                            }}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={
@@ -1131,7 +1159,10 @@ export default function ManageQuoteDialog({
                                             name={field.fieldName}
                                             type={field.type}
                                             options={field.option}
-                                            setFieldValue={setFieldValue}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange({ [name]: value })
+                                              setFieldValue(name, value)
+                                            }}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={
@@ -1189,6 +1220,9 @@ export default function ManageQuoteDialog({
                                               ? val.optionValue
                                               : ""
                                           );
+                                          handleValuesChange({
+                                            [field.fieldName]: val && val.optionValue ? val.optionValue : ""
+                                          })
 
                                           if (
                                             val &&
@@ -1239,7 +1273,10 @@ export default function ManageQuoteDialog({
                                         name={field.fieldName}
                                         type={field.type}
                                         options={collaboratorData}
-                                        setFieldValue={setFieldValue}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange({ [name]: value })
+                                          setFieldValue(name, value)
+                                        }}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
@@ -1262,7 +1299,10 @@ export default function ManageQuoteDialog({
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
-                                        setFieldValue={setFieldValue}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange({ [name]: value })
+                                          setFieldValue(name, value)
+                                        }}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
@@ -1294,7 +1334,10 @@ export default function ManageQuoteDialog({
                                         name={field.fieldName}
                                         type={field.type}
                                         options={field.option}
-                                        setFieldValue={setFieldValue}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange({ [name]: value })
+                                          setFieldValue(name, value)
+                                        }}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
@@ -1327,7 +1370,10 @@ export default function ManageQuoteDialog({
                                           name={field.fieldName}
                                           type={field.type}
                                           options={field.option}
-                                          setFieldValue={setFieldValue}
+                                          setFieldValue={(name, value) => {
+                                            handleValuesChange({ [name]: value })
+                                            setFieldValue(name, value)
+                                          }}
                                           required={field.required}
                                           fullWidth
                                           isTooltip={field?.isTooltip || false}
@@ -1339,7 +1385,7 @@ export default function ManageQuoteDialog({
                                       <FormTypes
                                         {...field}
                                         isNew={isNew}
-                                        disabled={!isClone ? (disableCurrency || (!isNew && field.disableOnEdit)) : false}
+                                        disabled={!isClone ? (!editCurrency || (!isNew && field.disableOnEdit)) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -1347,7 +1393,10 @@ export default function ManageQuoteDialog({
                                         name={field.fieldName}
                                         type={field.type}
                                         options={field.option}
-                                        setFieldValue={setFieldValue}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange({ [name]: value })
+                                          setFieldValue(name, value)
+                                        }}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
@@ -1390,7 +1439,10 @@ export default function ManageQuoteDialog({
                                         name={field.fieldName}
                                         type={field.type}
                                         options={field.option}
-                                        setFieldValue={setFieldValue}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange({ [name]: value })
+                                          setFieldValue(name, value)
+                                        }}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
@@ -1415,7 +1467,10 @@ export default function ManageQuoteDialog({
                                         name={field.fieldName}
                                         type={field.type}
                                         options={field.option}
-                                        setFieldValue={setFieldValue}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange({ [name]: value })
+                                          setFieldValue(name, value)
+                                        }}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
@@ -1469,7 +1524,10 @@ export default function ManageQuoteDialog({
                                             label={field.fieldLabel}
                                             name={field.fieldName}
                                             type={field.type}
-                                            setFieldValue={setFieldValue}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange({ [name]: value })
+                                              setFieldValue(name, value)
+                                            }}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={field.isTooltip}
@@ -1553,7 +1611,10 @@ export default function ManageQuoteDialog({
                                               label={field.fieldLabel}
                                               name={field.fieldName}
                                               type={field.type}
-                                              setFieldValue={setFieldValue}
+                                              setFieldValue={(name, value) => {
+                                                handleValuesChange({ [name]: value })
+                                                setFieldValue(name, value)
+                                              }}
                                               required={field.required}
                                               fullWidth
                                               isTooltip={field.isTooltip}
@@ -1619,7 +1680,10 @@ export default function ManageQuoteDialog({
                                           type={field.type}
                                           options={projectSalesDataSource}
                                           disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
-                                          setFieldValue={setFieldValue}
+                                          setFieldValue={(name, value) => {
+                                            handleValuesChange({ [name]: value })
+                                            setFieldValue(name, value)
+                                          }}
                                           required={field.required}
                                           fullWidth
                                           isTooltip={
@@ -1648,7 +1712,10 @@ export default function ManageQuoteDialog({
                                             name={field.fieldName}
                                             type={field.type}
                                             options={field.option}
-                                            setFieldValue={setFieldValue}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange({ [name]: value })
+                                              setFieldValue(name, value)
+                                            }}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}
@@ -1685,7 +1752,10 @@ export default function ManageQuoteDialog({
                               name={field.fieldName}
                               type={field.type}
                               options={field.option}
-                              setFieldValue={setFieldValue}
+                              setFieldValue={(name, value) => {
+                                handleValuesChange({ [name]: value })
+                                setFieldValue(name, value)
+                              }}
                               required={field.required}
                               fullWidth
                               isTooltip={field?.isTooltip || false}
