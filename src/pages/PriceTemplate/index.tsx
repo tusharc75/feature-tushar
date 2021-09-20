@@ -165,10 +165,10 @@ const PriceTemplate: FC = () => {
 
     const CreateNew = (id, isClone) => {
         if (isClone) {
-            history.push(routes.priceTemplate.path + "/" + id, { isClone: true })
+            history.push(routes.priceTemplate.path + "/0", { isClone: true })
         }
         else {
-            history.push(routes.priceTemplate.path + "/0", { isClone: false })
+            history.push(routes.priceTemplate.path + "/" + id, { isClone: false })
         }
     }
 
@@ -200,7 +200,7 @@ const PriceTemplate: FC = () => {
 
         if (selectedEntity) {
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;
-          }
+        }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
@@ -282,7 +282,7 @@ const PriceTemplate: FC = () => {
                 <div className="header-panel">
                     <Grid container className={styles.filter_side_container}>
                         <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-                            <CgTemplate size={22} style={{paddingBottom: "3px"}}/> <span className="listingHeader">{routes.priceTemplate.title}</span>
+                            <CgTemplate size={22} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.priceTemplate.title}</span>
                         </Grid>
                         <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
                             <Box className={styles.filter_side_header} component="div" >
