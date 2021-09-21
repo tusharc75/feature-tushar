@@ -32,8 +32,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 
 let timeout;
-function PriceCondition() {
-
+const PricingConditions = () => {
   const {
     state: { permissions },
   }: any = useData();
@@ -324,7 +323,7 @@ function PriceCondition() {
               afterImportCompleted={() => {
                 fetchPriceConditionList();
               }}
-              />
+            />
           </Grid>
         </Grid>
 
@@ -430,4 +429,4 @@ function PriceCondition() {
   );
 }
 
-export default PriceCondition;
+export default PricingConditions;
