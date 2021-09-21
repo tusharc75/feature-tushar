@@ -96,6 +96,7 @@ import RentalManagementDetailsPage from "./pages/RentalManagement/RentalManageme
 import DeliveryTicket from "./pages/DeliveryTicket/index"
 import DeliveryTicketDetailsPage from "./pages/DeliveryTicket/DeliveryTicketDetailPage"
 import RecordDeletedDialog from "./components/Helpers/RecordDeletedDialog";
+import PricingConditions from "./pages/PricingConditions";
 import RepairJob from "./pages/RepairJob";
 import RepairJobDetails from "./pages/RepairJob/RepairJobDetails";
 import ReceivingTicket from "./pages/ReceivingTicket";
@@ -556,6 +557,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.budget.path}>
               <Budget />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.pricingCondition.path}>
+              <PricingConditions />
             </PrivateRoute>
             <PrivateRoute exact path={routes.marketSegment.path}>
               <MarketSegment />

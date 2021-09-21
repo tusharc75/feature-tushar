@@ -131,9 +131,10 @@ export const sidebarResource = {
   event: 'Event',
   dashboard: 'Dashboard',
   productInventory: 'Product Inventory',
-  equipmentRentalMaster: 'Equiptment Rental Master',
-  rentalManagement: 'Rental Management',
+  equipmentRentalMaster: "Equiptment Rental Master",
+  rentalManagement: "Rental Management",
   deliveryTicket: 'Loading Ticket',
+  pricingCondition:'Pricing Condition',
   repairJob: 'Repair Job',
   receivingTicket: 'Receiving Ticket'
 };
@@ -180,6 +181,7 @@ export const RESOURCE_LABEL = {
   quotePdfTemplate: 'Quote PDF Templates',
   rentalManagement: 'Rental Management',
   deliveryTicket: 'Loading Tickets',
+  pricingCondition:'Pricing Condition',
   repairJob: 'Repair Job',
   receivingTicket: "Receiving Ticket"
 };
@@ -204,6 +206,8 @@ export const productTemplate = {
   productTemplateApi: '/product-template',
   productTemplateRoute: 'product-template'
 };
+
+
 
 export const priceTemplate = {
   priceTemplateResource: 'priceTemplate',
@@ -304,6 +308,13 @@ export const budget = {
   budgetApi: '/budget',
   budgetRoute: '/budget',
   budgetPermission: 'budget'
+};
+
+export const pricingCondition = {
+  pricingConditionApi: "/pricing-condition",
+  pricingConditionRoute: "pricing-condition",
+  pricingConditionPermission: "pricingCondition",
+
 };
 
 export const quotePdfTemplate = {

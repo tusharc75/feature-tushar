@@ -70,7 +70,7 @@ export function reducer(state, action) {
         ...state,
         limit: action.limit,
         page: 0,
-        loading: true
+        loading: false
       };
 
     case 'count':

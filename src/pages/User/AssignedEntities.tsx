@@ -14,6 +14,7 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import {useData} from '../../StateProvider/Provider'
+import RoleEngine from '../../components/Shared/RoleEngine';
 
 export default function AssignedEntities({
   entities,
@@ -273,7 +274,7 @@ export default function AssignedEntities({
                   </BoxWithBorder>
                 </Grid>
                 <Grid item xs={12} sm={12} md={8} lg={8}>
-                  {/* <BoxWithBorder
+                  <BoxWithBorder
                     style={{
                       padding: "0px",
                       height: "352px",
@@ -284,7 +285,7 @@ export default function AssignedEntities({
                       resource={unionRoleData ? unionRoleData.resource : []}
                       isDisable={true}
                     />
-                  </BoxWithBorder> */}
+                  </BoxWithBorder>
                 </Grid>
               </Grid>
             </Box>
