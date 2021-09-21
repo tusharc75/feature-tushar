@@ -12,12 +12,12 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { repairJob } from '../../constants/helpers';
-import ManageRepairJob from './ManageRepairJob';
+import { receivingTicket } from '../../constants/helpers';
+import ManageReceivingTicket from './ManageReceivingTicket';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 
-const RepairJobDetails = () => {
+const ReceivingTicketDetails = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -27,58 +27,56 @@ const RepairJobDetails = () => {
   }: any = useData();
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
-  const [repairJobData, setRepairJobData] = useState(null);
+  const [receivingTicketData, setReceivingTicketData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [repairJobFields, setRepairJobFields] = useState([]);
+  const [receivingTicketFields, setReceivingTicketFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
 
   useEffect(() => {
     if (id) {
-      fetchRepairJobData()
+      fetchReceivingTicketData()
     }
     // eslint-disable-next-line
   }, [id]);
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
-    mainPoint['Repair Job Name'] = data?.repairJobName || '';
+    mainPoint['Receiving Job Name'] = data?.receivingJobName || '';
+    mainPoint['Delivery Person'] = data?.deliveryPerson.optionLabel || '';
     mainPoint['Status'] = data?.status || '';
-    mainPoint['Repair Person'] = data?.repairPerson.optionLabel || '';
     setMainPoints(mainPoint);
   };
 
   const getRessourceFields = () => {
     setLoading(true);
     axiosInstance()
-      .get('/field?resource=Repair Job')
+      .get('/field?resource=Receiving Ticket')
       .then(({ data: { data } }) => {
-        setRepairJobFields(data)
-        setLoading(false);
-
+        setReceivingTicketFields(data)
+        setLoading(false)
       })
       .catch((err) => {
+        setLoading(false)
         toastConfig.setToastConfig(err);
-        setLoading(false);
       });
   };
 
-  const fetchRepairJobData = () => {
+  const fetchReceivingTicketData = () => {
     setLoading(true);
     axiosInstance()
-      .get(`${routes.repairJob.path}/${id}`)
+      .get(`${routes.receivingTicket.path}/${id}`)
       .then(({ data: { data } }) => {
-        setRepairJobData(data)
+        setReceivingTicketData(data)
         handleMainPoints(data)
-        setHeadingLabel(data.repairJobName);
-        setCustomizedRoutes([routes.repairJob, { title: data.repairJobName }]);
+        setHeadingLabel(data.receivingJobName);
+        setCustomizedRoutes([routes.receivingTicket, { title: data.receivingJobName }]);
         getRessourceFields();
       })
       .catch((err) => {
-        toastConfig.setToastConfig(err);
         setLoading(false);
-
+        toastConfig.setToastConfig(err);
       });
   };
 
@@ -88,7 +86,7 @@ const RepairJobDetails = () => {
 
   const handleDelete = () => {
     axiosInstance()
-      .put(`${repairJob.repairJobApi}/remove`, { ids: [id] })
+      .put(`${receivingTicket.receivingTicketApi}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
         history.goBack();
@@ -108,7 +106,7 @@ const RepairJobDetails = () => {
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
             <Paper>
-              {!repairJobData ? (
+              {!receivingTicketData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
                   <Box display="flex">
@@ -119,23 +117,23 @@ const RepairJobDetails = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
-                  {permissions?.repairJob?.isUpdate && (
+                  {permissions?.receivingTicket?.isUpdate && (
                     <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                       Edit
                     </Button>
                   )}
-                  {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                  {permissions?.receivingTicket?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 </DetailsPageHeader>
               )}
 
               <Box>
-                {loading || !repairJobFields.length ? (
+                {loading || !receivingTicketFields.length ? (
                   <Grid container spacing={2} style={{ padding: '8px' }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
                   </Grid>
                 ) : (
                   <>
-                    <DetailsPage data={repairJobData} fields={repairJobFields} />
+                    <DetailsPage data={receivingTicketData} fields={receivingTicketFields} />
                   </>
                 )}
               </Box>
@@ -147,7 +145,7 @@ const RepairJobDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this repair job: ${headingLabel} ?`}
+          message={`Are you sure you want to delete this receiving Ticket: ${headingLabel} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -155,10 +153,10 @@ const RepairJobDetails = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManageRepairJob
+        <ManageReceivingTicket
           open={openUpdateDialog}
           isClone={false}
-          repairJobId={id}
+          receivingTicketId={id}
           onClose={() => {
             setOpenUpdateDialog(false);
           }}
@@ -172,4 +170,4 @@ const RepairJobDetails = () => {
   );
 };
 
-export default RepairJobDetails;
+export default ReceivingTicketDetails;

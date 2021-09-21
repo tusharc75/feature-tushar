@@ -257,6 +257,14 @@ const routes = {
     title: storedRoutes ? storedRoutes.repairJob?.title : RESOURCE_LABEL.repairJob,
     path: "/repair-job/detail",
   },
-};
+  receivingTicket: {
+    title: storedRoutes ? storedRoutes.receivingTicket?.title : RESOURCE_LABEL.receivingTicket,
+    path: "/receiving-ticket",
+  },
+  receivingTicketDetail: {
+    title: storedRoutes ? storedRoutes.receivingTicket?.title : RESOURCE_LABEL.receivingTicket,
+    path: "/receiving-ticket/detail",
+  },
+}; 
 
 export default routes;

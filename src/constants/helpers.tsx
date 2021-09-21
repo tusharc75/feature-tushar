@@ -134,7 +134,8 @@ export const sidebarResource = {
   equipmentRentalMaster: 'Equiptment Rental Master',
   rentalManagement: 'Rental Management',
   deliveryTicket: 'Loading Ticket',
-  repairJob: 'Repair Job'
+  repairJob: 'Repair Job',
+  receivingTicket: 'Receiving Ticket'
 };
 
 export const RESOURCE_LABEL = {
@@ -179,7 +180,8 @@ export const RESOURCE_LABEL = {
   quotePdfTemplate: 'Quote PDF Templates',
   rentalManagement: 'Rental Management',
   deliveryTicket: 'Loading Tickets',
-  repairJob: 'Repair Job'
+  repairJob: 'Repair Job',
+  receivingTicket: "Receiving Ticket"
 };
 
 export const lead = {
@@ -227,6 +229,11 @@ export const deliveryTicket = {
 export const repairJob = {
   repairJobResource: 'repairJob',
   repairJobApi: '/repair-job'
+};
+
+export const receivingTicket = {
+  receivingTicketResource: 'receivingTicket',
+  receivingTicketApi: '/receiving-ticket'
 };
 
 export const projectSales = {
