@@ -25,7 +25,7 @@ interface InitialData {
   values: object;
 }
 
-const ManageEntity = ({ open, close, fetchData, isNew, values = {} }) => {
+const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = false, entityId = null }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
@@ -73,16 +73,23 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {} }) => {
     setLoading(true);
     axiosInstance()
       .get("/field?resource=Entity")
-      .then(({ data: { data } }) => {
+      .then(async ({ data: { data } }) => {
 
         const fieldsData = isNew ? data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData)
           : data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
+        let tempData = getObjKeys("", fieldsData)
+        if (isClone) {
+          const { data: { data } } = await axiosInstance().get(`/entity/${entityId}`);
+          const { entityName, ...rest } = data
+          tempData = getObjKeysWithValues({ ...rest }, fieldsData)
+        }
+
         setInitialData({
           fields: fieldsData,
-          values: isNew ? getObjKeys("", fieldsData) : getObjKeysWithValues(values, fieldsData),
+          values: isNew ? tempData : getObjKeysWithValues(values, fieldsData),
         });
-        setFormValues(isNew ? getObjKeys("", fieldsData) : getObjKeysWithValues(values, fieldsData))
+        setFormValues(isNew ? tempData : getObjKeysWithValues(values, fieldsData))
         setLoading(false);
       })
       .catch((err) => {
@@ -152,7 +159,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {} }) => {
       fullWidth
       fullScreen={isMobile}
     >
-      <CustomDialogHeader title={isNew ? "Create New Entities" : "Update Entity"}
+      <CustomDialogHeader title={isClone ? "Clone" : isNew ? "Create New Entities" : "Update Entity"}
         onClose={() => {
           if (isFieldNotTouched({
             ...initialData,

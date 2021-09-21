@@ -22,7 +22,7 @@ import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 const ManageMarketSegmentDialog = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { marketSegmentId, onClose, onSuccess } = props;
+    const { marketSegmentId, onClose, onSuccess, isClone = false } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [formsData, setFormsData] = useState([]);
@@ -42,9 +42,14 @@ const ManageMarketSegmentDialog = (props) => {
                 let tempOptionArray = fieldsData.find(d => d.fieldName === "parentMarketSegment").option
                 fieldsData.find(d => d.fieldName === "parentMarketSegment").option = tempOptionArray.filter(data => data.optionValue !== marketSegmentId)
                 axiosInstance().get(`${marketSegment.marketSegmentApi}/` + marketSegmentId).then(({ data: { data } }) => {
+                    let tempData = { ...data }
+                    if (isClone) {
+                        const { _id, createdBy, history, name, ...rest } = tempData
+                        tempData = { ...rest }
+                    }
                     setInitialData({
                         fields: fieldsData,
-                        values: getObjKeysWithValues(data, fieldsData),
+                        values: getObjKeysWithValues(tempData, fieldsData),
                     });
                 }).catch((error) => {
                     toastConfig.setToastConfig(error);
@@ -65,7 +70,7 @@ const ManageMarketSegmentDialog = (props) => {
 
     const handleSubmit = (values) => {
         setLoading(true);
-        if (marketSegmentId) {
+        if (marketSegmentId && !isClone) {
             values._id = marketSegmentId
             axiosInstance().put(`${marketSegment.marketSegmentApi}`, values).then(({ data: { data } }) => {
                 setLoading(false);
@@ -113,7 +118,7 @@ const ManageMarketSegmentDialog = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={marketSegmentId ? "Update " + routes.marketSegment.title : "Create " + routes.marketSegment.title}
+                        <CustomDialogHeader title={isClone ? "Clone" : marketSegmentId ? "Update " + routes.marketSegment.title : "Create " + routes.marketSegment.title}
                             onClose={() => {
                                 if (isFieldNotTouched({
                                     fields: initialData.fields,

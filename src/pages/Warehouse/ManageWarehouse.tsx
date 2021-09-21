@@ -18,7 +18,7 @@ import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 const ManageWarehouse = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { addressResourceId, onClose, onSuccess } = props;
+    const { addressResourceId, onClose, onSuccess, isClone } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -30,9 +30,16 @@ const ManageWarehouse = (props) => {
 
             if (addressResourceId) {
                 axiosInstance().get(`/warehouse/` + addressResourceId).then(({ data: { data } }) => {
+                    let fields = fieldsDataForUpdate
+                    let tempData = data
+                    if (isClone) {
+                        fields = fieldsDataForCreate
+                        const { warehouseName, ...rest } = data
+                        tempData = { ...rest }
+                    }
                     setInitialData({
-                        fields: fieldsDataForUpdate,
-                        values: getObjKeysWithValues(data, fieldsDataForUpdate),
+                        fields: fields,
+                        values: getObjKeysWithValues(tempData, fields),
                     });
                 }).catch((error) => {
                     toastConfig.setToastConfig(error);
@@ -52,7 +59,7 @@ const ManageWarehouse = (props) => {
 
 
     const handleSubmit = (values) => {
-        if (addressResourceId) {
+        if (addressResourceId && !isClone) {
             values._id = addressResourceId
             axiosInstance().put(`/warehouse`, values).then(({ data: { data } }) => {
                 setLoading(false);

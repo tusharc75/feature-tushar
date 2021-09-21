@@ -40,6 +40,7 @@ export default function ManageUserDialog({
   isNew,
   userId = null,
   dataToUpdate,
+  isClone = false,
   redirectToDetailsScreen = true,
 }) {
   const {
@@ -74,13 +75,28 @@ export default function ManageUserDialog({
           .filter((d) => (isNew ? d.isCreate : d.isUpdate))
           .map((_f) => newFields.push(_f.fieldData));
 
-        setInitialData({
-          fields: newFields,
-          values: isNew
-            ? getObjKeys("", newFields)
-            : getObjKeysWithValues(dataToUpdate, newFields),
-        });
-        setFormValues(isNew ? getObjKeys("", newFields) : getObjKeysWithValues(dataToUpdate, newFields))
+        let dataToClone
+        if (isClone && userId) {
+          axiosInstance().get(`/user/${userId}`).then(({ data: { data } }) => {
+            const { _id, createdBy, permissions, firstName, lastName, updatedBy, ...rest } = data
+            setInitialData({
+              fields: newFields,
+              values: isNew
+                ? getObjKeys("", newFields)
+                : getObjKeysWithValues({ ...rest }, newFields),
+            });
+            setFormValues(isNew ? getObjKeys("", newFields) : getObjKeysWithValues({ ...rest }, newFields))
+          })
+        }
+        else {
+          setInitialData({
+            fields: newFields,
+            values: isNew
+              ? getObjKeys("", newFields)
+              : getObjKeysWithValues(dataToUpdate, newFields),
+          });
+          setFormValues(isNew ? getObjKeys("", newFields) : getObjKeysWithValues(dataToUpdate, newFields))
+        }
 
         setLoading(false);
       })
@@ -133,7 +149,7 @@ export default function ManageUserDialog({
           // if (redirectToDetailsScreen) {
           history.push({
             pathname: `/user/detail/${newId}`,
-            search:user?.user?.userType === userType.brandAdmin ? '?userSetup=true':'',
+            search: user?.user?.userType === userType.brandAdmin ? '?userSetup=true' : '',
             state: { location: location },
           });
           close();
@@ -200,11 +216,12 @@ export default function ManageUserDialog({
     >
       <CustomDialogHeader
         title={
-          isNew
-            ? "Create New User"
-            : `Updating ${[dataToUpdate.firstName, dataToUpdate.lastName]
-              .filter((f) => f)
-              .join(" ")}`
+          isClone ? "Clone" :
+            isNew
+              ? "Create New User"
+              : `Updating ${[dataToUpdate.firstName, dataToUpdate.lastName]
+                .filter((f) => f)
+                .join(" ")}`
         }
         onClose={() => {
           if (isFieldNotTouched({

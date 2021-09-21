@@ -42,6 +42,8 @@ export default function ManageLeadDialog({
   leadApi,
   userId = null,
   isRedirectToDetailPage = true,
+  isClone = false,
+  leadId = null
 }) {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -211,11 +213,31 @@ export default function ManageLeadDialog({
               newFields.push(_f.fieldData);
             });
 
-            setLeadData({
-              fields: newFields,
-              initialValues: getObjKeys("", newFields),
-            });
-            setFormValues(getObjKeys("", newFields))
+            if (isClone) {
+              axiosInstance()
+                .get(`${leadApi}/${leadId}?entity=${selectedEntity}`)
+                .then(({ data: { data } }) => {
+
+                  const { _id, firstName, lastName, middleName, email, ...rest } = data
+                  let tempData = { ...rest }
+                  if (marketSegmentDropdownData) {
+                    setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data?.marketSegment?.optionValue));
+                  }
+                  setLeadData({
+                    fields: newFields,
+                    initialValues: getObjKeysWithValues(tempData, newFields),
+                  });
+                  setFormValues(getObjKeysWithValues(tempData, newFields))
+                })
+            }
+            else {
+              setLeadData({
+                fields: newFields,
+                initialValues: getObjKeys("", newFields),
+              });
+              setFormValues(getObjKeys("", newFields))
+            }
+
             setTimeout(() => setLoadingData(false), 500);
           } else {
             if (marketSegmentDropdownData) {
@@ -347,13 +369,14 @@ export default function ManageLeadDialog({
       >
         <CustomDialogHeader
           title={
-            isNew
-              ? "Create Lead"
-              : `Editing ${[dataToUpdate.firstName, dataToUpdate.lastName]
-                .filter((f) => f)
-                .join(" ")}`
+            isClone ? "Clone" :
+              isNew
+                ? "Create Lead"
+                : `Editing ${[dataToUpdate.firstName, dataToUpdate.lastName]
+                  .filter((f) => f)
+                  .join(" ")}`
           }
-          onClose={(e, reason) => {
+          onClose={() => {
             if (isFieldNotTouched(leadData, formValues)) onClose()
             else setShowConfirmDialog(true)
           }}

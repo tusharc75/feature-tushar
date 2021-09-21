@@ -23,6 +23,7 @@ import CustomAgGrid from '../../components/AgGridComponents/CustomAgGrid';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -129,7 +130,7 @@ const AddressResource = () => {
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState({ open: false, isClone: false });
   const [addressResourceId, setAddressResourceId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -217,7 +218,7 @@ const AddressResource = () => {
         className="link"
         onClick={() => {
           setAddressResourceId(params.data.id);
-          setOpen(true);
+          setOpen({ open: false, isClone: false });
         }}
       >
         <CustomRenderCell value={params.value} />
@@ -227,6 +228,20 @@ const AddressResource = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
+      <Tooltip
+        className={warehousePermissions.isCreate ? "" : "cursor-stop"}
+        title={warehousePermissions.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setAddressResourceId(params.data.id);
+            setOpen({ open: true, isClone: true })
+          }}
+        >
+          <FileCopyIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
       {warehousePermissions.isDelete && params?.data?.createdById === user?.user?._id ? (
         <Tooltip title="Delete">
           <IconButton
@@ -349,7 +364,7 @@ const AddressResource = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-              <FaWarehouse size={20} style={{paddingBottom: "3px"}}/> <span className="listingHeader">{routes.address.title}</span>
+              <FaWarehouse size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.address.title}</span>
             </Grid>
             <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
@@ -359,7 +374,7 @@ const AddressResource = () => {
                     className={styles.add_submit_btn}
                     onClick={() => {
                       setAddressResourceId(null);
-                      setOpen(true);
+                      setOpen({ open: true, isClone: false });
                     }}
                     variant="contained"
                     size="small"
@@ -425,14 +440,15 @@ const AddressResource = () => {
           />
         )}
 
-        {open && (
+        {open?.open && (
           <ManageWarehouse
             addressResourceId={addressResourceId}
-            onClose={() => setOpen(false)}
+            onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
-              setOpen(false);
+              setOpen({ open: false, isClone: false });
               fetchWarehouses();
             }}
+            isClone={open?.isClone}
           />
         )}
       </CustomContainer>

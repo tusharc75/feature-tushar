@@ -45,7 +45,8 @@ export default function ManageBudgetDialog({
     open,
     onSuccess,
     onClose,
-    budgetId
+    budgetId,
+    isClone
 }) {
     const { budgetApi } = budget;
     const toastConfig = useContext(CustomToastContext);
@@ -164,11 +165,17 @@ export default function ManageBudgetDialog({
                             setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data.marketSegment));
                         }
 
+                        let clonedData = { ...data }
+
+                        if (isClone) {
+                            let { name, _id, ...rest } = clonedData
+                            clonedData = { ...rest }
+                        }
                         setEntityData({
                             fields: newFields,
-                            initialValues: getObjKeysWithValues(data, newFields)
+                            initialValues: getObjKeysWithValues(clonedData, newFields)
                         });
-                        setFormValues(getObjKeysWithValues(data, newFields))
+                        setFormValues(getObjKeysWithValues(clonedData, newFields))
                     }).catch((error) => {
                         toastConfig.setToastConfig(error);
                     });
@@ -201,7 +208,7 @@ export default function ManageBudgetDialog({
         values.year = new Date(values.year).getFullYear();
         setLoading(true);
 
-        if (budgetId) {
+        if (budgetId && !isClone) {
             values._id = budgetId;
             axiosInstance().put(budgetApi, values).then(({ data }) => {
                 toastConfig.setToastConfig({
@@ -310,9 +317,10 @@ export default function ManageBudgetDialog({
             >
                 <CustomDialogHeader
                     title={
-                        budgetId
-                            ? `Editing ${entityData.initialValues && entityData.initialValues["name"] ? entityData.initialValues["name"] : ""}`
-                            : "Create Budget"
+                        isClone ? "Clone" :
+                            budgetId
+                                ? `Editing ${entityData.initialValues && entityData.initialValues["name"] ? entityData.initialValues["name"] : ""}`
+                                : "Create Budget"
                     }
                     onClose={() => {
                         if (isFieldNotTouched(entityData, formValues)) onClose()

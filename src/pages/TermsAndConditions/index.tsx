@@ -25,13 +25,14 @@ import { cloneDeep } from 'lodash'
 import { IoDocumentTextOutline } from 'react-icons/io5';
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import routes from '../../components/Helpers/Routes';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 let termsTimeout
 export default function TermsAndCondition(props) {
     const { termsAndConditionBreadcrumb } = props
     const toastConfig = useContext(CustomToastContext);
     const { state: { permissions, user, selectedEntity } }: any = useData();
-    const [showCreateDialog, setShowCreateDialog] = useState(false);
+    const [showCreateDialog, setShowCreateDialog] = useState({ open: false, isClone: false });
     const [anchorEl, setAnchorEl] = useState(null);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [actionsPermissions, setActionsPermissions] = useState({ isCreate: false, isRead: false, isUpdate: false, isDelete: false, approveAccount: false });
@@ -55,7 +56,7 @@ export default function TermsAndCondition(props) {
     const TermsConditionNameRenderer = params => (
         <span className="link cursor-pointer"
             onClick={() => {
-                setShowCreateDialog(true);
+                setShowCreateDialog({ open: false, isClone: false });
                 setEditRecord(cloneDeep(params.data))
             }}>
             <CustomRenderCell value={params?.value} />
@@ -64,6 +65,20 @@ export default function TermsAndCondition(props) {
 
     const ActionsRenderer = params => (
         <>
+            <Tooltip
+                className={permissions?.termsAndConditions?.isCreate ? "" : "cursor-stop"}
+                title={permissions?.termsAndConditions?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+                <IconButton
+                    size="small"
+                    aria-label="Clone"
+                    onClick={() => {
+                        setShowCreateDialog({ open: true, isClone: true })
+                        setEditRecord({ ...params.data })
+                    }}
+                >
+                    <FileCopyIcon fontSize="small" color="primary" />
+                </IconButton>
+            </Tooltip>
             {permissions?.termsAndConditions?.isDelete && user?.user?._id === params.data?.owner ?
                 <Tooltip title="Delete" >
                     <IconButton aria-label="Delete" onClick={() => {
@@ -149,7 +164,7 @@ export default function TermsAndCondition(props) {
     }
 
     const handleCloseCreateDialog = (params) => {
-        setShowCreateDialog(false)
+        setShowCreateDialog({ open: false, isClone: false })
         setEditRecord({})
         if (params?.fetchData) fetchTermsAndConditions()
     }
@@ -217,7 +232,7 @@ export default function TermsAndCondition(props) {
                                         color="primary"
                                         size="small"
                                         className={styles.add_submit_btn}
-                                        onClick={() => setShowCreateDialog(true)}
+                                        onClick={() => setShowCreateDialog({ open: true, isClone: false })}
                                         startIcon={<AddOutlined />} >Add</Button>
                                 }
 
@@ -251,7 +266,7 @@ export default function TermsAndCondition(props) {
                                                 setShowDeleteConfirmBox(true);
                                             }}
                                             disabled={selectedRecords.some((item) => item?.owner !== user?.user._id)}
-                                            >Delete</MenuItem>
+                                        >Delete</MenuItem>
                                     }
 
                                 </Menu>
@@ -283,10 +298,11 @@ export default function TermsAndCondition(props) {
                             onOk={handleDeleteTermsAndConditions}
                         /> : null
                 }
-                {showCreateDialog ? (
+                {showCreateDialog?.open ? (
                     <ManageTermsAndCondition
                         termsAndCondition={termsAndCondition}
-                        open={showCreateDialog}
+                        open={showCreateDialog?.open}
+                        isClone={showCreateDialog?.isClone}
                         handleClose={handleCloseCreateDialog}
                         fetchData={fetchTermsAndConditions}
                         editRecord={editRecord}
