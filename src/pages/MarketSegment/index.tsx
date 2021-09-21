@@ -30,7 +30,7 @@ import CustomAgGrid, { reducer, intialState } from "../../components/AgGridCompo
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
-
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 const MarketSegment = () => {
 
@@ -41,8 +41,7 @@ const MarketSegment = () => {
 
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
-    const [open, setOpen] = useState(false);
-    const [marketSegmentId, setMarketSegmentId] = useState(null);
+    const [open, setOpen] = useState({ open: false, isClone: false, idToClone: null });
     const [anchorEl, setAnchorEl] = useState(null);
 
     // const [selectedCategory, setSelectedCategory] = useState([]);
@@ -63,13 +62,13 @@ const MarketSegment = () => {
     ];
     if (columnState) {
         columns.map((item) => {
-          columnState.map((d) => {
-            if (d.colId == item.field) {
-              item.show = !d.hide;
-            }
-          });
+            columnState.map((d) => {
+                if (d.colId == item.field) {
+                    item.show = !d.hide;
+                }
+            });
         });
-      }
+    }
     //  Grid Variables - End
 
     useEffect(() => {
@@ -78,15 +77,26 @@ const MarketSegment = () => {
 
     const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
         <span className="link" onClick={() => {
-            setMarketSegmentId(params.data.id);
-            setOpen(true);
+            setOpen({ open: true, isClone: false, idToClone: params.data.id });
         }}>
             <CustomRenderCell value={params.value} />
         </span>
 
-    </span>
+    </span >
 
     const ActionsRenderer = params => <Fragment>
+        <Tooltip
+            className={permissions.marketSegment.isCreate ? "" : "cursor-stop"}
+            title={permissions.marketSegment.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+            <IconButton
+                size="small"
+                aria-label="Clone"
+                onClick={() => {
+                    setOpen({ open: true, idToClone: params.data._id, isClone: true })
+                }}>
+                <FileCopyIcon fontSize="small" color="primary" />
+            </IconButton>
+        </Tooltip>
         {permissions.marketSegment.isDelete ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
@@ -260,7 +270,9 @@ const MarketSegment = () => {
                                 value={search}
                             />
                             {permissions.marketSegment.isCreate &&
-                                <Button className={styles.add_submit_btn} onClick={() => { setMarketSegmentId(null); setOpen(true); }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                <Button className={styles.add_submit_btn} onClick={() => {
+                                    setOpen({ open: true, isClone: false, idToClone: null });
+                                }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                             }
                             {permissions.marketSegment.isDelete &&
                                 <Button
@@ -295,7 +307,7 @@ const MarketSegment = () => {
 
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                 dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
-                loading={loading} renderedFrom="marketSegmentPage"/>
+                loading={loading} renderedFrom="marketSegmentPage" />
 
             {showDeleteConfirmBox &&
                 <ConfirmationDialog
@@ -305,14 +317,15 @@ const MarketSegment = () => {
                     onOk={handleDelete}
                 />
             }
-            {open &&
+            {open?.open &&
                 <CreateMarketSegment
-                    marketSegmentId={marketSegmentId}
-                    onClose={() => setOpen(false)}
+                    marketSegmentId={open?.idToClone}
+                    onClose={() => setOpen({ open: false, isClone: false, idToClone: null })}
                     onSuccess={() => {
-                        setOpen(false);
+                        setOpen({ open: false, isClone: false, idToClone: null });
                         fetchMarketSegment()
                     }}
+                    isClone={open.isClone}
                 />}
         </CustomContainer>
     </Fragment>

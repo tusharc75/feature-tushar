@@ -33,6 +33,10 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import contactClass from './contact.module.scss'
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
+import Tooltip from "@material-ui/core/Tooltip"
+import IconButton from "@material-ui/core/IconButton"
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+
 
 const ContactTypes = [
   {
@@ -63,7 +67,7 @@ export default function Contact(props) {
   const [renderCount, setRenderCount] = useState(0);
 
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
-  const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
+  const [showCreateContactDialog, setShowCreateContactDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [singleContactDelete, setSingleContactDelete] = useState({
     id: null,
     show: false,
@@ -219,6 +223,19 @@ export default function Contact(props) {
 
   const ActionsRenderer = (params) => (
     <>
+      <Tooltip
+        className={contactPermissions.isCreate ? "" : "cursor-stop"}
+        title={contactPermissions.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setShowCreateContactDialog({ open: true, isClone: true, idToClone: params.data._id })
+          }}
+        >
+          <FileCopyIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
       <GridDeleteIcon
         hasDeletePermission={contactPermissions.isDelete}
         ownerId={params.data.ownerId}
@@ -397,7 +414,7 @@ export default function Contact(props) {
   };
 
   const clickCreateNew = () => {
-    setShowCreateContactDialog(true);
+    setShowCreateContactDialog({ open: true, isClone: false, idToClone: null });
   };
 
   const handleDeleteContact = () => {
@@ -589,17 +606,19 @@ export default function Contact(props) {
             />
           ) : null}
 
-          {showCreateContactDialog && (
+          {showCreateContactDialog?.open && (
             <ManageContactDialog
-              open={showCreateContactDialog}
-              onClose={() => setShowCreateContactDialog(false)}
+              open={showCreateContactDialog?.open}
+              onClose={() => setShowCreateContactDialog({ open: false, isClone: false, idToClone: null })}
               onSuccess={() => {
-                setShowCreateContactDialog(false);
+                setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
                 getContacts();
               }}
               contactResource={contactResource}
               contactApi={contactApi}
               account={account}
+              contactId={showCreateContactDialog?.idToClone}
+              isClone={showCreateContactDialog?.open}
             />
           )}
 

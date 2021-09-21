@@ -30,6 +30,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 let timeout;
 function Budget() {
@@ -46,6 +47,7 @@ function Budget() {
   const [showManageBudgetDialog, setShowManageBudgetDialog] = useState({
     show: false,
     id: null,
+    isClone: false
   });
 
   const [gridApi, setGridApi] = useState(null);
@@ -142,7 +144,7 @@ function Budget() {
         permissions.budget.isUpdate ?
           <span className="link"
             onClick={() => {
-              setShowManageBudgetDialog({ show: true, id: params.data.id });
+              setShowManageBudgetDialog({ show: true, id: params.data.id, isClone: false });
             }}>
             <CustomRenderCell value={params?.value} />
           </span>
@@ -153,6 +155,18 @@ function Budget() {
 
   const ActionsRenderer = params => (
     <>
+      <Tooltip
+        className={permissions.budget.isCreate ? "" : "cursor-stop"}
+        title={permissions.budget.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setShowManageBudgetDialog({ show: true, id: params.data._id, isClone: true })
+          }}>
+          <FileCopyIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
       {
         permissions.budget.isDelete &&
         <Tooltip title="Delete">
@@ -266,7 +280,7 @@ function Budget() {
   const onSuccess = () => {
     // Add code of getting grid data again
     fetchBudgetList();
-    setShowManageBudgetDialog({ show: false, id: null });
+    setShowManageBudgetDialog({ show: false, id: null, isClone: false });
   };
 
   const handleDelete = () => {
@@ -306,9 +320,10 @@ function Budget() {
           open={showManageBudgetDialog.show}
           onSuccess={onSuccess}
           onClose={() => {
-            setShowManageBudgetDialog({ show: false, id: null });
+            setShowManageBudgetDialog({ show: false, id: null, isClone: false });
           }}
           budgetId={showManageBudgetDialog.id}
+          isClone={showManageBudgetDialog.isClone}
         />
       )}
       <Fragment>
@@ -324,7 +339,7 @@ function Budget() {
               afterImportCompleted={() => {
                 fetchBudgetList();
               }}
-              />
+            />
           </Grid>
         </Grid>
 
@@ -360,7 +375,7 @@ function Budget() {
                       startIcon={<AddIcon />}
                       className={styles.add_submit_btn}
                       onClick={() => {
-                        setShowManageBudgetDialog({ show: true, id: null });
+                        setShowManageBudgetDialog({ show: true, id: null, isClone: false });
                       }}
                     >
                       Add

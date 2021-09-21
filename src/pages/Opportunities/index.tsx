@@ -22,6 +22,9 @@ import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import './style.scss';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
+import Tooltip from "@material-ui/core/Tooltip"
+import IconButton from "@material-ui/core/IconButton"
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 let opportunityTimeout;
 const OpportunityTypes = [
@@ -53,7 +56,7 @@ const Opportunities = () => {
     isRead: permissions[opportunityResource]?.isRead,
     isDelete: permissions[opportunityResource]?.isDelete
   });
-  const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
+  const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [singleOpportunityDelete, setSingleOpportunityDelete] = useState({
     id: null,
@@ -175,6 +178,19 @@ const Opportunities = () => {
 
   const ActionsRenderer = (params) => (
     <>
+      <Tooltip
+        className={opportunityPermissions?.isCreate ? "" : "cursor-stop"}
+        title={opportunityPermissions?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setShowCreateOpportunityDialog({ open: true, isClone: true, idToClone: params.data._id })
+          }}
+        >
+          <FileCopyIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
       <GridDeleteIcon
         hasDeletePermission={opportunityPermissions.isDelete}
         ownerId={params.data.ownerId}
@@ -345,7 +361,7 @@ const Opportunities = () => {
   };
 
   const onSuccess = () => {
-    setShowCreateOpportunityDialog(false);
+    setShowCreateOpportunityDialog({ open: false, isClone: false, idToClone: null });
     fetchOpportunities();
   };
 
@@ -365,7 +381,7 @@ const Opportunities = () => {
   };
 
   const clickCreateNew = () => {
-    setShowCreateOpportunityDialog(true);
+    setShowCreateOpportunityDialog({ open: true, isClone: false, idToClone: null });
   };
 
   const handleDeleteOpportunity = async () => {
@@ -516,17 +532,19 @@ const Opportunities = () => {
         ) : null}
       </CustomContainer>
 
-      {showCreateOpportunityDialog && (
+      {showCreateOpportunityDialog?.open && (
         <ManageOpportunityDialog
-          open={showCreateOpportunityDialog}
+          open={showCreateOpportunityDialog?.open}
           onSuccess={onSuccess}
           onClose={() => {
-            setShowCreateOpportunityDialog(false);
+            setShowCreateOpportunityDialog({ open: false, isClone: false, idToClone: null });
           }}
           isNew={true}
           dataToUpdate={null}
           resource={null}
           isRedirectTodetailPage={true}
+          isClone={showCreateOpportunityDialog?.isClone}
+          opportunityId={showCreateOpportunityDialog?.idToClone}
         />
       )}
       {showTransferEntityDialog && (
