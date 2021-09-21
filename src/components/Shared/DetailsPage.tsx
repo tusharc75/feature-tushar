@@ -299,7 +299,7 @@ const Details = (props: DetailProps) => {
     } else {
       return fieldData.type === "multiImageUpload" ? 
        
-      <div className={classes.imageListContainer}>
+      val[fieldData.fieldName] && <div className={classes.imageListContainer}>
         <ImageList className={classes.imageList} cols={2.5}>
           {val[fieldData.fieldName].map((item, i) => (
             <ImageListItem className={classes.imageListItem} key={item}>

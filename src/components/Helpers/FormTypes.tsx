@@ -412,9 +412,16 @@ const FormTypes = (props) => {
         if (!multiple) {
           setFieldValue(name, data.fileUrl);
         } else {
-          setImage("")
-          setFieldValue(name, [...values[name], data.fileUrl]);
-          setImageFileName("")
+          if (values[name]) {
+            setImage("")
+            setFieldValue(name, [...values[name], data.fileUrl]);
+            setImageFileName("")
+          } else {
+            let currentData = values[name] ? values[name] : []
+            setImage("")
+            setFieldValue(name, [...currentData, data.fileUrl]);
+            setImageFileName("")
+          }
         }
         setImgUploading(false);
       })
@@ -1982,7 +1989,7 @@ const FormTypes = (props) => {
           </Button>
         </label>
         <Box mt={1}>
-          <Typography color="textSecondary">{values[name].length > 0 ? "Images Preview" : "No Images"}</Typography>
+          <Typography color="textSecondary">{values[name]?.length > 0 ? "Images Preview" : "No Images"}</Typography>
           <Box display="flex" flexWrap="wrap" justifyContent="space-arounf" overflow="hidden">
           <ImageList style={{flexWrap: "nowrap", transform: 'translateZ(0)'}}>
             {values[name]? values[name].map((item, i) => (
