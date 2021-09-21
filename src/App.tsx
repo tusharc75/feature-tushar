@@ -97,6 +97,10 @@ import DeliveryTicket from "./pages/DeliveryTicket/index"
 import DeliveryTicketDetailsPage from "./pages/DeliveryTicket/DeliveryTicketDetailPage"
 import RecordDeletedDialog from "./components/Helpers/RecordDeletedDialog";
 import PricingConditions from "./pages/PricingConditions";
+import RepairJob from "./pages/RepairJob";
+import RepairJobDetails from "./pages/RepairJob/RepairJobDetails";
+import ReceivingTicket from "./pages/ReceivingTicket";
+import ReceivingTicketDetails from "./pages/ReceivingTicket/ReceivingTicketDetails";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -565,6 +569,18 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.deliveryTicket.path}/detail/:id`} >
               <DeliveryTicketDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.repairJob.path}>
+              <RepairJob />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.repairJobDetail.path}/:id`} >
+              <RepairJobDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.receivingTicket.path}>
+              <ReceivingTicket />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.receivingTicketDetail.path}/:id`} >
+              <ReceivingTicketDetails />
             </PrivateRoute>
 
             <Route path="*" component={NotFound} />
