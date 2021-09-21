@@ -28,6 +28,8 @@ const CreateRole = ({
   roleType,
   setToastConfig,
   selectedEntity,
+  isClone = false,
+  roleId = null
 }) => {
   const theme = useTheme();
   const history = useHistory();
@@ -40,9 +42,28 @@ const CreateRole = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   useEffect(() => {
-    getInitialData();
-    // eslint-disable-next-line
+    if (isClone) {
+      fetchRoleData()
+    }
+    else {
+      getInitialData();
+    }
   }, []);
+
+  const fetchRoleData = async () => {
+    setLoading(true);
+    try {
+      const {
+        data: { data },
+      } = await axiosInstance().get(`/role/${roleId}`);
+      setValues({ name: "", description: data.description });
+      setField(data.field);
+      setResource(data.resource);
+      setLoading(false);
+    } catch (error) {
+      setToastConfig(error);
+    }
+  };
 
   const getInitialData = () => {
     setLoading(true);

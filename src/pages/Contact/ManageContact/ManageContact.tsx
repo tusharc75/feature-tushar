@@ -47,7 +47,8 @@ export default function ManageContact(props) {
     contactId = null,
     accountId = null,
     formValues = {},
-    handleValuesChange = null
+    handleValuesChange = null,
+    isClone
   } = props;
 
   const classes = useStyles();
@@ -264,9 +265,10 @@ export default function ManageContact(props) {
             }
           }}
           title={
-            isNew
-              ? "Add Contact"
-              : `Editing ${contactData.initialValues.firstName}`
+            isClone ? "Clone" :
+              isNew
+                ? "Add Contact"
+                : `Editing ${contactData.initialValues.firstName}`
           }
         />
 

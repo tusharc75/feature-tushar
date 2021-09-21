@@ -52,7 +52,8 @@ const mappedVariablesNames = {
     owner: "Owner",
     currentDate: "Current Date",
     customerContactName: "Customer Contact",
-    collaborator: "Collaborator"
+    collaborator: "Collaborator",
+    incoTerms: "Inco Terms"
 }
 
 const toBase64 = file => new Promise((resolve, reject) => {
@@ -504,7 +505,7 @@ export default function TinyMCE(props) {
                                                     {
                                                         ['entity', 'customerAccountName', 'quoteDate', 'quoteName',
                                                             'version', 'quoteId', "currency", "expiryDate", "collaborator",
-                                                            "customerContactName", "currentDate", "owner"
+                                                            "customerContactName", "currentDate", "owner", "incoTerms"
                                                         ].map(o => {
                                                             return <MenuItem
                                                                 onClick={() => handleVaribleSelect(o)}

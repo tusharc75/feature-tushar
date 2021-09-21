@@ -20,7 +20,7 @@ import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 const CreateProductCategory = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { productCategoryId, onClose, onSuccess, isUpdateDisabled = false } = props;
+    const { productCategoryId, onClose, onSuccess, isUpdateDisabled = false, isClone = false } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [formValues, setFormValues] = useState({})
@@ -35,11 +35,22 @@ const CreateProductCategory = (props) => {
                 axiosInstance().get(`/product-category/` + productCategoryId).then(({ data: { data } }) => {
                     let tempOptionArray = fieldsDataForUpdate.find(d => d.fieldName === "parentCategory").option
                     fieldsDataForUpdate.find(d => d.fieldName === "parentCategory").option = tempOptionArray.filter(data => data.optionValue !== productCategoryId)
-                    setInitialData({
-                        fields: fieldsDataForUpdate,
-                        values: getObjKeysWithValues(data, fieldsDataForUpdate),
-                    });
-                    setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate))
+                    const { name, ...rest } = data
+                    if (isClone) {
+                        setInitialData({
+                            fields: fieldsDataForCreate,
+                            values: getObjKeysWithValues({ ...rest }, fieldsDataForCreate),
+                        });
+                        setFormValues(getObjKeysWithValues({ ...rest }, fieldsDataForCreate))
+                    }
+                    else {
+                        setInitialData({
+                            fields: fieldsDataForUpdate,
+                            values: getObjKeysWithValues(data, fieldsDataForUpdate),
+                        });
+                        setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate))
+                    }
+
                 }).catch((error) => {
                     toastConfig.setToastConfig(error);
                 });
@@ -59,7 +70,7 @@ const CreateProductCategory = (props) => {
 
 
     const handleSubmit = (values) => {
-        if (productCategoryId) {
+        if (productCategoryId && !isClone) {
             values._id = productCategoryId
             axiosInstance().put(`/product-category`, values).then(({ data: { data } }) => {
                 setLoading(false);
@@ -114,7 +125,8 @@ const CreateProductCategory = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={productCategoryId ? !isUpdateDisabled ? "Update " + routes.productCategory.title : values["name"] : "Create " + routes.productCategory.title}
+                        <CustomDialogHeader
+                            title={isClone ? "Clone" : productCategoryId ? !isUpdateDisabled ? "Update " + routes.productCategory.title : values["name"] : "Create " + routes.productCategory.title}
                             onClose={() => {
                                 if (isFieldNotTouched({
                                     initialValues: initialData.values,
