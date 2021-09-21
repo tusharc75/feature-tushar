@@ -249,6 +249,22 @@ const routes = {
     title: storedRoutes ? storedRoutes.deliveryTicket?.title : RESOURCE_LABEL.deliveryTicket,
     path: "/loading-ticket/detail",
   },
-};
+  repairJob: {
+    title: storedRoutes ? storedRoutes.repairJob?.title : RESOURCE_LABEL.repairJob,
+    path: "/repair-job",
+  },
+  repairJobDetail: {
+    title: storedRoutes ? storedRoutes.repairJob?.title : RESOURCE_LABEL.repairJob,
+    path: "/repair-job/detail",
+  },
+  receivingTicket: {
+    title: storedRoutes ? storedRoutes.receivingTicket?.title : RESOURCE_LABEL.receivingTicket,
+    path: "/receiving-ticket",
+  },
+  receivingTicketDetail: {
+    title: storedRoutes ? storedRoutes.receivingTicket?.title : RESOURCE_LABEL.receivingTicket,
+    path: "/receiving-ticket/detail",
+  },
+}; 
 
 export default routes;
