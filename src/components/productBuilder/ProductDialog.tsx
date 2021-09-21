@@ -255,7 +255,7 @@ const CreateProduct = (props) => {
   };
 
   const replaceUnit = (label, unit) => {
-    if (label.includes("Unit") && unit) {
+    if (label!== "Secondary Unit" && label.includes("Unit") && unit) {
       label = `${label.split(" Unit")[0]} ${unit}`;
     }
     return label;
@@ -318,7 +318,7 @@ const CreateProduct = (props) => {
                                 section.sectionFields.map((field) =>
                                   field.type === "converter" || field.type === "currencyAmount" || field.isConverter ? (
                                     <FormTypes
-                                      style={{ background: field.isUneditable ? "#1e768221" : "" }}
+                                      style={{ background: field?.isUneditable ? "#FF573321" : field?.isFormula ? "#1e768221"   : "" }}
                                       fields={initialData.fields}
                                       fieldData={field}
                                       values={values}
@@ -364,7 +364,7 @@ const CreateProduct = (props) => {
                                         <Box flexGrow={1}>
                                           <FormTypes
                                             {...field}
-                                            style={{ background: field.isUneditable ? "#1e768221" : "" }}
+                                            style={{ background: field?.isUneditable ? "#FF573321" : field?.isFormula ? "#1e768221"   : "" }}
                                             productTemplateId={values?.productTemplate}
                                             priceTemplateId={values?.priceTemplate}
                                             fields={initialData.fields}
