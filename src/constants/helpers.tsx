@@ -134,7 +134,8 @@ export const sidebarResource = {
   productInventory: 'Product Inventory',
   equipmentRentalMaster: "Equiptment Rental Master",
   rentalManagement: "Rental Management",
-  deliveryTicket: 'Loading Ticket'
+  deliveryTicket: 'Loading Ticket',
+  pricingCondition:'Pricing Condition'
 };
 
 export const RESOURCE_LABEL = {
@@ -178,7 +179,9 @@ export const RESOURCE_LABEL = {
   marketSegment: 'Market Segments',
   quotePdfTemplate: 'Quote PDF Templates',
   rentalManagement: 'Rental Management',
-  deliveryTicket: 'Loading Tickets'
+  deliveryTicket: 'Loading Tickets',
+  pricingCondition:'Pricing Condition'
+
 };
 
 export const lead = {
@@ -201,6 +204,8 @@ export const productTemplate = {
   productTemplateApi: "/product-template",
   productTemplateRoute: "product-template",
 };
+
+
 
 export const priceTemplate = {
   priceTemplateResource: "priceTemplate",
@@ -242,9 +247,9 @@ export const supplierAccount = {
 };
 
 export const termsAndCondition = {
-  api: "/termsandconditions",
-  route: "/terms-conditions",
-  permission: "termsAndConditions",
+  api: "/termsandcondition",
+  route: "/terms-condition",
+  permission: "termsAndCondition",
 };
 
 export const customerAccount = {
@@ -292,6 +297,13 @@ export const budget = {
   budgetRoute: "/budget",
   budgetPermission: "budget",
 }
+
+export const pricingCondition = {
+  pricingConditionApi: "/pricing-condition",
+  pricingConditionRoute: "pricing-condition",
+  pricingConditionPermission: "pricingCondition",
+
+};
 
 export const quotePdfTemplate = {
   quotePdfTemplateApi: "/quote-pdf-template",

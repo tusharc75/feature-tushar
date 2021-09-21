@@ -96,6 +96,7 @@ import RentalManagementDetailsPage from "./pages/RentalManagement/RentalManageme
 import DeliveryTicket from "./pages/DeliveryTicket/index"
 import DeliveryTicketDetailsPage from "./pages/DeliveryTicket/DeliveryTicketDetailPage"
 import RecordDeletedDialog from "./components/Helpers/RecordDeletedDialog";
+import PriceCondition from "./pages/PricingConditions";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -552,6 +553,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.budget.path}>
               <Budget />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.pricingCondition.path}>
+              <PriceCondition />
             </PrivateRoute>
             <PrivateRoute exact path={routes.marketSegment.path}>
               <MarketSegment />
