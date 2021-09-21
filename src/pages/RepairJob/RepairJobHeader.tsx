@@ -109,7 +109,7 @@ function RepairJobHeader(props) {
                 >
                   Delete
                 </MenuItem>
-                {RepairJobPermissions.isUpdate && (
+                {/* {RepairJobPermissions.isUpdate && (
                   <MenuItem
                     disabled={selectedRecords.find((d) => d.canDelete === false)}
                     onClick={() => {
@@ -119,7 +119,7 @@ function RepairJobHeader(props) {
                   >
                     Transfer Entity
                   </MenuItem>
-                )}
+                )} */}
                 {/* <MenuItem
                   disabled={selectedRecords.length !== 1}
                   onClick={() => {

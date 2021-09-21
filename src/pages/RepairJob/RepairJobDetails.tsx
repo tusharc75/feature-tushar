@@ -37,14 +37,16 @@ const RepairJobDetails = () => {
   useEffect(() => {
     if (id) {
       getRessourceFields();
+      fetchRepairJobData()
     }
     // eslint-disable-next-line
   }, [id]);
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
-    mainPoint['Quantity'] = data?.qty || '';
-    mainPoint['MRP'] = data?.mrp || '';
+    mainPoint['Repair Job Name'] = data?.repairJobName || '';
+    mainPoint['Status'] = data?.status || '';
+    mainPoint['Repair Person'] = data?.repairPerson.optionLabel || '';
     setMainPoints(mainPoint);
   };
 
@@ -52,7 +54,25 @@ const RepairJobDetails = () => {
     setLoading(true);
     axiosInstance()
       .get('/field?resource=Repair Job')
-      .then(({ data: { data } }) => {})
+      .then(({ data: { data } }) => {
+        setRepairJobFields(data)
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchRepairJobData = () => {
+    setLoading(true);
+    axiosInstance()
+      .get(`${routes.repairJob.path}/${id}`)
+      .then(({ data: { data } }) => {
+        setRepairJobData(data)
+        handleMainPoints(data)
+        setHeadingLabel(data.repairJobName);
+        setCustomizedRoutes([routes.repairJob, { title: data.repairJobName }]);
+        setLoading(false);
+      })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -123,7 +143,7 @@ const RepairJobDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this repair job ${headingLabel} ?`}
+          message={`Are you sure you want to delete this repair job: ${headingLabel} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

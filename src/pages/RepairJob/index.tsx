@@ -68,7 +68,7 @@ const RepairJob = () => {
       headerName: 'Repair Job Name',
       show: true,
       disabled: true,
-      cellRenderer: 'repariJobNameRenderer'
+      cellRenderer: 'repairJobNameRenderer'
     },
     {
       field: 'status',
@@ -78,18 +78,26 @@ const RepairJob = () => {
       cellRenderer: 'commonRenderer'
     },
     {
-      field: 'customerAccount',
-      headerName: 'Customer Account Name',
+      field: 'productInventory',
+      headerName: 'Product Inventory',
       show: true,
-      cellRenderer: 'customerAccountRenderer'
+      disabled: false,
+      cellRenderer: 'commonRenderer'
     },
     {
-      field: 'relatedOpportunity',
-      headerName: 'Related Opportunity',
+      field: 'repairPerson',
+      headerName: 'Repair Person',
       show: true,
-      cellRenderer: 'relatedOpportunityRenderer'
+      disabled: false,
+      cellRenderer: 'repairPersonRenderer'
     },
-
+    {
+      field: 'typeOfRepair',
+      headerName: 'Type Of Repair',
+      show: true,
+      disabled: false,
+      cellRenderer: 'commonRenderer'
+    },
     {
       field: 'createdBy',
       headerName: 'Created By',
@@ -160,10 +168,10 @@ const RepairJob = () => {
     </>
   );
 
-  const CustomerAccountRenderer = (params) => (
+  const RepairPersonRenderer = (params) => (
     <>
       {params.value ? (
-        <Link className="link" title={params.value} to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}>
+        <Link className="link" title={params.value} to={`${routes.user.path}/detail/${params.data.repairPersonId}`}>
           {params.value}
         </Link>
       ) : (
@@ -172,10 +180,22 @@ const RepairJob = () => {
     </>
   );
 
-  const RelatedOpportunityRenderer = (params) => (
+  // const ProductInventoryRenderer = (params) => (
+  //   <>
+  //     {params.value ? (
+  //       <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
+  //         {params.value}
+  //       </Link>
+  //     ) : (
+  //       <NoDataCell />
+  //     )}
+  //   </>
+  // );
+
+  const OwnerRenderer = (params) => (
     <>
       {params.value ? (
-        <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
+        <Link className="link" to={`${routes.userDetail.path}/${params.data.ownerId}`} title={params.owner}>
           {params.value}
         </Link>
       ) : (
@@ -224,8 +244,9 @@ const RepairJob = () => {
 
   const frameworkComponents = {
     repairJobNameRenderer: RepairJobNameRenderer,
-    customerAccountRenderer: CustomerAccountRenderer,
-    relatedOpportunityRenderer: RelatedOpportunityRenderer,
+    repairPersonRenderer: RepairPersonRenderer,
+    // productInventoryRenderer: ProductInventoryRenderer,
+    ownerRenderer: OwnerRenderer,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
     actionsRenderer: ActionsRenderer,
@@ -326,14 +347,11 @@ const RepairJob = () => {
           let res = {
             ...restProperties,
             id: u._id,
-            status: u.status,
-            owner: u.owner?.optionLabel,
-            ownerId: u.owner?.optionValue,
-            customerAccount: u.customerAccount?.optionLabel,
-            customerAccountId: u.customerAccount?.optionValue,
-            customerContact: u.customerContact?.optionLabel,
-            relatedOpportunity: u.opportunity?.optionLabel,
-            relatedOpportunityId: u.opportunity?.optionValue,
+            productInventory: u.productInventory?.map(p => p.optionLabel).join(", "),
+            repairPerson: u.repairPerson?.optionLabel,
+            repairPersonId: u.repairPerson?.optionValue,
+            owner: u.createdBy?.user?.concatedName,
+            ownerId: u.createdBy?.user?._id,
             createdBy: u.createdBy?.user?.concatedName,
             createdByDate: u.createdBy?.date,
             updatedBy: u.updatedBy?.user?.concatedName,

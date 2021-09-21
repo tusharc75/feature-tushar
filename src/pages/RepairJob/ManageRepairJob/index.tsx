@@ -1,20 +1,17 @@
 import { useState, useEffect, useContext } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, CircularProgress, Grid } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import CustomButton from '../../../components/Helpers/CustomButton';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
-  getCollaboratorDropdownDataSource,
   getObjKeys,
   getObjKeysWithValues,
-  getOwnerDropdownDataSource,
   isFieldNotTouched,
   repairJob,
   setFieldsInAscendingOrder,
@@ -25,42 +22,24 @@ import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
+import { useData } from '../../../StateProvider/Provider';
 import routes from '../../../components/Helpers/Routes';
 
 const ManageRepairJob = ({ isClone, repairJobId, onClose, onSuccess, open }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [repairJobData, setRepairJobData] = useState({ fields: [], initialValues: {} });
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
-  const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
-  const [ownerData, setOwnerData] = useState([]);
-  const [collaboratorData, setCollaboratorData] = useState([]);
-  const {
-    state: { user }
-  }: any = useData();
   const [formValues, setFormValues] = useState({});
 
   useEffect(() => {
-    const ownerCollabOptions = repairJobData.fields.filter((d) => ['owner', 'collaborator'].indexOf(d.fieldName) !== -1);
-    if (ownerCollabOptions.length > 0) {
-      setOwnerCollaboratorData(ownerCollabOptions[0].option);
-      setOwnerData(ownerCollabOptions[0].option);
-      setCollaboratorData(ownerCollabOptions[0].option);
-    }
-
     setFormsData(setFieldsInAscendingOrder(repairJobData.fields));
   }, [repairJobData.fields]);
 
-  const onOwnerDropdownOpen = (selectedCollaborator) => {
-    setOwnerData(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData));
-  };
-
-  const onCollabOwnerMultiselectOpen = (selectedOwnerId) => {
-    setCollaboratorData(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData));
-  };
 
   useEffect(() => {
     setLoading(true);
@@ -75,7 +54,7 @@ const ManageRepairJob = ({ isClone, repairJobId, onClose, onSuccess, open }) => 
             .get(`${repairJob.repairJobApi}/` + repairJobId)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, brand, createdBy, entity, history, products, repairJobName, updatedBy, ...rest } = data;
+                const { _id, brand, createdBy, history, repairJobName, updatedBy, ...rest } = data;
 
                 setRepairJobData({
                   fields: fieldsDataForCreate,
@@ -97,7 +76,7 @@ const ManageRepairJob = ({ isClone, repairJobId, onClose, onSuccess, open }) => 
             });
         } else {
           let initialData = getObjKeys('', fieldsDataForCreate);
-          initialData['currency'] = user.user?.brandCurrency || '';
+
           setRepairJobData({
             fields: fieldsDataForCreate,
             initialValues: initialData
@@ -125,13 +104,13 @@ const ManageRepairJob = ({ isClone, repairJobId, onClose, onSuccess, open }) => 
   };
 
   const handleUpdateRepairJorepairJob = (values) => {
-    setLoading(true);
+    setSubmitting(true);
     if (repairJobId && isClone === false) {
       values._id = repairJobId;
       axiosInstance()
         .put(`${repairJob.repairJobApi}`, values)
         .then(({ data }) => {
-          setLoading(false);
+          setSubmitting(false);
           onSuccess();
           toastConfig.setToastConfig({
             open: true,
@@ -140,16 +119,17 @@ const ManageRepairJob = ({ isClone, repairJobId, onClose, onSuccess, open }) => 
           });
         })
         .catch((error) => {
-          setLoading(false);
+          setSubmitting(false);
           toastConfig.setToastConfig(error);
         });
     } else {
       axiosInstance()
-        .post(`${repairJob.repairJobApi}`, values)
+        .post(`${repairJob.repairJobApi}`, values) 
         .then(({ data: { data, message } }) => {
-          history.push(`${routes.repairJobDetail.path}/${data}`);
-          setLoading(false);
+          history.push(`${routes.repairJobDetail.path}/${data._id}`);
+          setSubmitting(false);
           onSuccess(data);
+          console.log(data)
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -157,7 +137,7 @@ const ManageRepairJob = ({ isClone, repairJobId, onClose, onSuccess, open }) => 
           });
         })
         .catch((error) => {
-          setLoading(false);
+          setSubmitting(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -244,72 +224,6 @@ const ManageRepairJob = ({ isClone, repairJobId, onClose, onSuccess, open }) => 
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field) => (
                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                      {field.fieldName === 'owner' ? (
-                                        <FormTypes
-                                          repairJobId={repairJobId}
-                                          {...field}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={ownerData}
-                                          onChange={(e, val) => {
-                                            setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                            handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : '' });
-
-                                            if (val && val.optionValue !== user?.user?._id) {
-                                              const checkOwnerAddedInCollaborator = values['collaborator'].find(
-                                                (d) => d?.optionValue === user?.user?._id
-                                              );
-                                              if (!checkOwnerAddedInCollaborator) {
-                                                setFieldValue('collaborator', [
-                                                  ...values['collaborator'],
-                                                  collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                                ]);
-                                                handleValuesChange({
-                                                  collaborator: collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                                });
-                                              }
-                                            }
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          disabled={!repairJobId && field.disableOnEdit}
-                                          onOpen={() => {
-                                            onOwnerDropdownOpen(values['collaborator']);
-                                          }}
-                                        />
-                                      ) : field.fieldName === 'collaborator' ? (
-                                        <FormTypes
-                                          repairJobId={repairJobId}
-                                          {...field}
-                                          disabled={!repairJobId && field.disableOnEdit}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={collaboratorData}
-                                          setFieldValue={(name, value) => {
-                                            handleValuesChange({ [name]: value });
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          onOpen={() => {
-                                            onCollabOwnerMultiselectOpen(values['owner']);
-                                          }}
-                                        />
-                                      ) : (
                                         <FormTypes
                                           repairJobId={repairJobId}
                                           {...field}
@@ -338,7 +252,7 @@ const ManageRepairJob = ({ isClone, repairJobId, onClose, onSuccess, open }) => 
                                               : null
                                           }
                                         />
-                                      )}
+
                                     </Grid>
                                   ))}
                                 </Grid>
@@ -352,6 +266,7 @@ const ManageRepairJob = ({ isClone, repairJobId, onClose, onSuccess, open }) => 
 
                 <CustomDialogFooter>
                   <Button
+                    disabled={submitting}
                     type="button"
                     variant="outlined"
                     color="primary"
@@ -368,9 +283,10 @@ const ManageRepairJob = ({ isClone, repairJobId, onClose, onSuccess, open }) => 
                     loading={loading}
                     variant="contained"
                     color="primary"
+                    startIcon={submitting && <CircularProgress size={20} color='inherit' />}
                     disabled={
                       // loading || Object.keys(errors).length > 0 ? true : false
-                      uploadingImageOrFileProgress > 0 || isFieldNotTouched(repairJobData, values) || loading
+                      uploadingImageOrFileProgress > 0 || isFieldNotTouched(repairJobData, values) || submitting || loading
                     }
                     onClick={(e) => {
                       e.preventDefault();
