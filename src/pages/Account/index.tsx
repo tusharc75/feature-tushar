@@ -40,7 +40,8 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import styles from '../Leads/Header.module.scss';
-import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
+import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes"
+import EntitySelections from "../../components/EntitySelections"
 
 const AccTypes = [
   {
@@ -307,6 +308,7 @@ export default function Account(props) {
         }}
         entity="account"
       />
+      <EntitySelections />
     </>
   );
 
