@@ -193,6 +193,10 @@ const routes = {
     title: storedRoutes ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
     path: "/budget",
   },
+  pricingCondition:{
+    title: storedRoutes ? storedRoutes.pricingCondition?.title : RESOURCE_LABEL.pricingCondition,
+    path: "/pricing-condition",
+  },
   marketSegment: {
     title: storedRoutes ? storedRoutes.marketSegment?.title : RESOURCE_LABEL.marketSegment,
     path: "/market-segment",
