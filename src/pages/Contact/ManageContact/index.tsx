@@ -120,18 +120,15 @@ export default function ManageContactDialog(props) {
       axiosInstance()
         .get(`/${contactApi}/${contactId}`)
         .then(({ data: { data } }) => {
-          const { _id, collaborator, reportsTo, email, owner, createdBy, accountName, entity, staticData, updatedBy, parentHierarchy, ...rest } = data
+          const { _id, firstName, lastName, middleName, email, reportsTo, ...rest } = data
+
           let tempData = { ...rest }
-          tempData.entity = entity.map(entity => entity?.optionValue)
-          tempData.collaborator = collaborator.map(o => o?.optionValue)
-          tempData.owner = owner?.optionValue
-          tempData.reportsTo = reportsTo?.optionValue
-          tempData.accountName = accountName?.optionValue
+          tempData.reportsTo = reportsTo.optionValue
+
           setContactData({
             fields: newFields,
             initialValues: getObjKeysWithValues(tempData, newFields),
           });
-
           setFormValues(getObjKeysWithValues(tempData, newFields))
           setTimeout(() => setLoading(false), 500);
         })

@@ -48,7 +48,7 @@ export default function ManageContact(props) {
     accountId = null,
     formValues = {},
     handleValuesChange = null,
-    isClone
+    isClone = false
   } = props;
 
   const classes = useStyles();
@@ -110,7 +110,7 @@ export default function ManageContact(props) {
         (d) => d.fieldName === "reportsTo"
       );
       if (reportsToDropdownData) {
-        if (isNew) {
+        if (isNew && !isClone) {
           setReportsToMainDataSource(reportsToDropdownData.option);
         } else {
           let currentContactRemovedDataSource =
@@ -124,7 +124,6 @@ export default function ManageContact(props) {
       setFormsData(setFieldsInAscendingOrder(contactData.fields));
     }
   }, [contactData.fields]);
-
 
   const onOwnerDropdownOpen = (selectedCollaborator, selectedEntity) => {
     if (selectedEntity?.length > 0) {
