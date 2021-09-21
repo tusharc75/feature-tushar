@@ -640,7 +640,7 @@ const FormTypes = (props) => {
         field.displayCurrency = field.displayCurrency.filter((e) => e !== displayValue);
         if (field.isConverter) {
           let _fieldName = field.fieldName + '_' + displayValue.toLowerCase() + '_' + field.displayUnits[0].toLowerCase();
-          setFieldValue(_fieldName, 0);
+          //setFieldValue(_fieldName, 0);
         } else {
           let _fieldName = field.fieldName + '_' + displayValue.toLowerCase();
           setFieldValue(_fieldName, 0);
@@ -648,7 +648,7 @@ const FormTypes = (props) => {
       } else if (displayType === 'converter') {
         field.displayUnits = field.displayUnits.filter((e) => e !== displayValue);
         let _fieldName = field.fieldName + '_' + displayValue.toLowerCase();
-        setFieldValue(_fieldName, 0);
+        //setFieldValue(_fieldName, 0);
       }
       removeDisplayType(displayType, field, displayValue);
     }
