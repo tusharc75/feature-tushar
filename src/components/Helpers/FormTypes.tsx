@@ -1686,7 +1686,7 @@ const FormTypes = (props) => {
           const matches = option.structured_formatting.main_text_matched_substrings;
           const parts = parse(
             option.structured_formatting.main_text,
-            matches.map((match) => [match.offset, match.offset + match.length])
+            matches?.map((match) => [match.offset, match.offset + match.length])
           );
 
           return (
@@ -1700,7 +1700,7 @@ const FormTypes = (props) => {
                 />
               </Grid>
               <Grid item xs>
-                {parts.map((part, index) => (
+                {parts?.map((part, index) => (
                   <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
                     {part.text}
                   </span>
