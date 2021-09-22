@@ -8,7 +8,6 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 
 export default function AccountHierarchy({ data, currentAccountId, accountRoute }) {
 
-    console.log('data', data)
     const commonFieldWidth = 150;
     const options: any = {
         search: false,

@@ -258,10 +258,10 @@ const ProjectSales: FC = () => {
         entity="Project"
       />
       {
-        permissions?.projectSales.isUpdate && <Tooltip title="Clone">
+        permissions?.projectSales.isUpdate && <Tooltip title="Entity">
           <IconButton
             size="small"
-            aria-label="Clone"
+            aria-label="Entity"
             onClick={() => {
               setProjectSalesId(params.data._id)
               setShowEntityDialog(true)
@@ -270,7 +270,7 @@ const ProjectSales: FC = () => {
                 setEntities([...restEntities])
               }
             }}>
-            <AiOutlineDeploymentUnit fontSize="small" color="primary" />
+            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
           </IconButton>
         </Tooltip>
       }

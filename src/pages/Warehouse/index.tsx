@@ -268,7 +268,7 @@ const AddressResource = () => {
         </Tooltip>
       )}
       {
-        warehousePermissions.isUpdate && <Tooltip title="Clone">
+        warehousePermissions.isUpdate && <Tooltip title="Entity">
           <IconButton
             size="small"
             aria-label="Entity"
@@ -280,7 +280,7 @@ const AddressResource = () => {
                 setEntities([...restEntities])
               }
             }}>
-            <AiOutlineDeploymentUnit fontSize="small" color="primary" />
+            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
           </IconButton>
         </Tooltip>
       }

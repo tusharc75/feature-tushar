@@ -199,7 +199,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
   const handleSave = (values) => {
     let data = [...section];
-    console.log('data', data)
     data.forEach((row) => {
       if (row.sectionId.toString() === sectionId.toString()) {
         row.field.forEach((ele) => {

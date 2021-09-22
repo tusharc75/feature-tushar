@@ -316,10 +316,10 @@ export default function Account(props) {
       />
       {
         accountPermissions.isUpdate &&
-        <Tooltip title="Clone">
+        <Tooltip title="Entity">
           <IconButton
             size="small"
-            aria-label="Clone"
+            aria-label="Entity"
             onClick={() => {
               setAccountId(params.data._id)
               setShowEntityDialog(true)
@@ -335,7 +335,7 @@ export default function Account(props) {
                 setEntities([...entities])
               }
             }}>
-            <AiOutlineDeploymentUnit fontSize="small" color="primary" />
+            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
           </IconButton>
         </Tooltip>
       }

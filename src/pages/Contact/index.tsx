@@ -255,10 +255,10 @@ export default function Contact(props) {
 
       {
         contactPermissions.isUpdate &&
-        <Tooltip title="Clone">
+        <Tooltip title="Entity">
           <IconButton
             size="small"
-            aria-label="Clone"
+            aria-label="Entity"
             onClick={() => {
               setContactId(params.data._id)
               setShowEntityDialog(true)
@@ -278,7 +278,7 @@ export default function Contact(props) {
                 setEntities([...restEntities])
               }
             }}>
-            <AiOutlineDeploymentUnit fontSize="small" color="primary" />
+            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
           </IconButton>
         </Tooltip>
       }
