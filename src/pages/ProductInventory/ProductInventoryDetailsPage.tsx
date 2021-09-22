@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment } from "react";
+import { useState, useEffect, useContext, Fragment, useReducer } from "react";
 import { Grid, Box, Button, Paper } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
@@ -11,12 +11,14 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { productInventory, getObjKeysWithValues } from "../../constants/helpers";
+import { productInventory, getObjKeysWithValues, gridLoadingTimeout } from "../../constants/helpers";
 import ManageProductInventory from "./ManageProductInventory";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
 import ReasonDialog from "./ReasonDialog"
+import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
+import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 
 const ProductInventoryDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -27,7 +29,7 @@ const ProductInventoryDetailsPage = () => {
     state: { permissions }
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loadingProductInventory, setLoadingProductInventory] = useState(false);
   const [productInventoryData, setProductInventoryData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -47,10 +49,26 @@ const ProductInventoryDetailsPage = () => {
     }
   })
 
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+
+  const frameworkComponents = {
+    commonRenderer: CommonRenderer,
+  };
+  const columns = [
+    { field: "date", headerName: "Date", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "referenceNumber", headerName: "Reference Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "comments", headerName: "Comments", show: true, cellRenderer: "commonRenderer" },
+  ];
+
   useEffect(() => {
     if (id) {
       getProductInventoryFields();
       fetchProductInventoryData();
+      fetchProductInventoryHistory();
     }
 
   }, [id]);
@@ -61,8 +79,28 @@ const ProductInventoryDetailsPage = () => {
     setMainPoints(mainPoint);
   };
 
+  const fetchProductInventoryHistory = () => {
+    dispatch({ type: "loading", loading: true });
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+    axiosInstance().get(`/history/inventory/${id}`).then(({ data }) => {
+      data.data = data.data?.map((u) => ({
+        ...u,
+        id: u.inventory?._id,
+      }));
+      dispatch({ type: "initialize", data: data.data, count: data.data.length });
+      setTimeout(() => {
+        dispatch({ type: "loading", loading: false });
+      }, gridLoadingTimeout);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      dispatch({ type: "loading", loading: false });
+    });
+  };
+
   const fetchProductInventoryData = async () => {
-    setLoading(true);
+    setLoadingProductInventory(true);
     try {
       const {
         data: { data },
@@ -73,7 +111,7 @@ const ProductInventoryDetailsPage = () => {
       setCustomizedRoutes([routes.productInventory,
       { title: `${data?.serialNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
       setProductInventoryData(data);
-      setLoading(false);
+      setLoadingProductInventory(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -231,7 +269,7 @@ const ProductInventoryDetailsPage = () => {
 
 
               <Box>
-                {loading || !productInventoryFields.length ? (
+                {loadingProductInventory || !productInventoryFields.length ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
                   </Grid>
@@ -247,7 +285,30 @@ const ProductInventoryDetailsPage = () => {
               </Box>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
-
+                  {columns ?
+                    <CustomAgGrid
+                      columns={columns}
+                      dataRows={dataRows}
+                      frameworkComponents={frameworkComponents}
+                      setGridApi={setGridApi}
+                      dispatch={dispatch}
+                      rowCount={rowCount}
+                      limit={limit}
+                      pageSizes={pageSizes}
+                      page={page}
+                      allowAction={false}
+                      allowSelection={false}
+                      isClientSideGrid={true}
+                      loading={loading}
+                      renderedFrom="rentalManagementDetailsPageInventory"
+                    />
+                    : <Box
+                      p={2}
+                      height={500}
+                      bgcolor="white">
+                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                    </Box>
+                  }
                 </Grid>
               </Grid>
             </Paper>
