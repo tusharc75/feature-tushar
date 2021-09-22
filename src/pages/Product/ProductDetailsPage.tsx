@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, Fragment } from "react";
 import { Grid, Box, Button, Typography, IconButton, Paper, Chip } from "@material-ui/core";
-import { ControlPoint, ExpandLess, ExpandMore } from "@material-ui/icons";
+import { ControlPoint, ExpandLess, ExpandMore, InfoOutlined } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
@@ -20,6 +20,7 @@ import AssignedFrequentlyBoughtProduct from "./AssignedFrequentlyBoughtProduct";
 import AssignProductDialog from "../../components/AssignRolesDialog/AssignProductDialog";
 import ManageProductInventory from "../ProductInventory/ManageProductInventory"
 import { extractFields } from "../../constants/formulaUtility";
+import HtmlTooltip from "../../components/CustomTooltipTitle";
 
 const ProductDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -40,6 +41,7 @@ const ProductDetailsPage = () => {
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
     const [frequentlyBoughtProduct, setFrequentlyBoughtProduct] = useState([]);
     const [inventoriesData, setInventoriesData] = useState([]);
+    const [statusData, setStatusData] = useState([]);
     const [selectedWarehouse, setSelectedWarehouse] = useState(null)
     const [openProductInventoryDialog, setOpenProductInventoryDialog] = useState(false);
 
@@ -162,14 +164,30 @@ const ProductDetailsPage = () => {
         axiosInstance().get(`product/${id}/inventory`)
             .then(async ({ data: { data } }) => {
                 let wareHouses = []
+                let byStatus = []
                 for (const d of data) {
                     if (!wareHouses.includes(d?.warehouse.optionLabel)) {
                         wareHouses.push(d?.warehouse.optionLabel)
                     }
+
+                    if (!byStatus.includes(d?.status)) {
+                        byStatus.push(d?.status)
+                    }
+
                 }
+
                 const inventories = wareHouses.map(w => {
                     let inventory = data.filter(d => w === d?.warehouse.optionLabel);
-                    return { warehouse: w, inventory }
+
+                    let status = byStatus.map(status => {
+                        let count = data.filter(d => w === d?.warehouse.optionLabel).filter(d => status === d?.status).length;
+
+                        if (count) {
+                            return { status, count }
+                        }
+                    }).filter(x => x)
+
+                    return { warehouse: w, inventory, status }
                 })
                 setInventoriesData(inventories)
 
@@ -354,7 +372,7 @@ const ProductDetailsPage = () => {
                                         ))
 
                                     ) : inventoriesData.length ?
-                                        inventoriesData.map(({ inventory, warehouse }) => (
+                                        inventoriesData.map(({ inventory, warehouse, status }) => (
                                             <Box>
                                                 <Box key={warehouse}
                                                     display="flex"
@@ -378,7 +396,7 @@ const ProductDetailsPage = () => {
                                                                         {selectedWarehouse === warehouse ? <ExpandLess /> : <ExpandMore />}
                                                                     </IconButton>
                                                                 </Box>
-                                                                <Box ml={1}>
+                                                                <Box ml={1} display="flex" alignItems='center'>
                                                                     <Typography
                                                                         variant="subtitle2"
                                                                         color="primary"
@@ -387,6 +405,21 @@ const ProductDetailsPage = () => {
                                                                     >
                                                                         {warehouse} ({inventory.length || 0})
                                                                     </Typography>
+                                                                    <Box mx={1} />
+                                                                    <HtmlTooltip arrow interactive title={
+                                                                        <>
+                                                                            <Typography>Inventory Status: </Typography>
+                                                                            {status.map((s) => (
+                                                                                <Typography>
+                                                                                    {`(${s.count}) ${s.status}`}
+                                                                                </Typography>
+                                                                            ))}
+                                                                        </>
+                                                                    }>
+                                                                        <IconButton size="small">
+                                                                            <InfoOutlined />
+                                                                        </IconButton>
+                                                                    </HtmlTooltip>
                                                                 </Box>
                                                             </Box>
                                                         </Grid>
