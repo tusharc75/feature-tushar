@@ -254,9 +254,16 @@ const CreateProduct = (props) => {
     setFieldChanges(_fieldChanges);
   };
 
-  const replaceUnit = (label, unit) => {
-    if (label!== "Secondary Unit" && label.includes("Unit") && unit) {
-      label = `${label.split(" Unit")[0]} ${unit}`;
+  const replaceUnit = (label, unit, sUnit = null) => {
+    if (label !== "Secondary Unit") {
+      if (label.includes("Secondary Unit") && sUnit) {
+        label = `${label.split(" Secondary Unit")[0]} ${sUnit}`;
+      }
+      
+      if (!label.includes("Secondary Unit") && label.includes("Unit")  && unit) {
+        label = `${label.split(" Unit")[0]} ${unit}`;
+      }
+
     }
     return label;
   };
@@ -328,11 +335,13 @@ const CreateProduct = (props) => {
                                         field.isUneditable
                                           ? `${replaceUnit(
                                             field.fieldLabel,
-                                            values?.unit
+                                            values?.unit,
+                                            values?.secondaryUnit
                                           )} (Auto Calculated Field)`
                                           : replaceUnit(
                                             field.fieldLabel,
-                                            values?.unit
+                                            values?.unit,
+                                            values?.secondaryUnit
                                           )
                                       }
                                       name={field.fieldName}
@@ -376,11 +385,13 @@ const CreateProduct = (props) => {
                                               field.isUneditable
                                                 ? `${replaceUnit(
                                                   field.fieldLabel,
-                                                  values?.unit
+                                                  values?.unit,
+                                                  values?.secondaryUnit
                                                 )} (Auto Calculated Field)`
                                                 : replaceUnit(
                                                   field.fieldLabel,
-                                                  values?.unit
+                                                  values?.unit,
+                                                  values?.secondaryUnit
                                                 )
                                             }
                                             name={field.fieldName}
