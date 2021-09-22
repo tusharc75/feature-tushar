@@ -942,7 +942,7 @@ export default function Account(props) {
           showEntityDialog ?
             <EntitySelectionsDialog
               open={showEntityDialog}
-              resource={accountApi}
+              resource={sidebarResource[accountResource]}
               resourceId={accountId}
               onClose={() => {
                 setShowEntityDialog(false)

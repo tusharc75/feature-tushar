@@ -25,6 +25,7 @@ function EntitySelections(props) {
     const { open, entities = [], resource, resourceId, onClose, onSuccess } = props
     const [selectedEntities, setSelectedEntities] = useState([])
     const [entityList, setEntityList] = useState([])
+    const [loading, setLoading] = useState(false)
     const { entityApi } = entity
 
     useEffect(() => {
@@ -48,9 +49,11 @@ function EntitySelections(props) {
             ids: [resourceId],
             entity: [...selectedEntities]
         }
+        setLoading(true)
         axiosInstance()
             .put(`/entity/entity-resource/${resource}`, request)
             .then(({ data }) => {
+                setLoading(false)
                 toastConfig.setToastConfig({
                     open: true,
                     type: "success",
@@ -60,6 +63,7 @@ function EntitySelections(props) {
                 onSuccess()
             })
             .catch((error) => {
+                setLoading(false)
                 toastConfig.setToastConfig(error);
             });
     };
@@ -128,7 +132,8 @@ function EntitySelections(props) {
                     onClick={onClose}
                 >Cancel</Button>
                 <CustomButton
-                    // loading={loading}
+                    loading={loading}
+                    disabled={loading}
                     variant="contained"
                     color="primary"
                     type="submit"

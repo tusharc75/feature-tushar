@@ -276,15 +276,8 @@ const AddressResource = () => {
               setShowEntityDialog(true)
               setWarehouseId(params.data._id)
               if (params?.data?.entity) {
-                let entities = []
-                if (params?.data?.entityId) {
-                  entities.push(params?.data?.entityId)
-                }
-                if (params?.data?.restEntity) {
-                  let restEntities = params?.data?.restEntity.map(o => o?.optionValue)
-                  entities = [...entities, ...restEntities]
-                }
-                setEntities([...entities])
+                let restEntities = params?.data?.entity.map(o => o?.optionValue)
+                setEntities([...restEntities])
               }
             }}>
             <AiOutlineDeploymentUnit fontSize="small" color="primary" />

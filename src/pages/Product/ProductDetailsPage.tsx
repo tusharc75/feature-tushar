@@ -119,21 +119,9 @@ const ProductDetailsPage = () => {
             axiosInstance()
                 .get(`/product/bom/${productData?._id}`)
                 .then(({ data: { data } }) => {
-                    let bomData = [...frequentlyBoughtProduct]
-                    bomData = bomData.map(o => {
-                        return {
-                            ...o,
-                            type: "child",
-                            parentAccountId: productData?._id
-                        }
-                    })
-                    let tempData = {
-                        productName: productData?.productName,
-                        _id: productData?._id,
-                        type: "parent"
+                    if (data && data.length) {
+                        setBOMData([...data])
                     }
-                    bomData = [...bomData, tempData]
-                    setBOMData([...bomData])
                 })
         }
     }
@@ -321,18 +309,18 @@ const ProductDetailsPage = () => {
                                             </BoxWithBorder>
                                         ))
 
-                                    ) : BOMData.length ? (
+                                    ) : frequentlyBoughtProduct.length ? (
                                         <>
-                                            {/* <AssignedFrequentlyBoughtProduct
+                                            <AssignedFrequentlyBoughtProduct
                                                 permissions={permissions.product}
                                                 product={frequentlyBoughtProduct}
                                                 unassignProduct={unassignProduct}
-                                            /> */}
-                                            <ProductHierarchy
+                                            />
+                                            {/* <ProductHierarchy
                                                 data={BOMData}
                                                 permissions={permissions.product}
                                                 unassignProduct={unassignProduct}
-                                            />
+                                            /> */}
                                             <Box marginY={1} />
                                         </>
                                     ) : (
@@ -487,6 +475,7 @@ const ProductDetailsPage = () => {
                     assignedProducts={frequentlyBoughtProduct}
                     onSuccess={() => {
                         getFrequentlyBoughtProduct();
+                        getProductTree()
                         setOpenAssignProductDialog(false)
                     }}
                 />
