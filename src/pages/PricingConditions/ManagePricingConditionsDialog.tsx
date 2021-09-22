@@ -15,7 +15,7 @@ import {
     yupSchema,
     getObjKeysWithValues,
     simplifyValues,
-    budget,
+    pricingCondition,
     setFieldsInAscendingOrder,
     getUniqueCurrencies,
     formFieldNames,
@@ -37,22 +37,18 @@ import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialo
 import { useData } from "../../StateProvider/Provider";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
-const budgetMonths = ["januaryBudget", "februaryBudget", "marchBudget", "aprilBudget", "mayBudget", "juneBudget",
-    "julyBudget", "augustBudget", "septemberBudget", "octoberBudget", "novemberBudget", "decemberBudget"]
-
 const arr = [...Array(9).keys()];
-export default function ManageBudgetDialog({
+export default function ManagePricingConditionsDialog({
     open,
     onSuccess,
     onClose,
-    budgetId,
-    isClone
+    pricingConditionId
 }) {
-    const { budgetApi } = budget;
+    const { pricingConditionApi } = pricingCondition;
     const toastConfig = useContext(CustomToastContext);
 
 
-    const [entityData, setEntityData] = useState({
+    const [pricingConditionData, setEntityData] = useState({
         fields: [],
         initialValues: {},
     });
@@ -82,12 +78,12 @@ export default function ManageBudgetDialog({
     const [formValues, setFormValues] = useState({})
 
     useEffect(() => {
-        getBudgetFields();
+        getPricingConditionsFields();
     }, [])
 
     useEffect(() => {
-        setFormsData(setFieldsInAscendingOrder(entityData.fields));
-    }, [entityData.fields]);
+        setFormsData(setFieldsInAscendingOrder(pricingConditionData.fields));
+    }, [pricingConditionData.fields]);
 
     const onSalesRepDropdownOpen = (selectedEntity) => {
         if (selectedEntity) {
@@ -109,12 +105,12 @@ export default function ManageBudgetDialog({
         }
     };
 
-    const getBudgetFields = () => {
+    const getPricingConditionsFields = () => {
         axiosInstance()
-            .get(`/field?resource=Budget`)
+            .get(`/field?resource=Pricing Condition`)
             .then(({ data: { data } }) => {
 
-                const filterData = budgetId
+                const filterData = pricingConditionId
                     ? data.filter((d) => d.isUpdate)
                     : data.filter((d) => d.isCreate);
 
@@ -142,10 +138,10 @@ export default function ManageBudgetDialog({
                     setUsersDataSource(salesRepDropdownData.option);
                 }
 
-                if (budgetId) {
+                if (pricingConditionId) {
                     let newFields = [];
 
-                    axiosInstance().get(`${budgetApi}/${budgetId}`).then(({ data: { data } }) => {
+                    axiosInstance().get(`${pricingConditionApi}/${pricingConditionId}`).then(({ data: { data } }) => {
                         data.year = new Date(`${data.year}-01-01`);
 
                         filterData.map((_f) => {
@@ -165,17 +161,11 @@ export default function ManageBudgetDialog({
                             setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data.marketSegment));
                         }
 
-                        let clonedData = { ...data }
-
-                        if (isClone) {
-                            let { name, _id, ...rest } = clonedData
-                            clonedData = { ...rest }
-                        }
                         setEntityData({
                             fields: newFields,
-                            initialValues: getObjKeysWithValues(clonedData, newFields)
+                            initialValues: getObjKeysWithValues(data, newFields)
                         });
-                        setFormValues(getObjKeysWithValues(clonedData, newFields))
+                        setFormValues(getObjKeysWithValues(data, newFields))
                     }).catch((error) => {
                         toastConfig.setToastConfig(error);
                     });
@@ -208,9 +198,9 @@ export default function ManageBudgetDialog({
         values.year = new Date(values.year).getFullYear();
         setLoading(true);
 
-        if (budgetId && !isClone) {
-            values._id = budgetId;
-            axiosInstance().put(budgetApi, values).then(({ data }) => {
+        if (pricingConditionId) {
+            values._id = pricingConditionId;
+            axiosInstance().put(pricingConditionApi, values).then(({ data }) => {
                 toastConfig.setToastConfig({
                     open: true,
                     type: "success",
@@ -225,7 +215,7 @@ export default function ManageBudgetDialog({
             });
         }
         else {
-            axiosInstance().post(budgetApi, values).then(({ data }) => {
+            axiosInstance().post(pricingConditionApi, values).then(({ data }) => {
                 toastConfig.setToastConfig({
                     open: true,
                     type: "success",
@@ -317,26 +307,25 @@ export default function ManageBudgetDialog({
             >
                 <CustomDialogHeader
                     title={
-                        isClone ? "Clone" :
-                            budgetId
-                                ? `Editing ${entityData.initialValues && entityData.initialValues["name"] ? entityData.initialValues["name"] : ""}`
-                                : "Create Budget"
+                        pricingConditionId
+                            ? `Editing ${pricingConditionData.initialValues && pricingConditionData.initialValues["name"] ? pricingConditionData.initialValues["name"] : ""}`
+                            : "Create Pricing Conditions"
                     }
                     onClose={() => {
-                        if (isFieldNotTouched(entityData, formValues)) onClose()
+                        if (isFieldNotTouched(pricingConditionData, formValues)) onClose()
                         else setShowConfirmDialog(true)
                     }}
                 />
 
-                {entityData.fields.length === 0 && (
+                {pricingConditionData.fields.length === 0 && (
                     <CustomDialogContent>
                         <CommonSkeleton lenArray={arr} />
                     </CustomDialogContent>
                 )}
-                {entityData.fields.length > 0 && (
+                {pricingConditionData.fields.length > 0 && (
                     <Formik
-                        initialValues={entityData.initialValues}
-                        validationSchema={yupSchema(entityData.fields)}
+                        initialValues={pricingConditionData.initialValues}
+                        validationSchema={yupSchema(pricingConditionData.fields)}
                         validateOnMount
                         onSubmit={onSubmit}
                     >
@@ -423,36 +412,6 @@ export default function ManageBudgetDialog({
                                                                                         }
                                                                                     }}
                                                                                 />
-                                                                            ) : budgetMonths.some(d => d === field.fieldName.trim()) ? (
-                                                                                <FormTypes
-                                                                                    // {...rest}
-                                                                                    selectedCurrencyCode={values["currency"]}
-                                                                                    startAdornment={
-                                                                                        currencySymbol ? (
-                                                                                            <InputAdornment position="start">
-                                                                                                {currencySymbol}
-                                                                                            </InputAdornment>
-                                                                                        ) : (
-                                                                                            ""
-                                                                                        )
-                                                                                    }
-                                                                                    values={values}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    label={field.fieldLabel}
-                                                                                    name={field.fieldName}
-                                                                                    type={field.type}
-                                                                                    options={field.option}
-                                                                                    setFieldValue={(name, value) => {
-                                                                                        handleValuesChange({ [name]: value })
-                                                                                        setFieldValue(name, value)
-                                                                                    }}
-                                                                                    required={field.required}
-                                                                                    fullWidth
-                                                                                    isTooltip={field?.isTooltip || false}
-                                                                                    tooltipMessage={field?.tooltipMessage}
-                                                                                    size="small"
-                                                                                />
                                                                             ) : field.fieldName === "productCategory" ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                                                                 <Grid container spacing={1}>
                                                                                     <Grid
@@ -472,9 +431,9 @@ export default function ManageBudgetDialog({
                                                                                         }
                                                                                     >
                                                                                         <FormTypes
-                                                                                            fields={entityData.fields}
+                                                                                            fields={pricingConditionData.fields}
                                                                                             fieldData={field}
-                                                                                            disabled={(Boolean(budgetId) && field.disableOnEdit)}
+                                                                                            disabled={(Boolean(pricingConditionId) && field.disableOnEdit)}
                                                                                             errors={errors}
                                                                                             touched={touched}
                                                                                             label={field.fieldLabel}
@@ -517,10 +476,10 @@ export default function ManageBudgetDialog({
                                                                                                 >
                                                                                                     <IconButton
                                                                                                         onClick={() => { setShowAddProductCategoryDialog(true); }}
-                                                                                                        disabled={(Boolean(budgetId) && field.disableOnEdit)}
+                                                                                                        disabled={(Boolean(pricingConditionId) && field.disableOnEdit)}
                                                                                                         size="small"
                                                                                                     >
-                                                                                                        <AddIcon color={(Boolean(budgetId) && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                                                                        <AddIcon color={(Boolean(pricingConditionId) && field.disableOnEdit) ? "disabled" : "primary"} />
                                                                                                     </IconButton>
                                                                                                 </Tooltip>
                                                                                             </Grid>
@@ -557,9 +516,9 @@ export default function ManageBudgetDialog({
                                                                                             }
                                                                                         >
                                                                                             <FormTypes
-                                                                                                fields={entityData.fields}
+                                                                                                fields={pricingConditionData.fields}
                                                                                                 fieldData={field}
-                                                                                                disabled={(Boolean(budgetId) && field.disableOnEdit)}
+                                                                                                disabled={(Boolean(pricingConditionId) && field.disableOnEdit)}
                                                                                                 errors={errors}
                                                                                                 touched={touched}
                                                                                                 label={field.fieldLabel}
@@ -608,10 +567,10 @@ export default function ManageBudgetDialog({
                                                                                                     >
                                                                                                         <IconButton
                                                                                                             onClick={() => { setShowAddMarketSegmentDialog(true); }}
-                                                                                                            disabled={(Boolean(budgetId) && field.disableOnEdit)}
+                                                                                                            disabled={(Boolean(pricingConditionId) && field.disableOnEdit)}
                                                                                                             size="small"
                                                                                                         >
-                                                                                                            <AddIcon color={(Boolean(budgetId) && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                                                                            <AddIcon color={(Boolean(pricingConditionId) && field.disableOnEdit) ? "disabled" : "primary"} />
                                                                                                         </IconButton>
                                                                                                     </Tooltip>
                                                                                                 </Grid>
@@ -647,9 +606,9 @@ export default function ManageBudgetDialog({
                                                                                             }
                                                                                         >
                                                                                             <FormTypes
-                                                                                                fields={entityData.fields}
+                                                                                                fields={pricingConditionData.fields}
                                                                                                 fieldData={field}
-                                                                                                disabled={(Boolean(budgetId) && field.disableOnEdit)}
+                                                                                                disabled={(Boolean(pricingConditionId) && field.disableOnEdit)}
                                                                                                 errors={errors}
                                                                                                 touched={touched}
                                                                                                 label={field.fieldLabel}
@@ -692,10 +651,10 @@ export default function ManageBudgetDialog({
                                                                                                             onClick={() => {
                                                                                                                 setShowAddMarketSegmentDialog(true);
                                                                                                             }}
-                                                                                                            disabled={(Boolean(budgetId) && field.disableOnEdit)}
+                                                                                                            disabled={(Boolean(pricingConditionId) && field.disableOnEdit)}
                                                                                                             size="small"
                                                                                                         >
-                                                                                                            <AddIcon color={(Boolean(budgetId) && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                                                                            <AddIcon color={(Boolean(pricingConditionId) && field.disableOnEdit) ? "disabled" : "primary"} />
                                                                                                         </IconButton>
                                                                                                     </Tooltip>
                                                                                                 </Grid>
@@ -722,7 +681,7 @@ export default function ManageBudgetDialog({
                                                                                             md={11}
                                                                                         >
                                                                                             <FormTypes
-                                                                                                fields={entityData.fields}
+                                                                                                fields={pricingConditionData.fields}
                                                                                                 fieldData={field}
                                                                                                 errors={errors}
                                                                                                 touched={touched}
@@ -823,7 +782,7 @@ export default function ManageBudgetDialog({
                                         color="primary"
                                         size="small"
                                         onClick={() => {
-                                            if (isFieldNotTouched(entityData, values)) onClose()
+                                            if (isFieldNotTouched(pricingConditionData, values)) onClose()
                                             else setShowConfirmDialog(true)
                                         }}
                                     >
@@ -838,12 +797,12 @@ export default function ManageBudgetDialog({
                                             loading ||
                                             Object.values(
                                                 simplifyValues(
-                                                    entityData.initialValues,
-                                                    entityData.fields
+                                                    pricingConditionData.initialValues,
+                                                    pricingConditionData.fields
                                                 )
                                             ).toString() ===
                                             Object.values(
-                                                simplifyValues(values, entityData.fields)
+                                                simplifyValues(values, pricingConditionData.fields)
                                             ).toString()
                                         }
                                         onClick={(e) => {
@@ -997,9 +956,9 @@ export default function ManageBudgetDialog({
 }
 
 
-ManageBudgetDialog.propTypes = {
+ManagePricingConditionsDialog.propTypes = {
     open: PropTypes.bool,
     onSuccess: PropTypes.func,
     onClose: PropTypes.any,
-    budgetId: PropTypes.string
+    pricingConditionsId: PropTypes.string
 };

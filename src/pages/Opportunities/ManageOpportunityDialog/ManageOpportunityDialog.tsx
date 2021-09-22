@@ -56,6 +56,8 @@ export default function ManageOpportunityDialog({
   contactId = null,
   contactResource = null,
   disableOwnerAndAccount = false,
+  opportunityId = null,
+  isClone = false
 
 }) {
   const { opportunityApi } = opportunity;
@@ -182,7 +184,7 @@ export default function ManageOpportunityDialog({
   const getOpportunityFields = () => {
     axiosInstance()
       .get(`/field?resource=Opportunity&entity=${selectedEntity}`)
-      .then(({ data: { data } }) => {
+      .then(async ({ data: { data } }) => {
         const newFields = [];
 
         const filterData = isNew
@@ -233,13 +235,25 @@ export default function ManageOpportunityDialog({
           }
         });
 
-        if (!isNew && marketSegmentDropdownData) {
-          setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === dataToUpdate.marketSegment?.optionValue));
+        let initialData = getObjKeys("", newFields)
+        if (isClone && opportunityId) {
+          const {
+            data: { data },
+          } = await axiosInstance()
+            .get(`${opportunityApi}/${opportunityId}?entity=${selectedEntity}`)
+          const { opportunityName, ...rest } = data
+          initialData = getObjKeysWithValues({ ...rest }, newFields)
+          if (data?.marketSegment?.optionValue && marketSegmentDropdownData) {
+            setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data?.marketSegment?.optionValue));
+          }
+        }
+        else {
+          if (!isNew && marketSegmentDropdownData) {
+            setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === dataToUpdate.marketSegment?.optionValue));
+          }
         }
 
-        let initialData = getObjKeys("", newFields);
-
-        if (isNew) {
+        if (!isClone && isNew) {
           const selectedEntityDetails = user?.entity?.find(d => d?._id === selectedEntity)
           if (selectedEntityDetails) {
             initialData["currency"] = selectedEntityDetails.currency || "";
@@ -253,12 +267,13 @@ export default function ManageOpportunityDialog({
             : getObjKeysWithValues(dataToUpdate, newFields),
         });
         setFormValues(isNew ? initialData : getObjKeysWithValues(dataToUpdate, newFields))
+
       });
   };
 
   const onSubmit = (values) => {
     isNew ? handleCreateOpportunity(values) : handleUpdateOpportunity(values);
-  };
+  }
 
   const initializeMarketSegmentDropdown = (values, marketSegmentSource) => {
     if (values && values.hasOwnProperty(formFieldNames.marketSegment)) {
@@ -410,9 +425,10 @@ export default function ManageOpportunityDialog({
       >
         <CustomDialogHeader
           title={
-            isNew
-              ? "Create Opportunity"
-              : `Editing ${dataToUpdate.opportunityName}`
+            isClone ? "Clone" :
+              isNew
+                ? "Create Opportunity"
+                : `Editing ${dataToUpdate.opportunityName}`
           }
           onClose={(e, reason) => {
             if (isFieldNotTouched(entityData, formValues)) onClose()

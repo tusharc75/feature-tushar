@@ -33,7 +33,7 @@ interface InitialData {
   values: object;
 }
 
-const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesId = null, fields = null }) => {
+const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = null, projectSalesId = null, fields = null }) => {
   const {
     state: {
       user: { user }, permissions
@@ -122,11 +122,24 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
               newFields.push(_f.fieldData);
             });
 
-            setInitialData({
-              fields: newFields,
-              values: getObjKeysWithValues(data, newFields),
-            });
-            setFormValues(getObjKeysWithValues(data, newFields))
+            if (isClone) {
+
+              const { projectName, ...rest } = data
+              let tempData = { ...rest }
+
+              setInitialData({
+                fields: newFields,
+                values: getObjKeysWithValues(tempData, newFields),
+              });
+              setFormValues(getObjKeysWithValues(tempData, newFields))
+            }
+            else {
+              setInitialData({
+                fields: newFields,
+                values: getObjKeysWithValues(data, newFields),
+              });
+              setFormValues(getObjKeysWithValues(data, newFields))
+            }
             setProductSalesName(data.projectName)
 
             if (marketSegmentDropdownData && data.marketSegment) {
@@ -154,7 +167,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
   };
 
   const handleSubmit = (values) => {
-    if (projectSalesId) {
+    if (projectSalesId && !isClone) {
       setSubmitting(true);
 
       axiosInstance()
@@ -274,7 +287,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null, projectSalesI
           if (isFieldNotTouched(initialData, formValues)) close()
           else setShowConfirmDialog(true)
         }}
-        title={`${projectSalesId ? `Update ${productSalesName}` : "Create New Project Sales"}`} />
+        title={`${isClone ? "Clone" : projectSalesId ? `Update ${productSalesName}` : "Create New Project Sales"}`} />
 
       {loading || !initialData.fields.length ? (
         <>

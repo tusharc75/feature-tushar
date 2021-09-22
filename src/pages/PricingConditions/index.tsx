@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, useReducer, Fragment } from "react";
-import ManageBudgetDialog from "./ManageBudgetDialog";
+import ManagePriceConditionDialog from "./ManagePricingConditionsDialog";
 import { Box, Button, Menu, MenuItem, Grid } from "@material-ui/core";
 import { useData } from "../../StateProvider/Provider";
 import { ExpandMore } from "@material-ui/icons";
@@ -15,7 +15,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import {
   isObjectEmpty,
   gridLoadingTimeout,
-  budget,
+  pricingCondition,
 } from "../../constants/helpers";
 import routes from "./../../components/Helpers/Routes";
 import {
@@ -30,24 +30,21 @@ import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 let timeout;
-function Budget() {
-
+const PricingConditions = () => {
   const {
     state: { permissions },
   }: any = useData();
-  const { budgetApi } = budget;
+  const { pricingConditionApi } = pricingCondition;
 
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
-  const [showManageBudgetDialog, setShowManageBudgetDialog] = useState({
+  const [showManagePriceConditionDialog, setShowManagePriceConditionDialog] = useState({
     show: false,
     id: null,
-    isClone: false
   });
 
   const [gridApi, setGridApi] = useState(null);
@@ -74,15 +71,15 @@ function Budget() {
     }
 
     timeout = setTimeout(() => {
-      fetchBudgetList()
+      fetchPriceConditionList()
     }, millisec);
   }, [search]);
 
   useEffect(() => {
-    fetchBudgetList();
+    fetchPriceConditionList();
   }, [page, limit, filters, sorting]);
 
-  const columnState = JSON.parse(localStorage.getItem("budgetPage"));
+  const columnState = JSON.parse(localStorage.getItem("pricingConditionPage"));
 
   const columns = [
     {
@@ -141,10 +138,10 @@ function Budget() {
   const NameRenderer = params => (
     <>
       {
-        permissions.budget.isUpdate ?
+        permissions.pricingCondition.isUpdate ?
           <span className="link"
             onClick={() => {
-              setShowManageBudgetDialog({ show: true, id: params.data.id, isClone: false });
+              setShowManagePriceConditionDialog({ show: true, id: params.data.id });
             }}>
             <CustomRenderCell value={params?.value} />
           </span>
@@ -155,20 +152,8 @@ function Budget() {
 
   const ActionsRenderer = params => (
     <>
-      <Tooltip
-        className={permissions.budget.isCreate ? "" : "cursor-stop"}
-        title={permissions.budget.isCreate ? "Clone" : "You do not have permission to clone/create"} >
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setShowManageBudgetDialog({ show: true, id: params.data._id, isClone: true })
-          }}>
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
       {
-        permissions.budget.isDelete &&
+        permissions.pricingCondition.isDelete &&
         <Tooltip title="Delete">
           <IconButton size="small" aria-label="Delete" onClick={() => {
             setDeleteRecord(params.data)
@@ -241,7 +226,7 @@ function Budget() {
     return deepFilter;
   };
 
-  const fetchBudgetList = () => {
+  const fetchPriceConditionList = () => {
     dispatch({ type: "loading", loading: true });
 
     if (gridApi) {
@@ -250,7 +235,7 @@ function Budget() {
 
     const queryString = getQueryString();
     axiosInstance()
-      .get(`/budget${queryString}`)
+      .get(`/pricing-condition${queryString}`)
       .then(({ data }) => {
         let rows = data.data.map((item) => {
           const { createdBy, updatedBy, productCategory, marketSegment, subMarketSegment, entity, ...restProperties } =
@@ -279,8 +264,8 @@ function Budget() {
 
   const onSuccess = () => {
     // Add code of getting grid data again
-    fetchBudgetList();
-    setShowManageBudgetDialog({ show: false, id: null, isClone: false });
+    fetchPriceConditionList();
+    setShowManagePriceConditionDialog({ show: false, id: null });
   };
 
   const handleDelete = () => {
@@ -291,8 +276,8 @@ function Budget() {
     else {
       ids = selectedRecords.map(d => d._id);
     }
-    axiosInstance().put(`${budgetApi}/remove`, { "ids": ids }).then(() => {
-      fetchBudgetList();
+    axiosInstance().put(`${pricingConditionApi}/remove`, { "ids": ids }).then(() => {
+      fetchPriceConditionList();
       setShowDeleteConfirmBox(false)
       setDeleteRecord(null)
       setAnchorEl(null)
@@ -315,29 +300,28 @@ function Budget() {
 
   return (
     <>
-      {showManageBudgetDialog.show && (
-        <ManageBudgetDialog
-          open={showManageBudgetDialog.show}
+      {showManagePriceConditionDialog.show && (
+        <ManagePriceConditionDialog
+          open={showManagePriceConditionDialog.show}
           onSuccess={onSuccess}
           onClose={() => {
-            setShowManageBudgetDialog({ show: false, id: null, isClone: false });
+            setShowManagePriceConditionDialog({ show: false, id: null });
           }}
-          budgetId={showManageBudgetDialog.id}
-          isClone={showManageBudgetDialog.isClone}
+          pricingConditionId={showManagePriceConditionDialog.id}
         />
       )}
       <Fragment>
         <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>
-            <CustomBreadCrumbs routes={[{ title: routes.budget.title }]} />
+            <CustomBreadCrumbs routes={[{ title: routes.pricingCondition.title }]} />
           </Grid>
           <Grid item md={8} sm={1} xs={2}>
             <ImportExportLinks
-              permissions={permissions.budget}
-              module="budget(s)"
-              api={"budget"}
+              permissions={permissions.pricingCondition}
+              module="pricingCondition(s)"
+              api={"pricingCondition"}
               afterImportCompleted={() => {
-                fetchBudgetList();
+                fetchPriceConditionList();
               }}
             />
           </Grid>
@@ -353,7 +337,7 @@ function Budget() {
               <Grid item className="d-flex align-items-center gap-1">
                 <MdContacts className="headerLogo" />
                 <span className="listingHeader">
-                  {routes.budget.title}
+                  {routes.pricingCondition.title}
                 </span>
               </Grid>
               <Grid className={styles.filter_side} item>
@@ -363,7 +347,7 @@ function Budget() {
                     searchbox={styles.search_box_input}
                     value={search}
                     size="small"
-                    placeholder="Search Budget"
+                    placeholder="Search PriceCondition"
                     width="242px"
                   />
 
@@ -375,7 +359,7 @@ function Budget() {
                       startIcon={<AddIcon />}
                       className={styles.add_submit_btn}
                       onClick={() => {
-                        setShowManageBudgetDialog({ show: true, id: null, isClone: false });
+                        setShowManagePriceConditionDialog({ show: true, id: null });
                       }}
                     >
                       Add
@@ -427,7 +411,7 @@ function Budget() {
               page={page}
               actionWidth={100}
               loading={loading}
-              renderedFrom="budgetPage"
+              renderedFrom="pricingConditionPage"
             />
           </Box>
         </CustomContainer>
@@ -435,7 +419,7 @@ function Budget() {
         {showDeleteConfirmBox &&
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={deleteRecord?._id ? `Are you sure you want to delete the budget ${deleteRecord?.name} ?` : "Are you sure you want to delete selected budget(s) ?"}
+            message={deleteRecord?._id ? `Are you sure you want to delete the pricing condition ${deleteRecord?.name} ?` : "Are you sure you want to delete selected pricingCondition(s) ?"}
             onClose={() => setShowDeleteConfirmBox(false)}
             onOk={handleDelete}
           />
@@ -445,4 +429,4 @@ function Budget() {
   );
 }
 
-export default Budget;
+export default PricingConditions;

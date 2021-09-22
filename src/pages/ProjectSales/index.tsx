@@ -25,6 +25,7 @@ import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -122,7 +123,7 @@ const ProjectSales: FC = () => {
   const {
     state: { user, permissions, selectedEntity },
   }: any = useData();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedType, setselectedType] = useState(1);
@@ -235,6 +236,19 @@ const ProjectSales: FC = () => {
 
   const ActionsRenderer = (params) => (
     <>
+      <Tooltip
+        className={permissions?.projectSales.isCreate ? "" : "cursor-stop"}
+        title={permissions?.projectSales.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setIsOpen({ open: true, isClone: true, idToClone: params.data._id })
+          }}
+        >
+          <FileCopyIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
       <GridDeleteIcon
         hasDeletePermission={permissions?.projectSales.isDelete}
         ownerId={params.data.projectManagerId}
@@ -436,18 +450,20 @@ const ProjectSales: FC = () => {
   };
 
   const handleCreate = () => {
-    setIsOpen(true);
+    setIsOpen({ open: true, isClone: false, idToClone: null });
   };
 
   const handleClose = () => {
-    setIsOpen(false);
+    setIsOpen({ open: false, isClone: false, idToClone: null });
   };
 
   return (
     <>
-      {isOpen && (
+      {isOpen?.open && (
         <CreateProjectSales
-          open={isOpen}
+          open={isOpen?.open}
+          isClone={isOpen?.isClone}
+          projectSalesId={isOpen?.idToClone}
           close={handleClose}
           fetchData={fetchProjects}
         />

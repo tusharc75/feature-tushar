@@ -32,6 +32,7 @@ import { useData } from "../../StateProvider/Provider";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 function reducer(state, action) {
     switch (action.type) {
@@ -139,7 +140,8 @@ const ProductCategory = () => {
 
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState({ open: false, isClone: false });
+
     const [productCategoryId, setProductCategoryId] = useState(null);
 
     // const [selectedCategory, setSelectedCategory] = useState([]);
@@ -186,12 +188,26 @@ const ProductCategory = () => {
             label={`${params.value}`}
             onClick={() => {
                 setProductCategoryId(params.data.id);
-                setOpen(true);
+                setOpen({ open: true, isClone: false });
             }}
         />
     </span>
 
     const ActionsRenderer = params => <Fragment>
+        <Tooltip
+            className={productCategoryPermissions.isCreate ? "" : "cursor-stop"}
+            title={productCategoryPermissions.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+            <IconButton
+                size="small"
+                aria-label="Clone"
+                onClick={() => {
+                    setProductCategoryId(params.data.id);
+                    setOpen({ open: true, isClone: true })
+                }}
+            >
+                <FileCopyIcon fontSize="small" color="primary" />
+            </IconButton>
+        </Tooltip>
         {productCategoryPermissions.isDelete && (params?.data?.createdById == user?.user?._id) ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
@@ -364,7 +380,7 @@ const ProductCategory = () => {
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
                     <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-                        <FaThemeisle size={20} style={{paddingBottom: "3px"}}/> <span className="listingHeader">{routes.productCategory.title}</span>
+                        <FaThemeisle size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.productCategory.title}</span>
                     </Grid>
                     <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
                         <Box className={styles.filter_side_header} component="div" >
@@ -376,7 +392,10 @@ const ProductCategory = () => {
                                 value={search}
                             />
                             {productCategoryPermissions.isCreate &&
-                                <Button className={styles.add_submit_btn} onClick={() => { setProductCategoryId(null); setOpen(true); }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                <Button className={styles.add_submit_btn} onClick={() => {
+                                    setProductCategoryId(null);
+                                    setOpen({ open: true, isClone: false });
+                                }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                             }
                             {productCategoryPermissions.isDelete &&
                                 <Button
@@ -429,13 +448,14 @@ const ProductCategory = () => {
                 />
             }
 
-            {open &&
+            {open?.open &&
                 <CreateProductCategory
                     isUpdateDisabled={false}
                     productCategoryId={productCategoryId}
-                    onClose={() => setOpen(false)}
+                    isClone={open?.isClone}
+                    onClose={() => setOpen({ open: false, isClone: false })}
                     onSuccess={() => {
-                        setOpen(false);
+                        setOpen({ open: false, isClone: false });
                         fetchProductCategory()
                     }}
                 />

@@ -23,10 +23,10 @@ import CustomAgGrid from '../../components/AgGridComponents/CustomAgGrid';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
-import EntitySelections from "../../components/EntitySelections"
 import { entity } from "../../constants/helpers"
 import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -134,7 +134,7 @@ const AddressResource = () => {
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState({ open: false, isClone: false });
   const [addressResourceId, setAddressResourceId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [showEntityDialog, setShowEntityDialog] = useState(false)
@@ -225,7 +225,7 @@ const AddressResource = () => {
         className="link"
         onClick={() => {
           setAddressResourceId(params.data.id);
-          setOpen(true);
+          setOpen({ open: false, isClone: false });
         }}
       >
         <CustomRenderCell value={params.value} />
@@ -235,6 +235,20 @@ const AddressResource = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
+      <Tooltip
+        className={warehousePermissions.isCreate ? "" : "cursor-stop"}
+        title={warehousePermissions.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setAddressResourceId(params.data.id);
+            setOpen({ open: true, isClone: true })
+          }}
+        >
+          <FileCopyIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
       {warehousePermissions.isDelete && params?.data?.createdById === user?.user?._id ? (
         <Tooltip title="Delete">
           <IconButton
@@ -384,7 +398,7 @@ const AddressResource = () => {
                     className={styles.add_submit_btn}
                     onClick={() => {
                       setAddressResourceId(null);
-                      setOpen(true);
+                      setOpen({ open: true, isClone: false });
                     }}
                     variant="contained"
                     size="small"
@@ -450,14 +464,15 @@ const AddressResource = () => {
           />
         )}
 
-        {open && (
+        {open?.open && (
           <ManageWarehouse
             addressResourceId={addressResourceId}
-            onClose={() => setOpen(false)}
+            onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
-              setOpen(false);
+              setOpen({ open: false, isClone: false });
               fetchWarehouses();
             }}
+            isClone={open?.isClone}
           />
         )}
         {
