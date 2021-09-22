@@ -255,7 +255,7 @@ const ProductDetailsPage = () => {
                                 alignItems="center"
                             >
                                 <Typography variant="subtitle2">
-                                    Frequently Bought Product
+                                    BOM
                                 </Typography>
 
                                 {permissions.product.isUpdate && (

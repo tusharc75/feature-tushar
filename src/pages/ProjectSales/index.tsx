@@ -21,6 +21,10 @@ import {
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import "./style.scss";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import EntitySelectionsDialog from "../../components/EntitySelections"
+import { AiOutlineDeploymentUnit } from "react-icons/ai"
+import Tooltip from "@material-ui/core/Tooltip"
+import IconButton from "@material-ui/core/IconButton"
 
 function reducer(state, action) {
   switch (action.type) {
@@ -126,8 +130,10 @@ const ProjectSales: FC = () => {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] =
     useState(false);
   const [renderCount, setRenderCount] = useState(0);
-
+  const [projectSalesId, setProjectSalesId] = useState(null)
+  const [showEntityDialog, setShowEntityDialog] = useState(false)
   const [gridApi, setGridApi] = useState(null);
+  const [entities, setEntities] = useState([])
 
   const [state, dispatch] = useReducer(reducer, intialState);
   const {
@@ -236,6 +242,30 @@ const ProjectSales: FC = () => {
         onDelete={() => showConfirmBox(params.data)}
         entity="Project"
       />
+      {
+        permissions?.projectSales.isUpdate && <Tooltip title="Clone">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setProjectSalesId(params.data._id)
+              setShowEntityDialog(true)
+              if (params?.data?.entity) {
+                let entities = []
+                if (params?.data?.entityId) {
+                  entities.push(params?.data?.entityId)
+                }
+                if (params?.data?.restEntity) {
+                  let restEntities = params?.data?.restEntity.map(o => o.optionValue)
+                  entities = [...entities, ...restEntities]
+                }
+                setEntities([...entities])
+              }
+            }}>
+            <AiOutlineDeploymentUnit fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
+      }
     </>
   );
 
@@ -490,6 +520,20 @@ const ProjectSales: FC = () => {
             onOk={handleDeleteProjects}
           />
         ) : null}
+        {
+          showEntityDialog ?
+            <EntitySelectionsDialog
+              open={showEntityDialog}
+              resource={""}
+              resourceId={projectSalesId}
+              onClose={() => {
+                setShowEntityDialog(false)
+                setProjectSalesId("")
+              }}
+              entities={entities}
+              onSuccess={fetchProjects}
+            /> : null
+        }
       </Fragment>
     </>
   );

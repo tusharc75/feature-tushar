@@ -148,11 +148,10 @@ const AssignProductDialog = ({
                                             edge="start"
                                             onChange={(e) => {
                                                 product.isChecked = e.target.checked
-                                                if (products.filter(r => r.isChecked).length > 3) {
-                                                    products.find(r => r._id === selectedProducts[0]).isChecked = false
-                                                }
+                                                // if (products.filter(r => r.isChecked).length > 3) {
+                                                //     products.find(r => r._id === selectedProducts[0]).isChecked = false
+                                                // }
                                                 setSelectedProducts(products.filter(r => r.isChecked).map(obj => obj._id))
-
                                             }
                                             }
                                             checked={product.isChecked}

@@ -17,12 +17,16 @@ import routes from '../../components/Helpers/Routes';
 import { ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
-import { gridLoadingTimeout, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
+import { gridLoadingTimeout, gridPageSizes, isObjectEmpty, sidebarResource } from '../../constants/helpers';
 import { CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CustomAgGrid from '../../components/AgGridComponents/CustomAgGrid';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
+import EntitySelections from "../../components/EntitySelections"
+import { entity } from "../../constants/helpers"
+import EntitySelectionsDialog from "../../components/EntitySelections"
+import { AiOutlineDeploymentUnit } from "react-icons/ai"
 
 function reducer(state, action) {
   switch (action.type) {
@@ -115,6 +119,7 @@ const intialState = {
 };
 
 const AddressResource = () => {
+  const { entityApi } = entity
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, user }
@@ -132,6 +137,9 @@ const AddressResource = () => {
   const [open, setOpen] = useState(false);
   const [addressResourceId, setAddressResourceId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [showEntityDialog, setShowEntityDialog] = useState(false)
+  const [warehouseId, setWarehouseId] = useState("")
+  const [entities, setEntities] = useState([])
 
   // const [selectedCategory, setSelectedCategory] = useState([]);
 
@@ -246,6 +254,23 @@ const AddressResource = () => {
           </IconButton>
         </Tooltip>
       )}
+      {
+        warehousePermissions.isUpdate && <Tooltip title="Clone">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setShowEntityDialog(true)
+              setWarehouseId(params.data._id)
+              if (params?.data?.entity && params?.data?.entity.length) {
+                let entities = params?.data?.entity.map(o => o?.optionValue)
+                setEntities([...entities])
+              }
+            }}>
+            <AiOutlineDeploymentUnit fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
+      }
     </Fragment>
   );
 
@@ -349,7 +374,7 @@ const AddressResource = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-              <FaWarehouse size={20} style={{paddingBottom: "3px"}}/> <span className="listingHeader">{routes.address.title}</span>
+              <FaWarehouse size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.address.title}</span>
             </Grid>
             <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
@@ -435,6 +460,20 @@ const AddressResource = () => {
             }}
           />
         )}
+        {
+          showEntityDialog ?
+            <EntitySelectionsDialog
+              open={showEntityDialog}
+              resource={"warehouse"}
+              resourceId={warehouseId}
+              onClose={() => {
+                setShowEntityDialog(false)
+                setWarehouseId("")
+              }}
+              onSuccess={fetchWarehouses}
+              entities={entities}
+            /> : null
+        }
       </CustomContainer>
     </Fragment>
   );
