@@ -224,7 +224,7 @@ export default function ManageAccount(props) {
         <CustomDialogHeader
           onClose={() => {
             if (isFieldNotTouched(accountData, formValues)) {
-              onClose()
+              onClose({})
             } else {
               setShowConfirmDialog(true)
             }
@@ -588,7 +588,7 @@ export default function ManageAccount(props) {
                   <CustomDialogFooter>
                     <Button
                       onClick={() => {
-                        if (isFieldNotTouched(accountData, values)) onClose()
+                        if (isFieldNotTouched(accountData, values)) onClose({})
                         else setShowConfirmDialog(true)
                       }}
                       variant="outlined"
@@ -641,7 +641,7 @@ export default function ManageAccount(props) {
                         }}
                         onClose={() => {
                           setShowConfirmDialog(false)
-                          onClose()
+                          onClose({})
                         }}
                       /> : null
                   }
