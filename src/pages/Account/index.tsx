@@ -24,7 +24,7 @@ import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import { MdAccountCircle } from 'react-icons/md';
-import { gridLoadingTimeout } from '../../constants/helpers';
+import { gridLoadingTimeout, entity, sidebarResource } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from './../../components/Helpers/Routes';
@@ -40,7 +40,9 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import styles from '../Leads/Header.module.scss';
-import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
+import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes"
+import EntitySelectionsDialog from "../../components/EntitySelections"
+import { AiOutlineDeploymentUnit } from "react-icons/ai"
 
 const AccTypes = [
   {
@@ -75,6 +77,8 @@ export default function Account(props) {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [isAccDialogVisible, setIsAccDialogVisible] = useState(false);
   const [selectedType, setselectedType] = useState(1);
+  const [accountId, setAccountId] = useState(null)
+  const [showEntityDialog, setShowEntityDialog] = useState(false)
 
   const [singleAccountDelete, setSingleAccountDelete] = useState({
     id: null,
@@ -97,6 +101,7 @@ export default function Account(props) {
     approveAccount: false,
   });
   const [open, setOpen] = React.useState(false);
+  const [entities, setEntities] = useState([])
   const anchorRef = React.useRef<HTMLDivElement>(null);
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const [filter, setFilter] = useState('All Accounts');
@@ -139,6 +144,7 @@ export default function Account(props) {
       setAccountPermissions(permissions[accountResource]);
     }
   }, [permissions]);
+
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -238,6 +244,7 @@ export default function Account(props) {
       <NoDataCell />
     );
 
+
   const ActionsRenderer = (params) => (
     <>
       {accountPermissions.isCreate ? (
@@ -307,6 +314,31 @@ export default function Account(props) {
         }}
         entity="account"
       />
+      {
+        accountPermissions.isUpdate &&
+        <Tooltip title="Entity">
+          <IconButton
+            size="small"
+            aria-label="Entity"
+            onClick={() => {
+              setAccountId(params.data._id)
+              setShowEntityDialog(true)
+              if (params?.data?.entity) {
+                let entities = []
+                if (params?.data?.entityId) {
+                  entities.push(params?.data?.entityId)
+                }
+                if (params?.data?.restEntity) {
+                  let restEntities = params?.data?.restEntity.map(o => o.optionValue)
+                  entities = [...entities, ...restEntities]
+                }
+                setEntities([...entities])
+              }
+            }}>
+            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
+          </IconButton>
+        </Tooltip>
+      }
     </>
   );
 
@@ -906,6 +938,20 @@ export default function Account(props) {
             accountApi={accountApi}
           />
         ) : null}
+        {
+          showEntityDialog ?
+            <EntitySelectionsDialog
+              open={showEntityDialog}
+              resource={sidebarResource[accountResource]}
+              resourceId={accountId}
+              onClose={() => {
+                setShowEntityDialog(false)
+                setAccountId("")
+              }}
+              onSuccess={fetchAccounts}
+              entities={entities}
+            /> : null
+        }
       </CustomContainer>
     </>
   );
