@@ -368,7 +368,7 @@ const ProductDetailsPage = () => {
                                                             <Box display="flex" alignItems="center">
                                                                 <Box >
                                                                     <IconButton size='small' onClick={() => {
-                                                                        if (!selectedWarehouse) {
+                                                                        if (selectedWarehouse !== warehouse) {
                                                                             setSelectedWarehouse(warehouse)
                                                                         } else {
                                                                             setSelectedWarehouse(null)
