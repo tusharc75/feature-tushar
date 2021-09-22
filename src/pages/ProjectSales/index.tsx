@@ -26,6 +26,7 @@ import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { sidebarResource } from "../../constants/helpers"
 
 function reducer(state, action) {
   switch (action.type) {
@@ -265,15 +266,8 @@ const ProjectSales: FC = () => {
               setProjectSalesId(params.data._id)
               setShowEntityDialog(true)
               if (params?.data?.entity) {
-                let entities = []
-                if (params?.data?.entityId) {
-                  entities.push(params?.data?.entityId)
-                }
-                if (params?.data?.restEntity) {
-                  let restEntities = params?.data?.restEntity.map(o => o.optionValue)
-                  entities = [...entities, ...restEntities]
-                }
-                setEntities([...entities])
+                let restEntities = params?.data?.entity.map(o => o.optionValue)
+                setEntities([...restEntities])
               }
             }}>
             <AiOutlineDeploymentUnit fontSize="small" color="primary" />
@@ -508,8 +502,8 @@ const ProjectSales: FC = () => {
             rowCount={rowCount}
             limit={limit}
             pageSizes={pageSizes}
-            page={page}
             actionWidth={150}
+            page={page}
             loading={loading}
             renderedFrom="projectSalesPage"
           />
@@ -540,7 +534,7 @@ const ProjectSales: FC = () => {
           showEntityDialog ?
             <EntitySelectionsDialog
               open={showEntityDialog}
-              resource={""}
+              resource={sidebarResource.projectSales}
               resourceId={projectSalesId}
               onClose={() => {
                 setShowEntityDialog(false)

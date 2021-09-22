@@ -20,6 +20,7 @@ import AssignedFrequentlyBoughtProduct from "./AssignedFrequentlyBoughtProduct";
 import AssignProductDialog from "../../components/AssignRolesDialog/AssignProductDialog";
 import ManageProductInventory from "../ProductInventory/ManageProductInventory"
 import { extractFields } from "../../constants/formulaUtility";
+import ProductHierarchy from "./ProductHierarchy"
 
 const ProductDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -40,6 +41,7 @@ const ProductDetailsPage = () => {
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
     const [frequentlyBoughtProduct, setFrequentlyBoughtProduct] = useState([]);
     const [inventoriesData, setInventoriesData] = useState([]);
+    const [BOMData, setBOMData] = useState([])
     const [selectedWarehouse, setSelectedWarehouse] = useState(null)
     const [openProductInventoryDialog, setOpenProductInventoryDialog] = useState(false);
 
@@ -53,6 +55,10 @@ const ProductDetailsPage = () => {
         }
         // eslint-disable-next-line
     }, [id]);
+
+    useEffect(() => {
+        getProductTree()
+    }, [productData])
 
     const handleMainPoints = (data) => {
         let mainPoint = {};
@@ -107,6 +113,30 @@ const ProductDetailsPage = () => {
                 toastConfig.setToastConfig(err);
             });
     };
+
+    const getProductTree = () => {
+        if (productData?._id) {
+            axiosInstance()
+                .get(`/product/bom/${productData?._id}`)
+                .then(({ data: { data } }) => {
+                    let bomData = [...frequentlyBoughtProduct]
+                    bomData = bomData.map(o => {
+                        return {
+                            ...o,
+                            type: "child",
+                            parentAccountId: productData?._id
+                        }
+                    })
+                    let tempData = {
+                        productName: productData?.productName,
+                        _id: productData?._id,
+                        type: "parent"
+                    }
+                    bomData = [...bomData, tempData]
+                    setBOMData([...bomData])
+                })
+        }
+    }
 
     const getFrequentlyBoughtProduct = () => {
         axiosInstance()
@@ -291,11 +321,16 @@ const ProductDetailsPage = () => {
                                             </BoxWithBorder>
                                         ))
 
-                                    ) : frequentlyBoughtProduct.length ? (
+                                    ) : BOMData.length ? (
                                         <>
-                                            <AssignedFrequentlyBoughtProduct
+                                            {/* <AssignedFrequentlyBoughtProduct
                                                 permissions={permissions.product}
                                                 product={frequentlyBoughtProduct}
+                                                unassignProduct={unassignProduct}
+                                            /> */}
+                                            <ProductHierarchy
+                                                data={BOMData}
+                                                permissions={permissions.product}
                                                 unassignProduct={unassignProduct}
                                             />
                                             <Box marginY={1} />

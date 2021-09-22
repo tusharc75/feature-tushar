@@ -234,7 +234,7 @@ const AddressResource = () => {
   );
 
   const ActionsRenderer = (params) => (
-    <Fragment>
+    <>
       <Tooltip
         className={warehousePermissions.isCreate ? "" : "cursor-stop"}
         title={warehousePermissions.isCreate ? "Clone" : "You do not have permission to clone/create"} >
@@ -244,8 +244,7 @@ const AddressResource = () => {
           onClick={() => {
             setAddressResourceId(params.data.id);
             setOpen({ open: true, isClone: true })
-          }}
-        >
+          }}>
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
       </Tooltip>
@@ -272,12 +271,19 @@ const AddressResource = () => {
         warehousePermissions.isUpdate && <Tooltip title="Clone">
           <IconButton
             size="small"
-            aria-label="Clone"
+            aria-label="Entity"
             onClick={() => {
               setShowEntityDialog(true)
               setWarehouseId(params.data._id)
-              if (params?.data?.entity && params?.data?.entity.length) {
-                let entities = params?.data?.entity.map(o => o?.optionValue)
+              if (params?.data?.entity) {
+                let entities = []
+                if (params?.data?.entityId) {
+                  entities.push(params?.data?.entityId)
+                }
+                if (params?.data?.restEntity) {
+                  let restEntities = params?.data?.restEntity.map(o => o?.optionValue)
+                  entities = [...entities, ...restEntities]
+                }
                 setEntities([...entities])
               }
             }}>
@@ -285,7 +291,7 @@ const AddressResource = () => {
           </IconButton>
         </Tooltip>
       }
-    </Fragment>
+    </>
   );
 
   const frameworkComponents = {
@@ -450,7 +456,7 @@ const AddressResource = () => {
           limit={limit}
           pageSizes={pageSizes}
           page={page}
-          actionWidth={100}
+          actionWidth={150}
           loading={loading}
           renderedFrom="warehousePage"
         />
@@ -479,7 +485,7 @@ const AddressResource = () => {
           showEntityDialog ?
             <EntitySelectionsDialog
               open={showEntityDialog}
-              resource={"warehouse"}
+              resource={sidebarResource.warehouse}
               resourceId={warehouseId}
               onClose={() => {
                 setShowEntityDialog(false)

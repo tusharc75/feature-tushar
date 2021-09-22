@@ -119,8 +119,6 @@ export default function Contact(props) {
     });
   }
 
-
-
   const handleFilter = (event, newFilter) => {
     if (newFilter !== null) {
       setFilter(newFilter);
@@ -177,7 +175,6 @@ export default function Contact(props) {
   );
 
   const EntityRenderer = (params) => (
-
     <h5 className="createBy d-flex">
       {params.data?.firstEntity ?
         <Link className="link" title={params.data.firstEntity} to={`${routes.entity.path}/detail/${params.data.firstEntityId}`}>
@@ -265,16 +262,20 @@ export default function Contact(props) {
             onClick={() => {
               setContactId(params.data._id)
               setShowEntityDialog(true)
-              if (params?.data?.entity) {
+              if (params?.data?.firstEntityId) {
                 let entities = []
-                if (params?.data?.entityId) {
-                  entities.push(params?.data?.entityId)
+                if (params?.data?.firstEntityId) {
+                  entities.push(params?.data?.firstEntityId)
                 }
                 if (params?.data?.restEntity) {
                   let restEntities = params?.data?.restEntity.map(o => o?.optionValue)
                   entities = [...entities, ...restEntities]
                 }
                 setEntities([...entities])
+              }
+              else if (params?.data?.restEntity) {
+                let restEntities = params?.data?.restEntity.map(o => o?.optionValue)
+                setEntities([...restEntities])
               }
             }}>
             <AiOutlineDeploymentUnit fontSize="small" color="primary" />
@@ -595,8 +596,7 @@ export default function Contact(props) {
                             closeActions();
                             setShowDeleteConfirmBox(true);
                           }
-                        }}
-                      >
+                        }}>
                         Delete
                       </MenuItem>
                     </Menu>
@@ -616,8 +616,8 @@ export default function Contact(props) {
             rowCount={rowCount}
             limit={limit}
             pageSizes={pageSizes}
+            actionWidth={170}
             page={page}
-            actionWidth={100}
             loading={loading}
             renderedFrom={contactResource}
           />
