@@ -468,13 +468,13 @@ export default function QuoteDetail() {
     setReopenReason(event.target.value);
   };
 
-
-
   return (
     <>
       <Fragment>
         <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={customizedRoutes}
+
+          />
         </Grid>
         <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
           <div>

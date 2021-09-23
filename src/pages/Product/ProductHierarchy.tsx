@@ -7,6 +7,7 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 export default function ProductHierarchy({ data, permissions, unassignProduct }) {
+    console.log('data', data)
     const options: any = {
         search: false,
         paging: false,
@@ -62,7 +63,7 @@ export default function ProductHierarchy({ data, permissions, unassignProduct })
                             data={data}
                             columns={columns}
                             parentChildData={(row, rows) => {
-                                return rows.find(a => a._id === row.parentAccountId)
+                                return rows.find(a => a._id === row.parent)
                             }}
                             options={options}
                         />
