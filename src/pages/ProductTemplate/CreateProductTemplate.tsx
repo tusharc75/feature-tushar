@@ -107,7 +107,7 @@ const ProductTemplate = () => {
 
     const fetchOneProductTemplate = () => {
         if (id === "0") {
-            let initialData = { name: "", productCategory: "", entity: [], owner: user.user._id, collaborator: [], isStandard: false }
+            let initialData = { name: "", productCategory: [], entity: [], owner: user.user._id, collaborator: [], isStandard: false }
             setInitialValues(initialData);
             setFormValues(initialData)
             axiosInstance().get(`/product-template/default-field`).then(({ data: { data } }) => {
@@ -179,7 +179,7 @@ const ProductTemplate = () => {
         data.name = values.name;
         data.isStandard = values.isStandard;
         if (data.isStandard) {
-            data.productCategory = null;
+            data.productCategory = [];
             data.unit = null;
             data.entity = values?.entity;
             data.owner = values?.owner;
@@ -239,7 +239,7 @@ const ProductTemplate = () => {
     function validate(values) {
         const errors = {};
         if (!values.isStandard) {
-            if (!values.productCategory || values.productCategory === "") {
+            if (!values.productCategory || values.productCategory.length === 0) {
                 errors["productCategory"] = "Product category is required";
             }
             if (!values.owner || values.owner === "") {
@@ -363,19 +363,15 @@ const ProductTemplate = () => {
                                         {!values["isStandard"] && <Autocomplete
                                             disabled={!hasPermissionToUpdate}
                                             options={productCategory}
+                                            multiple
                                             getOptionLabel={(option: any) => (option ? option.name : "")}
                                             getOptionSelected={(option: any, val) => option._id === val}
-                                            value={productCategory.filter((data) => data._id === values["productCategory"]).length
-                                                ? productCategory.filter((data) => data._id === values["productCategory"])[0]
-                                                : ""
-                                            }
+                                            value={productCategory.filter((data) => values["productCategory"]?.some(d => d === data._id)).length
+                                                ? productCategory.filter((data) => values["productCategory"]?.some(d => d === data._id))
+                                                : []}
                                             onChange={(e, val) => {
-                                                handleValuesChange({ productCategory: val && val._id ? val._id : "" })
-                                                setFieldValue("productCategory", val && val._id ? val._id : "")
-                                                if (val && val.name) {
-                                                    handleValuesChange({ name: val.name })
-                                                    setFieldValue("name", val.name);
-                                                }
+                                                handleValuesChange({ productCategory: val && val?.map(d => d._id) })
+                                                setFieldValue("productCategory", val && val?.map(d => d._id))
                                             }}
                                             renderInput={(params) => (
                                                 <TextField
