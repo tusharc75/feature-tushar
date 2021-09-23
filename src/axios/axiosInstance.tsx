@@ -53,7 +53,6 @@ export default (history = null, passedHeaders = null) => {
                 localStorage.setItem("slowInternetConnection", "false")
             }
         }
-        request.url = encodeURI(request.url);
         return request;
     }, error => {
         return Promise.reject(error);
