@@ -19,6 +19,8 @@ import Menu from "@material-ui/core/Menu"
 import ReasonDialog from "./ReasonDialog"
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import ManageRepairJob from '../RepairJob/ManageRepairJob'
+
 
 const ProductInventoryDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -30,6 +32,7 @@ const ProductInventoryDetailsPage = () => {
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loadingProductInventory, setLoadingProductInventory] = useState(false);
+  const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
   const [productInventoryData, setProductInventoryData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -66,12 +69,16 @@ const ProductInventoryDetailsPage = () => {
 
   useEffect(() => {
     if (id) {
-      getProductInventoryFields();
-      fetchProductInventoryData();
-      fetchProductInventoryHistory();
+      fetchAllData()
     }
 
   }, [id]);
+
+  const fetchAllData = () => {
+    getProductInventoryFields();
+    fetchProductInventoryData();
+    fetchProductInventoryHistory();
+  }
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
@@ -225,11 +232,20 @@ const ProductInventoryDetailsPage = () => {
                         variant="outlined"
                         color="default"
                         size="small"
+                        onClick={() => setShowRepairJobDialog(true)}
+                      >
+                        Create Repair Job
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="default"
+                        size="small"
                         onClick={openActions}
                         disabled={updateLoading}
                         aria-controls="action-menu"
+                        endIcon={<ExpandMore />}
                       >
-                        Change Status <ExpandMore />
+                        Change Status
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -327,6 +343,19 @@ const ProductInventoryDetailsPage = () => {
           onOk={handleDelete}
         />
       )}
+      {
+        showRepairJobDialog &&
+        <ManageRepairJob
+          fromInventory
+          inventories={[id]}
+          open={showRepairJobDialog}
+          onClose={() => setShowRepairJobDialog(false)}
+          onSuccess={() => {
+            setShowRepairJobDialog(false);
+            fetchAllData()
+          }}
+        />
+      }
       {openUpdateDialog &&
         <ManageProductInventory
           isClone={false}

@@ -22,10 +22,10 @@ import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
-import { useData } from '../../../StateProvider/Provider';
 import routes from '../../../components/Helpers/Routes';
 
-const ManageRepairJob = ({ isClone, repairJobId, onClose, onSuccess, open }) => {
+const ManageRepairJob = (props) => {
+  const { isClone, repairJobId, onClose, onSuccess, open, inventories, fromInventory } = props
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
@@ -124,9 +124,11 @@ const ManageRepairJob = ({ isClone, repairJobId, onClose, onSuccess, open }) => 
         });
     } else {
       axiosInstance()
-        .post(`${repairJob.repairJobApi}`, values) 
+        .post(`${repairJob.repairJobApi}`, values)
         .then(({ data: { data, message } }) => {
-          history.push(`${routes.repairJobDetail.path}/${data._id}`);
+          if (!fromInventory) {
+            history.push(`${routes.repairJobDetail.path}/${data._id}`);
+          }
           setSubmitting(false);
           onSuccess(data);
           console.log(data)
@@ -162,6 +164,16 @@ const ManageRepairJob = ({ isClone, repairJobId, onClose, onSuccess, open }) => 
       ...data
     }));
   };
+
+
+  const getValues = (values) => {
+    if (fromInventory) {
+      values["productInventory"] = inventories
+    }
+
+    return values
+  }
+
   return (
     <>
       <Dialog
@@ -206,7 +218,7 @@ const ManageRepairJob = ({ isClone, repairJobId, onClose, onSuccess, open }) => 
             </CustomDialogFooter>
           </>
         ) : (
-          <Formik initialValues={repairJobData.initialValues} validationSchema={yupSchema(repairJobData.fields)} validateOnMount onSubmit={() => {}}>
+          <Formik initialValues={repairJobData.initialValues} validationSchema={yupSchema(repairJobData.fields)} validateOnMount onSubmit={() => { }}>
             {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
               <>
                 <CustomDialogContent>
@@ -224,10 +236,40 @@ const ManageRepairJob = ({ isClone, repairJobId, onClose, onSuccess, open }) => 
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field) => (
                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      {field.fieldName === "productInventory"
+                                        ? <FormTypes
+                                          repairJobId={repairJobId}
+                                          {...field}
+                                          disabled={(!repairJobId && field.disableOnEdit) || (field.fieldName === "productInventory" && fromInventory)}
+                                          values={getValues(values)}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            handleValuesChange({ [name]: value });
+                                            setFieldValue(name, value);
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          imageOrFileUploadCompletePercentage={
+                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                              ? (completePercentage) => {
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
+                                              : null
+                                          }
+                                        />
+                                        :
                                         <FormTypes
                                           repairJobId={repairJobId}
                                           {...field}
-                                          disabled={!repairJobId && field.disableOnEdit}
+                                          disabled={(!repairJobId && field.disableOnEdit)}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -247,11 +289,11 @@ const ManageRepairJob = ({ isClone, repairJobId, onClose, onSuccess, open }) => 
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
                                               : null
                                           }
-                                        />
+                                        />}
 
                                     </Grid>
                                   ))}
