@@ -445,7 +445,6 @@ export default function Contact(props) {
   const closeActions = () => {
     setAnchorEl(null);
   };
-
   const clickCreateNew = () => {
     setShowCreateContactDialog({ open: true, isClone: false, idToClone: null });
   };
@@ -657,7 +656,7 @@ export default function Contact(props) {
               contactApi={contactApi}
               account={account}
               contactId={showCreateContactDialog?.idToClone}
-              isClone={showCreateContactDialog?.open}
+              isClone={showCreateContactDialog?.isClone}
             />
           )}
 

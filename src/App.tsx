@@ -101,6 +101,7 @@ import RepairJob from "./pages/RepairJob";
 import RepairJobDetails from "./pages/RepairJob/RepairJobDetails";
 import ReceivingTicket from "./pages/ReceivingTicket";
 import ReceivingTicketDetails from "./pages/ReceivingTicket/ReceivingTicketDetails";
+import PricingConditionsDetailsPage from "./pages/PricingConditions/PricingConditionsDetailsPage";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -561,6 +562,9 @@ function App() {
             <PrivateRoute exact path={routes.pricingCondition.path}>
               <PricingConditions />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.pricingCondition.path}/detail/:id`}>
+              <PricingConditionsDetailsPage />
+            </PrivateRoute>
             <PrivateRoute exact path={routes.marketSegment.path}>
               <MarketSegment />
             </PrivateRoute>
@@ -601,7 +605,7 @@ function App() {
           /> : (toast.toastConfig.type === "notFoundError" ? <RecordDeletedDialog /> : "")
         )
       }
-      
+
       {
         isOffline ?
           <OfflineStatusDialog /> : null
