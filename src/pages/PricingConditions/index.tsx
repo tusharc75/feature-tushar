@@ -30,6 +30,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import { Link } from "react-router-dom";
 
 let timeout;
 const PricingConditions = () => {
@@ -83,39 +84,27 @@ const PricingConditions = () => {
 
   const columns = [
     {
-      field: "name",
+      field: "conditionName",
       headerName: "Name",
       show: true,
       disabled: true,
       cellRenderer: "nameRenderer"
     },
     {
-      field: "year",
-      headerName: "Year",
+      field: "customer",
+      headerName: "Customer",
       show: true,
       cellRenderer: "commonRenderer"
     },
     {
-      field: "entity",
-      headerName: "Entity",
+      field: "product",
+      headerName: "Product",
       show: true,
       cellRenderer: "commonRenderer"
     },
     {
-      field: "marketSegment",
-      headerName: "Market Segment",
-      show: true,
-      cellRenderer: "commonRenderer"
-    },
-    {
-      field: "subMarketSegment",
-      headerName: "Sub Market Segment",
-      show: true,
-      cellRenderer: "commonRenderer"
-    },
-    {
-      field: "productCategory",
-      headerName: "Product Category",
+      field: "warehouse",
+      headerName: "Warehouse",
       show: true,
       cellRenderer: "commonRenderer"
     },
@@ -135,20 +124,12 @@ const PricingConditions = () => {
       });
     });
   }
-  const NameRenderer = params => (
-    <>
-      {
-        permissions.pricingCondition.isUpdate ?
-          <span className="link"
-            onClick={() => {
-              setShowManagePriceConditionDialog({ show: true, id: params.data.id });
-            }}>
-            <CustomRenderCell value={params?.value} />
-          </span>
-          : params?.value
-      }
-    </>
-  )
+
+  const NameRenderer = params => <Link className="link"
+    to={`${routes.pricingConditionDetail.path}/${params.data._id}`} title={params.value}>
+    {params.value}
+  </Link>;
+
 
   const ActionsRenderer = params => (
     <>
@@ -185,13 +166,13 @@ const PricingConditions = () => {
     if (field !== updatedField) return updatedField;
 
     switch (field) {
-      case "marketSegment":
-        return "marketSegment.optionLabel";
+      case "product":
+        return "product.optionLabel";
 
-      case "subMarketSegment":
-        return "subMarketSegment.optionLabel";
+      case "warehouse":
+        return "warehouse.optionLabel";
 
-      case "entity":
+      case "customer":
         return "entity.optionLabel";
 
       default:
@@ -238,15 +219,14 @@ const PricingConditions = () => {
       .get(`/pricing-condition${queryString}`)
       .then(({ data }) => {
         let rows = data.data.map((item) => {
-          const { createdBy, updatedBy, productCategory, marketSegment, subMarketSegment, entity, ...restProperties } =
+          const { createdBy, updatedBy, product, warehouse, customer, ...restProperties } =
             item;
           let res = {
             ...restProperties,
             id: item._id,
-            productCategory: productCategory?.optionLabel ?? "",
-            marketSegment: marketSegment?.optionLabel ?? "",
-            subMarketSegment: subMarketSegment?.optionLabel ?? "",
-            entity: entity?.optionLabel ?? ""
+            product: product?.optionLabel ?? "",
+            warehouse: warehouse?.optionLabel ?? "",
+            customer: customer?.optionLabel ?? "",
           };
           return res;
         });
