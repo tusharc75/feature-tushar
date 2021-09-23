@@ -110,7 +110,7 @@ export default function ManageContact(props) {
         (d) => d.fieldName === "reportsTo"
       );
       if (reportsToDropdownData) {
-        if (isNew && !isClone) {
+        if (isNew) {
           setReportsToMainDataSource(reportsToDropdownData.option);
         } else {
           let currentContactRemovedDataSource =
