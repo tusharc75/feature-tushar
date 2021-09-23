@@ -33,10 +33,12 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import contactClass from './contact.module.scss'
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
+import EntitySelectionsDialog from "../../components/EntitySelections"
+import { AiOutlineDeploymentUnit } from "react-icons/ai"
+import { sidebarResource } from "../../constants/helpers"
 import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-
 
 const ContactTypes = [
   {
@@ -53,7 +55,6 @@ let contactTimeout;
 export default function Contact(props) {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-
   const {
     state: { user, selectedEntity, permissions }, dispatch: entityDispatch
   }: any = useData();
@@ -63,6 +64,7 @@ export default function Contact(props) {
   } = props;
   const [selectedType, setSelectedType] = useState(1);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [contactId, setContactId] = useState('');
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
 
@@ -84,8 +86,10 @@ export default function Contact(props) {
     isRead: permissions[contactResource]?.isRead,
     isDelete: permissions[contactResource]?.isDelete,
   });
+  const [showEntityDialog, setShowEntityDialog] = useState(false)
 
   const [filter, setFilter] = useState('All Contacts');
+  const [entities, setEntities] = useState([])
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -171,7 +175,6 @@ export default function Contact(props) {
   );
 
   const EntityRenderer = (params) => (
-
     <h5 className="createBy d-flex">
       {params.data?.firstEntity ?
         <Link className="link" title={params.data.firstEntity} to={`${routes.entity.path}/detail/${params.data.firstEntityId}`}>
@@ -249,6 +252,36 @@ export default function Contact(props) {
         }}
         entity="contact"
       />
+
+      {
+        contactPermissions.isUpdate &&
+        <Tooltip title="Entity">
+          <IconButton
+            size="small"
+            aria-label="Entity"
+            onClick={() => {
+              setContactId(params.data._id)
+              setShowEntityDialog(true)
+              if (params?.data?.firstEntityId) {
+                let entities = []
+                if (params?.data?.firstEntityId) {
+                  entities.push(params?.data?.firstEntityId)
+                }
+                if (params?.data?.restEntity) {
+                  let restEntities = params?.data?.restEntity.map(o => o?.optionValue)
+                  entities = [...entities, ...restEntities]
+                }
+                setEntities([...entities])
+              }
+              else if (params?.data?.restEntity) {
+                let restEntities = params?.data?.restEntity.map(o => o?.optionValue)
+                setEntities([...restEntities])
+              }
+            }}>
+            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
+          </IconButton>
+        </Tooltip>
+      }
     </>
   );
 
@@ -412,7 +445,6 @@ export default function Contact(props) {
   const closeActions = () => {
     setAnchorEl(null);
   };
-
   const clickCreateNew = () => {
     setShowCreateContactDialog({ open: true, isClone: false, idToClone: null });
   };
@@ -563,8 +595,7 @@ export default function Contact(props) {
                             closeActions();
                             setShowDeleteConfirmBox(true);
                           }
-                        }}
-                      >
+                        }}>
                         Delete
                       </MenuItem>
                     </Menu>
@@ -584,8 +615,8 @@ export default function Contact(props) {
             rowCount={rowCount}
             limit={limit}
             pageSizes={pageSizes}
+            actionWidth={170}
             page={page}
-            actionWidth={100}
             loading={loading}
             renderedFrom={contactResource}
           />
@@ -618,7 +649,7 @@ export default function Contact(props) {
               contactApi={contactApi}
               account={account}
               contactId={showCreateContactDialog?.idToClone}
-              isClone={showCreateContactDialog?.open}
+              isClone={showCreateContactDialog?.isClone}
             />
           )}
 
@@ -636,6 +667,20 @@ export default function Contact(props) {
               onOk={handleSingleDeleteContacts}
             />
           ) : null}
+          {
+            showEntityDialog ?
+              <EntitySelectionsDialog
+                open={showEntityDialog}
+                resource={sidebarResource[contactResource]}
+                resourceId={contactId}
+                onClose={() => {
+                  setShowEntityDialog(false)
+                  setContactId("")
+                }}
+                onSuccess={getContacts}
+                entities={entities}
+              /> : null
+          }
         </Box>
       </CustomContainer>
     </Fragment>

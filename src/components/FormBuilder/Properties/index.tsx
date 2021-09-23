@@ -629,7 +629,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'percent' ||
                     values['type'] === 'converter') &&
                     module !== 'form-builder' &&
-                   (
+                    (
                       <>
                         <br></br>
                         <FormControlLabel
@@ -810,15 +810,15 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       />
                     ) : fieldData.type === 'colorPicker' && values['isDefaultValue'] ? (
                       <Box>
-                        <input  
+                        <input
                           value={values["defaultValue"]}
-                          type="color" 
+                          type="color"
                           onChange={(e) => {
-                          setFieldValue("defaultValue", e.target.value)
-                          }} 
+                            setFieldValue("defaultValue", e.target.value)
+                          }}
                         />
                         <Box component="span" ml={2}>{values["defaultValue"]}</Box>
-                      </Box> 
+                      </Box>
                     ) : values['isDefaultValue'] ? (
                       <Box display="block">
                         {module === 'pdf-template' &&

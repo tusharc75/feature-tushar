@@ -195,9 +195,7 @@ export default function ManagePricingConditionsDialog({
     }
 
     const onSubmit = (values) => {
-        values.year = new Date(values.year).getFullYear();
         setLoading(true);
-
         if (pricingConditionId) {
             values._id = pricingConditionId;
             axiosInstance().put(pricingConditionApi, values).then(({ data }) => {

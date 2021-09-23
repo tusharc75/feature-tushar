@@ -20,6 +20,7 @@ import AssignedFrequentlyBoughtProduct from "./AssignedFrequentlyBoughtProduct";
 import AssignProductDialog from "../../components/AssignRolesDialog/AssignProductDialog";
 import ManageProductInventory from "../ProductInventory/ManageProductInventory"
 import { extractFields } from "../../constants/formulaUtility";
+import ProductHierarchy from "./ProductHierarchy"
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 
 const ProductDetailsPage = () => {
@@ -41,6 +42,7 @@ const ProductDetailsPage = () => {
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
     const [frequentlyBoughtProduct, setFrequentlyBoughtProduct] = useState([]);
     const [inventoriesData, setInventoriesData] = useState([]);
+    const [BOMData, setBOMData] = useState([])
     const [statusData, setStatusData] = useState([]);
     const [selectedWarehouse, setSelectedWarehouse] = useState(null)
     const [openProductInventoryDialog, setOpenProductInventoryDialog] = useState(false);
@@ -55,6 +57,10 @@ const ProductDetailsPage = () => {
         }
         // eslint-disable-next-line
     }, [id]);
+
+    useEffect(() => {
+        getProductTree()
+    }, [productData])
 
     const handleMainPoints = (data) => {
         let mainPoint = {};
@@ -109,6 +115,18 @@ const ProductDetailsPage = () => {
                 toastConfig.setToastConfig(err);
             });
     };
+
+    const getProductTree = () => {
+        if (productData?._id) {
+            axiosInstance()
+                .get(`/product/bom/${productData?._id}`)
+                .then(({ data: { data } }) => {
+                    if (data && data.length) {
+                        setBOMData([...data])
+                    }
+                })
+        }
+    }
 
     const getFrequentlyBoughtProduct = () => {
         axiosInstance()
@@ -273,7 +291,7 @@ const ProductDetailsPage = () => {
                                 alignItems="center"
                             >
                                 <Typography variant="subtitle2">
-                                    Frequently Bought Product
+                                    BOM
                                 </Typography>
 
                                 {permissions.product.isUpdate && (
@@ -316,6 +334,11 @@ const ProductDetailsPage = () => {
                                                 product={frequentlyBoughtProduct}
                                                 unassignProduct={unassignProduct}
                                             />
+                                            {/* <ProductHierarchy
+                                                data={BOMData}
+                                                permissions={permissions.product}
+                                                unassignProduct={unassignProduct}
+                                            /> */}
                                             <Box marginY={1} />
                                         </>
                                     ) : (
@@ -485,6 +508,7 @@ const ProductDetailsPage = () => {
                     assignedProducts={frequentlyBoughtProduct}
                     onSuccess={() => {
                         getFrequentlyBoughtProduct();
+                        getProductTree()
                         setOpenAssignProductDialog(false)
                     }}
                 />

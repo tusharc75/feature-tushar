@@ -17,12 +17,15 @@ import routes from '../../components/Helpers/Routes';
 import { ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
-import { gridLoadingTimeout, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
+import { gridLoadingTimeout, gridPageSizes, isObjectEmpty, sidebarResource } from '../../constants/helpers';
 import { CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CustomAgGrid from '../../components/AgGridComponents/CustomAgGrid';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
+import { entity } from "../../constants/helpers"
+import EntitySelectionsDialog from "../../components/EntitySelections"
+import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 function reducer(state, action) {
@@ -116,6 +119,7 @@ const intialState = {
 };
 
 const AddressResource = () => {
+  const { entityApi } = entity
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, user }
@@ -133,6 +137,9 @@ const AddressResource = () => {
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [addressResourceId, setAddressResourceId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [showEntityDialog, setShowEntityDialog] = useState(false)
+  const [warehouseId, setWarehouseId] = useState("")
+  const [entities, setEntities] = useState([])
 
   // const [selectedCategory, setSelectedCategory] = useState([]);
 
@@ -227,7 +234,7 @@ const AddressResource = () => {
   );
 
   const ActionsRenderer = (params) => (
-    <Fragment>
+    <>
       <Tooltip
         className={warehousePermissions.isCreate ? "" : "cursor-stop"}
         title={warehousePermissions.isCreate ? "Clone" : "You do not have permission to clone/create"} >
@@ -237,8 +244,7 @@ const AddressResource = () => {
           onClick={() => {
             setAddressResourceId(params.data.id);
             setOpen({ open: true, isClone: true })
-          }}
-        >
+          }}>
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
       </Tooltip>
@@ -261,7 +267,24 @@ const AddressResource = () => {
           </IconButton>
         </Tooltip>
       )}
-    </Fragment>
+      {
+        warehousePermissions.isUpdate && <Tooltip title="Entity">
+          <IconButton
+            size="small"
+            aria-label="Entity"
+            onClick={() => {
+              setShowEntityDialog(true)
+              setWarehouseId(params.data._id)
+              if (params?.data?.entity) {
+                let restEntities = params?.data?.entity.map(o => o?.optionValue)
+                setEntities([...restEntities])
+              }
+            }}>
+            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
+          </IconButton>
+        </Tooltip>
+      }
+    </>
   );
 
   const frameworkComponents = {
@@ -426,7 +449,7 @@ const AddressResource = () => {
           limit={limit}
           pageSizes={pageSizes}
           page={page}
-          actionWidth={100}
+          actionWidth={150}
           loading={loading}
           renderedFrom="warehousePage"
         />
@@ -451,6 +474,20 @@ const AddressResource = () => {
             isClone={open?.isClone}
           />
         )}
+        {
+          showEntityDialog ?
+            <EntitySelectionsDialog
+              open={showEntityDialog}
+              resource={sidebarResource.warehouse}
+              resourceId={warehouseId}
+              onClose={() => {
+                setShowEntityDialog(false)
+                setWarehouseId("")
+              }}
+              onSuccess={fetchWarehouses}
+              entities={entities}
+            /> : null
+        }
       </CustomContainer>
     </Fragment>
   );
