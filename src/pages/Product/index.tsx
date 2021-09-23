@@ -92,6 +92,8 @@ const Product = () => {
                 let res = {
                     ...restProperties,
                     id: u._id,
+                    inventoryCount: u?.inventoryCount,
+                    warehouses: u.warehouse?.map(w => w.optionLabel).join(", "),
                     createdBy: u.createdBy?.user?.concatedName,
                     createdByDate: u.createdBy?.date,
                     updatedBy: u.updatedBy?.user?.concatedName,
@@ -194,6 +196,8 @@ const Product = () => {
             });
             if (column.length) {
                 column.push(
+                    { field: "inventoryCount", headerName: "Inventory Count", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" },
+                    { field: "warehouses", headerName: "Warehouses", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" },
                     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer", leval: "price-builder-custom" },
                     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer", leval: "price-builder-custom" },
                 )
