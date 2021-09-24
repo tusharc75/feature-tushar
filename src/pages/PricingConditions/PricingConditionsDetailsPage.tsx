@@ -234,10 +234,10 @@ const PricingConditionsDetailsPage = () => {
                                                                             <ListItemText
                                                                                 primary={
                                                                                     <Typography>
-                                                                                        {obj?.discount || ""}
+                                                                                        {`Discount% ${obj?.discount || ""}`}
                                                                                     </Typography>
                                                                                 }
-                                                                                secondary={obj.amount}
+                                                                                secondary={`Amount ${currency} ${obj?.amount}`}
                                                                             />
                                                                         </div>
                                                                     </ListItem>
@@ -293,6 +293,7 @@ const PricingConditionsDetailsPage = () => {
                     pricingConditionsData={pricingConditionsData}
                     onSuccess={() => {
                         setOpenPricingConditionDialog(false)
+                        getPricingConditionsFieldsAndData()
                     }}
                 />
             )
