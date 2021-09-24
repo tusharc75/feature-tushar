@@ -52,6 +52,7 @@ const PricingConditionsDetailsPage = () => {
     const [mainPoints, setMainPoints] = useState(null);
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
     const [currency, setCurrency] = useState(null);
+    const [discountType, setDiscountType] = useState(null);
 
 
     useEffect(() => {
@@ -86,6 +87,7 @@ const PricingConditionsDetailsPage = () => {
                 setHeadingLabel(data.conditionName);
                 setPricingConditionsData(data);
                 setCurrency(data.currency)
+                setDiscountType(data.type)
                 setCustomizedRoutes([routes.pricingCondition, { title: data.conditionName }]);
                 setLoading(false);
             })
@@ -234,10 +236,10 @@ const PricingConditionsDetailsPage = () => {
                                                                             <ListItemText
                                                                                 primary={
                                                                                     <Typography>
-                                                                                        {`Discount% ${obj?.discount || ""}`}
+                                                                                        {`Quantity ${obj?.quantity || ""}`}
                                                                                     </Typography>
                                                                                 }
-                                                                                secondary={`Amount ${currency} ${obj?.amount}`}
+                                                                                secondary={discountType === "Flat Discount" ? `Discount % ${obj?.amount}` : `Amount ${currency} ${obj?.amount}`}
                                                                             />
                                                                         </div>
                                                                     </ListItem>
@@ -291,6 +293,7 @@ const PricingConditionsDetailsPage = () => {
                     }}
                     currency={currency}
                     pricingConditionsData={pricingConditionsData}
+                    discountType={discountType}
                     onSuccess={() => {
                         setOpenPricingConditionDialog(false)
                         getPricingConditionsFieldsAndData()
