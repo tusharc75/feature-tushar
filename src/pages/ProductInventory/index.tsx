@@ -27,6 +27,7 @@ import { useData } from "../../StateProvider/Provider";
 import ManageProductInventory from "./ManageProductInventory";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import { useHistory } from "react-router-dom";
 
 const ProductInventory = () => {
 
@@ -42,10 +43,13 @@ const ProductInventory = () => {
     const {
         state: { permissions },
     }: any = useData();
+    const history = useHistory();
+
+    const [warehouse, setWarehouse] = useState(history.location?.state?.warehouse);
 
     useEffect(() => {
         fetchProductInventory()
-    }, [page, limit, filters, sorting, search]);
+    }, [page, limit, filters, sorting, search, warehouse]);
 
     const columns = [
         { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
@@ -103,6 +107,9 @@ const ProductInventory = () => {
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
 
+        if (warehouse?.optionValue) {
+            deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "warehouse", term: warehouse?.optionValue }])}`
+        }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
@@ -246,8 +253,18 @@ const ProductInventory = () => {
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <GiStockpiles size={20} style={{paddingBottom: "3px"}} className="headerLogo" />
+                        <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
                         <span className="listingHeader">{routes.productInventory?.title} </span>
+                        {warehouse && (
+                            <Chip
+                                className="ml-3"
+                                color="primary"
+                                label={`Warehouse : ${warehouse.optionLabel}`}
+                                onDelete={() => {
+                                    setWarehouse(null);
+                                }}
+                            />
+                        )}
                     </Grid>
                     <Grid xs={6} container className={styles.filter_side} >
                         <Box className={styles.filter_side_header} component="div" >

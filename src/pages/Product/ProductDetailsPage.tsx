@@ -43,7 +43,7 @@ const ProductDetailsPage = () => {
     const [frequentlyBoughtProduct, setFrequentlyBoughtProduct] = useState([]);
     const [inventoriesData, setInventoriesData] = useState([]);
     const [BOMData, setBOMData] = useState([])
-    const [statusData, setStatusData] = useState([]);
+    const [productWarehouseData, setProductWarehouseData] = useState([]);
     const [selectedWarehouse, setSelectedWarehouse] = useState(null)
     const [openProductInventoryDialog, setOpenProductInventoryDialog] = useState(false);
 
@@ -181,6 +181,7 @@ const ProductDetailsPage = () => {
     const getWarehouses = () => {
         axiosInstance().get(`product/${id}/inventory`)
             .then(async ({ data: { data } }) => {
+                setProductWarehouseData(data)
                 let wareHouses = []
                 let byStatus = []
                 for (const d of data) {
@@ -449,10 +450,19 @@ const ProductDetailsPage = () => {
                                                     </Grid>
                                                 </Box>
                                                 <Box p={1}>
-                                                    {selectedWarehouse === warehouse && inventory?.map((i, idx) => (
+                                                    {selectedWarehouse === warehouse && inventory?.slice(0, 6).map((i, index) => (
                                                         <Fragment key={i._id}>
-                                                            {i?.serialNumber ?
+                                                            {i?.serialNumber ? index === 5 ?
                                                                 <Chip
+                                                                    label={"show more"}
+                                                                    // color="secondary"
+                                                                    style={{ marginRight: '2px', background: "#ffb4b4" }}
+                                                                    onClick={() => {
+                                                                        history.push(`${routes.productInventory.path}`, {
+                                                                            warehouse: productWarehouseData.find(d => d?.warehouse?.optionLabel === selectedWarehouse).warehouse,
+                                                                        })
+                                                                    }} />
+                                                                : <Chip
                                                                     label={i?.serialNumber}
                                                                     // color="secondary"
                                                                     style={{ marginRight: '2px', background: ["New", "Available"].indexOf(i?.status) >= 0 ? "#b9ffce" : "#ffb4b4" }}

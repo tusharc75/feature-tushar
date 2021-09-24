@@ -13,6 +13,7 @@ import { startCase } from "lodash";
 import { SearchActivity } from "../../../axios/activity";
 import { useData } from "../../../StateProvider/Provider";
 import { resActivityColors } from "../Helpers/utils";
+import ActivityModelHandler from "../ActivityModelHandler";
 
 export const capitalize = (string) => {
   return string && typeof string === "string"
@@ -36,6 +37,8 @@ export const SearchFilter = ({
   const [inputValue, setInputValue] = React.useState("");
   const [value, setValue] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
+  const [selectedActivityId, setSelectedActivityId] = React.useState(null);
+  const [selectedActivityType, setSelectedActivityType] = React.useState(null);
 
   const allSearch = [
     { type: "customerAccount", name: "All", isAll: true },
@@ -50,7 +53,7 @@ export const SearchFilter = ({
   ];
 
   useEffect(() => {
-    setValue(filter.filter(d => allSearch.some(obj => obj.type === d.type)));
+    setValue(filter);
   }, [filter]);
 
   useEffect(() => {
@@ -64,7 +67,7 @@ export const SearchFilter = ({
       SearchActivity(inputValue)
         .then(({ data }) => {
           setLoading(false);
-          setOptions(data.filter(d => allSearch.some(obj => obj.type === d.type) || activityName ? d.type === activityName : d.type === "note"));
+          setOptions(data);
         })
         .catch((err) => {
           setLoading(false);
@@ -73,91 +76,106 @@ export const SearchFilter = ({
   }, [inputValue]);
 
   const handleChangeValue = (newValue) => {
-    setValue(newValue.filter(d => allSearch.some(obj => obj.type === d.type)));
+    let tempActivity = newValue.slice().reverse().find(d => d._id !== undefined && d.type !== undefined)
+    if(tempActivity){
+      setSelectedActivityId(tempActivity._id)
+      setSelectedActivityType(tempActivity.type)
+    }
+    setValue(newValue);
     handleChangeFilter(newValue);
   };
 
 
   return (
-    <Autocomplete
-      multiple={true}
-      disableCloseOnSelect={true}
-      size="small"
-      fullWidth
-      loading={loading}
-      options={options}
-      getOptionLabel={(option) => (option ? option.name : "")}
-      filterSelectedOptions={false}
-      onChange={(event, newValue) => handleChangeValue(newValue)}
-      onInputChange={(event, newInputValue) => {
-        setInputValue(newInputValue);
-      }}
-      renderTags={(value, getTagProps) =>
-        value.map((option, index) => (
-          <Chip
-            size={chip?.size || "medium"}
-            color={chip?.color || "primary"}
-            style={{
-              backgroundColor: resActivityColors[option.type],
-              color: "white",
+    <>
+      <Autocomplete
+        multiple={true}
+        disableCloseOnSelect={true}
+        size="small"
+        fullWidth
+        loading={loading}
+        options={options}
+        getOptionLabel={(option) => (option ? option.name : "")}
+        filterSelectedOptions={false}
+        onChange={(event, newValue) => handleChangeValue(newValue)}
+        onInputChange={(event, newInputValue) => {
+          setInputValue(newInputValue);
+        }}
+        renderTags={(value, getTagProps) =>
+          value.map((option, index) => (
+            <Chip
+              size={chip?.size || "medium"}
+              color={chip?.color || "primary"}
+              style={{
+                backgroundColor: resActivityColors[option.type],
+                color: "white",
+              }}
+              label={
+                option && option.type === "my"
+                  ? activityName ? "My" + " " + startCase(activityName) : "My activities"
+                  : startCase(option.type) + " - " + option.name
+              }
+              {...getTagProps({ index })}
+            />
+          ))
+        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            size="small"
+            variant="outlined"
+            placeholder="Search or Filter"
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <React.Fragment>
+                  {loading ? (
+                    <CircularProgress color="inherit" size={20} />
+                  ) : null}
+                  {params.InputProps.endAdornment}
+                </React.Fragment>
+              ),
             }}
-            label={
-              option && option.type === "my"
-                ? activityName ? "My" + " " + startCase(activityName) : "My activities"
-                : startCase(option.type) + " - " + option.name
-            }
-            {...getTagProps({ index })}
           />
-        ))
-      }
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          size="small"
-          variant="outlined"
-          placeholder="Search or Filter"
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <React.Fragment>
-                {loading ? (
-                  <CircularProgress color="inherit" size={20} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </React.Fragment>
-            ),
-          }}
+        )}
+        value={value}
+        renderOption={(option) => {
+          return (
+            <Grid container alignItems="center" spacing={3}>
+              <Grid item>
+                <Chip
+                  size={chip?.size || "medium"}
+                  style={{
+                    backgroundColor: resActivityColors[option.type],
+                    color: "white",
+                  }}
+                  label={
+                    option.isAll
+                      ? option.type === "my"
+                        ? activityName ? "My" + " " + startCase(activityName) : "My activities"
+                        : option.name + " " + startCase(option.type)
+                      : startCase(option.type)
+                  }
+                />
+              </Grid>
+              <Grid item xs>
+                {!option.isAll && (
+                  <Typography variant="body2">{option.name}</Typography>
+                )}
+              </Grid>
+            </Grid>
+          );
+        }}
+      />
+      {selectedActivityId && (
+        <ActivityModelHandler
+          setActivityData={setSelectedActivityId}
+          activityType={selectedActivityType}
+          fetchBoard={() => { }}
+          activityId={selectedActivityId}
         />
       )}
-      value={value}
-      renderOption={(option) => {
-        return (
-          <Grid container alignItems="center" spacing={3}>
-            <Grid item>
-              <Chip
-                size={chip?.size || "medium"}
-                style={{
-                  backgroundColor: resActivityColors[option.type],
-                  color: "white",
-                }}
-                label={
-                  option.isAll
-                    ? option.type === "my"
-                      ? activityName ? "My" + " " + startCase(activityName) : "My activities"
-                      : option.name + " " + startCase(option.type)
-                    : startCase(option.type)
-                }
-              />
-            </Grid>
-            <Grid item xs>
-              {!option.isAll && (
-                <Typography variant="body2">{option.name}</Typography>
-              )}
-            </Grid>
-          </Grid>
-        );
-      }}
-    />
+    </>
   );
 };
 
