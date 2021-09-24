@@ -18,6 +18,8 @@ import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { productInventory, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
 import {
+    DateRenderer,
+    CommonRenderer,
     CreatedByRenderer,
     UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -58,8 +60,8 @@ const ProductInventory = () => {
         { field: "product", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
         { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "productCategoryRenderer" },
         { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
-        { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "commonRenderer" },
-        { field: "bornInDate", headerName: "Born on Date", show: true, cellRenderer: "commonRenderer" },
+        { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "dateRenderer" },
+        { field: "bornInDate", headerName: "Born on Date", show: true, cellRenderer: "dateRenderer" },
         { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
@@ -154,15 +156,15 @@ const ProductInventory = () => {
     }
 
     const NameRenderer = (params) => (
-        <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+        params.value ? <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
             {params.value}
-        </Link>
+        </Link> : <NoDataCell />
     );
 
     const ProductRenderer = (params) => (
-        <Link className="link" title={params.value} to={`${routes.product.path}/detail/${params.data.productId}`}>
+        params.value ? <Link className="link" title={params.value} to={`${routes.product.path}/detail/${params.data.productId}`}>
             {params.value}
-        </Link>
+        </Link> : <NoDataCell />
     );
 
     const ProductCategoryRenderer = (params) => (
@@ -224,7 +226,9 @@ const ProductInventory = () => {
     };
 
     const frameworkComponents = {
+        commonRenderer: CommonRenderer,
         createdByRenderer: CreatedByRenderer,
+        dateRenderer: DateRenderer,
         productRenderer: ProductRenderer,
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer,
