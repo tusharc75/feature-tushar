@@ -123,6 +123,12 @@ const ProductDetailsPage = () => {
                 .get(`/product/bom/${productData?._id}`)
                 .then(({ data: { data } }) => {
                     if (data && data.length) {
+                        data = data.map(o => {
+                            if (o.parent) {
+                                o.type = "child"
+                            }
+                            return o
+                        })
                         setBOMData([...data])
                     }
                 })

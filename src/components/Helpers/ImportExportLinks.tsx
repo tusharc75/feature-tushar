@@ -46,7 +46,10 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-export default function ImportExportLinks({ permissions, module, api, afterImportCompleted, recordsToExport = 0, exportSelectedRecords = () => { } }) {
+export default function ImportExportLinks({ ids = [], permissions, module, api,
+  afterImportCompleted, recordsToExport = 0, exportSelectedRecords = null,
+  onExportToExcelSuccess = () => { }
+}) {
   const classes = useStyles();
   const isMobile = useMediaQuery("(max-width: 960px)");
   const toastConfig = useContext(CustomToastContext);
@@ -109,9 +112,16 @@ export default function ImportExportLinks({ permissions, module, api, afterImpor
    * EXPORT TABLES INTO EXCEL
    */
   const exportToExcel = () => {
-    // if (recordsToExport === 0) {
+    let exportApi = `${api}/template?export=true`
+    if (recordsToExport > 0) {
+      if (exportSelectedRecords) {
+        exportSelectedRecords()
+        return
+      }
+      exportApi = exportApi + `&ids=${JSON.stringify(ids)}`
+    }
     axiosInstance()
-      .get(`${api}/template?export=true`, {
+      .get(exportApi, {
         responseType: "arraybuffer",
       })
       .then((response) => {
@@ -120,6 +130,9 @@ export default function ImportExportLinks({ permissions, module, api, afterImpor
         )[1];
         downloadExcel(response.data, fileName);
 
+        if (recordsToExport > 0) {
+          onExportToExcelSuccess()
+        }
         toastConfig.setToastConfig({
           open: true,
           type: "success",
@@ -129,10 +142,7 @@ export default function ImportExportLinks({ permissions, module, api, afterImpor
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-    // }
-    // else {
-    //   exportSelectedRecords()
-    // }
+
   };
 
   /**
@@ -191,7 +201,7 @@ export default function ImportExportLinks({ permissions, module, api, afterImpor
           onClick={exportToExcel}
           className={`${classes.links} cursor-pointer`}
         >
-          Export to Excel {/* ({recordsToExport === 0 ? "All" : recordsToExport}) */}
+          Export to Excel ({recordsToExport === 0 ? "All" : recordsToExport})
         </label>
         <Divider
           orientation="vertical"
@@ -235,7 +245,7 @@ export default function ImportExportLinks({ permissions, module, api, afterImpor
             handleClose();
           }}
         >
-          Export to Excel {/* ({recordsToExport === 0 ? "All" : recordsToExport}) */}
+          Export to Excel ({recordsToExport === 0 ? "All" : recordsToExport})
         </MenuItem>
         <MenuItem
           onClick={() => {

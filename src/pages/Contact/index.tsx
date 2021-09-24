@@ -490,7 +490,8 @@ export default function Contact(props) {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes[contactResource].title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes[contactResource].title }]}
+          />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
@@ -499,6 +500,12 @@ export default function Contact(props) {
             api={contactApi}
             afterImportCompleted={() => {
               getContacts();
+            }}
+            recordsToExport={selectedRecords.length}
+            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            onExportToExcelSuccess={() => {
+              if (gridApi) gridApi.deselectAll()
+              else getContacts()
             }}
           />
         </Grid>

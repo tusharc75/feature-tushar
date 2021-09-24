@@ -475,6 +475,12 @@ const ProjectSales: FC = () => {
               afterImportCompleted={() => {
                 fetchProjects();
               }}
+              recordsToExport={selectedRecords.length}
+              ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+              onExportToExcelSuccess={() => {
+                if (gridApi) gridApi.deselectAll()
+                else fetchProjects()
+              }}
             />
           </Grid>
         </Grid>
