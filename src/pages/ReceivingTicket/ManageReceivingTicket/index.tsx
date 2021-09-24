@@ -25,7 +25,7 @@ import { useHistory } from 'react-router-dom';
 import { useData } from '../../../StateProvider/Provider';
 import routes from '../../../components/Helpers/Routes';
 
-const ManageReceivingTicket = ({ isClone, receivingTicketId, onClose, onSuccess, open }) => {
+const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryForReceivingTicket = null, rentalData = null, warehouseId = null, onClose, onSuccess, open }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
@@ -75,13 +75,28 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, onClose, onSuccess,
               toastConfig.setToastConfig(error);
             });
         } else {
-          let initialData = getObjKeys('', fieldsDataForCreate);
-
-          setReceivingTicketData({
-            fields: fieldsDataForCreate,
-            initialValues: initialData
-          });
-          setFormValues(initialData);
+          if (productInventoryForReceivingTicket && rentalData) {
+            const tempInitialData = getObjKeys("", fieldsDataForCreate)
+            tempInitialData["productInventory"] = productInventoryForReceivingTicket.map(d => d.inventory._id)
+            tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
+            tempInitialData["rentalJob"] = rentalData._id
+            tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
+            tempInitialData["pickupAddress"] = rentalData.shippingAddress
+            tempInitialData["receivingJobName"] = rentalData?.rentalJobName
+            setReceivingTicketData({
+              fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rentalJob"),
+              initialValues: tempInitialData,
+            });
+            setFormValues(tempInitialData)
+          }
+          else {
+            let initialData = getObjKeys('', fieldsDataForCreate);
+            setReceivingTicketData({
+              fields: fieldsDataForCreate,
+              initialValues: initialData
+            });
+            setFormValues(initialData);
+          }
           setLoading(false);
         }
       })
@@ -124,7 +139,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, onClose, onSuccess,
         });
     } else {
       axiosInstance()
-        .post(`${receivingTicket.receivingTicketApi}`, values) 
+        .post(`${receivingTicket.receivingTicketApi}`, values)
         .then(({ data: { data, message } }) => {
           history.push(`${routes.receivingTicketDetail.path}/${data._id}`);
           setSubmitting(false);
@@ -206,7 +221,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, onClose, onSuccess,
             </CustomDialogFooter>
           </>
         ) : (
-          <Formik initialValues={receivingTicketData.initialValues} validationSchema={yupSchema(receivingTicketData.fields)} validateOnMount onSubmit={() => {}}>
+          <Formik initialValues={receivingTicketData.initialValues} validationSchema={yupSchema(receivingTicketData.fields)} validateOnMount onSubmit={() => { }}>
             {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
               <>
                 <CustomDialogContent>
@@ -224,10 +239,11 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, onClose, onSuccess,
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field) => (
                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      {field.fieldName === "customerAccount" || field.fieldName === "pickupAddress" || field.fieldName === "deliveryType" ? (
                                         <FormTypes
-                                          receivingTicketId={receivingTicketId}
                                           {...field}
-                                          disabled={!receivingTicketId && field.disableOnEdit}
+                                          disabled={true}
+                                          isNew={Boolean(receivingTicketId)}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -236,23 +252,45 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, onClose, onSuccess,
                                           type={field.type}
                                           options={field.option}
                                           setFieldValue={(name, value) => {
-                                            handleValuesChange({ [name]: value });
-                                            setFieldValue(name, value);
+                                            handleValuesChange({ [name]: value })
+                                            setFieldValue(name, value)
                                           }}
                                           required={field.required}
                                           fullWidth
                                           isTooltip={field?.isTooltip || false}
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                              ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
-                                              : null
-                                          }
+                                          imageOrFileUploadCompletePercentage={null}
                                         />
-
+                                      ) : <FormTypes
+                                        receivingTicketId={receivingTicketId}
+                                        {...field}
+                                        disabled={!receivingTicketId && field.disableOnEdit}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange({ [name]: value });
+                                          setFieldValue(name, value);
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        imageOrFileUploadCompletePercentage={
+                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                            ? (completePercentage) => {
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
+                                            : null
+                                        }
+                                      />
+                                      }
                                     </Grid>
                                   ))}
                                 </Grid>

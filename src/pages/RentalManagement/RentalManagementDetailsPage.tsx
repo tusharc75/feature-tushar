@@ -34,8 +34,10 @@ import ManageProductInventory from '../ProductInventory/ManageProductInventory'
 import AddRentalCost from "./AddRentalCost";
 import Activity from "../../components/Activity";
 import styles from "./Retal.module.scss";
+import ReceivingTicket from "./ReceivingTicket";
+import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
 
-const rentalProcessSteps = ["New", "Add Rental Cost", "Additional Cost", "Loading Ticket", "Ready To Ship"]
+const rentalProcessSteps = ["New", "Add Rental Cost", "Additional Cost", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -65,6 +67,9 @@ const RentalManagementDetailsPage = () => {
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showActivity, setActivityShow] = useState(true);
   const [allowedToEdit, setAllowedToEdit] = useState(false)
+  const [productInventoryForReceivingTicket, setProductInventoryForReceivingTicket] = useState<any[]>([]);
+  const [warehouseForReceivingTicket, setWarehouseForReceivingTicket] = useState<any[]>([]);
+  const [showReceivingTicketDialog, setShowReceivingTicketDialog] = useState(false);
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
@@ -112,8 +117,8 @@ const RentalManagementDetailsPage = () => {
             "_id": rentalManagementData._id,
             "rentalJobName": rentalManagementData.rentalJobName,
             "rentalJobID": rentalManagementData.rentalJobID,
-            "customerAccount": rentalManagementData.customerAccount.optionValue,
-            "customerContact": rentalManagementData.customerContact.optionValue,
+            "customerAccount": rentalManagementData.customerAccount?.optionValue,
+            "customerContact": rentalManagementData.customerContact?.optionValue,
             "shippingAddress": rentalManagementData.shippingAddress,
             "currency": rentalManagementData.currency,
             "rentalStartDate": rentalManagementData.rentalStartDate,
@@ -213,6 +218,13 @@ const RentalManagementDetailsPage = () => {
     setWarehouseForDeliveryTicket(warehouse)
     setShowDeliveryTicketDialog(true)
   }
+
+  const handleReceivingTicketDialog = (selectedProductInventory, warehouse) => {
+    setProductInventoryForReceivingTicket(selectedProductInventory)
+    setWarehouseForReceivingTicket(warehouse)
+    setShowReceivingTicketDialog(true)
+  }
+
   const costTypeList = ["Repair", "Delivery", "Assembly"]
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -332,9 +344,9 @@ const RentalManagementDetailsPage = () => {
 
         })
         setProductInventory(tempProductInventory)
-        if (tempProductInventory.length > 0 && tempProductInventory.every(d => d.deliveryTicket !== undefined)) {
-          setCurrentStep(4)
-        }
+        // if (tempProductInventory.length > 0 && tempProductInventory.every(d => d.deliveryTicket !== undefined)) {
+        //   setCurrentStep(4)
+        // }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -432,9 +444,9 @@ const RentalManagementDetailsPage = () => {
             </div>
             <div>
               <Steps
-                  className={styles.steps_box}
+                className={styles.steps_box}
                 isNextStep={!Boolean(productInventory.length)}
-                steps={rentalProcessSteps.slice(0, 4)}
+                steps={rentalProcessSteps.slice(0, 5)}
                 currentStep={currentStep}
                 setCurrentStep={setCurrentStep}
               />
@@ -447,7 +459,7 @@ const RentalManagementDetailsPage = () => {
                       size="small"
                       onClick={() => { setAddExistingProductDialog(true) }}
                     >
-                       Add Existing Serialized Assets
+                      Add Existing Serialized Assets
                     </Button>
                     <Box mx={1} />
                     <Button
@@ -456,7 +468,7 @@ const RentalManagementDetailsPage = () => {
                       size="small"
                       onClick={() => { setShowManageProductInventoryDialog(true) }}
                     >
-                     Add New Serialized Assets
+                      Add New Serialized Assets
                     </Button>
                   </Box>
                   {columns ?
@@ -495,7 +507,7 @@ const RentalManagementDetailsPage = () => {
               )}
               {(currentStep === 2) && (
                 <Formik
-                  initialValues={{ additionalCost: additionalCost || [{"id": "", "type": "", "amount": 0}] }}
+                  initialValues={{ additionalCost: additionalCost || [{ "id": "", "type": "", "amount": 0 }] }}
                   enableReinitialize={true}
                   onSubmit={() => { }}>
                   {({ values }) => (
@@ -659,13 +671,22 @@ const RentalManagementDetailsPage = () => {
                 </Formik>
 
               )}
-              {(currentStep === 3 || currentStep === 4) && (
+              {(currentStep === 3) && (
                 <DeliveryTicket
                   rentalManagementId={id}
                   warehouselist={warehouseList}
                   productInventory={productInventory}
                   currentStep={currentStep}
                   handleDeliveryTicketDialog={handleDeliveryTicketDialog}
+                />
+              )}
+              {(currentStep === 4 || currentStep === 5) && (
+                <ReceivingTicket
+                  rentalManagementId={id}
+                  warehouselist={warehouseList}
+                  productInventory={productInventory}
+                  currentStep={currentStep}
+                  handleReceivingTicketDialog={handleReceivingTicketDialog}
                 />
               )}
             </div>
@@ -727,7 +748,7 @@ const RentalManagementDetailsPage = () => {
         <AddExistingProductInventory
           addProductInventory={handleAddProductInventory}
           handleProductInventoryClose={() => { setAddExistingProductDialog(false) }}
-      />}
+        />}
       {openUpdateDialog && (
         <ManageRentalManagementDialog
           isClone={false}
@@ -752,16 +773,32 @@ const RentalManagementDetailsPage = () => {
           }}
         />
       }
+      {showReceivingTicketDialog && <ManageReceivingTicket
+        open={showReceivingTicketDialog}
+        isClone={false}
+        receivingTicketId={null}
+        productInventoryForReceivingTicket={productInventoryForReceivingTicket}
+        warehouseId={warehouseForReceivingTicket}
+        rentalData={rentalManagementData}
+        onClose={() => setShowReceivingTicketDialog(false)}
+        onSuccess={() => {
+          setShowReceivingTicketDialog(false)
+          fetchProductInventory()
+        }}
+
+      />
+
+      }
       {showManageProductInventoryDialog &&
         <ManageProductInventory
-            isClone={null}
-            productInventoryId={null}
-            onClose={() => setShowManageProductInventoryDialog(false)}
-            onSuccess={(data) => {
-                setShowManageProductInventoryDialog(false);
-                handleAddProductInventory([data])
-            }}
-      />}
+          isClone={null}
+          productInventoryId={null}
+          onClose={() => setShowManageProductInventoryDialog(false)}
+          onSuccess={(data) => {
+            setShowManageProductInventoryDialog(false);
+            handleAddProductInventory([data])
+          }}
+        />}
     </>
   );
 };
