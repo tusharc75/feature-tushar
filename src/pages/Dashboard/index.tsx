@@ -1,21 +1,22 @@
-import {useEffect, useState, Fragment} from 'react';
-import {Container, Grid, Paper, Box, Typography, Button} from '@material-ui/core';
-import {Link} from 'react-router-dom';
-import {useData} from '../../StateProvider/Provider';
-import {kebabCase} from 'lodash';
+import { useEffect, useState, Fragment } from 'react';
+import { Container, Grid, Paper, Box, Typography, Button } from '@material-ui/core';
+import { Link } from 'react-router-dom';
+import { useData } from '../../StateProvider/Provider';
+import { kebabCase } from 'lodash';
 import styles from "./Dashboard.module.scss";
 import crmImage from "../../assets/eQuip_t-homepage-design-trs.-in-png.png";
-import {SiCivicrm} from 'react-icons/si';
+import { SiCivicrm } from 'react-icons/si';
 import AccountBoxIcon from '@material-ui/icons/AccountBox';
 import PhoneIcon from '@material-ui/icons/Phone';
-import {color} from "chart.js/helpers";
-import {classNames} from "react-easy-crop/helpers";
-import {MdNavigateNext, MdLocalActivity} from 'react-icons/md';
-import {RiAccountPinCircleFill, RiFolderSettingsFill} from 'react-icons/ri';
-import {BsCalendarFill} from 'react-icons/bs';
-import {FaRegistered} from 'react-icons/fa';
+import { color } from "chart.js/helpers";
+import { classNames } from "react-easy-crop/helpers";
+import { MdNavigateNext, MdLocalActivity } from 'react-icons/md';
+import { RiAccountPinCircleFill, RiFolderSettingsFill } from 'react-icons/ri';
+import { BsCalendarFill } from 'react-icons/bs';
+import { FaRegistered } from 'react-icons/fa';
 
 function Dashboard() {
+
     const {
         state: {user}
     } = useData();
@@ -164,12 +165,13 @@ function Dashboard() {
                                     ) : null;
                                 })}
                             </Grid>
-                        </Box>
-                    </div>
-                </Grid>
-            </Container>
-        </Fragment>
-    );
+
+            </Box>
+          </div>
+        </Grid>
+      </Container>
+    </Fragment>
+  );
 }
 
 export default Dashboard;
