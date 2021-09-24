@@ -476,10 +476,11 @@ const ProductDetailsPage = () => {
                                                                 <Chip
                                                                     label={"show more"}
                                                                     // color="secondary"
-                                                                    style={{ marginRight: '2px', background: "#ffb4b4" }}
+                                                                    style={{ marginRight: '2px', background: "#1aa3ff" }}
                                                                     onClick={() => {
                                                                         history.push(`${routes.productInventory.path}`, {
                                                                             warehouse: productWarehouseData.find(d => d?.warehouse?.optionLabel === selectedWarehouse).warehouse,
+                                                                            product: { "id": id, "name": headingLabel },
                                                                         })
                                                                     }} />
                                                                 : <Chip
