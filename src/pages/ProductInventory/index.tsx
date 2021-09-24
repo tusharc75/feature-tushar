@@ -287,38 +287,21 @@ const ProductInventory = () => {
                                     setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null })
                                 }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                             }
-                            {permissions?.productInventory?.isUpdate &&
-                                <HtmlTooltip title="Please select some inventories">
-                                    <span>
-                                        <Button
-                                            className={styles.add_submit_btn}
-                                            onClick={() => setShowRepairJobDialog(true)}
-                                            variant="contained"
-                                            size="small"
-                                            color="primary"
-                                            startIcon={<AddIcon />}
-                                            disabled={!selectedRecords.length}
-                                        >Create Repair Job
-                                        </Button>
-                                    </span>
-                                </HtmlTooltip>
-                            }
-                            {permissions?.productInventory?.isDelete &&
-                                <HtmlTooltip title="Please select some inventories">
-                                    <span>
-                                        <Button
-                                            className={styles.action_submit_btn}
-                                            variant="outlined"
-                                            color="default"
-                                            size="small"
-                                            onClick={openActions}
-                                            disabled={selectedRecords.length ? false : true}
-                                            aria-controls="action-menu"
-                                        >Actions <ExpandMore />
-                                        </Button>
-                                    </span>
-                                </HtmlTooltip>
-                            }
+
+                            <HtmlTooltip title="Please select some inventories">
+                                <span>
+                                    <Button
+                                        className={styles.action_submit_btn}
+                                        variant="outlined"
+                                        color="default"
+                                        size="small"
+                                        onClick={openActions}
+                                        disabled={selectedRecords.length ? false : true}
+                                        aria-controls="action-menu"
+                                    >Actions <ExpandMore />
+                                    </Button>
+                                </span>
+                            </HtmlTooltip>
                             <Menu
                                 anchorEl={anchorEl}
                                 keepMounted
@@ -331,7 +314,14 @@ const ProductInventory = () => {
                                 open={Boolean(anchorEl)}
                                 onClose={closeActions}
                             >
-                                <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                                {permissions?.productInventory?.isDelete && <MenuItem onClick={() => {
+                                    closeActions()
+                                    setShowDeleteConfirmBox(true)
+                                }}>Delete</MenuItem>}
+                                {permissions?.repairJob?.isCreate && permissions?.productInventory?.isUpdate && <MenuItem onClick={() => {
+                                    closeActions()
+                                    setShowRepairJobDialog(true)
+                                }}>Create Repair Job</MenuItem>}
                             </Menu>
                         </Box>
                     </Grid>

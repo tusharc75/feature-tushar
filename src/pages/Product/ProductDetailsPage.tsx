@@ -1,5 +1,10 @@
 import { useState, useEffect, useContext, Fragment } from "react";
-import { Grid, Box, Button, Typography, IconButton, Paper, Chip } from "@material-ui/core";
+import {
+    Grid, Box, Button, Typography, IconButton, Paper, Chip, List,
+    ListItem,
+    ListItemText,
+    ListItemSecondaryAction
+} from "@material-ui/core";
 import { ControlPoint, ExpandLess, ExpandMore, InfoOutlined } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
@@ -34,6 +39,7 @@ const ProductDetailsPage = () => {
     }: any = useData();
     const [headingLabel, setHeadingLabel] = useState("");
     const [loading, setLoading] = useState(false);
+    const [loadingWarehouse, setLoadingWarehouse] = useState(false);
     const [productData, setProductData] = useState(null);
     const [showConfirmBox, setShowConfirmBox] = useState(false);
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -54,19 +60,22 @@ const ProductDetailsPage = () => {
         if (id) {
             getProductFieldsAndData();
             getFrequentlyBoughtProduct();
-            getWarehouses()
         }
         // eslint-disable-next-line
     }, [id]);
 
     useEffect(() => {
         getProductTree()
+        if (productData) {
+            getWarehouses()
+        }
     }, [productData])
 
     const handleMainPoints = (data) => {
         let mainPoint = {};
         mainPoint['Quantity'] = data?.qty || '';
         mainPoint['MRP'] = data?.mrp || '';
+        mainPoint['Serialized Product'] = data?.serializedProduct ? "Yes" : 'No';
         setMainPoints(mainPoint);
     };
 
@@ -186,39 +195,43 @@ const ProductDetailsPage = () => {
 
 
     const getWarehouses = () => {
+        setLoadingWarehouse(true)
         axiosInstance().get(`product/${id}/inventory`)
             .then(async ({ data: { data } }) => {
                 setProductWarehouseData(data)
-                let wareHouses = []
-                let byStatus = []
-                for (const d of data) {
-                    if (!wareHouses.includes(d?.warehouse.optionLabel)) {
-                        wareHouses.push(d?.warehouse.optionLabel)
+                if (productData?.serializedProduct) {
+                    let wareHouses = []
+                    let byStatus = []
+                    for (const d of data) {
+                        if (!wareHouses.includes(d?.warehouse.optionLabel)) {
+                            wareHouses.push(d?.warehouse.optionLabel)
+                        }
+                        if (!byStatus.includes(d?.status)) {
+                            byStatus.push(d?.status)
+                        }
                     }
+                    const inventories = wareHouses.map(w => {
+                        let inventory = data.filter(d => w === d?.warehouse.optionLabel);
+                        let status = byStatus.map(status => {
+                            let count = data.filter(d => w === d?.warehouse.optionLabel).filter(d => status === d?.status).length;
+                            if (count) {
+                                return { status, count }
+                            }
+                        }).filter(x => x)
+                        return { warehouse: w, inventory, status }
+                    })
+                    setInventoriesData(inventories)
+                    setLoadingWarehouse(false)
 
-                    if (!byStatus.includes(d?.status)) {
-                        byStatus.push(d?.status)
-                    }
+                } else {
+                    setInventoriesData(data)
+                    setLoadingWarehouse(false)
 
                 }
-
-                const inventories = wareHouses.map(w => {
-                    let inventory = data.filter(d => w === d?.warehouse.optionLabel);
-
-                    let status = byStatus.map(status => {
-                        let count = data.filter(d => w === d?.warehouse.optionLabel).filter(d => status === d?.status).length;
-
-                        if (count) {
-                            return { status, count }
-                        }
-                    }).filter(x => x)
-
-                    return { warehouse: w, inventory, status }
-                })
-                setInventoriesData(inventories)
-
             }).catch(err => {
+                setLoadingWarehouse(false)
                 toastConfig.setToastConfig(err)
+
             })
     }
 
@@ -315,7 +328,7 @@ const ProductDetailsPage = () => {
                             </Box>
                             {(
                                 <Box>
-                                    {loading ? (
+                                    {loading && loadingWarehouse ? (
                                         [1, 2].map((i) => (
                                             <BoxWithBorder
                                                 key={i}
@@ -335,18 +348,18 @@ const ProductDetailsPage = () => {
                                             </BoxWithBorder>
                                         ))
 
-                                    ) : frequentlyBoughtProduct.length ? (
+                                    ) : BOMData.length ? (
                                         <>
-                                            <AssignedFrequentlyBoughtProduct
+                                            {/* <AssignedFrequentlyBoughtProduct
                                                 permissions={permissions.product}
                                                 product={frequentlyBoughtProduct}
                                                 unassignProduct={unassignProduct}
-                                            />
-                                            {/* <ProductHierarchy
+                                            /> */}
+                                            <ProductHierarchy
                                                 data={BOMData}
                                                 permissions={permissions.product}
                                                 unassignProduct={unassignProduct}
-                                            /> */}
+                                            />
                                             <Box marginY={1} />
                                         </>
                                     ) : (
@@ -403,9 +416,9 @@ const ProductDetailsPage = () => {
                                         ))
 
                                     ) : inventoriesData.length ?
-                                        inventoriesData.map(({ inventory, warehouse, status }) => (
-                                            <Box>
-                                                <Box key={warehouse}
+                                        productData?.serializedProduct ? inventoriesData.map(({ inventory, warehouse, status }, i) => (
+                                            <Box key={i}>
+                                                <Box
                                                     display="flex"
                                                     p="8px"
                                                     m="8px 8px 0 8px"
@@ -481,7 +494,28 @@ const ProductDetailsPage = () => {
                                                     ))}
                                                 </Box>
                                             </Box>
-                                        ))
+                                        )) :
+
+                                            <Box width="100%">
+                                                <Box mx={2} mt={1} display="flex" justifyContent="space-between">
+                                                    <Typography variant="h6">Warehouse</Typography>
+                                                    <Typography variant="h6">Qty.</Typography>
+                                                </Box>
+                                                {
+                                                    inventoriesData.map(({ qty, wareHouse }) => (
+                                                        <List disablePadding key={wareHouse._id}>
+                                                            <ListItem dense>
+                                                                <ListItemText primary={wareHouse.warehouseName} />
+                                                                <ListItemSecondaryAction>
+                                                                    <Typography variant="h6">
+                                                                        {qty}
+                                                                    </Typography>
+                                                                </ListItemSecondaryAction>
+                                                            </ListItem>
+                                                        </List>
+                                                    ))
+                                                }
+                                            </Box>
                                         : (
                                             <Box textAlign="center" padding={2}>
                                                 <Typography>No Warehouses Found</Typography>

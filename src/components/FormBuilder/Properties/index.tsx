@@ -565,7 +565,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     <Option
                       values={values}
                       setFieldValue={(name, value) => {
-                        handleValuesChange({ [name]: value })
+                        if (!isInitialUpdated["dropDown"]) {
+                          setIsInitialUpdated((prevState) => ({ ...prevState, dropDown: true }))
+                        }
+                        else {
+                          handleValuesChange({ [name]: value })
+                        }
                         setFieldValue(name, value)
                       }}
                       fields={fields}
