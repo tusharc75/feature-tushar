@@ -468,8 +468,6 @@ export default function QuoteDetail() {
     setReopenReason(event.target.value);
   };
 
-
-
   return (
     <>
       <Fragment>
