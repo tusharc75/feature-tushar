@@ -53,7 +53,7 @@ export const SearchFilter = ({
   ];
 
   useEffect(() => {
-    setValue(filter);
+    setValue(filter.filter(d => allSearch.some(f => f.type === d.type)));
   }, [filter]);
 
   useEffect(() => {
@@ -77,12 +77,12 @@ export const SearchFilter = ({
 
   const handleChangeValue = (newValue) => {
     let tempActivity = newValue.slice().reverse().find(d => d._id !== undefined && d.type !== undefined)
-    if(tempActivity){
+    if (tempActivity) {
       setSelectedActivityId(tempActivity._id)
       setSelectedActivityType(tempActivity.type)
     }
-    setValue(newValue);
-    handleChangeFilter(newValue);
+    setValue(newValue.filter(d => allSearch.some(f => f.type === d.type)));
+    handleChangeFilter(newValue.filter(d => allSearch.some(f => f.type === d.type)));
   };
 
 

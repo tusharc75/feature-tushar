@@ -50,6 +50,7 @@ const ProductInventory = () => {
     const history = useHistory();
 
     const [warehouse, setWarehouse] = useState(history.location?.state?.warehouse);
+    const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
 
     useEffect(() => {
         fetchProductInventory()
@@ -111,8 +112,8 @@ const ProductInventory = () => {
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
 
-        if (warehouse?.optionValue) {
-            deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "warehouse", term: warehouse?.optionValue }])}`
+        if (warehouse?.optionValue && redirectProduct?.id) {
+            deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "warehouse", term: warehouse?.optionValue }, { field: "product", term: redirectProduct?.id }])}`
         }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
@@ -267,7 +268,19 @@ const ProductInventory = () => {
                                 color="primary"
                                 label={`Warehouse : ${warehouse.optionLabel}`}
                                 onDelete={() => {
+                                    setRedirectProduct(null);
                                     setWarehouse(null);
+                                }}
+                            />
+                        )}
+                        {redirectProduct && (
+                            <Chip
+                                className="ml-3"
+                                color="primary"
+                                label={`Product : ${redirectProduct.name}`}
+                                onDelete={() => {
+                                    setWarehouse(null);
+                                    setRedirectProduct(null);
                                 }}
                             />
                         )}
