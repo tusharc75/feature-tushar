@@ -18,8 +18,10 @@ import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
 import ReasonDialog from "./ReasonDialog"
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import ManageRepairJob from '../RepairJob/ManageRepairJob'
+import { Link } from 'react-router-dom'
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 
 const ProductInventoryDetailsPage = () => {
@@ -56,14 +58,36 @@ const ProductInventoryDetailsPage = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
+  const NameRenderer = (params) => (
+    <>{
+      params.value ?(
+        params.data.type === "Receiving Ticket" ?
+          <Link className="link" title={params.value} to={`${routes.receivingTicketDetail.path}/${params.data.referenceId}`}>
+            {params.value}
+          </Link> : params.data.type.toLowerCase() === "repair" ?
+            <Link className="link" title={params.value} to={`${routes.repairJobDetail.path}/${params.data.referenceId}`}>
+              {params.value}
+            </Link> 
+         : params.data.type.toLowerCase() === "rental" ?
+          <Link className="link" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`}>
+            {params.value}
+          </Link> : params.value
+      ): (
+      <NoDataCell />
+      )
+    }
 
+    </>
+  );
   const frameworkComponents = {
+    nameRenderer: NameRenderer,
     commonRenderer: CommonRenderer,
+    dateRenderer: DateRenderer,
   };
   const columns = [
-    { field: "date", headerName: "Date", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "reference", headerName: "Reference", show: true, cellRenderer: "nameRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "referenceNumber", headerName: "Reference Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "date", headerName: "Date", show: true, disabled: true, cellRenderer: "dateRenderer" },
     { field: "comments", headerName: "Comments", show: true, cellRenderer: "commonRenderer" },
   ];
 
@@ -95,6 +119,8 @@ const ProductInventoryDetailsPage = () => {
       data.data = data.data?.map((u) => ({
         ...u,
         id: u.inventory?._id,
+        reference: u.reference?.optionLabel,
+        referenceId: u.reference?.optionValue
       }));
       dispatch({ type: "initialize", data: data.data, count: data.data.length });
       setTimeout(() => {

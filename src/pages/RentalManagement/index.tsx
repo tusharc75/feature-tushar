@@ -54,7 +54,7 @@ const RentalManagement = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions },
+    state: { user, permissions, selectedEntity },
   }: any = useData();
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
@@ -201,6 +201,7 @@ const RentalManagement = () => {
     filters,
     sorting,
     accountDetails,
+    selectedEntity
   ]);
 
   const handleSingleDeleteRentalManagement = async () => {
