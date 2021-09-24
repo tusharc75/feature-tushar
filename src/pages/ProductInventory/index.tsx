@@ -3,7 +3,6 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import AddIcon from "@material-ui/icons/Add";
-import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { Link } from 'react-router-dom'
@@ -25,14 +24,17 @@ import {
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import ManageProductInventory from "./ManageProductInventory";
+import ManageRepairJob from '../RepairJob/ManageRepairJob'
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useHistory } from "react-router-dom";
+import HtmlTooltip from "../../components/CustomTooltipTitle";
 
 const ProductInventory = () => {
 
     const toastConfig = useContext(CustomToastContext)
     const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
+    const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
@@ -182,7 +184,7 @@ const ProductInventory = () => {
         <>
             {
                 permissions?.productInventory?.isCreate &&
-                <Tooltip title="Clone">
+                <HtmlTooltip title="Clone">
                     <IconButton
                         size="small"
                         aria-label="Clone"
@@ -192,17 +194,17 @@ const ProductInventory = () => {
                     >
                         <FileCopyIcon color="primary" />
                     </IconButton>
-                </Tooltip>
+                </HtmlTooltip>
             }
             {permissions?.productInventory?.isDelete &&
-                <Tooltip title="Delete">
+                <HtmlTooltip title="Delete">
                     <IconButton size="small" aria-label="Delete" onClick={() => {
                         setDeleteRecord(params.data);
                         setShowDeleteConfirmBox(true)
                     }} >
                         <DeleteIcon color="error" />
                     </IconButton>
-                </Tooltip >
+                </HtmlTooltip >
             }
         </>
     )
@@ -281,17 +283,37 @@ const ProductInventory = () => {
                                     setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null })
                                 }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                             }
+                            {permissions?.productInventory?.isUpdate &&
+                                <HtmlTooltip title="Please select some inventories">
+                                    <span>
+                                        <Button
+                                            className={styles.add_submit_btn}
+                                            onClick={() => setShowRepairJobDialog(true)}
+                                            variant="contained"
+                                            size="small"
+                                            color="primary"
+                                            startIcon={<AddIcon />}
+                                            disabled={!selectedRecords.length}
+                                        >Create Repair Job
+                                        </Button>
+                                    </span>
+                                </HtmlTooltip>
+                            }
                             {permissions?.productInventory?.isDelete &&
-                                <Button
-                                    className={styles.action_submit_btn}
-                                    variant="outlined"
-                                    color="default"
-                                    size="small"
-                                    onClick={openActions}
-                                    disabled={selectedRecords.length ? false : true}
-                                    aria-controls="action-menu"
-                                >Actions <ExpandMore />
-                                </Button>
+                                <HtmlTooltip title="Please select some inventories">
+                                    <span>
+                                        <Button
+                                            className={styles.action_submit_btn}
+                                            variant="outlined"
+                                            color="default"
+                                            size="small"
+                                            onClick={openActions}
+                                            disabled={selectedRecords.length ? false : true}
+                                            aria-controls="action-menu"
+                                        >Actions <ExpandMore />
+                                        </Button>
+                                    </span>
+                                </HtmlTooltip>
                             }
                             <Menu
                                 anchorEl={anchorEl}
@@ -336,6 +358,19 @@ const ProductInventory = () => {
                 onClose={() => setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null })}
                 onSuccess={() => {
                     setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null });
+                    fetchProductInventory()
+                }}
+            />
+        }
+        {
+            showRepairJobDialog &&
+            <ManageRepairJob
+                fromInventory
+                inventories={selectedRecords?.map(s => s.id)}
+                open={showRepairJobDialog}
+                onClose={() => setShowRepairJobDialog(false)}
+                onSuccess={() => {
+                    setShowRepairJobDialog(false);
                     fetchProductInventory()
                 }}
             />

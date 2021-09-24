@@ -22,6 +22,7 @@ import ManageProductInventory from "../ProductInventory/ManageProductInventory"
 import { extractFields } from "../../constants/formulaUtility";
 import ProductHierarchy from "./ProductHierarchy"
 import HtmlTooltip from "../../components/CustomTooltipTitle";
+import AssingAssetsDialog from "./AssingAssetsDialog";
 
 const ProductDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -525,7 +526,7 @@ const ProductDetailsPage = () => {
             }
 
             {openProductInventoryDialog ?
-                <ManageProductInventory
+                productData.serializedProduct ? <ManageProductInventory
                     productId={productData?._id}
                     productCategory={productData?.productCategory}
                     productInventoryId={null}
@@ -534,7 +535,15 @@ const ProductDetailsPage = () => {
                         setOpenProductInventoryDialog(false)
                         getWarehouses()
                     }}
-                /> : null
+                /> : <AssingAssetsDialog
+                    productId={id}
+                    onClose={() => setOpenProductInventoryDialog(false)}
+                    onSuccess={() => {
+                        setOpenProductInventoryDialog(false)
+                        getWarehouses()
+                    }}
+                />
+                : null
             }
         </>
     );

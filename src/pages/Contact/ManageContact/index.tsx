@@ -123,7 +123,6 @@ export default function ManageContactDialog(props) {
           const { _id, firstName, lastName, middleName, email, reportsTo, ...rest } = data
 
           let tempData = { ...rest }
-          tempData.reportsTo = reportsTo.optionValue
 
           setContactData({
             fields: newFields,
@@ -178,6 +177,7 @@ export default function ManageContactDialog(props) {
 
   const handleDialogClose = () => {
     setShowAccountDialog(false);
+    onClose()
   };
 
   const handleGetAddedAccount = ({ data }) => {
