@@ -208,17 +208,17 @@ const CreateProduct = (props) => {
                                 setPriceTemplate(data.data)
                                 let defaultpriceTemplate = ""
                                 if (data.data.length) {
-                                    defaultpriceTemplate = data.data[0].optionValue;
+                                    defaultpriceTemplate = data?.data[0]?.optionValue;
                                 }
                                 setInitialData({
                                     fields: newField,
                                     values: {
-                                        ...getObjKeys('', newField), ...ref.current.values,
+                                        ...getObjKeys('', newField), ...ref?.current?.values,
                                         productTemplate: defaultproductTemplate, priceTemplate: defaultpriceTemplate
                                     },
                                 });
                                 setFormValues({
-                                    ...getObjKeys('', newField), ...ref.current.values,
+                                    ...getObjKeys('', newField), ...ref?.current?.values,
                                     productTemplate: defaultproductTemplate, priceTemplate: defaultpriceTemplate
                                 })
                                 EvaluteproductFields(newField)

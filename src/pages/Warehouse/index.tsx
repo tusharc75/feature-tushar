@@ -122,7 +122,7 @@ const AddressResource = () => {
   const { entityApi } = entity
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, user }
+    state: { permissions, user, selectedEntity }
   }: any = useData();
 
   const [warehousePermissions, setWarehousePermissions] = useState({
@@ -217,7 +217,7 @@ const AddressResource = () => {
 
   useEffect(() => {
     fetchWarehouses();
-  }, [page, limit, filters, sorting, search]);
+  }, [page, limit, filters, sorting, search, selectedEntity]);
 
   const NameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
