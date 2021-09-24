@@ -138,7 +138,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
           values.additionalInfoSection = '';
         }
 
-        console.log('intital Data', values)
         setInitialValues(values);
       }
 
@@ -381,7 +380,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     }
   };
 
-  console.log('initialValues', initialValues)
   return (
     <Dialog
       maxWidth="md"
