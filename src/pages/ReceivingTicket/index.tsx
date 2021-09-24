@@ -109,7 +109,7 @@ const ReceivingTicket = () => {
       headerName: 'Pickup Date',
       show: true,
       disabled: true,
-      cellRenderer: 'commonRenderer'
+      cellRenderer: 'dateRenderer'
     },
     {
       field: 'pickupAddress',
