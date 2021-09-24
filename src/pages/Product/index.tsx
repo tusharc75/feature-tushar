@@ -92,8 +92,8 @@ const Product = () => {
                 let res = {
                     ...restProperties,
                     id: u._id,
-                    inventoryCount: u?.inventoryCount,
-                    warehouses: u.warehouse?.map(w => w.optionLabel).join(", "),
+                    inventoryCount: u?.qty,
+                    warehouses: u.warehouse?.map(w => w.warehouseName).join(", "),
                     createdBy: u.createdBy?.user?.concatedName,
                     createdByDate: u.createdBy?.date,
                     updatedBy: u.updatedBy?.user?.concatedName,
