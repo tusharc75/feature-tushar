@@ -38,7 +38,7 @@ const ReceivingTicket = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { user, permissions, selectedEntity }
   }: any = useData();
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
@@ -60,7 +60,8 @@ const ReceivingTicket = () => {
   });
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters,
+    sorting, selectedRecords } = state;
 
   const columns = [
     {
@@ -148,7 +149,7 @@ const ReceivingTicket = () => {
     if (renderCount > 0) {
       fetchReceivingTickets();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity]);
 
   const handleSingleDeleteReceivingTicket = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -329,6 +330,11 @@ const ReceivingTicket = () => {
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&filterReceivingTickets=${selectedType}`;
+
+    if (selectedEntity) {
+      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+    }
+
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
