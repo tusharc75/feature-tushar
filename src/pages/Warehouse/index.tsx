@@ -225,7 +225,7 @@ const AddressResource = () => {
         className="link"
         onClick={() => {
           setAddressResourceId(params.data.id);
-          setOpen({ open: false, isClone: false });
+          setOpen({ open: true, isClone: false });
         }}
       >
         <CustomRenderCell value={params.value} />
