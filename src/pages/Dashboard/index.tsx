@@ -98,6 +98,7 @@ function Dashboard() {
         // }
     };
 
+
     return (
         <Fragment>
             <Container>
@@ -115,41 +116,48 @@ function Dashboard() {
                                     return section.items.length > 0 ? (
                                         <Grid key={section.head} item xs={12} sm={6} md={4}>
                                             <Paper className={styles.box_layout}>
+
                                                 <Box padding={2}>
                                                     <Box textAlign="center" marginBottom={2}>
-                                                        <p className={styles.set_icon}>{section.icon}</p>
-                                                        <h2 className={styles.headline}>{section.head}</h2>
-                                                        <p>{section.text}</p>
-                                                        <div className={styles.dropdown}>
-                                                            <Button className={styles.list}>
-                                                                View all<MdNavigateNext/>
-                                                                <div className={styles.dropdown_content}>
-                                                                    <a href="#">Link 1</a>
-                                                                    <a href="#">Link 2</a>
-                                                                    <a href="#">Link 3</a>
-                                                                </div>
-                                                            </Button>
+                                                        <div className={styles.box_layout_content}>
+                                                            <p className={styles.set_icon}>{section.icon}</p>
+                                                            <h2 className={styles.headline}>{section.head}</h2>
+                                                            <p>{section.text}</p>
+                                                            <div className={styles.dropdown}>
+                                                                <Button className={styles.list}>
+                                                                    View all<MdNavigateNext/>
+                                                                </Button>
+                                                            </div>
+                                                            <div className={styles.list_content}>
+                                                                <Box height="150px" style={{overflowY: 'auto'}}>
+                                                                    {section.items.map((item) => (
+                                                                        <>
+                                                                            <Box marginY={1} key={item.name}
+                                                                                 component="div">
+                                                                                <Typography paragraph>
+                                                                                    <Link
+                                                                                        to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
+                                                                                </Typography>
+                                                                            </Box>
+                                                                            {/*Only show product list if environment is local || development*/}
+                                                                            {['local', 'development'].includes(process.env.REACT_APP_ENV) && item.name === 'Product' && (
+                                                                                <Box marginY={1} key={item.name}
+                                                                                     component="div">
+                                                                                    <Typography paragraph>
+                                                                                        <Link to={`/product-list`}>Product
+                                                                                            List</Link>
+                                                                                    </Typography>
+                                                                                </Box>
+                                                                            )}
+                                                                        </>
+                                                                    ))}
+                                                                </Box>
+                                                            </div>
+
+
                                                         </div>
                                                     </Box>
-                                                    {/*<Box height="150px" style={{ overflowY: 'auto' }}>*/}
-                                                    {/*  {section.items.map((item) => (*/}
-                                                    {/*    <>*/}
-                                                    {/*      <Box marginY={1} key={item.name} component="div">*/}
-                                                    {/*        <Typography paragraph>*/}
-                                                    {/*          <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>*/}
-                                                    {/*        </Typography>*/}
-                                                    {/*      </Box>*/}
-                                                    {/*      /!*Only show product list if environment is local || development*!/*/}
-                                                    {/*      {['local', 'development'].includes(process.env.REACT_APP_ENV) && item.name === 'Product' && (*/}
-                                                    {/*        <Box marginY={1} key={item.name} component="div">*/}
-                                                    {/*          <Typography paragraph>*/}
-                                                    {/*            <Link to={`/product-list`}>Product List</Link>*/}
-                                                    {/*          </Typography>*/}
-                                                    {/*        </Box>*/}
-                                                    {/*      )}*/}
-                                                    {/*    </>*/}
-                                                    {/*  ))}*/}
-                                                    {/*</Box>*/}
+
                                                 </Box>
                                             </Paper>
                                         </Grid>
