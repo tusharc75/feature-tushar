@@ -75,6 +75,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
   });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formValues, setFormValues] = useState({})
+  const [isInitialUpdated, setIsInitialUpdated] = useState({
+    MultipleFormula: false,
+    Currency: false,
+    Converter: false
+  })
   //const [isChangeFieldName, setIsChangeFieldName] = useState(true);
 
   useEffect(() => {
@@ -454,7 +459,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   )}
                   {values['type'] === 'currencyAmount' && (
                     <Currency values={values} setFieldValue={(name, value) => {
-                      handleValuesChange({ [name]: value })
+                      if (!isInitialUpdated["Currency"]) {
+                        setIsInitialUpdated((prevState) => ({ ...prevState, Currency: true }))
+                      }
+                      else {
+                        handleValuesChange({ [name]: value })
+                      }
                       setFieldValue(name, value)
                     }} refrence="form-builder" touched={touched} errors={errors} />
                   )}
@@ -636,7 +646,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       fields={fields}
                       values={values}
                       setFieldValue={(name, value) => {
-                        handleValuesChange({ [name]: value })
+                        if (!isInitialUpdated["Converter"]) {
+                          setIsInitialUpdated((prevState) => ({ ...prevState, Converter: true }))
+                        }
+                        else {
+                          handleValuesChange({ [name]: value })
+                        }
                         setFieldValue(name, value)
                       }}
                       touched={touched}
@@ -679,7 +694,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       fields={fields}
                       values={values}
                       setFieldValue={(name, value) => {
-                        handleValuesChange({ [name]: value })
+                        if (!isInitialUpdated["MultipleFormula"]) {
+                          setIsInitialUpdated((prevState) => ({ ...prevState, MultipleFormula: true }))
+                        }
+                        else {
+                          handleValuesChange({ [name]: value })
+                        }
                         setFieldValue(name, value)
                       }}
                       _id={fieldData._id}
