@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import {
     Box,
     Button,
@@ -12,7 +12,7 @@ import {
     InputAdornment,
     Dialog
 } from "@material-ui/core";
-import { Formik, Form, Field, FieldArray } from 'formik';
+import { Formik, Form, Field, FieldArray, FormikProps } from 'formik';
 import { Add, Delete } from "@material-ui/icons";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import axiosInstance from "../../axios/axiosInstance";
@@ -21,6 +21,8 @@ import { CustomDialogTransition, getUniqueCurrencies, pricingCondition, removeEm
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { isMobile, isTablet } from "react-device-detect";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup/ToggleButtonGroup";
+import { ToggleButton } from "@material-ui/lab";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -54,7 +56,18 @@ const useStyles = makeStyles((theme) => ({
         padding: "4px !important"
     }
 }));
-const ManagePricingDiscountDialog = ({ currency, pricingConditionsData, open, onClose, onSuccess }) => {
+
+const discountTypeArray = [
+    {
+        key: "Flat Discount",
+        value: 1,
+    },
+    {
+        key: "Price Discount",
+        value: 2,
+    }
+];
+const ManagePricingDiscountDialog = ({ currency, discountType = null, pricingConditionsData, open, onClose, onSuccess }) => {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const [currencySymbol, setCurrencySymbol] = useState(
@@ -65,12 +78,15 @@ const ManagePricingDiscountDialog = ({ currency, pricingConditionsData, open, on
             : null);
     const { pricingConditionApi } = pricingCondition;
     const [loading, setLoading] = useState(false);
+    const [filter, setFilter] = useState(discountType ? discountTypeArray.find((d) => d.key === discountType).key : "Flat Discount");
+    const [selectedType, setSelectedType] = useState(discountType ? discountTypeArray.find((d) => d.key === discountType).value : discountTypeArray.find((d) => d.key === "Flat Discount").value);
+    const formikRef = useRef<FormikProps<{ discounts: any[]; }>>();
 
 
 
     const handleSubmit = async (values) => {
         setLoading(true);
-        axiosInstance().post(`${pricingConditionApi}/discount`, { "_id": pricingConditionsData._id, "discount": values }).then(({ data }) => {
+        axiosInstance().post(`${pricingConditionApi}/discount`, { "_id": pricingConditionsData._id, "type": discountTypeArray.find((d) => d.value === selectedType).key, "discount": values }).then(({ data }) => {
             toastConfig.setToastConfig({
                 open: true,
                 type: "success",
@@ -86,6 +102,15 @@ const ManagePricingDiscountDialog = ({ currency, pricingConditionsData, open, on
     }
 
 
+    const handleFilter = (event, newFilter) => {
+        if (newFilter !== null) {
+            setFilter(newFilter);
+            setSelectedType(discountTypeArray.find((d) => d.key === newFilter).value);
+            formikRef.current?.resetForm()
+
+        }
+    };
+
     return (
         <>
             {
@@ -99,6 +124,21 @@ const ManagePricingDiscountDialog = ({ currency, pricingConditionsData, open, on
                     onClose={onClose}
                 >
                     <CustomDialogHeader title={"Add Pricing Condition"} />
+                    <Grid container className={classes.priceConditionBox}>
+                        <Grid item xs={6} md={6} sm={6}>
+                            <ToggleButtonGroup size="small"
+                                value={filter}
+                                exclusive
+                                onChange={handleFilter}>
+                                {discountTypeArray.map((k, index) => {
+                                    return (
+                                        <ToggleButton value={k.key} key={index}>{k.key}
+                                        </ToggleButton>
+                                    );
+                                })}
+                            </ToggleButtonGroup>
+                        </Grid>
+                    </Grid>
                     <Formik
                         initialValues={{ discounts: pricingConditionsData?.discount }}
                         enableReinitialize={true}
@@ -126,8 +166,8 @@ const ManagePricingDiscountDialog = ({ currency, pricingConditionsData, open, on
                                                                 alignItems="center"
                                                             >
                                                                 <Grid item md={1}> # </Grid>
-                                                                <Grid item md={5}> Discount </Grid>
-                                                                <Grid item md={4}> Amount </Grid>
+                                                                <Grid item md={5}> Quantity </Grid>
+                                                                <Grid item md={4}> {selectedType === 1 ? `Discount` : `Amount`} </Grid>
                                                                 <Grid item md={2}></Grid>
 
                                                             </Grid>
@@ -157,13 +197,13 @@ const ManagePricingDiscountDialog = ({ currency, pricingConditionsData, open, on
                                                                                         type="text"
                                                                                         size="small"
                                                                                         component={TextField}
-                                                                                        name="discount"
-                                                                                        placeholder="Enter Discount"
-                                                                                        value={discountVal?.discount}
+                                                                                        name="quantity"
+                                                                                        placeholder="Enter Quantity"
+                                                                                        value={discountVal?.quantity}
                                                                                         onChange={(e) => {
                                                                                             arrayHelpers.replace(index, {
                                                                                                 ...values?.discounts[index],
-                                                                                                ["discount"]: e.target.value.replace(/[^0-9]/g, '')
+                                                                                                ["quantity"]: e.target.value.replace(/[^0-9]/g, '')
                                                                                             })
                                                                                         }}
                                                                                         required
@@ -176,11 +216,11 @@ const ManagePricingDiscountDialog = ({ currency, pricingConditionsData, open, on
                                                                                         InputProps={{
                                                                                             startAdornment: (
                                                                                                 <InputAdornment position="start">
-                                                                                                    {currencySymbol ? currencySymbol : ""}
+                                                                                                    {selectedType === 1 ? `%` : currencySymbol ? currencySymbol : ""}
                                                                                                 </InputAdornment>
                                                                                             ),
                                                                                         }}
-                                                                                        startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ""}
+                                                                                        startAdornment={currencySymbol ? <InputAdornment position="start">{selectedType === 1 ? `%` : currencySymbol ? currencySymbol : ""}</InputAdornment> : ""}
                                                                                         variant="outlined"
                                                                                         type="text"
                                                                                         size="small"
@@ -205,7 +245,7 @@ const ManagePricingDiscountDialog = ({ currency, pricingConditionsData, open, on
                                                                                             size="small"
                                                                                             aria-label="add"
                                                                                             onClick={() => {
-                                                                                                arrayHelpers.push({ "discount": 0, "amount": 0 })
+                                                                                                arrayHelpers.push({ "quantity": 0, "amount": 0 })
                                                                                             }
                                                                                             } >
                                                                                             <Add />
@@ -224,7 +264,7 @@ const ManagePricingDiscountDialog = ({ currency, pricingConditionsData, open, on
                                                                                 color="primary"
                                                                                 size="large"
                                                                                 onClick={() => {
-                                                                                    arrayHelpers.push({ "discount": 0, "amount": 0 })
+                                                                                    arrayHelpers.push({ "quantity": 0, "amount": 0 })
                                                                                 }}
                                                                             >
                                                                                 Add Discount

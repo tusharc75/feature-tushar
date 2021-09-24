@@ -28,23 +28,23 @@ export default function ProductHierarchy({ data, permissions, unassignProduct })
                 </Link>
             </div>
         },
-        {
-            title: 'Actions',
-            field: 'actions',
-            render: (rowData: any) => (
-                <> {
-                    permissions?.isUpdate &&
-                    <div style={{ width: 250 }}>
-                        <Tooltip title="Delete">
-                            <IconButton size="small" aria-label="Delete"
-                                onClick={() => unassignProduct(rowData)} >
-                                <DeleteIcon color="error" />
-                            </IconButton>
-                        </Tooltip >
-                    </div >
-                }
-                </>)
-        }
+        // {
+        //     title: 'Actions',
+        //     field: 'actions',
+        //     render: (rowData: any) => (
+        //         <> {
+        //             permissions?.isUpdate &&
+        //             <div style={{ width: 250 }}>
+        //                 <Tooltip title="Delete">
+        //                     <IconButton size="small" aria-label="Delete"
+        //                         onClick={() => unassignProduct(rowData)} >
+        //                         <DeleteIcon color="error" />
+        //                     </IconButton>
+        //                 </Tooltip >
+        //             </div >
+        //         }
+        //         </>)
+        // }
     ];
 
     return (
