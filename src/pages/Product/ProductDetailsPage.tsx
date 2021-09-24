@@ -334,7 +334,7 @@ const ProductDetailsPage = () => {
                                             </BoxWithBorder>
                                         ))
 
-                                    ) : frequentlyBoughtProduct.length ? (
+                                    ) : BOMData.length ? (
                                         <>
                                             {/* <AssignedFrequentlyBoughtProduct
                                                 permissions={permissions.product}
