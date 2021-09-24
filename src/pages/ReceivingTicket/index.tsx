@@ -108,7 +108,7 @@ const ReceivingTicket = () => {
       headerName: 'Pickup Date',
       show: true,
       disabled: true,
-      cellRenderer: 'commonRenderer'
+      cellRenderer: 'dateRenderer'
     },
     {
       field: 'pickupAddress',
@@ -493,7 +493,7 @@ const ReceivingTicket = () => {
                   permissions={permissions.receivingTicket}
                   module="receivingTicket"
                   api={receivingTicket.receivingTicketApi}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                 />
               </Grid>
             </Grid>
@@ -517,9 +517,9 @@ const ReceivingTicket = () => {
             icon={<FaRegistered className="headerLogo" />}
             heading={routes.receivingTicket.title}
             showTransferEntityDialog={handleTransferEntityDialog}
-            // showCloneReceivingTicketDialog={() => {
-            //   handleShowCloneReceivingTicketDialog()
-            // }}
+          // showCloneReceivingTicketDialog={() => {
+          //   handleShowCloneReceivingTicketDialog()
+          // }}
           >
             {accountDetails.accountId && (
               <Chip
@@ -563,9 +563,8 @@ const ReceivingTicket = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.receivingJobName ? 'Receiving Ticket' : 'Receiving Tickets'}   ${
-              deleteRecord.receivingJobName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.receivingJobName ? 'Receiving Ticket' : 'Receiving Tickets'}   ${deleteRecord.receivingJobName || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
