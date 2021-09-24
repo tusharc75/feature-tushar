@@ -53,10 +53,10 @@ export default (history = null, passedHeaders = null) => {
                 localStorage.setItem("slowInternetConnection", "false")
             }
         }
-        const splittedUrl = request.url.split("?");
-        if (splittedUrl.length > 1) {
-            request.url = `${splittedUrl[0]}?${encodeURIComponent(splittedUrl[1])}`
-        }
+        // const splittedUrl = request.url.split("?");
+        // if (splittedUrl.length > 1) {
+        //     request.url = `${splittedUrl[0]}?${encodeURIComponent(splittedUrl[1])}`
+        // }
         return request;
     }, error => {
         return Promise.reject(error);
