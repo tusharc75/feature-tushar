@@ -7,7 +7,6 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 export default function ProductHierarchy({ data, permissions, unassignProduct }) {
-    console.log('data', data)
     const options: any = {
         search: false,
         paging: false,
