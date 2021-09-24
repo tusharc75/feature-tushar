@@ -38,7 +38,7 @@ const RepairJob = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { user, permissions, selectedEntity }
   }: any = useData();
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
@@ -135,7 +135,7 @@ const RepairJob = () => {
     if (renderCount > 0) {
       fetchRepairJobs();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity]);
 
   const handleSingleDeleteRepairJob = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -448,7 +448,7 @@ const RepairJob = () => {
                   permissions={permissions.repairJob}
                   module="repairJob"
                   api={repairJob.repairJobApi}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                 />
               </Grid>
             </Grid>
@@ -472,9 +472,9 @@ const RepairJob = () => {
             icon={<FaRegistered className="headerLogo" />}
             heading={routes.repairJob.title}
             showTransferEntityDialog={handleTransferEntityDialog}
-            // showCloneRepairJobDialog={() => {
-            //   handleShowCloneRepairJobDialog()
-            // }}
+          // showCloneRepairJobDialog={() => {
+          //   handleShowCloneRepairJobDialog()
+          // }}
           >
             {accountDetails.accountId && (
               <Chip
@@ -518,9 +518,8 @@ const RepairJob = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${
-              deleteRecord.repairJobName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${deleteRecord.repairJobName || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

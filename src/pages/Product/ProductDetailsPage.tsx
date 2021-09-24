@@ -348,18 +348,18 @@ const ProductDetailsPage = () => {
                                             </BoxWithBorder>
                                         ))
 
-                                    ) : frequentlyBoughtProduct.length ? (
+                                    ) : BOMData.length ? (
                                         <>
-                                            <AssignedFrequentlyBoughtProduct
+                                            {/* <AssignedFrequentlyBoughtProduct
                                                 permissions={permissions.product}
                                                 product={frequentlyBoughtProduct}
                                                 unassignProduct={unassignProduct}
-                                            />
-                                            {/* <ProductHierarchy
+                                            /> */}
+                                            <ProductHierarchy
                                                 data={BOMData}
                                                 permissions={permissions.product}
                                                 unassignProduct={unassignProduct}
-                                            /> */}
+                                            />
                                             <Box marginY={1} />
                                         </>
                                     ) : (
