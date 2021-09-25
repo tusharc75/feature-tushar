@@ -39,11 +39,21 @@ h5 {
   padding-bottom: 10px;
 }
 
-.list {
-  color: var(--danger-light) !important;
-  margin: 15px 0;
-  display: flex;
-  justify-content: center;
+.view_button {
+  color: #43AEA7 !important;
+  margin: 20px 0 !important;
+  padding: 0 !important;
+}
+.hover_list_box{
+  color: #43AEA7;
+  margin: 5px 0 !important;
+  text-align: center;
+  a{
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+
 }
 //.list_content {
 //  display: none;

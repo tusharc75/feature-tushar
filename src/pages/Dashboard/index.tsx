@@ -59,18 +59,18 @@ function Dashboard() {
 
         case "Product Setup":
           icon = <RiFolderSettingsFill size={32} />;
-          text = "We Need to Talk About Budgeting. It’s a Necessary Evil."
+          text = "You’ll Kick Yourself if You Miss This Chance to Try Our New Activities."
           break;
 
         case "Admin Portal":
           icon = <BsCalendarFill size={32} style={{ padding: "4px" }} />;
 
-          text = "We Need to Talk About Budgeting. It’s a Necessary Evil."
+          text = "Try to Change Your Work Patterns and Get More Done with us."
           break;
 
         case "Rentals":
           icon = <FaRegistered size={32} />;
-          text = "We Need to Talk About Budgeting. It’s a Necessary Evil."
+          text = "The Guaranteed Method For Avoiding Client Lag with Rentals."
           break;
       }
 
@@ -111,7 +111,7 @@ function Dashboard() {
           </div>
           <div>
             <Box marginY={2}>
-              <Grid container spacing={1}>
+              <Grid container spacing={1} className={styles.full_layout}>
                 {sections.map((section) => {
                   return section.items.length > 0 ? (
                     <Grid key={section.head} item xs={12} sm={6} md={4}>
@@ -119,40 +119,37 @@ function Dashboard() {
                         <Box padding={2}
                           onMouseEnter={() => setShownDisplaySection(section.head)}
                           onMouseLeave={() => setShownDisplaySection(null)}>
-                          {shownDisplaySection !== section.head && <Box textAlign="center" marginBottom={2}>
+                          {shownDisplaySection !== section.head && <Box textAlign="center" >
                             <p className={styles.set_icon}>{section.icon}</p>
                             <h2 className={styles.headline}>{section.head}</h2>
                             <p>{section.text}</p>
-                            <div className={styles.dropdown}>
-                              <Button className={styles.list}>
+                            {/*<div className={styles.dropdown}>*/}
+                              <Button className={styles.view_button}>
                                 View all<MdNavigateNext />
-                                <div className={styles.dropdown_content}>
-                                  {
-                                    section.items.map((item) => (
-                                      <Typography>
-                                        <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
-                                      </Typography>
-                                    ))
-                                  }
-                                  {/* <a href="#">Link 1</a>
-                                  <a href="#">Link 2</a>
-                                  <a href="#">Link 3</a> */}
-                                </div>
+                                {/*<div className={styles.dropdown_content}>*/}
+                                {/*  {*/}
+                                {/*    section.items.map((item) => (*/}
+                                {/*      <Typography>*/}
+                                {/*        <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>*/}
+                                {/*      </Typography>*/}
+                                {/*    ))*/}
+                                {/*  }*/}
+                                {/*</div>*/}
                               </Button>
-                            </div>
+                            {/*</div>*/}
                           </Box>}
-                          {shownDisplaySection === section.head && <Box height="150px" style={{ overflowY: 'auto' }}>
+                          {shownDisplaySection === section.head && <Box height="215px" style={{ overflowY: 'auto' }}>
                             {section.items.map((item) => (
                               <>
-                                <Box marginY={1} key={item.name} component="div">
-                                  <Typography paragraph>
+                                <Box marginY={1} key={item.name} component="div" >
+                                  <Typography paragraph className={styles.hover_list_box}>
                                     <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
                                   </Typography>
                                 </Box>
                                 {/*Only show product list if environment is local || development*/}
                                 {['local', 'development'].includes(process.env.REACT_APP_ENV) && item.name === 'Product' && (
                                   <Box marginY={1} key={item.name} component="div">
-                                    <Typography paragraph>
+                                    <Typography paragraph className={styles.hover_list_box}>
                                       <Link to={`/product-list`}>Product List</Link>
                                     </Typography>
                                   </Box>
