@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { kebabCase } from 'lodash';
 import styles from "./Dashboard.module.scss";
-import crmImage from "../../assets/eQuip_t-homepage-design-trs.-in-png.png";
+import crmImage from "../../assets/eQuip_t-homepage-design-trs-small-size.-in-png.png";
 import { SiCivicrm } from 'react-icons/si';
 import AccountBoxIcon from '@material-ui/icons/AccountBox';
 import PhoneIcon from '@material-ui/icons/Phone';
@@ -14,6 +14,7 @@ import { MdNavigateNext, MdLocalActivity } from 'react-icons/md';
 import { RiAccountPinCircleFill, RiFolderSettingsFill } from 'react-icons/ri';
 import { BsCalendarFill } from 'react-icons/bs';
 import { FaRegistered } from 'react-icons/fa';
+import { AiFillSetting } from 'react-icons/ai';
 
 function Dashboard() {
   const {
@@ -35,7 +36,7 @@ function Dashboard() {
     const data = arr.map((sec) => {
       const list = allData?.filter((u) => sec === u.sectionName && u.isRead);
 
-      let icon = <PhoneIcon />;
+      let icon = <AiFillSetting size={32}/>;
       let heading = "";
       let text = "";
 
@@ -103,7 +104,7 @@ function Dashboard() {
     <Fragment>
       <Container>
         <Grid className={styles.dashboard_layout}>
-          <div className={styles.first_box}>
+          <div className={styles.all_content_box}>
             <h1>
               Raising resiliency in a rapidly transforming business environment</h1>
             <p>Managing your customer leads, opportunities, complex projects, and quotes just got easier</p>
