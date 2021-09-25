@@ -350,7 +350,7 @@ const ProductTemplate = () => {
                                             />
                                         </Box>
                                     </Grid>
-                                    <Grid item xs={12} sm={3}>
+                                    <Grid item xs={12} sm={4}>
                                         {!values["isStandard"] && <Autocomplete
                                             disabled={!hasPermissionToUpdate}
                                             options={productCategory}
@@ -378,7 +378,7 @@ const ProductTemplate = () => {
                                             )}
                                         />}
                                     </Grid>
-                                    <Grid item xs={12} sm={5} container justify="flex-end">
+                                    <Grid item xs={12} sm={4} container justify="flex-end">
                                         <HistoryButton onClick={() => setShowHistory(true)} />
                                         <Box>
                                             {(productTemplatePermissions.isCreate || productTemplatePermissions.isUpdate) &&
@@ -403,7 +403,7 @@ const ProductTemplate = () => {
                                     </Grid>
                                 </Grid>
                                 <Grid container spacing={1}>
-                                    <Grid item xs={12} sm={3}>
+                                    <Grid item xs={12} sm={4}>
                                         {<Autocomplete
                                             disabled={!hasPermissionToUpdate}
                                             multiple
@@ -432,7 +432,7 @@ const ProductTemplate = () => {
                                             )}
                                         />}
                                     </Grid>
-                                    <Grid item xs={12} sm={3}>
+                                    <Grid item xs={12} sm={4}>
                                         {<Autocomplete
                                             disabled={!hasPermissionToUpdate}
                                             getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
@@ -463,7 +463,7 @@ const ProductTemplate = () => {
                                             )}
                                         />}
                                     </Grid>
-                                    <Grid item xs={12} sm={3}>
+                                    <Grid item xs={12} sm={4}>
                                         {<Autocomplete
                                             disabled={!hasPermissionToUpdate}
                                             multiple
