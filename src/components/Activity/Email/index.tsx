@@ -87,6 +87,7 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   };
 
   const handleClose = () => {
+    console.log('handleClose')
     fetchEmail()
     setOpen(false)
     handleActivityRefresh()

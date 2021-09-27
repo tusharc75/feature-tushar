@@ -65,7 +65,6 @@ const ProductDetailsPage = () => {
     }, [id]);
 
     useEffect(() => {
-        console.log('productData', productData)
         getProductTree()
         if (productData) {
             getWarehouses()
@@ -129,7 +128,6 @@ const ProductDetailsPage = () => {
 
     const getProductTree = () => {
         setProductLoading(true)
-        console.log('productData?._id', productData?._id)
         if (productData?._id) {
             axiosInstance()
                 .get(`/product/bom/${productData?._id}`)
@@ -238,7 +236,6 @@ const ProductDetailsPage = () => {
             })
     }
 
-    console.log('BOMData', BOMData)
     return (
         <>
             <Fragment>
