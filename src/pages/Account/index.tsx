@@ -74,7 +74,7 @@ export default function Account(props) {
   const [type, setType] = useState(options[0]);
   const [renderCount, setRenderCount] = useState(0);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
   const [isAccDialogVisible, setIsAccDialogVisible] = useState(false);
   const [selectedType, setselectedType] = useState(1);
   const [accountId, setAccountId] = useState(null)
@@ -832,7 +832,7 @@ export default function Account(props) {
                         onClick={() => {
                           if (selectedRecords.some((d) => d.canDelete === false)) {
                             closeActions();
-                            setShowDeleteWarningConfirmBox(true);
+                            setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
                           } else {
                             closeActions();
                             setShowDeleteConfirmBox(true);
@@ -840,6 +840,35 @@ export default function Account(props) {
                         }}
                       >
                         Delete
+                      </MenuItem>
+                    )}
+                    {accountPermissions.isUpdate && (
+                      <MenuItem
+                        disabled={selectedRecords.length === 0}
+                        onClick={() => {
+                          if (selectedRecords.some((d) => d.isUpdate === false)) {
+                            closeActions();
+                            setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+                          } else {
+                            closeActions();
+                            if (selectedRecords.length) {
+                              let entities = []
+                              selectedRecords.map(current => {
+                                if (current?.entityId) {
+                                  entities = [...entities, current?.entityId]
+                                }
+                                if (current?.restEntity) {
+                                  let restEntities = current?.restEntity.map(o => o.optionValue)
+                                  entities = [...entities, ...restEntities]
+                                }
+                              })
+                              setEntities([...entities])
+                            }
+                            setShowEntityDialog(true)
+                          }
+                        }}
+                      >
+                        Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
                       </MenuItem>
                     )}
                   </Menu>
@@ -874,13 +903,19 @@ export default function Account(props) {
           renderedFrom={accountResource}
         />
 
-        {showDeleteWarningConfirmBox ? (
+
+        {showDeleteWarningConfirmBox?.show ? (
           <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
+            open={showDeleteWarningConfirmBox?.show}
+            message={
+              showDeleteWarningConfirmBox.isDelete ?
+                `You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.` :
+                `You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`
+            }
+            onClose={() => setShowDeleteWarningConfirmBox({ show: false, isDelete: false })}
           />
         ) : null}
+
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
@@ -949,7 +984,7 @@ export default function Account(props) {
             <EntitySelectionsDialog
               open={showEntityDialog}
               resource={sidebarResource[accountResource]}
-              resourceId={accountId}
+              resourceIds={selectedRecords.length ? selectedRecords.map(o => o._id) : [accountId]}
               onClose={() => {
                 setShowEntityDialog(false)
                 setAccountId("")

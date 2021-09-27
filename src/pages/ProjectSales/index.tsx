@@ -28,6 +28,7 @@ import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { sidebarResource } from "../../constants/helpers"
 
+
 function reducer(state, action) {
   switch (action.type) {
     case "loading":
@@ -130,7 +131,7 @@ const ProjectSales: FC = () => {
   const [selectedType, setselectedType] = useState(1);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] =
-    useState(false);
+    useState({ show: false, isDelete: false });
   const [renderCount, setRenderCount] = useState(0);
   const [projectSalesId, setProjectSalesId] = useState(null)
   const [showEntityDialog, setShowEntityDialog] = useState(false)
@@ -394,7 +395,7 @@ const ProjectSales: FC = () => {
         );
 
         if (selectedRecords?.length !== myData.length) {
-          setShowDeleteWarningConfirmBox(true);
+          setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
         } else {
           setIsConformDialogVisible(true);
         }
@@ -496,6 +497,10 @@ const ProjectSales: FC = () => {
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
               canDelete={selectedRecords?.length === 0}
+              selectedRecords={selectedRecords}
+              setShowDeleteWarningConfirmBox={setShowDeleteWarningConfirmBox}
+              setShowEntityDialog={setShowEntityDialog}
+              setEntities={setEntities}
             />
           </div>
 
@@ -515,11 +520,15 @@ const ProjectSales: FC = () => {
           />
         </div>
 
-        {showDeleteWarningConfirmBox ? (
+        {showDeleteWarningConfirmBox?.show ? (
           <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
+            open={showDeleteWarningConfirmBox?.show}
+            message={
+              showDeleteWarningConfirmBox?.isDelete ?
+                `You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`
+                : `You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`
+            }
+            onClose={() => setShowDeleteWarningConfirmBox({ show: false, isDelete: false })}
           />
         ) : null}
 
@@ -541,7 +550,7 @@ const ProjectSales: FC = () => {
             <EntitySelectionsDialog
               open={showEntityDialog}
               resource={sidebarResource.projectSales}
-              resourceId={projectSalesId}
+              resourceIds={selectedRecords.length ? selectedRecords.map(o => o._id) : [projectSalesId]}
               onClose={() => {
                 setShowEntityDialog(false)
                 setProjectSalesId("")
