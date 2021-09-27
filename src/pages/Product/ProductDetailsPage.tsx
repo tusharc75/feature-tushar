@@ -39,7 +39,6 @@ const ProductDetailsPage = () => {
     }: any = useData();
     const [headingLabel, setHeadingLabel] = useState("");
     const [loading, setLoading] = useState(false);
-    const [productLoading, setProductLoading] = useState(false);
     const [loadingWarehouse, setLoadingWarehouse] = useState(false);
     const [productData, setProductData] = useState(null);
     const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -127,7 +126,6 @@ const ProductDetailsPage = () => {
     };
 
     const getProductTree = () => {
-        setProductLoading(true)
         if (productData?._id) {
             axiosInstance()
                 .get(`/product/bom/${productData?._id}`)
@@ -139,9 +137,6 @@ const ProductDetailsPage = () => {
                         return o
                     })
                     setBOMData([...data])
-                    setProductLoading(false)
-                }).catch(err => {
-                    setProductLoading(false)
                 })
         }
     }
