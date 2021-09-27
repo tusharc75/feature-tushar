@@ -13,6 +13,7 @@ import CustomContainer from "../../components/CustomContainer";
 import { useData } from "../../StateProvider/Provider";
 import { checkFormulaLoop, checkUniqueValidation } from "../../constants/formulaUtility";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
+import { isEqual } from "lodash";
 
 const CreateFormBuilder = () => {
 
@@ -27,14 +28,12 @@ const CreateFormBuilder = () => {
     const history = useHistory();
     const { resource } = useParams();
     const toastConfig = useContext(CustomToastContext)
+    const [orisection, setOriSection] = useState(null);
     const [section, setSection] = useState(null);
     const [brandName, setBrandName] = useState("");
     const [deleteField, setDeleteField] = useState([]);
     const [isUpdating, setIsUpdating] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-    const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
-    const [isFormModified, setIsFormModified] = useState(false);
-
 
     useEffect(() => {
         if (permissions && permissions.formBuilder) {
@@ -63,6 +62,7 @@ const CreateFormBuilder = () => {
     const fetchBrandResourceData = async () => {
         axiosInstance().get(`/sa-formbuilder/resourcedata/` + resource).then(({ data: { data } }) => {
             setSection(data.section)
+            setOriSection(JSON.parse(JSON.stringify(data.section)))
             setBrandName(data.brandName)
         }).catch((error) => {
             toastConfig.setToastConfig(error);
@@ -84,8 +84,6 @@ const CreateFormBuilder = () => {
                 data.push(_field_data)
             })
         })
-
-
         if ((resource.toString()).toLowerCase() === "product") {
             var otherField = []
             await axiosInstance().get(`/product-template/allfields`).then(({ data: { data } }) => {
@@ -119,7 +117,7 @@ const CreateFormBuilder = () => {
         setIsUpdating(true)
         axiosInstance().put(`/sa-formbuilder/resourcedata`, sendData).then(({ data: { data } }) => {
             setIsUpdating(false)
-            history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : "/form-builder" });
+            history.push({ pathname: routes.formBuilder.path });
         }).catch((error) => {
             setIsUpdating(false)
             toastConfig.setToastConfig(error);
@@ -131,12 +129,10 @@ const CreateFormBuilder = () => {
             <CustomBreadCrumbs routes={[routes.formBuilder, { title: resource }]}
                 isConfirmBeforeClick={true}
                 onBreadCrumbClick={(path) => {
-                    if (isFormModified) {
-                        setIsBreakCrumbPath(path)
+                    if (!isEqual(orisection, section)) {
                         setShowConfirmDialog(true)
                     }
-                    else history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : "/form-builder" })
-
+                    else history.push({ pathname: routes.formBuilder.path })
                 }}
             />
         </Grid>
@@ -165,11 +161,11 @@ const CreateFormBuilder = () => {
                                 <Box ml={1} >
                                     <Button color="primary" variant="contained" size="small"
                                         onClick={() => {
-                                            if (isFormModified) {
+                                            if (!isEqual(orisection, section)) {
                                                 setShowConfirmDialog(true)
                                             }
                                             else {
-                                                history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : "/form-builder" })
+                                                history.push({ pathname: routes.formBuilder.path })
                                             }
                                         }} > Close</Button>
                                 </Box>
@@ -185,7 +181,6 @@ const CreateFormBuilder = () => {
                             isCustomField={false}
                             extraFields={[]}
                             module="form-builder"
-                            onAddRemoveField={() => setIsFormModified(true)}
                         />
                     </Box>
                     {
@@ -198,8 +193,7 @@ const CreateFormBuilder = () => {
                                 }}
                                 onClose={() => {
                                     setShowConfirmDialog(false)
-                                    history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : "/form-builder" })
-                                    setIsBreakCrumbPath("")
+                                    history.push({ pathname: routes.formBuilder.path })
                                 }}
                             /> : null
                     }

@@ -1385,7 +1385,7 @@ export default function ManageQuoteDialog({
                                       <FormTypes
                                         {...field}
                                         isNew={isNew}
-                                        disabled={!isClone ? (!editCurrency || (!isNew && field.disableOnEdit)) : false}
+                                        disabled={!isClone && !isNew ? (!editCurrency || field.disableOnEdit) : false}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
