@@ -376,6 +376,15 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         errors['vlookupInputFields'] = 'Please select input parameters';
       }
     }
+
+    if (values.isTooltip && !values.tooltipMessage) {
+      errors["tooltipMessage"] = "Please enter tooltip message."
+    }
+
+    if (values.isWarningTooltip && !values.warningTooltipMessage) {
+      errors["warningTooltipMessage"] = "Please enter warning message."
+    }
+
     return errors;
   }
 
@@ -823,8 +832,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         fullWidth
                         margin="dense"
                         value={values['tooltipMessage']}
-                        error={touched['tooltipMessage'] && Boolean(errors['tooltipMessage'])}
-                        helperText={touched['tooltipMessage'] && errors['tooltipMessage']}
+                        error={touched['isTooltip'] && Boolean(errors['tooltipMessage'])}
+                        helperText={touched['isTooltip'] && errors['tooltipMessage']}
                         onChange={(e) => {
                           setFieldValue('tooltipMessage', e.target.value.trimStart())
                           handleValuesChange({ tooltipMessage: e.target.value.trimStart() })
