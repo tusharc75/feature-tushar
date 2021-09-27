@@ -528,12 +528,8 @@ export const CreateEmail = ({
       <CustomDialogHeader
         title={`${emailId ? "View" : "New"} Email`}
         onClose={() => {
-          if (isFieldNotTouched(initialValues, formValues)) {
-            handleClose()
-          }
-          else {
-            setShowConfirmDialog(true)
-          }
+          if (isFieldNotTouched(initialValues, formValues)) handleClose()
+          else setShowConfirmDialog(true)
         }}
       ></CustomDialogHeader>
       {loading ? (
@@ -850,12 +846,8 @@ export const CreateEmail = ({
                   {/* <Typography color="textSecondary"> {!emailId && <> Mail will sent from {azureAccount?.username} </>}</Typography> */}
                   <Button color="primary" size="small"
                     onClick={() => {
-                      if (isFieldNotTouched(initialValues, values)) {
-                        handleClose()
-                      }
-                      else {
-                        setShowConfirmDialog(true)
-                      }
+                      if (isFieldNotTouched(initialValues, values)) handleClose()
+                      else setShowConfirmDialog(true)
                     }}>
                     Cancel
                   </Button>
