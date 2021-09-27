@@ -57,7 +57,7 @@ export default function ManageBudgetDialog({
         initialValues: {},
     });
     const {
-        state: { permissions },
+        state: { permissions, selectedEntity, user },
     }: any = useData();
 
     const [formsData, setFormsData] = useState([]);
@@ -72,7 +72,7 @@ export default function ManageBudgetDialog({
     const [usersDataSource, setUsersDataSource] = useState([]);
 
     const [showAddMarketSegmentDialog, setShowAddMarketSegmentDialog] = useState(false);
-
+ 
     const [mainMarketSegmentDataSource, setMainMarketSegmentDataSource] = useState([]);
     const [marketSegmentDataSource, setMarketSegmentDataSource] = useState([]);
     const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
@@ -83,6 +83,11 @@ export default function ManageBudgetDialog({
 
     useEffect(() => {
         getBudgetFields();
+        setCurrencySymbol(
+            getUniqueCurrencies().find(
+                (d) => d.currencyCode === user.entity.find(d => d._id === selectedEntity).currency
+            )?.symbolNative
+        );
     }, [])
 
     useEffect(() => {
