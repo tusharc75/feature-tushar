@@ -43,6 +43,7 @@ import styles from '../Leads/Header.module.scss';
 import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes"
 import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
+import { HiBadgeCheck } from "react-icons/hi"
 
 const AccTypes = [
   {
@@ -284,19 +285,21 @@ export default function Account(props) {
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip title="Approve">
+        <Tooltip title={params?.data?.approved ? "Disapprove" : "Approve"}>
           <IconButton
-            aria-label="Approve"
+            aria-label={params?.data?.approved ? "Disapprove" : "Approve"}
             onClick={() => {
               setSingleApproveDisapproveAccount({
                 show: true,
-                approved: true,
+                approved: params?.data?.approved ? false : true,
                 id: params.data._id,
                 accountName: params.data.accountName
               });
             }}
           >
-            <FcApproval />
+            {
+              params?.data?.approved ? <HiBadgeCheck /> : <FcApproval />
+            }
           </IconButton>
         </Tooltip>
       )}
