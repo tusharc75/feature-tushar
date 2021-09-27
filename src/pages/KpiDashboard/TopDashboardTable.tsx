@@ -5,8 +5,8 @@ import { startCase } from 'lodash';
 import PptxGenJs from 'pptxgenjs';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { saveAs } from "file-saver";
-import { utils, write } from "xlsx";
+import { saveAs } from 'file-saver';
+import { utils, write } from 'xlsx';
 
 import axiosInstance from '../../axios/axiosInstance';
 import { formatAmountWithCurrency } from '../../constants/helpers';
@@ -15,9 +15,9 @@ import { Skeleton } from '@material-ui/lab';
 
 const useStyles = makeStyles((theme) => ({
   regionTable: {
-    height: "625px",
-    [theme.breakpoints.down("xs")]: {
-      height: "auto",
+    height: '625px',
+    [theme.breakpoints.down('xs')]: {
+      height: 'auto'
     }
   }
 }));
@@ -174,21 +174,22 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates 
                   <TableRow key={data.region}>
                     {Object.keys(data).map((label, i) => (
                       <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                        {i < 1 ? data[label] : formatAmountWithCurrency(filterCurrency || currency, data[label]).fullFormatAmount}
+                        {i < 1 ? data[label] : formatAmountWithCurrency(filterCurrency || currency, data[label].toFixed(2)).fullFormatAmount}
                       </TableCell>
                     ))}
                   </TableRow>
                 ))
               ) : (
                 <Box component="span" p={2} width="100%">
-                  {loading ?
+                  {loading ? (
                     [...Array(10).keys()].map((_, i) => (
                       <Box component="span" m={1} key={i} width="100%">
-                        <Skeleton variant='text' width="100%" />
-
+                        <Skeleton variant="text" width="100%" />
                       </Box>
                     ))
-                    : <Typography>No Data for regional sales</Typography>}
+                  ) : (
+                    <Typography>No Data for regional sales</Typography>
+                  )}
                 </Box>
               )}
             </TableBody>
