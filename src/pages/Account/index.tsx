@@ -457,7 +457,7 @@ export default function Account(props) {
     axiosInstance()
       .get(`${accountApi}${queryString}`)
       .then(({ data: { data, count } }) => {
-        let rows = data.map((u, i) => {
+        let rows = data.map((u) => {
           const { owner, collaborator, createdBy, updatedBy, staticData, parentAccount, parentHierarchy, entity, ...restProperties } = u;
           const [firstEntity, ...restEntity] = entity;
           let res = {
@@ -468,7 +468,7 @@ export default function Account(props) {
             ownerId: u.owner?.optionValue,
             canDelete: u.owner?.optionValue === user?.user._id,
 
-            isAllowedToUpdate: i == 0 ? false : [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
+            isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
             lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
             leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
             leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
