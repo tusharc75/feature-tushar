@@ -1,0 +1,59 @@
+.dashboard_layout {
+  display: grid;
+  grid-template-columns: minmax(200px, 450px) minmax(350px, 800px);
+  grid-template-rows: minmax(300px, 550px);
+  padding-top: 80px;
+
+}
+
+.all_content_box {
+  display: grid;
+}
+
+.set_crm_image {
+  width: 85%;
+  height: auto;
+}
+
+h1 {
+  padding-top: 12px;
+  font-size: 32px !important;
+  line-height: 35px;
+}
+
+h5 {
+  font-weight: bolder;
+}
+
+.set_icon {
+  padding: 15px 0;
+}
+
+.headline {
+  font-size: 24px !important;
+  padding-bottom: 10px;
+}
+
+.view_button {
+  color: #43AEA7 !important;
+  margin: 20px 0 !important;
+  padding: 0 !important;
+}
+.hover_list_box{
+  color: #43AEA7;
+  margin: 5px 0 !important;
+  text-align: center;
+  a{
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+
+}
+
+.box_layout {
+  border-radius: 10px 50px !important;
+
+}
+
+//

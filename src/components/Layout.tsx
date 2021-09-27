@@ -19,7 +19,7 @@ const useStyles = makeStyles(() => ({
     overflowX: "hidden",
     overflowY: "auto",
     height: "100%",
-    zIndex: 1
+    zIndex: 1,
   }
 }));
 

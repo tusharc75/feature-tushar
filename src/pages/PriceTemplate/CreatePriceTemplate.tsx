@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment } from "react";
+import { useState, useEffect, useContext, Fragment, useRef } from "react";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
@@ -9,17 +9,14 @@ import { FormBuilder } from "../../components/FormBuilder";
 import { Formik, Form } from "formik";
 import { object, string } from "yup";
 import TextField from "@material-ui/core/TextField";
-import { camelCase, simplifyValues } from "../../constants/helpers";
+import { camelCase } from "../../constants/helpers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "../../components/Helpers/Routes";
 import { Autocomplete } from "@material-ui/lab";
-import { uniq, map } from "lodash";
-import {
-  extractFields,
-  checkFormulaLoop,
-} from "../../constants/formulaUtility";
+import { uniq, map, isEqual } from "lodash";
+import { extractFields, checkFormulaLoop } from "../../constants/formulaUtility";
 import { useData } from "../../StateProvider/Provider";
 import HistoryButton from "../../components/Helpers/HistoryButton";
 import HistoryDialog from "../../components/Activity/History"
@@ -36,6 +33,7 @@ const PriceTemplateSchema = object().shape({
 });
 
 const PriceTemplate = () => {
+
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const { id } = useParams();
@@ -50,12 +48,10 @@ const PriceTemplate = () => {
   const [showHistory, setShowHistory] = useState(false)
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
-
   const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(null)
-
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-  const [isFormModified, setIsFormModified] = useState(false)
   const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
+  const ref = useRef(null);
 
   const {
     state: { user, permissions },
@@ -71,7 +67,12 @@ const PriceTemplate = () => {
     if (hasPermissionToUpdate) {
       e.preventDefault();
       window.history.pushState(null, null, window.location.pathname);
-      setShowConfirmDialog(true)
+      if (!isEqual(ref.current.values, initialValues) || !isEqual(initialValues.section, section)) {
+        setShowConfirmDialog(true)
+      }
+      else {
+        history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path })
+      }
     }
   }
 
@@ -90,7 +91,6 @@ const PriceTemplate = () => {
   }, [permissions]);
 
   useEffect(() => {
-
     axiosInstance().get("/field?resource=Product").then(({ data: { data } }) => {
       const _productField: any = []
       data.forEach((_f) => {
@@ -106,8 +106,6 @@ const PriceTemplate = () => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-
-
     fetchOnePriceTemplate();
     fetchUser();
   }, [id]);
@@ -151,7 +149,7 @@ const PriceTemplate = () => {
           else {
             setInitialValues(data);
             handleProductTemplateField(data.productTemplate);
-            setSection(data.section);
+            setSection(JSON.parse(JSON.stringify(data.section)));
             if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator?.some(d => d === user.user._id)) {
               setHasPermissionToUpdate(false)
             } else {
@@ -280,29 +278,6 @@ const PriceTemplate = () => {
       setTemplateField([]);
     }
   };
-  const isFieldNotTouched = (data, values) => {
-    if (isFormModified) {
-      return false
-    }
-    let isModified = Object.values(
-      simplifyValues(
-        data.initialValues,
-        data.fields
-      )
-    ).toString() ===
-      Object.values(
-        simplifyValues(values, data.fields)
-      ).toString()
-    if (isModified) {
-      // if (values?.collaborator && !data?.initialValues?.collaborator) {
-      //   return false
-      // }
-      // if (values?.collaborator.toString() === data?.initialValues?.collaborator.toString()) {
-      //   return false
-      // }
-    }
-    return isModified
-  }
 
   return (
     <Fragment>
@@ -321,9 +296,11 @@ const PriceTemplate = () => {
             isConfirmBeforeClick={hasPermissionToUpdate}
             onBreadCrumbClick={(path) => {
               setIsBreakCrumbPath(path)
-              if (hasPermissionToUpdate) {
+              if (hasPermissionToUpdate && (!isEqual(ref.current.values, initialValues) ||
+                !isEqual(initialValues.section, section))) {
                 setShowConfirmDialog(true)
               }
+              else history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path })
             }}
           />
         </Grid>
@@ -360,6 +337,7 @@ const PriceTemplate = () => {
       <div className="main-container">
         {initialValues ? (
           <Formik
+            innerRef={ref}
             initialValues={initialValues}
             validationSchema={PriceTemplateSchema}
             onSubmit={handleSave}
@@ -461,19 +439,14 @@ const PriceTemplate = () => {
                           size="small"
                           variant="contained"
                           onClick={() => {
-
-                            if (hasPermissionToUpdate) {
+                            if (hasPermissionToUpdate && (!isEqual(ref.current.values, initialValues) ||
+                              !isEqual(initialValues.section, section))) {
                               setShowConfirmDialog(true)
-                              if (isFieldNotTouched({ initialValues: initialValues, fields: productField }, values)) {
-                                history.push(routes.priceTemplate.path)
-                              }
-                              else setShowConfirmDialog(true)
-                            } else {
+                            }
+                            else {
                               history.push(routes.priceTemplate.path)
                             }
-                          }
-                          }
-                        >
+                          }}  >
                           Close
                         </Button>
                       </Box>
@@ -581,7 +554,6 @@ const PriceTemplate = () => {
                     setDeleteField={setDeleteField}
                     isCustomField={true}
                     extraFields={templateField}
-                    onAddRemoveField={() => setIsFormModified(true)}
                     module="price-template"
                   />
                 </Box>
