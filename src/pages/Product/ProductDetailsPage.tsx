@@ -39,6 +39,7 @@ const ProductDetailsPage = () => {
     }: any = useData();
     const [headingLabel, setHeadingLabel] = useState("");
     const [loading, setLoading] = useState(false);
+    const [productLoading, setProductLoading] = useState(false);
     const [loadingWarehouse, setLoadingWarehouse] = useState(false);
     const [productData, setProductData] = useState(null);
     const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -61,10 +62,10 @@ const ProductDetailsPage = () => {
             getProductFieldsAndData();
             getFrequentlyBoughtProduct();
         }
-        // eslint-disable-next-line
     }, [id]);
 
     useEffect(() => {
+        console.log('productData', productData)
         getProductTree()
         if (productData) {
             getWarehouses()
@@ -127,19 +128,22 @@ const ProductDetailsPage = () => {
     };
 
     const getProductTree = () => {
+        setProductLoading(true)
+        console.log('productData?._id', productData?._id)
         if (productData?._id) {
             axiosInstance()
                 .get(`/product/bom/${productData?._id}`)
                 .then(({ data: { data } }) => {
-                    if (data && data.length) {
-                        data = data.map(o => {
-                            if (o.parent) {
-                                o.type = "child"
-                            }
-                            return o
-                        })
-                        setBOMData([...data])
-                    }
+                    data = data.map(o => {
+                        if (o?.parent) {
+                            o.type = "child"
+                        }
+                        return o
+                    })
+                    setBOMData([...data])
+                    setProductLoading(false)
+                }).catch(err => {
+                    setProductLoading(false)
                 })
         }
     }
@@ -203,17 +207,17 @@ const ProductDetailsPage = () => {
                     let wareHouses = []
                     let byStatus = []
                     for (const d of data) {
-                        if (!wareHouses.includes(d?.warehouse.optionLabel)) {
-                            wareHouses.push(d?.warehouse.optionLabel)
+                        if (!wareHouses.includes(d?.warehouse?.optionLabel)) {
+                            wareHouses.push(d?.warehouse?.optionLabel)
                         }
                         if (!byStatus.includes(d?.status)) {
                             byStatus.push(d?.status)
                         }
                     }
                     const inventories = wareHouses.map(w => {
-                        let inventory = data.filter(d => w === d?.warehouse.optionLabel);
+                        let inventory = data.filter(d => w === d?.warehouse?.optionLabel);
                         let status = byStatus.map(status => {
-                            let count = data.filter(d => w === d?.warehouse.optionLabel).filter(d => status === d?.status).length;
+                            let count = data.filter(d => w === d?.warehouse?.optionLabel).filter(d => status === d?.status).length;
                             if (count) {
                                 return { status, count }
                             }
@@ -231,11 +235,10 @@ const ProductDetailsPage = () => {
             }).catch(err => {
                 setLoadingWarehouse(false)
                 toastConfig.setToastConfig(err)
-
             })
     }
 
-
+    console.log('BOMData', BOMData)
     return (
         <>
             <Fragment>
@@ -328,7 +331,7 @@ const ProductDetailsPage = () => {
                             </Box>
                             {(
                                 <Box>
-                                    {loading && loadingWarehouse ? (
+                                    {loading ? (
                                         [1, 2].map((i) => (
                                             <BoxWithBorder
                                                 key={i}
@@ -347,7 +350,6 @@ const ProductDetailsPage = () => {
                                                 </Box>
                                             </BoxWithBorder>
                                         ))
-
                                     ) : BOMData.length ? (
                                         <>
                                             {/* <AssignedFrequentlyBoughtProduct
@@ -504,9 +506,9 @@ const ProductDetailsPage = () => {
                                                 </Box>
                                                 {
                                                     inventoriesData.map(({ qty, wareHouse }) => (
-                                                        <List disablePadding key={wareHouse._id}>
+                                                        <List disablePadding key={wareHouse?._id}>
                                                             <ListItem dense>
-                                                                <ListItemText primary={wareHouse.warehouseName} />
+                                                                <ListItemText primary={wareHouse?.warehouseName} />
                                                                 <ListItemSecondaryAction>
                                                                     <Typography variant="h6">
                                                                         {qty}
