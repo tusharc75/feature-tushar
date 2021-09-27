@@ -60,8 +60,7 @@ const ReceivingTicket = () => {
   });
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters,
-    sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
   const columns = [
     {
@@ -129,7 +128,7 @@ const ReceivingTicket = () => {
       headerName: 'Updated By',
       show: true,
       cellRenderer: 'updatedByRenderer'
-    },
+    }
   ];
   //  Grid Variables - End
 
@@ -194,30 +193,28 @@ const ReceivingTicket = () => {
     </>
   );
 
-  const CustomerAccountRenderer = (params) => <>
-    {
-      params.value ?
-        <Link
-          className="link"
-          title={params.value}
-          to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}
-        >
+  const CustomerAccountRenderer = (params) => (
+    <>
+      {params.value ? (
+        <Link className="link" title={params.value} to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}>
           {params.value}
-        </Link> : <NoDataCell />
-    }
-  </>
-  const WarehouseRenderer = (params) => <>
-    {
-      params.value ?
-        <Link
-          className="link"
-          title={params.value}
-          to={`${routes.address.path}/detail/${params.data.warehouseId}`}
-        >
+        </Link>
+      ) : (
+        <NoDataCell />
+      )}
+    </>
+  );
+  const WarehouseRenderer = (params) => (
+    <>
+      {params.value ? (
+        <Link className="link" title={params.value} to={`${routes.address.path}/detail/${params.data.warehouseId}`}>
           {params.value}
-        </Link> : <NoDataCell />
-    }
-  </>
+        </Link>
+      ) : (
+        <NoDataCell />
+      )}
+    </>
+  );
 
   // const ProductInventoryRenderer = (params) => (
   //   <>
@@ -276,7 +273,7 @@ const ReceivingTicket = () => {
             receivingJobName: `${params.data.receivingJobName}`
           })
         }
-        entity="receivingTicket"
+        entity="receiving ticket"
       />
     </>
   );
@@ -393,8 +390,8 @@ const ReceivingTicket = () => {
           let res = {
             ...restProperties,
             id: u._id,
-            pickupDate: u["pick-UpDate"],
-            productInventory: u.productInventory?.map(p => p.optionLabel).join(", "),
+            pickupDate: u['pick-UpDate'],
+            productInventory: u.productInventory?.map((p) => p.optionLabel).join(', '),
             deliveryPerson: u.deliveryPerson?.optionLabel,
             deliveryPersonId: u.deliveryPerson?.optionValue,
             warehouse: u.warehouse?.optionLabel,
@@ -499,7 +496,7 @@ const ReceivingTicket = () => {
                   permissions={permissions.receivingTicket}
                   module="receivingTicket"
                   api={receivingTicket.receivingTicketApi}
-                  afterImportCompleted={() => { }}
+                  afterImportCompleted={() => {}}
                 />
               </Grid>
             </Grid>
@@ -523,9 +520,9 @@ const ReceivingTicket = () => {
             icon={<FaRegistered className="headerLogo" />}
             heading={routes.receivingTicket.title}
             showTransferEntityDialog={handleTransferEntityDialog}
-          // showCloneReceivingTicketDialog={() => {
-          //   handleShowCloneReceivingTicketDialog()
-          // }}
+            // showCloneReceivingTicketDialog={() => {
+            //   handleShowCloneReceivingTicketDialog()
+            // }}
           >
             {accountDetails.accountId && (
               <Chip
@@ -569,8 +566,9 @@ const ReceivingTicket = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.receivingJobName ? 'Receiving Ticket' : 'Receiving Tickets'}   ${deleteRecord.receivingJobName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.receivingJobName ? 'Receiving Ticket' : 'Receiving Tickets'}   ${
+              deleteRecord.receivingJobName || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

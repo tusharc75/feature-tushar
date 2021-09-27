@@ -102,6 +102,8 @@ import RepairJobDetails from "./pages/RepairJob/RepairJobDetails";
 import ReceivingTicket from "./pages/ReceivingTicket";
 import ReceivingTicketDetails from "./pages/ReceivingTicket/ReceivingTicketDetails";
 import PricingConditionsDetailsPage from "./pages/PricingConditions/PricingConditionsDetailsPage";
+import SalesOrder from "./pages/SalesOrderCreation";
+import SalesOrderDetails from "./pages/SalesOrderCreation/SalesOrderDetails";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -585,6 +587,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.receivingTicketDetail.path}/:id`} >
               <ReceivingTicketDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.salesOrder.path}>
+              <SalesOrder />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.salesOrderDetail.path}/:id`} >
+              <SalesOrderDetails />
             </PrivateRoute>
 
             <Route path="*" component={NotFound} />
