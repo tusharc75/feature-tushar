@@ -28,6 +28,7 @@ import {
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import './style.scss';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 const LeadTypes = [
   {
@@ -50,7 +51,7 @@ const Leads = () => {
   }: any = useData();
   const { leadResource, leadApi } = lead;
   const [selectedType, setSelectedType] = useState(1);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
   const [renderCount, setRenderCount] = useState(0);
   const [okButtonLoading, setOkButtonLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -147,6 +148,18 @@ const Leads = () => {
 
   const ActionsRenderer = (params) => (
     <>
+      <Tooltip
+        className={leadsPermissions.isCreate ? "" : "cursor-stop"}
+        title={leadsPermissions.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setIsOpen({ open: true, isClone: true, idToClone: params.data._id })
+          }}>
+          <FileCopyIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
       {hasPermissionToConvertInOpportunity && generateLeadToOpportunityButton(params.data)}
 
       <GridDeleteIcon
@@ -289,11 +302,11 @@ const Leads = () => {
   };
 
   const handleCreate = () => {
-    setIsOpen(true);
+    setIsOpen({ open: true, isClone: false, idToClone: null });
   };
 
   const handleClose = () => {
-    setIsOpen(false);
+    setIsOpen({ open: false, isClone: false, idToClone: null });
     fetchLeads();
   };
 
@@ -451,6 +464,12 @@ const Leads = () => {
             afterImportCompleted={() => {
               fetchLeads();
             }}
+            recordsToExport={selectedRecords.length}
+            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            onExportToExcelSuccess={() => {
+              if (gridApi) gridApi.deselectAll()
+              else fetchLeads()
+            }}
           />
         </Grid>
       </Grid>
@@ -500,16 +519,18 @@ const Leads = () => {
           renderedFrom={leadResource}
         />
 
-        {isOpen && (
+        {isOpen?.open && (
           <ManageLeadDialog
-            open={isOpen}
+            open={isOpen?.open}
             onSuccess={handleClose}
             onClose={() => {
-              setIsOpen(false);
+              setIsOpen({ open: false, isClone: false, idToClone: null });
             }}
             isNew={true}
             dataToUpdate={null}
             leadApi={leadApi}
+            isClone={isOpen?.isClone}
+            leadId={isOpen?.idToClone}
           />
         )}
 

@@ -21,6 +21,13 @@ import {
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import "./style.scss";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import EntitySelectionsDialog from "../../components/EntitySelections"
+import { AiOutlineDeploymentUnit } from "react-icons/ai"
+import Tooltip from "@material-ui/core/Tooltip"
+import IconButton from "@material-ui/core/IconButton"
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { sidebarResource } from "../../constants/helpers"
+
 
 function reducer(state, action) {
   switch (action.type) {
@@ -118,16 +125,18 @@ const ProjectSales: FC = () => {
   const {
     state: { user, permissions, selectedEntity },
   }: any = useData();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedType, setselectedType] = useState(1);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] =
-    useState(false);
+    useState({ show: false, isDelete: false });
   const [renderCount, setRenderCount] = useState(0);
-
+  const [projectSalesId, setProjectSalesId] = useState(null)
+  const [showEntityDialog, setShowEntityDialog] = useState(false)
   const [gridApi, setGridApi] = useState(null);
+  const [entities, setEntities] = useState([])
 
   const [state, dispatch] = useReducer(reducer, intialState);
   const {
@@ -229,6 +238,19 @@ const ProjectSales: FC = () => {
 
   const ActionsRenderer = (params) => (
     <>
+      <Tooltip
+        className={permissions?.projectSales.isCreate ? "" : "cursor-stop"}
+        title={permissions?.projectSales.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setIsOpen({ open: true, isClone: true, idToClone: params.data._id })
+          }}
+        >
+          <FileCopyIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
       <GridDeleteIcon
         hasDeletePermission={permissions?.projectSales.isDelete}
         ownerId={params.data.projectManagerId}
@@ -236,6 +258,23 @@ const ProjectSales: FC = () => {
         onDelete={() => showConfirmBox(params.data)}
         entity="Project"
       />
+      {
+        permissions?.projectSales.isUpdate && <Tooltip title="Entity">
+          <IconButton
+            size="small"
+            aria-label="Entity"
+            onClick={() => {
+              setProjectSalesId(params.data._id)
+              setShowEntityDialog(true)
+              if (params?.data?.entity) {
+                let restEntities = params?.data?.entity.map(o => o.optionValue)
+                setEntities([...restEntities])
+              }
+            }}>
+            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
+          </IconButton>
+        </Tooltip>
+      }
     </>
   );
 
@@ -356,7 +395,7 @@ const ProjectSales: FC = () => {
         );
 
         if (selectedRecords?.length !== myData.length) {
-          setShowDeleteWarningConfirmBox(true);
+          setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
         } else {
           setIsConformDialogVisible(true);
         }
@@ -406,18 +445,20 @@ const ProjectSales: FC = () => {
   };
 
   const handleCreate = () => {
-    setIsOpen(true);
+    setIsOpen({ open: true, isClone: false, idToClone: null });
   };
 
   const handleClose = () => {
-    setIsOpen(false);
+    setIsOpen({ open: false, isClone: false, idToClone: null });
   };
 
   return (
     <>
-      {isOpen && (
+      {isOpen?.open && (
         <CreateProjectSales
-          open={isOpen}
+          open={isOpen?.open}
+          isClone={isOpen?.isClone}
+          projectSalesId={isOpen?.idToClone}
           close={handleClose}
           fetchData={fetchProjects}
         />
@@ -435,6 +476,12 @@ const ProjectSales: FC = () => {
               afterImportCompleted={() => {
                 fetchProjects();
               }}
+              recordsToExport={selectedRecords.length}
+              ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+              onExportToExcelSuccess={() => {
+                if (gridApi) gridApi.deselectAll()
+                else fetchProjects()
+              }}
             />
           </Grid>
         </Grid>
@@ -450,6 +497,10 @@ const ProjectSales: FC = () => {
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
               canDelete={selectedRecords?.length === 0}
+              selectedRecords={selectedRecords}
+              setShowDeleteWarningConfirmBox={setShowDeleteWarningConfirmBox}
+              setShowEntityDialog={setShowEntityDialog}
+              setEntities={setEntities}
             />
           </div>
 
@@ -462,18 +513,22 @@ const ProjectSales: FC = () => {
             rowCount={rowCount}
             limit={limit}
             pageSizes={pageSizes}
-            page={page}
             actionWidth={150}
+            page={page}
             loading={loading}
             renderedFrom="projectSalesPage"
           />
         </div>
 
-        {showDeleteWarningConfirmBox ? (
+        {showDeleteWarningConfirmBox?.show ? (
           <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
+            open={showDeleteWarningConfirmBox?.show}
+            message={
+              showDeleteWarningConfirmBox?.isDelete ?
+                `You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`
+                : `You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`
+            }
+            onClose={() => setShowDeleteWarningConfirmBox({ show: false, isDelete: false })}
           />
         ) : null}
 
@@ -490,6 +545,20 @@ const ProjectSales: FC = () => {
             onOk={handleDeleteProjects}
           />
         ) : null}
+        {
+          showEntityDialog ?
+            <EntitySelectionsDialog
+              open={showEntityDialog}
+              resource={sidebarResource.projectSales}
+              resourceIds={selectedRecords.length ? selectedRecords.map(o => o._id) : [projectSalesId]}
+              onClose={() => {
+                setShowEntityDialog(false)
+                setProjectSalesId("")
+              }}
+              entities={entities}
+              onSuccess={fetchProjects}
+            /> : null
+        }
       </Fragment>
     </>
   );

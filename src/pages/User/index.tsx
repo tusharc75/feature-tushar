@@ -31,6 +31,7 @@ import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityD
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import UserSetupDialog from "./UserSetupDialog";
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 let userTimeout: ReturnType<typeof setTimeout>;
 
@@ -46,7 +47,7 @@ const User: FC = () => {
   const [regionalRolesDialogOpen, setRegionalRolesDialogOpen] = useState(false);
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [unAssignLoading, setUnAssignLoading] = useState(false);
@@ -166,6 +167,19 @@ const User: FC = () => {
       </p>
     ) : (
       <>
+        <Tooltip
+          className={permissions.user.isCreate ? "" : "cursor-stop"}
+          title={permissions.user.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setIsOpen({ open: true, isClone: true, idToClone: params.data._id })
+            }}
+          >
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
         {permissions.user.isDelete ? (
 
           params.data.isBrandAdmin ? (
@@ -415,11 +429,11 @@ const User: FC = () => {
   };
 
   const handleCreate = () => {
-    setIsOpen(true);
+    setIsOpen({ open: true, isClone: false, idToClone: null });
   };
 
   const handleClose = () => {
-    setIsOpen(false);
+    setIsOpen({ open: false, isClone: false, idToClone: null });
   };
 
   const handleGlobalRolesOpenDialog = () => {
@@ -476,9 +490,12 @@ const User: FC = () => {
   return (
     <>
       {
-        isOpen && (
-          <ManageUserDialog open={isOpen} close={handleClose} onSuccess={(obj) => { setUserList([]);fetchUsers() }}
-            userId={null} dataToUpdate={null} isNew={true} />
+        isOpen?.open && (
+          <ManageUserDialog
+            open={isOpen?.open}
+            isClone={isOpen?.isClone}
+            close={handleClose} onSuccess={(obj) => { setUserList([]); fetchUsers() }}
+            userId={isOpen?.idToClone} dataToUpdate={null} isNew={true} />
           // <CreateUser open={isOpen} close={handleClose} fetchData={fetchUsers} />
         )
       }

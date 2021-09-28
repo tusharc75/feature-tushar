@@ -4,8 +4,8 @@ import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
 import { ImportExport } from '@material-ui/icons';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { saveAs } from "file-saver";
-import { utils, write } from "xlsx";
+import { saveAs } from 'file-saver';
+import { utils, write } from 'xlsx';
 
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
@@ -195,7 +195,7 @@ const OpportunityTable = ({ filterCurrency, currency, salesFilter, getExchangeRa
                 <ListItemSecondaryAction>
                   <Typography>
                     {product[toggleButtonValue]
-                      ? formatAmountWithCurrency(filterCurrency || currency, product[toggleButtonValue]).fullFormatAmount
+                      ? formatAmountWithCurrency(filterCurrency || currency, product[toggleButtonValue].toFixed(2)).fullFormatAmount
                       : 0}
                   </Typography>
                 </ListItemSecondaryAction>

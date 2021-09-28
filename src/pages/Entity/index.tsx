@@ -24,6 +24,7 @@ import CustomAgGrid, { reducer, intialState } from "../../components/AgGridCompo
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import { FaUser } from "react-icons/fa";
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 let entityTimeout;
 
@@ -34,7 +35,7 @@ const Entity: FC = () => {
   const {
     state: { permissions },
   }: any = useData();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState({ open: false, isClone: false, entityId: null });
   const [renderCount, setRenderCount] = useState(0);
   const [usersDialogOpen, setUsersDialogOpen] = useState(false);
   const [usersDialogLoding, setUsersDialogLoding] = useState(false);
@@ -113,7 +114,19 @@ const Entity: FC = () => {
   </Link>;
 
   const ActionsRenderer = params => <>
-
+    <Tooltip
+      className={permissions[entityResource]?.isCreate ? "" : "cursor-stop"}
+      title={permissions[entityResource]?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+      <IconButton
+        size="small"
+        aria-label="Clone"
+        onClick={() => {
+          setIsOpen({ open: true, isClone: true, entityId: params.data._id })
+        }}
+      >
+        <FileCopyIcon fontSize="small" color="primary" />
+      </IconButton>
+    </Tooltip>
     {permissions[entityResource]?.isUpdate ?
 
       <Tooltip title="Assign users">
@@ -233,11 +246,11 @@ const Entity: FC = () => {
 
 
   const handleCreate = () => {
-    setIsOpen(true);
+    setIsOpen({ open: true, isClone: false, entityId: null });
   };
 
   const handleClose = () => {
-    setIsOpen(false);
+    setIsOpen({ open: false, isClone: false, entityId: null });
   };
   const handleOpenDialog = () => {
     setUsersDialogOpen(true);
@@ -285,12 +298,14 @@ const Entity: FC = () => {
           dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
           loading={loading} renderedFrom="entityPage" />
 
-        {isOpen && (
+        {isOpen?.open && (
           <ManageEntity
             open={isOpen}
             close={handleClose}
             fetchData={fetchEntity}
             isNew={true}
+            entityId={isOpen?.entityId}
+            isClone={isOpen?.isClone}
           />
         )}
         {usersDialogOpen && !usersDialogLoding && (

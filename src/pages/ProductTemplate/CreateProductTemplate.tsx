@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment } from "react";
+import { useState, useEffect, useContext, Fragment, useRef } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -8,7 +8,7 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { FormBuilder } from "../../components/FormBuilder";
 import { Formik, Form } from "formik";
 import { object, string } from "yup";
-import { camelCase, isFieldNotTouched } from "../../constants/helpers";
+import { camelCase } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -25,6 +25,7 @@ import HistoryDialog from "../../components/Activity/History"
 import { productTemplate } from "../../constants/helpers"
 import HistoryButton from "../../components/Helpers/HistoryButton";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
+import { isEqual } from "lodash";
 
 const ProductTemplateSchema = object().shape({
     name: string()
@@ -54,7 +55,7 @@ const ProductTemplate = () => {
     const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(true)
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
-    const [formValues, setFormValues] = useState({})
+    const ref = useRef(null);
 
     const {
         state: { user, permissions },
@@ -70,13 +71,12 @@ const ProductTemplate = () => {
         if (hasPermissionToUpdate) {
             e.preventDefault();
             window.history.pushState(null, null, window.location.pathname);
-            if (isFieldNotTouched({
-                initialValues: initialValues,
-                fields: productField
-            }, formValues)) {
-                history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : "/product-Template" })
+            if (!isEqual(ref.current.values, initialValues) || !isEqual(initialValues.section, section)) {
+                setShowConfirmDialog(true)
             }
-            else setShowConfirmDialog(true)
+            else {
+                history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.productTemplate.path })
+            }
         }
     }
 
@@ -109,7 +109,6 @@ const ProductTemplate = () => {
         if (id === "0") {
             let initialData = { name: "", productCategory: [], entity: [], owner: user.user._id, collaborator: [], isStandard: false }
             setInitialValues(initialData);
-            setFormValues(initialData)
             axiosInstance().get(`/product-template/default-field`).then(({ data: { data } }) => {
                 const _data = []
                 const _section = uniq(map(data.fields, 'sectionName'));
@@ -134,8 +133,7 @@ const ProductTemplate = () => {
                     data.owner = user.user._id
                 }
                 setInitialValues(data);
-                setFormValues(data)
-                setSection(data.section);
+                setSection(JSON.parse(JSON.stringify(data.section)));
                 if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator.some(d => d === user.user._id)) {
                     setHasPermissionToUpdate(false)
                 }
@@ -172,7 +170,6 @@ const ProductTemplate = () => {
             toastConfig.setToastConfig(error);
         });
     };
-
 
     const handleSave = (values) => {
         let data: any = {}
@@ -271,12 +268,6 @@ const ProductTemplate = () => {
         reader.readAsBinaryString(f)
     }
 
-    const handleValuesChange = (data) => {
-        setFormValues((prevState) => ({
-            ...prevState,
-            ...data
-        }))
-    }
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
@@ -285,9 +276,11 @@ const ProductTemplate = () => {
                     isConfirmBeforeClick={hasPermissionToUpdate}
                     onBreadCrumbClick={(path) => {
                         setIsBreakCrumbPath(path)
-                        if (hasPermissionToUpdate) {
+                        if (hasPermissionToUpdate && (!isEqual(ref.current.values, initialValues) ||
+                            !isEqual(initialValues.section, section))) {
                             setShowConfirmDialog(true)
                         }
+                        else history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.productTemplate.path })
                     }}
                 />
             </Grid>
@@ -315,7 +308,7 @@ const ProductTemplate = () => {
         </Grid>
         <CustomContainer>
             {(initialValues && productCategory) ?
-                <Formik initialValues={initialValues} validationSchema={ProductTemplateSchema} onSubmit={handleSave} validate={validate}>
+                <Formik innerRef={ref} initialValues={initialValues} validationSchema={ProductTemplateSchema} onSubmit={handleSave} validate={validate}>
                     {({ submitForm, touched, errors, setFieldValue, values }) => (
                         <Form>
                             <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
@@ -335,7 +328,6 @@ const ProductTemplate = () => {
                                             error={touched["name"] && Boolean(errors["name"])}
                                             helperText={touched["name"] && errors["name"]}
                                             onChange={(e) => {
-                                                handleValuesChange({ name: e.target.value.trimStart() })
                                                 setFieldValue("name", e.target.value.trimStart())
                                             }}
                                         />
@@ -349,7 +341,6 @@ const ProductTemplate = () => {
                                                         name="isStandard"
                                                         checked={values["isStandard"]}
                                                         onChange={(e) => {
-                                                            handleValuesChange({ isStandard: e.target.checked })
                                                             setFieldValue("isStandard", e.target.checked)
                                                         }}
                                                         color="primary"
@@ -359,7 +350,7 @@ const ProductTemplate = () => {
                                             />
                                         </Box>
                                     </Grid>
-                                    <Grid item xs={12} sm={3}>
+                                    <Grid item xs={12} sm={4}>
                                         {!values["isStandard"] && <Autocomplete
                                             disabled={!hasPermissionToUpdate}
                                             options={productCategory}
@@ -370,7 +361,6 @@ const ProductTemplate = () => {
                                                 ? productCategory.filter((data) => values["productCategory"]?.some(d => d === data._id))
                                                 : []}
                                             onChange={(e, val) => {
-                                                handleValuesChange({ productCategory: val && val?.map(d => d._id) })
                                                 setFieldValue("productCategory", val && val?.map(d => d._id))
                                             }}
                                             renderInput={(params) => (
@@ -388,7 +378,7 @@ const ProductTemplate = () => {
                                             )}
                                         />}
                                     </Grid>
-                                    <Grid item xs={12} sm={5} container justify="flex-end">
+                                    <Grid item xs={12} sm={4} container justify="flex-end">
                                         <HistoryButton onClick={() => setShowHistory(true)} />
                                         <Box>
                                             {(productTemplatePermissions.isCreate || productTemplatePermissions.isUpdate) &&
@@ -400,9 +390,11 @@ const ProductTemplate = () => {
                                         <Box ml={1} >
                                             <Button color="primary" variant="contained" size="small"
                                                 onClick={() => {
-                                                    if (hasPermissionToUpdate) {
+                                                    if (hasPermissionToUpdate && (!isEqual(ref.current.values, initialValues) ||
+                                                        !isEqual(initialValues.section, section))) {
                                                         setShowConfirmDialog(true)
-                                                    } else {
+                                                    }
+                                                    else {
                                                         history.push(routes.productTemplate.path)
                                                     }
                                                 }}
@@ -411,7 +403,7 @@ const ProductTemplate = () => {
                                     </Grid>
                                 </Grid>
                                 <Grid container spacing={1}>
-                                    <Grid item xs={12} sm={3}>
+                                    <Grid item xs={12} sm={4}>
                                         {<Autocomplete
                                             disabled={!hasPermissionToUpdate}
                                             multiple
@@ -421,7 +413,6 @@ const ProductTemplate = () => {
                                                 ? user?.entity.filter((data) => values["entity"]?.some(d => d === data._id))
                                                 : []}
                                             onChange={(e, val) => {
-                                                handleValuesChange({ entity: val && val?.map(d => d._id) })
                                                 setFieldValue("entity", val && val?.map(d => d._id))
                                                 val && val.length !== 0 ?
                                                     setOwnerCollaboratorData(ownerCollaboratorDataConst.filter(data => val?.some(d => data.entities?.some(e => e.entity === d._id))))
@@ -441,7 +432,7 @@ const ProductTemplate = () => {
                                             )}
                                         />}
                                     </Grid>
-                                    <Grid item xs={12} sm={3}>
+                                    <Grid item xs={12} sm={4}>
                                         {<Autocomplete
                                             disabled={!hasPermissionToUpdate}
                                             getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
@@ -450,7 +441,6 @@ const ProductTemplate = () => {
                                                 : ""}
                                             options={ownerCollaboratorData.filter(user => !values["collaborator"]?.some((d) => (user._id === d)))}
                                             onChange={(e, val) => {
-                                                handleValuesChange({ owner: val && val._id ? val._id : "" })
                                                 setFieldValue("owner", val && val._id ? val._id : "");
                                             }}
                                             onOpen={() =>
@@ -473,7 +463,7 @@ const ProductTemplate = () => {
                                             )}
                                         />}
                                     </Grid>
-                                    <Grid item xs={12} sm={3}>
+                                    <Grid item xs={12} sm={4}>
                                         {<Autocomplete
                                             disabled={!hasPermissionToUpdate}
                                             multiple
@@ -483,7 +473,6 @@ const ProductTemplate = () => {
                                                 ? ownerCollaboratorData.filter((data) => values["collaborator"]?.some(d => d === data._id))
                                                 : []}
                                             onChange={(e, val) => {
-                                                handleValuesChange({ collaborator: val && val?.map(d => d._id) })
                                                 setFieldValue("collaborator", val && val?.map(d => d._id))
                                             }}
 

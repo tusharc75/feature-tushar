@@ -3,7 +3,6 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import AddIcon from "@material-ui/icons/Add";
-import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { Link } from 'react-router-dom'
@@ -19,19 +18,25 @@ import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { productInventory, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
 import {
+    DateRenderer,
+    CommonRenderer,
     CreatedByRenderer,
     UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import ManageProductInventory from "./ManageProductInventory";
+import ManageRepairJob from '../RepairJob/ManageRepairJob'
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import { useHistory } from "react-router-dom";
+import HtmlTooltip from "../../components/CustomTooltipTitle";
 
 const ProductInventory = () => {
 
     const toastConfig = useContext(CustomToastContext)
     const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
+    const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
@@ -42,18 +47,22 @@ const ProductInventory = () => {
     const {
         state: { permissions },
     }: any = useData();
+    const history = useHistory();
+
+    const [warehouse, setWarehouse] = useState(history.location?.state?.warehouse);
+    const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
 
     useEffect(() => {
         fetchProductInventory()
-    }, [page, limit, filters, sorting, search]);
+    }, [page, limit, filters, sorting, search, warehouse]);
 
     const columns = [
         { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
         { field: "product", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
         { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "productCategoryRenderer" },
         { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
-        { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "commonRenderer" },
-        { field: "bornInDate", headerName: "Born on Date", show: true, cellRenderer: "commonRenderer" },
+        { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "dateRenderer" },
+        { field: "bornInDate", headerName: "Born on Date", show: true, cellRenderer: "dateRenderer" },
         { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
@@ -103,6 +112,9 @@ const ProductInventory = () => {
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
 
+        if (warehouse?.optionValue && redirectProduct?.id) {
+            deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "warehouse", term: warehouse?.optionValue }, { field: "product", term: redirectProduct?.id }])}`
+        }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
@@ -145,15 +157,15 @@ const ProductInventory = () => {
     }
 
     const NameRenderer = (params) => (
-        <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+        params.value ? <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
             {params.value}
-        </Link>
+        </Link> : <NoDataCell />
     );
 
     const ProductRenderer = (params) => (
-        <Link className="link" title={params.value} to={`${routes.product.path}/detail/${params.data.productId}`}>
+        params.value ? <Link className="link" title={params.value} to={`${routes.product.path}/detail/${params.data.productId}`}>
             {params.value}
-        </Link>
+        </Link> : <NoDataCell />
     );
 
     const ProductCategoryRenderer = (params) => (
@@ -175,7 +187,7 @@ const ProductInventory = () => {
         <>
             {
                 permissions?.productInventory?.isCreate &&
-                <Tooltip title="Clone">
+                <HtmlTooltip title="Clone">
                     <IconButton
                         size="small"
                         aria-label="Clone"
@@ -185,17 +197,17 @@ const ProductInventory = () => {
                     >
                         <FileCopyIcon color="primary" />
                     </IconButton>
-                </Tooltip>
+                </HtmlTooltip>
             }
             {permissions?.productInventory?.isDelete &&
-                <Tooltip title="Delete">
+                <HtmlTooltip title="Delete">
                     <IconButton size="small" aria-label="Delete" onClick={() => {
                         setDeleteRecord(params.data);
                         setShowDeleteConfirmBox(true)
                     }} >
                         <DeleteIcon color="error" />
                     </IconButton>
-                </Tooltip >
+                </HtmlTooltip >
             }
         </>
     )
@@ -215,7 +227,9 @@ const ProductInventory = () => {
     };
 
     const frameworkComponents = {
+        commonRenderer: CommonRenderer,
         createdByRenderer: CreatedByRenderer,
+        dateRenderer: DateRenderer,
         productRenderer: ProductRenderer,
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer,
@@ -246,8 +260,30 @@ const ProductInventory = () => {
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <GiStockpiles size={20} style={{paddingBottom: "3px"}} className="headerLogo" />
+                        <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
                         <span className="listingHeader">{routes.productInventory?.title} </span>
+                        {warehouse && (
+                            <Chip
+                                className="ml-3"
+                                color="primary"
+                                label={`Warehouse : ${warehouse.optionLabel}`}
+                                onDelete={() => {
+                                    setRedirectProduct(null);
+                                    setWarehouse(null);
+                                }}
+                            />
+                        )}
+                        {redirectProduct && (
+                            <Chip
+                                className="ml-3"
+                                color="primary"
+                                label={`Product : ${redirectProduct.name}`}
+                                onDelete={() => {
+                                    setWarehouse(null);
+                                    setRedirectProduct(null);
+                                }}
+                            />
+                        )}
                     </Grid>
                     <Grid xs={6} container className={styles.filter_side} >
                         <Box className={styles.filter_side_header} component="div" >
@@ -264,18 +300,21 @@ const ProductInventory = () => {
                                     setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null })
                                 }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                             }
-                            {permissions?.productInventory?.isDelete &&
-                                <Button
-                                    className={styles.action_submit_btn}
-                                    variant="outlined"
-                                    color="default"
-                                    size="small"
-                                    onClick={openActions}
-                                    disabled={selectedRecords.length ? false : true}
-                                    aria-controls="action-menu"
-                                >Actions <ExpandMore />
-                                </Button>
-                            }
+
+                            <HtmlTooltip title="Please select some inventories">
+                                <span>
+                                    <Button
+                                        className={styles.action_submit_btn}
+                                        variant="outlined"
+                                        color="default"
+                                        size="small"
+                                        onClick={openActions}
+                                        disabled={selectedRecords.length ? false : true}
+                                        aria-controls="action-menu"
+                                    >Actions <ExpandMore />
+                                    </Button>
+                                </span>
+                            </HtmlTooltip>
                             <Menu
                                 anchorEl={anchorEl}
                                 keepMounted
@@ -288,7 +327,14 @@ const ProductInventory = () => {
                                 open={Boolean(anchorEl)}
                                 onClose={closeActions}
                             >
-                                <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                                {permissions?.productInventory?.isDelete && <MenuItem onClick={() => {
+                                    closeActions()
+                                    setShowDeleteConfirmBox(true)
+                                }}>Delete</MenuItem>}
+                                {permissions?.repairJob?.isCreate && permissions?.productInventory?.isUpdate && <MenuItem onClick={() => {
+                                    closeActions()
+                                    setShowRepairJobDialog(true)
+                                }}>Create Repair Job</MenuItem>}
                             </Menu>
                         </Box>
                     </Grid>
@@ -319,6 +365,19 @@ const ProductInventory = () => {
                 onClose={() => setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null })}
                 onSuccess={() => {
                     setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null });
+                    fetchProductInventory()
+                }}
+            />
+        }
+        {
+            showRepairJobDialog &&
+            <ManageRepairJob
+                fromInventory
+                inventories={selectedRecords?.map(s => s.id)}
+                open={showRepairJobDialog}
+                onClose={() => setShowRepairJobDialog(false)}
+                onSuccess={() => {
+                    setShowRepairJobDialog(false);
                     fetchProductInventory()
                 }}
             />

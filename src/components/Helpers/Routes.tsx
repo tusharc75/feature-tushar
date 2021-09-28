@@ -193,6 +193,14 @@ const routes = {
     title: storedRoutes ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
     path: "/budget",
   },
+  pricingCondition: {
+    title: storedRoutes ? storedRoutes.pricingCondition?.title : RESOURCE_LABEL.pricingCondition,
+    path: "/pricing-condition",
+  },
+  pricingConditionDetail: {
+    title: storedRoutes ? storedRoutes.pricingCondition?.title : RESOURCE_LABEL.pricingCondition,
+    path: "/pricing-condition/detail",
+  },
   marketSegment: {
     title: storedRoutes ? storedRoutes.marketSegment?.title : RESOURCE_LABEL.marketSegment,
     path: "/market-segment",
@@ -248,6 +256,30 @@ const routes = {
   deliveryTicketDetail: {
     title: storedRoutes ? storedRoutes.deliveryTicket?.title : RESOURCE_LABEL.deliveryTicket,
     path: "/loading-ticket/detail",
+  },
+  repairJob: {
+    title: storedRoutes ? storedRoutes.repairJob?.title : RESOURCE_LABEL.repairJob,
+    path: "/repair-job",
+  },
+  repairJobDetail: {
+    title: storedRoutes ? storedRoutes.repairJob?.title : RESOURCE_LABEL.repairJob,
+    path: "/repair-job/detail",
+  },
+  receivingTicket: {
+    title: storedRoutes ? storedRoutes.receivingTicket?.title : RESOURCE_LABEL.receivingTicket,
+    path: "/receiving-ticket",
+  },
+  receivingTicketDetail: {
+    title: storedRoutes ? storedRoutes.receivingTicket?.title : RESOURCE_LABEL.receivingTicket,
+    path: "/receiving-ticket/detail",
+  },
+  salesOrder: {
+    title: storedRoutes ? storedRoutes.salesOrder?.title : RESOURCE_LABEL.salesOrder,
+    path: "/sales-order",
+  },
+  salesOrderDetail: {
+    title: storedRoutes ? storedRoutes.salesOrder?.title : RESOURCE_LABEL.salesOrder,
+    path: "/sales-order/detail",
   },
 };
 

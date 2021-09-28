@@ -18,6 +18,7 @@ import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import AssignUserDialog from "../../components/AssignRolesDialog/AssignUserDialog";
 import AssignRegionalRolesUserDialog from "../../components/AssignRolesDialog/AssignRegionalRolesUserDialog";
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -120,7 +121,7 @@ const Roles: FC = () => {
   const [selectedType, setSelectedType] = useState(localStorage.getItem(localStorageKeys.currentSelectedRoleType) ?
     roleTypes.find((d) => d.key === localStorage.getItem(localStorageKeys.currentSelectedRoleType)).value :
     roleTypes.find((d) => d.key === "Global")?.value);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
@@ -173,6 +174,19 @@ const Roles: FC = () => {
   </Link>
 
   const ActionsRenderer = params => <>
+    <Tooltip
+      className={permissions.role.isCreate ? "" : "cursor-stop"}
+      title={permissions.role.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+      <IconButton
+        size="small"
+        aria-label="Clone"
+        onClick={() => {
+          setIsOpen({ open: true, isClone: true, idToClone: params.data._id })
+        }}
+      >
+        <FileCopyIcon fontSize="small" color="primary" />
+      </IconButton>
+    </Tooltip>
     {permissions.role.isDelete ? (
       <span title="Delete Role">
         {
@@ -346,11 +360,11 @@ const Roles: FC = () => {
   };
 
   const handleCreate = () => {
-    setIsOpen(true);
+    setIsOpen({ open: true, isClone: false, idToClone: null });
   };
 
   const handleClose = () => {
-    setIsOpen(false);
+    setIsOpen({ open: false, isClone: false, idToClone: null });
   };
   const handleRoleTypeSelect = (filteredValue) => {
     setSelectedType(filteredValue);
@@ -370,14 +384,16 @@ const Roles: FC = () => {
 
   return (
     <>
-      {isOpen && (
+      {isOpen?.open && (
         <CreateRole
-          open={isOpen}
+          open={isOpen?.open}
           close={handleClose}
           fetchData={fetchRoles}
           roleType={selectedType}
           setToastConfig={toastConfig.setToastConfig}
           selectedEntity={selectedEntity}
+          roleId={isOpen?.idToClone}
+          isClone={isOpen?.isClone}
         />
       )}
       {showAssignUserDialog && (

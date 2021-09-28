@@ -254,9 +254,16 @@ const CreateProduct = (props) => {
     setFieldChanges(_fieldChanges);
   };
 
-  const replaceUnit = (label, unit) => {
-    if (label.includes("Unit") && unit) {
-      label = `${label.split(" Unit")[0]} ${unit}`;
+  const replaceUnit = (label, unit, sUnit = null) => {
+    if (label !== "Secondary Unit") {
+      if (label.includes("Secondary Unit") && sUnit) {
+        label = `${label.split(" Secondary Unit")[0]} ${sUnit}`;
+      }
+      
+      if (!label.includes("Secondary Unit") && label.includes("Unit")  && unit) {
+        label = `${label.split(" Unit")[0]} ${unit}`;
+      }
+
     }
     return label;
   };
@@ -318,7 +325,7 @@ const CreateProduct = (props) => {
                                 section.sectionFields.map((field) =>
                                   field.type === "converter" || field.type === "currencyAmount" || field.isConverter ? (
                                     <FormTypes
-                                      style={{ background: field.isUneditable ? "#1e768221" : "" }}
+                                      style={{ background: field?.isUneditable ? "#FF573321" : field?.isFormula ? "#1e768221"   : "" }}
                                       fields={initialData.fields}
                                       fieldData={field}
                                       values={values}
@@ -328,11 +335,13 @@ const CreateProduct = (props) => {
                                         field.isUneditable
                                           ? `${replaceUnit(
                                             field.fieldLabel,
-                                            values?.unit
+                                            values?.unit,
+                                            values?.secondaryUnit
                                           )} (Auto Calculated Field)`
                                           : replaceUnit(
                                             field.fieldLabel,
-                                            values?.unit
+                                            values?.unit,
+                                            values?.secondaryUnit
                                           )
                                       }
                                       name={field.fieldName}
@@ -364,7 +373,7 @@ const CreateProduct = (props) => {
                                         <Box flexGrow={1}>
                                           <FormTypes
                                             {...field}
-                                            style={{ background: field.isUneditable ? "#1e768221" : "" }}
+                                            style={{ background: field?.isUneditable ? "#FF573321" : field?.isFormula ? "#1e768221"   : "" }}
                                             productTemplateId={values?.productTemplate}
                                             priceTemplateId={values?.priceTemplate}
                                             fields={initialData.fields}
@@ -376,11 +385,13 @@ const CreateProduct = (props) => {
                                               field.isUneditable
                                                 ? `${replaceUnit(
                                                   field.fieldLabel,
-                                                  values?.unit
+                                                  values?.unit,
+                                                  values?.secondaryUnit
                                                 )} (Auto Calculated Field)`
                                                 : replaceUnit(
                                                   field.fieldLabel,
-                                                  values?.unit
+                                                  values?.unit,
+                                                  values?.secondaryUnit
                                                 )
                                             }
                                             name={field.fieldName}

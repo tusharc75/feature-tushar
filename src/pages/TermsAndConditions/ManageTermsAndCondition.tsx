@@ -61,7 +61,8 @@ const TermsAndCondition = ({
   termsAndCondition,
   fetchData,
   editRecord,
-  displayTitle
+  displayTitle,
+  isClone = false
 }) => {
   const {
     state: { user },
@@ -96,9 +97,13 @@ const TermsAndCondition = ({
 
   useEffect(() => {
     if (editRecord && editRecord?._id) {
+      let tacName = editRecord.TACName
+      if (isClone) {
+        tacName = ""
+      }
       setInitialValues({
         description: editRecord.description,
-        TACName: editRecord.TACName,
+        TACName: tacName,
         file: editRecord?.file ?? "",
         entity: editRecord?.entity ? editRecord?.entity : [],
         owner: editRecord?.owner ? editRecord?.owner : user.user._id,
@@ -139,7 +144,7 @@ const TermsAndCondition = ({
     }
 
     setLoading(true);
-    if (editRecord?._id) {
+    if (editRecord?._id && !isClone) {
       axiosInstance()
         .put(termsAndCondition.api, { ...request, _id: editRecord?._id })
         .then(({ data }) => {
@@ -198,7 +203,7 @@ const TermsAndCondition = ({
       className={classes.termAndConditionDialog}
     >
       <CustomDialogHeader
-        title={`${editRecord?._id
+        title={`${isClone ? "Clone" : editRecord?._id
           ? hasPermissionToUpdate ? `Edit ${editRecord?.TACName ?? ""}` : editRecord?.TACName
           : `Create ${displayTitle}`
           }`}

@@ -92,6 +92,8 @@ const Product = () => {
                 let res = {
                     ...restProperties,
                     id: u._id,
+                    inventoryCount: u?.qty,
+                    warehouses: u.warehouse?.map(w => w.warehouseName).join(", "),
                     createdBy: u.createdBy?.user?.concatedName,
                     createdByDate: u.createdBy?.date,
                     updatedBy: u.updatedBy?.user?.concatedName,
@@ -193,6 +195,8 @@ const Product = () => {
                 return levalOrderBy.indexOf(item.leval)
             });
             if (column.length) {
+                column.splice(4, 0, { field: "inventoryCount", headerName: "Inventory Count", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" },
+                    { field: "warehouses", headerName: "Warehouses", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" })
                 column.push(
                     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer", leval: "price-builder-custom" },
                     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer", leval: "price-builder-custom" },

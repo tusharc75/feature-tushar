@@ -40,7 +40,9 @@ const AssignProductDialog = ({
         axiosInstance()
             .get(`/product`)
             .then(({ data: { data } }) => {
-                setProducts(data.map(obj => ({ ...obj, isChecked: assignedProducts.some(item => item?._id === obj?._id) ? true : false })))
+                let tData = data.filter(o => o._id !== productId)
+                tData = tData.map(obj => ({ ...obj, isChecked: assignedProducts.some(item => item?._id === obj?._id) ? true : false }))
+                setProducts([...tData])
                 setProductsConst(data.map(obj => ({ ...obj, isChecked: assignedProducts.some(item => item?._id === obj?._id) ? true : false })))
                 setSelectedProducts(assignedProducts.map(obj => obj._id))
                 setLoadingProducts(false);
@@ -148,11 +150,10 @@ const AssignProductDialog = ({
                                             edge="start"
                                             onChange={(e) => {
                                                 product.isChecked = e.target.checked
-                                                if (products.filter(r => r.isChecked).length > 3) {
-                                                    products.find(r => r._id === selectedProducts[0]).isChecked = false
-                                                }
+                                                // if (products.filter(r => r.isChecked).length > 3) {
+                                                //     products.find(r => r._id === selectedProducts[0]).isChecked = false
+                                                // }
                                                 setSelectedProducts(products.filter(r => r.isChecked).map(obj => obj._id))
-
                                             }
                                             }
                                             checked={product.isChecked}

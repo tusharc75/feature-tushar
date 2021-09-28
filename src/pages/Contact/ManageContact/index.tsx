@@ -4,6 +4,7 @@ import {
   getObjKeys,
   initializeDropdownById,
   sidebarResource,
+  getObjKeysWithValues
 } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import { useHistory } from "react-router-dom";
@@ -29,6 +30,7 @@ export default function ManageContactDialog(props) {
     collaborators,
     owners,
     fromProject,
+    isClone = false
   } = props;
   const { accountApi, accountResource } = account;
   const {
@@ -63,6 +65,8 @@ export default function ManageContactDialog(props) {
     } else getContactFields();
   }, [user]);
 
+
+
   const getContactFields = () => {
     setLoading(true);
     axiosInstance()
@@ -93,15 +97,43 @@ export default function ManageContactDialog(props) {
             }
             newFields.push(_f.fieldData);
           });
-        setContactData({
-          fields: newFields,
-          initialValues: getObjKeys("", newFields),
-        });
-        setFormValues(getObjKeys("", newFields))
-        setTimeout(() => setLoading(false), 500);
+        if (isClone && contactId) {
+          getContactCloneData(newFields)
+        }
+        else {
+          setContactData({
+            fields: newFields,
+            initialValues: getObjKeys("", newFields),
+          });
+          setFormValues(getObjKeys("", newFields))
+          setTimeout(() => setLoading(false), 500);
+        }
+
       })
       .catch((err) => setLoading(false));
   };
+
+  const getContactCloneData = (newFields) => {
+    if (contactId) {
+
+      setLoading(false)
+      axiosInstance()
+        .get(`/${contactApi}/${contactId}`)
+        .then(({ data: { data } }) => {
+          const { _id, firstName, lastName, middleName, email, reportsTo, ...rest } = data
+
+          let tempData = { ...rest }
+
+          setContactData({
+            fields: newFields,
+            initialValues: getObjKeysWithValues(tempData, newFields),
+          });
+          setFormValues(getObjKeysWithValues(tempData, newFields))
+          setTimeout(() => setLoading(false), 500);
+        })
+    }
+  }
+
 
   const handleCreateContact = (values, saveAndNew, setValues) => {
     setLoading(true);
@@ -126,6 +158,7 @@ export default function ManageContactDialog(props) {
         toastConfig.setToastConfig(error);
       });
   };
+
   // const handleSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
   //     const errors = formValidation(values, _.cloneDeep(contactData.fields));
   //     if (Object.keys(errors).length) {
@@ -144,6 +177,7 @@ export default function ManageContactDialog(props) {
 
   const handleDialogClose = () => {
     setShowAccountDialog(false);
+    onClose()
   };
 
   const handleGetAddedAccount = ({ data }) => {
@@ -175,7 +209,7 @@ export default function ManageContactDialog(props) {
       <ManageContact
         loading={loading}
         open={open}
-        isNew={contactId ? false : true}
+        isNew={isClone ? true : contactId ? false : true}
         onClose={onClose}
         contactData={contactData}
         handleSubmit={handleSubmit ? handleSubmit : handleCreateContact}
@@ -190,6 +224,7 @@ export default function ManageContactDialog(props) {
         fromProject={fromProject}
         formValues={formValues}
         handleValuesChange={handleValuesChange}
+        isClone={isClone}
       />
       {showAccountDialog ? (
         <ManageAccountDialog

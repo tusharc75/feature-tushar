@@ -412,9 +412,16 @@ const FormTypes = (props) => {
         if (!multiple) {
           setFieldValue(name, data.fileUrl);
         } else {
-          setImage("")
-          setFieldValue(name, [...values[name], data.fileUrl]);
-          setImageFileName("")
+          if (values[name]) {
+            setImage("")
+            setFieldValue(name, [...values[name], data.fileUrl]);
+            setImageFileName("")
+          } else {
+            let currentData = values[name] ? values[name] : []
+            setImage("")
+            setFieldValue(name, [...currentData, data.fileUrl]);
+            setImageFileName("")
+          }
         }
         setImgUploading(false);
       })
@@ -640,7 +647,7 @@ const FormTypes = (props) => {
         field.displayCurrency = field.displayCurrency.filter((e) => e !== displayValue);
         if (field.isConverter) {
           let _fieldName = field.fieldName + '_' + displayValue.toLowerCase() + '_' + field.displayUnits[0].toLowerCase();
-          setFieldValue(_fieldName, 0);
+          //setFieldValue(_fieldName, 0);
         } else {
           let _fieldName = field.fieldName + '_' + displayValue.toLowerCase();
           setFieldValue(_fieldName, 0);
@@ -648,7 +655,7 @@ const FormTypes = (props) => {
       } else if (displayType === 'converter') {
         field.displayUnits = field.displayUnits.filter((e) => e !== displayValue);
         let _fieldName = field.fieldName + '_' + displayValue.toLowerCase();
-        setFieldValue(_fieldName, 0);
+        //setFieldValue(_fieldName, 0);
       }
       removeDisplayType(displayType, field, displayValue);
     }
@@ -1686,7 +1693,7 @@ const FormTypes = (props) => {
           const matches = option.structured_formatting.main_text_matched_substrings;
           const parts = parse(
             option.structured_formatting.main_text,
-            matches.map((match) => [match.offset, match.offset + match.length])
+            matches?.map((match) => [match.offset, match.offset + match.length])
           );
 
           return (
@@ -1700,7 +1707,7 @@ const FormTypes = (props) => {
                 />
               </Grid>
               <Grid item xs>
-                {parts.map((part, index) => (
+                {parts?.map((part, index) => (
                   <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
                     {part.text}
                   </span>
@@ -1982,7 +1989,7 @@ const FormTypes = (props) => {
           </Button>
         </label>
         <Box mt={1}>
-          <Typography color="textSecondary">{values[name].length > 0 ? "Images Preview" : "No Images"}</Typography>
+          <Typography color="textSecondary">{values[name]?.length > 0 ? "Images Preview" : "No Images"}</Typography>
           <Box display="flex" flexWrap="wrap" justifyContent="space-arounf" overflow="hidden">
           <ImageList style={{flexWrap: "nowrap", transform: 'translateZ(0)'}}>
             {values[name]? values[name].map((item, i) => (

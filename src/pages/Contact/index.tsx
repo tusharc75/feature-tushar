@@ -33,6 +33,12 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import contactClass from './contact.module.scss'
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
+import EntitySelectionsDialog from "../../components/EntitySelections"
+import { AiOutlineDeploymentUnit } from "react-icons/ai"
+import { sidebarResource } from "../../constants/helpers"
+import Tooltip from "@material-ui/core/Tooltip"
+import IconButton from "@material-ui/core/IconButton"
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 const ContactTypes = [
   {
@@ -49,7 +55,6 @@ let contactTimeout;
 export default function Contact(props) {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-
   const {
     state: { user, selectedEntity, permissions }, dispatch: entityDispatch
   }: any = useData();
@@ -59,11 +64,12 @@ export default function Contact(props) {
   } = props;
   const [selectedType, setSelectedType] = useState(1);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [contactId, setContactId] = useState('');
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
 
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
-  const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
+  const [showCreateContactDialog, setShowCreateContactDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [singleContactDelete, setSingleContactDelete] = useState({
     id: null,
     show: false,
@@ -80,8 +86,10 @@ export default function Contact(props) {
     isRead: permissions[contactResource]?.isRead,
     isDelete: permissions[contactResource]?.isDelete,
   });
+  const [showEntityDialog, setShowEntityDialog] = useState(false)
 
   const [filter, setFilter] = useState('All Contacts');
+  const [entities, setEntities] = useState([])
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -127,7 +135,8 @@ export default function Contact(props) {
         setContactPermissions({
           isCreate: hasContactPermission.isCreate,
           isRead: hasContactPermission.isRead,
-          isDelete: hasContactPermission.isDelete
+          isDelete: hasContactPermission.isDelete,
+          isUpdate: hasContactPermission.isUpdate
         });
       }
     }
@@ -167,7 +176,6 @@ export default function Contact(props) {
   );
 
   const EntityRenderer = (params) => (
-
     <h5 className="createBy d-flex">
       {params.data?.firstEntity ?
         <Link className="link" title={params.data.firstEntity} to={`${routes.entity.path}/detail/${params.data.firstEntityId}`}>
@@ -219,6 +227,19 @@ export default function Contact(props) {
 
   const ActionsRenderer = (params) => (
     <>
+      <Tooltip
+        className={contactPermissions.isCreate ? "" : "cursor-stop"}
+        title={contactPermissions.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setShowCreateContactDialog({ open: true, isClone: true, idToClone: params.data._id })
+          }}
+        >
+          <FileCopyIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
       <GridDeleteIcon
         hasDeletePermission={contactPermissions.isDelete}
         ownerId={params.data.ownerId}
@@ -232,6 +253,36 @@ export default function Contact(props) {
         }}
         entity="contact"
       />
+
+      {
+        contactPermissions.isUpdate &&
+        <Tooltip title="Entity">
+          <IconButton
+            size="small"
+            aria-label="Entity"
+            onClick={() => {
+              setContactId(params.data._id)
+              setShowEntityDialog(true)
+              if (params?.data?.firstEntityId) {
+                let entities = []
+                if (params?.data?.firstEntityId) {
+                  entities.push(params?.data?.firstEntityId)
+                }
+                if (params?.data?.restEntity) {
+                  let restEntities = params?.data?.restEntity.map(o => o?.optionValue)
+                  entities = [...entities, ...restEntities]
+                }
+                setEntities([...entities])
+              }
+              else if (params?.data?.restEntity) {
+                let restEntities = params?.data?.restEntity.map(o => o?.optionValue)
+                setEntities([...restEntities])
+              }
+            }}>
+            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
+          </IconButton>
+        </Tooltip>
+      }
     </>
   );
 
@@ -395,9 +446,8 @@ export default function Contact(props) {
   const closeActions = () => {
     setAnchorEl(null);
   };
-
   const clickCreateNew = () => {
-    setShowCreateContactDialog(true);
+    setShowCreateContactDialog({ open: true, isClone: false, idToClone: null });
   };
 
   const handleDeleteContact = () => {
@@ -441,7 +491,8 @@ export default function Contact(props) {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes[contactResource].title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes[contactResource].title }]}
+          />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
@@ -450,6 +501,12 @@ export default function Contact(props) {
             api={contactApi}
             afterImportCompleted={() => {
               getContacts();
+            }}
+            recordsToExport={selectedRecords.length}
+            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            onExportToExcelSuccess={() => {
+              if (gridApi) gridApi.deselectAll()
+              else getContacts()
             }}
           />
         </Grid>
@@ -509,50 +566,78 @@ export default function Contact(props) {
                     </Button>
                   </>
                 )}
-
-                {contactPermissions.isDelete && (
-                  <>
-                    <Button
-                      // disabled={Boolean(!selectedBrand)}
-                      disabled={selectedRecords.length === 0}
-                      variant="outlined"
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      className={styles.action_submit_btn}
-                      aria-controls="action-menu"
-                    >
-                      Actions <ExpandMore />
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
+                <>
+                  <Button
+                    // disabled={Boolean(!selectedBrand)}
+                    disabled={selectedRecords.length === 0}
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    className={styles.action_submit_btn}
+                    aria-controls="action-menu"
+                  >
+                    Actions <ExpandMore />
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    {contactPermissions.isDelete && (
                       <MenuItem
                         disabled={selectedRecords.length === 0}
                         onClick={() => {
                           if (selectedRecords.some((d) => d.canDelete === false)) {
                             closeActions();
-                            setShowDeleteWarningConfirmBox(true);
+                            setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
                           } else {
                             closeActions();
                             setShowDeleteConfirmBox(true);
                           }
+                        }}>
+                        Delete
+                      </MenuItem>)}
+                    {contactPermissions.isUpdate && (
+                      <MenuItem
+                        disabled={selectedRecords.length === 0}
+                        onClick={() => {
+                          if (selectedRecords.some((d) => d.isUpdate === false)) {
+                            closeActions();
+                            setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+                          } else {
+                            closeActions();
+                            if (selectedRecords.length) {
+                              let entities = []
+                              selectedRecords.map(current => {
+
+                                if (current?.firstEntityId) {
+                                  entities = [...entities, current?.firstEntityId]
+                                }
+                                if (current?.restEntity) {
+                                  let restEntities = current?.restEntity.map(o => o?.optionValue)
+                                  entities = [...entities, ...restEntities]
+                                }
+                              })
+                              setEntities([...entities])
+                            }
+                            setShowEntityDialog(true)
+                          }
                         }}
                       >
-                        Delete
+                        Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
                       </MenuItem>
-                    </Menu>
-                  </>
-                )}
+                    )}
+                  </Menu>
+                </>
+
               </Box>
             </Grid>
           </Grid>
@@ -567,17 +652,20 @@ export default function Contact(props) {
             rowCount={rowCount}
             limit={limit}
             pageSizes={pageSizes}
+            actionWidth={170}
             page={page}
-            actionWidth={100}
             loading={loading}
             renderedFrom={contactResource}
           />
 
-          {showDeleteWarningConfirmBox ? (
+          {showDeleteWarningConfirmBox?.show ? (
             <MessageDialog
-              open={showDeleteWarningConfirmBox}
-              message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-              onClose={() => setShowDeleteWarningConfirmBox(false)}
+              open={showDeleteWarningConfirmBox?.show}
+              message={showDeleteWarningConfirmBox?.isDelete ?
+                `You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`
+                : `You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`
+              }
+              onClose={() => setShowDeleteWarningConfirmBox({ show: false, isDelete: false })}
             />
           ) : null}
           {showDeleteConfirmBox ? (
@@ -589,17 +677,19 @@ export default function Contact(props) {
             />
           ) : null}
 
-          {showCreateContactDialog && (
+          {showCreateContactDialog?.open && (
             <ManageContactDialog
-              open={showCreateContactDialog}
-              onClose={() => setShowCreateContactDialog(false)}
+              open={showCreateContactDialog?.open}
+              onClose={() => setShowCreateContactDialog({ open: false, isClone: false, idToClone: null })}
               onSuccess={() => {
-                setShowCreateContactDialog(false);
+                setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
                 getContacts();
               }}
               contactResource={contactResource}
               contactApi={contactApi}
               account={account}
+              contactId={showCreateContactDialog?.idToClone}
+              isClone={showCreateContactDialog?.isClone}
             />
           )}
 
@@ -617,6 +707,20 @@ export default function Contact(props) {
               onOk={handleSingleDeleteContacts}
             />
           ) : null}
+          {
+            showEntityDialog ?
+              <EntitySelectionsDialog
+                open={showEntityDialog}
+                resource={sidebarResource[contactResource]}
+                resourceIds={selectedRecords.length ? selectedRecords.map(o => o._id) : [contactId]}
+                onClose={() => {
+                  setShowEntityDialog(false)
+                  setContactId("")
+                }}
+                onSuccess={getContacts}
+                entities={entities}
+              /> : null
+          }
         </Box>
       </CustomContainer>
     </Fragment>

@@ -47,7 +47,8 @@ export default function ManageContact(props) {
     contactId = null,
     accountId = null,
     formValues = {},
-    handleValuesChange = null
+    handleValuesChange = null,
+    isClone = false
   } = props;
 
   const classes = useStyles();
@@ -123,7 +124,6 @@ export default function ManageContact(props) {
       setFormsData(setFieldsInAscendingOrder(contactData.fields));
     }
   }, [contactData.fields]);
-
 
   const onOwnerDropdownOpen = (selectedCollaborator, selectedEntity) => {
     if (selectedEntity?.length > 0) {
@@ -264,9 +264,10 @@ export default function ManageContact(props) {
             }
           }}
           title={
-            isNew
-              ? "Add Contact"
-              : `Editing ${contactData.initialValues.firstName}`
+            isClone ? "Clone" :
+              isNew
+                ? "Add Contact"
+                : `Editing ${contactData.initialValues.firstName}`
           }
         />
 
