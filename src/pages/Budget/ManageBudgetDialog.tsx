@@ -379,7 +379,9 @@ export default function ManageBudgetDialog({
                                                                                     options={field.option}
                                                                                     fullWidth
                                                                                     isTooltip={field?.isTooltip || false}
+                                                                                    required={field.required}
                                                                                     tooltipMessage={field?.tooltipMessage}
+                                                                                    disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                     size="small"
                                                                                     onChange={(e, value) => {
                                                                                         setFieldValue(
@@ -411,6 +413,7 @@ export default function ManageBudgetDialog({
                                                                                     fullWidth
                                                                                     isTooltip={field?.isTooltip || false}
                                                                                     tooltipMessage={field?.tooltipMessage}
+                                                                                    disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                     size="small"
                                                                                     onChange={(e, val) => {
                                                                                         if (val && val.currencyCode) {
@@ -441,6 +444,7 @@ export default function ManageBudgetDialog({
                                                                                         )
                                                                                     }
                                                                                     values={values}
+                                                                                    disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                     errors={errors}
                                                                                     touched={touched}
                                                                                     label={field.fieldLabel}
