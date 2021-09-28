@@ -506,83 +506,85 @@ const User: FC = () => {
 
   return (
     <>
-      <Joyride
-        continuous
-        callback={handleJoyrideCallback}
-        getHelpers={getHelpers}
-        run={tourRun}
-        scrollToFirstStep={true}
-        showProgress={true}
-        showSkipButton={true}
-        steps={[
-          {
-            content: <h2>Welcome to user resource.</h2>,
-            locale: { skip: <strong aria-label="skip">S-K-I-P</strong> },
-            placement: 'center',
-            target: '#userResourceTitle',
-          },
-          {
-            content: <p>Control flow for the user operations.</p>,
-            title: "User Controls",
-            placement: 'bottom',
-            target: '#userOperations',
-          },
-          {
-            content: <p>Import and Export data for the resource<br /> to import data first download the template and then create your records and import them directly.</p>,
-            title: "Import, Export Data",
-            placement: 'bottom',
-            target: '#importExportLinks',
-          },
-          {
-            content: <p>This is column selector, you can choose which information of the resource should appear in the grid, by default it shows all the fields.</p>,
-            title: "Columns Selector",
-            placement: 'bottom',
-            target: '.ag-grid-listing-grid-header-options',
-          },
-          {
-            content: <p>This is data grid for the resource and all the records will appear here.</p>,
-            title: "Resource Grid",
-            placement: 'bottom',
-            target: '.ag-grid-listing-grid',
-          },
-          {
-            content: <p>These checkboxes are for selcting the records that appears in the grid you can select all by clicking in this or you can select particular records of each row.</p>,
-            title: "Select Records",
-            placement: 'bottom',
-            target: '.ag-pinned-left-header',
-          },
-          {
-            content: <p>There will be actions in an each row according to permission to delete or clone record.</p>,
-            title: "Grid Actions",
-            placement: 'bottom',
-            target: '.ag-pinned-right-header',
-          },
-          {
-            content: <p>This is for pagination in the grid.</p>,
-            title: "Grid Pagination",
-            placement: 'bottom',
-            target: '.agPagination',
-          },
-          {
-            content: <p>Here you can choose how many rows you'd like to see in the grid.</p>,
-            title: "Select Row Count",
-            placement: 'bottom',
-            target: '.MuiTablePagination-selectRoot',
-          },
-          {
-            content: <p>Go to next and previous.</p>,
-            title: "Next and previous",
-            placement: 'bottom',
-            target: '.MuiTablePagination-actions',
-          },
-        ]
-        }
-        styles={{
-          options: {
-            zIndex: 10000
+      {['local', 'development'].includes(process.env.REACT_APP_ENV) && (
+        <Joyride
+          continuous
+          callback={handleJoyrideCallback}
+          getHelpers={getHelpers}
+          run={tourRun}
+          scrollToFirstStep={true}
+          showProgress={true}
+          showSkipButton={true}
+          steps={[
+            {
+              content: <h2>Welcome to user resource.</h2>,
+              locale: { skip: <strong aria-label="skip">S-K-I-P</strong> },
+              placement: 'center',
+              target: '#userResourceTitle',
+            },
+            {
+              content: <p>Control flow for the user operations.</p>,
+              title: "User Controls",
+              placement: 'bottom',
+              target: '#userOperations',
+            },
+            {
+              content: <p>Import and Export data for the resource<br /> to import data first download the template and then create your records and import them directly.</p>,
+              title: "Import, Export Data",
+              placement: 'bottom',
+              target: '#importExportLinks',
+            },
+            {
+              content: <p>This is column selector, you can choose which information of the resource should appear in the grid, by default it shows all the fields.</p>,
+              title: "Columns Selector",
+              placement: 'bottom',
+              target: '.ag-grid-listing-grid-header-options',
+            },
+            {
+              content: <p>This is data grid for the resource and all the records will appear here.</p>,
+              title: "Resource Grid",
+              placement: 'bottom',
+              target: '.ag-grid-listing-grid',
+            },
+            {
+              content: <p>These checkboxes are for selcting the records that appears in the grid you can select all by clicking in this or you can select particular records of each row.</p>,
+              title: "Select Records",
+              placement: 'bottom',
+              target: '.ag-pinned-left-header',
+            },
+            {
+              content: <p>There will be actions in an each row according to permission to delete or clone record.</p>,
+              title: "Grid Actions",
+              placement: 'bottom',
+              target: '.ag-pinned-right-header',
+            },
+            {
+              content: <p>This is for pagination in the grid.</p>,
+              title: "Grid Pagination",
+              placement: 'bottom',
+              target: '.agPagination',
+            },
+            {
+              content: <p>Here you can choose how many rows you'd like to see in the grid.</p>,
+              title: "Select Row Count",
+              placement: 'bottom',
+              target: '.MuiTablePagination-selectRoot',
+            },
+            {
+              content: <p>Go to next and previous.</p>,
+              title: "Next and previous",
+              placement: 'bottom',
+              target: '.MuiTablePagination-actions',
+            },
+          ]
           }
-        }}
-      />
+          styles={{
+            options: {
+              zIndex: 10000
+            }
+          }}
+        />
+      )}
       {
         isOpen?.open && (
           <ManageUserDialog
