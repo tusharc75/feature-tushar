@@ -1393,6 +1393,7 @@ export default function QuoteProcess(props) {
                                         className="mr-1"
                                         startIcon={<AiFillPlusCircle />}
                                         color="primary"
+                                        disabled={!permissions.product?.isCreate}
                                         onClick={() => {
                                             setIsAddNewProduct(true);
                                         }}
