@@ -27,7 +27,8 @@ const Header = (props) => {
     unAssignUsersFromEntity,
     openUserSetupDialog,
     assignDoaDisabled,
-    userSetupDisabled
+    userSetupDisabled,
+    setTourRun
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -43,8 +44,8 @@ const Header = (props) => {
     <Grid container className={styles.filter_side_container}>
       <Grid item xs={6} className="d-flex align-items-center gap-1">
         <FaUsers className="headerLogo" />{" "}
-        <span className="listingHeader">{routes.user.title}</span>
-
+        <span id="userResourceTitle" className="listingHeader">{routes.user.title}</span>
+        <Button size="small" variant="outlined" onClick={() => setTourRun(true)}>Start Tour</Button>
         {entityRoleRedirectDetails.id && (
           <Chip
             className="ml-3"
@@ -57,7 +58,7 @@ const Header = (props) => {
         )}
       </Grid>
       <Grid item xs={6} className={styles.filter_side}>
-        <Box component="div" className={styles.filter_side_header}>
+        <Box component="div" className={styles.filter_side_header} id="userOperations">
           <SearchBox
             searchbox={styles.search_box_input}
             onSearch={onSearch}
