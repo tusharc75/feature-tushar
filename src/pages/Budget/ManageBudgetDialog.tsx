@@ -87,6 +87,10 @@ export default function ManageBudgetDialog({
 
     useEffect(() => {
         setFormsData(setFieldsInAscendingOrder(entityData.fields));
+
+        if (entityData.initialValues && entityData.initialValues["entity"]) {
+            onSalesRepDropdownOpen(entityData.initialValues["entity"])
+        }
     }, [entityData.fields]);
 
     const onSalesRepDropdownOpen = (selectedEntity) => {
@@ -162,7 +166,7 @@ export default function ManageBudgetDialog({
                         });
 
                         if (marketSegmentDropdownData) {
-                            setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data.marketSegment));
+                            setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data.marketSegment?.optionValue));
                         }
 
                         let clonedData = { ...data }
