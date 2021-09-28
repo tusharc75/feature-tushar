@@ -475,6 +475,7 @@ export default function ManageQuoteDialog({
         if (isClone) {
           let tempQuoteData = JSON.parse(JSON.stringify(dataToUpdate))
           const { _id, createdBy, updatedBy, quoteName, versions, ...rest } = tempQuoteData;
+          rest.owner = user?.user?._id
           setEntityData({
             fields: newFields,
             initialValues: getObjKeysWithValues(rest, newFields),
