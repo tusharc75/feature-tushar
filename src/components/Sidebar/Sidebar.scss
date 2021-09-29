@@ -17,17 +17,17 @@
   position: fixed;
   height: 140px;
   top: 55px;
-  padding: 10PX;
+  padding: 10px;
   z-index: 1;
-  background:  var(--primary);
+  background: var(--primary);
   width: 100%;
-  background-image: url("../../assets/header-bg.png");
+  background-image: url('../../assets/header-bg.png');
   background-blend-mode: overlay;
   width: calc(100% - 48px) !important;
 
   ol {
     li {
-       color: var(--tertiary-light)  !important;
+      color: var(--tertiary-light) !important;
       a {
         margin: 0px 4px;
         font-size: 1rem;
@@ -63,7 +63,6 @@
       .MuiListItem-root {
         padding: 2px 0px 0 50px;
         background: #f2f2f2;
-        
 
         &:hover {
           background: #d7d7d7;
@@ -73,7 +72,7 @@
     .sub-list::before {
       background-color: white;
       bottom: auto;
-      content: "";
+      content: '';
       height: 8.5px;
       left: 24px;
       margin-top: 14px;
@@ -88,7 +87,7 @@
     .sub-list::after {
       border-left: 2px solid var(--primary);
       bottom: 0;
-      content: "";
+      content: '';
       left: 27px;
       position: absolute;
       top: 0;
@@ -99,8 +98,7 @@
   color: var(--primary);
 }
 
-
-.profileBox{
+.profileBox {
   margin-right: 1rem !important;
   // margin-top: 0.5rem !important;
   background: #ececec;
@@ -108,6 +106,14 @@
   padding: 10px 5px;
 }
 
-.bgbox{
+.bgbox {
   background: #ececec;
+}
+
+.sidebar-overflow-hide {
+  overflow-x: hidden !important;
+}
+
+.sidebar-overflow-auto {
+  overflow: auto !important;
 }

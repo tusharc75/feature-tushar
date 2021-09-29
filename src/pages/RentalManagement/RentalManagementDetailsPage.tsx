@@ -36,6 +36,7 @@ import Activity from "../../components/Activity";
 import styles from "./Retal.module.scss";
 import ReceivingTicket from "./ReceivingTicket";
 import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
+import DeleteButton from "../../components/Helpers/DeleteButton";
 
 const rentalProcessSteps = ["New", "Add Rental Cost", "Additional Cost", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
@@ -203,8 +204,7 @@ const RentalManagementDetailsPage = () => {
   };
 
   const handleDelete = () => {
-
-    axiosInstance().put(`${rentalManagement.rentalManagementApi}/remove`, { "ids": [] }).then(() => {
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/remove`, { "ids": [rentalManagementData._id] }).then(() => {
       setShowConfirmBox(false);
       history.goBack();
     }).catch((error) => {
@@ -425,6 +425,15 @@ const RentalManagementDetailsPage = () => {
                       </Button>
                     )}
 
+                    {permissions?.rentalManagement?.isDelete &&
+                      rentalManagementData?.owner?.optionValue &&
+                      user?.user?._id &&
+                      rentalManagementData.owner.optionValue === user.user._id ? (
+                      <DeleteButton
+                        text="Delete"
+                        onClick={() => setShowConfirmBox(true)}
+                      />
+                    ) : null}
                   </DetailsPageHeader>
                 )}
 
@@ -736,7 +745,7 @@ const RentalManagementDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this product inventory ?`
+          message={`Are you sure you want to delete this rental management ?`
           }
           onClose={() => {
             setShowConfirmBox(false);
