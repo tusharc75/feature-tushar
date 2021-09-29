@@ -12,6 +12,7 @@ export const detailPagePath = {
     user: routes?.userDetail?.path,
     collaborator: routes?.userDetail?.path,
 }
+
 export const getColumnData = (title, field) => {
     let tempMetaData = {
         leads: {
