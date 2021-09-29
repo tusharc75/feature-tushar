@@ -29,6 +29,7 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import './style.scss';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { getColumnData } from "../../constants/columns"
 
 const LeadTypes = [
   {
@@ -110,6 +111,9 @@ const Leads = () => {
       setLeadsPermissions(permissions[leadResource]);
     }
   }, [permissions]);
+  useEffect(() => {
+    fetchGridMetadata()
+  }, [])
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -128,6 +132,38 @@ const Leads = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity]);
 
+  const fetchGridMetadata = () => {
+    axiosInstance()
+      .get(`user/meta-grid/60b9111e25391aca2ba3a31c`)
+      .then((data) => { })
+
+    let title = routes.lead.title.toLowerCase()
+    let dd = [
+      { field: 'concatedName', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
+      { field: 'relatedOpportunity', headerName: 'Related Opportunity', show: true, cellRenderer: 'relatedOpportunityRenderer' },
+      { field: 'title', headerName: 'Title', show: true, cellRenderer: 'commonRenderer' },
+      { field: 'company', headerName: 'Company', show: true, cellRenderer: 'commonRenderer' },
+      { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
+      { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
+      { field: 'phone', headerName: 'Phone', show: true, cellRenderer: 'commonRendererWithCopy' },
+      { field: 'mobile', headerName: 'Mobile', show: true, cellRenderer: 'commonRendererWithCopy' },
+      { field: 'email', headerName: 'Email', show: true, cellRenderer: 'commonRendererWithCopy' },
+      { field: 'owner', headerName: 'Owner Alies', show: true, cellRenderer: 'commonRenderer' }
+    ]
+    axiosInstance()
+      .get(`/field?resource=Lead&entity=${selectedEntity}`)
+      .then(({ data: { data } }) => {
+        let columns = []
+        let filteredData = data.map(o => {
+          let field = o?.fieldData
+          console.log('routes.lead.title', title)
+          let currentColumn = getColumnData(title, o?.fieldData)
+          columns = [...columns, currentColumn]
+          return o?.fieldData
+        })
+        console.log("🚀 ~ file: index.tsx ~ line 138 ~ .then ~ data", filteredData)
+      })
+  }
   const NameRenderer = (params) => (
     <Link className="link" to={`${leadDetailPage.path}/${params.data._id}`} title={params.value}>
       {params.value}
