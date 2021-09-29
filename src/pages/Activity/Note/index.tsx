@@ -105,7 +105,12 @@ const Note = () => {
   };
 
   const NameRenderer = (params) => (
-    <span className="link cursor-pointer" onClick={() => handleActivityOpen(params.data)}>
+    <span className={permissions?.note?.isUpdate ? "link cursor-pointer" : ""}
+      onClick={() => {
+        if (permissions?.note?.isUpdate) {
+          handleActivityOpen(params.data)
+        }
+      }}>
       {params.value}
     </span>
   );
@@ -118,7 +123,7 @@ const Note = () => {
   const ActionsRenderer = (params) => (
     <>
       <GridDeleteIcon
-        hasDeletePermission={permissions.note.isDelete}
+        hasDeletePermission={permissions?.note?.isDelete}
         ownerId={params.data.createdBy}
         userId={user?.user?._id}
         onDelete={() => showConfirmBox(params.data)}
@@ -242,19 +247,21 @@ const Note = () => {
             <Grid item xs={6} className={styles.filter_side}>
               <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>
                 <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  className={styles.add_submit_btn}
-                  onClick={() => {
-                    setIsNew(true);
-                    setShowCreateDialog(true);
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
+                {
+                  permissions?.note?.isCreate ?
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      className={styles.add_submit_btn}
+                      onClick={() => {
+                        setIsNew(true);
+                        setShowCreateDialog(true);
+                      }}
+                      startIcon={<AddOutlined />}
+                    >
+                      Add
+                    </Button> : null}
                 {/* </Box> */}
                 <Button
                   className={styles.action_submit_btn}

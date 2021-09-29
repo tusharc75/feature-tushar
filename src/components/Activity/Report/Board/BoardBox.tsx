@@ -35,7 +35,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 export const BoardBox = (props) => {
-  const { type, data, id, index, moveCard, fetchBoard, handleActivityOpen } =
+  const { type, data, id, index, moveCard, fetchBoard, handleActivityOpen, canUpdate, canDelete } =
     props;
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -101,7 +101,7 @@ export const BoardBox = (props) => {
           setAnchorEl(null);
           fetchBoard();
         })
-        .catch((err) => {});
+        .catch((err) => { });
     }
     if (type === "case") {
       DeleteCase(data._id)
@@ -109,7 +109,7 @@ export const BoardBox = (props) => {
           setAnchorEl(null);
           fetchBoard();
         })
-        .catch((err) => {});
+        .catch((err) => { });
     }
     if (type === "task") {
       DeleteTask(data._id)
@@ -117,7 +117,7 @@ export const BoardBox = (props) => {
           setAnchorEl(null);
           fetchBoard();
         })
-        .catch((err) => {});
+        .catch((err) => { });
     }
   };
 
@@ -128,14 +128,17 @@ export const BoardBox = (props) => {
     <div
       ref={ref}
       data-handler-id={handlerId}
-      title={`Due Date - ${
-        new Date(data?.dueDate).getDate() === new Date().getDate()
-          ? "Today"
-          : new Date(data?.dueDate).toDateString()
-      }`}
+      title={`Due Date - ${new Date(data?.dueDate).getDate() === new Date().getDate()
+        ? "Today"
+        : new Date(data?.dueDate).toDateString()
+        }`}
     >
       <Box
-        onClick={() => handleActivityOpen(id)}
+        onClick={() => {
+          if (canUpdate) {
+            handleActivityOpen(id)
+          }
+        }}
         className={classes.activitybox}
         style={{ opacity }}
       >
@@ -162,19 +165,19 @@ export const BoardBox = (props) => {
                         color:
                           new Date(data?.dueDate).getDate() <
                             new Date().getDate() ||
-                          new Date(data?.dueDate).getMonth() <
+                            new Date(data?.dueDate).getMonth() <
                             new Date().getMonth() ||
-                          new Date(data?.dueDate).getFullYear() <
+                            new Date(data?.dueDate).getFullYear() <
                             new Date().getFullYear()
                             ? "#dc3545"
                             : new Date(data?.dueDate).getDate() ===
-                                new Date().getDate() &&
+                              new Date().getDate() &&
                               new Date(data?.dueDate).getMonth() ===
-                                new Date().getMonth() &&
+                              new Date().getMonth() &&
                               new Date(data?.dueDate).getFullYear() ===
-                                new Date().getFullYear()
-                            ? "#28a745"
-                            : "#838485",
+                              new Date().getFullYear()
+                              ? "#28a745"
+                              : "#838485",
                       }}
                       fontSize="small"
                     />
@@ -185,32 +188,36 @@ export const BoardBox = (props) => {
                     color:
                       new Date(data?.dueDate).getDate() <
                         new Date().getDate() ||
-                      new Date(data?.dueDate).getMonth() <
+                        new Date(data?.dueDate).getMonth() <
                         new Date().getMonth() ||
-                      new Date(data?.dueDate).getFullYear() <
+                        new Date(data?.dueDate).getFullYear() <
                         new Date().getFullYear()
                         ? "#dc3545"
                         : new Date(data?.dueDate).getDate() ===
-                            new Date().getDate() &&
+                          new Date().getDate() &&
                           new Date(data?.dueDate).getMonth() ===
-                            new Date().getMonth() &&
+                          new Date().getMonth() &&
                           new Date(data?.dueDate).getFullYear() ===
-                            new Date().getFullYear()
-                        ? "#28a745"
-                        : "#838485",
+                          new Date().getFullYear()
+                          ? "#28a745"
+                          : "#838485",
                   }}
                 />
               </Box>
             </Grid>
-            <Grid item xs={1}>
-              <IconButton
-                size="small"
-                aria-label="delete"
-                onClick={handleOpenMenu}
-              >
-                <MoreHoriz />
-              </IconButton>
-            </Grid>
+            {
+              canDelete ?
+                <Grid item xs={1}>
+                  <IconButton
+                    size="small"
+                    aria-label="delete"
+                    onClick={handleOpenMenu}
+                  >
+                    <MoreHoriz />
+                  </IconButton>
+                </Grid>
+                : null
+            }
           </Grid>
           <Typography color="textSecondary" variant="body2">
             {data?.description}
@@ -219,15 +226,19 @@ export const BoardBox = (props) => {
         <Box pt={2}>
           <ListRelatedTo relatedTo={data?.relatedTo} originRelatedTo={[]} />
         </Box>
-        <Menu
-          id="simple-menu"
-          anchorEl={anchorEl}
-          keepMounted
-          open={Boolean(anchorEl)}
-          onClose={handleCloseMenu}
-        >
-          <MenuItem onClick={handleDelete}>Delete</MenuItem>
-        </Menu>
+        {
+          canDelete ?
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleCloseMenu}>
+              <MenuItem onClick={handleDelete}>Delete</MenuItem>
+            </Menu>
+            : null
+        }
+
       </Box>
     </div>
   );

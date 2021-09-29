@@ -28,7 +28,6 @@ const Header = (props) => {
     openUserSetupDialog,
     assignDoaDisabled,
     userSetupDisabled,
-    setTourRun
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -45,7 +44,6 @@ const Header = (props) => {
       <Grid item xs={6} className="d-flex align-items-center gap-1">
         <FaUsers className="headerLogo" />{" "}
         <span id="userResourceTitle" className="listingHeader">{routes.user.title}</span>
-        <Button size="small" variant="outlined" onClick={() => setTourRun(true)}>Start Tour</Button>
         {entityRoleRedirectDetails.id && (
           <Chip
             className="ml-3"

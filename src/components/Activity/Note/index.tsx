@@ -14,6 +14,7 @@ import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, displayDate } from "../../../constants/helpers";
+import { useData } from "../../../StateProvider/Provider";
 
 export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -21,6 +22,9 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [noteId, setNoteId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(true);
+  const {
+    state: { permissions },
+  }: any = useData();
 
   useEffect(() => {
     fetchNote();
@@ -75,7 +79,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   };
   const handleDialogClose = () => {
     setOpen(false);
-}
+  }
 
   return (
     <Box className="activityDetailBox">
@@ -107,16 +111,19 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                       {displayDate(_note.createdBy.date)}
                     </span>
                   </Grid>
-                  <Grid item xs={2} container justify="flex-end">
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      aria-label="delete"
-                      onClick={(event) => handleOpenMenu(event, _note._id)}
-                    >
-                      <MoreHorizIcon />
-                    </IconButton>
-                  </Grid>
+                  {
+                    permissions["note"]?.isUpdate || permissions["note"]?.isDelete ?
+                      <Grid item xs={2} container justify="flex-end">
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          aria-label="delete"
+                          onClick={(event) => handleOpenMenu(event, _note._id)}
+                        >
+                          <MoreHorizIcon />
+                        </IconButton>
+                      </Grid> : null
+                  }
                 </Grid>
               </Box>
               <Box pt={1}>
@@ -138,6 +145,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
           <Typography variant="subtitle2">No Past Note</Typography>
         </Box>
       )}
+
       <Menu
         id="simple-menu"
         anchorEl={anchorEl}
@@ -145,9 +153,14 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         open={Boolean(anchorEl)}
         onClose={handleCloseMenu}
       >
-        <MenuItem onClick={handleEdit}>Edit</MenuItem>
-        <MenuItem onClick={handleDelete}>Delete</MenuItem>
+        {
+          permissions["note"]?.isUpdate ? <MenuItem onClick={handleEdit}>Edit</MenuItem> : null
+        }
+        {
+          permissions["note"]?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
       </Menu>
+
+
       <Dialog
         open={open}
         aria-labelledby="customized-dialog-title"
