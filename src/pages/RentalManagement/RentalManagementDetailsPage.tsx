@@ -37,14 +37,14 @@ import styles from "./Retal.module.scss";
 import ReceivingTicket from "./ReceivingTicket";
 import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
-import InfoIcon from '@material-ui/icons/Info';
 import HideWhenOffline from "../../components/HideWhenOffline";
+import DeleteButton from "../../components/Helpers/DeleteButton";
 
 const rentalProcessSteps = ["New", "Add Rental Cost", "Additional Cost", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
-  const { isOffline, offlineFieldsData, offlineGridData } = useContext(CustomOfflineContext)
+  const { isOffline, offlineFieldsData, offlineGridData, updateOfflineGridData } = useContext(CustomOfflineContext);
 
   const { id } = useParams();
   const history = useHistory();
@@ -185,6 +185,12 @@ const RentalManagementDetailsPage = () => {
         }
       }
 
+      try {
+        updateOfflineGridData("rentalManagement", [data], []);
+      } catch (ex) {
+        console.error(`Rental Management: Error while adding/updating data for Offline context. Error: ${ex.message}`)
+      }
+
       handleMainPoints(data);
       setHeadingLbl(data.rentalJobName);
       setCustomizedRoutes([routes.rentalManagement, { title: `${data.rentalJobName}` }]);
@@ -223,8 +229,13 @@ const RentalManagementDetailsPage = () => {
   };
 
   const handleDelete = () => {
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/remove`, { "ids": [rentalManagementData._id] }).then(() => {
+      try {
+        updateOfflineGridData("rentalManagement", [], [rentalManagementData._id]);
+      } catch (ex) {
+        console.error(`Rental Management: Error while removing data for Offline context. Error: ${ex.message}`)
+      }
 
-    axiosInstance().put(`${rentalManagement.rentalManagementApi}/remove`, { "ids": [] }).then(() => {
       setShowConfirmBox(false);
       history.goBack();
     }).catch((error) => {
@@ -444,6 +455,18 @@ const RentalManagementDetailsPage = () => {
                         Edit
                       </Button>
                     )}
+
+                    <HideWhenOffline>
+                      {permissions?.rentalManagement?.isDelete &&
+                        rentalManagementData?.owner?.optionValue &&
+                        user?.user?._id &&
+                        rentalManagementData.owner.optionValue === user.user._id ? (
+                        <DeleteButton
+                          text="Delete"
+                          onClick={() => setShowConfirmBox(true)}
+                        />
+                      ) : null}
+                    </HideWhenOffline>
                   </DetailsPageHeader>
                 )}
 
@@ -759,21 +782,18 @@ const RentalManagementDetailsPage = () => {
         </div>
 
       </Fragment>
-      {
-        showConfirmBox && (
-          <ConfirmationDialog
-            open={showConfirmBox}
-            message={`Are you sure you want to delete this product inventory ?`
-            }
-            onClose={() => {
-              setShowConfirmBox(false);
-            }}
-            onOk={handleDelete}
-          />
-        )
-      }
-      {
-        addExistingProductDialog &&
+      {showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete this rental management ?`
+          }
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={handleDelete}
+        />
+      )}
+      {addExistingProductDialog &&
         <AddExistingProductInventory
           addProductInventory={handleAddProductInventory}
           handleProductInventoryClose={() => { setAddExistingProductDialog(false) }}
