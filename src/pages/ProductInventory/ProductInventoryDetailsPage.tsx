@@ -60,20 +60,20 @@ const ProductInventoryDetailsPage = () => {
 
   const NameRenderer = (params) => (
     <>{
-      params.value ?(
+      params.value ? (
         params.data.type === "Receiving Ticket" ?
           <Link className="link" title={params.value} to={`${routes.receivingTicketDetail.path}/${params.data.referenceId}`}>
             {params.value}
           </Link> : params.data.type.toLowerCase() === "repair" ?
             <Link className="link" title={params.value} to={`${routes.repairJobDetail.path}/${params.data.referenceId}`}>
               {params.value}
-            </Link> 
-         : params.data.type.toLowerCase() === "rental" ?
-          <Link className="link" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`}>
-            {params.value}
-          </Link> : params.value
-      ): (
-      <NoDataCell />
+            </Link>
+            : params.data.type.toLowerCase() === "rental" ?
+              <Link className="link" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`}>
+                {params.value}
+              </Link> : params.value
+      ) : (
+        <NoDataCell />
       )
     }
 
@@ -326,6 +326,13 @@ const ProductInventoryDetailsPage = () => {
                 )}
               </Box>
               <Grid container spacing={2}>
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <div className="detail-box">
+                    <h3 className="form-label-style" title={"Asset History"}>
+                      {"Asset History"}
+                    </h3>
+                  </div>
+                </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
                   {columns ?
                     <CustomAgGrid
