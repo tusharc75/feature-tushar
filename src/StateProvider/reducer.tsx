@@ -1,7 +1,7 @@
 import { getPermissions } from "../constants/helpers";
 import {
   SET_USER, USER_LOADING, SET_ROLE, SET_SELECTED_ENTITY, SET_CHATTER,
-  SET_CART_COUNT
+  SET_CART_COUNT, SET_START_TOUR
 } from "./actionTypes";
 
 export const initialState = {
@@ -12,7 +12,11 @@ export const initialState = {
   selectedEntity: null,
   permissions: null,
   chatter: null,
-  cartCount: 0
+  cartCount: 0,
+  tour: {
+    path: '',
+    start: false,
+  }
 };
 
 const reducer = (state = initialState, action) => {
@@ -28,6 +32,10 @@ const reducer = (state = initialState, action) => {
 
     case SET_CHATTER:
       return { ...state, chatter: action.payload };
+
+    case SET_START_TOUR:
+      const { start, path } = action.payload
+      return { ...state, tour: { start, path } };
 
     case SET_CART_COUNT:
       return { ...state, cartCount: action.payload };

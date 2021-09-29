@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { Toolbar, Box, makeStyles, withWidth } from "@material-ui/core";
 import { motion } from "framer-motion";
-import { useLocation } from "react-router-dom";
+import { useLocation, useHistory } from "react-router-dom";
+import Joyride, { CallBackProps, STATUS, StoreHelpers } from 'react-joyride';
+
 
 import Sidebar from "./Sidebar/Sidebar";
 import GlobalUserChat from "./GlobalUserChat";
+import { useData } from "../StateProvider/Provider";
+import { SET_START_TOUR } from "../StateProvider/actionTypes";
+import { DashboardSteps, UserSteps } from "../constants/tourSteps";
 
 const useStyles = makeStyles(() => ({
   content: {
@@ -26,8 +31,10 @@ const useStyles = makeStyles(() => ({
 const Layout = ({ children, width }) => {
   const contentRef = useRef(null);
   const { key } = useLocation();
+  const history = useHistory();
   const classes = useStyles();
   const [toggleDrawer, setToggleDrawer] = useState<Boolean>(false);
+  const { state: { tour }, dispatch } = useData()
 
   const mobileWidths = ["xs", "sm"];
 
@@ -40,8 +47,52 @@ const Layout = ({ children, width }) => {
     });
   }, [key]);
 
+  const getHelpers = (helpers: StoreHelpers) => {
+
+  }
+
+  const handleJoyrideCallback = (data: CallBackProps) => {
+    const { status } = data
+    const finishedStatus: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
+
+    if (finishedStatus.includes(status)) {
+      dispatch({
+        type: SET_START_TOUR, payload: {
+          start: false,
+          path: ""
+        }
+      })
+    }
+  }
+
+  const grapSteps = () => {
+    switch (tour.path) {
+      case "/":
+        return DashboardSteps;
+      case "/user":
+        return UserSteps
+      default:
+        return;
+    }
+  }
+
   return (
     <div ref={contentRef}>
+      {['local', 'development'].includes(process.env.REACT_APP_ENV) && <Joyride
+        continuous
+        callback={handleJoyrideCallback}
+        getHelpers={getHelpers}
+        run={tour.start}
+        scrollToFirstStep={true}
+        showProgress={true}
+        showSkipButton={true}
+        steps={grapSteps()}
+        styles={{
+          options: {
+            zIndex: 10000
+          }
+        }}
+      />}
       <Sidebar toggleDrawer={toggleDrawer} setToggleDrawer={setToggleDrawer} />
       <Toolbar />
       <Box display="flex">
