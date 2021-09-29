@@ -10,6 +10,7 @@ export const DashboardSteps: Step[] = [
   {
     content: 'You can access quickly all the resources from here',
     title: 'Sidebar (Quick Access)',
+    placement: 'right-start',
     target: '#sidebarOrDrawer'
   },
   {
@@ -68,13 +69,91 @@ export const UserSteps: Step[] = [
     title: 'User Resource',
     content: 'We will guide you through the usage.',
     placement: 'center',
-    target: '#userResourceTitle'
+    target: '#resourceHeader'
   },
   {
     content: 'Control flow for the user operations.',
     title: 'User Controls',
     placement: 'bottom',
-    target: '#userOperations'
+    target: '#resourceOperations'
+  },
+  {
+    content:
+      'Import and Export data for the resource \n to import data first download the template and then create your records and import them directly.',
+    title: 'Import, Export Data',
+    placement: 'bottom',
+    target: '#importExportLinks'
+  },
+  {
+    content:
+      'This is column selector, you can choose which information of the resource should appear in the grid, by default it shows all the fields.',
+    title: 'Columns Selector',
+    placement: 'bottom',
+    target: '.ag-grid-listing-grid-header-options'
+  },
+  {
+    content: 'This is data grid for the resource and all the records will appear here.',
+    title: 'Resource Grid',
+    placement: 'bottom',
+    target: '.ag-grid-listing-grid'
+  },
+  {
+    content:
+      'These checkboxes are for selcting the records that appears in the grid you can select all by clicking in this or you can select particular records of each row.',
+    title: 'Select Records',
+    placement: 'bottom',
+    target: '.ag-pinned-left-header'
+  },
+  {
+    content: 'There will be actions in an each row according to permission to delete or clone record.',
+    title: 'Grid Actions',
+    placement: 'bottom',
+    target: '.ag-pinned-right-header'
+  },
+  {
+    content: 'This is for pagination in the grid.',
+    title: 'Grid Pagination',
+    placement: 'bottom',
+    target: '.agPagination'
+  },
+  {
+    content: "Here you can choose how many rows you'd like to see in the grid.",
+    title: 'Select Row Count',
+    placement: 'bottom',
+    target: '.MuiTablePagination-selectRoot'
+  },
+  {
+    content: 'Go to next and previous.',
+    title: 'Next and previous',
+    placement: 'bottom',
+    target: '.MuiTablePagination-actions'
+  }
+];
+
+export const AccountSteps: Step[] = [
+  {
+    title: 'Account Resource',
+    content: 'We will guide you through the usage.',
+    placement: 'center',
+    target: '#resourceHeader'
+  },
+  {
+    content: 'Control flow for the account operations.',
+    title: 'Action Controls',
+    placement: 'bottom',
+    target: '#resourceOperations'
+  },
+  {
+    content: 'Select between which is current entity accounts and all brand accounts',
+    title: 'Type Select',
+    placement: 'bottom',
+    target: '#resourceTypeSelector'
+  },
+  {
+    content: 'Select which you wish to see, you can choose between approve, disapprove or all.',
+    title: 'Status Select',
+    placement: 'bottom',
+    target: '#approveDisapprove'
   },
   {
     content:

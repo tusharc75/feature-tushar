@@ -687,10 +687,11 @@ export default function Account(props) {
           <Grid container className="header-panel" justify="space-between" alignContent="center">
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
               <div className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
-                <MdAccountCircle className="headerLogo" /> <span className="listingHeader">{routes[accountResource].title}</span>
+                <MdAccountCircle className="headerLogo" /> <span id="resourceHeader" className="listingHeader">{routes[accountResource].title}</span>
                 <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
                   {AccTypes && (
                     <ToggleButtonGroup
+                      id="resourceTypeSelector"
                       size="small"
                       className={`ml-8 ${accountClass.accountActions}`}
                       value={filter}
@@ -707,6 +708,7 @@ export default function Account(props) {
                     </ToggleButtonGroup>
                   )}
                   <ButtonGroup
+                    id="approveDisapprove"
                     size="small"
                     className={accountClass.accountActions}
                     variant="outlined"
@@ -758,7 +760,7 @@ export default function Account(props) {
               </div>
             </Grid>
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1" justify="flex-end">
-              <div className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
+              <div id="resourceOperations" className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
                 <SearchBox onSearch={handleSearch} searchbox="account_header_search_bar" width="300px" value={search} />
                 <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
                   {accountPermissions.isCreate && (

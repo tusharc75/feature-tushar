@@ -9,7 +9,7 @@ import Sidebar from "./Sidebar/Sidebar";
 import GlobalUserChat from "./GlobalUserChat";
 import { useData } from "../StateProvider/Provider";
 import { SET_START_TOUR } from "../StateProvider/actionTypes";
-import { DashboardSteps, UserSteps } from "../constants/tourSteps";
+import { AccountSteps, DashboardSteps, UserSteps } from "../constants/tourSteps";
 
 const useStyles = makeStyles(() => ({
   content: {
@@ -52,10 +52,12 @@ const Layout = ({ children, width }) => {
   }
 
   const handleJoyrideCallback = (data: CallBackProps) => {
-    const { status } = data
+    const { status, lifecycle } = data
     const finishedStatus: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
 
-    if (finishedStatus.includes(status)) {
+    console.log(data)
+
+    if (finishedStatus.includes(status) || lifecycle === "beacon") {
       dispatch({
         type: SET_START_TOUR, payload: {
           start: false,
@@ -71,6 +73,10 @@ const Layout = ({ children, width }) => {
         return DashboardSteps;
       case "/user":
         return UserSteps
+      case "/customer-account":
+        return AccountSteps
+      case "/supplier-account":
+        return AccountSteps
       default:
         return;
     }
