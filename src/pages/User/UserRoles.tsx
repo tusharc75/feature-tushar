@@ -46,7 +46,7 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
             ? data.map((obj: any, i: string) => (
               <BoxWithBorder
                 key={i}
-                style={{ padding: "0px"}}
+                style={{ padding: "0px" }}
               >
                 <ListItem>
                   <ListItemText
@@ -55,9 +55,14 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                         title={obj.name || ""}
                         className="text-truncate"
                       >
-                        <Link to={`/role/detail/${obj._id}`}>
-                          {obj.name || ""}
-                        </Link>
+                        {
+                          permissions.role.isRead ?
+                            <Link to={`/role/detail/${obj._id}`}>
+                              {obj.name || ""}
+                            </Link>
+                            :
+                            <span>{obj.name || ""}</span>
+                        }
                       </Typography>
 
                     }
