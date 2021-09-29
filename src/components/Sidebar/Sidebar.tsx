@@ -57,7 +57,6 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    overflowX: "hidden",
     width: "48px",
     [theme.breakpoints.down("sm")]: {
       width: 0,
@@ -226,16 +225,22 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         className={clsx(classes.drawer, {
           [classes.drawerOpen]: toggleDrawer,
           [classes.drawerClose]: !toggleDrawer,
+          'sidebar-overflow-hide': !toggleDrawer,
+          'sidebar-overflow-auto': toggleDrawer,
         })}
         classes={{
           paper: clsx({
             [classes.drawerOpen]: toggleDrawer,
             [classes.drawerClose]: !toggleDrawer,
+            'sidebar-overflow-hide': !toggleDrawer,
+            'sidebar-overflow-auto': toggleDrawer,
           }),
         }}
+
+
       >
         <Toolbar />
-        <div>
+        <div id="sidebarOrDrawer" >
           <List className="sidebar-list">
             <ListItem button className="list-item">
               <ListItemIcon>

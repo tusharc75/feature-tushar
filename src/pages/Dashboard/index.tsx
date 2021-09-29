@@ -36,7 +36,7 @@ function Dashboard() {
     const data = arr.map((sec) => {
       const list = allData?.filter((u) => sec === u.sectionName && u.isRead);
 
-      let icon = <AiFillSetting size={32}/>;
+      let icon = <AiFillSetting size={32} />;
       let heading = "";
       let text = "";
 
@@ -111,7 +111,7 @@ function Dashboard() {
             <img src={crmImage} alt="Logo" className={styles.set_crm_image} />
           </div>
           <div>
-            <Box marginY={2}>
+            <Box marginY={2} id="resourcesHomeGrid">
               <Grid container spacing={1} className={styles.full_layout}>
                 {sections.map((section) => {
                   return section.items.length > 0 ? (
@@ -125,24 +125,24 @@ function Dashboard() {
                             <h2 className={styles.headline}>{section.head}</h2>
                             <p>{section.text}</p>
                             {/*<div className={styles.dropdown}>*/}
-                              <Button className={styles.view_button}>
-                                View all<MdNavigateNext />
-                                {/*<div className={styles.dropdown_content}>*/}
-                                {/*  {*/}
-                                {/*    section.items.map((item) => (*/}
-                                {/*      <Typography>*/}
-                                {/*        <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>*/}
-                                {/*      </Typography>*/}
-                                {/*    ))*/}
-                                {/*  }*/}
-                                {/*</div>*/}
-                              </Button>
+                            <Button className={styles.view_button}>
+                              View all<MdNavigateNext />
+                              {/*<div className={styles.dropdown_content}>*/}
+                              {/*  {*/}
+                              {/*    section.items.map((item) => (*/}
+                              {/*      <Typography>*/}
+                              {/*        <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>*/}
+                              {/*      </Typography>*/}
+                              {/*    ))*/}
+                              {/*  }*/}
+                              {/*</div>*/}
+                            </Button>
                             {/*</div>*/}
                           </Box>}
                           {shownDisplaySection === section.head && <Box height="215px" style={{ overflowY: 'auto' }}>
                             {section.items.map((item) => (
-                              <>
-                                <Box marginY={1} key={item.name} component="div" >
+                              <div key={item.name}>
+                                <Box marginY={1} component="div" >
                                   <Typography paragraph className={styles.hover_list_box}>
                                     <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
                                   </Typography>
@@ -155,7 +155,7 @@ function Dashboard() {
                                     </Typography>
                                   </Box>
                                 )}
-                              </>
+                              </div>
                             ))}
                           </Box>}
                         </Box>
