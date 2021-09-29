@@ -253,7 +253,6 @@ const EntityDetailsPage = () => {
           close={closeUpdateDIalog}
           fetchData={() => {
             fetchEntityData();
-            fetchUserData();
           }}
           values={entityData}
           isNew={false}
