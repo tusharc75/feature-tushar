@@ -317,7 +317,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                             )}
                             className={classes.nested}
                           >
-                            <ListItemText primary={item.name} />
+                            <ListItemText primary={item.resourceLabel || item.name} />
                           </ListItem>
                         </Link>
                       ))}
