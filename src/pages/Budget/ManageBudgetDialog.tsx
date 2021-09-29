@@ -92,6 +92,10 @@ export default function ManageBudgetDialog({
 
     useEffect(() => {
         setFormsData(setFieldsInAscendingOrder(entityData.fields));
+
+        if (entityData.initialValues && entityData.initialValues["entity"]) {
+            onSalesRepDropdownOpen(entityData.initialValues["entity"])
+        }
     }, [entityData.fields]);
 
     const onSalesRepDropdownOpen = (selectedEntity) => {
@@ -167,7 +171,7 @@ export default function ManageBudgetDialog({
                         });
 
                         if (marketSegmentDropdownData) {
-                            setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data.marketSegment));
+                            setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data.marketSegment?.optionValue));
                         }
 
                         let clonedData = { ...data }
@@ -380,7 +384,9 @@ export default function ManageBudgetDialog({
                                                                                     options={field.option}
                                                                                     fullWidth
                                                                                     isTooltip={field?.isTooltip || false}
+                                                                                    required={field.required}
                                                                                     tooltipMessage={field?.tooltipMessage}
+                                                                                    disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                     size="small"
                                                                                     onChange={(e, value) => {
                                                                                         setFieldValue(
@@ -412,6 +418,7 @@ export default function ManageBudgetDialog({
                                                                                     fullWidth
                                                                                     isTooltip={field?.isTooltip || false}
                                                                                     tooltipMessage={field?.tooltipMessage}
+                                                                                    disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                     size="small"
                                                                                     onChange={(e, val) => {
                                                                                         if (val && val.currencyCode) {
@@ -442,6 +449,7 @@ export default function ManageBudgetDialog({
                                                                                         )
                                                                                     }
                                                                                     values={values}
+                                                                                    disabled={(Boolean(budgetId) && field.disableOnEdit)}
                                                                                     errors={errors}
                                                                                     touched={touched}
                                                                                     label={field.fieldLabel}
