@@ -131,6 +131,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
             message: data.message,
           });
           setSubmitting(false);
+          close();
           fetchData();
         })
         .catch((error) => {
@@ -295,7 +296,10 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                   color="primary"
                   size="small"
                   onClick={submitForm}
-                  disabled={isSubmitting || loading || uploadingImageOrFileProgress > 0}
+                  disabled={isSubmitting || loading || uploadingImageOrFileProgress > 0 || isFieldNotTouched({
+                    ...initialData,
+                    initialValues: initialData.values
+                  }, values)}
                 >
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
                 </Button>

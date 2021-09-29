@@ -1450,7 +1450,32 @@ export default function ManageQuoteDialog({
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                       />
-                                    ) : [
+                                    ): field.fieldName === "expiryDate"  ? (
+                                    <FormTypes
+                                      {...field}
+                                      // {...rest}
+                                      disablePast={true}
+                                      isNew={isNew}
+                                      disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
+                                      selectedCurrencyCode={values["currency"]}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        handleValuesChange({ [name]: value })
+                                        setFieldValue(name, value)
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                    />
+                                  ) : [
                                       "quoteAcceptDate",
                                       "salesOrderCreationDate",
                                       "invoiceCreationDate",
