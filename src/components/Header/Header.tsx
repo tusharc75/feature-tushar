@@ -877,13 +877,15 @@ const Header = ({ toggleDrawer }) => {
 
 
   const startTour = () => {
-    dispatch({
-      type: SET_START_TOUR,
-      payload: {
-        path: pathname,
-        start: true
-      }
-    })
+    if (['local', 'development'].includes(process.env.REACT_APP_ENV)) {
+      dispatch({
+        type: SET_START_TOUR,
+        payload: {
+          path: pathname,
+          start: true
+        }
+      })
+    }
   }
 
   return (
