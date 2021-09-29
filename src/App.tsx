@@ -147,7 +147,13 @@ function App() {
   }, false);
 
   window.addEventListener('offline', function (e) {
-    setIsOffline(true);
+    const pathnames = history.location.pathname.split("/").filter((x) => x);
+
+    if (!(history.location.pathname === "/" || [
+      "rental-management"
+    ].indexOf(pathnames[0]) >= 0)) {
+      setIsOffline(true);
+    }
   }, false);
 
   const getNotification = async () => {

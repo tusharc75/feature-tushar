@@ -21,6 +21,7 @@ import { CustomNotificationCountProvider } from "./StateProvider/CustomNotificat
 import "./components/Chatter/style.scss"
 import { CustomChatNotificationCountProvider } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
 import { GlobalChatProvider } from "./StateProvider/GlobalChatContext";
+import { CustomOfflineProvider } from "./StateProvider/OfflineContext/OfflineContext";
 
 // @ts-ignore
 if (process.env.REACT_APP_ENV !== 'local') {
@@ -46,7 +47,9 @@ ReactDOM.render(
             <CustomChatNotificationCountProvider>
               <MsalProvider instance={AzureInstance}>
                 <GlobalChatProvider>
-                  <App />
+                  <CustomOfflineProvider>
+                    <App />
+                  </CustomOfflineProvider>
                 </GlobalChatProvider>
               </MsalProvider>
             </CustomChatNotificationCountProvider>
