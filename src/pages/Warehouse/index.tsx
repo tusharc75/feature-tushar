@@ -2,6 +2,7 @@ import React, { useState, useEffect, Fragment, useContext, useReducer } from 're
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import MessageDialog from '../../components/Helpers/MessageDialog';
 import AddIcon from '@material-ui/icons/Add';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
@@ -27,6 +28,7 @@ import { entity } from "../../constants/helpers"
 import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import Chip from "@material-ui/core/Chip"
 
 function reducer(state, action) {
   switch (action.type) {
@@ -122,7 +124,7 @@ const AddressResource = () => {
   const { entityApi } = entity
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, user }
+    state: { permissions, user, selectedEntity }
   }: any = useData();
 
   const [warehousePermissions, setWarehousePermissions] = useState({
@@ -140,6 +142,7 @@ const AddressResource = () => {
   const [showEntityDialog, setShowEntityDialog] = useState(false)
   const [warehouseId, setWarehouseId] = useState("")
   const [entities, setEntities] = useState([])
+  const [showUpdateWarningConfirmBox, setShowUpdateWarningConfirmBox] = useState(false)
 
   // const [selectedCategory, setSelectedCategory] = useState([]);
 
@@ -217,7 +220,7 @@ const AddressResource = () => {
 
   useEffect(() => {
     fetchWarehouses();
-  }, [page, limit, filters, sorting, search]);
+  }, [page, limit, filters, sorting, search, selectedEntity]);
 
   const NameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
@@ -407,19 +410,18 @@ const AddressResource = () => {
                     Add
                   </Button>
                 )}
-                {warehousePermissions.isDelete && (
-                  <Button
-                    className={styles.action_submit_btn}
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    disabled={selectedRecords.length ? false : true}
-                    aria-controls="action-menu"
-                  >
-                    Actions <ExpandMore />
-                  </Button>
-                )}
+                <Button
+                  className={styles.action_submit_btn}
+                  variant="outlined"
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  disabled={selectedRecords.length ? false : true}
+                  aria-controls="action-menu"
+                >
+                  Actions <ExpandMore />
+                </Button>
+
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
@@ -432,7 +434,35 @@ const AddressResource = () => {
                   open={Boolean(anchorEl)}
                   onClose={closeActions}
                 >
-                  <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                  {warehousePermissions.isDelete ?
+                    <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                    : null}
+                  {warehousePermissions.isUpdate && (
+                    <MenuItem
+                      disabled={selectedRecords.length === 0}
+                      onClick={() => {
+                        if (selectedRecords.some((d) => d.isUpdate === false)) {
+                          closeActions();
+                          setShowUpdateWarningConfirmBox(true)
+                        } else {
+                          closeActions();
+                          if (selectedRecords.length) {
+                            let entities = []
+                            selectedRecords.map(current => {
+                              if (current?.entity) {
+                                let restEntities = current?.entity.map(o => o?.optionValue)
+                                entities = [...entities, ...restEntities]
+                              }
+                            })
+                            setEntities([...entities])
+                          }
+                          setShowEntityDialog(true)
+                        }
+                      }}
+                    >
+                      Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
+                    </MenuItem>
+                  )}
                 </Menu>
               </Box>
             </Grid>
@@ -474,12 +504,19 @@ const AddressResource = () => {
             isClone={open?.isClone}
           />
         )}
+        {showUpdateWarningConfirmBox ? (
+          <MessageDialog
+            open={showUpdateWarningConfirmBox}
+            message={`You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`}
+            onClose={() => setShowUpdateWarningConfirmBox(false)}
+          />
+        ) : null}
         {
           showEntityDialog ?
             <EntitySelectionsDialog
               open={showEntityDialog}
               resource={sidebarResource.warehouse}
-              resourceId={warehouseId}
+              resourceIds={selectedRecords.length ? selectedRecords.map(o => o._id) : [warehouseId]}
               onClose={() => {
                 setShowEntityDialog(false)
                 setWarehouseId("")

@@ -43,6 +43,7 @@ import styles from '../Leads/Header.module.scss';
 import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes"
 import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
+import { HiBadgeCheck } from "react-icons/hi"
 
 const AccTypes = [
   {
@@ -74,7 +75,7 @@ export default function Account(props) {
   const [type, setType] = useState(options[0]);
   const [renderCount, setRenderCount] = useState(0);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
   const [isAccDialogVisible, setIsAccDialogVisible] = useState(false);
   const [selectedType, setselectedType] = useState(1);
   const [accountId, setAccountId] = useState(null)
@@ -284,19 +285,21 @@ export default function Account(props) {
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip title="Approve">
+        <Tooltip title={params?.data?.approved ? "Disapprove" : "Approve"}>
           <IconButton
-            aria-label="Approve"
+            aria-label={params?.data?.approved ? "Disapprove" : "Approve"}
             onClick={() => {
               setSingleApproveDisapproveAccount({
                 show: true,
-                approved: true,
+                approved: params?.data?.approved ? false : true,
                 id: params.data._id,
                 accountName: params.data.accountName
               });
             }}
           >
-            <FcApproval />
+            {
+              params?.data?.approved ? <HiBadgeCheck /> : <FcApproval />
+            }
           </IconButton>
         </Tooltip>
       )}
@@ -684,10 +687,11 @@ export default function Account(props) {
           <Grid container className="header-panel" justify="space-between" alignContent="center">
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
               <div className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
-                <MdAccountCircle className="headerLogo" /> <span className="listingHeader">{routes[accountResource].title}</span>
+                <MdAccountCircle className="headerLogo" /> <span id="resourceHeader" className="listingHeader">{routes[accountResource].title}</span>
                 <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
                   {AccTypes && (
                     <ToggleButtonGroup
+                      id="resourceTypeSelector"
                       size="small"
                       className={`ml-8 ${accountClass.accountActions}`}
                       value={filter}
@@ -704,6 +708,7 @@ export default function Account(props) {
                     </ToggleButtonGroup>
                   )}
                   <ButtonGroup
+                    id="approveDisapprove"
                     size="small"
                     className={accountClass.accountActions}
                     variant="outlined"
@@ -755,7 +760,7 @@ export default function Account(props) {
               </div>
             </Grid>
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1" justify="flex-end">
-              <div className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
+              <div id="resourceOperations" className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
                 <SearchBox onSearch={handleSearch} searchbox="account_header_search_bar" width="300px" value={search} />
                 <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
                   {accountPermissions.isCreate && (
@@ -832,7 +837,7 @@ export default function Account(props) {
                         onClick={() => {
                           if (selectedRecords.some((d) => d.canDelete === false)) {
                             closeActions();
-                            setShowDeleteWarningConfirmBox(true);
+                            setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
                           } else {
                             closeActions();
                             setShowDeleteConfirmBox(true);
@@ -840,6 +845,35 @@ export default function Account(props) {
                         }}
                       >
                         Delete
+                      </MenuItem>
+                    )}
+                    {accountPermissions.isUpdate && (
+                      <MenuItem
+                        disabled={selectedRecords.length === 0}
+                        onClick={() => {
+                          if (selectedRecords.some((d) => d?.isAllowedToUpdate === false)) {
+                            closeActions();
+                            setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+                          } else {
+                            closeActions();
+                            if (selectedRecords.length) {
+                              let entities = []
+                              selectedRecords.map(current => {
+                                if (current?.entityId) {
+                                  entities = [...entities, current?.entityId]
+                                }
+                                if (current?.restEntity) {
+                                  let restEntities = current?.restEntity.map(o => o.optionValue)
+                                  entities = [...entities, ...restEntities]
+                                }
+                              })
+                              setEntities([...entities])
+                            }
+                            setShowEntityDialog(true)
+                          }
+                        }}
+                      >
+                        Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
                       </MenuItem>
                     )}
                   </Menu>
@@ -874,13 +908,19 @@ export default function Account(props) {
           renderedFrom={accountResource}
         />
 
-        {showDeleteWarningConfirmBox ? (
+
+        {showDeleteWarningConfirmBox?.show ? (
           <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
+            open={showDeleteWarningConfirmBox?.show}
+            message={
+              showDeleteWarningConfirmBox.isDelete ?
+                `You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.` :
+                `You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`
+            }
+            onClose={() => setShowDeleteWarningConfirmBox({ show: false, isDelete: false })}
           />
         ) : null}
+
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
@@ -949,7 +989,7 @@ export default function Account(props) {
             <EntitySelectionsDialog
               open={showEntityDialog}
               resource={sidebarResource[accountResource]}
-              resourceId={accountId}
+              resourceIds={selectedRecords.length ? selectedRecords.map(o => o._id) : [accountId]}
               onClose={() => {
                 setShowEntityDialog(false)
                 setAccountId("")

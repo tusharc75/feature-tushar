@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper } from "@material-ui/core";
+import { Grid, Box, Button, Paper, Typography } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
@@ -11,15 +11,21 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { productInventory, getObjKeysWithValues, gridLoadingTimeout } from "../../constants/helpers";
+import { productInventory, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL } from "../../constants/helpers";
 import ManageProductInventory from "./ManageProductInventory";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
 import ReasonDialog from "./ReasonDialog"
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import ManageRepairJob from '../RepairJob/ManageRepairJob'
+import { Link } from 'react-router-dom'
+import NoDataCell from "../../components/Helpers/NoDataCell";
+import BoxWithBorder from "../../components/BoxWithBorder";
+import ProductHierarchy from "../Product/ProductHierarchy";
+
+const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
 
 const ProductInventoryDetailsPage = () => {
@@ -40,6 +46,7 @@ const ProductInventoryDetailsPage = () => {
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [productId, setProductId] = useState(null);
   const [statusOptions, setStatusOptions] = useState([])
   const [showReasonDialog, setShowReasonDialog] = useState(false)
   const [updateLoading, setUpdateLoading] = useState(false)
@@ -51,19 +58,41 @@ const ProductInventoryDetailsPage = () => {
       sectionName: "Product Inventory"
     }
   })
-
+  const [BOMData, setBOMData] = useState([])
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
+  const NameRenderer = (params) => (
+    <>{
+      params.value ? (
+        params.data.type === "Receiving Ticket" ?
+          <Link className="link" title={params.value} to={`${routes.receivingTicketDetail.path}/${params.data.referenceId}`}>
+            {params.value}
+          </Link> : params.data.type.toLowerCase() === "repair" ?
+            <Link className="link" title={params.value} to={`${routes.repairJobDetail.path}/${params.data.referenceId}`}>
+              {params.value}
+            </Link>
+            : params.data.type.toLowerCase() === "rental" ?
+              <Link className="link" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`}>
+                {params.value}
+              </Link> : params.value
+      ) : (
+        <NoDataCell />
+      )
+    }
 
+    </>
+  );
   const frameworkComponents = {
+    nameRenderer: NameRenderer,
     commonRenderer: CommonRenderer,
+    dateRenderer: DateRenderer,
   };
   const columns = [
-    { field: "date", headerName: "Date", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "reference", headerName: "Reference", show: true, cellRenderer: "nameRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "referenceNumber", headerName: "Reference Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "date", headerName: "Date", show: true, disabled: true, cellRenderer: "dateRenderer" },
     { field: "comments", headerName: "Comments", show: true, cellRenderer: "commonRenderer" },
   ];
 
@@ -73,6 +102,10 @@ const ProductInventoryDetailsPage = () => {
     }
 
   }, [id]);
+
+  useEffect(() => {
+    getProductTree()
+  }, [productId])
 
   const fetchAllData = () => {
     getProductInventoryFields();
@@ -95,6 +128,8 @@ const ProductInventoryDetailsPage = () => {
       data.data = data.data?.map((u) => ({
         ...u,
         id: u.inventory?._id,
+        reference: u.reference?.optionLabel,
+        referenceId: u.reference?.optionValue
       }));
       dispatch({ type: "initialize", data: data.data, count: data.data.length });
       setTimeout(() => {
@@ -117,6 +152,7 @@ const ProductInventoryDetailsPage = () => {
       setHeadingLbl(`${data?.serialNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
       setCustomizedRoutes([routes.productInventory,
       { title: `${data?.serialNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
+      setProductId(data?.product?.optionValue)
       setProductInventoryData(data);
       setLoadingProductInventory(false);
     } catch (error) {
@@ -142,6 +178,22 @@ const ProductInventoryDetailsPage = () => {
         toastConfig.setToastConfig(err);
       });
   };
+
+  const getProductTree = () => {
+    if (productId) {
+      axiosInstance()
+        .get(`/product/bom/${productId}`)
+        .then(({ data: { data } }) => {
+          data = data.map(o => {
+            if (o?.parent) {
+              o.type = "child"
+            }
+            return o
+          })
+          setBOMData([...data])
+        })
+    }
+  }
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -299,35 +351,94 @@ const ProductInventoryDetailsPage = () => {
                   </>
                 )}
               </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
-                  {columns ?
-                    <CustomAgGrid
-                      columns={columns}
-                      dataRows={dataRows}
-                      frameworkComponents={frameworkComponents}
-                      setGridApi={setGridApi}
-                      dispatch={dispatch}
-                      rowCount={rowCount}
-                      limit={limit}
-                      pageSizes={pageSizes}
-                      page={page}
-                      allowAction={false}
-                      allowSelection={false}
-                      isClientSideGrid={true}
-                      loading={loading}
-                      renderedFrom="rentalManagementDetailsPageInventory"
-                    />
-                    : <Box
-                      p={2}
-                      height={500}
-                      bgcolor="white">
-                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                    </Box>
-                  }
-                </Grid>
-              </Grid>
             </Paper>
+          </Grid>
+          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+            <Paper>
+              <Box
+                padding={1}
+                bgcolor="grey.200"
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Typography variant="subtitle2">
+                  BOM
+                </Typography>
+              </Box>
+              {(
+                <Box>
+                  {loading ? (
+                    [1, 2].map((i) => (
+                      <BoxWithBorder
+                        key={i}
+                        style={{
+                          margin: "8px",
+                        }}
+                      >
+                        <Box padding={1}>
+                          <Skeleton
+                            variant="text"
+                            width="100px"
+                            height="20px"
+                          />
+                          <Box marginTop={1} />
+                          <Skeleton variant="text" width="100%" height="15px" />
+                        </Box>
+                      </BoxWithBorder>
+                    ))
+                  ) : BOMData.length ? (
+                    <>
+                      {/* <AssignedFrequentlyBoughtProduct
+                                                permissions={permissions.product}
+                                                product={frequentlyBoughtProduct}
+                                                unassignProduct={unassignProduct}
+                                            /> */}
+                      <ProductHierarchy
+                        data={BOMData}
+                        permissions={permissions.product}
+                        unassignProduct={() => { }}
+                      />
+                      <Box marginY={1} />
+                    </>
+                  ) : (
+                    <Box textAlign="center" padding={2}>
+                      <Typography>No Product has been assigned </Typography>
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </Paper>
+          </Grid>
+
+
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={12} md={12} lg={12}>
+              {columns ?
+                <CustomAgGrid
+                  columns={columns}
+                  dataRows={dataRows}
+                  frameworkComponents={frameworkComponents}
+                  setGridApi={setGridApi}
+                  dispatch={dispatch}
+                  rowCount={rowCount}
+                  limit={limit}
+                  pageSizes={pageSizes}
+                  page={page}
+                  allowAction={false}
+                  allowSelection={false}
+                  isClientSideGrid={true}
+                  loading={loading}
+                  renderedFrom="rentalManagementDetailsPageInventory"
+                />
+                : <Box
+                  p={2}
+                  height={500}
+                  bgcolor="white">
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>
+              }
+            </Grid>
           </Grid>
         </Grid>
 
@@ -335,7 +446,7 @@ const ProductInventoryDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this product inventory ?`
+          message={`Are you sure you want to delete this ${storedRoutes ? storedRoutes.productInventory?.title : RESOURCE_LABEL.productInventory} ?`
           }
           onClose={() => {
             setShowConfirmBox(false);

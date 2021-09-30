@@ -33,6 +33,7 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import UserSetupDialog from "./UserSetupDialog";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 
+
 let userTimeout: ReturnType<typeof setTimeout>;
 
 const User: FC = () => {
@@ -487,6 +488,7 @@ const User: FC = () => {
         });
     }
   }
+
   return (
     <>
       {

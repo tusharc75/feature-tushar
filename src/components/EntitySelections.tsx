@@ -18,13 +18,17 @@ import { CustomDialogTransition, entity } from "../constants/helpers";
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
+import Box from '@material-ui/core/Box';
+import BoxWithBorder from "./BoxWithBorder";
+import { Skeleton } from "@material-ui/lab";
 import { CustomToastContext } from '../StateProvider/CustomToastContext/CustomToastContext';
 
 function EntitySelections(props) {
     const toastConfig = useContext(CustomToastContext);
-    const { open, entities = [], resource, resourceId, onClose, onSuccess } = props
+    const { open, entities = [], resource, resourceIds = [], onClose, onSuccess } = props
     const [selectedEntities, setSelectedEntities] = useState([])
     const [entityList, setEntityList] = useState([])
+    const [dataLoading, setDataLoading] = useState(false)
     const [loading, setLoading] = useState(false)
     const { entityApi } = entity
 
@@ -37,16 +41,20 @@ function EntitySelections(props) {
     }, [])
 
     const fetchEntities = () => {
+        setDataLoading(true)
         axiosInstance()
             .get(`${entityApi}`)
             .then(({ data: { data } }) => {
                 setEntityList(data)
+                setDataLoading(false)
+            }).catch(err => {
+                setDataLoading(false)
             })
     }
     const onUpdateEntity = () => {
 
         let request = {
-            ids: [resourceId],
+            ids: [...resourceIds],
             entity: [...selectedEntities]
         }
         setLoading(true)
@@ -84,47 +92,67 @@ function EntitySelections(props) {
 
             <CustomDialogContent>
                 {
-                    entityList.length === 0 ?
-                        <>
-                            <Card>
-                                <CardContent>
-                                    <Typography variant="h5" component="h2">
-                                        No Entity
-                                    </Typography>
-                                </CardContent>
-                            </Card>
-                        </> :
-                        <List style={{ padding: 0 }}>
-                            {entityList.map((d) => (
-                                <ListItem divider key={d._id}>
-                                    <ListItemIcon>
-                                        <Checkbox
-                                            edge="start"
-                                            onChange={(e) => {
-                                                let list = [...selectedEntities]
-                                                if (e.target.checked) {
-                                                    if (list.indexOf(d._id) < 0) {
-                                                        list.push(d._id)
-                                                    }
-                                                }
-                                                else {
-                                                    list.splice(list.indexOf(d._id), 1)
-                                                }
-                                                setSelectedEntities([...list])
-                                            }}
-                                            checked={selectedEntities.indexOf(d._id) >= 0}
-                                            inputProps={{
-                                                "aria-labelledby": `checkbox-list-label-${d._id}`,
-                                            }}
+                    dataLoading ?
+                        <Box>{
+                            [1, 2].map((i) => (
+                                <BoxWithBorder
+                                    key={i}
+                                    style={{
+                                        margin: "8px",
+                                    }}
+                                >
+                                    <Box padding={1}>
+                                        <Skeleton
+                                            variant="text"
+                                            width="100px"
+                                            height="20px"
                                         />
-                                    </ListItemIcon>
-                                    <ListItemText
-                                        primary={d.entityName || ""}
-                                        secondary={d.address || ""}
-                                    />
-                                </ListItem>
-                            ))}
-                        </List>
+                                        <Box marginTop={1} />
+                                        <Skeleton variant="text" width="100%" height="15px" />
+                                    </Box>
+                                </BoxWithBorder>))
+                        }
+                        </Box> : entityList.length === 0 ?
+                            <>
+                                <Card>
+                                    <CardContent>
+                                        <Typography variant="h5" component="h2">
+                                            No Entity
+                                        </Typography>
+                                    </CardContent>
+                                </Card>
+                            </> :
+                            <List style={{ padding: 0 }}>
+                                {entityList.map((d) => (
+                                    <ListItem divider key={d._id}>
+                                        <ListItemIcon>
+                                            <Checkbox
+                                                edge="start"
+                                                onChange={(e) => {
+                                                    let list = [...selectedEntities]
+                                                    if (e.target.checked) {
+                                                        if (list.indexOf(d._id) < 0) {
+                                                            list.push(d._id)
+                                                        }
+                                                    }
+                                                    else {
+                                                        list.splice(list.indexOf(d._id), 1)
+                                                    }
+                                                    setSelectedEntities([...list])
+                                                }}
+                                                checked={selectedEntities.indexOf(d._id) >= 0}
+                                                inputProps={{
+                                                    "aria-labelledby": `checkbox-list-label-${d._id}`,
+                                                }}
+                                            />
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary={d.entityName || ""}
+                                            secondary={d.address || ""}
+                                        />
+                                    </ListItem>
+                                ))}
+                            </List>
                 }
             </CustomDialogContent>
             <CustomDialogFooter>

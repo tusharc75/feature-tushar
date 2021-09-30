@@ -4,8 +4,8 @@ import { Chip, Grid, IconButton, Tooltip } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
 
-import ManageRepairJobDialog from './ManageRepairJob';
-import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, repairJob } from '../../constants/helpers';
+import ManageSalesOrderDialog from './ManageSalesOrder';
+import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, salesOrder } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -16,25 +16,25 @@ import { CommonRenderer, CreatedByRenderer, DateRenderer, UpdatedByRenderer } fr
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import RepairJobHeader from './RepairJobHeader';
+import SalesOrderHeader from './SalesOrderHeader';
 
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 
-let repairJobTimeout;
-const RepairJobType = [
+let salesOrderTimeout;
+const SalesOrderType = [
   {
-    key: 'All Repair Job',
+    key: 'All Sales Order',
     value: 1
   },
   {
-    key: 'My Repair Job',
+    key: 'My Sales Order',
     value: 2
   }
 ];
 
-const RepairJob = () => {
+const SalesOrder = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -46,12 +46,12 @@ const RepairJob = () => {
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
-  const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showManageSalesOrderDialog, setShowManageSalesOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
-  const [singleRepairJobDelete, setSingleRepairJobDelete] = useState({
+  const [singleSalesOrderDelete, setSingleSalesOrderDelete] = useState({
     id: null,
     show: false,
-    repairJobName: ''
+    salesOrderName: ''
   });
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
@@ -64,39 +64,11 @@ const RepairJob = () => {
 
   const columns = [
     {
-      field: 'repairJobName',
-      headerName: 'Repair Job Name',
+      field: 'salesOrderNo',
+      headerName: 'Sales Order No.',
       show: true,
       disabled: true,
-      cellRenderer: 'repairJobNameRenderer'
-    },
-    {
-      field: 'status',
-      headerName: 'Status',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer'
-    },
-    {
-      field: 'productInventory',
-      headerName: 'Product Inventory',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer'
-    },
-    {
-      field: 'repairPerson',
-      headerName: 'Repair Person',
-      show: true,
-      disabled: false,
-      cellRenderer: 'repairPersonRenderer'
-    },
-    {
-      field: 'typeOfRepair',
-      headerName: 'Type Of Repair',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer'
+      cellRenderer: 'salesOrderNoRenderer'
     },
     {
       field: 'createdBy',
@@ -112,7 +84,7 @@ const RepairJob = () => {
     },
     {
       field: 'owner',
-      headerName: 'Repair Job Owner',
+      headerName: 'Sales Order Owner',
       show: true,
       cellRenderer: 'OwnerRenderer'
     }
@@ -121,28 +93,28 @@ const RepairJob = () => {
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (repairJobTimeout) {
-      clearTimeout(repairJobTimeout);
+    if (salesOrderTimeout) {
+      clearTimeout(salesOrderTimeout);
     }
 
-    repairJobTimeout = setTimeout(() => {
-      fetchRepairJobs();
+    salesOrderTimeout = setTimeout(() => {
+      fetchSalesOrder();
     }, millisec);
     // eslint-disable-next-line
   }, [search]);
 
   useEffect(() => {
     if (renderCount > 0) {
-      fetchRepairJobs();
+      fetchSalesOrder();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity]);
 
-  const handleSingleDeleteRepairJob = async () => {
+  const handleSingleDeleteSalesOrder = async () => {
     dispatch({ type: 'loading', loading: true });
 
     axiosInstance()
-      .put(`${repairJob.repairJobApi}/remove`, {
-        ids: [singleRepairJobDelete.id]
+      .put(`${salesOrder.salesOrderApi}/remove`, {
+        ids: [singleSalesOrderDelete.id]
       })
       .then(({ data }) => {
         toastConfig.setToastConfig({
@@ -150,9 +122,9 @@ const RepairJob = () => {
           type: 'success',
           message: data.message
         });
-        fetchRepairJobs();
+        fetchSalesOrder();
         dispatch({ type: 'loading', loading: false });
-        setSingleRepairJobDelete({ id: null, show: false, repairJobName: '' });
+        setSingleSalesOrderDelete({ id: null, show: false, salesOrderName: '' });
       })
       .catch((error) => {
         dispatch({ type: 'loading', loading: false });
@@ -160,37 +132,13 @@ const RepairJob = () => {
       });
   };
 
-  const RepairJobNameRenderer = (params) => (
+  const SalesOrderNoRenderer = (params) => (
     <>
-      <Link className="text-truncate link" title={params.value} to={`${routes.repairJob.path}/detail/${params.data._id}`}>
+      <Link className="text-truncate link" title={params.value} to={`${routes.salesOrderDetail.path}/${params.data.id}`}>
         {params.value}
       </Link>
     </>
   );
-
-  const RepairPersonRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" title={params.value} to={`${routes.user.path}/detail/${params.data.repairPersonId}`}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
-  // const ProductInventoryRenderer = (params) => (
-  //   <>
-  //     {params.value ? (
-  //       <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
-  //         {params.value}
-  //       </Link>
-  //     ) : (
-  //       <NoDataCell />
-  //     )}
-  //   </>
-  // );
 
   const OwnerRenderer = (params) => (
     <>
@@ -206,13 +154,13 @@ const RepairJob = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions.repairJob.isCreate ? (
+      {permissions.salesOrder.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
             size="small"
             aria-label="Clone"
             onClick={() => {
-              setShowManageRepairJobDialog({ open: true, isClone: true, idToClone: params.data._id });
+              setShowManageSalesOrderDialog({ open: true, isClone: true, idToClone: params.data._id });
             }}
           >
             <FileCopyIcon fontSize="small" color="primary" />
@@ -227,25 +175,23 @@ const RepairJob = () => {
       )}
 
       <GridDeleteIcon
-        hasDeletePermission={permissions.repairJob.isDelete}
+        hasDeletePermission={permissions.salesOrder.isDelete}
         ownerId={params.data.ownerId}
         userId={user?.user?._id}
         onDelete={() =>
-          setSingleRepairJobDelete({
+          setSingleSalesOrderDelete({
             show: true,
             id: params.data._id,
-            repairJobName: `${params.data.repairJobName}`
+            salesOrderName: `${params.data.salesOrderNo}`
           })
         }
-        entity="repair job"
+        entity="sales order"
       />
     </>
   );
 
   const frameworkComponents = {
-    repairJobNameRenderer: RepairJobNameRenderer,
-    repairPersonRenderer: RepairPersonRenderer,
-    // productInventoryRenderer: ProductInventoryRenderer,
+    salesOrderNoRenderer: SalesOrderNoRenderer,
     ownerRenderer: OwnerRenderer,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
@@ -288,7 +234,7 @@ const RepairJob = () => {
   };
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterRepairJobs=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}&filterSalesOrder=${selectedType}`;
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
@@ -330,7 +276,7 @@ const RepairJob = () => {
     return deepFilter;
   };
 
-  const fetchRepairJobs = async () => {
+  const fetchSalesOrder = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
@@ -339,7 +285,7 @@ const RepairJob = () => {
     }
 
     axiosInstance()
-      .get(`${repairJob.repairJobApi}${queryString}`)
+      .get(`${salesOrder.salesOrderApi}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           const { owner, collaborator, createdBy, updatedBy, customerAccount, ...restProperties } = u;
@@ -347,10 +293,6 @@ const RepairJob = () => {
           let res = {
             ...restProperties,
             id: u._id,
-            productInventory: u.productInventory?.map((p) => p.optionLabel).join(', '),
-            repairPerson: u.repairPerson?.optionLabel,
-            repairPersonId: u.repairPerson?.optionValue,
-            owner: u.createdBy?.user?.concatedName,
             ownerId: u.createdBy?.user?._id,
             createdBy: u.createdBy?.user?.concatedName,
             createdByDate: u.createdBy?.date,
@@ -375,7 +317,7 @@ const RepairJob = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const handleRepairJobTypeSel = (filterValues) => {
+  const handleSalesOrderTypeSel = (filterValues) => {
     setSelectedType(filterValues);
   };
 
@@ -399,10 +341,10 @@ const RepairJob = () => {
   };
 
   const clickCreateNew = () => {
-    setShowManageRepairJobDialog({ open: true, isClone: false, idToClone: null });
+    setShowManageSalesOrderDialog({ open: true, isClone: false, idToClone: null });
   };
 
-  const handleDeleteRepairJob = async () => {
+  const handleDeleteSalesOrder = async () => {
     setDeleteLoading(true);
     let recordsToDelete = [];
     if (deleteRecord?._id) {
@@ -412,7 +354,7 @@ const RepairJob = () => {
     }
     if (recordsToDelete.length > 0) {
       axiosInstance()
-        .put(`${repairJob.repairJobApi}/remove`, {
+        .put(`${salesOrder.salesOrderApi}/remove`, {
           ids: recordsToDelete
         })
         .then(({ data }) => {
@@ -424,7 +366,7 @@ const RepairJob = () => {
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
-          fetchRepairJobs();
+          fetchSalesOrder();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -438,16 +380,16 @@ const RepairJob = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.repairJob]} />
+          <CustomBreadCrumbs routes={[routes.salesOrder]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <Grid container direction="row">
             <Grid item xs={12} sm={12}>
               <Grid container justify="flex-end">
                 <ImportExportLinks
-                  permissions={permissions.repairJob}
-                  module="repairJob"
-                  api={repairJob.repairJobApi}
+                  permissions={permissions.salesOrder}
+                  module="salesOrder"
+                  api={salesOrder.salesOrderApi}
                   afterImportCompleted={() => {}}
                 />
               </Grid>
@@ -459,21 +401,21 @@ const RepairJob = () => {
       {/* Tables Begins Here */}
       <CustomContainer>
         <div className="header-panel">
-          <RepairJobHeader
+          <SalesOrderHeader
             selectedRecords={selectedRecords}
-            onTypeChange={handleRepairJobTypeSel}
-            options={RepairJobType}
+            onTypeChange={handleSalesOrderTypeSel}
+            options={SalesOrderType}
             onSearch={handleSearch}
             searchVal={search}
-            RepairJobPermissions={permissions.repairJob}
+            SalesOrderPermissions={permissions.salesOrder}
             onCreate={clickCreateNew}
             showConfirmBox={showConfirmBox}
             canDelete={selectedRecords.length === 0}
             icon={<FaRegistered className="headerLogo" />}
-            heading={routes.repairJob.title}
+            heading={routes.salesOrder.title}
             showTransferEntityDialog={handleTransferEntityDialog}
-            // showCloneRepairJobDialog={() => {
-            //   handleShowCloneRepairJobDialog()
+            // showCloneSalesOrderDialog={() => {
+            //   handleShowCloneSalesOrderDialog()
             // }}
           >
             {accountDetails.accountId && (
@@ -490,7 +432,7 @@ const RepairJob = () => {
                 }}
               />
             )}
-          </RepairJobHeader>
+          </SalesOrderHeader>
         </div>
 
         <CustomAgGrid
@@ -505,7 +447,7 @@ const RepairJob = () => {
           page={page}
           actionWidth={100}
           loading={loading}
-          renderedFrom={'repairJobPage'}
+          renderedFrom={'salesOrderPage'}
         />
 
         {showDeleteWarningConfirmBox ? (
@@ -518,42 +460,42 @@ const RepairJob = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${
-              deleteRecord.repairJobName || ''
+            message={`Are you sure you want to delete ${deleteRecord?.salesOrderName ? 'Sales Order' : 'Sales Orders'}   ${
+              deleteRecord.salesOrderName || ''
             }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
             }}
             okBtnLoading={deleteLoading}
-            onOk={handleDeleteRepairJob}
+            onOk={handleDeleteSalesOrder}
           />
         ) : null}
 
-        {singleRepairJobDelete.show ? (
+        {singleSalesOrderDelete.show ? (
           <ConfirmationDialog
-            open={singleRepairJobDelete.show}
-            message={`Are you sure you want to delete Repair Job: ${singleRepairJobDelete.repairJobName}?`}
+            open={singleSalesOrderDelete.show}
+            message={`Are you sure you want to delete Sales Order: ${singleSalesOrderDelete.salesOrderName}?`}
             onClose={() =>
-              setSingleRepairJobDelete({
+              setSingleSalesOrderDelete({
                 id: null,
                 show: false,
-                repairJobName: ''
+                salesOrderName: ''
               })
             }
-            onOk={handleSingleDeleteRepairJob}
+            onOk={handleSingleDeleteSalesOrder}
           />
         ) : null}
       </CustomContainer>
-      {showManageRepairJobDialog.open && (
-        <ManageRepairJobDialog
-          isClone={showManageRepairJobDialog.isClone}
-          open={showManageRepairJobDialog.open}
-          repairJobId={showManageRepairJobDialog.idToClone}
-          onClose={() => setShowManageRepairJobDialog({ open: false, isClone: false, idToClone: null })}
+      {showManageSalesOrderDialog.open && (
+        <ManageSalesOrderDialog
+          isClone={showManageSalesOrderDialog.isClone}
+          open={showManageSalesOrderDialog.open}
+          salesOrderId={showManageSalesOrderDialog.idToClone}
+          onClose={() => setShowManageSalesOrderDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {
-            fetchRepairJobs();
-            setShowManageRepairJobDialog({ open: false, isClone: false, idToClone: null });
+            fetchSalesOrder();
+            setShowManageSalesOrderDialog({ open: false, isClone: false, idToClone: null });
           }}
         />
       )}
@@ -561,4 +503,4 @@ const RepairJob = () => {
   );
 };
 
-export default RepairJob;
+export default SalesOrder;

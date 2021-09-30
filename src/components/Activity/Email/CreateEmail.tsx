@@ -511,8 +511,8 @@ export const CreateEmail = ({
   }
 
   const isFieldNotTouched = (initialValues, values) => {
-    let initialData = { ...initialValues, content: initialValues?.content.toString("html") ?? "" }
-    let dataValues = { ...values, content: values?.content.toString("html") ?? "" }
+    let initialData = { ...initialValues, content: initialValues?.content?.toString("html") ?? "" }
+    let dataValues = { ...values, content: values?.content?.toString("html") ?? "" }
     return (Object.values(initialData).toString() === Object.values(dataValues).toString())
 
   }

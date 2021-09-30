@@ -121,13 +121,7 @@ function Budget() {
       headerName: "Product Category",
       show: true,
       cellRenderer: "commonRenderer"
-    },
-    {
-      field: "currency",
-      headerName: "Currency",
-      show: true,
-      cellRenderer: "commonRenderer"
-    },
+    }
   ];
   if (columnState) {
     columns.map((item) => {

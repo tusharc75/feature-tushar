@@ -547,6 +547,7 @@ const Steps = (props) => {
                                   !allowedToEdit ||
                                   loading ||
                                   !nextStep ||
+                                  versionStatus.includes("Sent for DOA") ||
                                   versionStatus.includes("Accepted  by DOA")
                                   // || versionStatus.includes("Sent to Customer") ||
                                   // steps[currentStep] === "Send To Customer" ||
@@ -627,6 +628,7 @@ const Steps = (props) => {
                             !allowedToEdit ||
                             loading ||
                             !nextStep ||
+                            versionStatus.includes("Sent for DOA") ||
                             versionStatus.includes("Accepted  by DOA") ||
                             approvedQuote.approved
                           }

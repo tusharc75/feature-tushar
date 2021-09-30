@@ -193,11 +193,11 @@ const routes = {
     title: storedRoutes ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
     path: "/budget",
   },
-  pricingCondition:{
+  pricingCondition: {
     title: storedRoutes ? storedRoutes.pricingCondition?.title : RESOURCE_LABEL.pricingCondition,
     path: "/pricing-condition",
   },
-  pricingConditionDetail:{
+  pricingConditionDetail: {
     title: storedRoutes ? storedRoutes.pricingCondition?.title : RESOURCE_LABEL.pricingCondition,
     path: "/pricing-condition/detail",
   },
@@ -273,6 +273,14 @@ const routes = {
     title: storedRoutes ? storedRoutes.receivingTicket?.title : RESOURCE_LABEL.receivingTicket,
     path: "/receiving-ticket/detail",
   },
-}; 
+  salesOrder: {
+    title: storedRoutes ? storedRoutes.salesOrder?.title : RESOURCE_LABEL.salesOrder,
+    path: "/sales-order",
+  },
+  salesOrderDetail: {
+    title: storedRoutes ? storedRoutes.salesOrder?.title : RESOURCE_LABEL.salesOrder,
+    path: "/sales-order/detail",
+  },
+};
 
 export default routes;
