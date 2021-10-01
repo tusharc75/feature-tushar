@@ -86,7 +86,7 @@ const Event = () => {
                   fullWidth
                   startIcon={<Add />}
                   variant="outlined"
-                  size="small" 
+                  size="small"
                   onClick={() => setOpenDialog(true)}
                 >
                   Create Event
@@ -96,6 +96,7 @@ const Event = () => {
                 handleChangeFilter={handleChangeFilter}
                 filter={filter}
                 chip={{ variant: "default", size: "small", color: "default" }}
+                activityName="event"
               />
             </Box>
 

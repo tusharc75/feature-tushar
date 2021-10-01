@@ -349,7 +349,12 @@ const Email = () => {
             <Grid item xs={6} className={styles.filter_side}>
               <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>
                 {/* <Box style={{ width: '70%' }}> */}
-                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} />
+                <SearchFilter
+                  handleChangeFilter={handleChangeFilter}
+                  filter={filter}
+                  chip={{ size: 'small' }}
+                  activityName="email"
+                />
                 <Button
                   variant="contained"
                   color="primary"
