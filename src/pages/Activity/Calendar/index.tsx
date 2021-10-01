@@ -222,6 +222,7 @@ const BigCalendar = () => {
                 handleChangeFilter={handleChangeFilter}
                 filter={filter}
                 chip={{ size: "small" }}
+                activityName="calendar"
               />
             </Grid>
           </Grid>

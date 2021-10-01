@@ -146,8 +146,13 @@ const SelectionDialog = (props) => {
     function validate(values) {
         const errors = {};
         if (isProductTemplate) {
-            if (!values.productTemplate ) {
+            if (!values.productTemplate) {
                 errors["productTemplate"] = "please select product template";
+            }
+        }
+        if (isProductTemplate && api !== "product") {
+            if (!values.priceTemplate) {
+                errors["priceTemplate"] = "please select price template";
             }
         }
         return errors;
@@ -265,7 +270,7 @@ const SelectionDialog = (props) => {
                                         />
                                     </Box>
                                 }
-                                {api !== "product" &&
+                                {(isProductTemplate && api !== "product") &&
                                     <Box mt={1}>
                                         <FormTypes
                                             values={values}

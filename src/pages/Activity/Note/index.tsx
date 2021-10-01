@@ -241,7 +241,7 @@ const Note = () => {
             </Grid>
             <Grid item xs={6} className={styles.filter_side}>
               <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>
-                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} />
+                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="note" />
                 <Button
                   variant="contained"
                   color="primary"
