@@ -148,8 +148,8 @@ export const GetUpcomingActivity = async (relatedTo) => {
     return data;
 };
 
-export const SearchActivity = async (searchText) => {
-    const { data } = await api().get(`/activity/search?searchText=${searchText}`);
+export const SearchActivity = async (searchText, activity) => {
+    const { data } = await api().get(`/activity/search?searchText=${searchText}&activity=${activity}`);
     return data;
 };
 

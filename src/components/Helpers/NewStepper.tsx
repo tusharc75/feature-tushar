@@ -219,6 +219,16 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
                           {`${label?.firstName} ${label?.lastName}`}
                         </Link>
                       </div>
+                      {label?.proxyBy && <div style={{ color: "#09445A" }}>
+                        <Link
+                          title={label?.proxyBy?.firstName}
+                          className="link"
+                          to={`${routes.userDetail.path}/${label?.id}`}
+                        >
+                          {`(${label?.proxyBy?.firstName} ${label?.proxyBy?.lastName})`}
+                        </Link>
+                      </div>
+                      }
                     </StepLabel>
                   </Step>
                 )))
@@ -226,7 +236,7 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
                   <Step key={label?.id}>
                     <StepLabel StepIconComponent={QontoStepIcon}>
                       <div style={{ color: "#09445A" }}>
-                      <Link
+                        <Link
                           title={label?.name}
                           className="link"
                           to={`${routes.userDetail.path}/${label?.id}`}

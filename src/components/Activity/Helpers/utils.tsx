@@ -9,4 +9,11 @@ export const resActivityColors = {
   quote: "#CC33CC",
   projectSales: "#003333",
   my: "#990033",
+
+  task: "#3949ab",
+  event: "#e65100",
+  case: "#bf360c",
+  note: "#990033",
+  email: "#990033",
+  attachment: "#990033",
 };

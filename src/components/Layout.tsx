@@ -183,7 +183,7 @@ const Layout = ({ children, width }) => {
       />}
       <Sidebar toggleDrawer={toggleDrawer} setToggleDrawer={setToggleDrawer} />
       <Toolbar />
-      <Box display="flex">
+      <Box display="flex" >
         {!mobileWidths.includes(width) && <Toolbar style={{ width: "48px" }} />}
         <motion.div
           animate={{ opacity: 1 }}
