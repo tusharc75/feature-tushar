@@ -878,11 +878,21 @@ const Header = ({ toggleDrawer }) => {
 
   const startTour = () => {
     if (['local', 'development'].includes(process.env.REACT_APP_ENV)) {
+
+      const paths = pathname.split("/").filter((x: string) => x)
+      let path: string;
+
+      if (paths.includes("detail")) {
+        paths.splice(paths.length - 1, 1)
+        path = paths.join("/")
+      }
+
       dispatch({
         type: SET_START_TOUR,
         payload: {
-          path: pathname,
-          start: true
+          path: paths.includes("detail") ? `/${path}` : pathname,
+          start: true,
+          stepIndex: 0
         }
       })
     }

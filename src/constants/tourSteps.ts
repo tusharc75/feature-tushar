@@ -207,3 +207,92 @@ export const AccountSteps: Step[] = [
     target: '.MuiTablePagination-actions'
   }
 ];
+
+export const AccountDetailsSteps: Step[] = [
+  {
+    title: 'Details Page Guide',
+    content: 'We will guide you through the usage.',
+    placement: 'center',
+    target: '.detail-container'
+  },
+  {
+    title: 'Header',
+    content: 'This is page header.',
+    placement: 'bottom',
+    disableScrolling: true,
+    disableScrollParentFix: true,
+    target: '#detailHeaderPageTitle'
+  },
+  {
+    title: 'Actions',
+    content: 'These are actions for this particular record.',
+    placement: 'top',
+    target: '#detailHeaderPageActions'
+  },
+  {
+    title: 'Approve Button',
+    content: 'This is button will approve the account.',
+    placement: 'top',
+    target: '#detailApproveButton'
+  },
+  {
+    title: 'Edit Button',
+    content: 'This is for editing a current a record.',
+    placement: 'top',
+    target: '#detailEditButton'
+  },
+  {
+    title: 'Delete Button',
+    content: 'This will delete the current record.',
+    placement: 'top',
+    target: '#detailDeleteButton'
+  },
+  {
+    title: 'Details',
+    content: 'All the information about Account.',
+    placement: 'right',
+    target: '#a11y-tab-0'
+  },
+  {
+    title: 'Hierarchy',
+    content: 'This hierarchy to show the child of this current account.',
+    placement: 'right',
+    target: '#a11y-tab-1'
+  },
+  {
+    title: 'OM-Neurons',
+    content: 'Here you will see 3D visualization for all the account hierarchy and its child.',
+    placement: 'right',
+    target: '#a11y-tab-2'
+  },
+  {
+    title: 'Opportunities',
+    content: 'Here you will see all the opportunities that are connected with this account.',
+    placement: 'top',
+    target: '#opportunityAccordion'
+  },
+  {
+    title: 'Projects',
+    content: 'Here you will see all the projects that are connected with this account.',
+    placement: 'top',
+    target: '#projectsAccordion'
+  },
+  {
+    title: 'Quotes',
+    content: 'Here you will see all the quotes that are connected with this account.',
+    placement: 'top',
+    target: '#quotesAccordion'
+  },
+  {
+    title: 'Activities',
+    content: 'Here you will see all the related activities with this account.',
+    placement: 'left',
+    target: '#activitiesSidebar'
+  },
+  {
+    title: 'Related Contacts',
+    content: 'Here you will see all the related contacts with this account.',
+    placement: 'left',
+    target: '.account_detail_page_div3__22Pv5'
+  }
+];
