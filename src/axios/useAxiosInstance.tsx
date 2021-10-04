@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { backendApi } from './../config';
+import { backendApi } from '../config';
 
 const ERROR_CODE = {
     permissionError: '1001',
@@ -9,7 +9,7 @@ const ERROR_CODE = {
 };
 Object.freeze(ERROR_CODE);
 
-export default (history = null, passedHeaders = null) => {
+export default function useAxiosInstance(history = null, passedHeaders = null) {
     let headers: any = passedHeaders ? passedHeaders : {};
 
     if (localStorage.token) {
@@ -53,10 +53,6 @@ export default (history = null, passedHeaders = null) => {
                 localStorage.setItem("slowInternetConnection", "false")
             }
         }
-        // const splittedUrl = request.url.split("?");
-        // if (splittedUrl.length > 1) {
-        //     request.url = `${splittedUrl[0]}?${encodeURIComponent(splittedUrl[1])}`
-        // }
         return request;
     }, error => {
         return Promise.reject(error);
@@ -81,11 +77,9 @@ export default (history = null, passedHeaders = null) => {
             }
 
             if (error.message == "Network Error") {
-                if (navigator.onLine) {
-                    return new Promise((resolve, reject) => {
-                        reject({ open: true, type: "error", message: "Api Not Working" });
-                    })
-                }
+                return new Promise((resolve, reject) => {
+                    reject({ open: true, type: "error", message: "Api Not Working" });
+                })
             }
 
             if (!error.response) {
@@ -95,8 +89,6 @@ export default (history = null, passedHeaders = null) => {
             }
 
             if (error.response.data && error.response.data.code && Object.values(ERROR_CODE).some(s => s === error.response.data.code)) {
-                localStorage.removeItem("selectedEntity");
-
                 if (window.confirm((`${error.response.data.error}\n\nPress Ok to redirect to home\nPress Cancel to stay here`))) {
                     //@ts-ignore
                     window.location = "/";

@@ -130,7 +130,7 @@ function App() {
       localStorage.setItem("slowInternetConnection", "false")
     }
   });
-  ReactGA.initialize(TRACKING_ID);
+  // ReactGA.initialize(TRACKING_ID);
 
   window.addEventListener('load', function (e) {
     //@ts-ignore
@@ -147,7 +147,13 @@ function App() {
   }, false);
 
   window.addEventListener('offline', function (e) {
-    setIsOffline(true);
+    const pathnames = history.location.pathname.split("/").filter((x) => x);
+
+    if (!(history.location.pathname === "/" || [
+      "rental-management"
+    ].indexOf(pathnames[0]) >= 0)) {
+      setIsOffline(true);
+    }
   }, false);
 
   const getNotification = async () => {
@@ -614,10 +620,10 @@ function App() {
         )
       }
 
-      {
+      {/* {
         isOffline ?
           <OfflineStatusDialog /> : null
-      }
+      } */}
     </ThemeProvider>
   );
 }
