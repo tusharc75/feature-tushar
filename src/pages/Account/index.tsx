@@ -619,7 +619,7 @@ export default function Account(props) {
   };
 
   const approveDisapproveAccounts = () => {
-    const selectedAccountIds = dataRows.filter((d) => d.approved === !multipleApproveDisapproveAccount.approved).map((m) => m._id);
+    const selectedAccountIds = selectedRecords.filter((d) => d.approved === !multipleApproveDisapproveAccount.approved).map((m) => m._id);
 
     axiosInstance()
       .post(`/${accountApi}/approve`, {
