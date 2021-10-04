@@ -75,6 +75,7 @@ const DetailsPageHeader = (props) => {
                   variant="h6"
                   component="h2"
                   color="primary"
+                  id="detailHeaderPageTitle"
                 >
                   <span className="d-flex align-items-center"><span className="listingHeader">{heading}
                   </span>
@@ -94,7 +95,7 @@ const DetailsPageHeader = (props) => {
               </>
             ) : null}
           </Grid>
-          <Grid item className="d-flex align-items-center gap-2" justify="flex-end">{children}</Grid>
+          <Grid id="detailHeaderPageActions" item className="d-flex align-items-center gap-2" justify="flex-end">{children}</Grid>
         </Grid>
         <Box className="gap-2 detailHeaderDashboard">
           {loading ? (
@@ -156,7 +157,7 @@ const DetailsPageHeader = (props) => {
                             style={{ fontWeight: 500 }}
                           >
                             {mainPoints[key] || ""}
-                            {["email", "phone"].indexOf(key.toLocaleLowerCase()) >= 0 ? <CopyToClipboard textToCopy={mainPoints[key]} style={{ color: isMobile || isTablet ?  "#010c02" : "white" }} /> : null}
+                            {["email", "phone"].indexOf(key.toLocaleLowerCase()) >= 0 ? <CopyToClipboard textToCopy={mainPoints[key]} style={{ color: isMobile || isTablet ? "#010c02" : "white" }} /> : null}
                           </Typography>
                         </Box>
                       )) : null}

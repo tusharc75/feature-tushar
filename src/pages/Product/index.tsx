@@ -86,30 +86,35 @@ const Product = () => {
 
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
-            data.data = data.data?.map((u) => {
-                const { createdBy, entity, ...restProperties } = u;
-                const [firstEntity, ...restEntity] = entity;
-                let res = {
-                    ...restProperties,
-                    id: u._id,
-                    inventoryCount: u?.qty,
-                    warehouses: u.warehouse?.map(w => w.warehouseName).join(", "),
-                    createdBy: u.createdBy?.user?.concatedName,
-                    createdByDate: u.createdBy?.date,
-                    updatedBy: u.updatedBy?.user?.concatedName,
-                    updatedByDate: u.updatedBy?.date,
-                    entity: firstEntity?.optionLabel,
-                    entityId: firstEntity?.optionValue,
-                    productCategoryChipColor: u.productCategory.chipColour,
-                    restEntity: restEntity,
-                }
-                for (let col in res) {
-                    if (res[col] && res[col].optionLabel) {
-                        res[col] = res[col].optionLabel;
+            try {
+                data.data = data.data?.map((u) => {
+                    const { createdBy, entity, ...restProperties } = u;
+                    const [firstEntity, ...restEntity] = entity ? entity : [];
+                    let res = {
+                        ...restProperties,
+                        id: u._id,
+                        inventoryCount: u?.qty,
+                        warehouses: u.warehouse?.map(w => w.warehouseName).join(", "),
+                        createdBy: u.createdBy?.user?.concatedName,
+                        createdByDate: u.createdBy?.date,
+                        updatedBy: u.updatedBy?.user?.concatedName,
+                        updatedByDate: u.updatedBy?.date,
+                        entity: firstEntity?.optionLabel,
+                        entityId: firstEntity?.optionValue,
+                        productCategoryChipColor: u.productCategory?.chipColour,
+                        restEntity: restEntity,
                     }
-                }
-                return res;
-            });
+                    for (let col in res) {
+                        if (res[col] && res[col].optionLabel) {
+                            res[col] = res[col].optionLabel;
+                        }
+                    }
+                    return res;
+                });
+            }
+            catch (e) {
+                console.log(e)
+            }
             let column = []
             data.data.forEach((row) => {
                 row.fields.forEach((ele) => {

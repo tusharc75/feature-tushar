@@ -16,6 +16,7 @@ export const initialState = {
   tour: {
     path: '',
     start: false,
+    stepIndex: 0,
   },
   gridMetaData: {}
 };
@@ -35,8 +36,8 @@ const reducer = (state = initialState, action) => {
       return { ...state, chatter: action.payload };
 
     case SET_START_TOUR:
-      const { start, path } = action.payload
-      return { ...state, tour: { start, path } };
+      const { start, path, stepIndex } = action.payload
+      return { ...state, tour: { start, path, stepIndex } };
 
     case SET_CART_COUNT:
       return { ...state, cartCount: action.payload };
