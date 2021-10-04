@@ -22,6 +22,7 @@ import "./components/Chatter/style.scss"
 import { CustomChatNotificationCountProvider } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
 import { GlobalChatProvider } from "./StateProvider/GlobalChatContext";
 import { CustomOfflineProvider } from "./StateProvider/OfflineContext/OfflineContext";
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 // @ts-ignore
 if (process.env.REACT_APP_ENV !== 'local') {
@@ -60,3 +61,8 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById("root")
 );
+
+// If you want your app to work offline and load faster, you can change
+// unregister() to register() below. Note this comes with some pitfalls.
+// Learn more about service workers: https://cra.link/PWA
+serviceWorkerRegistration.register();
