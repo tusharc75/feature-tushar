@@ -127,7 +127,7 @@ const Entity: FC = () => {
         <FileCopyIcon fontSize="small" color="primary" />
       </IconButton>
     </Tooltip>
-    {permissions[entityResource]?.isUpdate ?
+    {permissions[entityResource]?.isUpdate && permissions?.role.isRead && permissions?.user.isRead ?
 
       <Tooltip title="Assign users">
         <IconButton
