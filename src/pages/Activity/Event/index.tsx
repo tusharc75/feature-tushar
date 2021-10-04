@@ -86,9 +86,8 @@ const Event = () => {
                   fullWidth
                   startIcon={<Add />}
                   variant="outlined"
-                  size="small" 
-                  onClick={() => setOpenDialog(true)}
-                >
+                  size="small"
+                  onClick={() => setOpenDialog(true)}>
                   Create Event
                 </Button>
               </Box>

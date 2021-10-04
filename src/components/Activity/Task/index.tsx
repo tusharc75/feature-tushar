@@ -14,6 +14,7 @@ import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, displayDate } from "../../../constants/helpers";
+import { useData } from "../../../StateProvider/Provider";
 
 export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -21,6 +22,9 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [taskId, setTaskId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(true);
+  const {
+    state: { permissions },
+  }: any = useData();
 
   useEffect(() => {
     fetchTask();
@@ -104,16 +108,18 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                       Due On : {displayDate(_task?.dueDate)}
                     </span>
                   </Grid>
-                  <Grid item xs={2} container justify="flex-end">
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      aria-label="delete"
-                      onClick={(event) => handleOpenMenu(event, _task._id)}
-                    >
-                      <MoreHorizIcon />
-                    </IconButton>
-                  </Grid>
+                  {
+                    permissions["task"]?.isUpdate || permissions["task"]?.isDelete ?
+                      <Grid item xs={2} container justify="flex-end">
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          aria-label="delete"
+                          onClick={(event) => handleOpenMenu(event, _task._id)}
+                        >
+                          <MoreHorizIcon />
+                        </IconButton>
+                      </Grid> : null}
                 </Grid>
               </Box>
               <Box pt={1}>
@@ -143,8 +149,11 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         open={Boolean(anchorEl)}
         onClose={handleCloseMenu}
       >
-        <MenuItem onClick={handleEdit}>Edit</MenuItem>
-        <MenuItem onClick={handleDelete}>Delete</MenuItem>
+        {
+          permissions["task"]?.isUpdate ?
+            <MenuItem onClick={handleEdit}>Edit</MenuItem> : null}
+        {
+          permissions["task"]?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
       </Menu>
       <Dialog
         fullScreen={isMobile || isTablet}

@@ -15,6 +15,7 @@ import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
 import { isMobile, isTablet } from "react-device-detect";
 import { dateFormat, CustomDialogTransition } from "../../../constants/helpers";
+import { useData } from "../../../StateProvider/Provider";
 
 export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -22,6 +23,9 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [caseId, setCaseId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(true);
+  const {
+    state: { permissions },
+  }: any = useData();
 
   useEffect(() => {
     fetchCash();
@@ -104,16 +108,18 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                       Due Date : {moment(_case.dueDate).format(dateFormat)}
                     </span>
                   </Grid>
-                  <Grid item xs={2} container justify="flex-end">
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      aria-label="delete"
-                      onClick={(event) => handleOpenMenu(event, _case._id)}
-                    >
-                      <MoreHorizIcon />
-                    </IconButton>
-                  </Grid>
+                  {
+                    permissions["case"]?.isUpdate || permissions["case"]?.isDelete ?
+                      <Grid item xs={2} container justify="flex-end">
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          aria-label="delete"
+                          onClick={(event) => handleOpenMenu(event, _case._id)}
+                        >
+                          <MoreHorizIcon />
+                        </IconButton>
+                      </Grid> : null}
                 </Grid>
               </Box>
               <Box pt={1}>
@@ -143,8 +149,11 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         open={Boolean(anchorEl)}
         onClose={handleCloseMenu}
       >
-        <MenuItem onClick={handleEdit}>Edit</MenuItem>
-        <MenuItem onClick={handleDelete}>Delete</MenuItem>
+        {
+          permissions["case"]?.isUpdate ?
+            <MenuItem onClick={handleEdit}>Edit</MenuItem> : null}
+        {
+          permissions["case"]?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
       </Menu>
       <Dialog
         open={open}

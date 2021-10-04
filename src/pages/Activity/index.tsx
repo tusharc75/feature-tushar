@@ -9,10 +9,8 @@ import queryString from "query-string";
 import { GetReferenceName } from "../../axios/activity";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import CustomContainer from "../../components/CustomContainer";
-
 import routes from "../../components/Helpers/Routes";
 import "./style.scss";
-import ActivityModelHandler from "../../components/Activity/ActivityModelHandler";
 
 const capitalize = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -37,6 +35,7 @@ const Activity = ({ type }) => {
 
   const [viewType, setViewType] = useState(0);
   const [filter, setFilter] = useState([]);
+
 
   useEffect(() => {
     if (referenceType) {

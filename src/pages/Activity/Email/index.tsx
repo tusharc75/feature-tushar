@@ -41,7 +41,7 @@ const Email = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user }
+    state: { user, permissions }
   }: any = useData();
   const parsed = queryString.parse(history.location.search);
   const { referenceType, referenceId } = parsed;
@@ -186,8 +186,10 @@ const Email = () => {
     <span
       className="link cursor-pointer"
       onClick={(e) => {
-        setOpen(true);
-        setEmailId(params.data.id);
+        if (permissions?.email?.isUpdate) {
+          setOpen(true);
+          setEmailId(params.data.id);
+        }
       }}
     >
       {typeof params.data.to === 'string' ? (
@@ -350,6 +352,21 @@ const Email = () => {
               <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>
                 {/* <Box style={{ width: '70%' }}> */}
                 <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} />
+                {
+                  permissions?.email?.isCreate ?
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      className={styles.add_submit_btn}
+                      onClick={() => {
+                        setOpen(true);
+                      }}
+                      startIcon={<AddOutlined />}
+                    >
+                      Add
+                    </Button> : null
+                }
                 <Button
                   variant="contained"
                   color="primary"

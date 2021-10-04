@@ -23,7 +23,7 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [loading, setLoading] = useState(false)
   const {
-    state: { user },
+    state: { user, permissions },
   }: any = useData();
 
   useEffect(() => {
@@ -111,12 +111,14 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                       }}
                     >{_email?.subject}</Typography>
                   </Grid>
-                  <Grid item xs={2} container justify="flex-end" >
-                    <IconButton size="small" color="primary" aria-label="delete"
-                      onClick={(event) => handleOpenMenu(event, _email._id)} >
-                      <MoreHorizIcon />
-                    </IconButton>
-                  </Grid>
+                  {
+                    permissions["email"]?.isDelete || permissions["email"]?.isRead ? <Grid item xs={2} container justify="flex-end" >
+                      <IconButton size="small" color="primary" aria-label="delete"
+                        onClick={(event) => handleOpenMenu(event, _email._id)} >
+                        <MoreHorizIcon />
+                      </IconButton>
+                    </Grid> : null
+                  }
                 </Grid>
               </Box>
               <Box pt={1}>
@@ -143,8 +145,12 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         open={Boolean(anchorEl)}
         onClose={handleCloseMenu}
       >
-        <MenuItem onClick={handleEdit}>View</MenuItem>
-        <MenuItem onClick={handleDelete}>Delete</MenuItem>
+        {
+          permissions["email"]?.isRead ? <MenuItem onClick={handleEdit}>View</MenuItem> : null
+        }
+        {
+          permissions["email"]?.isDelete ?
+            <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
       </Menu>
       <Dialog
         open={open}

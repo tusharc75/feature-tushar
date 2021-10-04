@@ -25,6 +25,7 @@ export default function UserProfile(props) {
   return (
     <>
       <IconButton
+        id="userProfileIcon"
         edge="end"
         ref={anchorRef}
         aria-label="account of current user"
