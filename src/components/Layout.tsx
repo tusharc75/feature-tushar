@@ -9,7 +9,7 @@ import Sidebar from "./Sidebar/Sidebar";
 import GlobalUserChat from "./GlobalUserChat";
 import { useData } from "../StateProvider/Provider";
 import { SET_START_TOUR } from "../StateProvider/actionTypes";
-import { AccountDetailsSteps, AccountSteps, DashboardSteps, UserSteps } from "../constants/tourSteps";
+import { AccountDetailsSteps, AccountSteps, DashboardSteps, UserSteps, ContactsSteps, ContactDetailsSteps } from "../constants/tourSteps";
 
 const useStyles = makeStyles(() => ({
   content: {
@@ -152,10 +152,18 @@ const Layout = ({ children, width }) => {
         return AccountSteps
       case "/supplier-account":
         return AccountSteps
+      case "/customer-contact":
+        return ContactsSteps
+      case "/supplier-contact":
+        return ContactsSteps
       case "/customer-account/detail":
         return AccountDetailsSteps
       case "/supplier-account/detail":
         return AccountDetailsSteps
+      case "/customer-contact/detail":
+        return ContactDetailsSteps
+      case "/supplier-contact/detail":
+        return ContactDetailsSteps
       default:
         return;
     }
