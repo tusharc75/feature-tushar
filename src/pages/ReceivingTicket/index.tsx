@@ -38,7 +38,7 @@ const ReceivingTicket = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { user, permissions, selectedEntity }
   }: any = useData();
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
@@ -128,7 +128,7 @@ const ReceivingTicket = () => {
       headerName: 'Updated By',
       show: true,
       cellRenderer: 'updatedByRenderer'
-    },
+    }
   ];
   //  Grid Variables - End
 
@@ -148,7 +148,7 @@ const ReceivingTicket = () => {
     if (renderCount > 0) {
       fetchReceivingTickets();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity]);
 
   const handleSingleDeleteReceivingTicket = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -193,30 +193,28 @@ const ReceivingTicket = () => {
     </>
   );
 
-  const CustomerAccountRenderer = (params) => <>
-    {
-      params.value ?
-        <Link
-          className="link"
-          title={params.value}
-          to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}
-        >
+  const CustomerAccountRenderer = (params) => (
+    <>
+      {params.value ? (
+        <Link className="link" title={params.value} to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}>
           {params.value}
-        </Link> : <NoDataCell />
-    }
-  </>
-  const WarehouseRenderer = (params) => <>
-    {
-      params.value ?
-        <Link
-          className="link"
-          title={params.value}
-          to={`${routes.address.path}/detail/${params.data.warehouseId}`}
-        >
+        </Link>
+      ) : (
+        <NoDataCell />
+      )}
+    </>
+  );
+  const WarehouseRenderer = (params) => (
+    <>
+      {params.value ? (
+        <Link className="link" title={params.value} to={`${routes.address.path}/detail/${params.data.warehouseId}`}>
           {params.value}
-        </Link> : <NoDataCell />
-    }
-  </>
+        </Link>
+      ) : (
+        <NoDataCell />
+      )}
+    </>
+  );
 
   // const ProductInventoryRenderer = (params) => (
   //   <>
@@ -275,7 +273,7 @@ const ReceivingTicket = () => {
             receivingJobName: `${params.data.receivingJobName}`
           })
         }
-        entity="receivingTicket"
+        entity="receiving ticket"
       />
     </>
   );
@@ -329,6 +327,11 @@ const ReceivingTicket = () => {
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&filterReceivingTickets=${selectedType}`;
+
+    if (selectedEntity) {
+      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+    }
+
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
@@ -387,8 +390,8 @@ const ReceivingTicket = () => {
           let res = {
             ...restProperties,
             id: u._id,
-            pickupDate: u["pick-UpDate"],
-            productInventory: u.productInventory?.map(p => p.optionLabel).join(", "),
+            pickupDate: u['pick-UpDate'],
+            productInventory: u.productInventory?.map((p) => p.optionLabel).join(', '),
             deliveryPerson: u.deliveryPerson?.optionLabel,
             deliveryPersonId: u.deliveryPerson?.optionValue,
             warehouse: u.warehouse?.optionLabel,
@@ -493,7 +496,7 @@ const ReceivingTicket = () => {
                   permissions={permissions.receivingTicket}
                   module="receivingTicket"
                   api={receivingTicket.receivingTicketApi}
-                  afterImportCompleted={() => { }}
+                  afterImportCompleted={() => {}}
                 />
               </Grid>
             </Grid>
@@ -517,9 +520,9 @@ const ReceivingTicket = () => {
             icon={<FaRegistered className="headerLogo" />}
             heading={routes.receivingTicket.title}
             showTransferEntityDialog={handleTransferEntityDialog}
-          // showCloneReceivingTicketDialog={() => {
-          //   handleShowCloneReceivingTicketDialog()
-          // }}
+            // showCloneReceivingTicketDialog={() => {
+            //   handleShowCloneReceivingTicketDialog()
+            // }}
           >
             {accountDetails.accountId && (
               <Chip
@@ -563,8 +566,9 @@ const ReceivingTicket = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.receivingJobName ? 'Receiving Ticket' : 'Receiving Tickets'}   ${deleteRecord.receivingJobName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.receivingJobName ? 'Receiving Ticket' : 'Receiving Tickets'}   ${
+              deleteRecord.receivingJobName || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

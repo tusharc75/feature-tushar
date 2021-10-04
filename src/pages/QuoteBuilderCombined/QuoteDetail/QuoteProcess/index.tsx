@@ -396,15 +396,6 @@ export default function QuoteProcess(props) {
         return result;
     }, [quoteData]);
 
-    const getNormalizeKey = (key) => {
-        return key.includes("_")
-            ? key.split("_").length === 2
-                ? `${startCase(key.split("_")[0])} ${key.split("_")[1].toUpperCase()}`
-                : key.split("_").length === 3
-                    ? `${startCase(key.split("_")[0])} ${key.split("_")[1].toUpperCase()} ${key.split("_")[2].toUpperCase()}`
-                    : `${startCase(key.split("_")[0])} ${key.split("_")[1].toUpperCase()} ${key.split("_")[2].toUpperCase()} ${key.split("_")[3].toUpperCase()}`
-            : startCase(key);
-    }
 
     const productCalculationForDoa = (BuilderData) => {
         const inventory: { fieldName: string; fieldValue: any }[][] = [];
@@ -476,34 +467,54 @@ export default function QuoteProcess(props) {
         let dynamicTable = [];
 
         const filterKeys = ["priceTemplate", "productTemplate", "productCategory", "productImage"]
-        BuilderData.forEach((quoteRows: { [x: string]: any }) => {
+        BuilderData.forEach((quoteRows: { [x: string]: any }, i) => {
             const quoteRowKeys = Object.keys(quoteRows);
             let inventorydata: { fieldName: string; fieldValue: any }[] = [];
+            // if (i === 0) console.log(quoteRows)
 
             // Making table columns and data for table
             quoteRowKeys.forEach((key) => {
                 if (key === "fields") {
                     const labelsWithVal = {}
-                    quoteRows[key].forEach((data) => {
+                    quoteRows[key].forEach((data, i) => {
+                        // console.log(data)
                         if (!filterKeys.includes(data.fieldName)) {
                             const fieldLabel = data.fieldLabel;
+                            const fieldName = data.fieldName;
                             const labels = []
-                            if (data.displayCurrency) {
+                            if (data.displayCurrency && data.units) {
                                 data.displayCurrency.forEach((cur) => {
-                                    const casedLabel = `${camelCase(fieldLabel)}_${cur.toLowerCase()}`
-                                    labels.push(`${fieldLabel} ${cur}`)
-                                    labelsWithVal[`${fieldLabel} ${cur}`] = quoteRows[casedLabel]
+                                    if (data.units) {
+                                        data.units.forEach(unit => {
+                                            const casedLabel = `${fieldName}_${cur.toLowerCase()}_${unit.toLowerCase()}`
+                                            if (quoteRows[casedLabel]) {
+                                                labels.push(`${fieldLabel} ${unit.toUpperCase()} ${cur}`)
+                                                labelsWithVal[`${fieldLabel} ${unit.toUpperCase()} ${cur}`] = quoteRows[casedLabel]
+                                            }
+                                        })
+                                    } else {
+                                        const casedLabel = `${fieldName}_${cur.toLowerCase()}`
+                                        if (quoteRows[casedLabel]) {
+                                            labels.push(`${fieldLabel} ${cur}`)
+                                            labelsWithVal[`${fieldLabel} ${cur}`] = quoteRows[casedLabel]
+                                        }
+                                    }
                                 })
-                            } else if (data.displayUnits) {
-                                data.displayUnits.forEach((unit) => {
-                                    const casedLabel = `${camelCase(fieldLabel)}_${unit.toLowerCase()}`
-                                    labels.push(`${fieldLabel} ${unit.toUpperCase()}`)
-                                    labelsWithVal[`${fieldLabel} ${unit.toUpperCase()}`] = quoteRows[casedLabel]
+                            } else if (data.units && !data.displayCurrency) {
+                                data.units.forEach((unit) => {
+                                    const casedLabel = `${camelCase(fieldName)}_${unit.toLowerCase()}`
+                                    if (quoteRows[casedLabel]) {
+                                        labels.push(`${fieldLabel} ${unit.toUpperCase()}`)
+                                        labelsWithVal[`${fieldLabel} ${unit.toUpperCase()}`] = quoteRows[casedLabel]
+                                    }
                                 })
 
                             } else {
-                                labels.push(fieldLabel)
-                                labelsWithVal[fieldLabel] = quoteRows[data.fieldName]
+                                if (quoteRows[fieldName]) {
+                                    labels.push(fieldLabel)
+                                    labelsWithVal[fieldLabel] = quoteRows[fieldName]
+                                }
+
                             }
 
                             labels.forEach(d => {
@@ -511,9 +522,11 @@ export default function QuoteProcess(props) {
                                     colName.push(d)
                                 }
                             })
+
                         }
                     })
                     dynamicTable.push(labelsWithVal)
+
                 }
 
                 if (ignoredKeys.indexOf(key) === -1) {
@@ -572,6 +585,7 @@ export default function QuoteProcess(props) {
 
         setColName(colName)
         setDynamicTableData(dynamicTable);
+        // console.log("*** TABLE ***: ", dynamicTable)
         return {
             inventory: inventory,
             totalMargin: totalMargin,
@@ -1379,6 +1393,7 @@ export default function QuoteProcess(props) {
                                         className="mr-1"
                                         startIcon={<AiFillPlusCircle />}
                                         color="primary"
+                                        disabled={!permissions.product?.isCreate}
                                         onClick={() => {
                                             setIsAddNewProduct(true);
                                         }}

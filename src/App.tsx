@@ -102,6 +102,8 @@ import RepairJobDetails from "./pages/RepairJob/RepairJobDetails";
 import ReceivingTicket from "./pages/ReceivingTicket";
 import ReceivingTicketDetails from "./pages/ReceivingTicket/ReceivingTicketDetails";
 import PricingConditionsDetailsPage from "./pages/PricingConditions/PricingConditionsDetailsPage";
+import SalesOrder from "./pages/SalesOrderCreation";
+import SalesOrderDetails from "./pages/SalesOrderCreation/SalesOrderDetails";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -128,7 +130,7 @@ function App() {
       localStorage.setItem("slowInternetConnection", "false")
     }
   });
-  ReactGA.initialize(TRACKING_ID);
+  // ReactGA.initialize(TRACKING_ID);
 
   window.addEventListener('load', function (e) {
     //@ts-ignore
@@ -145,7 +147,13 @@ function App() {
   }, false);
 
   window.addEventListener('offline', function (e) {
-    setIsOffline(true);
+    const pathnames = history.location.pathname.split("/").filter((x) => x);
+
+    if (!(history.location.pathname === "/" || [
+      "rental-management"
+    ].indexOf(pathnames[0]) >= 0)) {
+      setIsOffline(true);
+    }
   }, false);
 
   const getNotification = async () => {
@@ -586,6 +594,12 @@ function App() {
             <PrivateRoute exact path={`${routes.receivingTicketDetail.path}/:id`} >
               <ReceivingTicketDetails />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.salesOrder.path}>
+              <SalesOrder />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.salesOrderDetail.path}/:id`} >
+              <SalesOrderDetails />
+            </PrivateRoute>
 
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
@@ -606,10 +620,10 @@ function App() {
         )
       }
 
-      {
+      {/* {
         isOffline ?
           <OfflineStatusDialog /> : null
-      }
+      } */}
     </ThemeProvider>
   );
 }

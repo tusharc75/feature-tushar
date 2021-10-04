@@ -68,7 +68,7 @@ export default function Contact(props) {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
 
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
   const [showCreateContactDialog, setShowCreateContactDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [singleContactDelete, setSingleContactDelete] = useState({
     id: null,
@@ -135,7 +135,8 @@ export default function Contact(props) {
         setContactPermissions({
           isCreate: hasContactPermission.isCreate,
           isRead: hasContactPermission.isRead,
-          isDelete: hasContactPermission.isDelete
+          isDelete: hasContactPermission.isDelete,
+          isUpdate: hasContactPermission.isUpdate
         });
       }
     }
@@ -518,11 +519,11 @@ export default function Contact(props) {
               <Grid container>
                 <Grid item md={4} sm={4} xs={12} className="d-flex align-items-center gap-1" >
                   <MdContacts className="headerLogo" />
-                  <span className="listingHeader">{routes[contactResource].title}</span>
+                  <span id="resourceHeader" className="listingHeader">{routes[contactResource].title}</span>
                 </Grid>
                 <Grid item md={4} sm={4} xs={12}>
                   {ContactTypes && (
-                    <ToggleButtonGroup size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
+                    <ToggleButtonGroup id="resourceTypeSelector" size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
                       {ContactTypes.map((k, index) => {
                         return (
                           <ToggleButton value={k.key} key={index}>
@@ -549,7 +550,7 @@ export default function Contact(props) {
               </Grid>
             </Grid>
             <Grid item md={6} sm={6} xs={12} className={styles.filter_side}>
-              <Box className={styles.filter_side_header} component="div">
+              <Box id="resourceOperations" className={styles.filter_side_header} component="div">
                 <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} value={search} size="small" />
                 {contactPermissions.isCreate && (
                   <>
@@ -565,49 +566,78 @@ export default function Contact(props) {
                     </Button>
                   </>
                 )}
-
-                {contactPermissions.isDelete && (
-                  <>
-                    <Button
-                      // disabled={Boolean(!selectedBrand)}
-                      disabled={selectedRecords.length === 0}
-                      variant="outlined"
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      className={styles.action_submit_btn}
-                      aria-controls="action-menu"
-                    >
-                      Actions <ExpandMore />
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
+                <>
+                  <Button
+                    // disabled={Boolean(!selectedBrand)}
+                    disabled={selectedRecords.length === 0}
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    className={styles.action_submit_btn}
+                    aria-controls="action-menu"
+                  >
+                    Actions <ExpandMore />
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    {contactPermissions.isDelete && (
                       <MenuItem
                         disabled={selectedRecords.length === 0}
                         onClick={() => {
                           if (selectedRecords.some((d) => d.canDelete === false)) {
                             closeActions();
-                            setShowDeleteWarningConfirmBox(true);
+                            setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
                           } else {
                             closeActions();
                             setShowDeleteConfirmBox(true);
                           }
                         }}>
                         Delete
+                      </MenuItem>)}
+                    {contactPermissions.isUpdate && (
+                      <MenuItem
+                        disabled={selectedRecords.length === 0}
+                        onClick={() => {
+                          if (selectedRecords.some((d) => d.isUpdate === false)) {
+                            closeActions();
+                            setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+                          } else {
+                            closeActions();
+                            if (selectedRecords.length) {
+                              let entities = []
+                              selectedRecords.map(current => {
+
+                                if (current?.firstEntityId) {
+                                  entities = [...entities, current?.firstEntityId]
+                                }
+                                if (current?.restEntity) {
+                                  let restEntities = current?.restEntity.map(o => o?.optionValue)
+                                  entities = [...entities, ...restEntities]
+                                }
+                              })
+                              setEntities([...entities])
+                            }
+                            setShowEntityDialog(true)
+                          }
+                        }}
+                      >
+                        Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
                       </MenuItem>
-                    </Menu>
-                  </>
-                )}
+                    )}
+                  </Menu>
+                </>
+
               </Box>
             </Grid>
           </Grid>
@@ -628,11 +658,14 @@ export default function Contact(props) {
             renderedFrom={contactResource}
           />
 
-          {showDeleteWarningConfirmBox ? (
+          {showDeleteWarningConfirmBox?.show ? (
             <MessageDialog
-              open={showDeleteWarningConfirmBox}
-              message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-              onClose={() => setShowDeleteWarningConfirmBox(false)}
+              open={showDeleteWarningConfirmBox?.show}
+              message={showDeleteWarningConfirmBox?.isDelete ?
+                `You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`
+                : `You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`
+              }
+              onClose={() => setShowDeleteWarningConfirmBox({ show: false, isDelete: false })}
             />
           ) : null}
           {showDeleteConfirmBox ? (
@@ -679,7 +712,7 @@ export default function Contact(props) {
               <EntitySelectionsDialog
                 open={showEntityDialog}
                 resource={sidebarResource[contactResource]}
-                resourceId={contactId}
+                resourceIds={selectedRecords.length ? selectedRecords.map(o => o._id) : [contactId]}
                 onClose={() => {
                   setShowEntityDialog(false)
                   setContactId("")

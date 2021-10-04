@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Box, Grid, MenuItem, Button, Menu } from "@material-ui/core";
 import { AddOutlined, ExpandMore } from "@material-ui/icons";
-
+import Chip from "@material-ui/core/Chip"
 import styles from "../Leads/Header.module.scss";
 import SearchBox from "../../components/Helpers/SearchBox";
 import { BiNetworkChart } from "react-icons/bi";
@@ -18,6 +18,10 @@ const ProjectStrategyHeader = (props) => {
     canDelete,
     handleFilterChange,
     selectedType,
+    selectedRecords = [],
+    setShowDeleteWarningConfirmBox,
+    setShowEntityDialog,
+    setEntities
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -74,30 +78,32 @@ const ProjectStrategyHeader = (props) => {
               Add
             </Button>
           )}
-          {permissions.isDelete && (
-            <>
-              <Button
-                className={styles.action_submit_btn}
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-              >
-                Actions <ExpandMore />
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
+
+          <>
+            <Button
+              className={styles.action_submit_btn}
+              variant="outlined"
+              color="default"
+              size="small"
+              onClick={openActions}
+              aria-controls="action-menu"
+            >
+              Actions <ExpandMore />
+            </Button>
+
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              {permissions.isDelete && (
                 <MenuItem
                   disabled={canDelete}
                   onClick={() => {
@@ -106,10 +112,35 @@ const ProjectStrategyHeader = (props) => {
                   }}
                 >
                   Delete
+                </MenuItem>)}
+              {permissions.isUpdate && (
+                <MenuItem
+                  disabled={selectedRecords.length === 0}
+                  onClick={() => {
+                    if (selectedRecords.some((d) => d.isUpdate === false)) {
+                      closeActions();
+                      setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+                    } else {
+                      closeActions();
+                      if (selectedRecords.length) {
+                        let entities = []
+                        selectedRecords.map(current => {
+                          if (current?.entity) {
+                            let restEntities = current?.entity.map(o => o.optionValue)
+                            entities = [...entities, ...restEntities]
+                          }
+                        })
+                        setEntities([...entities])
+                      }
+                      setShowEntityDialog(true)
+                    }
+                  }}
+                >
+                  Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
                 </MenuItem>
-              </Menu>
-            </>
-          )}
+              )}
+            </Menu>
+          </>
         </Box>
       </Grid>
     </Grid>

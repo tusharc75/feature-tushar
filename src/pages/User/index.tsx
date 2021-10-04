@@ -1,5 +1,5 @@
 import { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
-import { Tooltip, IconButton, Grid, Dialog } from "@material-ui/core";
+import { Tooltip, IconButton, Grid, Dialog, Typography } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import {
@@ -32,6 +32,7 @@ import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import UserSetupDialog from "./UserSetupDialog";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+
 
 let userTimeout: ReturnType<typeof setTimeout>;
 
@@ -111,15 +112,15 @@ const User: FC = () => {
   const StatusRenderer = params => <div style={{ width: 150 }}>
     {params.value ? (
       <Tooltip title="Inactive">
-        <IconButton>
-          <FaUserAltSlash className="text-error" />
-        </IconButton>
+        <Typography>
+          <FaUserAltSlash className="text-error ml-2" />
+        </Typography>
       </Tooltip>
     ) : (
       <Tooltip title="Active">
-        <IconButton>
-          <FaUserCheck className="text-success" />
-        </IconButton>
+        <Typography>
+          <FaUserCheck className="text-success ml-2" />
+        </Typography>
       </Tooltip>
     )}{" "}
   </div>;
@@ -487,6 +488,7 @@ const User: FC = () => {
         });
     }
   }
+
   return (
     <>
       {

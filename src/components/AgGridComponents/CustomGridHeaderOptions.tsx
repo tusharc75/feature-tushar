@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Box, Button, Popover, FormControl, FormGroup, FormControlLabel, Tooltip, Divider, Switch } from '@material-ui/core';
 import ViewWeekIcon from '@material-ui/icons/ViewWeek';
 import RefreshIcon from '@material-ui/icons/Refresh';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 
 export default function CustomGridHeaderOptions({ columns, setColumns, columnApi, refreshGrid = null, renderedFrom = null }) {
+
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
   const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   return (
     <Box className="ag-grid-listing-grid-header-options border px-2 py-1 d-flex gap-2">
@@ -90,6 +93,7 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
             className="px-2"
             startIcon={<RefreshIcon />}
             color="primary"
+            disabled={isOffline}
             onClick={() => {
               refreshGrid();
             }}

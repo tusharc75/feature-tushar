@@ -16,7 +16,7 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
+import { productInventory, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
 import {
     DateRenderer,
     CommonRenderer,
@@ -31,6 +31,8 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useHistory } from "react-router-dom";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
+
+const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
 const ProductInventory = () => {
 
@@ -50,6 +52,7 @@ const ProductInventory = () => {
     const history = useHistory();
 
     const [warehouse, setWarehouse] = useState(history.location?.state?.warehouse);
+    const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
 
     useEffect(() => {
         fetchProductInventory()
@@ -111,8 +114,8 @@ const ProductInventory = () => {
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
 
-        if (warehouse?.optionValue) {
-            deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "warehouse", term: warehouse?.optionValue }])}`
+        if (warehouse?.optionValue && redirectProduct?.id) {
+            deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "warehouse", term: warehouse?.optionValue }, { field: "product", term: redirectProduct?.id }])}`
         }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
@@ -267,7 +270,19 @@ const ProductInventory = () => {
                                 color="primary"
                                 label={`Warehouse : ${warehouse.optionLabel}`}
                                 onDelete={() => {
+                                    setRedirectProduct(null);
                                     setWarehouse(null);
+                                }}
+                            />
+                        )}
+                        {redirectProduct && (
+                            <Chip
+                                className="ml-3"
+                                color="primary"
+                                label={`Product : ${redirectProduct.name}`}
+                                onDelete={() => {
+                                    setWarehouse(null);
+                                    setRedirectProduct(null);
                                 }}
                             />
                         )}
@@ -287,38 +302,21 @@ const ProductInventory = () => {
                                     setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null })
                                 }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                             }
-                            {permissions?.productInventory?.isUpdate &&
-                                <HtmlTooltip title="Please select some inventories">
-                                    <span>
-                                        <Button
-                                            className={styles.add_submit_btn}
-                                            onClick={() => setShowRepairJobDialog(true)}
-                                            variant="contained"
-                                            size="small"
-                                            color="primary"
-                                            startIcon={<AddIcon />}
-                                            disabled={!selectedRecords.length}
-                                        >Create Repair Job
-                                        </Button>
-                                    </span>
-                                </HtmlTooltip>
-                            }
-                            {permissions?.productInventory?.isDelete &&
-                                <HtmlTooltip title="Please select some inventories">
-                                    <span>
-                                        <Button
-                                            className={styles.action_submit_btn}
-                                            variant="outlined"
-                                            color="default"
-                                            size="small"
-                                            onClick={openActions}
-                                            disabled={selectedRecords.length ? false : true}
-                                            aria-controls="action-menu"
-                                        >Actions <ExpandMore />
-                                        </Button>
-                                    </span>
-                                </HtmlTooltip>
-                            }
+
+                            <HtmlTooltip title="Please select some inventories">
+                                <span>
+                                    <Button
+                                        className={styles.action_submit_btn}
+                                        variant="outlined"
+                                        color="default"
+                                        size="small"
+                                        onClick={openActions}
+                                        disabled={selectedRecords.length ? false : true}
+                                        aria-controls="action-menu"
+                                    >Actions <ExpandMore />
+                                    </Button>
+                                </span>
+                            </HtmlTooltip>
                             <Menu
                                 anchorEl={anchorEl}
                                 keepMounted
@@ -331,7 +329,14 @@ const ProductInventory = () => {
                                 open={Boolean(anchorEl)}
                                 onClose={closeActions}
                             >
-                                <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                                {permissions?.productInventory?.isDelete && <MenuItem onClick={() => {
+                                    closeActions()
+                                    setShowDeleteConfirmBox(true)
+                                }}>Delete</MenuItem>}
+                                {permissions?.repairJob?.isCreate && permissions?.productInventory?.isUpdate && <MenuItem onClick={() => {
+                                    closeActions()
+                                    setShowRepairJobDialog(true)
+                                }}>Create Repair Job</MenuItem>}
                             </Menu>
                         </Box>
                     </Grid>
@@ -381,9 +386,9 @@ const ProductInventory = () => {
         }
         {
             showDeleteConfirmBox &&
-            <ConfirmationDialog
-                open={showDeleteConfirmBox}
-                message={`Are you sure you want to delete the product inventory ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ?`}
+                <ConfirmationDialog
+                    open={showDeleteConfirmBox}
+                    message={`Are you sure you want to delete the ${storedRoutes ? storedRoutes.productInventory?.title?.toLowerCase() : RESOURCE_LABEL.productInventory?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
                 onClose={() => setShowDeleteConfirmBox(false)}
                 onOk={handleDelete}
             />

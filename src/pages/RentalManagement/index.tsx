@@ -8,7 +8,6 @@ import MessageDialog from "../../components/Helpers/MessageDialog";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { GiHiveMind } from "react-icons/gi";
 import { FaRegistered } from "react-icons/fa";
 
 import {
@@ -37,6 +36,8 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import RentalManagementHeader from "./RentalManagementHeader";
 import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementDialog";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
+import HideWhenOffline from "../../components/HideWhenOffline";
 
 let rentalManagementTimeout;
 const RentalManagementType = [
@@ -52,9 +53,11 @@ const RentalManagementType = [
 
 const RentalManagement = () => {
   const toastConfig = useContext(CustomToastContext);
+  const { isOffline, offlineGridData, updateOfflineGridData } = useContext(CustomOfflineContext);
+
   const history = useHistory();
   const {
-    state: { user, permissions },
+    state: { user, permissions, selectedEntity },
   }: any = useData();
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
@@ -201,6 +204,8 @@ const RentalManagement = () => {
     filters,
     sorting,
     accountDetails,
+    selectedEntity,
+    isOffline
   ]);
 
   const handleSingleDeleteRentalManagement = async () => {
@@ -266,6 +271,7 @@ const RentalManagement = () => {
     <>
       {
         permissions.rentalManagement.isCreate ? (
+
           <Tooltip title="Clone">
             <IconButton
               size="small"
@@ -285,19 +291,21 @@ const RentalManagement = () => {
           </Tooltip>
         )}
 
-      <GridDeleteIcon
-        hasDeletePermission={permissions.rentalManagement.isDelete}
-        ownerId={params.data.ownerId}
-        userId={user?.user?._id}
-        onDelete={() =>
-          setSingleRentalManagementDelete({
-            show: true,
-            id: params.data._id,
-            rentalManagementName: `${params.data.rentalManagementName}`,
-          })
-        }
-        entity="rentalManagement"
-      />
+      <HideWhenOffline>
+        <GridDeleteIcon
+          hasDeletePermission={permissions.rentalManagement.isDelete}
+          ownerId={params.data.ownerId}
+          userId={user?.user?._id}
+          onDelete={() =>
+            setSingleRentalManagementDelete({
+              show: true,
+              id: params.data._id,
+              rentalManagementName: `${params.data.rentalManagementName}`,
+            })
+          }
+          entity="rentalManagement"
+        />
+      </HideWhenOffline>
     </>
   );
 
@@ -400,57 +408,72 @@ const RentalManagement = () => {
       gridApi.setRowData([]);
     }
 
-    axiosInstance()
-      .get(`${rentalManagementApi}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
-          const {
-            owner,
-            collaborator,
-            createdBy,
-            updatedBy,
-            customerAccount,
-            ...restProperties
-          } = u;
+    try {
+      let data, count;
 
-          let res = {
-            ...restProperties,
-            id: u._id,
-            status: u.status,
-            owner: u.owner?.optionLabel,
-            ownerId: u.owner?.optionValue,
-            customerAccount: u.customerAccount?.optionLabel,
-            customerAccountId: u.customerAccount?.optionValue,
-            customerContact: u.customerContact?.optionLabel,
-            relatedOpportunity: u.opportunity?.optionLabel,
-            relatedOpportunityId: u.opportunity?.optionValue,
-            createdBy: u.createdBy?.user?.concatedName,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date,
-          };
-          return res;
-        });
+      if (!isOffline) {
+        const response: any = await axiosInstance().get(`${rentalManagementApi}${queryString}`);
 
-        dispatch({ type: "initialize", data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: "loading", loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((error) => {
-        dispatch({ type: "loading", loading: false });
-        toastConfig.setToastConfig(error);
+        data = response?.data?.data;
+        count = response?.data?.count;
+      }
+      else {
+        data = offlineGridData?.rentalManagement || [];
+        count = offlineGridData?.rentalManagement?.length || 0;
+      }
+
+      try {
+        updateOfflineGridData("rentalManagement", data);
+      } catch (ex) {
+        console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`)
+      }
+
+      let rows = data.map((u) => {
+        const {
+          owner,
+          collaborator,
+          createdBy,
+          updatedBy,
+          customerAccount,
+          ...restProperties
+        } = u;
+
+        let res = {
+          ...restProperties,
+          id: u._id,
+          status: u.status,
+          owner: u.owner?.optionLabel,
+          ownerId: u.owner?.optionValue,
+          customerAccount: u.customerAccount?.optionLabel,
+          customerAccountId: u.customerAccount?.optionValue,
+          customerContact: u.customerContact?.optionLabel,
+          relatedOpportunity: u.opportunity?.optionLabel,
+          relatedOpportunityId: u.opportunity?.optionValue,
+          createdBy: u.createdBy?.user?.concatedName,
+          createdByDate: u.createdBy?.date,
+          updatedBy: u.updatedBy?.user?.concatedName,
+          updatedByDate: u.updatedBy?.date,
+        };
+        return res;
       });
 
-  };
+      dispatch({ type: "initialize", data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: "loading", loading: false });
+      }, gridLoadingTimeout);
+    } catch (error) {
+      dispatch({ type: "loading", loading: false });
+      toastConfig.setToastConfig(error);
+    }
+  }
 
   const handleSearch = (e) => {
     dispatch({ type: "search", search: e.target.value });
-  };
+  }
 
   const handleRentalManagementTypeSel = (filterValues) => {
     setSelectedType(filterValues);
-  };
+  }
 
   const handleTransferEntityDialog = () => {
     setShowTransferEntityDialog(true)
@@ -489,6 +512,12 @@ const RentalManagement = () => {
           ids: recordsToDelete,
         })
         .then(({ data }) => {
+          try {
+            updateOfflineGridData("rentalManagement", [], recordsToDelete);
+          } catch (ex) {
+            console.error(`Rental Management: Error while removing data for Offline context. Error: ${ex.message}`)
+          }
+
           toastConfig.setToastConfig({
             open: true,
             type: "success",
@@ -583,6 +612,9 @@ const RentalManagement = () => {
             actionWidth={100}
             loading={loading}
             renderedFrom={"rentalManagementPage"}
+            allowSelection={!isOffline}
+            isClientSideGrid={isOffline}
+            refreshGrid={fetchRentalManagement}
           />
 
           {showDeleteWarningConfirmBox ? (
@@ -595,7 +627,7 @@ const RentalManagement = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${deleteRecord?.rentalManagementName ? "RentalManagement" : "RentalManagements"
+              message={`Are you sure you want to delete ${deleteRecord?.rentalManagementName ? "Rental Management" : "Rental Managements"
                 }   ${deleteRecord.rentalManagementName || ""}?`}
               onClose={() => {
                 if (deleteRecord) setDeleteRecord({});
@@ -609,7 +641,7 @@ const RentalManagement = () => {
           {singleRentalManagementDelete.show ? (
             <ConfirmationDialog
               open={singleRentalManagementDelete.show}
-              message={`Are you sure you want to delete RentalManagement: ${singleRentalManagementDelete.rentalManagementName}?`}
+              message={`Are you sure you want to delete Rental Management: ${singleRentalManagementDelete.rentalManagementName}?`}
               onClose={() =>
                 setSingleRentalManagementDelete({
                   id: null,
@@ -631,7 +663,9 @@ const RentalManagement = () => {
             rentalManagementId={showManageRentalManagementDialog.idToClone}
             onClose={() => setShowManageRentalManagementDialog({ open: false, isClone: false, idToClone: null })}
             onSuccess={() => {
-              fetchRentalManagement();
+              if (!isOffline) {
+                fetchRentalManagement();
+              }
               setShowManageRentalManagementDialog({ open: false, isClone: false, idToClone: null });
             }}
           />

@@ -38,7 +38,7 @@ const RepairJob = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { user, permissions, selectedEntity }
   }: any = useData();
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
@@ -135,7 +135,7 @@ const RepairJob = () => {
     if (renderCount > 0) {
       fetchRepairJobs();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity]);
 
   const handleSingleDeleteRepairJob = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -237,7 +237,7 @@ const RepairJob = () => {
             repairJobName: `${params.data.repairJobName}`
           })
         }
-        entity="repairJob"
+        entity="repair job"
       />
     </>
   );
@@ -347,7 +347,7 @@ const RepairJob = () => {
           let res = {
             ...restProperties,
             id: u._id,
-            productInventory: u.productInventory?.map(p => p.optionLabel).join(", "),
+            productInventory: u.productInventory?.map((p) => p.optionLabel).join(', '),
             repairPerson: u.repairPerson?.optionLabel,
             repairPersonId: u.repairPerson?.optionValue,
             owner: u.createdBy?.user?.concatedName,

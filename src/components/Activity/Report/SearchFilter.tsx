@@ -26,13 +26,9 @@ export const SearchFilter = ({
   filter,
   chip,
   dontShowMyActivity = false,
-  activityName = null,
+  activityName,
 }) => {
-  const {
-    state: {
-      user: { user },
-    },
-  } = useData();
+  const { state: { user: { user }, }, } = useData();
   const [options, setOptions] = React.useState([]);
   const [inputValue, setInputValue] = React.useState("");
   const [value, setValue] = React.useState([]);
@@ -52,19 +48,22 @@ export const SearchFilter = ({
     { type: "my", name: user?._id, isAll: true },
   ];
 
+  const activityType = ["task", "event", "case", "note", "email", "attachment"]
+
   useEffect(() => {
-    setValue(filter);
+    setValue(filter.filter(d => allSearch.some(f => f.type === d.type)));
   }, [filter]);
 
   useEffect(() => {
     if (inputValue === "") {
-      let filteredSearch = dontShowMyActivity
-        ? allSearch.filter((_o) => _o.type !== "my")
-        : allSearch;
-      setOptions(filteredSearch);
+      let filteredSearch = dontShowMyActivity ? allSearch.filter((_o) => _o.type !== "my") : allSearch; setOptions(filteredSearch);
     } else {
       setLoading(true);
-      SearchActivity(inputValue)
+      let _activityName = activityName;
+      if (_activityName === "calendar") {
+        _activityName = "task,event,case"
+      }
+      SearchActivity(inputValue, _activityName)
         .then(({ data }) => {
           setLoading(false);
           setOptions(data);
@@ -76,15 +75,14 @@ export const SearchFilter = ({
   }, [inputValue]);
 
   const handleChangeValue = (newValue) => {
-    let tempActivity = newValue.slice().reverse().find(d => d._id !== undefined && d.type !== undefined)
-    if(tempActivity){
-      setSelectedActivityId(tempActivity._id)
-      setSelectedActivityType(tempActivity.type)
+    let filterActivity = newValue.slice().reverse().find(d => activityType.includes(d.type))
+    if (filterActivity) {
+      setSelectedActivityId(filterActivity._id)
+      setSelectedActivityType(filterActivity.type)
     }
-    setValue(newValue);
-    handleChangeFilter(newValue);
+    setValue(newValue.filter(d => allSearch.some(f => f.type === d.type)));
+    handleChangeFilter(newValue.filter(d => allSearch.some(f => f.type === d.type)));
   };
-
 
   return (
     <>
@@ -182,7 +180,6 @@ export const SearchFilter = ({
 SearchFilter.propTypes = {
   handleChangeFilter: PropTypes.func.isRequired,
   filter: PropTypes.array.isRequired,
-
   chip: PropTypes.shape({
     variant: PropTypes.string,
     size: PropTypes.string,

@@ -57,7 +57,6 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    overflowX: "hidden",
     width: "48px",
     [theme.breakpoints.down("sm")]: {
       width: 0,
@@ -97,7 +96,7 @@ const useStyles = makeStyles((theme) => ({
 
 function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const {
-    state: { user, selectedEntity },
+    state: { user, selectedEntity, tour },
   }: any = useData();
 
   const history = useHistory();
@@ -226,16 +225,22 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         className={clsx(classes.drawer, {
           [classes.drawerOpen]: toggleDrawer,
           [classes.drawerClose]: !toggleDrawer,
+          'sidebar-overflow-hide': !toggleDrawer && tour.stepIndex !== 1,
+          'sidebar-overflow-auto': toggleDrawer && tour.stepIndex !== 1,
         })}
         classes={{
           paper: clsx({
             [classes.drawerOpen]: toggleDrawer,
             [classes.drawerClose]: !toggleDrawer,
+            'sidebar-overflow-hide': !toggleDrawer && tour.stepIndex !== 1,
+            'sidebar-overflow-auto': toggleDrawer && tour.stepIndex !== 1,
           }),
         }}
+
+
       >
         <Toolbar />
-        <div>
+        <div id="sidebarOrDrawer" >
           <List className="sidebar-list">
             <ListItem button className="list-item">
               <ListItemIcon>
@@ -312,7 +317,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                             )}
                             className={classes.nested}
                           >
-                            <ListItemText primary={item.name} />
+                            <ListItemText primary={item.resourceLabel || item.name} />
                           </ListItem>
                         </Link>
                       ))}

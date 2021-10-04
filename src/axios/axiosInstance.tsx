@@ -53,7 +53,10 @@ export default (history = null, passedHeaders = null) => {
                 localStorage.setItem("slowInternetConnection", "false")
             }
         }
-        request.url = encodeURI(request.url)
+        // const splittedUrl = request.url.split("?");
+        // if (splittedUrl.length > 1) {
+        //     request.url = `${splittedUrl[0]}?${encodeURIComponent(splittedUrl[1])}`
+        // }
         return request;
     }, error => {
         return Promise.reject(error);
@@ -78,9 +81,11 @@ export default (history = null, passedHeaders = null) => {
             }
 
             if (error.message == "Network Error") {
-                return new Promise((resolve, reject) => {
-                    reject({ open: true, type: "error", message: "Api Not Working" });
-                })
+                if (navigator.onLine) {
+                    return new Promise((resolve, reject) => {
+                        reject({ open: true, type: "error", message: "Api Not Working" });
+                    })
+                }
             }
 
             if (!error.response) {

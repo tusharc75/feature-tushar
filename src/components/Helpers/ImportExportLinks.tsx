@@ -180,7 +180,7 @@ export default function ImportExportLinks({ ids = [], permissions, module, api,
   );
 
   return (
-    <div className={`${classes.root}`}>
+    <div id="importExportLinks" className={`${classes.root}`}>
       <div className={classes.linksContainer}>
         {permissions?.isCreate && <>
           <label

@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper } from "@material-ui/core";
-import { Skeleton, Autocomplete } from "@material-ui/lab";
+import { Grid, Box, Button, Paper, Tooltip } from "@material-ui/core";
+import { Skeleton, Autocomplete, Alert } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import { isMobile, isTablet } from "react-device-detect";
 import axiosInstance from "../../axios/axiosInstance";
@@ -36,11 +36,15 @@ import Activity from "../../components/Activity";
 import styles from "./Retal.module.scss";
 import ReceivingTicket from "./ReceivingTicket";
 import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
+import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
+import HideWhenOffline from "../../components/HideWhenOffline";
+import DeleteButton from "../../components/Helpers/DeleteButton";
 
 const rentalProcessSteps = ["New", "Add Rental Cost", "Additional Cost", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
+  const { isOffline, offlineFieldsData, offlineGridData, updateOfflineGridData } = useContext(CustomOfflineContext);
 
   const { id } = useParams();
   const history = useHistory();
@@ -70,6 +74,7 @@ const RentalManagementDetailsPage = () => {
   const [productInventoryForReceivingTicket, setProductInventoryForReceivingTicket] = useState<any[]>([]);
   const [warehouseForReceivingTicket, setWarehouseForReceivingTicket] = useState<any[]>([]);
   const [showReceivingTicketDialog, setShowReceivingTicketDialog] = useState(false);
+  const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false)
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
@@ -90,7 +95,7 @@ const RentalManagementDetailsPage = () => {
     }
 
     if (currentStep > 0) {
-      axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/process-status `, { "processStatus": rentalProcessSteps[currentStep] }).then(({ data }) => {
+      axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/process-status`, { "processStatus": rentalProcessSteps[currentStep] }).then(({ data }) => {
       }).catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -164,9 +169,27 @@ const RentalManagementDetailsPage = () => {
 
   const fetchRentalManagementData = async () => {
     try {
-      const {
-        data: { data },
-      } = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}`);
+      let data;
+
+      if (!isOffline) {
+        const response: any = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}`);
+        data = response?.data?.data;
+      } else {
+        data = offlineGridData?.rentalManagement?.find(d => d._id === id)
+      }
+
+      if (localStorage.getItem("offlineDataToSave")) {
+        const offlineDataToSave = JSON.parse(localStorage.getItem("offlineDataToSave"))
+        if (offlineDataToSave["rentalManagement"]) {
+          setIsInOfflineSaveQueue(offlineDataToSave["rentalManagement"].some(d => d.values._id === id));
+        }
+      }
+
+      try {
+        updateOfflineGridData("rentalManagement", [data], []);
+      } catch (ex) {
+        console.error(`Rental Management: Error while adding/updating data for Offline context. Error: ${ex.message}`)
+      }
 
       handleMainPoints(data);
       setHeadingLbl(data.rentalJobName);
@@ -187,15 +210,18 @@ const RentalManagementDetailsPage = () => {
     }
   };
 
-  const getRentalManagementFields = () => {
-    axiosInstance()
-      .get("/field?resource=Rental Management")
-      .then(({ data }) => {
-        setRentalManagementFields(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const getRentalManagementFields = async () => {
+    try {
+      if (!isOffline) {
+        const response: any = await axiosInstance().get("/field?resource=Rental Management")
+        setRentalManagementFields(response?.data?.data)
+      } else {
+        setRentalManagementFields(offlineFieldsData?.rentalManagement);
+      }
+
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const handleOpenUpdateDialog = () => {
@@ -203,8 +229,13 @@ const RentalManagementDetailsPage = () => {
   };
 
   const handleDelete = () => {
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/remove`, { "ids": [rentalManagementData._id] }).then(() => {
+      try {
+        updateOfflineGridData("rentalManagement", [], [rentalManagementData._id]);
+      } catch (ex) {
+        console.error(`Rental Management: Error while removing data for Offline context. Error: ${ex.message}`)
+      }
 
-    axiosInstance().put(`${rentalManagement.rentalManagementApi}/remove`, { "ids": [] }).then(() => {
       setShowConfirmBox(false);
       history.goBack();
     }).catch((error) => {
@@ -236,7 +267,8 @@ const RentalManagementDetailsPage = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/inventory `).then(({ data }) => {
+
+    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/inventory`).then(({ data }) => {
       data.data = data.data?.map((u) => ({
         ...u,
         id: u.inventory?._id,
@@ -327,7 +359,6 @@ const RentalManagementDetailsPage = () => {
     });
   }
 
-
   const fetchDeliveryTicket = (values) => {
     setProductInventory([])
     axiosInstance()
@@ -408,12 +439,12 @@ const RentalManagementDetailsPage = () => {
                     </Box>
                   </div>
                 ) : (
-
                   <DetailsPageHeader
                     heading={headingLbl}
                     mainPoints={mainPoints}
                     showHeading={true}
                   >
+
                     {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
                       <Button
                         variant="contained"
@@ -425,9 +456,19 @@ const RentalManagementDetailsPage = () => {
                       </Button>
                     )}
 
+                    <HideWhenOffline>
+                      {permissions?.rentalManagement?.isDelete &&
+                        rentalManagementData?.owner?.optionValue &&
+                        user?.user?._id &&
+                        rentalManagementData.owner.optionValue === user.user._id ? (
+                        <DeleteButton
+                          text="Delete"
+                          onClick={() => setShowConfirmBox(true)}
+                        />
+                      ) : null}
+                    </HideWhenOffline>
                   </DetailsPageHeader>
                 )}
-
 
                 <Box>
                   {loadingDetails || !rentalManagementFields.length ? (
@@ -436,6 +477,12 @@ const RentalManagementDetailsPage = () => {
                     </Grid>
                   ) : (
                     <>
+                      {
+                        isInOfflineSaveQueue && <div className="px-3">
+                          <Alert variant="filled" severity="info">Updates are in offline state, it will be affected once you will be in network</Alert>
+                        </div>
+                      }
+
                       <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
                     </>
                   )}
@@ -692,43 +739,45 @@ const RentalManagementDetailsPage = () => {
             </div>
           </div>
           <div className="position-relative">
-            {showActivity ?
-              <Paper>
-                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
-                  <IoIosArrowDropright className="icon" />
-                </a>}
-                <Grid container>
-                  <Grid item xs={12}>
-                    {rentalManagementData && (
-                      <div>
-                        <Activity
-                          resourceId={rentalManagementData._id}
-                          resource={routes.rentalManagement}
-                          restrictedAddActivities={
-                            permissions &&
-                              permissions["rentalManagement"] &&
-                              permissions["rentalManagement"].isUpdate
-                              ? []
-                              : ["Attachment", "Case"]
-                          }
-                          relatedTo={[
-                            {
-                              type: rentalManagement,
-                              referenceId: rentalManagementData._id,
-                              access: true,
-                            },
-                          ]}
-                          handleActivityRefresh={() => { }}
-                          emails={[]}
-                        />
-                      </div>
-                    )}
+            <HideWhenOffline>
+              {showActivity ?
+                <Paper>
+                  {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                    <IoIosArrowDropright className="icon" />
+                  </a>}
+                  <Grid container>
+                    <Grid item xs={12}>
+                      {rentalManagementData && (
+                        <div>
+                          <Activity
+                            resourceId={rentalManagementData._id}
+                            resource={routes.rentalManagement}
+                            restrictedAddActivities={
+                              permissions &&
+                                permissions["rentalManagement"] &&
+                                permissions["rentalManagement"].isUpdate
+                                ? []
+                                : ["Attachment", "Case"]
+                            }
+                            relatedTo={[
+                              {
+                                type: rentalManagement,
+                                referenceId: rentalManagementData._id,
+                                access: true,
+                              },
+                            ]}
+                            handleActivityRefresh={() => { }}
+                            emails={[]}
+                          />
+                        </div>
+                      )}
+                    </Grid>
                   </Grid>
-                </Grid>
-              </Paper> :
-              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-                <IoIosArrowDropleft className="icon" />
-              </a>}
+                </Paper> :
+                !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+                  <IoIosArrowDropleft className="icon" />
+                </a>}
+            </HideWhenOffline>
           </div>
         </div>
 
@@ -736,7 +785,7 @@ const RentalManagementDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this product inventory ?`
+          message={`Are you sure you want to delete this rental management ?`
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -748,20 +797,23 @@ const RentalManagementDetailsPage = () => {
         <AddExistingProductInventory
           addProductInventory={handleAddProductInventory}
           handleProductInventoryClose={() => { setAddExistingProductDialog(false) }}
-        />}
-      {openUpdateDialog && (
-        <ManageRentalManagementDialog
-          isClone={false}
-          open={openUpdateDialog}
-          rentalManagementId={id}
-          onClose={() => setOpenUpdateDialog(false)}
-          onSuccess={() => {
-            setOpenUpdateDialog(false);
-            fetchRentalManagementData();
-          }}
         />
-      )}
-      {showDeliveryTicketDialog &&
+      }
+      {
+        openUpdateDialog && (
+          <ManageRentalManagementDialog
+            isClone={false}
+            open={openUpdateDialog}
+            rentalManagementId={id}
+            onClose={() => setOpenUpdateDialog(false)}
+            onSuccess={() => {
+              setOpenUpdateDialog(false);
+              fetchRentalManagementData();
+            }}
+          />)
+      }
+      {
+        showDeliveryTicketDialog &&
         <ManageDeliveryTicket
           onClose={() => setShowDeliveryTicketDialog(false)}
           productInventoryForDeliveryTicket={productInventoryForDeliveryTicket}
@@ -773,23 +825,23 @@ const RentalManagementDetailsPage = () => {
           }}
         />
       }
-      {showReceivingTicketDialog && <ManageReceivingTicket
-        open={showReceivingTicketDialog}
-        isClone={false}
-        receivingTicketId={null}
-        productInventoryForReceivingTicket={productInventoryForReceivingTicket}
-        warehouseId={warehouseForReceivingTicket}
-        rentalData={rentalManagementData}
-        onClose={() => setShowReceivingTicketDialog(false)}
-        onSuccess={() => {
-          setShowReceivingTicketDialog(false)
-          fetchProductInventory()
-        }}
-
-      />
-
+      {
+        showReceivingTicketDialog && <ManageReceivingTicket
+          open={showReceivingTicketDialog}
+          isClone={false}
+          receivingTicketId={null}
+          productInventoryForReceivingTicket={productInventoryForReceivingTicket}
+          warehouseId={warehouseForReceivingTicket}
+          rentalData={rentalManagementData}
+          onClose={() => setShowReceivingTicketDialog(false)}
+          onSuccess={() => {
+            setShowReceivingTicketDialog(false)
+            fetchProductInventory()
+          }}
+        />
       }
-      {showManageProductInventoryDialog &&
+      {
+        showManageProductInventoryDialog &&
         <ManageProductInventory
           isClone={null}
           productInventoryId={null}
@@ -798,7 +850,8 @@ const RentalManagementDetailsPage = () => {
             setShowManageProductInventoryDialog(false);
             handleAddProductInventory([data])
           }}
-        />}
+        />
+      }
     </>
   );
 };

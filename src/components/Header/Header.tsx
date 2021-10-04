@@ -13,17 +13,18 @@ import {
   Typography,
   useMediaQuery,
   ButtonBase,
-  Popover
+  Popover,
+  Tooltip
 } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
-import { Menu as MenuIcon, MoreVert as MoreIcon, Clear as ClearIcon, Notifications, HelpOutline, ExpandMore } from '@material-ui/icons';
+import { Menu as MenuIcon, MoreVert as MoreIcon, Clear as ClearIcon, Notifications, HelpOutline, ExpandMore, Brightness1 } from '@material-ui/icons';
 import io, { Socket } from 'socket.io-client';
-import { useHistory, Link } from 'react-router-dom';
+import { useHistory, Link, useLocation } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { SVG } from '../../assets';
 import UserProfile from './../UserProfile';
-import { SET_CHATTER, SET_SELECTED_ENTITY, SET_USER } from '../../StateProvider/actionTypes';
+import { SET_CHATTER, SET_SELECTED_ENTITY, SET_START_TOUR, SET_USER } from '../../StateProvider/actionTypes';
 import './Header.scss';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
@@ -38,6 +39,7 @@ import { CustomChatNotificationCountContext } from '../../StateProvider/CustomCh
 import { backendApi } from '../../config';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import { SET_CART_COUNT } from "../../StateProvider/actionTypes"
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -171,6 +173,7 @@ const Header = ({ toggleDrawer }) => {
   }: any = useData();
   const classes = useStyles();
   const history = useHistory();
+  const { pathname } = useLocation();
   const isMobile = useMediaQuery('(max-width:599px)');
   const [isSearch, setSearch] = useState(false);
   const [socket, setSocket] = useState<Socket>(null);
@@ -189,6 +192,7 @@ const Header = ({ toggleDrawer }) => {
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
   const toastConfig = useContext(CustomToastContext);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [notificationList, setNotificationList] = useState([]);
@@ -874,6 +878,29 @@ const Header = ({ toggleDrawer }) => {
     }
   }
 
+
+  const startTour = () => {
+    if (['local', 'development'].includes(process.env.REACT_APP_ENV)) {
+
+      const paths = pathname.split("/").filter((x: string) => x)
+      let path: string;
+
+      if (paths.includes("detail")) {
+        paths.splice(paths.length - 1, 1)
+        path = paths.join("/")
+      }
+
+      dispatch({
+        type: SET_START_TOUR,
+        payload: {
+          path: paths.includes("detail") ? `/${path}` : pathname,
+          start: true,
+          stepIndex: 0
+        }
+      })
+    }
+  }
+
   return (
     <div>
       <Slide direction="down" in={isSearch}>
@@ -927,7 +954,7 @@ const Header = ({ toggleDrawer }) => {
                 Services <ExpandMore />
               </Button> */}
               {selectedEntity && (
-                <ButtonBase>
+                <ButtonBase id="entitySelect">
                   <Box
                     aria-controls={entitiesMenuId}
                     color="inherit"
@@ -973,9 +1000,18 @@ const Header = ({ toggleDrawer }) => {
 
           <div className={classes.sectionDesktop}>
             <div>
+              {
+                isOffline && <IconButton>
+                  <Tooltip title="You are working offline right now">
+                    <Brightness1 color="error" className="blink" />
+                  </Tooltip>
+                </IconButton>
+              }
+
               {/*Only show cart icon if environment is local || development*/}
               {['local', 'development'].includes(process.env.REACT_APP_ENV) && (
                 <IconButton
+                  id="shoppingCartButton"
                   aria-describedby={fullScreenNotificationId}
                   aria-label="settings"
                   color="inherit"
@@ -990,7 +1026,9 @@ const Header = ({ toggleDrawer }) => {
                   </Badge>
                 </IconButton>
               )}
+
               <IconButton
+                id="notificationButton"
                 aria-describedby={fullScreenNotificationId}
                 aria-label="settings"
                 color="inherit"
@@ -1030,6 +1068,7 @@ const Header = ({ toggleDrawer }) => {
 
             <div>
               <IconButton
+                id="chatNotificationButton"
                 aria-describedby={fullScreenChatNotificationId}
                 aria-label="settings"
                 color="inherit"
@@ -1071,7 +1110,7 @@ const Header = ({ toggleDrawer }) => {
               </Badge>
             </IconButton> */}
 
-            <IconButton aria-label="help" color="inherit">
+            <IconButton id="helpButton" aria-label="help" color="inherit" onClick={startTour}>
               <HelpOutline />
             </IconButton>
           </div>
