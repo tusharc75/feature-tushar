@@ -190,8 +190,8 @@ export default function Attachment() {
     const fileUrl = file.map(f => f.url)
     setIsDownloading(true);
     axiosInstance()
-      .put(`user/download`,{
-        files:fileUrl
+      .put(`user/download`, {
+        files: fileUrl
       }, {
         responseType: 'blob',
         // onDownloadProgress: (progressEvent) => {
@@ -226,16 +226,16 @@ export default function Attachment() {
   const ActionsRenderer = (params) => (
     <>
       <Tooltip title="Download">
-                    <IconButton
-                        size="small"
-                        aria-label="Download"
-                        color="primary"
-                        disabled={isDownloading}
-                        onClick={() => downloadFile(params.data.file)}
-                    >
-                        <GoArrowDown size={26} />
-                    </IconButton>
-                </Tooltip>
+        <IconButton
+          size="small"
+          aria-label="Download"
+          color="primary"
+          disabled={isDownloading}
+          onClick={() => downloadFile(params.data.file)}
+        >
+          <GoArrowDown size={26} />
+        </IconButton>
+      </Tooltip>
       {params.data.canEdit ? (
         <Tooltip title="Delete">
           <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(params.data)}>
@@ -310,7 +310,7 @@ export default function Attachment() {
             const { createdBy, updatedBy, ...rest } = u;
             return {
               ...rest,
-              fileUrl:u.fileUrl,
+              fileUrl: u.fileUrl,
               canEdit: u.canEdit,
               createdByDate: u.createdBy.date ?? '',
               updatedByDate: u?.updatedBy?.date ?? ''
@@ -396,7 +396,12 @@ export default function Attachment() {
             </Grid>
             <Grid item xs={7} className={styles.filter_side}>
               <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>
-                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} />
+                <SearchFilter
+                  handleChangeFilter={handleChangeFilter}
+                  filter={filter}
+                  chip={{ size: 'small' }}
+                  activityName="attachment"
+                />
                 <Button
                   variant="contained"
                   color="primary"

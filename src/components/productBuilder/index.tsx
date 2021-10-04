@@ -190,7 +190,7 @@ const ProductBuilder = (props) => {
       setProduct(data.data);
       data = data.data?.map((u, index) => {
         const { entity, ...restProperties } = u;
-        const [firstEntity, ...restEntity] = entity;
+        const [firstEntity, ...restEntity] = entity ? entity : [];
         let res = {
           ...restProperties,
           id: u._id,

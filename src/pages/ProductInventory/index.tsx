@@ -16,7 +16,7 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
+import { productInventory, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
 import {
     DateRenderer,
     CommonRenderer,
@@ -31,6 +31,8 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useHistory } from "react-router-dom";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
+
+const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
 const ProductInventory = () => {
 
@@ -384,9 +386,9 @@ const ProductInventory = () => {
         }
         {
             showDeleteConfirmBox &&
-            <ConfirmationDialog
-                open={showDeleteConfirmBox}
-                message={`Are you sure you want to delete the product inventory ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ?`}
+                <ConfirmationDialog
+                    open={showDeleteConfirmBox}
+                    message={`Are you sure you want to delete the ${storedRoutes ? storedRoutes.productInventory?.title?.toLowerCase() : RESOURCE_LABEL.productInventory?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
                 onClose={() => setShowDeleteConfirmBox(false)}
                 onOk={handleDelete}
             />
