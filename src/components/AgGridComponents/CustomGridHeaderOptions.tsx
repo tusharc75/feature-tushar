@@ -3,13 +3,86 @@ import { Box, Button, Popover, FormControl, FormGroup, FormControlLabel, Tooltip
 import ViewWeekIcon from '@material-ui/icons/ViewWeek';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import axiosInstance from '../../axios/axiosInstance';
+import { useData } from '../../StateProvider/Provider';
+import { disabledColumns } from "../../constants/columns"
+import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
+import Menu from "@material-ui/core/Menu"
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import Checkbox from "@material-ui/core/Checkbox"
 
-export default function CustomGridHeaderOptions({ columns, setColumns, columnApi, refreshGrid = null, renderedFrom = null }) {
+const mappedStaticColumns = {
+  "Created By": "createdBy",
+  "Updated By": "updatedBy"
+}
+export default function CustomGridHeaderOptions({ columns, setColumns, columnApi,
+  refreshGrid = null, renderedFrom = null, }) {
 
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null);
   const { isOffline } = useContext(CustomOfflineContext);
+  const { state: { user, gridMetaData, dispatch } }: any = useData();
 
+  const updateGridHiddenColumns = (hiddenColumns = []) => {
+    let request = { ...gridMetaData }
+    if (request[renderedFrom]) {
+      request[renderedFrom].hide = [...hiddenColumns]
+    }
+    else {
+      request[renderedFrom] = {
+        hide: [...hiddenColumns],
+        staticColumns: {
+          createdBy: false,
+          updatedBy: false
+        },
+        disable: disabledColumns[renderedFrom] ?? []
+      }
+    }
+    updateGridMetaData(request)
+  }
+  const updateGridMetaData = (request) => {
+    axiosInstance()
+      .post(`user/meta-grid`, {
+        _id: user?.user?._id,
+        gridMetaData: { ...request }
+      })
+      .then((data) => {
+        if (data && data?.hasOwnProperty('gridMetaData')) {
+          let tempMetaData = JSON.stringify(data["gridMetaData"])
+          localStorage.setItem("gridMetaData", tempMetaData);
+          dispatch({ type: SET_GRID_METADATA, payload: tempMetaData });
+        }
+      })
+  }
+  const handleStaticColumnChange = (data = {}) => {
+    let request = { ...gridMetaData }
+    if (request[renderedFrom]) {
+      request[renderedFrom].staticColumns = {
+        ...request[renderedFrom].staticColumns,
+        ...data
+      }
+    }
+    else {
+      request[renderedFrom] = {
+        hide: [],
+        staticColumns: {
+          createdBy: false,
+          updatedBy: false,
+          ...data
+        },
+        disable: disabledColumns[renderedFrom] ?? []
+      }
+    }
+    updateGridMetaData(request)
+  }
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
   return (
     <Box className="ag-grid-listing-grid-header-options border px-2 py-1 d-flex gap-2">
       <Button
@@ -68,6 +141,11 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
                           const nonHiddenColumns = newColumns.filter((d) => d.show).map((m) => m.field);
                           columnApi.setColumnsVisible(hiddenColumns, false);
                           columnApi.setColumnsVisible(nonHiddenColumns, true);
+                          let tempColumnState = columnApi.getColumnState()
+                          let hidedColumns = tempColumnState.filter(o => o?.hide)
+                            .map(o => o?.colId)
+
+                          updateGridHiddenColumns(hidedColumns)
                           const columnState = JSON.stringify(columnApi.getColumnState());
 
                           localStorage.setItem(renderedFrom, columnState);
@@ -80,6 +158,9 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
               );
             })}
           </FormGroup>
+        </FormControl>
+        <FormControl>
+
         </FormControl>
       </Popover>
 
@@ -113,6 +194,47 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
             }}>
             {`${showGridFilters ? "Hide" : "Show"} filters`}
         </Button> */}
+      <span>
+        {
+          <>
+            <Button
+              variant="outlined"
+              color="default"
+              size="small"
+              onClick={openActions}
+              style={{ margin: "0 5px" }}
+              aria-controls="action-menu">
+              static Columns <ExpandMore />
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}>
+              <FormGroup style={{ margin: "0 5px" }}>
+                {
+                  ["Created By", "Updated By"].map(o => {
+                    return <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={gridMetaData[renderedFrom] ? gridMetaData[renderedFrom]?.staticColumns[mappedStaticColumns[o]] : false}
+                          onChange={(e) => handleStaticColumnChange({ [mappedStaticColumns[o]]: e.target.checked })} />
+                      }
+                      label={mappedStaticColumns[o]}
+                    />
+                  })
+                }
+              </FormGroup>
+            </Menu>
+          </>
+        }
+      </span>
     </Box>
   );
 }

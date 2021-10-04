@@ -130,6 +130,7 @@ export default function CustomAgGrid({
   renderedFrom = null,
   customGridOptions = null
 }) {
+  console.log('custom ag-grid columns', columns)
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
 
@@ -186,6 +187,7 @@ export default function CustomAgGrid({
         minWidth={column.width ?? 250}
         flex={1}
         rowDrag={column.rowDrag ?? false}
+        hide={(column.hasOwnProperty("show") && !column?.show) ? true : false}
       // floatingFilterComponent={column.floatingFilterComponent ?? null}
       // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
       //   suppressFilterButton: true,
@@ -202,6 +204,7 @@ export default function CustomAgGrid({
         minWidth={column.width ?? 250}
         flex={1}
         filterParams={customFilterParams}
+        hide={(column.hasOwnProperty("show") && !column?.show) ? true : false}
         comparator={() => {
           return 0;
         }}

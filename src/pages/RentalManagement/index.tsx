@@ -11,7 +11,6 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { FaRegistered } from "react-icons/fa";
 
 import {
-
   isObjectEmpty,
   customerAccount,
   supplierAccount,
@@ -38,6 +37,7 @@ import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementD
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import HideWhenOffline from "../../components/HideWhenOffline";
+import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
 
 let rentalManagementTimeout;
 const RentalManagementType = [
@@ -64,6 +64,8 @@ const RentalManagement = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false)
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  // const [columns, setColumns] = useState([])
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [showManageRentalManagementDialog, setShowManageRentalManagementDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] =
@@ -105,7 +107,7 @@ const RentalManagement = () => {
     {
       field: "rentalJobName",
       headerName: "Rental Job Name",
-      show: true,
+      show: false,
       disabled: true,
       cellRenderer: "rentalManagementNameRenderer",
     },
@@ -158,7 +160,7 @@ const RentalManagement = () => {
     {
       field: "updatedBy",
       headerName: "Updated By",
-      show: true,
+      show: false,
       cellRenderer: "updatedByRenderer",
     },
     {
@@ -168,8 +170,39 @@ const RentalManagement = () => {
       cellRenderer: "commonRenderer",
     },
   ];
+
+  useEffect(() => {
+    fetchGridMetadata()
+  }, [])
   //  Grid Variables - End
 
+  const fetchGridMetadata = () => {
+    let title = routes.lead.title.toLowerCase()
+    axiosInstance()
+      .get(`/field?resource=Rental Management&entity=${selectedEntity}`)
+      .then(({ data: { data } }) => {
+        let columns = []
+        let rendererNames = []
+        data.forEach(o => {
+          let currentColumn = getColumnData(`${routes.rentalManagement.title}Page`, o?.fieldData)
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData]
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
+          }
+          return o?.fieldData
+        })
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+          actionsRenderer: ActionsRenderer
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        columns = [...columns, ...getStaticFields()]
+        // setColumns([...columns])
+      })
+  }
   const columnState = JSON.parse(localStorage.getItem("rentalManagementPage"));
   if (columnState) {
     columns.forEach((item) => {
@@ -447,6 +480,7 @@ const RentalManagement = () => {
           customerAccount: u.customerAccount?.optionLabel,
           customerAccountId: u.customerAccount?.optionValue,
           customerContact: u.customerContact?.optionLabel,
+          customerContactId: u.customerContact?.optionValue,
           relatedOpportunity: u.opportunity?.optionLabel,
           relatedOpportunityId: u.opportunity?.optionValue,
           createdBy: u.createdBy?.user?.concatedName,
@@ -599,6 +633,7 @@ const RentalManagement = () => {
             </RentalManagementHeader>
           </div>
 
+
           <CustomAgGrid
             columns={columns}
             dataRows={dataRows}
@@ -611,7 +646,7 @@ const RentalManagement = () => {
             page={page}
             actionWidth={100}
             loading={loading}
-            renderedFrom={"rentalManagementPage"}
+            renderedFrom={`${routes.rentalManagement.title}Page`}
             allowSelection={!isOffline}
             isClientSideGrid={isOffline}
             refreshGrid={fetchRentalManagement}
