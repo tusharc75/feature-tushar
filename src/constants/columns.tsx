@@ -71,8 +71,26 @@ export const getStaticFields = () => {
         { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }]
 }
 
+export const checkStaticField = (renderedFrom, fieldData) => {
+    let data = localStorage.getItem("gridMetaData")
+    let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
+    if (gridMetaData[renderedFrom]) {
+        return {
+            ...fieldData,
+            show: gridMetaData[renderedFrom]?.staticColumns[fieldData?.field] ? true : false
+        }
+    }
+    return fieldData
+}
+
+export const staticColumns = ["createdBy", "updatedBy"]
 export const getColumnData = (title, field) => {
-    let gridMetaData = JSON.parse(localStorage.getItem("gridMetaData"));
+    let data = localStorage.getItem("gridMetaData")
+    let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
+
+    if (!gridMetaData) {
+        gridMetaData = {}
+    }
 
     let updatedTitle = camelCase(title)
     if (gridMetaData[updatedTitle]?.hidden && gridMetaData[updatedTitle]?.hidden.indexOf(field?.fieldName) >= 0) {

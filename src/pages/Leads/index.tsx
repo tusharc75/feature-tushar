@@ -61,7 +61,6 @@ const Leads = () => {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const { isOffline, offlineGridData, updateOfflineGridData } = useContext(CustomOfflineContext);
-  console.log("🚀 ~ file: index.tsx ~ line 64 ~ Leads ~ offlineGridData", offlineGridData)
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -132,24 +131,20 @@ const Leads = () => {
 
   const fetchGridMetadata = () => {
     axiosInstance()
-      .get(`user/meta-grid/60b9111e25391aca2ba3a31c`)
-      .then((data) => { })
-
-    let title = routes.lead.title.toLowerCase()
-    axiosInstance()
       .get(`/field?resource=Lead&entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
         let columns = []
         let rendererNames = []
         data.forEach(o => {
+
           let currentColumn = getColumnData(leadResource, o?.fieldData)
+
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData]
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
               rendererNames.push(currentColumn?.rendererName)
             }
           }
-          return o?.fieldData
         })
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
@@ -158,6 +153,7 @@ const Leads = () => {
         }
         setFrameWorkComponent({ ...tempFrameworkComponent })
         columns = [...columns, ...getStaticFields()]
+
         setColumns([...columns])
       })
   }
@@ -295,14 +291,14 @@ const Leads = () => {
           count = response?.data?.count;
         }
         else {
-          data = offlineGridData?.rentalManagement || [];
-          count = offlineGridData?.rentalManagement?.length || 0;
+          data = offlineGridData[leadResource] || [];
+          count = offlineGridData[leadResource]?.length || 0;
         }
 
         try {
-          updateOfflineGridData("rentalManagement", data);
+          updateOfflineGridData(leadResource, data);
         } catch (ex) {
-          console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`)
+          console.error(`Lead: Error while storing data for Offline context. Error: ${ex.message}`)
         }
 
         let rows = data.map((u) => {

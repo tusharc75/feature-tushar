@@ -10,36 +10,42 @@ import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import Menu from "@material-ui/core/Menu"
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import Checkbox from "@material-ui/core/Checkbox"
+import { getStaticFields } from "../../constants/columns"
 
 const mappedStaticColumns = {
   "Created By": "createdBy",
   "Updated By": "updatedBy"
 }
+let timeout
 export default function CustomGridHeaderOptions({ columns, setColumns, columnApi,
   refreshGrid = null, renderedFrom = null, }) {
-
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null);
   const { isOffline } = useContext(CustomOfflineContext);
-  const { state: { user, gridMetaData, dispatch } }: any = useData();
+  const { state: { user, gridMetaData } }: any = useData();
+  const { dispatch }: any = useData();
 
   const updateGridHiddenColumns = (hiddenColumns = []) => {
-    let request = { ...gridMetaData }
-    if (request[renderedFrom]) {
-      request[renderedFrom].hide = [...hiddenColumns]
-    }
-    else {
-      request[renderedFrom] = {
-        hide: [...hiddenColumns],
-        staticColumns: {
-          createdBy: false,
-          updatedBy: false
-        },
-        disable: disabledColumns[renderedFrom] ?? []
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(function () {
+      let request = { ...gridMetaData }
+      if (request[renderedFrom]) {
+        request[renderedFrom].hide = [...hiddenColumns]
       }
-    }
-    updateGridMetaData(request)
+      else {
+        request[renderedFrom] = {
+          hide: [...hiddenColumns],
+          staticColumns: {
+            createdBy: false,
+            updatedBy: false
+          },
+          disable: disabledColumns[renderedFrom] ?? []
+        }
+      }
+      updateGridMetaData(request)
+    }, 600);
+
   }
   const updateGridMetaData = (request) => {
     axiosInstance()
@@ -48,47 +54,28 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
         gridMetaData: { ...request }
       })
       .then((data) => {
-        if (data && data?.hasOwnProperty('gridMetaData')) {
-          let tempMetaData = JSON.stringify(data["gridMetaData"])
-          localStorage.setItem("gridMetaData", tempMetaData);
-          dispatch({ type: SET_GRID_METADATA, payload: tempMetaData });
+        fetchGridMetaData()
+      })
+  }
+  const fetchGridMetaData = () => {
+    axiosInstance()
+      .get(`user/meta-grid/${user?.user?._id}`)
+      .then(({ data: { data } }) => {
+        let tempMetaData = JSON.stringify(data?.gridMetaData)
+        localStorage.setItem("gridMetaData", tempMetaData);
+        if (dispatch) {
+          dispatch({ type: SET_GRID_METADATA, payload: data?.gridMetaData });
         }
       })
   }
-  const handleStaticColumnChange = (data = {}) => {
-    let request = { ...gridMetaData }
-    if (request[renderedFrom]) {
-      request[renderedFrom].staticColumns = {
-        ...request[renderedFrom].staticColumns,
-        ...data
-      }
-    }
-    else {
-      request[renderedFrom] = {
-        hide: [],
-        staticColumns: {
-          createdBy: false,
-          updatedBy: false,
-          ...data
-        },
-        disable: disabledColumns[renderedFrom] ?? []
-      }
-    }
-    updateGridMetaData(request)
-  }
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
 
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
   return (
     <Box className="ag-grid-listing-grid-header-options border px-2 py-1 d-flex gap-2">
       <Button
         aria-describedby="columnSelection"
         size="small"
         className="px-2"
+        disabled={isOffline}
         startIcon={<ViewWeekIcon />}
         color="primary"
         onClick={(event) => {
@@ -118,7 +105,9 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
       >
         <FormControl component="fieldset" className="px-3 py-2">
           <FormGroup>
-            {columns.map((column: any, index) => {
+            {[...columns,
+            ...getStaticFields()
+            ].map((column: any, index) => {
               return (
                 <Tooltip key={index} title={column.disabled ? 'Main columns are always visible' : ''}>
                   <FormControlLabel
@@ -194,47 +183,6 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
             }}>
             {`${showGridFilters ? "Hide" : "Show"} filters`}
         </Button> */}
-      <span>
-        {
-          <>
-            <Button
-              variant="outlined"
-              color="default"
-              size="small"
-              onClick={openActions}
-              style={{ margin: "0 5px" }}
-              aria-controls="action-menu">
-              static Columns <ExpandMore />
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}>
-              <FormGroup style={{ margin: "0 5px" }}>
-                {
-                  ["Created By", "Updated By"].map(o => {
-                    return <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={gridMetaData[renderedFrom] ? gridMetaData[renderedFrom]?.staticColumns[mappedStaticColumns[o]] : false}
-                          onChange={(e) => handleStaticColumnChange({ [mappedStaticColumns[o]]: e.target.checked })} />
-                      }
-                      label={mappedStaticColumns[o]}
-                    />
-                  })
-                }
-              </FormGroup>
-            </Menu>
-          </>
-        }
-      </span>
     </Box>
   );
 }

@@ -8,6 +8,7 @@ import CustomGridHeaderOptions from './CustomGridHeaderOptions';
 import { CustomLoadingOverlay } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter';
 import { orderBy } from 'lodash';
+import { checkStaticField, staticColumns } from "../../constants/columns"
 
 export function reducer(state, action) {
   switch (action.type) {
@@ -187,7 +188,8 @@ export default function CustomAgGrid({
         minWidth={column.width ?? 250}
         flex={1}
         rowDrag={column.rowDrag ?? false}
-        hide={(column.hasOwnProperty("show") && !column?.show) ? true : false}
+        hide={staticColumns.indexOf(column.field) >= 0 ? checkStaticField(renderedFrom, column.field) :
+          (column.hasOwnProperty("show") && !column?.show) ? true : false}
       // floatingFilterComponent={column.floatingFilterComponent ?? null}
       // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
       //   suppressFilterButton: true,

@@ -133,7 +133,7 @@ const Login = () => {
           .then(({ data: { data } }) => {
             let tempMetaData = JSON.stringify(data?.gridMetaData)
             localStorage.setItem("gridMetaData", tempMetaData);
-            dispatch({ type: SET_GRID_METADATA, payload: tempMetaData });
+            dispatch({ type: SET_GRID_METADATA, payload: data?.gridMetaData });
           })
       })
       .catch((error) => {
