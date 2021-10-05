@@ -38,6 +38,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import HideWhenOffline from "../../components/HideWhenOffline";
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
+import { camelCase } from "lodash";
 
 let rentalManagementTimeout;
 const RentalManagementType = [
@@ -53,8 +54,9 @@ const RentalManagementType = [
 
 const RentalManagement = () => {
   const toastConfig = useContext(CustomToastContext);
-  const { isOffline, offlineGridData, updateOfflineGridData } = useContext(CustomOfflineContext);
+  const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
 
+  const pageTitle = camelCase(`${routes.rentalManagement.title}Page`)
   const history = useHistory();
   const {
     state: { user, permissions, selectedEntity },
@@ -175,51 +177,50 @@ const RentalManagement = () => {
     fetchGridMetadata()
   }, [])
 
-  //  Grid Variables - End
-  console.log('isOffline', isOffline)
-  // useEffect(() => {
-  //   console.log('isOffline', isOffline, "columns", columns)
-  //   if (isOffline && columns.length) {
-  //     let updatedColumns = columns.map(current => {
-  //       return { ...current, filter: false, sortable: false }
-  //     })
-  //     setColumns([...updatedColumns])
-  //   }
-  // }, [isOffline])
+  const fetchGridMetadata = async () => {
+    let data
+    if (isOffline) {
+      data = offlineFieldsData
+    }
+    else {
+      const response = await axiosInstance()
+        .get(`/field?resource=Rental Management&entity=${selectedEntity}`)
 
-  const fetchGridMetadata = () => {
-    axiosInstance()
-      .get(`/field?resource=Rental Management&entity=${selectedEntity}`)
-      .then(({ data: { data } }) => {
-        let columns = []
-        let rendererNames = []
-        data.forEach(o => {
-          let currentColumn = getColumnData(`${routes.rentalManagement.title}Page`, o?.fieldData)
-          if (currentColumn !== null) {
-            if (isOffline) {
-              currentColumn.columnData["filter"] = false
-              currentColumn.columnData["sortable"] = false
-            }
-            columns = [...columns, currentColumn?.columnData]
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName)
-            }
-          }
-          return o?.fieldData
-        })
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
+      data = response?.data?.data
+      try {
+        updateFieldsData("rentalManagement", data);
+      } catch (ex) {
+        console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`)
+      }
+
+    }
+    let columns = []
+    let rendererNames = []
+    data.forEach(o => {
+      let currentColumn = getColumnData(pageTitle, o?.fieldData)
+      if (currentColumn !== null) {
+        if (isOffline) {
+          currentColumn.columnData["filter"] = false
+          currentColumn.columnData["sortable"] = false
         }
-        setFrameWorkComponent({ ...tempFrameworkComponent })
-        let staticFields = getStaticFields()
-        staticFields.forEach(field => {
-          columns.push(checkStaticField(`${routes.rentalManagement.title}Page`, field))
-        })
-
-        setColumns([...columns])
-      })
+        columns = [...columns, currentColumn?.columnData]
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName)
+        }
+      }
+      return o?.fieldData
+    })
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      actionsRenderer: ActionsRenderer
+    }
+    setFrameWorkComponent({ ...tempFrameworkComponent })
+    let staticFields = getStaticFields()
+    staticFields.forEach(field => {
+      columns.push(checkStaticField(pageTitle, field))
+    })
+    setColumns([...columns])
   }
   const columnState = JSON.parse(localStorage.getItem("rentalManagementPage"));
   if (columnState) {
@@ -501,6 +502,8 @@ const RentalManagement = () => {
           customerContactId: u.customerContact?.optionValue,
           relatedOpportunity: u.opportunity?.optionLabel,
           relatedOpportunityId: u.opportunity?.optionValue,
+          pDFTemplateId: u?.pDFTemplate?.optionValue,
+          pDFTemplate: u?.pDFTemplate?.optionLabel,
           createdBy: u.createdBy?.user?.concatedName,
           createdByDate: u.createdBy?.date,
           updatedBy: u.updatedBy?.user?.concatedName,
@@ -665,7 +668,7 @@ const RentalManagement = () => {
                 page={page}
                 actionWidth={100}
                 loading={loading}
-                renderedFrom={`${routes.rentalManagement.title}Page`}
+                renderedFrom={pageTitle}
                 allowSelection={!isOffline}
                 isClientSideGrid={isOffline}
                 refreshGrid={fetchRentalManagement}

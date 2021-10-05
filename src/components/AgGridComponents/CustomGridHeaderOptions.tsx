@@ -18,7 +18,7 @@ const mappedStaticColumns = {
 }
 let timeout
 export default function CustomGridHeaderOptions({ columns, setColumns, columnApi,
-  refreshGrid = null, renderedFrom = null, }) {
+  refreshGrid = null, renderedFrom = null, isClientSideGrid = false }) {
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -75,7 +75,7 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
         aria-describedby="columnSelection"
         size="small"
         className="px-2"
-        disabled={isOffline}
+        // disabled={isOffline}
         startIcon={<ViewWeekIcon />}
         color="primary"
         onClick={(event) => {
@@ -105,9 +105,7 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
       >
         <FormControl component="fieldset" className="px-3 py-2">
           <FormGroup>
-            {[...columns,
-            ...getStaticFields()
-            ].map((column: any, index) => {
+            {columns.map((column: any, index) => {
               return (
                 <Tooltip key={index} title={column.disabled ? 'Main columns are always visible' : ''}>
                   <FormControlLabel
@@ -130,11 +128,13 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
                           const nonHiddenColumns = newColumns.filter((d) => d.show).map((m) => m.field);
                           columnApi.setColumnsVisible(hiddenColumns, false);
                           columnApi.setColumnsVisible(nonHiddenColumns, true);
-                          let tempColumnState = columnApi.getColumnState()
-                          let hidedColumns = tempColumnState.filter(o => o?.hide)
-                            .map(o => o?.colId)
+                          if (!isClientSideGrid) {
+                            let tempColumnState = columnApi.getColumnState()
+                            let hidedColumns = tempColumnState.filter(o => o?.hide)
+                              .map(o => o?.colId)
+                            updateGridHiddenColumns(hidedColumns)
+                          }
 
-                          updateGridHiddenColumns(hidedColumns)
                           const columnState = JSON.stringify(columnApi.getColumnState());
 
                           localStorage.setItem(renderedFrom, columnState);

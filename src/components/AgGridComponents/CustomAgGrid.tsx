@@ -131,7 +131,6 @@ export default function CustomAgGrid({
   renderedFrom = null,
   customGridOptions = null
 }) {
-  console.log('custom ag-grid columns', columns)
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
 
@@ -236,6 +235,7 @@ export default function CustomAgGrid({
             columnApi={columnApi}
             refreshGrid={refreshGrid}
             renderedFrom={renderedFrom}
+            isClientSideGrid={isClientSideGrid}
           />
 
           <div className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>

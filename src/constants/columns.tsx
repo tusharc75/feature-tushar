@@ -10,6 +10,7 @@ import {
     DateRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
 
+
 export const staticFrameworkRender = {
     "createdByRenderer": CreatedByRenderer,
     "updatedByRenderer": UpdatedByRenderer
@@ -29,6 +30,7 @@ export const detailPagePath = {
     collaborator: routes?.userDetail?.path,
     rental: routes.rentalManagementDetail.path,
     deliveryPerson: routes?.userDetail?.path,
+    pDFTemplate: routes?.quotePdfTemplateDetail?.path
 }
 export const disabledColumns = {
     [routes.rentalManagementDetail.title]: [],
@@ -74,10 +76,10 @@ export const getStaticFields = () => {
 export const checkStaticField = (renderedFrom, fieldData) => {
     let data = localStorage.getItem("gridMetaData")
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
-    if (gridMetaData[renderedFrom]) {
+    if (gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom].hide.length) {
         return {
             ...fieldData,
-            show: gridMetaData[renderedFrom]?.staticColumns[fieldData?.field] ? true : false
+            show: gridMetaData[renderedFrom].hide.indexOf(fieldData?.field) >= 0 ? false : true
         }
     }
     return fieldData
@@ -86,8 +88,8 @@ export const checkStaticField = (renderedFrom, fieldData) => {
 export const staticColumns = ["createdBy", "updatedBy"]
 export const getColumnData = (title, field) => {
     let data = localStorage.getItem("gridMetaData")
-    let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
 
+    let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
     if (!gridMetaData) {
         gridMetaData = {}
     }
@@ -117,7 +119,8 @@ export const getColumnData = (title, field) => {
             }
         }
         else if (field?.lookup) {
-            let joinedFieldName = camelCase(field?.fieldName)
+
+            let joinedFieldName = field?.fieldName.indexOf("_") > 0 ? camelCase(field?.fieldName) : field?.fieldName
             let pathName = detailPagePath[joinedFieldName] ? detailPagePath[joinedFieldName] :
                 routes[`${joinedFieldName}Detail`]?.path ? routes[`${joinedFieldName}Detail`]?.path : ""
             return {
