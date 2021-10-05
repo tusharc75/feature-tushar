@@ -119,9 +119,7 @@ function App() {
 
   const history = useHistory();
   useEffect(() => {
-    console.log('user', user?.user)
     if (user?.user) {
-      console.log('timer started')
       const timer = new IdleTimer({
         timeout: 600, //expire after 10 seconds
         onTimeout: () => {
