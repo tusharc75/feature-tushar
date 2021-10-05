@@ -58,6 +58,30 @@ export const CustomOfflineProvider = ({ children }) => {
         setIsOffline(true)
     });
 
+    const updateFieldsData = (module, data) => {
+        let initializeOfflineData = {}
+        initializeOfflineData[module] = {
+            ...data
+        }
+        try {
+            const storedLocalStorageOfflineFieldsData = JSON.parse(localStorage.getItem("offlineFieldsData"));
+
+            if (storedLocalStorageOfflineFieldsData) {
+                storedLocalStorageOfflineFieldsData[module] = initializeOfflineData[module];
+
+                setOfflineFieldsData(storedLocalStorageOfflineFieldsData);
+                localStorage.setItem("offlineFieldsData", JSON.stringify(storedLocalStorageOfflineFieldsData));
+
+            } else {
+                setOfflineFieldsData(initializeOfflineData);
+                localStorage.setItem("offlineFieldsData", JSON.stringify(initializeOfflineData));
+            }
+        } catch (ex) {
+
+        }
+
+    }
+
     const fetchFieldsData = (module) => {
         if (module) {
             const getModule = dataToFetch.find(d => d.key === module);
@@ -158,7 +182,7 @@ export const CustomOfflineProvider = ({ children }) => {
 
     return (
         <CustomOfflineContext.Provider
-            value={{ isOffline, offlineFieldsData, offlineGridData, fetchFieldsData, updateOfflineGridData }}
+            value={{ isOffline, offlineFieldsData, offlineGridData, fetchFieldsData, updateOfflineGridData, updateFieldsData }}
         >
             {children}
         </CustomOfflineContext.Provider>
