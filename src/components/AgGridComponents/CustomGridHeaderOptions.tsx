@@ -148,9 +148,6 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
             })}
           </FormGroup>
         </FormControl>
-        <FormControl>
-
-        </FormControl>
       </Popover>
 
       {refreshGrid && (
