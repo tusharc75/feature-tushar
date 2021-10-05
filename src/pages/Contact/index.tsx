@@ -519,11 +519,11 @@ export default function Contact(props) {
               <Grid container>
                 <Grid item md={4} sm={4} xs={12} className="d-flex align-items-center gap-1" >
                   <MdContacts className="headerLogo" />
-                  <span className="listingHeader">{routes[contactResource].title}</span>
+                  <span id="resourceHeader" className="listingHeader">{routes[contactResource].title}</span>
                 </Grid>
                 <Grid item md={4} sm={4} xs={12}>
                   {ContactTypes && (
-                    <ToggleButtonGroup size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
+                    <ToggleButtonGroup id="resourceTypeSelector" size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
                       {ContactTypes.map((k, index) => {
                         return (
                           <ToggleButton value={k.key} key={index}>
@@ -550,7 +550,7 @@ export default function Contact(props) {
               </Grid>
             </Grid>
             <Grid item md={6} sm={6} xs={12} className={styles.filter_side}>
-              <Box className={styles.filter_side_header} component="div">
+              <Box id="resourceOperations" className={styles.filter_side_header} component="div">
                 <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} value={search} size="small" />
                 {contactPermissions.isCreate && (
                   <>

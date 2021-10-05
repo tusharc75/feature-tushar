@@ -31,6 +31,8 @@ import styles from "../Leads/Header.module.scss";
 import { GiAbstract055 } from 'react-icons/gi';
 import SearchBox from '../../components/Helpers/SearchBox'
 import ManageDeliveryTicketDialog from "./ManageDeliveryTicket"
+import { sidebarResource } from "../../constants/helpers"
+import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
 
 let deliveryTicketTimeout;
 
@@ -54,6 +56,8 @@ const DeliveryTicket = () => {
 
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showManageDeliveryTicket, setShowManageDeliveryTicket] = useState(false);
+  const [columns, setColumns] = useState([])
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
 
   const { deliveryTicketApi, deliveryTicketResource } = deliveryTicket;
 
@@ -73,81 +77,112 @@ const DeliveryTicket = () => {
     selectedRecords,
   } = state;
 
-  const columns = [
-    {
-      field: "deliveryJobName",
-      headerName: "Delivery Job Name",
-      show: true,
-      disabled: true,
-      cellRenderer: "deliveryJobNameRenderer",
-    },
-    {
-      field: "customerAccount",
-      headerName: "Customer Account",
-      show: true,
-      cellRenderer: "customerAccountNameRenderer",
-    },
-    {
-      field: "status",
-      headerName: "Status",
-      show: true,
-      cellRenderer: "commonRenderer",
-    },
-    {
-      field: "rentalName",
-      headerName: "Rental",
-      show: true,
-      cellRenderer: "rentalRenderer",
-    },
-    {
-      field: "deliveryDate",
-      headerName: "Delivery Date",
-      show: true,
-      cellRenderer: "dateRenderer",
-      filter: false,
-    },
-    {
-      field: "deliveryType",
-      headerName: "Delivery Type",
-      show: true,
-      cellRenderer: "commonRenderer",
-    },
-    {
-      field: "deliveryJobID",
-      headerName: "Delivery Job ID",
-      show: true,
-      cellRenderer: "commonRenderer",
-    },
-    // {
-    //   field: "productInventory",
-    //   headerName: "Product Inventory",
-    //   show: true,
-    //   filter: false,
-    //   cellRenderer: "productInventoryRenderer",
-    // },
-    {
-      field: "shippingAddress",
-      headerName: "Shipping Address",
-      show: true,
-      cellRenderer: "commonRenderer",
-    },
-    {
-      field: "warehouseName",
-      headerName: "Warehouse",
-      show: true,
-      cellRenderer: "commonRenderer",
-    },
+  // const columns = [
+  //   {
+  //     field: "deliveryJobName",
+  //     headerName: "Delivery Job Name",
+  //     show: true,
+  //     disabled: true,
+  //     cellRenderer: "deliveryJobNameRenderer",
+  //   },
+  //   {
+  //     field: "customerAccount",
+  //     headerName: "Customer Account",
+  //     show: true,
+  //     cellRenderer: "customerAccountNameRenderer",
+  //   },
+  //   {
+  //     field: "status",
+  //     headerName: "Status",
+  //     show: true,
+  //     cellRenderer: "commonRenderer",
+  //   },
+  //   {
+  //     field: "rentalName",
+  //     headerName: "Rental",
+  //     show: true,
+  //     cellRenderer: "rentalRenderer",
+  //   },
+  //   {
+  //     field: "deliveryDate",
+  //     headerName: "Delivery Date",
+  //     show: true,
+  //     cellRenderer: "dateRenderer",
+  //     filter: false,
+  //   },
+  //   {
+  //     field: "deliveryType",
+  //     headerName: "Delivery Type",
+  //     show: true,
+  //     cellRenderer: "commonRenderer",
+  //   },
+  //   {
+  //     field: "deliveryJobID",
+  //     headerName: "Delivery Job ID",
+  //     show: true,
+  //     cellRenderer: "commonRenderer",
+  //   },
+  //   // {
+  //   //   field: "productInventory",
+  //   //   headerName: "Product Inventory",
+  //   //   show: true,
+  //   //   filter: false,
+  //   //   cellRenderer: "productInventoryRenderer",
+  //   // },
+  //   {
+  //     field: "shippingAddress",
+  //     headerName: "Shipping Address",
+  //     show: true,
+  //     cellRenderer: "commonRenderer",
+  //   },
+  //   {
+  //     field: "warehouseName",
+  //     headerName: "Warehouse",
+  //     show: true,
+  //     cellRenderer: "commonRenderer",
+  //   },
 
-    {
-      field: "pick-UpDate",
-      headerName: "Pick-UpDate",
-      show: true,
-      cellRenderer: "dateRenderer",
-      filter: false,
-    },
-    { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-    { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
-  ];
+  //   {
+  //     field: "pick-UpDate",
+  //     headerName: "Pick-UpDate",
+  //     show: true,
+  //     cellRenderer: "dateRenderer",
+  //     filter: false,
+  //   },
+  //   { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
+  //   { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
+  // ];
+
+  const fetchGridMetadata = () => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource["deliveryTicket"]}&entity=${selectedEntity}`)
+      .then(({ data: { data } }) => {
+        let columns = []
+        let rendererNames = []
+        data.forEach(o => {
+          let currentColumn = getColumnData(deliveryTicketResource, o?.fieldData)
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData]
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
+          }
+          return o?.fieldData
+        })
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+          actionsRenderer: ActionsRenderer
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        columns = [...columns, ...getStaticFields()]
+        setColumns([...columns])
+      })
+  }
+
+  useEffect(() => {
+    fetchGridMetadata()
+  }, [])
 
   const columnState = JSON.parse(localStorage.getItem(deliveryTicketResource));
   if (columnState) {
@@ -159,7 +194,7 @@ const DeliveryTicket = () => {
       });
     });
   }
-  
+
   useEffect(() => {
     if (permissions && permissions.deliveryTicket) {
       setdeliveryPermissions(permissions.deliveryTicket);
@@ -366,13 +401,13 @@ const DeliveryTicket = () => {
               customerAccount: u?.customerAccount?.optionLabel,
               customerAccountId: u?.customerAccount?.optionValue,
 
-              deliveryPersonName: u?.deliveryPerson?.optionLabel,
+              deliveryPerson: u?.deliveryPerson?.optionLabel,
               deliveryPersonId: u?.deliveryPerson?.optionValue,
 
-              warehouseName: u?.warehouse?.optionLabel,
+              warehouse: u?.warehouse?.optionLabel,
               warehouseId: u?.warehouse?.optionValue,
 
-              rentalName: u?.rental?.optionLabel,
+              rental: u?.rental?.optionLabel,
               rentalId: u?.rental?.optionValue,
 
               createdBy: u?.createdBy?.user?.concatedName,
@@ -380,6 +415,10 @@ const DeliveryTicket = () => {
               updatedBy: u?.updatedBy?.user?.concatedName,
               updatedByDate: u?.updatedBy?.date,
             };
+            if (u?.productInventory[0]) {
+              res["productInventory"] = u?.productInventory[0] ? u?.productInventory[0]?.optionLabel : null
+              res["productInventoryId"] = u?.productInventory[0] ? u?.productInventory[0]?.optionValue : null
+            }
             return res;
           });
           dispatch({ type: "initialize", data: rows, count: count });
@@ -527,22 +566,24 @@ const DeliveryTicket = () => {
             </Grid>
           </div>
 
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={100}
-            loading={loading}
-            allowSelection={false}
-            allowAction={false}
-            renderedFrom={deliveryTicketResource}
-          />
+          {
+            Object.keys(frameWorkComponent).length > 0 ?
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameWorkComponent}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                actionWidth={100}
+                loading={loading}
+                allowSelection={false}
+                allowAction={false}
+                renderedFrom={deliveryTicketResource}
+              /> : null}
 
 
           {showDeleteWarningConfirmBox ? (
