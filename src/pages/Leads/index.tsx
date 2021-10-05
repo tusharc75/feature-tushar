@@ -109,7 +109,7 @@ const Leads = () => {
     }
   }, [permissions]);
   useEffect(() => {
-    fetchGridMetadata()
+    fetchGridColumns()
   }, [])
 
   useEffect(() => {
@@ -129,7 +129,7 @@ const Leads = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity]);
 
-  const fetchGridMetadata = () => {
+  const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=Lead&entity=${selectedEntity}`)
       .then(({ data: { data } }) => {

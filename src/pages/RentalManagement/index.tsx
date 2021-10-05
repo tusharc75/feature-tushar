@@ -174,10 +174,10 @@ const RentalManagement = () => {
   // ];
 
   useEffect(() => {
-    fetchGridMetadata()
+    fetchGridColumns()
   }, [])
 
-  const fetchGridMetadata = async () => {
+  const fetchGridColumns = async () => {
     let data
     if (isOffline) {
       data = offlineFieldsData

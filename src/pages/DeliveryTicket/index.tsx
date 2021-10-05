@@ -155,17 +155,12 @@ const DeliveryTicket = () => {
 
   const fetchGridMetadata = () => {
     axiosInstance()
-      .get(`user/meta-grid/60b9111e25391aca2ba3a31c`)
-      .then((data) => { })
-
-    let title = routes.lead.title.toLowerCase()
-    axiosInstance()
       .get(`/field?resource=${sidebarResource["deliveryTicket"]}&entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
         let columns = []
         let rendererNames = []
         data.forEach(o => {
-          let currentColumn = getColumnData(title, o?.fieldData)
+          let currentColumn = getColumnData(deliveryTicketResource, o?.fieldData)
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData]
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -181,7 +176,6 @@ const DeliveryTicket = () => {
         }
         setFrameWorkComponent({ ...tempFrameworkComponent })
         columns = [...columns, ...getStaticFields()]
-        console.log('columns', columns)
         setColumns([...columns])
       })
   }
@@ -427,7 +421,6 @@ const DeliveryTicket = () => {
             }
             return res;
           });
-          console.log('rows', rows)
           dispatch({ type: "initialize", data: rows, count: count });
           setTimeout(() => {
             dispatch({ type: "loading", loading: false });
