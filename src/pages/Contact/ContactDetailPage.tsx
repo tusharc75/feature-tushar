@@ -45,7 +45,7 @@ const ContactDetailsPage = (props) => {
   } = props;
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity }, dispatch
+    state: { user, permissions, selectedEntity, tour }, dispatch
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState('');
   const [contactData, setContactData] = useState<any>({});
@@ -113,6 +113,19 @@ const ContactDetailsPage = (props) => {
       }
     }
   }, [steps]);
+
+  useEffect(() => {
+
+    if (tour.start && tour.path === "/customer-contact/detail"
+      || tour.path === "/supplier-contact/detail") {
+      if (tour.stepIndex === 5) {
+        setCurrentTabIndex(0)
+      } else if (tour.stepIndex === 6) {
+        setCurrentTabIndex(1)
+      }
+    }
+
+  }, [tour])
 
   const fetchContactData = async () => {
     setLoading(true);
@@ -459,6 +472,10 @@ const ContactDetailsPage = (props) => {
   }
 
   let filteredContactFields = contactFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
+
+  const tourPaths = ["/customer-contact/detail", "/supplier-contact/detail"]
+
+
   return (
     <>
       {openUpdateDialog && showAtLast ? (
@@ -525,7 +542,15 @@ const ContactDetailsPage = (props) => {
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={customizedRoutes} />
       </Grid>
-      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}
+        style={{
+          height:
+            tour.start && tourPaths.includes(tour.path)
+              && tour.stepIndex > 0 && tour.stepIndex < 9
+              ? "auto"
+              : "calc(100vh - 98px)"
+        }}
+      >
         <div>
           <Paper>
             <DetailsPageHeader
@@ -536,7 +561,7 @@ const ContactDetailsPage = (props) => {
               showHeading={true}
             >
               {contactPermissions.isUpdate && canEdit ? (
-                <Button variant="contained" color="primary" size="small" onClick={handleOpneUpdateDialog}>
+                <Button id="detailEditButton" variant="contained" color="primary" size="small" onClick={handleOpneUpdateDialog}>
                   Edit
                 </Button>
               ) : null}
@@ -545,7 +570,7 @@ const ContactDetailsPage = (props) => {
                 contactData?.owner?.optionValue &&
                 user?.user?._id &&
                 contactData.owner.optionValue === user.user._id ? (
-                <DeleteButton text="Delete" size="small" onClick={() => setShowConfirmBox(true)} />
+                <DeleteButton id="detailDeleteButton" text="Delete" size="small" onClick={() => setShowConfirmBox(true)} />
               ) : null}
             </DetailsPageHeader>
             <ProcessFlow
@@ -601,46 +626,52 @@ const ContactDetailsPage = (props) => {
             </Box>
             <div className="p-3">
               {permissions?.opportunity?.isRead && (
-                <OpportunityInAccordian
-                  opportunityPermissions={permissions.opportunity}
-                  opportunities={opportunities}
-                  onNewOpportunityAdd={() => {
-                    fetchRelatedData();
-                  }}
-                  accountId={contactData?.accountName?.optionValue}
-                  accountName={contactData?.accountName?.optionLabel}
-                  recordsPerLine={3}
-                  resource={accountResource}
-                  isRedirect={false}
-                  contactId={id}
-                  contactResource={contactResource}
-                  isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
-                />
+                <span id='opportunityAccordion'>
+                  <OpportunityInAccordian
+                    opportunityPermissions={permissions.opportunity}
+                    opportunities={opportunities}
+                    onNewOpportunityAdd={() => {
+                      fetchRelatedData();
+                    }}
+                    accountId={contactData?.accountName?.optionValue}
+                    accountName={contactData?.accountName?.optionLabel}
+                    recordsPerLine={3}
+                    resource={accountResource}
+                    isRedirect={false}
+                    contactId={id}
+                    contactResource={contactResource}
+                    isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
+                  />
+                </span>
               )}
               {permissions?.projectSales?.isRead && accountResource === customerAccount.accountResource && (
-                <ProjectInAccordion
-                  recordsPerLine={3}
-                  projectSales={projectSales}
-                  type={typeCreateProjectSalesDialog}
-                  fetchData={fetchRelatedData}
-                  permissions={permissions}
-                  isAddProjectSale={true}
-                  isAllowedToEdit={contactPermissions.isUpdate && canEdit}
-                />
+                <span id="projectsAccordion">
+                  <ProjectInAccordion
+                    recordsPerLine={3}
+                    projectSales={projectSales}
+                    type={typeCreateProjectSalesDialog}
+                    fetchData={fetchRelatedData}
+                    permissions={permissions}
+                    isAddProjectSale={true}
+                    isAllowedToEdit={contactPermissions.isUpdate && canEdit}
+                  />
+                </span>
               )}
               {accountResource === customerAccount.accountResource && permissions?.quoteBuilder?.isRead && (
-                <QuotesInAccordion
-                  recordsPerLine={3}
-                  quotes={quotes}
-                  fetchData={fetchRelatedData}
-                  quoteBuilderPermission={permissions.quoteBuilder}
-                  accountId={contactData?.accountName?.optionValue}
-                  contactId={id}
-                  accountResource={accountResource}
-                  isRenderedInCustomerContact={true}
-                  isRenderedFromCustomerAccount={true}
-                  isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
-                />
+                <span id="quotesAccordion">
+                  <QuotesInAccordion
+                    recordsPerLine={3}
+                    quotes={quotes}
+                    fetchData={fetchRelatedData}
+                    quoteBuilderPermission={permissions.quoteBuilder}
+                    accountId={contactData?.accountName?.optionValue}
+                    contactId={id}
+                    accountResource={accountResource}
+                    isRenderedInCustomerContact={true}
+                    isRenderedFromCustomerAccount={true}
+                    isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
+                  />
+                </span>
               )}
               {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
               {/* {permissions?.lead?.isRead && contactData.staticData?.lead && (
@@ -651,7 +682,7 @@ const ContactDetailsPage = (props) => {
             </div>
           </Paper>
         </div>
-        <div className="position-relative">
+        <div id="activitiesSidebar" className="position-relative">
           {showActivity ?
             <Paper>
               {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>

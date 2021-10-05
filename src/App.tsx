@@ -130,7 +130,7 @@ function App() {
       localStorage.setItem("slowInternetConnection", "false")
     }
   });
-  ReactGA.initialize(TRACKING_ID);
+  // ReactGA.initialize(TRACKING_ID);
 
   window.addEventListener('load', function (e) {
     //@ts-ignore
@@ -620,10 +620,10 @@ function App() {
         )
       }
 
-      {
+      {/* {
         isOffline ?
           <OfflineStatusDialog /> : null
-      }
+      } */}
     </ThemeProvider>
   );
 }
