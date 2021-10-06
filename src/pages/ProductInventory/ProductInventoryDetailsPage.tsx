@@ -351,94 +351,42 @@ const ProductInventoryDetailsPage = () => {
                   </>
                 )}
               </Box>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
-            <Paper>
-              <Box
-                padding={1}
-                bgcolor="grey.200"
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Typography variant="subtitle2">
-                  BOM
-                </Typography>
-              </Box>
-              {(
-                <Box>
-                  {loading ? (
-                    [1, 2].map((i) => (
-                      <BoxWithBorder
-                        key={i}
-                        style={{
-                          margin: "8px",
-                        }}
-                      >
-                        <Box padding={1}>
-                          <Skeleton
-                            variant="text"
-                            width="100px"
-                            height="20px"
-                          />
-                          <Box marginTop={1} />
-                          <Skeleton variant="text" width="100%" height="15px" />
-                        </Box>
-                      </BoxWithBorder>
-                    ))
-                  ) : BOMData.length ? (
-                    <>
-                      {/* <AssignedFrequentlyBoughtProduct
-                                                permissions={permissions.product}
-                                                product={frequentlyBoughtProduct}
-                                                unassignProduct={unassignProduct}
-                                            /> */}
-                      <ProductHierarchy
-                        data={BOMData}
-                        permissions={permissions.product}
-                        unassignProduct={() => { }}
-                      />
-                      <Box marginY={1} />
-                    </>
-                  ) : (
-                    <Box textAlign="center" padding={2}>
-                      <Typography>No Product has been assigned </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <div className="detail-box">
+                    <h3 className="form-label-style" title={"Asset History"}>
+                      {"Asset History"}
+                    </h3>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                  {columns ?
+                    <CustomAgGrid
+                      columns={columns}
+                      dataRows={dataRows}
+                      frameworkComponents={frameworkComponents}
+                      setGridApi={setGridApi}
+                      dispatch={dispatch}
+                      rowCount={rowCount}
+                      limit={limit}
+                      pageSizes={pageSizes}
+                      page={page}
+                      allowAction={false}
+                      allowSelection={false}
+                      isClientSideGrid={true}
+                      loading={loading}
+                      renderedFrom="rentalManagementDetailsPageInventory"
+                    />
+                    : <Box
+                      p={2}
+                      height={500}
+                      bgcolor="white">
+                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
                     </Box>
-                  )}
-                </Box>
-              )}
+                  }
+                </Grid>
+              </Grid>
             </Paper>
-          </Grid>
-
-
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={12} md={12} lg={12}>
-              {columns ?
-                <CustomAgGrid
-                  columns={columns}
-                  dataRows={dataRows}
-                  frameworkComponents={frameworkComponents}
-                  setGridApi={setGridApi}
-                  dispatch={dispatch}
-                  rowCount={rowCount}
-                  limit={limit}
-                  pageSizes={pageSizes}
-                  page={page}
-                  allowAction={false}
-                  allowSelection={false}
-                  isClientSideGrid={true}
-                  loading={loading}
-                  renderedFrom="rentalManagementDetailsPageInventory"
-                />
-                : <Box
-                  p={2}
-                  height={500}
-                  bgcolor="white">
-                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Box>
-              }
-            </Grid>
           </Grid>
         </Grid>
 

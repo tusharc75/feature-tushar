@@ -41,7 +41,7 @@ const Email = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user }
+    state: { user, permissions }
   }: any = useData();
   const parsed = queryString.parse(history.location.search);
   const { referenceType, referenceId } = parsed;
@@ -186,8 +186,10 @@ const Email = () => {
     <span
       className="link cursor-pointer"
       onClick={(e) => {
-        setOpen(true);
-        setEmailId(params.data.id);
+        if (permissions?.email?.isUpdate) {
+          setOpen(true);
+          setEmailId(params.data.id);
+        }
       }}
     >
       {typeof params.data.to === 'string' ? (
