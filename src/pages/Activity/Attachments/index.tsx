@@ -131,7 +131,7 @@ export default function Attachment() {
   const [isDownloading, setIsDownloading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user }
+    state: { user, permissions }
   }: any = useData();
 
   const [gridApi, setGridApi] = useState(null);
@@ -182,9 +182,9 @@ export default function Attachment() {
   }, [page, limit, filter, filters, sorting]);
 
   const NameRenderer = (params) => (
-    <a className="link cursor-pointer" onClick={() => handleActivityOpen(params.data)}>
+    <a className={permissions?.attachment?.isUpdate ? "link cursor-pointer" : ""} onClick={() => handleActivityOpen(params.data)}>
       {params.data.name}
-    </a>
+    </a >
   );
   const downloadFile = (file) => {
     const fileUrl = file.map(f => f.url)

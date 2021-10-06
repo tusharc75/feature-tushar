@@ -87,8 +87,7 @@ const Event = () => {
                   startIcon={<Add />}
                   variant="outlined"
                   size="small"
-                  onClick={() => setOpenDialog(true)}
-                >
+                  onClick={() => setOpenDialog(true)}>
                   Create Event
                 </Button>
               </Box>

@@ -14,9 +14,14 @@ import { ExpandMore } from "@material-ui/icons";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import styles from "../Leads/Header.module.scss";
+import { useData } from "../../StateProvider/Provider";
 
 function QuoteHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const {
+    state: { permissions },
+  }: any = useData();
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -98,7 +103,6 @@ function QuoteHeader(props) {
               Add
             </Button>
           )}
-          {QuotePermissions.isDelete && (
             <>
               <Button
                 disabled={canDelete}
@@ -128,6 +132,7 @@ function QuoteHeader(props) {
                     closeActions();
                     showConfirmBox(null);
                   }}
+                  disabled={!permissions?.quoteBuilder?.isDelete}
                 >
                   Delete
                 </MenuItem>
@@ -151,7 +156,7 @@ function QuoteHeader(props) {
                 </MenuItem>
               </Menu>
             </>
-          )}
+          
         </Box>
       </Grid>
     </Grid>

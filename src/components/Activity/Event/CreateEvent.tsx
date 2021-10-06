@@ -481,13 +481,19 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                               label="End Time"
                               name="endTime"
                               placeholder="08:00 AM"
-                              mask="__:__ _M"
+                              mask="__:__"
                               value={values.endTime}
                               onChange={(date: any) => {
                                 const nDate = new Date(values.startTime).toISOString().split("T")[0];
-                                const nTime = new Date(date._d).toISOString().split("T")[1];
+                                let nTime = ""
+                                if ((date._d + "").includes("Invalid Date")) {
+                                  setFieldValue("endTime", `${date._i}`)
+                                }
+                                else {
+                                  nTime = new Date(date._d).toISOString().split("T")[1];
+                                  setFieldValue("endTime", new Date(`${nDate}T${nTime}`))
+                                }
 
-                                setFieldValue("endTime", new Date(`${nDate}T${nTime}`))
                               }}
                               error={
                                 Boolean(touched["endTime"]) &&

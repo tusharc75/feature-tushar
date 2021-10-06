@@ -105,7 +105,12 @@ const Note = () => {
   };
 
   const NameRenderer = (params) => (
-    <span className="link cursor-pointer" onClick={() => handleActivityOpen(params.data)}>
+    <span className={permissions?.note?.isUpdate ? "link cursor-pointer" : ""}
+      onClick={() => {
+        if (permissions?.note?.isUpdate) {
+          handleActivityOpen(params.data)
+        }
+      }}>
       {params.value}
     </span>
   );
@@ -118,7 +123,7 @@ const Note = () => {
   const ActionsRenderer = (params) => (
     <>
       <GridDeleteIcon
-        hasDeletePermission={permissions.note.isDelete}
+        hasDeletePermission={permissions?.note?.isDelete}
         ownerId={params.data.createdBy}
         userId={user?.user?._id}
         onDelete={() => showConfirmBox(params.data)}
