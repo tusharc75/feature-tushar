@@ -7,9 +7,9 @@ import {
     CreatedByRenderer,
     UpdatedByRenderer,
     CommonRendererWithCopy,
-    DateRenderer
+    DateRenderer,
+    LinkRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
-
 
 export const staticFrameworkRender = {
     "createdByRenderer": CreatedByRenderer,
@@ -44,6 +44,12 @@ export const getFrameworkComponents = (rendererNameList, showStaticRenderers = f
             result = {
                 ...result,
                 "commonRenderer": CommonRenderer
+            }
+        }
+        else if (o === "linkRenderer") {
+            result = {
+                ...result,
+                "linkRenderer": LinkRenderer
             }
         }
         else if (o === "commonRendererWithCopy") {
@@ -86,7 +92,9 @@ export const checkStaticField = (renderedFrom, fieldData) => {
 }
 
 export const staticColumns = ["createdBy", "updatedBy"]
+
 export const getColumnData = (title, field) => {
+
     let data = localStorage.getItem("gridMetaData")
 
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
@@ -114,8 +122,10 @@ export const getColumnData = (title, field) => {
                 columnData: {
                     ...commonFieldData,
                     field: "concatedName",
-                    cellRenderer: (params) => `<a id="link-a" href='${pathName}/${params?.data?._id}' title='${params?.value}'>${params?.value}</a >`,
-                }
+                    cellRenderer: "linkRenderer",
+                    cellRendererParams: { "pathName": pathName, "property": "_id" }
+                },
+                rendererName: 'linkRenderer',
             }
         }
         else if (field?.lookup) {
@@ -123,11 +133,14 @@ export const getColumnData = (title, field) => {
             let joinedFieldName = field?.fieldName.indexOf("_") > 0 ? camelCase(field?.fieldName) : field?.fieldName
             let pathName = detailPagePath[joinedFieldName] ? detailPagePath[joinedFieldName] :
                 routes[`${joinedFieldName}Detail`]?.path ? routes[`${joinedFieldName}Detail`]?.path : ""
+
             return {
                 columnData: {
                     ...commonFieldData,
-                    cellRenderer: (params) => params.value ? `<a id="link-a" href='${pathName}/${params.data[joinedFieldName + 'Id']}' title='${params.value}'>${params.value ?? null}</Link >` : "-----",
-                }
+                    cellRenderer: "linkRenderer",
+                    cellRendererParams: { "pathName": pathName, "property": joinedFieldName + 'Id' }
+                },
+                rendererName: 'linkRenderer',
             }
         }
         else if (isRenderWithCopy(field?.fieldName)) {
