@@ -31,8 +31,12 @@ import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { useHistory } from "react-router-dom";
+import queryString from "query-string";
 
 const MarketSegment = () => {
+
+    const history = useHistory();
 
     const toastConfig = useContext(CustomToastContext)
     const {
@@ -69,6 +73,13 @@ const MarketSegment = () => {
             });
         });
     }
+
+    useEffect(() => {
+        const parsedParams = queryString.parse(history?.location?.search);
+        if (parsedParams?.id) {
+            setOpen({ open: true, isClone: false, idToClone: parsedParams?.id });
+        }
+    }, [])
     //  Grid Variables - End
 
     useEffect(() => {

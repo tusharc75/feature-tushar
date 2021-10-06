@@ -30,8 +30,14 @@ export const detailPagePath = {
     collaborator: routes?.userDetail?.path,
     rental: routes.rentalManagementDetail.path,
     deliveryPerson: routes?.userDetail?.path,
-    pDFTemplate: routes?.quotePdfTemplateDetail?.path
+    pDFTemplate: routes?.quotePdfTemplateDetail?.path,
+    subMarketSegment: routes?.marketSegment?.path
 }
+export const hasDetailPageAsPopup = {
+    subMarketSegment: routes?.marketSegment?.path,
+    marketSegment: routes?.marketSegment?.path
+}
+
 export const disabledColumns = {
     [routes.rentalManagementDetail.title]: [],
     [routes.deliveryTicketDetail.title]: [],
@@ -131,14 +137,23 @@ export const getColumnData = (title, field) => {
         else if (field?.lookup) {
 
             let joinedFieldName = field?.fieldName.indexOf("_") > 0 ? camelCase(field?.fieldName) : field?.fieldName
-            let pathName = detailPagePath[joinedFieldName] ? detailPagePath[joinedFieldName] :
-                routes[`${joinedFieldName}Detail`]?.path ? routes[`${joinedFieldName}Detail`]?.path : ""
+            let pathName = ""
+            let isForPopup = false
+            if (hasDetailPageAsPopup[joinedFieldName]) {
+                isForPopup = true
+                pathName = `${hasDetailPageAsPopup[joinedFieldName]}`
+            }
+            else {
+                pathName = detailPagePath[joinedFieldName] ? detailPagePath[joinedFieldName] :
+                    routes[joinedFieldName]?.path ? routes[joinedFieldName]?.path :
+                        routes[`${joinedFieldName}Detail`]?.path ? routes[`${joinedFieldName}Detail`]?.path : ""
+            }
 
             return {
                 columnData: {
                     ...commonFieldData,
                     cellRenderer: "linkRenderer",
-                    cellRendererParams: { "pathName": pathName, "property": joinedFieldName + 'Id' }
+                    cellRendererParams: { "pathName": pathName, "property": joinedFieldName + 'Id', isForPopup: isForPopup }
                 },
                 rendererName: 'linkRenderer',
             }

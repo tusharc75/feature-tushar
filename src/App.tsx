@@ -106,7 +106,6 @@ import SalesOrder from "./pages/SalesOrderCreation";
 import SalesOrderDetails from "./pages/SalesOrderCreation/SalesOrderDetails";
 import PackageList from "./pages/Packages";
 import PackageDetails from "./pages/Packages/PackageDetails";
-import IdleTimer from "./IdleTimer";
 
 function App() {
   const toast = useContext(CustomToastContext);

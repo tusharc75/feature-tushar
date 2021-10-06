@@ -302,7 +302,7 @@ const Leads = () => {
         }
 
         let rows = data.map((u) => {
-          const { owner, collaborator, createdBy, updatedBy, staticData, ...restProperties } = u;
+          const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
 
           let res = {
             ...restProperties,
@@ -310,6 +310,11 @@ const Leads = () => {
 
             owner: u.owner?.optionLabel,
             ownerId: u.owner?.optionValue,
+            subMarketSegment: u?.subMarketSegment?.optionLabel,
+            subMarketSegmentId: u?.subMarketSegment?.optionValue,
+
+            marketSegment: u.marketSegment?.optionLabel,
+            marketSegmentId: u.marketSegment?.optionValue,
             isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id),
 
             convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
@@ -324,6 +329,7 @@ const Leads = () => {
           return res;
         });
 
+        console.log('rows', rows)
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });

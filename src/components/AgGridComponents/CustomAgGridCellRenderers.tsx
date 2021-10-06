@@ -47,7 +47,8 @@ export const UpdatedByRenderer = params => params.value ? (
 )
 
 export const LinkRenderer = params => params.value ? (
-    <Link className="link" to={`${params.pathName}/${params?.data[params.property]}`} title={params?.value}>{params?.value}</Link>
+    <Link className="link" to={params?.isForPopup ? `${params?.pathName}?id=${params?.data[params?.property]}` :
+        `${params?.pathName}/${params?.data[params?.property]}`} title={params?.value}>{params?.value}</Link>
 ) : (
     <NoDataCell />
 )
