@@ -1,6 +1,6 @@
 {
   "name": "oms_frontend",
-  "version": "1.10.15",
+  "version": "1.10.16",
   "private": true,
   "dependencies": {
     "@azure/msal-browser": "^2.14.1",
