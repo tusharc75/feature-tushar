@@ -63,7 +63,7 @@ const AssingAssetsDialog = (props) => {
             onChange={(_, val) => {
               setWarehouse(val);
             }}
-            renderInput={(params) => <TextField {...params} variant="outlined" required label="Selecte Warehouse" />}
+            renderInput={(params) => <TextField {...params} variant="outlined" required label="Select Warehouse" />}
           />
 
           <Box my={4} />
@@ -75,7 +75,7 @@ const AssingAssetsDialog = (props) => {
             onChange={(e) => setQty(parseInt(e.target.value))}
             variant="outlined"
             required
-            label="Selecte Warehouse"
+            label="Quantity"
           />
         </Box>
       </CustomDialogContent>
