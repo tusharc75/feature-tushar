@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.44](https://github.com/vebholic/oms_frontend/compare/v1.10.43...v1.10.44) (2021-10-06)
+
+### [1.10.43](https://github.com/vebholic/oms_frontend/compare/v1.10.42...v1.10.43) (2021-10-06)
+
+### [1.10.42](https://github.com/vebholic/oms_frontend/compare/v1.10.41...v1.10.42) (2021-10-06)
+
+### [1.10.41](https://github.com/vebholic/oms_frontend/compare/v1.10.40...v1.10.41) (2021-10-06)
+
+### [1.10.40](https://github.com/vebholic/oms_frontend/compare/v1.10.39...v1.10.40) (2021-10-06)
+
+### [1.10.39](https://github.com/vebholic/oms_frontend/compare/v1.10.38...v1.10.39) (2021-10-06)
+
+### [1.10.38](https://github.com/vebholic/oms_frontend/compare/v1.10.37...v1.10.38) (2021-10-06)
+
+### [1.10.37](https://github.com/vebholic/oms_frontend/compare/v1.10.36...v1.10.37) (2021-10-06)
+
+### [1.10.36](https://github.com/vebholic/oms_frontend/compare/v1.10.35...v1.10.36) (2021-10-06)
+
+### [1.10.35](https://github.com/vebholic/oms_frontend/compare/v1.10.34...v1.10.35) (2021-10-06)
+
+### [1.10.34](https://github.com/vebholic/oms_frontend/compare/v1.10.33...v1.10.34) (2021-10-06)
+
+### [1.10.33](https://github.com/vebholic/oms_frontend/compare/v1.10.32...v1.10.33) (2021-10-06)
+
+### [1.10.32](https://github.com/vebholic/oms_frontend/compare/v1.10.31...v1.10.32) (2021-10-06)
+
+### [1.10.31](https://github.com/vebholic/oms_frontend/compare/v1.10.30...v1.10.31) (2021-10-06)
+
+### [1.10.30](https://github.com/vebholic/oms_frontend/compare/v1.10.29...v1.10.30) (2021-10-06)
+
+### [1.10.29](https://github.com/vebholic/oms_frontend/compare/v1.10.28...v1.10.29) (2021-10-06)
+
+### [1.10.28](https://github.com/vebholic/oms_frontend/compare/v1.10.27...v1.10.28) (2021-10-06)
+
 ### [1.10.27](https://github.com/vebholic/oms_frontend/compare/v1.10.26...v1.10.27) (2021-10-06)
 
 ### [1.10.26](https://github.com/vebholic/oms_frontend/compare/v1.10.25...v1.10.26) (2021-10-06)
