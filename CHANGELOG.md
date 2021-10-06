@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.36](https://github.com/vebholic/oms_frontend/compare/v1.10.35...v1.10.36) (2021-10-06)
+
 ### [1.10.35](https://github.com/vebholic/oms_frontend/compare/v1.10.34...v1.10.35) (2021-10-06)
 
 ### [1.10.34](https://github.com/vebholic/oms_frontend/compare/v1.10.33...v1.10.34) (2021-10-06)
