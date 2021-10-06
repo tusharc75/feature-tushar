@@ -135,9 +135,10 @@ export const sidebarResource = {
   rentalManagement: "Rental Management",
   deliveryTicket: 'Loading Ticket',
   pricingCondition: 'Pricing Condition',
-  repairJob: 'Repair Job',
-  receivingTicket: 'Receiving Ticket',
-  salesOrder: "Sales Order"
+  repairJob: 'Repair Jobs',
+  receivingTicket: 'Receiving Tickets',
+  salesOrder: "Sales Orders",
+  packages: "Packages"
 };
 
 export const RESOURCE_LABEL = {
@@ -183,9 +184,10 @@ export const RESOURCE_LABEL = {
   rentalManagement: 'Rental Management',
   deliveryTicket: 'Loading Tickets',
   pricingCondition: 'Pricing Condition',
-  repairJob: 'Repair Job',
-  receivingTicket: "Receiving Ticket",
-  salesOrder: "Sales Order"
+  repairJob: 'Repair Jobs',
+  receivingTicket: "Receiving Tickets",
+  salesOrder: "Sales Orders",
+  packages: "Packages"
 };
 
 export const lead = {
@@ -240,6 +242,11 @@ export const repairJob = {
 export const salesOrder = {
   salesOrderResource: 'salesOrder',
   salesOrderApi: '/sales-order'
+};
+
+export const packages = {
+  packageResource: 'packages',
+  packageApi: '/packages'
 };
 
 export const receivingTicket = {
