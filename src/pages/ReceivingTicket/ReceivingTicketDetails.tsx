@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Typography, IconButton, Paper, Chip } from '@material-ui/core';
-import { ControlPoint, ExpandLess, ExpandMore } from '@material-ui/icons';
+import { Grid, Box, Button, Paper } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -14,7 +13,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { receivingTicket } from '../../constants/helpers';
 import ManageReceivingTicket from './ManageReceivingTicket';
-import BoxWithBorder from '../../components/BoxWithBorder';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 
 const ReceivingTicketDetails = () => {
