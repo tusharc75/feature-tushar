@@ -30,7 +30,8 @@ export default function ManageContactDialog(props) {
     collaborators,
     owners,
     fromProject,
-    isClone = false
+    isClone = false,
+    isAccountFieldDisable = false
   } = props;
   const { accountApi, accountResource } = account;
   const {
@@ -177,7 +178,7 @@ export default function ManageContactDialog(props) {
 
   const handleDialogClose = () => {
     setShowAccountDialog(false);
-    onClose()
+    // onClose()
   };
 
   const handleGetAddedAccount = ({ data }) => {
@@ -225,6 +226,7 @@ export default function ManageContactDialog(props) {
         formValues={formValues}
         handleValuesChange={handleValuesChange}
         isClone={isClone}
+        isAccountFieldDisable={isAccountFieldDisable}
       />
       {showAccountDialog ? (
         <ManageAccountDialog
