@@ -2,6 +2,49 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.15](https://github.com/vebholic/oms_frontend/compare/v1.10.14...v1.10.15) (2021-10-06)
+
+### [1.10.14](https://github.com/vebholic/oms_frontend/compare/v1.10.13...v1.10.14) (2021-10-06)
+
+### [1.10.13](https://github.com/vebholic/oms_frontend/compare/v1.10.12...v1.10.13) (2021-10-06)
+
+### [1.10.12](https://github.com/vebholic/oms_frontend/compare/v1.10.11...v1.10.12) (2021-10-06)
+
+### [1.10.11](https://github.com/vebholic/oms_frontend/compare/v1.10.10...v1.10.11) (2021-10-06)
+
+### [1.10.10](https://github.com/vebholic/oms_frontend/compare/v1.10.9...v1.10.10) (2021-10-06)
+
+### [1.10.9](https://github.com/vebholic/oms_frontend/compare/v1.10.8...v1.10.9) (2021-10-06)
+
+### [1.10.8](https://github.com/vebholic/oms_frontend/compare/v1.10.7...v1.10.8) (2021-10-06)
+
+### [1.10.7](https://github.com/vebholic/oms_frontend/compare/v1.10.6...v1.10.7) (2021-10-06)
+
+### [1.10.6](https://github.com/vebholic/oms_frontend/compare/v1.10.5...v1.10.6) (2021-10-06)
+
+### [1.10.5](https://github.com/vebholic/oms_frontend/compare/v1.10.4...v1.10.5) (2021-10-06)
+
+### [1.10.4](https://github.com/vebholic/oms_frontend/compare/v1.10.3...v1.10.4) (2021-10-06)
+
+### [1.10.3](https://github.com/vebholic/oms_frontend/compare/v1.10.2...v1.10.3) (2021-10-06)
+
+### [1.10.2](https://github.com/vebholic/oms_frontend/compare/v1.10.1...v1.10.2) (2021-10-06)
+
+### [1.10.1](https://github.com/vebholic/oms_frontend/compare/v1.10.0...v1.10.1) (2021-10-06)
+
+## [1.10.0](https://github.com/vebholic/oms_frontend/compare/v1.9.3...v1.10.0) (2021-10-06)
+
+
+### Features
+
+* **packages:** add package screen ([2a32028](https://github.com/vebholic/oms_frontend/commit/2a3202839af916d1cd73bd7f0de6544d47f41284))
+
+
+### Bug Fixes
+
+* **app.jsx:** conflict resolve ([5413794](https://github.com/vebholic/oms_frontend/commit/54137946861cbb965d4f0b7306c51e5f5d7b0256))
+* **productmaster:** label spelling fix ([65b0018](https://github.com/vebholic/oms_frontend/commit/65b00182c61a261f49a78bdc58db4f0d5a1e5f00))
+
 ### [1.9.3](https://github.com/vebholic/oms_frontend/compare/v1.9.2...v1.9.3) (2021-10-06)
 
 ### [1.9.2](https://github.com/vebholic/oms_frontend/compare/v1.9.1...v1.9.2) (2021-10-06)
