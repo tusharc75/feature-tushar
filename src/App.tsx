@@ -104,6 +104,7 @@ import ReceivingTicketDetails from "./pages/ReceivingTicket/ReceivingTicketDetai
 import PricingConditionsDetailsPage from "./pages/PricingConditions/PricingConditionsDetailsPage";
 import SalesOrder from "./pages/SalesOrderCreation";
 import SalesOrderDetails from "./pages/SalesOrderCreation/SalesOrderDetails";
+import IdleTimer from "./IdleTimer";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -117,6 +118,31 @@ function App() {
   }: any = useData();
 
   const history = useHistory();
+  useEffect(() => {
+    if (user?.user) {
+      const timer = new IdleTimer({
+        timeout: 600, //expire after 10 seconds
+        onTimeout: () => {
+          localStorage.removeItem('token');
+          if (history) {
+            //history.push('/login');
+            // history.push('/login');
+            // history.go();
+
+            history.push("/");
+            dispatch({ type: SET_USER, payload: null });
+            history.push("/login");
+          }
+        },
+        onExpired: () => {
+        }
+      });
+      return () => {
+        timer.cleanUp();
+      };
+    }
+  }, [user]);
+
   history.listen(() => {
     let isSlowInternetConnection = localStorage.getItem("slowInternetConnection")
     if (isSlowInternetConnection == "true") {
@@ -130,7 +156,7 @@ function App() {
       localStorage.setItem("slowInternetConnection", "false")
     }
   });
-  ReactGA.initialize(TRACKING_ID);
+  // ReactGA.initialize(TRACKING_ID);
 
   window.addEventListener('load', function (e) {
     //@ts-ignore
@@ -147,7 +173,13 @@ function App() {
   }, false);
 
   window.addEventListener('offline', function (e) {
-    setIsOffline(true);
+    const pathnames = history.location.pathname.split("/").filter((x) => x);
+
+    if (!(history.location.pathname === "/" || [
+      "rental-management"
+    ].indexOf(pathnames[0]) >= 0)) {
+      setIsOffline(true);
+    }
   }, false);
 
   const getNotification = async () => {
@@ -613,11 +645,10 @@ function App() {
           /> : (toast.toastConfig.type === "notFoundError" ? <RecordDeletedDialog /> : "")
         )
       }
-
-      {
+      {/* {
         isOffline ?
           <OfflineStatusDialog /> : null
-      }
+      } */}
     </ThemeProvider>
   );
 }

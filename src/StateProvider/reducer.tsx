@@ -1,7 +1,7 @@
 import { getPermissions } from "../constants/helpers";
 import {
   SET_USER, USER_LOADING, SET_ROLE, SET_SELECTED_ENTITY, SET_CHATTER,
-  SET_CART_COUNT, SET_START_TOUR
+  SET_CART_COUNT, SET_START_TOUR, SET_GRID_METADATA
 } from "./actionTypes";
 
 export const initialState = {
@@ -17,7 +17,8 @@ export const initialState = {
     path: '',
     start: false,
     stepIndex: 0,
-  }
+  },
+  gridMetaData: {}
 };
 
 const reducer = (state = initialState, action) => {
@@ -46,6 +47,11 @@ const reducer = (state = initialState, action) => {
       return {
         ...state, selectedEntity: action.payload,
         permissions: getPermissions(state.user, action.payload)
+      };
+    case SET_GRID_METADATA:
+      return {
+        ...state,
+        gridMetaData: action.payload
       };
 
     default:
