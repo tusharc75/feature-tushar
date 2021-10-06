@@ -37,6 +37,7 @@ function PackageHeader(props) {
     };
 
     const {
+        openAssingToProduct,
         selectedRecords,
         onTypeChange,
         options,
@@ -106,44 +107,50 @@ function PackageHeader(props) {
                     )}
 
                     <HideWhenOffline>
-                        {
-                            packagePermissions.isDelete && (
-                                <>
-                                    <Button
-                                        disabled={canDelete}
-                                        variant="outlined"
-                                        color="default"
-                                        size="small"
-                                        onClick={openActions}
-                                        className={styles.action_submit_btn}
-                                        aria-controls="action-menu"
-                                    >
-                                        Actions <ExpandMore />
-                                    </Button>
-                                    <Menu
-                                        anchorEl={anchorEl}
-                                        keepMounted
-                                        getContentAnchorEl={null}
-                                        anchorOrigin={{
-                                            vertical: "bottom",
-                                            horizontal: "left",
-                                        }}
-                                        id="action-menu"
-                                        open={Boolean(anchorEl)}
-                                        onClose={closeActions}
-                                    >
-                                        <MenuItem
-                                            onClick={() => {
-                                                closeActions();
-                                                showConfirmBox(null);
-                                            }}
-                                        >
-                                            Delete
-                                        </MenuItem>
-                                    </Menu>
-                                </>
-                            )
-                        }
+
+                        <>
+                            <Button
+                                disabled={canDelete}
+                                variant="outlined"
+                                color="default"
+                                size="small"
+                                onClick={openActions}
+                                className={styles.action_submit_btn}
+                                aria-controls="action-menu"
+                            >
+                                Actions <ExpandMore />
+                            </Button>
+                            <Menu
+                                anchorEl={anchorEl}
+                                keepMounted
+                                getContentAnchorEl={null}
+                                anchorOrigin={{
+                                    vertical: "bottom",
+                                    horizontal: "left",
+                                }}
+                                id="action-menu"
+                                open={Boolean(anchorEl)}
+                                onClose={closeActions}
+                            >
+                                {packagePermissions.isDelete && <MenuItem
+                                    onClick={() => {
+                                        closeActions();
+                                        showConfirmBox(null);
+                                    }}
+                                >
+                                    Delete
+                                </MenuItem>}
+                                {packagePermissions.isUpdate && <MenuItem
+                                    onClick={() => {
+                                        openAssingToProduct()
+                                        closeActions();
+                                    }}
+                                >
+                                    Assign To Product
+                                </MenuItem>}
+                            </Menu>
+                        </>
+
                     </HideWhenOffline>
                 </Box>
             </Grid>
