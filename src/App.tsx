@@ -104,6 +104,8 @@ import ReceivingTicketDetails from "./pages/ReceivingTicket/ReceivingTicketDetai
 import PricingConditionsDetailsPage from "./pages/PricingConditions/PricingConditionsDetailsPage";
 import SalesOrder from "./pages/SalesOrderCreation";
 import SalesOrderDetails from "./pages/SalesOrderCreation/SalesOrderDetails";
+import PackageList from "./pages/Packages";
+import PackageDetails from "./pages/Packages/PackageDetails";
 import IdleTimer from "./IdleTimer";
 
 function App() {
@@ -601,6 +603,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.salesOrderDetail.path}/:id`} >
               <SalesOrderDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.packages.path}>
+              <PackageList />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.packagesDetail.path}/:id`} >
+              <PackageDetails />
             </PrivateRoute>
 
             <Route path="*" component={NotFound} />

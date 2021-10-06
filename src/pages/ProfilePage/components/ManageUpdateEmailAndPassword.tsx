@@ -91,8 +91,8 @@ export default function ManageUpdateEmailAndPassword({
                     setLoading(false)
                 })
                 .catch((error) => {
-                    toastConfig.setToastConfig(error);
                     setLoading(false);
+                    toastConfig.setToastConfig(error);
                 });
         }
     }
@@ -172,7 +172,7 @@ export default function ManageUpdateEmailAndPassword({
                 }) => (
                     <>
                         <CustomDialogContent>
-                            <Form noValidate>
+                            <Form noValidate autoComplete="off" autoCorrect="off">
                                 <div>
                                     <Box marginY={2}>
                                         <Grid spacing={3} container>
@@ -271,8 +271,12 @@ export default function ManageUpdateEmailAndPassword({
                                 variant="contained"
                                 color="primary"
                                 disabled={loading ? true : ((isUpdateEmail && values.email === userData.email) || false)}
-                                type="submit"
-                                onClick={submitForm}
+                                onClick={() => {
+                                    let errors = validateForm(values)
+                                    if (Object.keys(errors).length === 0) {
+                                        handleSubmit(values)
+                                    }
+                                }}
                             >
                                 Update
                             </CustomButton>

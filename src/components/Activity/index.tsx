@@ -35,6 +35,7 @@ import Chatter from "./Chatter";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
 import HistoryDialog from "./History/index"
+import { useData } from "./../../StateProvider/Provider";
 
 const useStyles = makeStyles(() => ({
   activityBox: {
@@ -77,6 +78,9 @@ const Activity = (props) => {
     Attachment: 0,
   });
   const [showHistory, setShowHistory] = useState(false)
+  const {
+    state: { permissions, selectedEntity },
+  }: any = useData();
 
   const tabs = ["Task", "Event", "Case", "Note", "Email", "Attachment"];
 
@@ -221,17 +225,18 @@ const Activity = (props) => {
                       </Box>
                     </Grid>
                     {
-                      restrictedAddActivities.indexOf(data) >= 0 ? null :
-                        <Grid item xs={4} container justify="flex-end">
-                          <IconButton
-                            color="primary"
-                            size="small"
-                            onClick={(event) => handleCreateActivity(event, data)}
-                          >
-                            {" "}
-                            <FiPlusSquare />
-                          </IconButton>
-                        </Grid>
+                      data === "Event" || permissions[data?.toLowerCase()]?.isCreate ?
+                        restrictedAddActivities.indexOf(data) >= 0 ? null :
+                          <Grid item xs={4} container justify="flex-end">
+                            <IconButton
+                              color="primary"
+                              size="small"
+                              onClick={(event) => handleCreateActivity(event, data)}
+                            >
+                              {" "}
+                              <FiPlusSquare />
+                            </IconButton>
+                          </Grid> : null
                     }
                   </Grid>
                 </Box>
