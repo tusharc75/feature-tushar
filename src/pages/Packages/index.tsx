@@ -1,86 +1,73 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from "react";
-import { Grid, Chip, IconButton, Tooltip } from "@material-ui/core";
-import { Link } from "react-router-dom";
-import { useData } from "../../StateProvider/Provider";
-import axiosInstance from "../../axios/axiosInstance";
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import MessageDialog from "../../components/Helpers/MessageDialog";
-import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
-import routes from "./../../components/Helpers/Routes";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { FaRegistered } from "react-icons/fa";
+import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { Grid, Chip, IconButton, Tooltip } from '@material-ui/core';
+import { Link } from 'react-router-dom';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { FaRegistered } from 'react-icons/fa';
 
-import {
-    isObjectEmpty,
-    customerAccount,
-    supplierAccount,
-    gridLoadingTimeout,
-    packages,
-} from "../../constants/helpers";
-import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import CustomContainer from "../../components/CustomContainer";
-import { useHistory } from "react-router-dom";
-import {
-    CommonRenderer,
-    CreatedByRenderer,
-    DateRenderer,
-    UpdatedByRenderer,
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import CustomAgGrid, {
-    reducer,
-    intialState,
-} from "../../components/AgGridComponents/CustomAgGrid";
-import NoDataCell from "../../components/Helpers/NoDataCell";
-import PackageHeader from "./PackageHeader";
-import ManagePackageDialog from "./ManagePackageDialog";
+import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, packages } from '../../constants/helpers';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import CustomContainer from '../../components/CustomContainer';
+import { useHistory } from 'react-router-dom';
+import { CommonRenderer, CreatedByRenderer, DateRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import NoDataCell from '../../components/Helpers/NoDataCell';
+import PackageHeader from './PackageHeader';
+import ManagePackageDialog from './ManagePackageDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
-import HideWhenOffline from "../../components/HideWhenOffline";
-import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
-import { camelCase } from "lodash";
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import HideWhenOffline from '../../components/HideWhenOffline';
+import AssignProductDialog from './AssignProducts';
+import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/columns';
+import { camelCase } from 'lodash';
 
 let packagesTimeout;
 const PackagesType = [
     {
-        key: "All Packages",
-        value: 1,
+        key: 'All Packages',
+        value: 1
     },
     {
-        key: "My Packages",
-        value: 2,
-    },
+        key: 'My Packages',
+        value: 2
+    }
 ];
 
 const PackageList = () => {
     const toastConfig = useContext(CustomToastContext);
     const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
 
-    const pageTitle = camelCase(`${routes.packages.title}Page`)
+    const pageTitle = camelCase(`${routes.packages.title}Page`);
     const history = useHistory();
     const {
-        state: { user, permissions, selectedEntity },
+        state: { user, permissions, selectedEntity }
     }: any = useData();
     const [selectedType, setSelectedType] = useState(1);
     const [renderCount, setRenderCount] = useState(0);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-    const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false)
-    const [frameWorkComponent, setFrameWorkComponent] = useState({})
-    const [columns, setColumns] = useState([])
+    const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
+    const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
+    const [frameWorkComponent, setFrameWorkComponent] = useState({});
+    const [columns, setColumns] = useState([]);
     const [deleteRecord, setDeleteRecord] = useState<any>({});
     const [showManagePackageDialog, setShowManagePackageDialog] = useState({ open: false, isClone: false, idToClone: null });
-    const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] =
-        useState(false);
+    const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
     const [singlePackageDelete, setSinglePackageDelete] = useState({
         id: null,
         show: false,
-        packageName: "",
+        packageName: ''
     });
     const [accountDetails, setAccountDetails] = useState({
         accountId: history.location?.state?.accountId,
         accountName: history.location?.state?.accountName,
-        resource: history.location?.state?.resource,
+        resource: history.location?.state?.resource
     });
     // const [packagePermissions, setPackagePermission] = useState({
     //   isCreate: permissions?.package?.isCreate,
@@ -92,69 +79,55 @@ const PackageList = () => {
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const {
-        dataRows,
-        rowCount,
-        loading,
-        page,
-        limit,
-        pageSizes,
-        search,
-        filters,
-        sorting,
-        selectedRecords,
-    } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
     useEffect(() => {
-        fetchGridColumns()
-    }, [])
+        fetchGridColumns();
+    }, []);
 
     const fetchGridColumns = async () => {
-        let data
+        let data;
         if (isOffline) {
-            data = offlineFieldsData
-        }
-        else {
-            const response = await axiosInstance()
-                .get(`/field?resource=Packages&entity=${selectedEntity}`)
+            data = offlineFieldsData;
+        } else {
+            const response = await axiosInstance().get(`/field?resource=Packages&entity=${selectedEntity}`);
 
-            data = response?.data?.data
+            data = response?.data?.data;
             try {
-                updateFieldsData("packages", data);
+                updateFieldsData('packages', data);
             } catch (ex) {
-                console.error(`Packages: Error while storing data for Offline context. Error: ${ex.message}`)
+                console.error(`Packages: Error while storing data for Offline context. Error: ${ex.message}`);
             }
-
         }
-        let columns = []
-        let rendererNames = []
-        data.forEach(o => {
-            let currentColumn = getColumnData(pageTitle, o?.fieldData)
+        let columns = [];
+        let rendererNames = [];
+        data.forEach((o) => {
+            let currentColumn = getColumnData(pageTitle, o?.fieldData);
             if (currentColumn !== null) {
                 if (isOffline) {
-                    currentColumn.columnData["filter"] = false
-                    currentColumn.columnData["sortable"] = false
+                    currentColumn.columnData['filter'] = false;
+                    currentColumn.columnData['sortable'] = false;
                 }
-                columns = [...columns, currentColumn?.columnData]
+                columns = [...columns, currentColumn?.columnData];
                 if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                    rendererNames.push(currentColumn?.rendererName)
+                    rendererNames.push(currentColumn?.rendererName);
                 }
             }
-            return o?.fieldData
-        })
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+            return o?.fieldData;
+        });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
             ...tempFrameworkComponent,
             actionsRenderer: ActionsRenderer
-        }
-        setFrameWorkComponent({ ...tempFrameworkComponent })
-        let staticFields = getStaticFields()
-        staticFields.forEach(field => {
-            columns.push(checkStaticField(pageTitle, field))
-        })
-        setColumns([...columns])
-    }
-    const columnState = JSON.parse(localStorage.getItem("packagesPage"));
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent });
+        let staticFields = getStaticFields();
+        staticFields.forEach((field) => {
+            columns.push(checkStaticField(pageTitle, field));
+        });
+        setColumns([...columns]);
+    };
+    const columnState = JSON.parse(localStorage.getItem('packagesPage'));
     if (columnState) {
         columns.forEach((item) => {
             columnState.forEach((d) => {
@@ -181,47 +154,34 @@ const PackageList = () => {
         if (renderCount > 0) {
             fetchPackages();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [
-        page,
-        limit,
-        selectedType,
-        filters,
-        sorting,
-        accountDetails,
-        selectedEntity,
-        isOffline
-    ]);
+    }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, isOffline]);
 
     const handleSingleDeletePackage = async () => {
-        dispatch({ type: "loading", loading: true });
+        dispatch({ type: 'loading', loading: true });
 
         axiosInstance()
             .put(`${packageApi}/remove`, {
-                ids: [singlePackageDelete.id],
+                ids: [singlePackageDelete.id]
             })
             .then(({ data }) => {
                 toastConfig.setToastConfig({
                     open: true,
-                    type: "success",
-                    message: data.message,
+                    type: 'success',
+                    message: data.message
                 });
                 fetchPackages();
-                dispatch({ type: "loading", loading: false });
-                setSinglePackageDelete({ id: null, show: false, packageName: "" });
+                dispatch({ type: 'loading', loading: false });
+                setSinglePackageDelete({ id: null, show: false, packageName: '' });
             })
             .catch((error) => {
-                dispatch({ type: "loading", loading: false });
+                dispatch({ type: 'loading', loading: false });
                 toastConfig.setToastConfig(error);
             });
     };
 
     const packageNameRenderer = (params) => (
         <>
-            <Link
-                className="text-truncate link"
-                title={params.value}
-                to={`${routes.packages.path}/detail/${params.data._id}`}
-            >
+            <Link className="text-truncate link" title={params.value} to={`${routes.packages.path}/detail/${params.data._id}`}>
                 {params.value}
             </Link>
         </>
@@ -229,27 +189,25 @@ const PackageList = () => {
 
     const ActionsRenderer = (params) => (
         <>
-            {
-                permissions?.packages.isCreate ? (
-
-                    <Tooltip title="Clone">
-                        <IconButton
-                            size="small"
-                            aria-label="Clone"
-                            onClick={() => {
-                                setShowManagePackageDialog({ open: true, isClone: true, idToClone: params.data._id })
-                            }}
-                        >
-                            <FileCopyIcon fontSize="small" color="primary" />
-                        </IconButton>
-                    </Tooltip>
-                ) : (
-                    <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-                        <IconButton aria-label="Clone" size="small">
-                            <FileCopyIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-                )}
+            {permissions?.packages.isCreate ? (
+                <Tooltip title="Clone">
+                    <IconButton
+                        size="small"
+                        aria-label="Clone"
+                        onClick={() => {
+                            setShowManagePackageDialog({ open: true, isClone: true, idToClone: params.data._id });
+                        }}
+                    >
+                        <FileCopyIcon fontSize="small" color="primary" />
+                    </IconButton>
+                </Tooltip>
+            ) : (
+                <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+                    <IconButton aria-label="Clone" size="small">
+                        <FileCopyIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+            )}
 
             <HideWhenOffline>
                 <GridDeleteIcon
@@ -260,7 +218,7 @@ const PackageList = () => {
                         setSinglePackageDelete({
                             show: true,
                             id: params.data._id,
-                            packageName: `${params.data.packageName}`,
+                            packageName: `${params.data.packageName}`
                         })
                     }
                     entity="packages"
@@ -275,16 +233,16 @@ const PackageList = () => {
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer,
         commonRenderer: CommonRenderer,
-        dateRenderer: DateRenderer,
+        dateRenderer: DateRenderer
     };
 
     const replaceFieldName = (field) => {
         switch (field) {
-            case "createdBy":
-                return "createdBy.user.concatedName";
+            case 'createdBy':
+                return 'createdBy.user.concatedName';
 
-            case "updatedBy":
-                return "updatedBy.user.concatedName";
+            case 'updatedBy':
+                return 'updatedBy.user.concatedName';
 
             default:
                 return field;
@@ -297,14 +255,14 @@ const PackageList = () => {
         if (field !== updatedField) return updatedField;
 
         switch (field) {
-            case "owner":
-                return "owner.optionLabel";
+            case 'owner':
+                return 'owner.optionLabel';
 
-            case "customerAccount":
-                return "customerAccount.optionLabel";
+            case 'customerAccount':
+                return 'customerAccount.optionLabel';
 
-            case "supplierAccountName":
-                return "supplierAccountName.optionLabel";
+            case 'supplierAccountName':
+                return 'supplierAccountName.optionLabel';
 
             default:
                 return field;
@@ -317,16 +275,16 @@ const PackageList = () => {
             if (accountDetails.resource === customerAccount.accountResource) {
                 deepFilter = `${deepFilter}&filterById=${JSON.stringify([
                     {
-                        field: replaceFieldName("customerAccount"),
-                        term: accountDetails.accountId,
-                    },
+                        field: replaceFieldName('customerAccount'),
+                        term: accountDetails.accountId
+                    }
                 ])}`;
             } else if (accountDetails.resource === supplierAccount.accountResource) {
                 deepFilter = `${deepFilter}&filterById=${JSON.stringify([
                     {
-                        field: replaceFieldName("supplierAccountName"),
-                        term: { $in: [accountDetails.accountId] },
-                    },
+                        field: replaceFieldName('supplierAccountName'),
+                        term: { $in: [accountDetails.accountId] }
+                    }
                 ])}`;
             }
         }
@@ -337,18 +295,14 @@ const PackageList = () => {
             Object.keys(filters).forEach((field) => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
-                    term: filters[field].filter,
+                    term: filters[field].filter
                 });
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(
-                updatedFilters
-            )}&filterType=and`;
+            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
         }
 
         if (sorting.length > 0) {
-            deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(
-                sorting[0].colId
-            )}&orderBy=${sorting[0].sort}`;
+            deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
         }
 
         if (search) {
@@ -359,7 +313,7 @@ const PackageList = () => {
     };
 
     const fetchPackages = async () => {
-        dispatch({ type: "loading", loading: true });
+        dispatch({ type: 'loading', loading: true });
         const queryString = getQueryString();
 
         if (gridApi) {
@@ -374,25 +328,19 @@ const PackageList = () => {
 
                 data = response?.data?.data;
                 count = response?.data?.count;
-            }
-            else {
+            } else {
                 data = offlineGridData?.packages || [];
                 count = offlineGridData?.packages?.length || 0;
             }
 
             try {
-                updateOfflineGridData("packages", data);
+                updateOfflineGridData('packages', data);
             } catch (ex) {
-                console.error(`Packages: Error while storing data for Offline context. Error: ${ex.message}`)
+                console.error(`Packages: Error while storing data for Offline context. Error: ${ex.message}`);
             }
 
             let rows = data.map((u) => {
-                const {
-                    owner,
-                    createdBy,
-                    updatedBy,
-                    ...restProperties
-                } = u;
+                const { owner, createdBy, updatedBy, ...restProperties } = u;
 
                 let res = {
                     ...restProperties,
@@ -402,32 +350,32 @@ const PackageList = () => {
                     createdBy: u.createdBy?.user?.concatedName,
                     createdByDate: u.createdBy?.date,
                     updatedBy: u.updatedBy?.user?.concatedName,
-                    updatedByDate: u.updatedBy?.date,
+                    updatedByDate: u.updatedBy?.date
                 };
                 return res;
             });
 
-            dispatch({ type: "initialize", data: rows, count: count });
+            dispatch({ type: 'initialize', data: rows, count: count });
             setTimeout(() => {
-                dispatch({ type: "loading", loading: false });
+                dispatch({ type: 'loading', loading: false });
             }, gridLoadingTimeout);
         } catch (error) {
-            dispatch({ type: "loading", loading: false });
+            dispatch({ type: 'loading', loading: false });
             toastConfig.setToastConfig(error);
         }
-    }
+    };
 
     const handleSearch = (e) => {
-        dispatch({ type: "search", search: e.target.value });
-    }
+        dispatch({ type: 'search', search: e.target.value });
+    };
 
     const handlePackageTypeSel = (filterValues) => {
         setSelectedType(filterValues);
-    }
+    };
 
     const handleTransferEntityDialog = () => {
-        setShowTransferEntityDialog(true)
-    }
+        setShowTransferEntityDialog(true);
+    };
 
     const showConfirmBox = (row) => {
         if (row) {
@@ -459,19 +407,19 @@ const PackageList = () => {
         if (recordsToDelete.length > 0) {
             axiosInstance()
                 .put(`${packageApi}/remove`, {
-                    ids: recordsToDelete,
+                    ids: recordsToDelete
                 })
                 .then(({ data }) => {
                     try {
-                        updateOfflineGridData("packages", [], recordsToDelete);
+                        updateOfflineGridData('packages', [], recordsToDelete);
                     } catch (ex) {
-                        console.error(`Packages: Error while removing data for Offline context. Error: ${ex.message}`)
+                        console.error(`Packages: Error while removing data for Offline context. Error: ${ex.message}`);
                     }
 
                     toastConfig.setToastConfig({
                         open: true,
-                        type: "success",
-                        message: data.message,
+                        type: 'success',
+                        message: data.message
                     });
                     setIsConformDialogVisible(false);
                     setDeleteLoading(false);
@@ -527,10 +475,10 @@ const PackageList = () => {
                             icon={<FaRegistered className="headerLogo" />}
                             heading={routes.packages.title}
                             showTransferEntityDialog={handleTransferEntityDialog}
+                            openAssingToProduct={() => setShowProductAssignDialog(true)}
                         // showClonepackagesDialog={() => {
                         //   handleShowClonepackagesDialog()
                         // }}
-
                         >
                             {accountDetails.accountId && (
                                 <Chip
@@ -541,7 +489,7 @@ const PackageList = () => {
                                         setAccountDetails({
                                             accountId: null,
                                             accountName: null,
-                                            resource: null,
+                                            resource: null
                                         });
                                     }}
                                 />
@@ -549,26 +497,25 @@ const PackageList = () => {
                         </PackageHeader>
                     </div>
 
-                    {
-                        Object.keys(frameWorkComponent).length > 0 ?
-                            <CustomAgGrid
-                                columns={columns}
-                                dataRows={dataRows}
-                                frameworkComponents={frameWorkComponent}
-                                setGridApi={setGridApi}
-                                dispatch={dispatch}
-                                rowCount={rowCount}
-                                limit={limit}
-                                pageSizes={pageSizes}
-                                page={page}
-                                actionWidth={100}
-                                loading={loading}
-                                renderedFrom={pageTitle}
-                                allowSelection={!isOffline}
-                                isClientSideGrid={isOffline}
-                                refreshGrid={fetchPackages}
-                            /> : null
-                    }
+                    {Object.keys(frameWorkComponent).length > 0 ? (
+                        <CustomAgGrid
+                            columns={columns}
+                            dataRows={dataRows}
+                            frameworkComponents={frameWorkComponent}
+                            setGridApi={setGridApi}
+                            dispatch={dispatch}
+                            rowCount={rowCount}
+                            limit={limit}
+                            pageSizes={pageSizes}
+                            page={page}
+                            actionWidth={100}
+                            loading={loading}
+                            renderedFrom={pageTitle}
+                            allowSelection={!isOffline}
+                            isClientSideGrid={isOffline}
+                            refreshGrid={fetchPackages}
+                        />
+                    ) : null}
 
                     {showDeleteWarningConfirmBox ? (
                         <MessageDialog
@@ -580,8 +527,7 @@ const PackageList = () => {
                     {isConfirmDialogVisible ? (
                         <ConfirmationDialog
                             open={isConfirmDialogVisible}
-                            message={`Are you sure you want to delete ${deleteRecord?.packageName ? "Package" : "Packages"
-                                }   ${deleteRecord.packageName || ""}?`}
+                            message={`Are you sure you want to delete ${deleteRecord?.packageName ? 'Package' : 'Packages'}   ${deleteRecord.packageName || ''}?`}
                             onClose={() => {
                                 if (deleteRecord) setDeleteRecord({});
                                 setIsConformDialogVisible(false);
@@ -599,7 +545,7 @@ const PackageList = () => {
                                 setSinglePackageDelete({
                                     id: null,
                                     show: false,
-                                    packageName: "",
+                                    packageName: ''
                                 })
                             }
                             onOk={handleSingleDeletePackage}
@@ -607,22 +553,27 @@ const PackageList = () => {
                     ) : null}
                 </CustomContainer>
             </Fragment>
-
-            {
-                showManagePackageDialog.open && (
-                    <ManagePackageDialog
-                        isClone={showManagePackageDialog.isClone}
-                        open={showManagePackageDialog.open}
-                        packageId={showManagePackageDialog.idToClone}
-                        onClose={() => setShowManagePackageDialog({ open: false, isClone: false, idToClone: null })}
-                        onSuccess={() => {
-                            if (!isOffline) {
-                                fetchPackages();
-                            }
-                            setShowManagePackageDialog({ open: false, isClone: false, idToClone: null });
-                        }}
-                    />
-                )}
+            {showProductAssignDialog && (
+                <AssignProductDialog
+                    packageIds={selectedRecords.map((s) => s.id)}
+                    onClose={() => setShowProductAssignDialog(false)}
+                    onSuccess={() => setShowProductAssignDialog(false)}
+                />
+            )}
+            {showManagePackageDialog.open && (
+                <ManagePackageDialog
+                    isClone={showManagePackageDialog.isClone}
+                    open={showManagePackageDialog.open}
+                    packageId={showManagePackageDialog.idToClone}
+                    onClose={() => setShowManagePackageDialog({ open: false, isClone: false, idToClone: null })}
+                    onSuccess={() => {
+                        if (!isOffline) {
+                            fetchPackages();
+                        }
+                        setShowManagePackageDialog({ open: false, isClone: false, idToClone: null });
+                    }}
+                />
+            )}
         </>
     );
 };
