@@ -25,7 +25,7 @@ export const BoardList = ({
 }) => {
   const {
     state: {
-      user: { user },
+      user: { user },permissions
     },
   } = useData();
   const ref = useRef(null);
@@ -87,27 +87,32 @@ export const BoardList = ({
                 id={element?._id}
                 index={index}
                 type={type}
+                canUpdate={permissions[type?.toLowerCase()]?.isUpdate}
+                canDelete={permissions[type?.toLowerCase()]?.isDelete}
                 moveCard={moveCard}
                 fetchBoard={fetchBoard}
                 handleActivityOpen={handleActivityOpen}
               />
             ))}
 
-            <Box
-              p={1}
-              style={{
-                opacity: isCreateButton || status === "To Do" ? 1 : 0,
-              }}
-            >
-              <Button
-                fullWidth
-                style={{ justifyContent: "flex-start" }}
-                startIcon={<Add />}
-                onClick={() => setOpenDialog(true)}
-              >
-                Create {type}
-              </Button>
-            </Box>
+            {
+             permissions &&  permissions[type?.toLowerCase()]?.isCreate ? 
+                <Box
+                  p={1}
+                  style={{
+                    opacity: isCreateButton || status === "To Do" ? 1 : 0,
+                  }}>
+                  <Button
+                    fullWidth
+                    style={{ justifyContent: "flex-start" }}
+                    startIcon={<Add />}
+                    onClick={() => setOpenDialog(true)}
+                  >
+                    Create {type}
+                  </Button>
+                </Box>
+                :null
+             } 
           </>
         ) : (
           <Box p={1}></Box>

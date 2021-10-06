@@ -680,7 +680,6 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
         }
       });
     }
-
     localStorage.setItem('routes', JSON.stringify(routesAndTitle));
     return permissions;
   }
