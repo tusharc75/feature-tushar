@@ -441,7 +441,7 @@ export default function ManageContact(props) {
                                                 )
                                                 : values
                                             }
-                                            disabled={fromProject || (!isNew && field.disableOnEdit)}
+                                            disabled={fromProject || (!isNew && field.disableOnEdit)|| Boolean(accountId)}
                                             errors={errors}
                                             touched={touched}
                                             label={field.fieldLabel}
@@ -481,9 +481,9 @@ export default function ManageContact(props) {
                                                 <IconButton
                                                   onClick={onCreateAccount}
                                                   size="small"
-                                                  disabled={fromProject || (!isNew && field.disableOnEdit)}
+                                                  disabled={fromProject || (!isNew && field.disableOnEdit)|| Boolean(accountId)}
                                                 >
-                                                  <AddIcon color={(fromProject || (!isNew && field.disableOnEdit)) ? "disabled" : "primary"} />
+                                                  <AddIcon color={(fromProject || (!isNew && field.disableOnEdit) || Boolean(accountId)) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>

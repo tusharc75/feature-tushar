@@ -217,7 +217,7 @@ export default function ManageContactDialog(props) {
         onCreateAccount={() => setShowAccountDialog(true)}
         accountResource={accountResource}
         contactResource={contactResource}
-        accountId={newAddedAccountId}
+        accountId={accountId ? accountId : newAddedAccountId}
         contactId={contactId}
         collaborators={collaborators}
         owners={owners}
