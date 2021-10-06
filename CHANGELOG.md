@@ -2,6 +2,134 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.79](https://github.com/vebholic/oms_frontend/compare/v1.10.78...v1.10.79) (2021-10-06)
+
+### [1.10.78](https://github.com/vebholic/oms_frontend/compare/v1.10.77...v1.10.78) (2021-10-06)
+
+### [1.10.77](https://github.com/vebholic/oms_frontend/compare/v1.10.76...v1.10.77) (2021-10-06)
+
+### [1.10.76](https://github.com/vebholic/oms_frontend/compare/v1.10.75...v1.10.76) (2021-10-06)
+
+### [1.10.75](https://github.com/vebholic/oms_frontend/compare/v1.10.74...v1.10.75) (2021-10-06)
+
+### [1.10.74](https://github.com/vebholic/oms_frontend/compare/v1.10.73...v1.10.74) (2021-10-06)
+
+### [1.10.73](https://github.com/vebholic/oms_frontend/compare/v1.10.72...v1.10.73) (2021-10-06)
+
+### [1.10.72](https://github.com/vebholic/oms_frontend/compare/v1.10.71...v1.10.72) (2021-10-06)
+
+### [1.10.71](https://github.com/vebholic/oms_frontend/compare/v1.10.70...v1.10.71) (2021-10-06)
+
+### [1.10.70](https://github.com/vebholic/oms_frontend/compare/v1.10.69...v1.10.70) (2021-10-06)
+
+### [1.10.69](https://github.com/vebholic/oms_frontend/compare/v1.10.68...v1.10.69) (2021-10-06)
+
+### [1.10.68](https://github.com/vebholic/oms_frontend/compare/v1.10.67...v1.10.68) (2021-10-06)
+
+### [1.10.67](https://github.com/vebholic/oms_frontend/compare/v1.10.66...v1.10.67) (2021-10-06)
+
+### [1.10.66](https://github.com/vebholic/oms_frontend/compare/v1.10.65...v1.10.66) (2021-10-06)
+
+### [1.10.65](https://github.com/vebholic/oms_frontend/compare/v1.10.64...v1.10.65) (2021-10-06)
+
+### [1.10.64](https://github.com/vebholic/oms_frontend/compare/v1.10.63...v1.10.64) (2021-10-06)
+
+### [1.10.63](https://github.com/vebholic/oms_frontend/compare/v1.10.62...v1.10.63) (2021-10-06)
+
+### [1.10.62](https://github.com/vebholic/oms_frontend/compare/v1.10.61...v1.10.62) (2021-10-06)
+
+### [1.10.61](https://github.com/vebholic/oms_frontend/compare/v1.10.60...v1.10.61) (2021-10-06)
+
+### [1.10.60](https://github.com/vebholic/oms_frontend/compare/v1.10.59...v1.10.60) (2021-10-06)
+
+### [1.10.59](https://github.com/vebholic/oms_frontend/compare/v1.10.58...v1.10.59) (2021-10-06)
+
+### [1.10.58](https://github.com/vebholic/oms_frontend/compare/v1.10.57...v1.10.58) (2021-10-06)
+
+### [1.10.57](https://github.com/vebholic/oms_frontend/compare/v1.10.56...v1.10.57) (2021-10-06)
+
+### [1.10.56](https://github.com/vebholic/oms_frontend/compare/v1.10.55...v1.10.56) (2021-10-06)
+
+### [1.10.55](https://github.com/vebholic/oms_frontend/compare/v1.10.54...v1.10.55) (2021-10-06)
+
+### [1.10.54](https://github.com/vebholic/oms_frontend/compare/v1.10.53...v1.10.54) (2021-10-06)
+
+### [1.10.53](https://github.com/vebholic/oms_frontend/compare/v1.10.52...v1.10.53) (2021-10-06)
+
+### [1.10.52](https://github.com/vebholic/oms_frontend/compare/v1.10.51...v1.10.52) (2021-10-06)
+
+### [1.10.51](https://github.com/vebholic/oms_frontend/compare/v1.10.50...v1.10.51) (2021-10-06)
+
+### [1.10.50](https://github.com/vebholic/oms_frontend/compare/v1.10.49...v1.10.50) (2021-10-06)
+
+### [1.10.49](https://github.com/vebholic/oms_frontend/compare/v1.10.48...v1.10.49) (2021-10-06)
+
+### [1.10.48](https://github.com/vebholic/oms_frontend/compare/v1.10.47...v1.10.48) (2021-10-06)
+
+### [1.10.47](https://github.com/vebholic/oms_frontend/compare/v1.10.46...v1.10.47) (2021-10-06)
+
+### [1.10.46](https://github.com/vebholic/oms_frontend/compare/v1.10.45...v1.10.46) (2021-10-06)
+
+### [1.10.45](https://github.com/vebholic/oms_frontend/compare/v1.10.44...v1.10.45) (2021-10-06)
+
+### [1.10.44](https://github.com/vebholic/oms_frontend/compare/v1.10.43...v1.10.44) (2021-10-06)
+
+### [1.10.43](https://github.com/vebholic/oms_frontend/compare/v1.10.42...v1.10.43) (2021-10-06)
+
+### [1.10.42](https://github.com/vebholic/oms_frontend/compare/v1.10.41...v1.10.42) (2021-10-06)
+
+### [1.10.41](https://github.com/vebholic/oms_frontend/compare/v1.10.40...v1.10.41) (2021-10-06)
+
+### [1.10.40](https://github.com/vebholic/oms_frontend/compare/v1.10.39...v1.10.40) (2021-10-06)
+
+### [1.10.39](https://github.com/vebholic/oms_frontend/compare/v1.10.38...v1.10.39) (2021-10-06)
+
+### [1.10.38](https://github.com/vebholic/oms_frontend/compare/v1.10.37...v1.10.38) (2021-10-06)
+
+### [1.10.37](https://github.com/vebholic/oms_frontend/compare/v1.10.36...v1.10.37) (2021-10-06)
+
+### [1.10.36](https://github.com/vebholic/oms_frontend/compare/v1.10.35...v1.10.36) (2021-10-06)
+
+### [1.10.35](https://github.com/vebholic/oms_frontend/compare/v1.10.34...v1.10.35) (2021-10-06)
+
+### [1.10.34](https://github.com/vebholic/oms_frontend/compare/v1.10.33...v1.10.34) (2021-10-06)
+
+### [1.10.33](https://github.com/vebholic/oms_frontend/compare/v1.10.32...v1.10.33) (2021-10-06)
+
+### [1.10.32](https://github.com/vebholic/oms_frontend/compare/v1.10.31...v1.10.32) (2021-10-06)
+
+### [1.10.31](https://github.com/vebholic/oms_frontend/compare/v1.10.30...v1.10.31) (2021-10-06)
+
+### [1.10.30](https://github.com/vebholic/oms_frontend/compare/v1.10.29...v1.10.30) (2021-10-06)
+
+### [1.10.29](https://github.com/vebholic/oms_frontend/compare/v1.10.28...v1.10.29) (2021-10-06)
+
+### [1.10.28](https://github.com/vebholic/oms_frontend/compare/v1.10.27...v1.10.28) (2021-10-06)
+
+### [1.10.27](https://github.com/vebholic/oms_frontend/compare/v1.10.26...v1.10.27) (2021-10-06)
+
+### [1.10.26](https://github.com/vebholic/oms_frontend/compare/v1.10.25...v1.10.26) (2021-10-06)
+
+### [1.10.25](https://github.com/vebholic/oms_frontend/compare/v1.10.24...v1.10.25) (2021-10-06)
+
+### [1.10.24](https://github.com/vebholic/oms_frontend/compare/v1.10.23...v1.10.24) (2021-10-06)
+
+### [1.10.23](https://github.com/vebholic/oms_frontend/compare/v1.10.22...v1.10.23) (2021-10-06)
+
+### [1.10.22](https://github.com/vebholic/oms_frontend/compare/v1.10.21...v1.10.22) (2021-10-06)
+
+### [1.10.21](https://github.com/vebholic/oms_frontend/compare/v1.10.20...v1.10.21) (2021-10-06)
+
+### [1.10.20](https://github.com/vebholic/oms_frontend/compare/v1.10.19...v1.10.20) (2021-10-06)
+
+### [1.10.19](https://github.com/vebholic/oms_frontend/compare/v1.10.18...v1.10.19) (2021-10-06)
+
+### [1.10.18](https://github.com/vebholic/oms_frontend/compare/v1.10.17...v1.10.18) (2021-10-06)
+
+### [1.10.17](https://github.com/vebholic/oms_frontend/compare/v1.10.16...v1.10.17) (2021-10-06)
+
+### [1.10.16](https://github.com/vebholic/oms_frontend/compare/v1.10.15...v1.10.16) (2021-10-06)
+
 ### [1.10.15](https://github.com/vebholic/oms_frontend/compare/v1.10.14...v1.10.15) (2021-10-06)
 
 ### [1.10.14](https://github.com/vebholic/oms_frontend/compare/v1.10.13...v1.10.14) (2021-10-06)
