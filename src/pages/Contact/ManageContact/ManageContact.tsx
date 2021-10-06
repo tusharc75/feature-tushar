@@ -48,7 +48,8 @@ export default function ManageContact(props) {
     accountId = null,
     formValues = {},
     handleValuesChange = null,
-    isClone = false
+    isClone = false, 
+    isAccountFieldDisable = false
   } = props;
 
   const classes = useStyles();
@@ -441,7 +442,7 @@ export default function ManageContact(props) {
                                                 )
                                                 : values
                                             }
-                                            disabled={fromProject || (!isNew && field.disableOnEdit)|| Boolean(accountId)}
+                                            disabled={fromProject || (!isNew && field.disableOnEdit)|| (accountId && isAccountFieldDisable)}
                                             errors={errors}
                                             touched={touched}
                                             label={field.fieldLabel}
@@ -481,9 +482,9 @@ export default function ManageContact(props) {
                                                 <IconButton
                                                   onClick={onCreateAccount}
                                                   size="small"
-                                                  disabled={fromProject || (!isNew && field.disableOnEdit)|| Boolean(accountId)}
+                                                  disabled={fromProject || (!isNew && field.disableOnEdit)|| (accountId && isAccountFieldDisable)}
                                                 >
-                                                  <AddIcon color={(fromProject || (!isNew && field.disableOnEdit) || Boolean(accountId)) ? "disabled" : "primary"} />
+                                                  <AddIcon color={(fromProject || (!isNew && field.disableOnEdit) || (accountId && isAccountFieldDisable)) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
