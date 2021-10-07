@@ -492,6 +492,7 @@ const Opportunities = () => {
           actionWidth={100}
           loading={loading}
           renderedFrom={opportunityResource}
+          refreshGrid={fetchOpportunities}
         />
 
         {showDeleteWarningConfirmBox ? (

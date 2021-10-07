@@ -383,6 +383,7 @@ const ProductCategory = () => {
                     }}
                 />
             </Grid>
+
         </Grid>
         <CustomContainer>
             <div className="header-panel">
