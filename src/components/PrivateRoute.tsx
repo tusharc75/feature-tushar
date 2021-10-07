@@ -54,11 +54,11 @@ const ProtectedRoute = ({ children, ...rest }) => {
         "product-list",
         "product/details",
         "quote-pdf-template",
-        "quote-pdf-template",
         "product-inventory",
         "equiptment-rental-master",
         "rental-management",
-        "loading-ticket"
+        "loading-ticket",
+        "entity",
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);

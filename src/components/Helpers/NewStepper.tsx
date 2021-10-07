@@ -232,7 +232,7 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
                     </StepLabel>
                   </Step>
                 )))
-                : (steps.map((label) => (
+                : (steps.filter((label) => label?.id).map((label) => (
                   <Step key={label?.id}>
                     <StepLabel StepIconComponent={QontoStepIcon}>
                       <div style={{ color: "#09445A" }}>

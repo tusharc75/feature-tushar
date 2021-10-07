@@ -15,6 +15,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import ActivityLoader from "../../Helpers/ActivityLoader";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
+import { useData } from "../../../StateProvider/Provider";
 
 export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
   const [open, setOpen] = useState(false);
@@ -24,6 +25,9 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [attachmentData, setAttachmentData] = useState(null);
   const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { permissions },
+  }: any = useData();
 
   useEffect(() => {
     fetchAttachment();
@@ -119,22 +123,25 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                             {_attachment?.name ?? ""}
                           </Typography>
                         </Grid>
-                        <Grid item xs={2} container justify="flex-end">
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            aria-label="delete"
-                            onClick={(event) =>
-                              handleOpenMenu(
-                                event,
-                                _attachment._id,
-                                _attachment
-                              )
-                            }
-                          >
-                            <MoreHorizIcon />
-                          </IconButton>
-                        </Grid>
+                        {
+                          permissions["attachment"]?.isUpdate || permissions["attachment"]?.isDelete ?
+                            <Grid item xs={2} container justify="flex-end">
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                aria-label="delete"
+                                onClick={(event) =>
+                                  handleOpenMenu(
+                                    event,
+                                    _attachment._id,
+                                    _attachment
+                                  )
+                                }
+                              >
+                                <MoreHorizIcon />
+                              </IconButton>
+                            </Grid>
+                            : null}
                       </Grid>
                     </Box>
                     <Box pt={1}>
@@ -163,8 +170,11 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               open={Boolean(anchorEl)}
               onClose={handleCloseMenu}
             >
-              <MenuItem onClick={handleEdit}>Edit</MenuItem>
-              <MenuItem onClick={handleDelete}>Delete</MenuItem>
+              {
+                permissions["attachment"]?.isUpdate ?
+                  <MenuItem onClick={handleEdit}>Edit</MenuItem> : null}
+              {
+                permissions["attachment"]?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
             </Menu>
             <Dialog
               open={open}

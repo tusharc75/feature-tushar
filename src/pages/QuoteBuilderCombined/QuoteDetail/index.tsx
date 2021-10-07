@@ -683,20 +683,6 @@ export default function QuoteDetail() {
                           referenceId: quoteData?._id,
                           access: true,
                         },
-                        {
-                          type: quoteData?.customerAccountName
-                            ? customerAccount?.accountResource
-                            : supplierAccount?.accountResource,
-                          referenceId: quoteData?.customerAccountName
-                            ? quoteData?.customerAccountName?.optionValue
-                            : quoteData?.supplierAccountName?.optionValue,
-                          access: false,
-                        },
-                        {
-                          type: opportunity.opportunityResource,
-                          referenceId: quoteData.opportunity?.optionValue,
-                          access: false,
-                        },
                       ]}
                       handleActivityRefresh={() => { }}
                       //   emails={contactsEmailsData}

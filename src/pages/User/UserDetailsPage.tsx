@@ -847,7 +847,7 @@ const UserDetailsPage = () => {
                     <Typography variant="subtitle2">
                       Assigned Entity ({entities?.length || 0})
                     </Typography>
-                    {permissions.entity.isUpdate && (
+                    {permissions.entity.isUpdate && permissions.role.isUpdate && (
                       <IconButton
                         title="Assign entities"
                         color="primary"

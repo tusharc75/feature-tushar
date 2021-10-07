@@ -11,7 +11,6 @@ const Activitydemo = () => {
     ]
 
     const [refresh, setRefresh] = useState(true);
-
     const handleActivityRefresh = () => {
         setRefresh(false)
         setRefresh(true)

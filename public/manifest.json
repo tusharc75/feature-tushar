@@ -59,7 +59,7 @@
             "density": "4.0"
         }
     ],
-    "short_name": "PWA in Cosmic JS",
+    "short_name": "eQuip-t OMS",
     "start_url": ".",
     "display": "standalone",
     "theme_color": "#000000",
