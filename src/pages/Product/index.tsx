@@ -340,7 +340,7 @@ const Product = () => {
             {productPermissions.isRead &&
                 <HtmlTooltip title="BOM">
                     <IconButton size="small" aria-label="View BOM" onClick={() => {
-                       
+
                     }} >
                         <RiBillLine color="primary" />
                     </IconButton>
@@ -412,6 +412,7 @@ const Product = () => {
                         }
                     }}
                     isExportAllOrSomeFeature={true}
+                    total={rowCount}
                     recordsToExport={selectedRecords.length}
                     ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
                     onExportToExcelSuccess={() => {

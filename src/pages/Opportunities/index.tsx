@@ -434,6 +434,7 @@ const Opportunities = () => {
                     fetchOpportunities();
                   }}
                   isExportAllOrSomeFeature={true}
+                  total={rowCount}
                   recordsToExport={selectedRecords.length}
                   ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
                   onExportToExcelSuccess={() => {

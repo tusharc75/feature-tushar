@@ -67,7 +67,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ImportExportLinks({ ids = [], permissions, module, api,
   refrenceId, onSuccessfulImport, recordsToExport = 0, exportSelectedRecords = null,
-  isExportAllOrSomeFeature = false, onExportToExcelSuccess = () => { } }) {
+  isExportAllOrSomeFeature = false, onExportToExcelSuccess = () => { }, total = 0 }) {
 
   const classes = useStyles();
   const isMobile = useMediaQuery("(max-width: 960px)");
@@ -217,7 +217,7 @@ export default function ImportExportLinks({ ids = [], permissions, module, api,
         >
           Export to Excel
           {
-            isExportAllOrSomeFeature ? (recordsToExport === 0 ? "All" : recordsToExport)
+            isExportAllOrSomeFeature ? ((recordsToExport === 0 || recordsToExport === total) ? " (All)" : ` (${recordsToExport})`)
               : null
           }
         </label>
