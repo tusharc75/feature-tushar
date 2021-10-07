@@ -65,7 +65,9 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-export default function ImportExportLinks({ permissions, module, api, refrenceId, onSuccessfulImport }) {
+export default function ImportExportLinks({ ids = [], permissions, module, api,
+  refrenceId, onSuccessfulImport, recordsToExport = 0, exportSelectedRecords = null,
+  isExportAllOrSomeFeature = false, onExportToExcelSuccess = () => { }, total = 0 }) {
 
   const classes = useStyles();
   const isMobile = useMediaQuery("(max-width: 960px)");
@@ -141,8 +143,17 @@ export default function ImportExportLinks({ permissions, module, api, refrenceId
    * EXPORT TABLES INTO EXCEL
    */
   const exportToExcel = () => {
+    let exportApi = `${api}/template?export=true` + "&refrenceId=" + refrenceId
+    if (recordsToExport > 0) {
+      if (exportSelectedRecords) {
+        exportSelectedRecords()
+        return
+      }
+      exportApi = exportApi + `&ids=${JSON.stringify(ids)}`
+    }
+
     axiosInstance()
-      .get(`${api}/template?export=true` + "&refrenceId=" + refrenceId, {
+      .get(exportApi, {
         responseType: "arraybuffer",
       })
       .then((response) => {
@@ -150,6 +161,9 @@ export default function ImportExportLinks({ permissions, module, api, refrenceId
           "filename="
         )[1];
         downloadExcel(response.data, fileName);
+        if (recordsToExport > 0) {
+          onExportToExcelSuccess()
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -202,6 +216,10 @@ export default function ImportExportLinks({ permissions, module, api, refrenceId
           className={`${module !== "builder" ? classes.links : classes.custom_links} cursor-pointer`}
         >
           Export to Excel
+          {
+            isExportAllOrSomeFeature ? ((recordsToExport === 0 || recordsToExport === total) ? " (All)" : ` (${recordsToExport})`)
+              : null
+          }
         </label>
         <Divider
           orientation="vertical"

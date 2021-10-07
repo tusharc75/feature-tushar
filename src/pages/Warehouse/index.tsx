@@ -385,6 +385,14 @@ const AddressResource = () => {
             afterImportCompleted={() => {
               fetchWarehouses();
             }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords.length}
+            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            onExportToExcelSuccess={() => {
+              if (gridApi) gridApi.deselectAll()
+              else fetchWarehouses()
+            }}
           />
         </Grid>
       </Grid>
@@ -490,9 +498,10 @@ const AddressResource = () => {
           <ConfirmationDialog
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${routes.warehouse.title.toLowerCase()} ${deleteRecord ? deleteRecord?._id ? deleteRecord?.warehouseName : "" : ""}?`}
-            onClose={() => { 
-              setDeleteRecord(null); 
-              setShowDeleteConfirmBox(false) }}
+            onClose={() => {
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false)
+            }}
             onOk={handleDelete}
           />
         )}
