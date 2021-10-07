@@ -340,7 +340,7 @@ const Product = () => {
             {productPermissions.isRead &&
                 <HtmlTooltip title="BOM">
                     <IconButton size="small" aria-label="View BOM" onClick={() => {
-                       
+
                     }} >
                         <RiBillLine color="primary" />
                     </IconButton>
@@ -410,6 +410,14 @@ const Product = () => {
                         if (isImportedSuccessfully) {
                             fetchProduct();
                         }
+                    }}
+                    isExportAllOrSomeFeature={true}
+                    total={rowCount}
+                    recordsToExport={selectedRecords.length}
+                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    onExportToExcelSuccess={() => {
+                        if (gridApi) gridApi.deselectAll()
+                        else fetchProduct()
                     }}
                 />
             </Grid>
