@@ -23,7 +23,7 @@ const ProductsTable: FC<TableProps> = ({ products, loading }) => {
             <TableRow>
               <TableCell>
                 <Typography variant="h6" color="textPrimary">
-                  Product
+                  Product(s)
                 </Typography>
               </TableCell>
               <TableCell align="right">
