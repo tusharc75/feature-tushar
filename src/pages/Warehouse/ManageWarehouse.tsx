@@ -18,7 +18,7 @@ import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 const ManageWarehouse = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { addressResourceId, onClose, onSuccess, isClone } = props;
+    const { addressResource, onClose, onSuccess, isClone } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -28,8 +28,8 @@ const ManageWarehouse = (props) => {
             const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-            if (addressResourceId) {
-                axiosInstance().get(`/warehouse/` + addressResourceId).then(({ data: { data } }) => {
+            if (addressResource) {
+                axiosInstance().get(`/warehouse/` + addressResource?.id).then(({ data: { data } }) => {
                     let fields = fieldsDataForUpdate
                     let tempData = data
                     if (isClone) {
@@ -55,12 +55,12 @@ const ManageWarehouse = (props) => {
             .catch((error) => {
                 toastConfig.setToastConfig(error);
             });
-    }, [addressResourceId]);
+    }, [addressResource]);
 
 
     const handleSubmit = (values) => {
-        if (addressResourceId && !isClone) {
-            values._id = addressResourceId
+        if (addressResource?.id && !isClone) {
+            values._id = addressResource?.id
             axiosInstance().put(`/warehouse`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess()
@@ -108,7 +108,7 @@ const ManageWarehouse = (props) => {
                 }) => (
                     <Fragment>
                         <CustomDialogHeader
-                            title={addressResourceId ? "Update " + routes.address.title : "Create " + routes.address.title}
+                            title={addressResource?.id ? "Update " + addressResource.warehouseName : "Create " + routes.warehouse.title}
                             onClose={() => {
                                 if (isFieldNotTouched({
                                     initialValues: initialData.values,
