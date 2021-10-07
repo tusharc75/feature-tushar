@@ -7,6 +7,10 @@
   text-transform: capitalize !important;
 }
 
+.MuiButton-root.text-transform-none {
+  text-transform: none !important;
+}
+
 /* .MuiOutlinedInput-input {
     padding: 12px 14px !important;
   } */
@@ -77,7 +81,7 @@
   border: none;
 }
 
-.MuiAutocomplete-inputRoot[class*='MuiOutlinedInput-root'] .MuiAutocomplete-endAdornment {
+.MuiAutocomplete-inputRoot[class*="MuiOutlinedInput-root"] .MuiAutocomplete-endAdornment {
   .MuiIconButton-root {
     padding: 2px !important;
   }
@@ -161,7 +165,7 @@ Button.MuiButtonBase-root {
 .MuiToggleButton-root {
   text-transform: capitalize !important;
 }
-.MuiStepConnector-root{
+.MuiStepConnector-root {
   flex: 0 !important;
 }
 
