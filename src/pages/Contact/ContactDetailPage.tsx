@@ -696,11 +696,6 @@ const ContactDetailsPage = (props) => {
                     restrictedAddActivities={contactPermissions.isUpdate && canEdit ? [] : ['Attachment', 'Case']}
                     relatedTo={[
                       {
-                        type: accountResource,
-                        referenceId: contactData?.accountName?.optionValue,
-                        access: false
-                      },
-                      {
                         type: contactResource,
                         referenceId: contactData._id,
                         access: true

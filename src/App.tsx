@@ -527,7 +527,7 @@ function App() {
             <PrivateRoute exact path={routes.currencyConverter.path}>
               <CurrencyConverter />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.address.path}>
+            <PrivateRoute exact path={routes.warehouse.path}>
               <Warehouse />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>

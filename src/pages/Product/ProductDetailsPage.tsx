@@ -17,7 +17,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { product } from "../../constants/helpers";
+import { product, warehouse } from "../../constants/helpers";
 import CreateProduct from "../../components/Product/CreateProduct";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import DeleteButton from "../../components/Helpers/DeleteButton";
@@ -28,6 +28,8 @@ import { extractFields } from "../../constants/formulaUtility";
 import ProductHierarchy from "./ProductHierarchy"
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import AssingAssetsDialog from "./AssingAssetsDialog";
+import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
+
 
 const ProductDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -570,14 +572,17 @@ const ProductDetailsPage = () => {
                         setOpenProductInventoryDialog(false)
                         getWarehouses()
                     }}
-                /> : <AssingAssetsDialog
-                    productId={id}
+                /> : <AssignQuantityDialog
+                    ids={id}
                     onClose={() => setOpenProductInventoryDialog(false)}
                     onSuccess={() => {
                         setOpenProductInventoryDialog(false)
                         getWarehouses()
                     }}
-                />
+                    resource={warehouse.warehouseApi}
+                    title="Assign Warehouses"
+                    label='Select Warehouse'
+                    resourceData={inventoriesData} />
                 : null
             }
         </>

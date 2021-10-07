@@ -15,6 +15,7 @@ import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import styles from "../Leads/Header.module.scss";
 import HideWhenOffline from "../../components/HideWhenOffline";
+import routes from "../../components/Helpers/Routes";
 
 function RentalManagementHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -27,7 +28,7 @@ function RentalManagementHeader(props) {
     setAnchorEl(null);
   };
 
-  const [filter, setFilter] = useState("All Rental Managements");
+  const [filter, setFilter] = useState(`All ${routes.rentalManagement.title}`);
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
@@ -87,7 +88,7 @@ function RentalManagementHeader(props) {
               searchbox={styles.search_box_input}
               value={searchVal}
               size="small"
-              placeholder="Search Rental Managements"
+              placeholder={`Search ${routes.rentalManagement.title}`}
               width="300px"
             />
           </HideWhenOffline>

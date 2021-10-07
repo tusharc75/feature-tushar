@@ -249,6 +249,11 @@ export const packages = {
   packageApi: '/packages'
 };
 
+export const warehouse = {
+  warehouseResource: 'warehouse',
+  warehouseApi: '/warehouse'
+};
+
 export const receivingTicket = {
   receivingTicketResource: 'receivingTicket',
   receivingTicketApi: '/receiving-ticket'
