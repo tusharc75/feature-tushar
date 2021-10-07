@@ -164,8 +164,8 @@ const PackageDetails = () => {
             </Paper>
             <Box mt={2}>
               <Box mb={1} display="flex" justifyContent="flex-end">
-                <Button variant="outlined" color="primary" endIcon={<Add />} size="small" onClick={() => setShowProductAssignDialog(true)}>
-                  Add Products
+                <Button className="text-transform-none" variant="outlined" color="primary" startIcon={<Add />} size="small" onClick={() => setShowProductAssignDialog(true)}>
+                  Assign Product(s)
                 </Button>
               </Box>
               <ProductsTable products={products} loading={loadingProducts} />
