@@ -29,7 +29,7 @@ const ManageWarehouse = (props) => {
             const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
             if (addressResource) {
-                axiosInstance().get(`/warehouse/` + addressResource.id).then(({ data: { data } }) => {
+                axiosInstance().get(`/warehouse/` + addressResource?.id).then(({ data: { data } }) => {
                     let fields = fieldsDataForUpdate
                     let tempData = data
                     if (isClone) {
@@ -59,8 +59,8 @@ const ManageWarehouse = (props) => {
 
 
     const handleSubmit = (values) => {
-        if (addressResource.id && !isClone) {
-            values._id = addressResource.id
+        if (addressResource?.id && !isClone) {
+            values._id = addressResource?.id
             axiosInstance().put(`/warehouse`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess()
@@ -108,7 +108,7 @@ const ManageWarehouse = (props) => {
                 }) => (
                     <Fragment>
                         <CustomDialogHeader
-                            title={addressResource.id ? "Update " + addressResource.warehouseName : "Create " + routes.warehouse.title}
+                            title={addressResource?.id ? "Update " + addressResource.warehouseName : "Create " + routes.warehouse.title}
                             onClose={() => {
                                 if (isFieldNotTouched({
                                     initialValues: initialData.values,
