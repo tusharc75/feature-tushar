@@ -1,6 +1,18 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Typography, IconButton, List, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
-import { ControlPoint } from '@material-ui/icons';
+import {
+  Grid,
+  Box,
+  Button,
+  Paper,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
+} from '@material-ui/core';
+import { Add } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -12,11 +24,11 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { packages } from '../../constants/helpers';
+import { packages, product } from '../../constants/helpers';
 import ManagePackageDialog from './ManagePackageDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
-import BoxWithBorder from '../../components/BoxWithBorder';
-import AssignProductDialog from './AssignProducts';
+import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
+import Loader from '../../components/Loader';
 
 const PackageDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -28,6 +40,7 @@ const PackageDetails = () => {
   }: any = useData();
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingProducts, setLoadingProducts] = useState(false);
   const [packageData, setPackageData] = useState(null);
   const [products, setProducts] = useState([]);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -44,12 +57,6 @@ const PackageDetails = () => {
     }
     // eslint-disable-next-line
   }, [id]);
-
-  const handleMainPoints = (data) => {
-    let mainPoint = {};
-    mainPoint['Package Name'] = data?.packageName || '';
-    setMainPoints(mainPoint);
-  };
 
   const getRessourceFields = () => {
     setLoading(true);
@@ -71,7 +78,6 @@ const PackageDetails = () => {
       .get(`${routes.packages.path}/${id}`)
       .then(({ data: { data } }) => {
         setPackageData(data);
-        handleMainPoints(data);
         setHeadingLabel(data.packageName);
         setCustomizedRoutes([routes.packages, { title: data.packageName }]);
         getRessourceFields();
@@ -100,14 +106,17 @@ const PackageDetails = () => {
   };
 
   const getProducts = () => {
+    setLoadingProducts(true)
     axiosInstance()
       .get(`${packages.packageApi}/get-products/${id}`)
       .then(({ data: { data } }) => {
-        const newArr = data?.products.map((product) => ({ product: product.productId, qty: product.qty })) || [];
+        const newArr = data.length > 0 ? data.map((product: any) => ({ product: product.productId, qty: product.qty })) : [];
         setProducts(newArr);
+        setLoadingProducts(false)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        setLoadingProducts(false)
       });
   };
 
@@ -118,7 +127,7 @@ const PackageDetails = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+          <Grid item xs={12} sm={12} md={8} lg={8}>
             <Paper>
               {!packageData ? (
                 <div>
@@ -152,55 +161,48 @@ const PackageDetails = () => {
                 )}
               </Box>
             </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
-            <Paper style={{ overflow: 'hidden' }} elevation={2}>
-              <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
-                <Typography variant="subtitle2">Products ({products.length || 0})</Typography>
-
-                {permissions?.product?.isUpdate && (
-                  <IconButton title="Assign users" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
-                    <ControlPoint />
-                  </IconButton>
-                )}
+            <Box mt={2}>
+              <Box mb={1} display="flex" justifyContent="flex-end">
+                <Button variant="outlined" color="primary" endIcon={<Add />} size="small" onClick={() => setShowProductAssignDialog(true)}>
+                  Add Products
+                </Button>
               </Box>
-              <Box style={{ paddingBottom: '4px' }}>
-                {loading ? (
-                  [1, 2].map((i) => (
-                    <BoxWithBorder key={i} margin={'8px'}>
-                      <Box padding={1}>
-                        <Skeleton variant="text" width="100px" height="20px" />
-                        <Box marginTop={1} />
-                        <Skeleton variant="text" width="100%" height="15px" />
-                      </Box>
-                    </BoxWithBorder>
-                  ))
-                ) : products.length > 0 ? (
-                  <>
-                    <Box width="100%">
-                      <Box mx={2} mt={1} display="flex" justifyContent="space-between">
-                        <Typography variant="h6">Product</Typography>
-                        <Typography variant="h6">Qty.</Typography>
-                      </Box>
-                      {products.map(({ qty, product }) => (
-                        <List disablePadding key={product?._id}>
-                          <ListItem dense>
-                            <ListItemText primary={product?.productName} />
-                            <ListItemSecondaryAction>
-                              <Typography variant="h6">{qty}</Typography>
-                            </ListItemSecondaryAction>
-                          </ListItem>
-                        </List>
-                      ))}
-                    </Box>
-                  </>
-                ) : (
-                  <Box textAlign="center" padding={1} minHeight={180}>
+              <TableContainer style={{ maxHeight: 400 }} component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>
+                        <Typography variant="h6" color="textPrimary">
+                          Product
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography variant="h6" color="textPrimary">
+                          Qty
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {products.map((row) => (
+                      <TableRow key={row?.product._id}>
+                        <TableCell>{row?.product.productName}</TableCell>
+                        <TableCell align="right">{row?.qty}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <Paper>
+                {loadingProducts ? <Loader minHeight={200} text="Loading..." /> : products.length === 0 &&
+                  <Box width={'100%'} minHeight={200} textAlign="center" p={5}>
                     <Typography>No Products</Typography>
-                  </Box>
-                )}
-              </Box>
-            </Paper>
+                  </Box>}
+              </Paper>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={12} md={4} lg={4}>
+            {/** RIGHT SIDE OF THE SCREEN **/}
           </Grid>
         </Grid>
       </Fragment>
@@ -229,13 +231,17 @@ const PackageDetails = () => {
         />
       )}
       {showProductAssignDialog && (
-        <AssignProductDialog
-          packageIds={[id]}
+        <AssignQuantityDialog
+          ids={[id]}
           onClose={() => setShowProductAssignDialog(false)}
           onSuccess={() => {
-            setShowProductAssignDialog(false);
-            getProducts();
+            setShowProductAssignDialog(false)
+            getProducts()
           }}
+          resource={product.api}
+          title="Assign Products"
+          label='Select Product'
+          resourceData={products}
         />
       )}
     </>

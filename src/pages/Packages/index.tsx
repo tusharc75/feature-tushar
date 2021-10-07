@@ -10,7 +10,7 @@ import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { FaRegistered } from 'react-icons/fa';
 
-import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, packages } from '../../constants/helpers';
+import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, packages, product } from '../../constants/helpers';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
 import { useHistory } from 'react-router-dom';
@@ -23,7 +23,7 @@ import ManagePackageDialog from './ManagePackageDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import HideWhenOffline from '../../components/HideWhenOffline';
-import AssignProductDialog from './AssignProducts';
+import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/columns';
 import { camelCase } from 'lodash';
 
@@ -527,7 +527,7 @@ const PackageList = () => {
                     {isConfirmDialogVisible ? (
                         <ConfirmationDialog
                             open={isConfirmDialogVisible}
-                            message={`Are you sure you want to delete ${deleteRecord?.packageName ? 'Package' : 'Packages'}   ${deleteRecord.packageName || ''}?`}
+                            message={`Are you sure you want to delete ${deleteRecord?.packageName ? 'Package' : 'selected Packages'}   ${deleteRecord.packageName || ''}?`}
                             onClose={() => {
                                 if (deleteRecord) setDeleteRecord({});
                                 setIsConformDialogVisible(false);
@@ -554,10 +554,14 @@ const PackageList = () => {
                 </CustomContainer>
             </Fragment>
             {showProductAssignDialog && (
-                <AssignProductDialog
-                    packageIds={selectedRecords.map((s) => s.id)}
+                <AssignQuantityDialog
+                    ids={selectedRecords.map((s) => s.id)}
                     onClose={() => setShowProductAssignDialog(false)}
                     onSuccess={() => setShowProductAssignDialog(false)}
+                    resource={product.api}
+                    title="Assign Products"
+                    label='Select Product'
+                    resourceData={[]}
                 />
             )}
             {showManagePackageDialog.open && (

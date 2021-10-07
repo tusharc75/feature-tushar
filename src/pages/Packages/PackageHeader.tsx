@@ -146,7 +146,7 @@ function PackageHeader(props) {
                                         closeActions();
                                     }}
                                 >
-                                    Assign To Product
+                                    Assign Products
                                 </MenuItem>}
                             </Menu>
                         </>
