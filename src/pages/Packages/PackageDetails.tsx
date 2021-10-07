@@ -29,6 +29,7 @@ import ManagePackageDialog from './ManagePackageDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
 import Loader from '../../components/Loader';
+import ProductsTable from './ProductsTable';
 
 const PackageDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -167,38 +168,7 @@ const PackageDetails = () => {
                   Add Products
                 </Button>
               </Box>
-              <TableContainer style={{ maxHeight: 400 }} component={Paper}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>
-                        <Typography variant="h6" color="textPrimary">
-                          Product
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography variant="h6" color="textPrimary">
-                          Qty
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {products.map((row) => (
-                      <TableRow key={row?.product._id}>
-                        <TableCell>{row?.product.productName}</TableCell>
-                        <TableCell align="right">{row?.qty}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <Paper>
-                {loadingProducts ? <Loader minHeight={200} text="Loading..." /> : products.length === 0 &&
-                  <Box width={'100%'} minHeight={200} textAlign="center" p={5}>
-                    <Typography>No Products</Typography>
-                  </Box>}
-              </Paper>
+              <ProductsTable products={products} loading={loadingProducts} />
             </Box>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
