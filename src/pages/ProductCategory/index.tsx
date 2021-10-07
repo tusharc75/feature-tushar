@@ -373,6 +373,13 @@ const ProductCategory = () => {
                     afterImportCompleted={() => {
                         fetchProductCategory();
                     }}
+                    isExportAllOrSomeFeature={true}
+                    recordsToExport={selectedRecords.length}
+                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    onExportToExcelSuccess={() => {
+                        if (gridApi) gridApi.deselectAll()
+                        else fetchProductCategory()
+                    }}
                 />
             </Grid>
         </Grid>

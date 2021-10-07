@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function ImportExportLinks({ ids = [], permissions, module, api,
-  afterImportCompleted, recordsToExport = 0, exportSelectedRecords = null,
+  afterImportCompleted, recordsToExport = 0, exportSelectedRecords = null, isExportAllOrSomeFeature = false,
   onExportToExcelSuccess = () => { }
 }) {
   const classes = useStyles();
@@ -201,7 +201,10 @@ export default function ImportExportLinks({ ids = [], permissions, module, api,
           onClick={exportToExcel}
           className={`${classes.links} cursor-pointer`}
         >
-          Export to Excel ({recordsToExport === 0 ? "All" : recordsToExport})
+          Export to Excel {
+            isExportAllOrSomeFeature ? (recordsToExport === 0 ? "All" : recordsToExport)
+              : null
+          }
         </label>
         <Divider
           orientation="vertical"

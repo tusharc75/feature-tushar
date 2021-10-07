@@ -502,6 +502,7 @@ export default function Contact(props) {
             afterImportCompleted={() => {
               getContacts();
             }}
+            isExportAllOrSomeFeature={true}
             recordsToExport={selectedRecords.length}
             ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
