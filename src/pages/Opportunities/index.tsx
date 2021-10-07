@@ -25,6 +25,7 @@ import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEnt
 import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
 
 let opportunityTimeout;
 const OpportunityTypes = [
@@ -69,22 +70,24 @@ const Opportunities = () => {
     resource: history.location?.state?.resource
   });
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [columns, setColumns] = useState([])
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const columnState = JSON.parse(localStorage.getItem(opportunityResource));
-  const columns = [
-    { field: 'opportunityName', headerName: 'Opportunity Name', show: true, disabled: true, cellRenderer: 'opportunityNameRenderer' },
-    { field: 'supplierAccountName', headerName: 'Supplier Account Name', show: true, cellRenderer: 'supplierAccountNameRenderer' },
-    { field: 'customerAccountName', headerName: 'Customer Account Name', show: true, cellRenderer: 'customerAccountNameRenderer' },
-    { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-    { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
-    { field: 'stage', headerName: 'Stage', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'closeDate', headerName: 'Close Date', show: true, filter: false, cellRenderer: 'commonRenderer' },
-    { field: 'owner', headerName: 'Opportunity Owner', show: true, cellRenderer: 'commonRenderer' }
-  ];
+  // const columns = [
+  //   { field: 'opportunityName', headerName: 'Opportunity Name', show: true, disabled: true, cellRenderer: 'opportunityNameRenderer' },
+  //   { field: 'supplierAccountName', headerName: 'Supplier Account Name', show: true, cellRenderer: 'supplierAccountNameRenderer' },
+  //   { field: 'customerAccountName', headerName: 'Customer Account Name', show: true, cellRenderer: 'customerAccountNameRenderer' },
+  //   { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
+  //   { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
+  //   { field: 'stage', headerName: 'Stage', show: true, cellRenderer: 'commonRenderer' },
+  //   { field: 'closeDate', headerName: 'Close Date', show: true, filter: false, cellRenderer: 'commonRenderer' },
+  //   { field: 'owner', headerName: 'Opportunity Owner', show: true, cellRenderer: 'commonRenderer' }
+  // ];
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
@@ -96,6 +99,44 @@ const Opportunities = () => {
   }
 
   //  Grid Variables - End
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+
+  const fetchGridColumns = async () => {
+
+    const response = await axiosInstance()
+      .get(`/field?resource=Opportunity&entity=${selectedEntity}`)
+
+    let data = response?.data?.data
+
+    let columns = []
+    let rendererNames = []
+    data.forEach(o => {
+      if (o?.fieldData?.fieldName === "opportunityName") {
+        o.fieldData.primary = true
+      }
+      let currentColumn = getColumnData(opportunityResource, o?.fieldData)
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData]
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName)
+        }
+      }
+      return o?.fieldData
+    })
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      actionsRenderer: ActionsRenderer
+    }
+    setFrameWorkComponent({ ...tempFrameworkComponent })
+    let staticFields = getStaticFields()
+    staticFields.forEach(field => {
+      columns.push(checkStaticField(routes.projectSales.title, field))
+    })
+    setColumns([...columns])
+  }
 
   useEffect(() => {
     if (permissions && permissions[opportunityResource]) {
@@ -191,6 +232,7 @@ const Opportunities = () => {
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
       </Tooltip>
+
       <GridDeleteIcon
         hasDeletePermission={opportunityPermissions.isDelete}
         ownerId={params.data.ownerId}
@@ -326,7 +368,14 @@ const Opportunities = () => {
               restSupplierAccounts: restSupplierAccounts,
 
               customerAccountName: u.customerAccountName?.optionLabel,
-              customerAccountId: u.customerAccountName?.optionValue,
+              customerAccountNameId: u.customerAccountName?.optionValue,
+              marketSegment: u?.marketSegment?.optionLabel,
+              marketSegmentId: u?.marketSegment?.optionValue,
+              subMarketSegment: u?.subMarketSegment?.optionLabel,
+              subMarketSegmentId: u?.subMarketSegment?.optionValue,
+
+              collaborator: u?.collaborator && u?.collaborator[0] ? u?.collaborator[0]?.optionLabel : "",
+              collaboratorId: u?.collaborator && u?.collaborator[0] ? u?.collaborator[0]?.optionValue : "",
 
               createdBy: u.createdBy?.user?.concatedName,
               createdByDate: u.createdBy?.date,
@@ -336,6 +385,7 @@ const Opportunities = () => {
             return res;
           });
 
+          console.log('rows', rows)
           dispatch({ type: 'initialize', data: rows, count: count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
@@ -477,20 +527,24 @@ const Opportunities = () => {
           </OpportunitiesHeader>
         </div>
 
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={100}
-          loading={loading}
-          renderedFrom={opportunityResource}
-        />
+        {
+          Object.keys(frameWorkComponent).length > 0 ?
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={100}
+              loading={loading}
+              renderedFrom={opportunityResource}
+              refreshGrid={fetchOpportunities}
+            /> : null
+        }
 
         {showDeleteWarningConfirmBox ? (
           <MessageDialog

@@ -109,7 +109,7 @@ const Entity: FC = () => {
       });
   };
   const NameRenderer = params => <Link className="link"
-    to={`${routes.entityDetails.path}/${params.data._id}`} title={params.value}>
+    to={`${routes.entityDetail.path}/${params.data._id}`} title={params.value}>
     {params.value}
   </Link>;
 

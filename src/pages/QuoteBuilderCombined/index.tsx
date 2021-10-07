@@ -40,6 +40,7 @@ import VersionStatus from "./VersionStatus";
 import TransferEntityDialog from "../../components/AssignRolesDialog/TransferEntityDialog";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
+import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
 
 let quoteTimeout;
 const QuoteType = [
@@ -88,6 +89,8 @@ const QuoteBuilders = () => {
     resource: history.location?.state?.resource,
   });
   const [showVersionsDialog, setShowVersionsDialog] = useState(false);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [columns, setColumns] = useState([])
   const [versionStatusData, setVersionStatusData] = useState({
     columns: [
       {
@@ -181,54 +184,93 @@ const QuoteBuilders = () => {
     selectedRecords,
   } = state;
 
-  const columns = [
-    {
-      field: "quoteName",
-      headerName: "Quote Name",
-      show: true,
-      disabled: true,
-      cellRenderer: "quoteNameRenderer",
-    },
-    {
-      field: "customerAccountName",
-      headerName: "Customer Account Name",
-      show: true,
-      cellRenderer: "customerAccountNameRenderer",
-    },
-    {
-      field: "relatedOpportunity",
-      headerName: "Related Opportunity",
-      show: true,
-      cellRenderer: "relatedOpportunityRenderer"
-    },
+  // const columns = [
+  //   {
+  //     field: "quoteName",
+  //     headerName: "Quote Name",
+  //     show: true,
+  //     disabled: true,
+  //     cellRenderer: "quoteNameRenderer",
+  //   },
+  //   {
+  //     field: "customerAccountName",
+  //     headerName: "Customer Account Name",
+  //     show: true,
+  //     cellRenderer: "customerAccountNameRenderer",
+  //   },
+  //   {
+  //     field: "relatedOpportunity",
+  //     headerName: "Related Opportunity",
+  //     show: true,
+  //     cellRenderer: "relatedOpportunityRenderer"
+  //   },
 
-    {
-      field: "createdBy",
-      headerName: "Created By",
-      show: true,
-      cellRenderer: "createdByRenderer",
-    },
-    {
-      field: "updatedBy",
-      headerName: "Updated By",
-      show: true,
-      cellRenderer: "updatedByRenderer",
-    },
-    {
-      field: "expiryDate",
-      headerName: "Expiry Date",
-      show: true,
-      filter: false,
-      cellRenderer: "commonRenderer",
-    },
-    {
-      field: "owner",
-      headerName: "Quote Owner",
-      show: true,
-      cellRenderer: "commonRenderer",
-    },
-  ];
+  //   {
+  //     field: "createdBy",
+  //     headerName: "Created By",
+  //     show: true,
+  //     cellRenderer: "createdByRenderer",
+  //   },
+  //   {
+  //     field: "updatedBy",
+  //     headerName: "Updated By",
+  //     show: true,
+  //     cellRenderer: "updatedByRenderer",
+  //   },
+  //   {
+  //     field: "expiryDate",
+  //     headerName: "Expiry Date",
+  //     show: true,
+  //     filter: false,
+  //     cellRenderer: "commonRenderer",
+  //   },
+  //   {
+  //     field: "owner",
+  //     headerName: "Quote Owner",
+  //     show: true,
+  //     cellRenderer: "commonRenderer",
+  //   },
+  // ];
   //  Grid Variables - End
+
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+
+  const fetchGridColumns = async () => {
+
+    const response = await axiosInstance()
+      .get(`/field?resource=Quotes&entity=${selectedEntity}`)
+
+    let data = response?.data?.data
+
+    let columns = []
+    let rendererNames = []
+    data.forEach(o => {
+      if (o?.fieldData?.fieldName === "quoteName") {
+        o.fieldData.primary = true
+      }
+      let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData)
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData]
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName)
+        }
+      }
+      return o?.fieldData
+    })
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      actionsRenderer: ActionsRenderer
+    }
+    setFrameWorkComponent({ ...tempFrameworkComponent })
+    let staticFields = getStaticFields()
+    staticFields.forEach(field => {
+      columns.push(checkStaticField(routes.projectSales.title, field))
+    })
+    setColumns([...columns])
+  }
 
   useEffect(() => {
     if (permissions && permissions.quoteBuilder) {
@@ -715,20 +757,24 @@ const QuoteBuilders = () => {
               )}
             </QuoteHeader>
           </div>
-
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={100}
-            loading={loading}
-          />
+          {
+            Object.keys(frameWorkComponent).length > 0 ?
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameWorkComponent}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                actionWidth={100}
+                loading={loading}
+                renderedFrom={routes.quoteBuilder.title}
+                refreshGrid={fetchQuoteBuilder}
+              /> : null
+          }
 
           {showDeleteWarningConfirmBox ? (
             <MessageDialog

@@ -32,6 +32,11 @@ export const DateRenderer = params => params.value ? (
 ) : (
     <NoDataCell />
 );
+export const CheckboxRenderer = params => (
+    <span>
+        {Boolean(params?.value) ? "Yes" : "No"}
+    </span>
+)
 
 export const UpdatedByRenderer = params => params.value ? (
     <h5 className="updateBy" title={`${params.value} • ${moment(

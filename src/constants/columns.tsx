@@ -8,7 +8,8 @@ import {
     UpdatedByRenderer,
     CommonRendererWithCopy,
     DateRenderer,
-    LinkRenderer
+    LinkRenderer,
+    CheckboxRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
 
 export const staticFrameworkRender = {
@@ -18,7 +19,6 @@ export const staticFrameworkRender = {
 
 export const headerName = {
     firstName: "Name",
-    owner: "Owner Alies"
 }
 export const isRenderWithCopy = (name) => {
     return ["mobile", "phone", "email"].indexOf(name) >= 0
@@ -28,7 +28,7 @@ export const detailPagePath = {
     owner: routes?.userDetail?.path,
     user: routes?.userDetail?.path,
     collaborator: routes?.userDetail?.path,
-    rental: routes.rentalManagementDetail.path,
+    rentalJob: routes.rentalManagementDetail.path,
     deliveryPerson: routes?.userDetail?.path,
     pDFTemplate: routes?.quotePdfTemplateDetail?.path,
     subMarketSegment: routes?.marketSegment?.path
@@ -70,6 +70,12 @@ export const getFrameworkComponents = (rendererNameList, showStaticRenderers = f
                 "dateRenderer": DateRenderer
             }
         }
+        else if (o === "checkboxRenderer") {
+            result = {
+                ...result,
+                "checkboxRenderer": CheckboxRenderer
+            }
+        }
     })
     if (showStaticRenderers) {
         result = {
@@ -101,6 +107,7 @@ export const staticColumns = ["createdBy", "updatedBy"]
 
 export const getColumnData = (title, field) => {
 
+
     let data = localStorage.getItem("gridMetaData")
 
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
@@ -120,23 +127,8 @@ export const getColumnData = (title, field) => {
             show: gridMetaData[updatedTitle]?.hide && gridMetaData[updatedTitle]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
             disabled: gridMetaData[updatedTitle]?.disabled && gridMetaData[updatedTitle]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false
         }
-        if (field?.fieldName === "firstName") {
-            let combinedTitle = camelCase(updatedTitle)
-            let pathName = detailPagePath[combinedTitle] ? detailPagePath[combinedTitle] :
-                routes.userDetail.path ? routes.userDetail.path : ""
-            return {
-                columnData: {
-                    ...commonFieldData,
-                    field: "concatedName",
-                    cellRenderer: "linkRenderer",
-                    cellRendererParams: { "pathName": pathName, "property": "_id" }
-                },
-                rendererName: 'linkRenderer',
-            }
-        }
-        else if (field?.lookup) {
-
-            let joinedFieldName = field?.fieldName.indexOf("_") > 0 ? camelCase(field?.fieldName) : field?.fieldName
+        let joinedFieldName = field?.fieldName.indexOf(" ") > 0 ? camelCase(field?.fieldName) : field?.fieldName
+        if (field?.primary) {
             let pathName = ""
             let isForPopup = false
             if (hasDetailPageAsPopup[joinedFieldName]) {
@@ -144,54 +136,114 @@ export const getColumnData = (title, field) => {
                 pathName = `${hasDetailPageAsPopup[joinedFieldName]}`
             }
             else {
-                pathName = detailPagePath[joinedFieldName] ? detailPagePath[joinedFieldName] :
-                    routes[joinedFieldName]?.path ? routes[joinedFieldName]?.path :
-                        routes[`${joinedFieldName}Detail`]?.path ? routes[`${joinedFieldName}Detail`]?.path : ""
-            }
+                pathName = detailPagePath[updatedTitle] ? detailPagePath[updatedTitle] :
+                    routes[`${updatedTitle}Detail`]?.path ? routes[`${updatedTitle}Detail`]?.path :
+                        routes[updatedTitle]?.path ? routes[updatedTitle]?.path : ""
 
-            return {
-                columnData: {
-                    ...commonFieldData,
-                    cellRenderer: "linkRenderer",
-                    cellRendererParams: { "pathName": pathName, "property": joinedFieldName + 'Id', isForPopup: isForPopup }
-                },
-                rendererName: 'linkRenderer',
-            }
-        }
-        else if (isRenderWithCopy(field?.fieldName)) {
-            return {
-                columnData: {
-                    ...commonFieldData,
-                    cellRenderer: 'commonRendererWithCopy'
-                },
-                rendererName: 'commonRendererWithCopy'
-            }
-        }
-        else if (field?.type === "imageUpload") {
-            return {
-                columnData: {
-                    ...commonFieldData,
-                    filter: false, sortable: false,
-                    cellRenderer: (params) => `<img src='${params?.value}' id="img-avatar" alt='profile' />`
+                return {
+                    columnData: {
+                        ...commonFieldData,
+                        cellRenderer: "linkRenderer",
+                        cellRendererParams: {
+                            pathName: pathName,
+                            property: "_id", isForPopup: isForPopup
+                        }
+                    },
+                    rendererName: 'linkRenderer',
                 }
             }
         }
-        else if (field?.type === "date") {
-            return {
-                columnData: {
-                    ...commonFieldData,
-                    cellRenderer: "dateRenderer"
-                },
-                rendererName: 'dateRenderer'
-            }
-        }
         else {
-            return {
-                columnData: {
-                    ...commonFieldData,
-                    cellRenderer: 'commonRenderer'
-                },
-                rendererName: 'commonRenderer'
+
+            if (field?.fieldName === "firstName") {
+
+                let pathName = detailPagePath[updatedTitle] ? detailPagePath[updatedTitle] :
+                    routes[title]?.path ? routes[title]?.path : ""
+                return {
+                    columnData: {
+                        ...commonFieldData,
+                        field: "concatedName",
+                        cellRenderer: "linkRenderer",
+                        cellRendererParams: { "pathName": pathName, "property": "_id" }
+                    },
+                    rendererName: 'linkRenderer',
+                }
+            }
+            else if (field?.lookup) {
+
+
+                let joinedFieldName = field?.fieldName.indexOf(" ") > 0 ? camelCase(field?.fieldName) : field?.fieldName
+
+                let ss = camelCase(field?.lookupResource) || "--"
+
+                let pathName = ""
+                let isForPopup = false
+                if (hasDetailPageAsPopup[joinedFieldName]) {
+                    isForPopup = true
+                    pathName = `${hasDetailPageAsPopup[joinedFieldName]}`
+                }
+                else {
+                    pathName = detailPagePath[joinedFieldName] ? detailPagePath[joinedFieldName] :
+                        field?.lookupResource && routes[`${camelCase(field?.lookupResource)}Detail`]?.path ?
+                            routes[`${camelCase(field?.lookupResource)}Detail`]?.path :
+                            routes[joinedFieldName]?.path ? routes[joinedFieldName]?.path :
+                                routes[`${joinedFieldName}Detail`]?.path ? routes[`${joinedFieldName}Detail`]?.path : ""
+                }
+
+                return {
+                    columnData: {
+                        ...commonFieldData,
+                        cellRenderer: "linkRenderer",
+                        cellRendererParams: { "pathName": pathName, "property": joinedFieldName + 'Id', isForPopup: isForPopup }
+                    },
+                    rendererName: 'linkRenderer',
+                }
+            }
+            else if (isRenderWithCopy(field?.fieldName)) {
+                return {
+                    columnData: {
+                        ...commonFieldData,
+                        cellRenderer: 'commonRendererWithCopy'
+                    },
+                    rendererName: 'commonRendererWithCopy'
+                }
+            }
+            else if (field?.type === "imageUpload") {
+                return {
+                    columnData: {
+                        ...commonFieldData,
+                        filter: false, sortable: false,
+                        cellRenderer: (params) => `<img src='${params?.value}' id="img-avatar" alt=${field?.fieldLabel} />`
+                    }
+                }
+            }
+            else if (field?.type === "date") {
+                return {
+                    columnData: {
+                        ...commonFieldData,
+                        cellRenderer: "dateRenderer"
+                    },
+                    rendererName: 'dateRenderer'
+                }
+            }
+            else if (field?.type === "checkBox") {
+                return {
+                    columnData: {
+                        ...commonFieldData,
+                        // filter: false, sortable: false,
+                        cellRenderer: "checkboxRenderer"
+                    },
+                    rendererName: 'checkboxRenderer'
+                }
+            }
+            else {
+                return {
+                    columnData: {
+                        ...commonFieldData,
+                        cellRenderer: 'commonRenderer'
+                    },
+                    rendererName: 'commonRenderer'
+                }
             }
         }
     }
