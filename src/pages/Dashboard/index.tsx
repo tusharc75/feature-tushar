@@ -116,7 +116,6 @@ function Dashboard() {
                   return section.items.length > 0 ? (
                     <Grid key={section.head} item xs={12} sm={4} md={4} className={styles.all_box_layout}>
                       <Paper className={styles.box_layout}>
-
                         <Box padding={2}>
                           <Grid className={styles.front_box}>
                           {<Box textAlign="center" >
