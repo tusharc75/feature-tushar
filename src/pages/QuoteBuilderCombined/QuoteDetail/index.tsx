@@ -648,6 +648,7 @@ export default function QuoteDetail() {
                       fetchQuoteData={fetchQuoteData}
                       columnView={columnView}
                       fetchTNC={fetchTermsAndConditions}
+                      globalLoading={loading}
                     />)}
                   </TabPanel>
                 </>

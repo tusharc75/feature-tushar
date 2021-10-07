@@ -805,6 +805,7 @@ const RentalManagementDetailsPage = () => {
             isClone={false}
             open={openUpdateDialog}
             rentalManagementId={id}
+            rentalManagement={rentalManagementData}
             onClose={() => setOpenUpdateDialog(false)}
             onSuccess={() => {
               setOpenUpdateDialog(false);

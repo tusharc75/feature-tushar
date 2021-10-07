@@ -18,7 +18,7 @@ import routes from '../../components/Helpers/Routes';
 import { ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
-import { gridLoadingTimeout, gridPageSizes, isObjectEmpty, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, gridPageSizes, isObjectEmpty, RESOURCE_LABEL, sidebarResource } from '../../constants/helpers';
 import { CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CustomAgGrid from '../../components/AgGridComponents/CustomAgGrid';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
@@ -137,7 +137,7 @@ const AddressResource = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
-  const [addressResourceId, setAddressResourceId] = useState(null);
+  const [addressResource, setAddressResource] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [showEntityDialog, setShowEntityDialog] = useState(false)
   const [warehouseId, setWarehouseId] = useState("")
@@ -171,6 +171,8 @@ const AddressResource = () => {
     });
   }
   //  Grid Variables - End
+
+  const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
   useEffect(() => {
     if (permissions && permissions.warehouse) {
@@ -227,7 +229,7 @@ const AddressResource = () => {
       <span
         className="link"
         onClick={() => {
-          setAddressResourceId(params.data.id);
+          setAddressResource(params.data);
           setOpen({ open: true, isClone: false });
         }}
       >
@@ -245,7 +247,7 @@ const AddressResource = () => {
           size="small"
           aria-label="Clone"
           onClick={() => {
-            setAddressResourceId(params.data.id);
+            setAddressResource(params.data);
             setOpen({ open: true, isClone: true })
           }}>
           <FileCopyIcon fontSize="small" color="primary" />
@@ -373,7 +375,7 @@ const AddressResource = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.address.title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.warehouse.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
@@ -390,16 +392,16 @@ const AddressResource = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-              <FaWarehouse size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.address.title}</span>
+              <FaWarehouse size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.warehouse.title}</span>
             </Grid>
             <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
-                <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
+                <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} placeholder={`Search ${routes.warehouse.title}`} />
                 {warehousePermissions.isCreate && (
                   <Button
                     className={styles.add_submit_btn}
                     onClick={() => {
-                      setAddressResourceId(null);
+                      setAddressResource(null);
                       setOpen({ open: true, isClone: false });
                     }}
                     variant="contained"
@@ -487,7 +489,7 @@ const AddressResource = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete product category  ${deleteRecord?._id ? deleteRecord?.name : ''}?`}
+            message={`Are you sure you want to ${routes.warehouse.title} ${deleteRecord ? deleteRecord?._id ? deleteRecord?.warehouseName : "" : ""}?`}
             onClose={() => setShowDeleteConfirmBox(false)}
             onOk={handleDelete}
           />
@@ -495,7 +497,7 @@ const AddressResource = () => {
 
         {open?.open && (
           <ManageWarehouse
-            addressResourceId={addressResourceId}
+            addressResource={addressResource}
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });
