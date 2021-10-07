@@ -197,7 +197,7 @@ const RentalManagement = () => {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      let currentColumn = getColumnData(pageTitle, o?.fieldData)
+      let currentColumn = getColumnData(pageTitle, o?.fieldData, routes.rentalManagementDetail.path)
       if (currentColumn !== null) {
         if (isOffline) {
           currentColumn.columnData["filter"] = false

@@ -10,6 +10,7 @@ import {
     DateRenderer,
     LinkRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
+import { RESOURCE_LABEL } from "./helpers";
 
 export const staticFrameworkRender = {
     "createdByRenderer": CreatedByRenderer,
@@ -31,7 +32,10 @@ export const detailPagePath = {
     rental: routes.rentalManagementDetail.path,
     deliveryPerson: routes?.userDetail?.path,
     pDFTemplate: routes?.quotePdfTemplateDetail?.path,
-    subMarketSegment: routes?.marketSegment?.path
+    subMarketSegment: routes?.marketSegment?.path,
+
+    // Instead of using static key, use resource
+    "Rental Information": routes.rentalManagementDetail.path
 }
 export const hasDetailPageAsPopup = {
     subMarketSegment: routes?.marketSegment?.path,
@@ -99,7 +103,7 @@ export const checkStaticField = (renderedFrom, fieldData) => {
 
 export const staticColumns = ["createdBy", "updatedBy"]
 
-export const getColumnData = (title, field) => {
+export const getColumnData = (title, field, detailScreenRoute = null) => {
 
     let data = localStorage.getItem("gridMetaData")
 
@@ -130,6 +134,17 @@ export const getColumnData = (title, field) => {
                     field: "concatedName",
                     cellRenderer: "linkRenderer",
                     cellRendererParams: { "pathName": pathName, "property": "_id" }
+                },
+                rendererName: 'linkRenderer',
+            }
+        }
+        else if (field?.primaryField === true && detailScreenRoute) {
+            return {
+                columnData: {
+                    ...commonFieldData,
+                    field: field.fieldName,
+                    cellRenderer: "linkRenderer",
+                    cellRendererParams: { "pathName": detailScreenRoute, "property": "_id" }
                 },
                 rendererName: 'linkRenderer',
             }
