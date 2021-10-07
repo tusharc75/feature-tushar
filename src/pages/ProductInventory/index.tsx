@@ -31,6 +31,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useHistory } from "react-router-dom";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
+import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -257,6 +258,25 @@ const ProductInventory = () => {
             <Grid item md={4} sm={11} xs={10}>
                 <CustomBreadCrumbs routes={[routes.productInventory]} />
             </Grid>
+            {/* <Grid item md={8} sm={1} xs={2}>
+                <ImportExportLinks
+                    permissions={permissions?.productInventory}
+                    module="product inventory"
+                    api={productInventory.api}
+                    afterImportCompleted={() => {
+                        fetchProductInventory();
+                    }}
+                    isExportAllOrSomeFeature={true}
+                    total={rowCount}
+                    recordsToExport={selectedRecords.length}
+                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    onExportToExcelSuccess={() => {
+                        if (gridApi) gridApi.deselectAll()
+                        else fetchProductInventory()
+                    }}
+                />
+            </Grid> */}
+
         </Grid>
         <div className="main-container">
             <div className="header-panel">
@@ -386,9 +406,9 @@ const ProductInventory = () => {
         }
         {
             showDeleteConfirmBox &&
-                <ConfirmationDialog
-                    open={showDeleteConfirmBox}
-                    message={`Are you sure you want to delete the ${storedRoutes ? storedRoutes.productInventory?.title?.toLowerCase() : RESOURCE_LABEL.productInventory?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
+            <ConfirmationDialog
+                open={showDeleteConfirmBox}
+                message={`Are you sure you want to delete the ${storedRoutes ? storedRoutes.productInventory?.title?.toLowerCase() : RESOURCE_LABEL.productInventory?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
                 onClose={() => setShowDeleteConfirmBox(false)}
                 onOk={handleDelete}
             />

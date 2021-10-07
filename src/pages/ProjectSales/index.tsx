@@ -519,6 +519,7 @@ const ProjectSales: FC = () => {
             page={page}
             loading={loading}
             renderedFrom="projectSalesPage"
+            refreshGrid={fetchProjects}
           />
         </div>
 
