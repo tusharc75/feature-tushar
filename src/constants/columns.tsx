@@ -33,10 +33,8 @@ export const detailPagePath = {
     deliveryPerson: routes?.userDetail?.path,
     pDFTemplate: routes?.quotePdfTemplateDetail?.path,
     subMarketSegment: routes?.marketSegment?.path,
-
-    // Instead of using static key, use resource
-    "Rental Information": routes.rentalManagementDetail.path
 }
+
 export const hasDetailPageAsPopup = {
     subMarketSegment: routes?.marketSegment?.path,
     marketSegment: routes?.marketSegment?.path
