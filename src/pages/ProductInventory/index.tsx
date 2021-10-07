@@ -258,7 +258,7 @@ const ProductInventory = () => {
             <Grid item md={4} sm={11} xs={10}>
                 <CustomBreadCrumbs routes={[routes.productInventory]} />
             </Grid>
-            {/* <Grid item md={8} sm={1} xs={2}>
+            <Grid item md={8} sm={1} xs={2}>
                 <ImportExportLinks
                     permissions={permissions?.productInventory}
                     module="product inventory"
@@ -275,7 +275,7 @@ const ProductInventory = () => {
                         else fetchProductInventory()
                     }}
                 />
-            </Grid> */}
+            </Grid>
 
         </Grid>
         <div className="main-container">
