@@ -18,7 +18,7 @@ import { useHistory } from 'react-router-dom'
 import routes from "../../../components/Helpers/Routes";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 
-const ManageRentalManagementDialog = ({ isClone, rentalManagementId, onClose, onSuccess, open }) => {
+const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManagementData = null, onClose, onSuccess, open }) => {
 
     const history = useHistory()
     const toastConfig = useContext(CustomToastContext);
@@ -279,8 +279,8 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, onClose, on
                 <CustomDialogHeader
                     title={
                         !rentalManagementId
-                            ? "Create Rental Management"
-                            : `${isClone ? "Clone" : "Editing"}`
+                            ? `Create ${routes.rentalManagement.title}`
+                            : `${isClone ? "Clone" : `Update ${rentalManagementData?.rentalJobName}`}`
                     }
                     onClose={(e, reason) => {
                         if (isFieldNotTouched(rentalData, formValues)) onClose()
