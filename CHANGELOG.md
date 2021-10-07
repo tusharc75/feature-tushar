@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.11.0](https://github.com/vebholic/oms_frontend/compare/v1.10.79...v1.11.0) (2021-10-07)
+
+
+### Features
+
+* **packages:** assing products to package ([71ad391](https://github.com/vebholic/oms_frontend/commit/71ad3918125bae388c6c3e6f4f402a9384864819))
+
+
+### Bug Fixes
+
+* **chatter:** standalone resource ([9d75c96](https://github.com/vebholic/oms_frontend/commit/9d75c9674aebd29e2829b1c415747653e5425938))
+
 ### [1.10.79](https://github.com/vebholic/oms_frontend/compare/v1.10.78...v1.10.79) (2021-10-06)
 
 ### [1.10.78](https://github.com/vebholic/oms_frontend/compare/v1.10.77...v1.10.78) (2021-10-06)
