@@ -527,7 +527,7 @@ const PackageList = () => {
                             limit={limit}
                             pageSizes={pageSizes}
                             page={page}
-                            actionWidth={100}
+                            actionWidth={140}
                             loading={loading}
                             renderedFrom={pageTitle}
                             allowSelection={!isOffline}
