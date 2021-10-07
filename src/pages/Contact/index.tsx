@@ -658,6 +658,7 @@ export default function Contact(props) {
             page={page}
             loading={loading}
             renderedFrom={contactResource}
+            refreshGrid={getContacts}
           />
 
           {showDeleteWarningConfirmBox?.show ? (

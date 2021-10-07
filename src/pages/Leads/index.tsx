@@ -574,6 +574,7 @@ const Leads = () => {
               actionWidth={150}
               loading={loading}
               renderedFrom={leadResource}
+              refreshGrid={fetchLeads}
             /> : null
         }
 
