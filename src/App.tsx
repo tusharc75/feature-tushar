@@ -106,6 +106,7 @@ import SalesOrder from "./pages/SalesOrderCreation";
 import SalesOrderDetails from "./pages/SalesOrderCreation/SalesOrderDetails";
 import PackageList from "./pages/Packages";
 import PackageDetails from "./pages/Packages/PackageDetails";
+import BOMTable from "./pages/BOM";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -561,8 +562,11 @@ function App() {
             <PrivateRoute exact path="/product-list">
               <Products />
             </PrivateRoute>
-            <PrivateRoute exact path="/product/details/:id">
+            <PrivateRoute exact path={`${routes.productDetail.path}/:id`}>
               <ProductDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.productDetail.path}/:id/bom`}>
+              <BOMTable />
             </PrivateRoute>
             <PrivateRoute exact path="/product/my-cart">
               <MyOwnCart />
