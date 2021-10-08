@@ -474,6 +474,7 @@ const Product = () => {
                 isClone={isClone}
                 productId={productId}
                 handleClose={handleClose}
+                isRedirectToDetailPage={true}
                 openFrom="productMaster"
             />
         }
