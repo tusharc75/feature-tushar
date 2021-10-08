@@ -28,10 +28,15 @@ interface FormData {
   qty: number;
 }
 
+interface ResourceType {
+  name: string;
+  id: string;
+}
+
 const AssingQuantityDialog: FC<DialogProps> = (props) => {
   const { ids, onClose, onSuccess, title, label, resource, resourceData: newResourceData } = props;
   const { setToastConfig } = useContext(CustomToastContext);
-  const [resourceData, setResourceData] = useState([]);
+  const [resourceData, setResourceData] = useState<ResourceType[]>([]);
   const [isSubmitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormData[]>([
     {
@@ -43,8 +48,8 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
 
   useEffect(() => {
     if (newResourceData.length > 0) {
-      let existingData = []
-      if (resource.includes("product")) {
+      let existingData = [];
+      if (resource.includes('product')) {
         existingData = newResourceData.map(({ product, qty }) => ({
           id: product._id,
           resource: {
@@ -52,8 +57,7 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
             id: product._id
           },
           qty
-        }))
-
+        }));
       } else {
         existingData = newResourceData.map(({ wareHouse, qty }) => ({
           id: wareHouse._id,
@@ -62,24 +66,47 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
             id: wareHouse._id
           },
           qty
-        }))
+        }));
       }
 
-      setFormData(existingData)
-
+      setFormData(existingData);
     }
-  }, [newResourceData])
+  }, [newResourceData]);
 
   useEffect(() => {
     (() => {
       axiosInstance()
         .get(`${resource}?limit=0`)
         .then(({ data: { data } }) => {
+          let existingData = [];
+          if (newResourceData.length > 0) {
+            existingData = newResourceData.map((resource) => {
+              if (resource.includes('warehouse')) {
+                return resource.wareHouse;
+              } else {
+                return resource.product;
+              }
+            });
+          }
+
           if (resource.includes('warehouse')) {
-            const warehouses = data.map((_d) => ({ id: _d._id, name: _d.warehouseName }));
+            let warehouses = [];
+            if (existingData.length > 0) {
+              warehouses = data
+                .map((_d) => ({ id: _d._id, name: _d.warehouseName }))
+                .filter((w) => existingData.filter((d) => d.id !== w.id).length > 0);
+            } else {
+              warehouses = data.map((_d) => ({ id: _d._id, name: _d.warehouseName }));
+            }
             setResourceData(warehouses);
           } else {
-            const products = data.map((_d) => ({ id: _d._id, name: _d.productName }));
+            let products = [];
+            if (existingData.length > 0) {
+              products = data.map((_d) => ({ id: _d._id, name: _d.productName }))
+                .filter((p) => existingData.filter((d) => d.id !== p.id).length > 0);
+            } else {
+              products = data.map((_d) => ({ id: _d._id, name: _d.productName }));
+            }
             setResourceData(products);
           }
         })
@@ -123,6 +150,13 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
   };
 
   const handleChange = (name: string, data: FormData, val: any) => {
+    if (name === 'resource') {
+      setResourceData((prevState) => {
+        const updatedArr = prevState.filter((state) => state.id !== val.id);
+        return updatedArr;
+      });
+    }
+
     setFormData((prevState) => {
       const updatedState = prevState.map((state) => {
         if (state.id === data.id) {
@@ -184,7 +218,7 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
                         setFormData((prevState) => [...prevState, { id: generateUniqueId(), resource: null, qty: 0 }]);
                       }}
                     >
-                      <Add color={!Boolean(form.resource) || !Boolean(form.qty) ? "disabled" : `primary`} />
+                      <Add color={!Boolean(form.resource) || !Boolean(form.qty) ? 'disabled' : `primary`} />
                     </IconButton>
                     {indx !== 0 && (
                       <Box ml={2}>
@@ -216,7 +250,7 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
         <Button
           onClick={submitForm}
           variant="contained"
-          disabled={isSubmitting || !Boolean(formData[0].resource) || !Boolean(formData[0].qty)}
+          disabled={isSubmitting || !Boolean(formData[formData.length - 1].resource) || !Boolean(formData[formData.length - 1].qty)}
           color="primary"
         >
           Save
