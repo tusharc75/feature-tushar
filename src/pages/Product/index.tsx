@@ -3,7 +3,6 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import AddIcon from "@material-ui/icons/Add";
-import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { Link } from 'react-router-dom'
@@ -30,6 +29,9 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useData } from "../../StateProvider/Provider";
 import { sortBy } from 'lodash';
+import HtmlTooltip from '../../components/CustomTooltipTitle'
+import { RiBillLine } from "react-icons/ri";
+
 
 const ignoreField = ["qty", "priceTemplate"]
 
@@ -315,7 +317,7 @@ const Product = () => {
     const ActionsRenderer = params => (
         <>
             {productPermissions.isCreate &&
-                <Tooltip title="Clone">
+                <HtmlTooltip title="Clone">
                     <IconButton
                         size="small"
                         aria-label="Clone"
@@ -323,17 +325,26 @@ const Product = () => {
                     >
                         <FileCopyIcon color="primary" />
                     </IconButton>
-                </Tooltip>
+                </HtmlTooltip>
             }
             {productPermissions.isDelete &&
-                <Tooltip title="Delete">
+                <HtmlTooltip title="Delete">
                     <IconButton size="small" aria-label="Delete" onClick={() => {
                         setDeleteRecord(params.data);
                         setShowDeleteConfirmBox(true)
                     }} >
                         <DeleteIcon color="error" />
                     </IconButton>
-                </Tooltip >
+                </HtmlTooltip >
+            }
+            {productPermissions.isRead &&
+                <HtmlTooltip title="BOM">
+                    <IconButton size="small" aria-label="View BOM" onClick={() => {
+
+                    }} >
+                        <RiBillLine color="primary" />
+                    </IconButton>
+                </HtmlTooltip >
             }
         </>
     )
@@ -399,6 +410,14 @@ const Product = () => {
                         if (isImportedSuccessfully) {
                             fetchProduct();
                         }
+                    }}
+                    isExportAllOrSomeFeature={true}
+                    total={rowCount}
+                    recordsToExport={selectedRecords.length}
+                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    onExportToExcelSuccess={() => {
+                        if (gridApi) gridApi.deselectAll()
+                        else fetchProduct()
                     }}
                 />
             </Grid>
@@ -466,6 +485,7 @@ const Product = () => {
                     actionWidth={150}
                     loading={loading}
                     renderedFrom="productPage"
+                    refreshGrid={fetchProduct}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>

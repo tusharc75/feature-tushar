@@ -104,7 +104,9 @@ import ReceivingTicketDetails from "./pages/ReceivingTicket/ReceivingTicketDetai
 import PricingConditionsDetailsPage from "./pages/PricingConditions/PricingConditionsDetailsPage";
 import SalesOrder from "./pages/SalesOrderCreation";
 import SalesOrderDetails from "./pages/SalesOrderCreation/SalesOrderDetails";
-import IdleTimer from "./IdleTimer";
+import PackageList from "./pages/Packages";
+import PackageDetails from "./pages/Packages/PackageDetails";
+import BOMTable from "./pages/BOM";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -118,30 +120,6 @@ function App() {
   }: any = useData();
 
   const history = useHistory();
-  useEffect(() => {
-    if (user?.user) {
-      const timer = new IdleTimer({
-        timeout: 600, //expire after 10 seconds
-        onTimeout: () => {
-          localStorage.removeItem('token');
-          if (history) {
-            //history.push('/login');
-            // history.push('/login');
-            // history.go();
-
-            history.push("/");
-            dispatch({ type: SET_USER, payload: null });
-            history.push("/login");
-          }
-        },
-        onExpired: () => {
-        }
-      });
-      return () => {
-        timer.cleanUp();
-      };
-    }
-  }, [user]);
 
   history.listen(() => {
     let isSlowInternetConnection = localStorage.getItem("slowInternetConnection")
@@ -550,7 +528,7 @@ function App() {
             <PrivateRoute exact path={routes.currencyConverter.path}>
               <CurrencyConverter />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.address.path}>
+            <PrivateRoute exact path={routes.warehouse.path}>
               <Warehouse />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>
@@ -584,8 +562,11 @@ function App() {
             <PrivateRoute exact path="/product-list">
               <Products />
             </PrivateRoute>
-            <PrivateRoute exact path="/product/details/:id">
+            <PrivateRoute exact path={`${routes.productDetail.path}/:id`}>
               <ProductDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.productDetail.path}/:id/bom`}>
+              <BOMTable />
             </PrivateRoute>
             <PrivateRoute exact path="/product/my-cart">
               <MyOwnCart />
@@ -625,6 +606,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.salesOrderDetail.path}/:id`} >
               <SalesOrderDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.packages.path}>
+              <PackageList />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.packagesDetail.path}/:id`} >
+              <PackageDetails />
             </PrivateRoute>
 
             <Route path="*" component={NotFound} />

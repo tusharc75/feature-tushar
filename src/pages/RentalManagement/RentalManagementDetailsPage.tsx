@@ -532,6 +532,7 @@ const RentalManagementDetailsPage = () => {
                       allowAction={true}
                       loading={loading}
                       renderedFrom="rentalManagementDetailsPageInventory"
+                      refreshGrid={fetchProductInventory}
                     />
                     : <Box
                       p={2}
@@ -785,7 +786,7 @@ const RentalManagementDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this rental management ?`
+          message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ?`
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -805,6 +806,7 @@ const RentalManagementDetailsPage = () => {
             isClone={false}
             open={openUpdateDialog}
             rentalManagementId={id}
+            rentalManagementData={rentalManagementData}
             onClose={() => setOpenUpdateDialog(false)}
             onSuccess={() => {
               setOpenUpdateDialog(false);

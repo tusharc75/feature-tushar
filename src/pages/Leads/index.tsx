@@ -511,6 +511,8 @@ const Leads = () => {
             afterImportCompleted={() => {
               fetchLeads();
             }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
             recordsToExport={selectedRecords.length}
             ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
@@ -566,6 +568,7 @@ const Leads = () => {
               actionWidth={150}
               loading={loading}
               renderedFrom={leadResource}
+              refreshGrid={fetchLeads}
             /> : null
         }
 
