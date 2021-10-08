@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.12.0](https://github.com/vebholic/oms_frontend/compare/v1.11.0...v1.12.0) (2021-10-08)
+
+
+### Features
+
+* - app name changed ([86d3b02](https://github.com/vebholic/oms_frontend/commit/86d3b02f09e55d632c6482ab21b804e539169764))
+* - Minor changes done ([69a9689](https://github.com/vebholic/oms_frontend/commit/69a96892e7b7b937fb057c03ee13571585533b75))
+* - Refresh icon moved to right in grid ([1d01ae1](https://github.com/vebholic/oms_frontend/commit/1d01ae122615c19ad894f10c1ee85db654d9d2a6))
+* added import export for serialized assets ([5426288](https://github.com/vebholic/oms_frontend/commit/54262888bf362393cf70cba6dc3aa1809233eb34))
+* **packagedetails.tsx:** dialog change ([c2f3ec7](https://github.com/vebholic/oms_frontend/commit/c2f3ec71c5e1de20f3d0a7294763a7b97b84f81d))
+* **packages:** list action icon ([ef24e04](https://github.com/vebholic/oms_frontend/commit/ef24e043c974b5c4fafbef755c04f401aa074835))
+* **productmaster:** new button ([9881cd4](https://github.com/vebholic/oms_frontend/commit/9881cd4f47fa17781e9aeb9c19b03f7e8b3eb246))
+
+
+### Bug Fixes
+
+* changes added ([25ac285](https://github.com/vebholic/oms_frontend/commit/25ac285cd9a8f8dae87cd9e09d13d294861a11ee))
+* dynamic component name in display warehouse,rental job ([bd48b4a](https://github.com/vebholic/oms_frontend/commit/bd48b4ae201f74cff64fdebe24de46d8ffd98845))
+* dynamic component name in ware house ,rental job ([1dd1ba7](https://github.com/vebholic/oms_frontend/commit/1dd1ba729a19927becb286d0535b790a6634964c))
+* export by count issue resolved ([1826cfc](https://github.com/vebholic/oms_frontend/commit/1826cfc2a7c0e51d7ef6722b1640ace269b551c4))
+* import export issue ([c67f426](https://github.com/vebholic/oms_frontend/commit/c67f426234397c6441177e9bd58909b705f1c8d0))
+* import export issue ([bcce686](https://github.com/vebholic/oms_frontend/commit/bcce6864931c922eb709e549803c63d2648b346e))
+* import export issue resolved ([d1b4a19](https://github.com/vebholic/oms_frontend/commit/d1b4a19d3e90aef1856c60bd9d7b7f1ff237e991))
+* **packagedetails.tsx:** changes ([9387a12](https://github.com/vebholic/oms_frontend/commit/9387a12e0c1163a422fc56b31e265cfae9f69509))
+* **packages:** increase action column width ([ee74bd0](https://github.com/vebholic/oms_frontend/commit/ee74bd08c8f3b64e2e6f0ed3e3c563e052013419))
+* **productdetailpage.tsx:** warehouse dialog change ([490b4ab](https://github.com/vebholic/oms_frontend/commit/490b4abcd80b45fe50650a6b5d4f521ac602338c))
+* removed autologout after 10 ideal minutes of user ([cfeed2e](https://github.com/vebholic/oms_frontend/commit/cfeed2e3ba18df9870d1b8795ae3f74e5732282d))
+
 ## [1.11.0](https://github.com/vebholic/oms_frontend/compare/v1.10.79...v1.11.0) (2021-10-07)
 
 
