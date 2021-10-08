@@ -27,7 +27,6 @@ import ManageProductInventory from "../ProductInventory/ManageProductInventory"
 import { extractFields } from "../../constants/formulaUtility";
 import ProductHierarchy from "./ProductHierarchy"
 import HtmlTooltip from "../../components/CustomTooltipTitle";
-import AssingAssetsDialog from "./AssingAssetsDialog";
 import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
 
 
@@ -42,6 +41,7 @@ const ProductDetailsPage = () => {
     const [headingLabel, setHeadingLabel] = useState("");
     const [loading, setLoading] = useState(false);
     const [loadingWarehouse, setLoadingWarehouse] = useState(false);
+    const [loadingBOMData, setLoadingBOMData] = useState(false);
     const [productData, setProductData] = useState(null);
     const [showConfirmBox, setShowConfirmBox] = useState(false);
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -129,6 +129,7 @@ const ProductDetailsPage = () => {
 
     const getProductTree = () => {
         if (productData?._id) {
+            setLoadingBOMData(true)
             axiosInstance()
                 .get(`/product/bom/${productData?._id}`)
                 .then(({ data: { data } }) => {
@@ -139,6 +140,9 @@ const ProductDetailsPage = () => {
                         return o
                     })
                     setBOMData([...data])
+                    setLoadingBOMData(false)
+                }).catch(err => {
+                    setLoadingBOMData(false)
                 })
         }
     }
@@ -325,7 +329,7 @@ const ProductDetailsPage = () => {
                             </Box>
                             {(
                                 <Box style={{ paddingBottom: "8px" }}>
-                                    {loading ? (
+                                    {loading || loadingBOMData ? (
                                         [1, 2].map((i) => (
                                             <BoxWithBorder
                                                 key={i}
@@ -356,7 +360,16 @@ const ProductDetailsPage = () => {
                                                 permissions={permissions.product}
                                                 unassignProduct={unassignProduct}
                                             />
-                                            <Box marginY={1} />
+                                            <Box px={1} my={1} >
+
+                                                <Button
+                                                    fullWidth
+                                                    variant="outlined"
+                                                    color='primary'
+                                                    onClick={() => history.push(`${routes.productDetail.path}/${id}/bom`, { productName: productData.productName })}>
+                                                    View All
+                                                </Button>
+                                            </Box>
                                         </>
                                     ) : (
                                         <Box textAlign="center" padding={2} minHeight={150}>
