@@ -57,6 +57,7 @@ const RentalManagementDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState(false);
+  const [inventoryType, setInventoryType] = useState(null);
   const [rentalManagementFields, setRentalManagementFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
@@ -67,7 +68,6 @@ const RentalManagementDetailsPage = () => {
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
-  const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showActivity, setActivityShow] = useState(true);
   const [allowedToEdit, setAllowedToEdit] = useState(false)
@@ -263,40 +263,36 @@ const RentalManagementDetailsPage = () => {
 
 
   const fetchProductInventory = () => {
+    let tempInventory = []
     dispatch({ type: "loading", loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
 
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/inventory`).then(({ data }) => {
-      data.data = data.data?.map((u) => ({
+    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/products-packages`).then(({ data }) => {
+      data.data?.products.map((u) => (tempInventory.push({
         ...u,
-        id: u.inventory?._id,
-        productId: u.product?._id,
-        productName: u.product?.productName,
-        productCategory: u.product?.productCategory?.optionLabel,
-        warehouse: u.inventory?.warehouse?.optionLabel,
-        status: u.inventory?.status,
-        assetNumber: u.inventory?.assetNumber,
-        serialNumber: u.inventory?.serialNumber,
-      }));
-      fetchDeliveryTicket(data.data);
+        id: u._id,
+        productId: u._id,
+        productCategory: u.productCategory?.optionLabel,
+      })));
+      fetchDeliveryTicket(tempInventory);
 
-      let tempWareHouse = []
-      data.data.map(d => {
-        if (!tempWareHouse.some(t => t.optionValue === d.inventory.warehouse.optionValue)) {
-          tempWareHouse.push(d.inventory.warehouse)
-        }
-      })
-      if (data.data > 0 && data.data.every(d => d.inventory?.warehouse?.optionLabel !== null && d.inventory?.warehouse?.optionLabel !== undefined)) {
-        setCurrentStep(4)
-        axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/status `, { "status": "Ready To Ship" }).then(({ data }) => {
-        }).catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-      }
-      setWarehouseList(tempWareHouse)
-      dispatch({ type: "initialize", data: data.data, count: data.count });
+      // let tempWareHouse = []
+      // data.data.map(d => {
+      //   if (!tempWareHouse.some(t => t.optionValue === d.inventory.warehouse.optionValue)) {
+      //     tempWareHouse.push(d.inventory.warehouse)
+      //   }
+      // })
+      // if (data.data > 0 && data.data.every(d => d.inventory?.warehouse?.optionLabel !== null && d.inventory?.warehouse?.optionLabel !== undefined)) {
+      //   setCurrentStep(4)
+      //   axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/status `, { "status": "Ready To Ship" }).then(({ data }) => {
+      //   }).catch((error) => {
+      //     toastConfig.setToastConfig(error);
+      //   });
+      // }
+      // setWarehouseList(tempWareHouse)
+      dispatch({ type: "initialize", data: tempInventory, count: tempInventory.length });
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
       }, gridLoadingTimeout);
@@ -340,12 +336,8 @@ const RentalManagementDetailsPage = () => {
     actionsRenderer: ActionsRenderer,
   };
   const columns = [
-    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "nameRenderer" },
     { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
-    { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
   ];
 
   const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageInventory"));
@@ -385,8 +377,9 @@ const RentalManagementDetailsPage = () => {
   };
 
   const handleAddProductInventory = (productInventoryArray) => {
-    let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
-    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/inventory`, { "products": tempProductArray })
+    // let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
+    let tempProductArray = productInventoryArray.map(d => { return { "id": d._id, "qty": d.quantity, "type": d.type } })
+    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/products-packages/`, { "productsPackages": tempProductArray })
       .then(({ data }) => {
         setAddExistingProductDialog(false)
         fetchProductInventory()
@@ -504,18 +497,24 @@ const RentalManagementDetailsPage = () => {
                       variant="contained"
                       color="primary"
                       size="small"
-                      onClick={() => { setAddExistingProductDialog(true) }}
+                      onClick={() => {
+                        setAddExistingProductDialog(true);
+                        setInventoryType("product")
+                      }}
                     >
-                      Add Existing Serialized Assets
+                      {`Add ${routes.product.title}`}
                     </Button>
                     <Box mx={1} />
                     <Button
                       variant="contained"
                       color="primary"
                       size="small"
-                      onClick={() => { setShowManageProductInventoryDialog(true) }}
+                      onClick={() => {
+                        setAddExistingProductDialog(true);
+                        setInventoryType("package")
+                      }}
                     >
-                      Add New Serialized Assets
+                      {`Add ${routes.packages.title}`}
                     </Button>
                   </Box>
                   {columns ?
@@ -797,6 +796,7 @@ const RentalManagementDetailsPage = () => {
         <AddExistingProductInventory
           addProductInventory={handleAddProductInventory}
           handleProductInventoryClose={() => { setAddExistingProductDialog(false) }}
+          type={inventoryType}
         />
       }
       {
@@ -841,18 +841,7 @@ const RentalManagementDetailsPage = () => {
           }}
         />
       }
-      {
-        showManageProductInventoryDialog &&
-        <ManageProductInventory
-          isClone={null}
-          productInventoryId={null}
-          onClose={() => setShowManageProductInventoryDialog(false)}
-          onSuccess={(data) => {
-            setShowManageProductInventoryDialog(false);
-            handleAddProductInventory([data])
-          }}
-        />
-      }
+
     </>
   );
 };
