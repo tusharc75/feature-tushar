@@ -545,27 +545,7 @@ const ProjectSalesDetails = () => {
                       type: projectSales.projectSalesResource,
                       referenceId: id,
                       access: true,
-                    },
-                    ...opportunities?.map((op) => ({
-                      type: opportunity.opportunityResource,
-                      referenceId: op._id,
-                      access: false,
-                    })),
-                    ...customerAccounts?.map((ca) => ({
-                      type: customerAccount.accountResource,
-                      referenceId: ca._id,
-                      access: false,
-                    })),
-                    ...customerContacts?.map((cc) => ({
-                      type: customerContact.contactResource,
-                      referenceId: cc._id,
-                      access: false,
-                    })),
-                    ...quotes?.map((q) => ({
-                      type: quote.quoteResource,
-                      referenceId: q._id,
-                      access: false,
-                    })),
+                    }
                   ]}
                   handleActivityRefresh={() => { }}
                   emails={[]}

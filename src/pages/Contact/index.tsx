@@ -502,6 +502,8 @@ export default function Contact(props) {
             afterImportCompleted={() => {
               getContacts();
             }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
             recordsToExport={selectedRecords.length}
             ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
@@ -656,6 +658,7 @@ export default function Contact(props) {
             page={page}
             loading={loading}
             renderedFrom={contactResource}
+            refreshGrid={getContacts}
           />
 
           {showDeleteWarningConfirmBox?.show ? (

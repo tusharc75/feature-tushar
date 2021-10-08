@@ -11,6 +11,7 @@ import {
     LinkRenderer,
     CheckboxRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
+import { RESOURCE_LABEL } from "./helpers";
 
 export const staticFrameworkRender = {
     "createdByRenderer": CreatedByRenderer,
@@ -31,8 +32,9 @@ export const detailPagePath = {
     rentalJob: routes.rentalManagementDetail.path,
     deliveryPerson: routes?.userDetail?.path,
     pDFTemplate: routes?.quotePdfTemplateDetail?.path,
-    subMarketSegment: routes?.marketSegment?.path
+    subMarketSegment: routes?.marketSegment?.path,
 }
+
 export const hasDetailPageAsPopup = {
     subMarketSegment: routes?.marketSegment?.path,
     marketSegment: routes?.marketSegment?.path
@@ -105,7 +107,7 @@ export const checkStaticField = (renderedFrom, fieldData) => {
 
 export const staticColumns = ["createdBy", "updatedBy"]
 
-export const getColumnData = (title, field) => {
+export const getColumnData = (title, field, detailScreenRoute = null) => {
 
 
     let data = localStorage.getItem("gridMetaData")
@@ -127,8 +129,34 @@ export const getColumnData = (title, field) => {
             show: gridMetaData[updatedTitle]?.hide && gridMetaData[updatedTitle]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
             disabled: gridMetaData[updatedTitle]?.disabled && gridMetaData[updatedTitle]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false
         }
-        let joinedFieldName = field?.fieldName.indexOf(" ") > 0 ? camelCase(field?.fieldName) : field?.fieldName
-        if (field?.primary) {
+        if (field?.fieldName === "firstName") {
+            let combinedTitle = camelCase(updatedTitle)
+            let pathName = detailPagePath[combinedTitle] ? detailPagePath[combinedTitle] :
+                routes.userDetail.path ? routes.userDetail.path : ""
+            return {
+                columnData: {
+                    ...commonFieldData,
+                    field: "concatedName",
+                    cellRenderer: "linkRenderer",
+                    cellRendererParams: { "pathName": pathName, "property": "_id" }
+                },
+                rendererName: 'linkRenderer',
+            }
+        }
+        else if (field?.primaryField === true && detailScreenRoute) {
+            return {
+                columnData: {
+                    ...commonFieldData,
+                    field: field.fieldName,
+                    cellRenderer: "linkRenderer",
+                    cellRendererParams: { "pathName": detailScreenRoute, "property": "_id" }
+                },
+                rendererName: 'linkRenderer',
+            }
+        }
+        else if (field?.lookup) {
+
+            let joinedFieldName = field?.fieldName.indexOf("_") > 0 ? camelCase(field?.fieldName) : field?.fieldName
             let pathName = ""
             let isForPopup = false
             if (hasDetailPageAsPopup[joinedFieldName]) {

@@ -1,5 +1,18 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper } from '@material-ui/core';
+import {
+  Grid,
+  Box,
+  Button,
+  Paper,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
+} from '@material-ui/core';
+import { Add } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -11,9 +24,12 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { packages } from '../../constants/helpers';
+import { packages, product } from '../../constants/helpers';
 import ManagePackageDialog from './ManagePackageDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
+import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
+import Loader from '../../components/Loader';
+import ProductsTable from './ProductsTable';
 
 const PackageDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -25,36 +41,34 @@ const PackageDetails = () => {
   }: any = useData();
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingProducts, setLoadingProducts] = useState(false);
   const [packageData, setPackageData] = useState(null);
+  const [products, setProducts] = useState([]);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [packageFields, setPackageFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
+  const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
 
   useEffect(() => {
     if (id) {
-      fetchPackage()
+      fetchPackage();
+      getProducts();
     }
     // eslint-disable-next-line
   }, [id]);
-
-  const handleMainPoints = (data) => {
-    let mainPoint = {};
-    mainPoint['Package Name'] = data?.packageName || '';
-    setMainPoints(mainPoint);
-  };
 
   const getRessourceFields = () => {
     setLoading(true);
     axiosInstance()
       .get('/field?resource=Packages')
       .then(({ data: { data } }) => {
-        setPackageFields(data)
-        setLoading(false)
+        setPackageFields(data);
+        setLoading(false);
       })
       .catch((err) => {
-        setLoading(false)
+        setLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -64,8 +78,7 @@ const PackageDetails = () => {
     axiosInstance()
       .get(`${routes.packages.path}/${id}`)
       .then(({ data: { data } }) => {
-        setPackageData(data)
-        handleMainPoints(data)
+        setPackageData(data);
         setHeadingLabel(data.packageName);
         setCustomizedRoutes([routes.packages, { title: data.packageName }]);
         getRessourceFields();
@@ -93,6 +106,21 @@ const PackageDetails = () => {
       });
   };
 
+  const getProducts = () => {
+    setLoadingProducts(true)
+    axiosInstance()
+      .get(`${packages.packageApi}/get-products/${id}`)
+      .then(({ data: { data } }) => {
+        const newArr = data.length > 0 ? data.map((product: any) => ({ product: product.productId, qty: product.qty })) : [];
+        setProducts(newArr);
+        setLoadingProducts(false)
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setLoadingProducts(false)
+      });
+  };
+
   return (
     <>
       <Fragment>
@@ -100,7 +128,7 @@ const PackageDetails = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+          <Grid item xs={12} sm={12} md={8} lg={8}>
             <Paper>
               {!packageData ? (
                 <div>
@@ -134,8 +162,18 @@ const PackageDetails = () => {
                 )}
               </Box>
             </Paper>
+            <Box mt={2}>
+              <Box mb={1} display="flex" justifyContent="flex-end">
+                <Button className="text-transform-none" variant="outlined" color="primary" startIcon={<Add />} size="small" onClick={() => setShowProductAssignDialog(true)}>
+                  Assign Product(s)
+                </Button>
+              </Box>
+              <ProductsTable products={products} loading={loadingProducts} />
+            </Box>
           </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}></Grid>
+          <Grid item xs={12} sm={12} md={4} lg={4}>
+            {/** RIGHT SIDE OF THE SCREEN **/}
+          </Grid>
         </Grid>
       </Fragment>
       {showConfirmBox && (
@@ -160,6 +198,20 @@ const PackageDetails = () => {
             fetchPackage();
             setOpenUpdateDialog(false);
           }}
+        />
+      )}
+      {showProductAssignDialog && (
+        <AssignQuantityDialog
+          ids={[id]}
+          onClose={() => setShowProductAssignDialog(false)}
+          onSuccess={() => {
+            setShowProductAssignDialog(false)
+            getProducts()
+          }}
+          resource={product.api}
+          title="Assign Products"
+          label='Select Product'
+          resourceData={products}
         />
       )}
     </>

@@ -2,6 +2,84 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.11.0](https://github.com/vebholic/oms_frontend/compare/v1.10.79...v1.11.0) (2021-10-07)
+
+
+### Features
+
+* **packages:** assing products to package ([71ad391](https://github.com/vebholic/oms_frontend/commit/71ad3918125bae388c6c3e6f4f402a9384864819))
+
+
+### Bug Fixes
+
+* **chatter:** standalone resource ([9d75c96](https://github.com/vebholic/oms_frontend/commit/9d75c9674aebd29e2829b1c415747653e5425938))
+
+### [1.10.79](https://github.com/vebholic/oms_frontend/compare/v1.10.78...v1.10.79) (2021-10-06)
+
+### [1.10.78](https://github.com/vebholic/oms_frontend/compare/v1.10.77...v1.10.78) (2021-10-06)
+
+### [1.10.77](https://github.com/vebholic/oms_frontend/compare/v1.10.76...v1.10.77) (2021-10-06)
+
+### [1.10.76](https://github.com/vebholic/oms_frontend/compare/v1.10.75...v1.10.76) (2021-10-06)
+
+### [1.10.75](https://github.com/vebholic/oms_frontend/compare/v1.10.74...v1.10.75) (2021-10-06)
+
+### [1.10.74](https://github.com/vebholic/oms_frontend/compare/v1.10.73...v1.10.74) (2021-10-06)
+
+### [1.10.73](https://github.com/vebholic/oms_frontend/compare/v1.10.72...v1.10.73) (2021-10-06)
+
+### [1.10.72](https://github.com/vebholic/oms_frontend/compare/v1.10.71...v1.10.72) (2021-10-06)
+
+### [1.10.71](https://github.com/vebholic/oms_frontend/compare/v1.10.70...v1.10.71) (2021-10-06)
+
+### [1.10.70](https://github.com/vebholic/oms_frontend/compare/v1.10.69...v1.10.70) (2021-10-06)
+
+### [1.10.69](https://github.com/vebholic/oms_frontend/compare/v1.10.68...v1.10.69) (2021-10-06)
+
+### [1.10.68](https://github.com/vebholic/oms_frontend/compare/v1.10.67...v1.10.68) (2021-10-06)
+
+### [1.10.67](https://github.com/vebholic/oms_frontend/compare/v1.10.66...v1.10.67) (2021-10-06)
+
+### [1.10.66](https://github.com/vebholic/oms_frontend/compare/v1.10.65...v1.10.66) (2021-10-06)
+
+### [1.10.65](https://github.com/vebholic/oms_frontend/compare/v1.10.64...v1.10.65) (2021-10-06)
+
+### [1.10.64](https://github.com/vebholic/oms_frontend/compare/v1.10.63...v1.10.64) (2021-10-06)
+
+### [1.10.63](https://github.com/vebholic/oms_frontend/compare/v1.10.62...v1.10.63) (2021-10-06)
+
+### [1.10.62](https://github.com/vebholic/oms_frontend/compare/v1.10.61...v1.10.62) (2021-10-06)
+
+### [1.10.61](https://github.com/vebholic/oms_frontend/compare/v1.10.60...v1.10.61) (2021-10-06)
+
+### [1.10.60](https://github.com/vebholic/oms_frontend/compare/v1.10.59...v1.10.60) (2021-10-06)
+
+### [1.10.59](https://github.com/vebholic/oms_frontend/compare/v1.10.58...v1.10.59) (2021-10-06)
+
+### [1.10.58](https://github.com/vebholic/oms_frontend/compare/v1.10.57...v1.10.58) (2021-10-06)
+
+### [1.10.57](https://github.com/vebholic/oms_frontend/compare/v1.10.56...v1.10.57) (2021-10-06)
+
+### [1.10.56](https://github.com/vebholic/oms_frontend/compare/v1.10.55...v1.10.56) (2021-10-06)
+
+### [1.10.55](https://github.com/vebholic/oms_frontend/compare/v1.10.54...v1.10.55) (2021-10-06)
+
+### [1.10.54](https://github.com/vebholic/oms_frontend/compare/v1.10.53...v1.10.54) (2021-10-06)
+
+### [1.10.53](https://github.com/vebholic/oms_frontend/compare/v1.10.52...v1.10.53) (2021-10-06)
+
+### [1.10.52](https://github.com/vebholic/oms_frontend/compare/v1.10.51...v1.10.52) (2021-10-06)
+
+### [1.10.51](https://github.com/vebholic/oms_frontend/compare/v1.10.50...v1.10.51) (2021-10-06)
+
+### [1.10.50](https://github.com/vebholic/oms_frontend/compare/v1.10.49...v1.10.50) (2021-10-06)
+
+### [1.10.49](https://github.com/vebholic/oms_frontend/compare/v1.10.48...v1.10.49) (2021-10-06)
+
+### [1.10.48](https://github.com/vebholic/oms_frontend/compare/v1.10.47...v1.10.48) (2021-10-06)
+
+### [1.10.47](https://github.com/vebholic/oms_frontend/compare/v1.10.46...v1.10.47) (2021-10-06)
+
 ### [1.10.46](https://github.com/vebholic/oms_frontend/compare/v1.10.45...v1.10.46) (2021-10-06)
 
 ### [1.10.45](https://github.com/vebholic/oms_frontend/compare/v1.10.44...v1.10.45) (2021-10-06)

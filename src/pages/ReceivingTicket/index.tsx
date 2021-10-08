@@ -207,7 +207,7 @@ const ReceivingTicket = () => {
   const WarehouseRenderer = (params) => (
     <>
       {params.value ? (
-        <Link className="link" title={params.value} to={`${routes.address.path}/detail/${params.data.warehouseId}`}>
+        <Link className="link" title={params.value} to={`${routes.warehouse.path}/detail/${params.data.warehouseId}`}>
           {params.value}
         </Link>
       ) : (

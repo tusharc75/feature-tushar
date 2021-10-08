@@ -648,6 +648,7 @@ export default function QuoteDetail() {
                       fetchQuoteData={fetchQuoteData}
                       columnView={columnView}
                       fetchTNC={fetchTermsAndConditions}
+                      globalLoading={loading}
                     />)}
                   </TabPanel>
                 </>
@@ -681,20 +682,6 @@ export default function QuoteDetail() {
                           type: quote.quoteResource,
                           referenceId: quoteData?._id,
                           access: true,
-                        },
-                        {
-                          type: quoteData?.customerAccountName
-                            ? customerAccount?.accountResource
-                            : supplierAccount?.accountResource,
-                          referenceId: quoteData?.customerAccountName
-                            ? quoteData?.customerAccountName?.optionValue
-                            : quoteData?.supplierAccountName?.optionValue,
-                          access: false,
-                        },
-                        {
-                          type: opportunity.opportunityResource,
-                          referenceId: quoteData.opportunity?.optionValue,
-                          access: false,
                         },
                       ]}
                       handleActivityRefresh={() => { }}
