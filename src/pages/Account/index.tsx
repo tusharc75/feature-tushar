@@ -158,7 +158,7 @@ export default function Account(props) {
       if (o?.fieldData?.fieldName === "accountName") {
         o.fieldData.primary = true
       }
-      let currentColumn = getColumnData(accountResource, o?.fieldData)
+      let currentColumn = getColumnData(accountResource, o?.fieldData, `/${accountRoute}/detail`)
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData]
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

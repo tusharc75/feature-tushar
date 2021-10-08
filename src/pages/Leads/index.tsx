@@ -137,7 +137,7 @@ const Leads = () => {
         let rendererNames = []
         data.forEach(o => {
 
-          let currentColumn = getColumnData(leadResource, o?.fieldData)
+          let currentColumn = getColumnData(leadResource, o?.fieldData, leadDetailPage.path)
 
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData]
@@ -153,6 +153,7 @@ const Leads = () => {
         }
         setFrameWorkComponent({ ...tempFrameworkComponent })
         columns = [...columns, ...getStaticFields()]
+        console.log('columns', columns)
 
         setColumns([...columns])
       })
