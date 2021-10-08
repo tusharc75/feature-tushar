@@ -367,18 +367,6 @@ const Email = () => {
                       Add
                     </Button> : null
                 }
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  className={styles.add_submit_btn}
-                  onClick={() => {
-                    setOpen(true);
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
                 {/* </Box> */}
                 <Button
                   className={styles.action_submit_btn}
