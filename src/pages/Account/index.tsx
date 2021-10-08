@@ -906,6 +906,7 @@ export default function Account(props) {
           page={page}
           loading={loading}
           renderedFrom={accountResource}
+          refreshGrid={fetchAccounts}
         />
 
 

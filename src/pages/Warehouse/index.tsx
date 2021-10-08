@@ -371,6 +371,7 @@ const AddressResource = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
+  console.log('permissions.addressResource', permissions)
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -379,9 +380,10 @@ const AddressResource = () => {
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.addressResource}
+            permissions={warehousePermissions}
             module="warehouse"
             api={'warehouse'}
+
             afterImportCompleted={() => {
               fetchWarehouses();
             }}

@@ -106,7 +106,6 @@ import SalesOrder from "./pages/SalesOrderCreation";
 import SalesOrderDetails from "./pages/SalesOrderCreation/SalesOrderDetails";
 import PackageList from "./pages/Packages";
 import PackageDetails from "./pages/Packages/PackageDetails";
-import IdleTimer from "./IdleTimer";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -120,30 +119,6 @@ function App() {
   }: any = useData();
 
   const history = useHistory();
-  useEffect(() => {
-    if (user?.user) {
-      const timer = new IdleTimer({
-        timeout: 600, //expire after 10 seconds
-        onTimeout: () => {
-          localStorage.removeItem('token');
-          if (history) {
-            //history.push('/login');
-            // history.push('/login');
-            // history.go();
-
-            history.push("/");
-            dispatch({ type: SET_USER, payload: null });
-            history.push("/login");
-          }
-        },
-        onExpired: () => {
-        }
-      });
-      return () => {
-        timer.cleanUp();
-      };
-    }
-  }, [user]);
 
   history.listen(() => {
     let isSlowInternetConnection = localStorage.getItem("slowInternetConnection")

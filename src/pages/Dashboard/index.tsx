@@ -114,7 +114,7 @@ function Dashboard() {
               <Grid container spacing={1} className={styles.full_layout}>
                 {sections.map((section) => {
                   return section.items.length > 0 ? (
-                    <Grid key={section.head} item xs={12} sm={6} md={4} className={styles.all_box_layout}>
+                    <Grid key={section.head} item xs={12} sm={4} md={4} className={styles.all_box_layout}>
                       <Paper className={styles.box_layout}>
 
                         <Box padding={2}>
@@ -122,7 +122,7 @@ function Dashboard() {
                           {<Box textAlign="center" >
                             <p className={styles.set_icon}>{section.icon}</p>
                             <h2 className={styles.headline}>{section.head}</h2>
-                            <p>{section.text}</p>
+                            <p className={styles.desc}>{section.text}</p>
                             {/*<div className={styles.dropdown}>*/}
                             <Button className={styles.view_button}>
                               View all<MdNavigateNext />
@@ -140,7 +140,7 @@ function Dashboard() {
                           </Box>}
                           </Grid>
                           <Grid className={styles.back_box}>
-                          {<Box height="215px" style={{ overflowY: 'auto' }} >
+                          {<Box height="215px" style={{ overflowY: 'auto' }} className={styles.back_box_content}>
                             {section.items.map((item) => (
                               <div key={item.name}>
                                 <Box marginY={1} component="div" >
