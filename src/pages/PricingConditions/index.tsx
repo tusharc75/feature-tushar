@@ -400,6 +400,7 @@ const PricingConditions = () => {
               actionWidth={100}
               loading={loading}
               renderedFrom="pricingConditionPage"
+              refreshGrid={fetchPriceConditionList}
             />
           </Box>
         </CustomContainer>

@@ -430,6 +430,7 @@ function Budget() {
               actionWidth={100}
               loading={loading}
               renderedFrom="budgetPage"
+              refreshGrid={fetchBudgetList}
             />
           </Box>
         </CustomContainer>

@@ -461,6 +461,7 @@ const DOAApproval = () => {
                     allowAction={false}
                     allowSelection={false}
                     loading={loading}
+                    refreshGrid={fetchQuote}
                   />
                 </div>
               </Grid>
@@ -488,7 +489,7 @@ const DOAApproval = () => {
             </Paper>
             :
             !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-              <IoIosArrowDropleft className="icon"/>
+              <IoIosArrowDropleft className="icon" />
             </a>}
         </div>
       </div>

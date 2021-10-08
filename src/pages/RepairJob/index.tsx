@@ -514,6 +514,7 @@ const RepairJob = () => {
           actionWidth={100}
           loading={loading}
           renderedFrom={'repairJobPage'}
+          refreshGrid={fetchRepairJobs}
         />
 
         {showDeleteWarningConfirmBox ? (

@@ -672,6 +672,7 @@ const User: FC = () => {
             actionWidth={110}
             loading={loading}
             renderedFrom="userPage"
+            refreshGrid={fetchUsers}
           />
 
         </CustomContainer>

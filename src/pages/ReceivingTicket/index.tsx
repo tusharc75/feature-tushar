@@ -562,6 +562,7 @@ const ReceivingTicket = () => {
           actionWidth={100}
           loading={loading}
           renderedFrom={'receivingTicketPage'}
+          refreshGrid={fetchReceivingTickets}
         />
 
         {showDeleteWarningConfirmBox ? (

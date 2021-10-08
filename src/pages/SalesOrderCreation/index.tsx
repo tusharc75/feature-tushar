@@ -456,6 +456,7 @@ const SalesOrder = () => {
           actionWidth={100}
           loading={loading}
           renderedFrom={'salesOrderPage'}
+          refreshGrid={fetchSalesOrder}
         />
 
         {showDeleteWarningConfirmBox ? (
