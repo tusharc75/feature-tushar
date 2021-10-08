@@ -494,6 +494,7 @@ const AddressResource = () => {
           actionWidth={150}
           loading={loading}
           renderedFrom="warehousePage"
+          refreshGrid={fetchWarehouses}
         />
 
         {showDeleteConfirmBox && (

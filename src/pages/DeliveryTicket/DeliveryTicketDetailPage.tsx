@@ -349,6 +349,7 @@ export default function DeliveryTicketDetail(props) {
                               actionWidth={150}
                               loading={false}
                               renderedFrom="deliveryTicketDetailInventoryPage"
+                              refreshGrid={fetchProductInventory}
                             />
                           </Grid>
                         </Grid>

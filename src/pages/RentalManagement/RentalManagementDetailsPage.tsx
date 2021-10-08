@@ -531,6 +531,7 @@ const RentalManagementDetailsPage = () => {
                       allowAction={true}
                       loading={loading}
                       renderedFrom="rentalManagementDetailsPageInventory"
+                      refreshGrid={fetchProductInventory}
                     />
                     : <Box
                       p={2}

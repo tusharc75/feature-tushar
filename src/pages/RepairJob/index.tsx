@@ -206,7 +206,7 @@ const RepairJob = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions.repairJob.isCreate ? (
+      {permissions.repairJob?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
             size="small"
@@ -227,7 +227,7 @@ const RepairJob = () => {
       )}
 
       <GridDeleteIcon
-        hasDeletePermission={permissions.repairJob.isDelete}
+        hasDeletePermission={permissions.repairJob?.isDelete}
         ownerId={params.data.ownerId}
         userId={user?.user?._id}
         onDelete={() =>
@@ -448,7 +448,15 @@ const RepairJob = () => {
                   permissions={permissions.repairJob}
                   module="repairJob"
                   api={repairJob.repairJobApi}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
+                  isExportAllOrSomeFeature={true}
+                  total={rowCount}
+                  recordsToExport={selectedRecords.length}
+                  ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                  onExportToExcelSuccess={() => {
+                    if (gridApi) gridApi.deselectAll()
+                    else fetchRepairJobs()
+                  }}
                 />
               </Grid>
             </Grid>
@@ -472,9 +480,9 @@ const RepairJob = () => {
             icon={<FaRegistered className="headerLogo" />}
             heading={routes.repairJob.title}
             showTransferEntityDialog={handleTransferEntityDialog}
-            // showCloneRepairJobDialog={() => {
-            //   handleShowCloneRepairJobDialog()
-            // }}
+          // showCloneRepairJobDialog={() => {
+          //   handleShowCloneRepairJobDialog()
+          // }}
           >
             {accountDetails.accountId && (
               <Chip
@@ -506,6 +514,7 @@ const RepairJob = () => {
           actionWidth={100}
           loading={loading}
           renderedFrom={'repairJobPage'}
+          refreshGrid={fetchRepairJobs}
         />
 
         {showDeleteWarningConfirmBox ? (
@@ -518,9 +527,8 @@ const RepairJob = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${
-              deleteRecord.repairJobName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${deleteRecord.repairJobName || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
