@@ -390,7 +390,15 @@ const SalesOrder = () => {
                   permissions={permissions.salesOrder}
                   module="salesOrder"
                   api={salesOrder.salesOrderApi}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
+                  isExportAllOrSomeFeature={true}
+                  total={rowCount}
+                  recordsToExport={selectedRecords.length}
+                  ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                  onExportToExcelSuccess={() => {
+                    if (gridApi) gridApi.deselectAll()
+                    else fetchSalesOrder()
+                  }}
                 />
               </Grid>
             </Grid>
@@ -414,9 +422,9 @@ const SalesOrder = () => {
             icon={<FaRegistered className="headerLogo" />}
             heading={routes.salesOrder.title}
             showTransferEntityDialog={handleTransferEntityDialog}
-            // showCloneSalesOrderDialog={() => {
-            //   handleShowCloneSalesOrderDialog()
-            // }}
+          // showCloneSalesOrderDialog={() => {
+          //   handleShowCloneSalesOrderDialog()
+          // }}
           >
             {accountDetails.accountId && (
               <Chip
@@ -460,9 +468,8 @@ const SalesOrder = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.salesOrderName ? 'Sales Order' : 'Sales Orders'}   ${
-              deleteRecord.salesOrderName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.salesOrderName ? 'Sales Order' : 'Sales Orders'}   ${deleteRecord.salesOrderName || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
