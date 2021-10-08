@@ -34,9 +34,10 @@ interface ResourceType {
 }
 
 const AssingQuantityDialog: FC<DialogProps> = (props) => {
-  const { ids, onClose, onSuccess, title, label, resource, resourceData: newResourceData } = props;
+  const { ids, onClose, onSuccess, title, label, resource, resourceData: existingResourceData } = props;
   const { setToastConfig } = useContext(CustomToastContext);
   const [resourceData, setResourceData] = useState<ResourceType[]>([]);
+  const [allResourceData, setAllResourceData] = useState<ResourceType[]>([]);
   const [isSubmitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormData[]>([
     {
@@ -47,10 +48,10 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
   ]);
 
   useEffect(() => {
-    if (newResourceData.length > 0) {
+    if (existingResourceData.length > 0) {
       let existingData = [];
       if (resource.includes('product')) {
-        existingData = newResourceData.map(({ product, qty }) => ({
+        existingData = existingResourceData.map(({ product, qty }) => ({
           id: product._id,
           resource: {
             name: product.productName,
@@ -59,7 +60,7 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
           qty
         }));
       } else {
-        existingData = newResourceData.map(({ wareHouse, qty }) => ({
+        existingData = existingResourceData.map(({ wareHouse, qty }) => ({
           id: wareHouse._id,
           resource: {
             name: wareHouse.warehouseName,
@@ -68,10 +69,15 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
           qty
         }));
       }
-
       setFormData(existingData);
     }
-  }, [newResourceData]);
+  }, [existingResourceData]);
+
+  useEffect(() => {
+    const customFormArr = formData.map(fD => fD.resource?.id);
+    const filteredData = allResourceData.filter(d => !customFormArr.includes(d.id))
+    setResourceData(filteredData)
+  }, [formData])
 
   useEffect(() => {
     (() => {
@@ -79,36 +85,38 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
         .get(`${resource}?limit=0`)
         .then(({ data: { data } }) => {
           let existingData = [];
-          if (newResourceData.length > 0) {
-            existingData = newResourceData.map((resource) => {
+          if (existingResourceData.length > 0) {
+            existingData = existingResourceData.map((r) => {
               if (resource.includes('warehouse')) {
-                return resource.wareHouse;
+                return r.wareHouse._id;
               } else {
-                return resource.product;
+                return r.product._id;
               }
             });
           }
 
+
+          let newData = [];
           if (resource.includes('warehouse')) {
-            let warehouses = [];
             if (existingData.length > 0) {
-              warehouses = data
-                .map((_d) => ({ id: _d._id, name: _d.warehouseName }))
-                .filter((w) => existingData.filter((d) => d.id !== w.id).length > 0);
+              data = data.map((_d) => ({ id: _d._id, name: _d.warehouseName }))
+
+              setAllResourceData(data)
+              newData = data.filter((w: ResourceType) => !existingData.includes(w.id));
             } else {
-              warehouses = data.map((_d) => ({ id: _d._id, name: _d.warehouseName }));
+              newData = data.map((_d) => ({ id: _d._id, name: _d.warehouseName }));
             }
-            setResourceData(warehouses);
           } else {
-            let products = [];
             if (existingData.length > 0) {
-              products = data.map((_d) => ({ id: _d._id, name: _d.productName }))
-                .filter((p) => existingData.filter((d) => d.id !== p.id).length > 0);
+              data = data.map((_d) => ({ id: _d._id, name: _d.productName }))
+              setAllResourceData(data)
+              newData = data.filter((p: ResourceType) => !existingData.includes(p.id));
             } else {
-              products = data.map((_d) => ({ id: _d._id, name: _d.productName }));
+              newData = data.map((_d) => ({ id: _d._id, name: _d.productName }));
             }
-            setResourceData(products);
           }
+
+          setResourceData(newData);
         })
         .catch((err) => {
           setToastConfig(err);
@@ -226,10 +234,7 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
                           size="small"
                           color="primary"
                           onClick={() => {
-                            setFormData((prevState) => {
-                              const updatedArr = prevState.filter((s) => s.id !== form.id);
-                              return updatedArr;
-                            });
+                            setFormData((prevState) => prevState.filter((s) => s.id !== form.id));
                           }}
                         >
                           <Delete color="error" />
