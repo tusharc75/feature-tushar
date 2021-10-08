@@ -279,7 +279,7 @@ const ProductTemplate: FC = () => {
                 <div className="header-panel">
                     <Grid container className={styles.filter_side_container}>
                         <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-                            <ImInsertTemplate size={20} style={{paddingBottom: "3px"}}/> <span className="listingHeader">{routes.productTemplate.title}</span>
+                            <ImInsertTemplate size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.productTemplate.title}</span>
                         </Grid>
                         <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
                             <Box className={styles.filter_side_header} component="div" >
@@ -325,7 +325,9 @@ const ProductTemplate: FC = () => {
 
                 <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                     dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
-                    loading={loading} renderedFrom="productTemplatePage" />
+                    loading={loading} renderedFrom="productTemplatePage"
+                    refreshGrid={fetchProductTemplate}
+                />
 
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog

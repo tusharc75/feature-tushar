@@ -278,6 +278,14 @@ const Entity: FC = () => {
             afterImportCompleted={() => {
               fetchEntity();
             }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords.length}
+            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            onExportToExcelSuccess={() => {
+              if (gridApi) gridApi.deselectAll()
+              else fetchEntity()
+            }}
           />
         </Grid>
       </Grid>
@@ -296,7 +304,9 @@ const Entity: FC = () => {
 
         <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
           dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
-          loading={loading} renderedFrom="entityPage" />
+          loading={loading} renderedFrom="entityPage"
+          refreshGrid={fetchEntity}
+        />
 
         {isOpen?.open && (
           <ManageEntity

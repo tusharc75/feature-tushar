@@ -71,12 +71,12 @@ function ReceivingTicketHeader(props) {
             width="300px"
           />
 
-          {ReceivingTicketPermissions.isCreate && ReceivingTicketPermissions.isUpdate && (
+          {ReceivingTicketPermissions?.isCreate && ReceivingTicketPermissions?.isUpdate && (
             <Button variant="contained" color="primary" size="small" className={styles.add_submit_btn} onClick={onCreate} startIcon={<AddOutlined />}>
               Add
             </Button>
           )}
-          {ReceivingTicketPermissions.isDelete && (
+          {ReceivingTicketPermissions?.isDelete && (
             <>
               <Button
                 disabled={canDelete}
