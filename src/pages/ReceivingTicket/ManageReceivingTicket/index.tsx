@@ -144,7 +144,6 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
           history.push(`${routes.receivingTicketDetail.path}/${data._id}`);
           setSubmitting(false);
           onSuccess(data);
-          console.log(data)
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
