@@ -250,11 +250,12 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
                       <IconButton
                         size="small"
                         color="primary"
+                        disabled={!Boolean(form.resource) || !Boolean(form.qty)}
                         onClick={() => {
                           setFormData((prevState) => prevState.filter((s) => s.id !== form.id));
                         }}
                       >
-                        <Delete color="error" />
+                        <Delete color={!Boolean(form.resource) || !Boolean(form.qty) ? 'disabled' : `error`} />
                       </IconButton>
                     </Box>
                     {/* )} */}
