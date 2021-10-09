@@ -242,7 +242,7 @@ const ReceivingTicket = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions.receivingTicket.isCreate ? (
+      {permissions.receivingTicket?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
             size="small"
@@ -263,7 +263,7 @@ const ReceivingTicket = () => {
       )}
 
       <GridDeleteIcon
-        hasDeletePermission={permissions.receivingTicket.isDelete}
+        hasDeletePermission={permissions.receivingTicket?.isDelete}
         ownerId={params.data.ownerId}
         userId={user?.user?._id}
         onDelete={() =>
