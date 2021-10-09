@@ -71,12 +71,12 @@ function RepairJobHeader(props) {
             width="300px"
           />
 
-          {RepairJobPermissions.isCreate && RepairJobPermissions.isUpdate && (
+          {RepairJobPermissions?.isCreate && RepairJobPermissions?.isUpdate && (
             <Button variant="contained" color="primary" size="small" className={styles.add_submit_btn} onClick={onCreate} startIcon={<AddOutlined />}>
               Add
             </Button>
           )}
-          {RepairJobPermissions.isDelete && (
+          {RepairJobPermissions?.isDelete && (
             <>
               <Button
                 disabled={canDelete}

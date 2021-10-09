@@ -462,6 +462,7 @@ export default function Attachment() {
           actionWidth={150}
           loading={loading}
           renderedFrom="attachmentPage"
+          refreshGrid={fetchAttachments}
         />
         {open ? (
           <Dialog

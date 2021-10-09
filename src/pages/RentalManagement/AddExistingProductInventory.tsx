@@ -181,6 +181,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                         page={page}
                         allowAction={false}
                         loading={loading}
+                        refreshGrid={fetchProductInventory}
                         customGridOptions={{ getRowStyle: getRowStyleScheduled }}
                     />
                     : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}

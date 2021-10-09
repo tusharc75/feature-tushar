@@ -74,9 +74,24 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
   }, [existingResourceData]);
 
   useEffect(() => {
-    const customFormArr = formData.map(fD => fD.resource?.id);
-    const filteredData = allResourceData.filter(d => !customFormArr.includes(d.id))
-    setResourceData(filteredData)
+    if (formData.length === 0) {
+      const initialData = [{
+        id: generateUniqueId(),
+        resource: null,
+        qty: 0
+      }];
+
+      setFormData(initialData);
+
+      const customFormArr = initialData.map(fD => fD.resource?.id);
+      const filteredData = allResourceData.filter(d => !customFormArr.includes(d.id))
+      setResourceData(filteredData)
+
+    } else {
+      const customFormArr = formData.map(fD => fD.resource?.id);
+      const filteredData = allResourceData.filter(d => !customFormArr.includes(d.id))
+      setResourceData(filteredData)
+    }
   }, [formData])
 
   useEffect(() => {
@@ -209,6 +224,8 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
                       const val = parseInt(e.target.value);
                       if (val > 0) {
                         handleChange('qty', form, val);
+                      } else {
+                        handleChange('qty', form, 0);
                       }
                     }}
                     variant="outlined"
@@ -228,19 +245,20 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
                     >
                       <Add color={!Boolean(form.resource) || !Boolean(form.qty) ? 'disabled' : `primary`} />
                     </IconButton>
-                    {indx !== 0 && (
-                      <Box ml={2}>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() => {
-                            setFormData((prevState) => prevState.filter((s) => s.id !== form.id));
-                          }}
-                        >
-                          <Delete color="error" />
-                        </IconButton>
-                      </Box>
-                    )}
+                    {/* {indx !== 0 && ( */}
+                    <Box ml={2}>
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        disabled={!Boolean(form.resource) || !Boolean(form.qty)}
+                        onClick={() => {
+                          setFormData((prevState) => prevState.filter((s) => s.id !== form.id));
+                        }}
+                      >
+                        <Delete color={!Boolean(form.resource) || !Boolean(form.qty) ? 'disabled' : `error`} />
+                      </IconButton>
+                    </Box>
+                    {/* )} */}
                   </Box>
                 </Grid>
               </Fragment>
@@ -255,7 +273,7 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
         <Button
           onClick={submitForm}
           variant="contained"
-          disabled={isSubmitting || !Boolean(formData[formData.length - 1].resource) || !Boolean(formData[formData.length - 1].qty)}
+          disabled={isSubmitting || !Boolean(formData[formData.length - 1]?.resource) || !Boolean(formData[formData.length - 1]?.qty)}
           color="primary"
         >
           Save

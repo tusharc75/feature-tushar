@@ -445,7 +445,9 @@ const Roles: FC = () => {
 
           <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
             dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
-            loading={loading} />
+            loading={loading}
+            refreshGrid={fetchRoles}
+          />
 
         </CustomContainer>
         {showDeleteWarningConfirmBox ? (
