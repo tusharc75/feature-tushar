@@ -143,7 +143,7 @@ export const sidebarResource = {
 
 export const RESOURCE_LABEL = {
   account: 'Supplier Accounts',
-  warehouse: 'Warehouses',
+  warehouse: 'Plants',
   customerAccount: 'Customer Accounts',
   user: 'Users',
   contact: 'Supplier Contacts',
@@ -181,13 +181,14 @@ export const RESOURCE_LABEL = {
   budget: 'Budgets',
   marketSegment: 'Market Segments',
   quotePdfTemplate: 'Quote PDF Templates',
-  rentalManagement: 'Rental Management',
+  rentalManagement: 'Rental Job',
   deliveryTicket: 'Loading Tickets',
-  pricingCondition: 'Pricing Condition',
+  pricingCondition: 'Pricing Conditions',
   repairJob: 'Repair Jobs',
-  receivingTicket: "Receiving Tickets",
-  salesOrder: "Sales Orders",
-  packages: "Packages"
+  receivingTicket: 'Receiving Tickets',
+  salesOrder: 'Sales Order',
+  eCommerce: 'e-Commerce',
+  packages: 'Packages',
 };
 
 export const lead = {
@@ -689,6 +690,8 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
           routesAndTitle[sidebarFieldsKeys[indexOfPermission]] = {
             title: d.resourceLabel || d.name
           };
+        } else {
+          console.error(`${d} resource not found`)
         }
       });
     }
