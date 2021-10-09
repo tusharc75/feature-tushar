@@ -341,7 +341,7 @@ const Product = () => {
             {productPermissions.isRead &&
                 <HtmlTooltip title="BOM">
                     <IconButton size="small" aria-label="View BOM" onClick={() => {
-                        history.push(`${routes.productDetail.path}/${params.data._id}/bom`)
+                        history.push(`${routes.productDetail.path}/${params.data._id}/bom`, { productName: params.data.productName })
                     }} >
                         <RiBillLine color="primary" />
                     </IconButton>

@@ -318,7 +318,7 @@ const ProductDetailsPage = () => {
 
                                 {permissions.product.isUpdate && (
                                     <IconButton
-                                        title="Assign users"
+                                        title="Manage Product(s)"
                                         color="primary"
                                         size="small"
                                         onClick={() => { setOpenAssignProductDialog(true) }}
@@ -393,7 +393,7 @@ const ProductDetailsPage = () => {
 
                                 {permissions?.productInventory?.isCreate && (
                                     <IconButton
-                                        title="Assign users"
+                                        title="Manage Warehouse(s)"
                                         color="primary"
                                         size="small"
                                         onClick={() => { setOpenProductInventoryDialog(true) }}
