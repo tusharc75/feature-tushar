@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.14.0](https://github.com/vebholic/oms_frontend/compare/v1.13.0...v1.14.0) (2021-10-10)
+
+
+### Features
+
+* - assign warehouse first record not removable issue fixed ([f38686e](https://github.com/vebholic/oms_frontend/commit/f38686ee770d8738cecab8292671187bfe500122))
+* - assign warehouse first record not removable issue fixed ([646c4cb](https://github.com/vebholic/oms_frontend/commit/646c4cbab1dd9b863a46d6921028efc35b495570))
+* - CustomAgGrid code updated ([8b91fbf](https://github.com/vebholic/oms_frontend/commit/8b91fbf99a0a182aa12991e692821e7017127c3b))
+* - minor changes done ([c9bd8bc](https://github.com/vebholic/oms_frontend/commit/c9bd8bcb241271580cf994db01e815f879842ec1))
+* - Receiving ticket list screen breaking issue fixed ([8d5ddec](https://github.com/vebholic/oms_frontend/commit/8d5ddec99ee8b8f3786a86b907f86935a78fe822))
+
 ## [1.13.0](https://github.com/vebholic/oms_frontend/compare/v1.12.0...v1.13.0) (2021-10-09)
 
 
