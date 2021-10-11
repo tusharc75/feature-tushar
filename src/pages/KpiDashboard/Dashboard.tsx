@@ -19,7 +19,6 @@ import OpportunityTrends from './OpportunityTrends';
 const Dashboard = () => {
   const [currency, setCurrency] = useState('');
   const [filterCurrency, setFilterCurrency] = useState('');
-
   const [entities, setEntities] = useState([]);
   const [salesReps, setSalesReps] = useState([]);
   const [customerAccounts, setCustomerAccounts] = useState([]);
