@@ -69,7 +69,7 @@ const ProjectSalesDetails = () => {
   const [dialogType, setDialogType] = useState("");
   const [showActivity, setActivityShow] = useState(true);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
-    routes.projectSales,
+    routes?.projectSales,
   ]);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [loadingGraphData, setLoadingGraphData] = useState(false);
@@ -366,7 +366,7 @@ const ProjectSalesDetails = () => {
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
-                  {(permissions?.projectSales.isUpdate && isTeamMember) ||
+                  {(permissions?.projectStrategy?.isUpdate && isTeamMember) ||
                     isManager ? (
                     <Button
                       variant="contained"
@@ -377,7 +377,7 @@ const ProjectSalesDetails = () => {
                       Edit
                     </Button>
                   ) : null}
-                  {permissions?.projectSales.isDelete && isManager ? (
+                  {permissions?.projectStrategy?.isDelete && isManager ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => {
@@ -458,7 +458,7 @@ const ProjectSalesDetails = () => {
                   justifyContent="space-between"
                 >
                   <Typography variant="subtitle2">Project Team</Typography>
-                  {(permissions?.projectSales.isUpdate && isTeamMember) ||
+                  {(permissions?.projectStrategy?.isUpdate && isTeamMember) ||
                     isManager ? (
                     <IconButton
                       color="primary"
@@ -524,7 +524,7 @@ const ProjectSalesDetails = () => {
                 estimatedAmount={projectSalesData?.amount}
                 marketSegmentId={projectSalesData?.marketSegment?.optionValue}
                 subMarketSegmentId={projectSalesData?.subMarketSegment?.optionValue}
-                permissions={permissions?.projectSales}
+                permissions={permissions?.projectStrategy}
                 fetchProjectData={getSalesData}
                 projectId={id}
                 users={teamUsers}
