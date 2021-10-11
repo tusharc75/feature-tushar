@@ -23,7 +23,7 @@ export const CreatedByRenderer = params => params.value ? (
 );
 
 export const DateRenderer = params => params.value ? (
-    <h5 className="createBy" title={`${params.value} • ${moment(
+    <h5 className="createBy" title={`${moment(
         params.value.slice(0, 10)
     ).format(dateFormat)}`}>
         {moment(params.value.slice(0, 10)).format(dateFormat)}

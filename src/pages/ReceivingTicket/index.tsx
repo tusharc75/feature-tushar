@@ -242,7 +242,7 @@ const ReceivingTicket = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions.receivingTicket.isCreate ? (
+      {permissions.receivingTicket?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
             size="small"
@@ -263,7 +263,7 @@ const ReceivingTicket = () => {
       )}
 
       <GridDeleteIcon
-        hasDeletePermission={permissions.receivingTicket.isDelete}
+        hasDeletePermission={permissions.receivingTicket?.isDelete}
         ownerId={params.data.ownerId}
         userId={user?.user?._id}
         onDelete={() =>
@@ -486,7 +486,7 @@ const ReceivingTicket = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.receivingTicket]} />
+          <CustomBreadCrumbs routes={[{ title: routes.receivingTicket.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <Grid container direction="row">
