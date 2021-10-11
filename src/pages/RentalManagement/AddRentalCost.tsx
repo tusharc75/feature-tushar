@@ -93,13 +93,11 @@ const AddRentalCost = (props) => {
     actionsRenderer: ActionsRenderer,
   };
   const columns = [
-    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "nameRenderer" },
-    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
-    { field: "costPerDay", headerName: "Cost Per Day", show: true, cellRenderer: "commonRenderer" },
-    { field: "totalCost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
-    { field: "startDate", headerName: "Start Date", show: true, cellRenderer: "dateRenderer" },
-    { field: "dueDate", headerName: "End Date", show: true, cellRenderer: "dateRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "productRenderer" },
+    { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
   ];
 
   return (
