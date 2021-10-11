@@ -535,7 +535,6 @@ export default function Account(props) {
           return res;
         });
 
-        console.log('rows', rows)
         dispatch({ type: 'initialize', data: rows, count: count });
 
         setTimeout(() => {

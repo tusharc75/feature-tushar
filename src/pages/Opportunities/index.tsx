@@ -382,7 +382,6 @@ const Opportunities = () => {
             return res;
           });
 
-          console.log('rows', rows)
           dispatch({ type: 'initialize', data: rows, count: count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });

@@ -1924,7 +1924,7 @@ const FormTypes = (props) => {
           name={name}
           label={getLabel(label)}
           onChange={(date) => setFieldValue(name, date)}
-          onError={console.log}
+          onError={console.error}
           disablePast
           format="yyyy/MM/dd HH:mm"
           error={touched[name] && Boolean(errors[name])}

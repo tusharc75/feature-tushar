@@ -10,7 +10,7 @@ import {
     DateRenderer,
     LinkRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
-import { RESOURCE_LABEL } from "./helpers";
+
 
 export const staticFrameworkRender = {
     "createdByRenderer": CreatedByRenderer,
@@ -19,6 +19,7 @@ export const staticFrameworkRender = {
 
 export const headerName = {
     firstName: "Name",
+    owner: "Owner Alies"
 }
 export const isRenderWithCopy = (name) => {
     return ["mobile", "phone", "email"].indexOf(name) >= 0
@@ -30,15 +31,8 @@ export const detailPagePath = {
     collaborator: routes?.userDetail?.path,
     rental: routes.rentalManagementDetail.path,
     deliveryPerson: routes?.userDetail?.path,
-    pDFTemplate: routes?.quotePdfTemplateDetail?.path,
-    subMarketSegment: routes?.marketSegment?.path,
+    pDFTemplate: routes?.quotePdfTemplateDetail?.path
 }
-
-export const hasDetailPageAsPopup = {
-    subMarketSegment: routes?.marketSegment?.path,
-    marketSegment: routes?.marketSegment?.path
-}
-
 export const disabledColumns = {
     [routes.rentalManagementDetail.title]: [],
     [routes.deliveryTicketDetail.title]: [],
@@ -99,9 +93,7 @@ export const checkStaticField = (renderedFrom, fieldData) => {
 }
 
 export const staticColumns = ["createdBy", "updatedBy"]
-
 export const getColumnData = (title, field, detailScreenRoute = null) => {
-
     let data = localStorage.getItem("gridMetaData")
 
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
@@ -129,10 +121,8 @@ export const getColumnData = (title, field, detailScreenRoute = null) => {
                 columnData: {
                     ...commonFieldData,
                     field: "concatedName",
-                    cellRenderer: "linkRenderer",
-                    cellRendererParams: { "pathName": pathName, "property": "_id" }
-                },
-                rendererName: 'linkRenderer',
+                    cellRenderer: (params) => `<a id="link-a" href='${pathName}/${params?.data?._id}' title='${params?.value}'>${params?.value}</a >`,
+                }
             }
         }
         else if (field?.primaryField === true && detailScreenRoute) {
