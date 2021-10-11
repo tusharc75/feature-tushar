@@ -287,7 +287,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                         else setShowConfirmDialog(true)
                     }}
                 />
-                {loading || !rentalData.fields.length ? (
+                {!rentalData.fields.length ? (
                     <>
                         <CustomDialogContent>
                             <Skeleton width="100%" height="70px" />
