@@ -10,16 +10,12 @@ import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { FaRegistered, FaListAlt } from 'react-icons/fa';
 import { BiPackage } from "react-icons/bi";
-
-
 import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, packages, product } from '../../constants/helpers';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
 import { useHistory } from 'react-router-dom';
-import { CommonRenderer, CreatedByRenderer, DateRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import NoDataCell from '../../components/Helpers/NoDataCell';
 import PackageHeader from './PackageHeader';
 import ManagePackageDialog from './ManagePackageDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -107,7 +103,7 @@ const PackageList = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-            let currentColumn = getColumnData(pageTitle, o?.fieldData);
+            let currentColumn = getColumnData(pageTitle, o?.fieldData, `${routes.packages.path}/detail`);
             if (currentColumn !== null) {
                 if (isOffline) {
                     currentColumn.columnData['filter'] = false;
@@ -184,14 +180,6 @@ const PackageList = () => {
             });
     };
 
-    // const packageNameRenderer = (params) => (
-    //     <>
-    //         <Link className="text-truncate link" title={params.value} to={`${routes.packages.path}/detail/${params.data._id}`}>
-    //             {params.value}
-    //         </Link>
-    //     </>
-    // );
-
     const ActionsRenderer = (params) => (
         <>
             {permissions?.packages.isCreate ? (
@@ -245,15 +233,6 @@ const PackageList = () => {
             </HideWhenOffline>
         </>
     );
-
-    // const frameworkComponents = {
-    //     packageNameRenderer: packageNameRenderer,
-    //     createdByRenderer: CreatedByRenderer,
-    //     updatedByRenderer: UpdatedByRenderer,
-    //     actionsRenderer: ActionsRenderer,
-    //     commonRenderer: CommonRenderer,
-    //     dateRenderer: DateRenderer
-    // };
 
     const replaceFieldName = (field) => {
         switch (field) {

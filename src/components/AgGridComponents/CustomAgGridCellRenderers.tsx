@@ -4,6 +4,7 @@ import { AiOutlineLoading } from "react-icons/ai";
 import CustomRenderCell from "../Helpers/CustomRenderCell";
 import NoDataCell from "../Helpers/NoDataCell";
 import { dateFormat } from "../../constants/helpers"
+import { Link } from 'react-router-dom'
 
 export const CommonRenderer = params => <CustomRenderCell value={params.value} />;
 
@@ -31,6 +32,11 @@ export const DateRenderer = params => params.value ? (
 ) : (
     <NoDataCell />
 );
+export const CheckboxRenderer = params => (
+    <span>
+        {Boolean(params?.value) ? "Yes" : "No"}
+    </span>
+)
 
 export const UpdatedByRenderer = params => params.value ? (
     <h5 className="updateBy" title={`${params.value} • ${moment(
@@ -41,6 +47,13 @@ export const UpdatedByRenderer = params => params.value ? (
             {moment(params.data.updatedByDate.slice(0, 10)).format(dateFormat)}
         </span>
     </h5>
+) : (
+    <NoDataCell />
+)
+
+export const LinkRenderer = params => params.value ? (
+    <Link className="link" to={params?.isForPopup ? `${params?.pathName}?id=${params?.data[params?.property]}` :
+        `${params?.pathName}/${params?.data[params?.property]}`} title={params?.value}>{params?.value}</Link>
 ) : (
     <NoDataCell />
 )

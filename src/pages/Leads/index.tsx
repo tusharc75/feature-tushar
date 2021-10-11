@@ -137,7 +137,7 @@ const Leads = () => {
         let rendererNames = []
         data.forEach(o => {
 
-          let currentColumn = getColumnData(leadResource, o?.fieldData)
+          let currentColumn = getColumnData(leadResource, o?.fieldData, leadDetailPage.path)
 
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData]
@@ -153,27 +153,9 @@ const Leads = () => {
         }
         setFrameWorkComponent({ ...tempFrameworkComponent })
         columns = [...columns, ...getStaticFields()]
-
         setColumns([...columns])
       })
   }
-  const NameRenderer = (params) => (
-    <Link className="link" to={`${leadDetailPage.path}/${params.data._id}`} title={params.value}>
-      {params.value}
-    </Link>
-  );
-
-  const RelatedOpportunityRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
 
   const ActionsRenderer = (params) => (
     <>
@@ -200,17 +182,6 @@ const Leads = () => {
       />
     </>
   );
-
-  // const frameworkComponents = {
-  //   // nameRenderer: NameRenderer,
-  //   // relatedOpportunityRenderer: RelatedOpportunityRenderer,
-  //   linkRenderer: LinkRenderer,
-  //   commonRenderer: CommonRenderer,
-  //   commonRendererWithCopy: CommonRendererWithCopy,
-  //   createdByRenderer: CreatedByRenderer,
-  //   updatedByRenderer: UpdatedByRenderer,
-  //   actionsRenderer: ActionsRenderer
-  // };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -302,7 +273,7 @@ const Leads = () => {
         }
 
         let rows = data.map((u) => {
-          const { owner, collaborator, createdBy, updatedBy, staticData, ...restProperties } = u;
+          const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
 
           let res = {
             ...restProperties,
@@ -310,6 +281,11 @@ const Leads = () => {
 
             owner: u.owner?.optionLabel,
             ownerId: u.owner?.optionValue,
+            subMarketSegment: u?.subMarketSegment?.optionLabel,
+            subMarketSegmentId: u?.subMarketSegment?.optionValue,
+
+            marketSegment: u.marketSegment?.optionLabel,
+            marketSegmentId: u.marketSegment?.optionValue,
             isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id),
 
             convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,

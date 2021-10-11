@@ -120,13 +120,10 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
 
     const isFieldNotTouched = (initialData, values) => {
         return Object.values(
-            simplifyValues(
-                initialData.values,
-                initialData.fields
-            )
+            simplifyValues(initialData.values, initialData?.fields[0]?.sectionFields || [])
         ).toString() ===
             Object.values(
-                simplifyValues(values, initialData.fields)
+                simplifyValues(values, initialData?.fields[0]?.sectionFields || [])
             ).toString()
     }
 
@@ -158,7 +155,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                     <Fragment>
                         <CustomDialogHeader title={productInventoryId ? (isClone ? "Clone" : "Update " + routes.productInventory.title) : "Create " + routes.productInventory.title}
                             onClose={() => {
-                                if (isFieldNotTouched(initialData, formValues)) onClose()
+                                if (isFieldNotTouched(initialData, values)) onClose()
                                 else setShowConfirmDialog(true)
                             }}
                         ></CustomDialogHeader>

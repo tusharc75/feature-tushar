@@ -33,7 +33,7 @@ const routes = {
     path: "/entity",
     data: {},
   },
-  entityDetails: {
+  entityDetail: {
     title: storedRoutes ? storedRoutes.entity?.title : RESOURCE_LABEL.entity,
     path: "/entity/detail",
     data: {},
