@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.14.1](https://github.com/vebholic/oms_frontend/compare/v1.14.0...v1.14.1) (2021-10-11)
+
+## [1.14.0](https://github.com/vebholic/oms_frontend/compare/v1.13.0...v1.14.0) (2021-10-10)
+
+
+### Features
+
+* - assign warehouse first record not removable issue fixed ([f38686e](https://github.com/vebholic/oms_frontend/commit/f38686ee770d8738cecab8292671187bfe500122))
+* - assign warehouse first record not removable issue fixed ([646c4cb](https://github.com/vebholic/oms_frontend/commit/646c4cbab1dd9b863a46d6921028efc35b495570))
+* - CustomAgGrid code updated ([8b91fbf](https://github.com/vebholic/oms_frontend/commit/8b91fbf99a0a182aa12991e692821e7017127c3b))
+* - minor changes done ([c9bd8bc](https://github.com/vebholic/oms_frontend/commit/c9bd8bcb241271580cf994db01e815f879842ec1))
+* - Receiving ticket list screen breaking issue fixed ([8d5ddec](https://github.com/vebholic/oms_frontend/commit/8d5ddec99ee8b8f3786a86b907f86935a78fe822))
+
+## [1.13.0](https://github.com/vebholic/oms_frontend/compare/v1.12.0...v1.13.0) (2021-10-09)
+
+
+### Features
+
+* - added export vy ids feature for all modules ([8ccdfcd](https://github.com/vebholic/oms_frontend/commit/8ccdfcddd676867e491539d58639227c2f13b9c7))
+* - added reresh grid prop for all grids ([d5b5edd](https://github.com/vebholic/oms_frontend/commit/d5b5edd81821d43c3551ed258be1e8e8495f060a))
+* - BOM redirection issue fixed from list screen ([0c1a9f4](https://github.com/vebholic/oms_frontend/commit/0c1a9f424dc9548b0e2964e84cca1d2e88d37ac2))
+* - BOM redirection issue fixed from list screen ([7829332](https://github.com/vebholic/oms_frontend/commit/7829332777a26b2441b697164ad5932fbc270418))
+* - changes added ([d6e2fec](https://github.com/vebholic/oms_frontend/commit/d6e2fec691980ce0923c94183e5facef0f6f601b))
+* **bomtable.tsx:** bom list page ([026db52](https://github.com/vebholic/oms_frontend/commit/026db52db03f8b48a33e300781ebfc2ebdb720d5))
+
+
+### Bug Fixes
+
+* **assignquantitydialog.tsx:** fix filter ([9a8dd69](https://github.com/vebholic/oms_frontend/commit/9a8dd69c5da8ae353e1d87625f36bb21402bdd32))
+* **productdetails:** show loading ([87c1dcf](https://github.com/vebholic/oms_frontend/commit/87c1dcfb61152c9d9761b3586dd9e025d9f9bc6e))
+* **quantitydialog:** fix existing data filter ([d794c04](https://github.com/vebholic/oms_frontend/commit/d794c045611e5a4432e13840bdb18b3e60752876))
+
 ## [1.12.0](https://github.com/vebholic/oms_frontend/compare/v1.11.0...v1.12.0) (2021-10-08)
 
 

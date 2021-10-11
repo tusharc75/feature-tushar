@@ -18,8 +18,6 @@ function ReceivingTicketHeader(props) {
     setAnchorEl(null);
   };
 
-  const [filter, setFilter] = useState('All Receiving Tickets');
-
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
       setFilter(newFilter);
@@ -43,6 +41,9 @@ function ReceivingTicketHeader(props) {
     showTransferEntityDialog
     // showCloneRentalManagementDialog
   } = props;
+
+  const [filter, setFilter] = useState(options[0].key);
+
   return (
     <Grid className={styles.filter_side_container} container>
       <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">

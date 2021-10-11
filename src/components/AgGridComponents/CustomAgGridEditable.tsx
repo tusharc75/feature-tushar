@@ -9,7 +9,7 @@ import {
   gridPageSizes,
 } from "../../constants/helpers";
 import CustomGridHeaderOptions from "./CustomGridHeaderOptions";
-import { CustomLoadingOverlay } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { CustomLoadingOverlay, CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomFloatingFilter from "../../components/AgGridComponents/CustomAgGridFilter";
 import { orderBy } from "lodash";
 import NumericEditor from "./NumericEditor";
@@ -297,6 +297,7 @@ export default function CustomAgGridEditable({
               rowHeight={AgGridRowHeight}
               frameworkComponents={{
                 ...frameworkComponents,
+                commonRenderer: frameworkComponents["commonRenderer"] ?? CommonRenderer,
                 customLoadingOverlay: CustomLoadingOverlay,
                 customFloatingFilter: CustomFloatingFilter,
                 numericCellEditor: NumericEditor,
