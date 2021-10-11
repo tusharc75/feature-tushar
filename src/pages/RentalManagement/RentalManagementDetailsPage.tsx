@@ -712,7 +712,7 @@ const RentalManagementDetailsPage = () => {
                       <div>
                         <Activity
                           resourceId={rentalManagementData._id}
-                          resource={routes.rentalManagement}
+                          resource={rentalManagement.resource}
                           restrictedAddActivities={
                             permissions &&
                               permissions["rentalManagement"] &&

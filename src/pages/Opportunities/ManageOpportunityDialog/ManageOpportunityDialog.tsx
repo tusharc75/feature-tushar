@@ -781,15 +781,15 @@ export default function ManageOpportunityDialog({
                                         <Grid
                                           item
                                           xs={
-                                            permissions.marketSegment.isCreate ? 10
+                                            permissions.marketsegment?.isCreate ? 10
                                               : 11
                                           }
                                           sm={
-                                            permissions.marketSegment.isCreate ? 10
+                                            permissions.marketsegment?.isCreate ? 10
                                               : 11
                                           }
                                           md={
-                                            permissions.marketSegment.isCreate ? 10
+                                            permissions.marketsegment?.isCreate ? 10
                                               : 11
                                           }
                                         >
@@ -835,7 +835,7 @@ export default function ManageOpportunityDialog({
                                         {
                                           // permissions.productCategory
                                           //     .isCreate
-                                          permissions.marketSegment.isCreate && (
+                                          permissions.marketsegment?.isCreate && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip
                                                 title="Add Market Segment"
@@ -870,15 +870,15 @@ export default function ManageOpportunityDialog({
                                           <Grid
                                             item
                                             xs={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketsegment?.isCreate ? 10
                                                 : 11
                                             }
                                             sm={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketsegment?.isCreate ? 10
                                                 : 11
                                             }
                                             md={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketsegment?.isCreate ? 10
                                                 : 11
                                             }
                                           >
@@ -919,7 +919,7 @@ export default function ManageOpportunityDialog({
                                             />
                                           </Grid>
                                           {
-                                            permissions.marketSegment.isCreate && (
+                                            permissions.marketsegment?.isCreate && (
                                               <Grid item xs={1} sm={1} md={1}>
                                                 <Tooltip
                                                   title="Add Sub Market Segment"
