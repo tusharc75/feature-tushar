@@ -44,6 +44,7 @@ import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes"
 import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import { HiBadgeCheck } from "react-icons/hi"
+import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
 
 const AccTypes = [
   {
@@ -110,23 +111,25 @@ export default function Account(props) {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
+  const [columns, setColumns] = useState([])
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem(accountResource));
 
-  const columns = [
-    { field: 'accountName', headerName: 'Account Name', show: true, disabled: true, cellRenderer: 'accountNameRenderer' },
-    { field: 'lead', headerName: 'Related Lead', show: true, cellRenderer: 'leadRenderer' },
-    { field: 'typeOfAccount', headerName: 'Type', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'entity', headerName: 'Entity Name', show: true, cellRenderer: 'entityRenderer' },
-    { field: 'industry', headerName: 'Industry', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-    { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
-    { field: 'parentAccount', headerName: 'Parent Account', show: true, cellRenderer: 'parentAccountRenderer' },
-    { field: 'masterAccount', headerName: 'Master Account', show: true, cellRenderer: 'masterAccountRenderer', filter: false, sortable: false },
-    { field: 'phone', headerName: 'Phone', show: true, cellRenderer: 'commonRendererWithCopy' }
-  ];
+  // const columns = [
+  //   { field: 'accountName', headerName: 'Account Name', show: true, disabled: true, cellRenderer: 'accountNameRenderer' },
+  //   { field: 'lead', headerName: 'Related Lead', show: true, cellRenderer: 'leadRenderer' },
+  //   { field: 'typeOfAccount', headerName: 'Type', show: true, cellRenderer: 'commonRenderer' },
+  //   { field: 'entity', headerName: 'Entity Name', show: true, cellRenderer: 'entityRenderer' },
+  //   { field: 'industry', headerName: 'Industry', show: true, cellRenderer: 'commonRenderer' },
+  //   { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
+  //   { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
+  //   { field: 'parentAccount', headerName: 'Parent Account', show: true, cellRenderer: 'parentAccountRenderer' },
+  //   { field: 'masterAccount', headerName: 'Master Account', show: true, cellRenderer: 'masterAccountRenderer', filter: false, sortable: false },
+  //   { field: 'phone', headerName: 'Phone', show: true, cellRenderer: 'commonRendererWithCopy' }
+  // ];
 
   if (columnState) {
     columns.forEach((item) => {
@@ -138,6 +141,44 @@ export default function Account(props) {
     });
   }
 
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+
+  const fetchGridColumns = async () => {
+
+    const response = await axiosInstance()
+      .get(`/field?resource=${sidebarResource[accountResource]}`)
+
+    let data = response?.data?.data
+
+    let columns = []
+    let rendererNames = []
+    data.forEach(o => {
+      if (o?.fieldData?.fieldName === "accountName") {
+        o.fieldData.primary = true
+      }
+      let currentColumn = getColumnData(accountResource, o?.fieldData, `/${accountRoute}/detail`)
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData]
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName)
+        }
+      }
+      return o?.fieldData
+    })
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      actionsRenderer: ActionsRenderer
+    }
+    setFrameWorkComponent({ ...tempFrameworkComponent })
+    let staticFields = getStaticFields()
+    staticFields.forEach(field => {
+      columns.push(checkStaticField(routes.projectSales.title, field))
+    })
+    setColumns([...columns])
+  }
   //  Grid Variables - End
 
   useEffect(() => {
@@ -345,18 +386,18 @@ export default function Account(props) {
     </>
   );
 
-  const frameworkComponents = {
-    accountNameRenderer: AccountNameRenderer,
-    leadRenderer: LeadRenderer,
-    commonRenderer: CommonRenderer,
-    commonRendererWithCopy: CommonRendererWithCopy,
-    parentAccountRenderer: ParentAccountRenderer,
-    masterAccountRenderer: MasterAccountRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-    entityRenderer: EntityRenderer
-  };
+  // const frameworkComponents = {
+  //   accountNameRenderer: AccountNameRenderer,
+  //   leadRenderer: LeadRenderer,
+  //   commonRenderer: CommonRenderer,
+  //   commonRendererWithCopy: CommonRendererWithCopy,
+  //   parentAccountRenderer: ParentAccountRenderer,
+  //   masterAccountRenderer: MasterAccountRenderer,
+  //   createdByRenderer: CreatedByRenderer,
+  //   updatedByRenderer: UpdatedByRenderer,
+  //   actionsRenderer: ActionsRenderer,
+  //   entityRenderer: EntityRenderer
+  // };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -673,6 +714,8 @@ export default function Account(props) {
             afterImportCompleted={() => {
               fetchAccounts();
             }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
             recordsToExport={selectedRecords.length}
             ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
@@ -894,20 +937,22 @@ export default function Account(props) {
             </CustomHeader> */}
         </div>
 
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          loading={loading}
-          renderedFrom={accountResource}
-          refreshGrid={fetchAccounts}
-        />
+        {
+          Object.keys(frameWorkComponent).length > 0 ?
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              loading={loading}
+              renderedFrom={accountResource}
+              refreshGrid={fetchAccounts}
+            /> : null}
 
 
         {showDeleteWarningConfirmBox?.show ? (

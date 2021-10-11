@@ -5,7 +5,7 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import AddIcon from "@material-ui/icons/Add";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import CreateProduct from "../../components/Product/CreateProduct";
@@ -46,6 +46,7 @@ var levalOrderBy = [
 
 const Product = () => {
 
+    const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
     const [open, setOpen] = useState(false);
     const [productId, setProductId] = useState(null);
@@ -115,7 +116,7 @@ const Product = () => {
                 });
             }
             catch (e) {
-                console.log(e)
+                console.error(e)
             }
             let column = []
             data.data.forEach((row) => {
@@ -340,7 +341,7 @@ const Product = () => {
             {productPermissions.isRead &&
                 <HtmlTooltip title="BOM">
                     <IconButton size="small" aria-label="View BOM" onClick={() => {
-
+                        history.push(`${routes.productDetail.path}/${params.data._id}/bom`, { productName: params.data.productName })
                     }} >
                         <RiBillLine color="primary" />
                     </IconButton>
@@ -485,6 +486,7 @@ const Product = () => {
                     actionWidth={150}
                     loading={loading}
                     renderedFrom="productPage"
+                    refreshGrid={fetchProduct}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
@@ -493,6 +495,7 @@ const Product = () => {
                 isClone={isClone}
                 productId={productId}
                 handleClose={handleClose}
+                isRedirectToDetailPage={true}
                 openFrom="productMaster"
             />
         }

@@ -328,7 +328,9 @@ const PriceTemplate: FC = () => {
 
                 <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                     dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
-                    loading={loading} renderedFrom="priceTemplatePage" />
+                    loading={loading} renderedFrom="priceTemplatePage"
+                    refreshGrid={fetchpriceTemplate}
+                />
 
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog

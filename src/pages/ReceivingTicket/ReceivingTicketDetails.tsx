@@ -143,7 +143,7 @@ const ReceivingTicketDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this receiving Ticket: ${headingLabel} ?`}
+          message={`Are you sure you want to delete this receiving ticket: ${headingLabel} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

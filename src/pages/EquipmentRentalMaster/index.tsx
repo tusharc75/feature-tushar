@@ -29,7 +29,7 @@ const EquipmentRentalMaster = () => {
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-    
+
     const {
         state: { permissions },
     }: any = useData();
@@ -171,7 +171,7 @@ const EquipmentRentalMaster = () => {
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <DiRequirejs size={25} style={{paddingBottom: "3px"}} className="headerLogo" /> <span className="listingHeader">{routes.equiptmentRentalMaster.title} </span>
+                        <DiRequirejs size={25} style={{ paddingBottom: "3px" }} className="headerLogo" /> <span className="listingHeader">{routes.equiptmentRentalMaster.title} </span>
                     </Grid>
                     <Grid xs={6} container className={styles.filter_side} >
                         <Box className={styles.filter_side_header} component="div" >
@@ -201,6 +201,7 @@ const EquipmentRentalMaster = () => {
                     allowAction={false}
                     loading={loading}
                     renderedFrom="equipmentRentalMasterPage"
+                    refreshGrid={fetchProductInventory}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>

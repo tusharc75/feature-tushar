@@ -615,6 +615,14 @@ const ProductBuilder = (props) => {
                     fetchProduct(productBuilderId);
                   }
                 }}
+                isExportAllOrSomeFeature={true}
+                total={rowCount}
+                recordsToExport={selectedRecords.length}
+                ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                onExportToExcelSuccess={() => {
+                  if (gridApi) gridApi.deselectAll()
+                  else fetchProduct(productBuilderId)
+                }}
               />
             )}
             {stage === "cost" && permissions.isUpdate && (
