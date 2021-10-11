@@ -446,7 +446,9 @@ const ProductCategory = () => {
                 setGridApi={setGridApi}
                 dispatch={dispatch}
                 rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={true}
-                loading={loading} renderedFrom="productCategoryPage" />
+                loading={loading} renderedFrom="productCategoryPage"
+                refreshGrid={fetchProductCategory}
+            />
 
             {showDeleteConfirmBox &&
                 <ConfirmationDialog

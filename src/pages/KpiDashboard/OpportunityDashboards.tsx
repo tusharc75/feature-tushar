@@ -81,7 +81,7 @@ const OpportunityDashboards = (props) => {
           ]
         });
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, [salesFilter.entity, salesFilter.between, status]);
 
   useEffect(() => {
@@ -147,7 +147,7 @@ const OpportunityDashboards = (props) => {
           ]
         });
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, [salesFilter.entity, salesFilter.between, status]);
 
   useEffect(() => {
@@ -182,10 +182,10 @@ const OpportunityDashboards = (props) => {
         setOpenQuoteData({
           all: data.count,
           open: data.open,
-          percent: Math.floor((data.open / data.count) * 100)
+          percent: data.count === 0 ? 0 : Math.floor((data.open / data.count) * 100)
         });
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, [salesFilter.entity, salesFilter.between, status]);
 
   useEffect(() => {
@@ -219,12 +219,16 @@ const OpportunityDashboards = (props) => {
                   {statusText[status] !== 'Lost' ? statusText[status] : 'Open'} Quotes
                 </Typography>
                 <Box display="flex" alignItems="center">
-                  <Typography variant="h5" color="primary">
-                    {openQuoteData.open}/
-                  </Typography>
-                  <Typography variant="h6" color="textSecondary">
-                    {openQuoteData.all}
-                  </Typography>
+                  {openQuoteData.open &&
+                    <Typography variant="h5" color="primary">
+                      {openQuoteData.open}/
+                    </Typography>
+                  }
+                  {openQuoteData.open > 0 &&
+                    <Typography variant="h6" color="textSecondary">
+                      {openQuoteData.all}
+                    </Typography>
+                  }
                 </Box>
               </Box>
             </Box>

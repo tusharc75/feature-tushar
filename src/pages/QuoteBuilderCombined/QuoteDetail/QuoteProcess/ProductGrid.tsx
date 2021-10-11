@@ -297,6 +297,7 @@ const ProductGrid = (props) => {
             isClientSideGrid={true}
             loading={loading}
             renderedFrom="productBuilderGrid"
+            refreshGrid={fetchProduct}
           />
         ) : (
           <Loader style={{ height: 500 }} text="Loading..." />

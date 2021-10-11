@@ -333,6 +333,14 @@ function Budget() {
               afterImportCompleted={() => {
                 fetchBudgetList();
               }}
+              isExportAllOrSomeFeature={true}
+              total={rowCount}
+              recordsToExport={selectedRecords.length}
+              ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+              onExportToExcelSuccess={() => {
+                if (gridApi) gridApi.deselectAll()
+                else fetchBudgetList()
+              }}
             />
           </Grid>
         </Grid>
@@ -422,6 +430,7 @@ function Budget() {
               actionWidth={100}
               loading={loading}
               renderedFrom="budgetPage"
+              refreshGrid={fetchBudgetList}
             />
           </Box>
         </CustomContainer>

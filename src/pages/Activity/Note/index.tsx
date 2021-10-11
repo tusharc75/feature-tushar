@@ -314,6 +314,7 @@ const Note = () => {
           isClientSideGrid={true}
           loading={loading}
           renderedFrom="notesPage"
+          refreshGrid={fetchNotes}
         />
 
         {noteId !== undefined && <ActivityModelHandler activityType="note" activityId={noteId} onClose={() => setNoteId(undefined)} />}
