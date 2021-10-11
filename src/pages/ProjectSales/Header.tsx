@@ -66,7 +66,7 @@ const ProjectStrategyHeader = (props) => {
             width="242px"
           />
 
-          {permissions.isCreate && permissions.isUpdate && (
+          {permissions?.isCreate && permissions?.isUpdate && (
             <Button
               className={styles.add_submit_btn}
               variant="contained"
@@ -103,7 +103,7 @@ const ProjectStrategyHeader = (props) => {
               open={Boolean(anchorEl)}
               onClose={closeActions}
             >
-              {permissions.isDelete && (
+              {permissions?.isDelete && (
                 <MenuItem
                   disabled={canDelete}
                   onClick={() => {
@@ -113,7 +113,7 @@ const ProjectStrategyHeader = (props) => {
                 >
                   Delete
                 </MenuItem>)}
-              {permissions.isUpdate && (
+              {permissions?.isUpdate && (
                 <MenuItem
                   disabled={selectedRecords.length === 0}
                   onClick={() => {

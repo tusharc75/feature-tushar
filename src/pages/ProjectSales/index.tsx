@@ -222,8 +222,8 @@ const ProjectSales: FC = () => {
   const ActionsRenderer = (params) => (
     <>
       <Tooltip
-        className={permissions?.projectSales.isCreate ? "" : "cursor-stop"}
-        title={permissions?.projectSales.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+        className={permissions?.projectStrategy?.isCreate ? "" : "cursor-stop"}
+        title={permissions?.projectStrategy?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
         <IconButton
           size="small"
           aria-label="Clone"
@@ -235,14 +235,14 @@ const ProjectSales: FC = () => {
         </IconButton>
       </Tooltip>
       <GridDeleteIcon
-        hasDeletePermission={permissions?.projectSales.isDelete}
+        hasDeletePermission={permissions?.projectStrategy?.isDelete}
         ownerId={params.data.projectManagerId}
         userId={user?.user?._id}
         onDelete={() => showConfirmBox(params.data)}
         entity="Project"
       />
       {
-        permissions?.projectSales.isUpdate && <Tooltip title="Entity">
+        permissions?.projectStrategy?.isUpdate && <Tooltip title="Entity">
           <IconButton
             size="small"
             aria-label="Entity"
@@ -369,7 +369,7 @@ const ProjectSales: FC = () => {
 
   const showConfirmBox = (row) => {
     if (row === null) {
-      if (permissions?.projectSales.isDelete) {
+      if (permissions?.projectStrategy?.isDelete) {
         const myData = selectedRecords.filter(
           (s) => s.projectManagerId === user.user._id
         );
@@ -450,7 +450,7 @@ const ProjectSales: FC = () => {
           </Grid>
           <Grid item md={8} sm={1} xs={2}>
             <ImportExportLinks
-              permissions={permissions.projectSales}
+              permissions={permissions?.projectStrategy}
               module="project-sale(s)"
               api={"project-sales"}
               afterImportCompleted={() => {
@@ -473,7 +473,7 @@ const ProjectSales: FC = () => {
               userId={user?.user?._id}
               onSearch={handleSearch}
               searchVal={search}
-              permissions={permissions?.projectSales}
+              permissions={permissions?.projectStrategy}
               selectedType={selectedType}
               handleFilterChange={handleProjectFilter}
               onCreate={handleCreate}
