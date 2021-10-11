@@ -153,28 +153,9 @@ const Leads = () => {
         }
         setFrameWorkComponent({ ...tempFrameworkComponent })
         columns = [...columns, ...getStaticFields()]
-        console.log('columns', columns)
-
         setColumns([...columns])
       })
   }
-  const NameRenderer = (params) => (
-    <Link className="link" to={`${leadDetailPage.path}/${params.data._id}`} title={params.value}>
-      {params.value}
-    </Link>
-  );
-
-  const RelatedOpportunityRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
 
   const ActionsRenderer = (params) => (
     <>
@@ -201,17 +182,6 @@ const Leads = () => {
       />
     </>
   );
-
-  // const frameworkComponents = {
-  //   // nameRenderer: NameRenderer,
-  //   // relatedOpportunityRenderer: RelatedOpportunityRenderer,
-  //   linkRenderer: LinkRenderer,
-  //   commonRenderer: CommonRenderer,
-  //   commonRendererWithCopy: CommonRendererWithCopy,
-  //   createdByRenderer: CreatedByRenderer,
-  //   updatedByRenderer: UpdatedByRenderer,
-  //   actionsRenderer: ActionsRenderer
-  // };
 
   const replaceFieldName = (field) => {
     switch (field) {

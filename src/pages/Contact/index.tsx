@@ -94,18 +94,6 @@ export default function Contact(props) {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const columnState = JSON.parse(localStorage.getItem(contactResource));
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
-  // const columns = [
-  //   { field: 'concatedName', headerName: 'Name', show: true, disabled: true, cellRenderer: 'concatedNameRenderer' },
-  //   { field: 'relatedLead', headerName: 'Related Lead', show: true, cellRenderer: 'relatedLeadRenderer' },
-  //   { field: 'entity', headerName: 'Entity Name', show: true, cellRenderer: 'entityRenderer' },
-  //   { field: 'phone', headerName: 'Phone', show: true, cellRenderer: 'commonRendererWithCopy' },
-  //   { field: 'email', headerName: 'Email', show: true, cellRenderer: 'commonRendererWithCopy' },
-  //   { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-  //   { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
-  //   { field: 'accountName', headerName: 'Account Name', show: true, cellRenderer: 'accountNameRenderer' }
-  // ];
-
   useEffect(() => {
     fetchGridColumns()
   }, [])
@@ -205,62 +193,6 @@ export default function Contact(props) {
     return entityList.includes(id);
   }
 
-  const ConcatedNameRenderer = (params) => (
-    <Link className="link" to={`/${contactRoute}/detail/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
-
-  const EntityRenderer = (params) => (
-    <h5 className="createBy d-flex">
-      {params.data?.firstEntity ?
-        <Link className="link" title={params.data.firstEntity} to={`${routes.entity.path}/detail/${params.data.entityId}`}>
-          {params.data.firstEntity}
-        </Link>
-        :
-        <NoDataCell />
-      }
-      {params.data?.restEntity?.length > 0 && (
-        <span className="createdAtTime badge-date">{`+${params.data.restEntity.length} more..`}</span>
-      )}
-    </h5>
-  )
-
-
-  const RelatedLeadRenderer = (params) =>
-    params.value ? (
-      params?.data?.relatedLeadEntity === selectedEntity ?
-        <Link className="link" to={`${routes.leadDetail.path}/${params.data.relatedLeadId}`} title={params.value}>
-          {params.value}
-        </Link>
-        :
-        hasAccessToEntity(params?.data?.relatedLeadEntity) ?
-          <span
-            className="link"
-            onClick={() => {
-              handleEntityChange(params.data?.relatedLeadEntity)
-              history.push(`${routes.leadDetail.path}/${params.data.relatedLeadId}`)
-            }}
-            title={params.value}
-          >
-            {params.value}
-          </span>
-          :
-          <span
-            title={params.value}
-          >
-            <CustomRenderCell value={params.value} />
-          </span>
-    ) : (
-      <NoDataCell />
-    );
-
-  const AccountNameRenderer = (params) => (
-    <Link className="link" to={`/${account.accountRoute}/detail/${params.data.accountId}`}>
-      {params.value}
-    </Link>
-  );
-
   const ActionsRenderer = (params) => (
     <>
       <Tooltip
@@ -321,18 +253,6 @@ export default function Contact(props) {
       }
     </>
   );
-
-  // const frameworkComponents = {
-  //   concatedNameRenderer: ConcatedNameRenderer,
-  //   relatedLeadRenderer: RelatedLeadRenderer,
-  //   commonRenderer: CommonRenderer,
-  //   commonRendererWithCopy: CommonRendererWithCopy,
-  //   createdByRenderer: CreatedByRenderer,
-  //   updatedByRenderer: UpdatedByRenderer,
-  //   accountNameRenderer: AccountNameRenderer,
-  //   actionsRenderer: ActionsRenderer,
-  //   entityRenderer: EntityRenderer,
-  // };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -446,7 +366,6 @@ export default function Contact(props) {
           };
         });
 
-        console.log('rows', rows)
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
