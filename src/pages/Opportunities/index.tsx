@@ -113,10 +113,7 @@ const Opportunities = () => {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      if (o?.fieldData?.fieldName === "opportunityName") {
-        o.fieldData.primary = true
-      }
-      let currentColumn = getColumnData(opportunityResource, o?.fieldData)
+      let currentColumn = getColumnData(opportunityResource, o?.fieldData, routes.opportunityDetail.path)
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData]
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

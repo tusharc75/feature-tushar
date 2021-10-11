@@ -138,7 +138,6 @@ export const getColumnData = (title, field, detailScreenRoute = null) => {
         else if (field?.primaryField === true && detailScreenRoute) {
             return {
                 columnData: {
-                    lockPosition: true,
                     pivotIndex: 0,
                     ...commonFieldData,
                     field: field?.fieldName === "firstName" ? "concatedName" : field.fieldName,

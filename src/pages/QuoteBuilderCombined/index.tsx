@@ -247,10 +247,7 @@ const QuoteBuilders = () => {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      if (o?.fieldData?.fieldName === "quoteName") {
-        o.fieldData.primary = true
-      }
-      let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData)
+      let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData]
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
