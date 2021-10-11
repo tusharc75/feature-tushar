@@ -27,9 +27,8 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
       dispatch({
         type: "initialize", data: productInventory.map((u) => ({
           ...u,
-          productName: u.productName || "",
-          inventoryId: u?.inventory._id,
-          productId: u?.product._id,
+          name: u.name || "",
+          inventoryId: u?._id,
           costPerDay: u.costing?.costPerDay,
           totalCost: u.costing?.totalCost,
           startDate: u.costing?.startDate,
@@ -44,9 +43,8 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
       dispatch({
         type: "initialize", data: productInventory.map((u) => ({
           ...u,
-          productName: u.productName || "",
-          inventoryId: u?.inventory._id,
-          productId: u?.product._id,
+          name: u.name || "",
+          inventoryId: u?._id,
           costPerDay: u.costing?.costPerDay,
           totalCost: u.costing?.totalCost,
           startDate: u.costing?.startDate,
@@ -90,15 +88,17 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
     dateRenderer: DateRenderer,
   };
   const columns = [
-    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "inventoryRenderer" },
-    { field: "productName", headerName: "Product Description", show: true, cellRenderer: "nameRenderer" },
-    { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "TicketRenderer" },
+    { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "productRenderer" },
+    { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
+     { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "TicketRenderer" },
     { field: "costPerDay", headerName: "Cost Per Day", show: true, cellRenderer: "commonRenderer" },
     { field: "totalCost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
     { field: "startDate", headerName: "Start Date", show: true, cellRenderer: "dateRenderer" },
     { field: "dueDate", headerName: "End Date", show: true, cellRenderer: "dateRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
-  ];
+ ];
 
   const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageDeliveryTicket"));
   if (columnState) {
