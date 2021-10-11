@@ -476,6 +476,8 @@ const ProjectSales: FC = () => {
               afterImportCompleted={() => {
                 fetchProjects();
               }}
+              isExportAllOrSomeFeature={true}
+              total={rowCount}
               recordsToExport={selectedRecords.length}
               ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
               onExportToExcelSuccess={() => {
@@ -517,6 +519,7 @@ const ProjectSales: FC = () => {
             page={page}
             loading={loading}
             renderedFrom="projectSalesPage"
+            refreshGrid={fetchProjects}
           />
         </div>
 

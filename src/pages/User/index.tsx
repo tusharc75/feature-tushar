@@ -617,6 +617,14 @@ const User: FC = () => {
                 fetchUsers();
                 setUserList([])
               }}
+              isExportAllOrSomeFeature={true}
+              total={rowCount}
+              recordsToExport={selectedRecords.length}
+              ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+              onExportToExcelSuccess={() => {
+                if (gridApi) gridApi.deselectAll()
+                else fetchUsers()
+              }}
             />
           </Grid>
         </Grid>
@@ -664,6 +672,7 @@ const User: FC = () => {
             actionWidth={110}
             loading={loading}
             renderedFrom="userPage"
+            refreshGrid={fetchUsers}
           />
 
         </CustomContainer>

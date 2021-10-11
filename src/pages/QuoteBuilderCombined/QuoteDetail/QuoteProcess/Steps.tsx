@@ -134,7 +134,8 @@ const Steps = (props) => {
     handleViewPdf,
     allowedToEdit,
     DOAData = null,
-    quoteData
+    quoteData,
+    globalLoading = false
   } = props;
   const classes = useStyles();
   let activeStep = currentStep;
@@ -468,7 +469,7 @@ const Steps = (props) => {
                           versionStatus.includes("Sent for DOA") ||
                           (steps.length === 6 && currentStep >= 4) ||
                           versionStatus.includes("Sent to Customer") ||
-                          loading
+                          loading || globalLoading
                         }
                         onClick={handleBack}
                         size="small"
@@ -505,7 +506,7 @@ const Steps = (props) => {
                                 versionStatus.includes("Sent for DOA") ||
                                 (steps.length === 6 && currentStep >= 4) ||
                                 versionStatus.includes("Sent to Customer") ||
-                                loading
+                                loading || globalLoading
                               }
                               onClick={handleBack}
                               size="small"
@@ -545,7 +546,7 @@ const Steps = (props) => {
                                 size="small"
                                 disabled={
                                   !allowedToEdit ||
-                                  loading ||
+                                  loading || globalLoading ||
                                   !nextStep ||
                                   versionStatus.includes("Sent for DOA") ||
                                   versionStatus.includes("Accepted  by DOA")
@@ -626,7 +627,7 @@ const Steps = (props) => {
                           size="small"
                           disabled={
                             !allowedToEdit ||
-                            loading ||
+                            loading || globalLoading ||
                             !nextStep ||
                             versionStatus.includes("Sent for DOA") ||
                             versionStatus.includes("Accepted  by DOA") ||

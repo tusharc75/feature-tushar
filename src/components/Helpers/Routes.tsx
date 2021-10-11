@@ -245,8 +245,8 @@ const routes = {
     title: "Products",
     path: "/product-list",
   },
-  address: {
-    title: (storedRoutes && storedRoutes.address && storedRoutes.address.title) ? storedRoutes.address.title : RESOURCE_LABEL.warehouse,
+  warehouse: {
+    title: (storedRoutes && storedRoutes.warehouse && storedRoutes.warehouse.title) ? storedRoutes.warehouse.title : RESOURCE_LABEL.warehouse,
     path: "/warehouse",
   },
   deliveryTicket: {

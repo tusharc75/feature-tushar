@@ -583,6 +583,7 @@ const DeliveryTicket = () => {
                 allowSelection={false}
                 allowAction={false}
                 renderedFrom={deliveryTicketResource}
+                refreshGrid={fetchDeliveryTicket}
               /> : null}
 
 

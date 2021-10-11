@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Grid, Chip, IconButton, Tooltip } from '@material-ui/core';
+import { Grid, Chip, IconButton } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -8,9 +8,11 @@ import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { FaRegistered } from 'react-icons/fa';
+import { FaRegistered, FaListAlt } from 'react-icons/fa';
+import { BiPackage } from "react-icons/bi";
 
-import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, packages } from '../../constants/helpers';
+
+import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, packages, product } from '../../constants/helpers';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
 import { useHistory } from 'react-router-dom';
@@ -23,9 +25,11 @@ import ManagePackageDialog from './ManagePackageDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import HideWhenOffline from '../../components/HideWhenOffline';
-import AssignProductDialog from './AssignProducts';
+import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/columns';
 import { camelCase } from 'lodash';
+import ProductListDialog from './ProductListDialog';
+import HtmlTooltip from '../../components/CustomTooltipTitle';
 
 let packagesTimeout;
 const PackagesType = [
@@ -59,6 +63,7 @@ const PackageList = () => {
     const [deleteRecord, setDeleteRecord] = useState<any>({});
     const [showManagePackageDialog, setShowManagePackageDialog] = useState({ open: false, isClone: false, idToClone: null });
     const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
+    const [openProductListDialog, setOpenProductListDialog] = useState({ open: false, id: null });
     const [singlePackageDelete, setSinglePackageDelete] = useState({
         id: null,
         show: false,
@@ -179,18 +184,18 @@ const PackageList = () => {
             });
     };
 
-    const packageNameRenderer = (params) => (
-        <>
-            <Link className="text-truncate link" title={params.value} to={`${routes.packages.path}/detail/${params.data._id}`}>
-                {params.value}
-            </Link>
-        </>
-    );
+    // const packageNameRenderer = (params) => (
+    //     <>
+    //         <Link className="text-truncate link" title={params.value} to={`${routes.packages.path}/detail/${params.data._id}`}>
+    //             {params.value}
+    //         </Link>
+    //     </>
+    // );
 
     const ActionsRenderer = (params) => (
         <>
             {permissions?.packages.isCreate ? (
-                <Tooltip title="Clone">
+                <HtmlTooltip title="Clone">
                     <IconButton
                         size="small"
                         aria-label="Clone"
@@ -200,13 +205,13 @@ const PackageList = () => {
                     >
                         <FileCopyIcon fontSize="small" color="primary" />
                     </IconButton>
-                </Tooltip>
+                </HtmlTooltip>
             ) : (
-                <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+                <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
                     <IconButton aria-label="Clone" size="small">
                         <FileCopyIcon fontSize="small" />
                     </IconButton>
-                </Tooltip>
+                </HtmlTooltip>
             )}
 
             <HideWhenOffline>
@@ -224,17 +229,31 @@ const PackageList = () => {
                     entity="packages"
                 />
             </HideWhenOffline>
+            <HideWhenOffline>
+                <HtmlTooltip title="View product list">
+                    <IconButton
+                        color='primary'
+                        size="small"
+                        aria-label="View List"
+                        onClick={() => {
+                            setOpenProductListDialog({ open: true, id: params.data._id })
+                        }}
+                    >
+                        <FaListAlt fontSize="small" />
+                    </IconButton>
+                </HtmlTooltip>
+            </HideWhenOffline>
         </>
     );
 
-    const frameworkComponents = {
-        packageNameRenderer: packageNameRenderer,
-        createdByRenderer: CreatedByRenderer,
-        updatedByRenderer: UpdatedByRenderer,
-        actionsRenderer: ActionsRenderer,
-        commonRenderer: CommonRenderer,
-        dateRenderer: DateRenderer
-    };
+    // const frameworkComponents = {
+    //     packageNameRenderer: packageNameRenderer,
+    //     createdByRenderer: CreatedByRenderer,
+    //     updatedByRenderer: UpdatedByRenderer,
+    //     actionsRenderer: ActionsRenderer,
+    //     commonRenderer: CommonRenderer,
+    //     dateRenderer: DateRenderer
+    // };
 
     const replaceFieldName = (field) => {
         switch (field) {
@@ -452,6 +471,14 @@ const PackageList = () => {
                                         afterImportCompleted={() => {
                                             fetchPackages();
                                         }}
+                                        isExportAllOrSomeFeature={true}
+                                        total={rowCount}
+                                        recordsToExport={selectedRecords.length}
+                                        ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                                        onExportToExcelSuccess={() => {
+                                            if (gridApi) gridApi.deselectAll()
+                                            else fetchPackages()
+                                        }}
                                     />
                                 </Grid>
                             </Grid>
@@ -472,7 +499,7 @@ const PackageList = () => {
                             onCreate={clickCreateNew}
                             showConfirmBox={showConfirmBox}
                             canDelete={selectedRecords.length === 0}
-                            icon={<FaRegistered className="headerLogo" />}
+                            icon={<BiPackage className="headerLogo" />}
                             heading={routes.packages.title}
                             showTransferEntityDialog={handleTransferEntityDialog}
                             openAssingToProduct={() => setShowProductAssignDialog(true)}
@@ -508,7 +535,7 @@ const PackageList = () => {
                             limit={limit}
                             pageSizes={pageSizes}
                             page={page}
-                            actionWidth={100}
+                            actionWidth={140}
                             loading={loading}
                             renderedFrom={pageTitle}
                             allowSelection={!isOffline}
@@ -527,7 +554,7 @@ const PackageList = () => {
                     {isConfirmDialogVisible ? (
                         <ConfirmationDialog
                             open={isConfirmDialogVisible}
-                            message={`Are you sure you want to delete ${deleteRecord?.packageName ? 'Package' : 'Packages'}   ${deleteRecord.packageName || ''}?`}
+                            message={`Are you sure you want to delete ${deleteRecord?.packageName ? 'Package' : 'selected Packages'}   ${deleteRecord.packageName || ''}?`}
                             onClose={() => {
                                 if (deleteRecord) setDeleteRecord({});
                                 setIsConformDialogVisible(false);
@@ -554,10 +581,14 @@ const PackageList = () => {
                 </CustomContainer>
             </Fragment>
             {showProductAssignDialog && (
-                <AssignProductDialog
-                    packageIds={selectedRecords.map((s) => s.id)}
+                <AssignQuantityDialog
+                    ids={selectedRecords.map((s) => s.id)}
                     onClose={() => setShowProductAssignDialog(false)}
                     onSuccess={() => setShowProductAssignDialog(false)}
+                    resource={product.api}
+                    title="Assign Products"
+                    label='Select Product'
+                    resourceData={[]}
                 />
             )}
             {showManagePackageDialog.open && (
@@ -573,6 +604,12 @@ const PackageList = () => {
                         setShowManagePackageDialog({ open: false, isClone: false, idToClone: null });
                     }}
                 />
+            )}
+            {openProductListDialog.open && (
+                <ProductListDialog
+                    id={openProductListDialog.id}
+                    onClose={() => setOpenProductListDialog({ open: false, id: null })}
+                    toastConfig={toastConfig} />
             )}
         </>
     );

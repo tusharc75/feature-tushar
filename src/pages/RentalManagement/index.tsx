@@ -43,11 +43,11 @@ import { camelCase } from "lodash";
 let rentalManagementTimeout;
 const RentalManagementType = [
   {
-    key: "All Rental Managements",
+    key: `All ${routes.rentalManagement.title}`,
     value: 1,
   },
   {
-    key: "My Rental Managements",
+    key: `My ${routes.rentalManagement.title}`,
     value: 2,
   },
 ];
@@ -75,7 +75,7 @@ const RentalManagement = () => {
   const [singleRentalManagementDelete, setSingleRentalManagementDelete] = useState({
     id: null,
     show: false,
-    rentalManagementName: "",
+    rentalJobName: "",
   });
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
@@ -275,7 +275,7 @@ const RentalManagement = () => {
         });
         fetchRentalManagement();
         dispatch({ type: "loading", loading: false });
-        setSingleRentalManagementDelete({ id: null, show: false, rentalManagementName: "" });
+        setSingleRentalManagementDelete({ id: null, show: false, rentalJobName: "" });
       })
       .catch((error) => {
         dispatch({ type: "loading", loading: false });
@@ -352,7 +352,7 @@ const RentalManagement = () => {
             setSingleRentalManagementDelete({
               show: true,
               id: params.data._id,
-              rentalManagementName: `${params.data.rentalManagementName}`,
+              rentalJobName: `${params.data.rentalJobName}`,
             })
           }
           entity="rentalManagement"
@@ -609,6 +609,14 @@ const RentalManagement = () => {
                     afterImportCompleted={() => {
                       fetchRentalManagement();
                     }}
+                    isExportAllOrSomeFeature={true}
+                    total={rowCount}
+                    recordsToExport={selectedRecords.length}
+                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    onExportToExcelSuccess={() => {
+                      if (gridApi) gridApi.deselectAll()
+                      else fetchRentalManagement()
+                    }}
                   />
                 </Grid>
               </Grid>
@@ -685,8 +693,7 @@ const RentalManagement = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${deleteRecord?.rentalManagementName ? "Rental Management" : "Rental Managements"
-                }   ${deleteRecord.rentalManagementName || ""}?`}
+              message={`Are you sure you want to delete selected ${routes.rentalManagement.title.toLowerCase()} ?`}
               onClose={() => {
                 if (deleteRecord) setDeleteRecord({});
                 setIsConformDialogVisible(false);
@@ -699,12 +706,12 @@ const RentalManagement = () => {
           {singleRentalManagementDelete.show ? (
             <ConfirmationDialog
               open={singleRentalManagementDelete.show}
-              message={`Are you sure you want to delete Rental Management: ${singleRentalManagementDelete.rentalManagementName}?`}
+              message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${singleRentalManagementDelete ? singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : "" : ""}?`}
               onClose={() =>
                 setSingleRentalManagementDelete({
                   id: null,
                   show: false,
-                  rentalManagementName: "",
+                  rentalJobName: "",
                 })
               }
               onOk={handleSingleDeleteRentalManagement}

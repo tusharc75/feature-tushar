@@ -25,6 +25,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
     const { isOffline, offlineFieldsData, offlineGridData } = useContext(CustomOfflineContext);
 
     const [loading, setLoading] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const [packageData, setPackageData] = useState({ fields: [], initialValues: {} });
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -153,13 +154,13 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
     };
 
     const handleUpdatePackage = (values) => {
-        setLoading(true);
+        setSubmitting(true);
         if (packageId && isClone === false) {
             values._id = packageId
 
             if (!isOffline) {
                 axiosInstance().put(`${packages.packageApi}`, values).then(({ data }) => {
-                    setLoading(false);
+                    setSubmitting(false);
                     onSuccess()
                     toastConfig.setToastConfig({
                         open: true,
@@ -167,7 +168,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                         message: data.message,
                     });
                 }).catch((error) => {
-                    setLoading(false);
+                    setSubmitting(false);
                     toastConfig.setToastConfig(error);
                 });
             } else {
@@ -190,7 +191,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
 
                 localStorage.setItem("offlineDataToSave", JSON.stringify(storedData));
 
-                setLoading(false);
+                setSubmitting(false);
                 toastConfig.setToastConfig({
                     open: true,
                     type: "info",
@@ -203,7 +204,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
             if (!isOffline) {
                 axiosInstance().post(`${packages.packageApi}`, values).then(({ data: { data, message } }) => {
                     history.push(`${routes.packagesDetail.path}/${data._id}`)
-                    setLoading(false);
+                    setSubmitting(false);
                     onSuccess(data)
                     toastConfig.setToastConfig({
                         open: true,
@@ -211,7 +212,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                         message: message,
                     });
                 }).catch((error) => {
-                    setLoading(false);
+                    setSubmitting(false);
                     toastConfig.setToastConfig(error);
                 });
             }
@@ -482,6 +483,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
 
                                 <CustomDialogFooter>
                                     <Button
+                                        disabled={submitting}
                                         type="button"
                                         variant="outlined"
                                         color="primary"
@@ -495,14 +497,14 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                                     </Button>
 
                                     <CustomButton
-                                        loading={loading}
+                                        loading={submitting}
                                         variant="contained"
                                         color="primary"
                                         disabled={
                                             // loading || Object.keys(errors).length > 0 ? true : false
                                             uploadingImageOrFileProgress > 0 ||
                                             isFieldNotTouched(packageData, values) ||
-                                            loading
+                                            submitting
                                         }
                                         onClick={(e) => {
                                             e.preventDefault();

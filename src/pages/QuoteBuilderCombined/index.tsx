@@ -665,6 +665,8 @@ const QuoteBuilders = () => {
                     afterImportCompleted={() => {
                       fetchQuoteBuilder();
                     }}
+                    isExportAllOrSomeFeature={true}
+                    total={rowCount}
                     recordsToExport={selectedRecords.length}
                     ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
                     onExportToExcelSuccess={() => {
@@ -728,6 +730,7 @@ const QuoteBuilders = () => {
             page={page}
             actionWidth={100}
             loading={loading}
+            refreshGrid={fetchQuoteBuilder}
           />
 
           {showDeleteWarningConfirmBox ? (

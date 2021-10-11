@@ -71,12 +71,12 @@ function SalesOrderHeader(props) {
             width="300px"
           />
 
-          {SalesOrderPermissions.isCreate && SalesOrderPermissions.isUpdate && (
+          {SalesOrderPermissions?.isCreate && SalesOrderPermissions?.isUpdate && (
             <Button variant="contained" color="primary" size="small" className={styles.add_submit_btn} onClick={onCreate} startIcon={<AddOutlined />}>
               Add
             </Button>
           )}
-          {SalesOrderPermissions.isDelete && (
+          {SalesOrderPermissions?.isDelete && (
             <>
               <Button
                 disabled={canDelete}

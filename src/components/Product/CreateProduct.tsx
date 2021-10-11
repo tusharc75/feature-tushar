@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect, Fragment, useContext } from "react";
+import { useHistory } from "react-router-dom";
 import { Box, Tooltip, Grid, Button, InputAdornment } from '@material-ui/core';
 import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
@@ -30,8 +31,9 @@ const ignoreField = ["priceTemplate"]
 const CreateProduct = (props) => {
 
     const { state: { permissions } }: any = useData();
+    const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
-    const { productId, handleClose, isClone, isAddInBuilder, addProductInBuilder, openFrom } = props;
+    const { productId, handleClose, isClone, isAddInBuilder, addProductInBuilder, openFrom, isRedirectToDetailPage } = props;
     const [masterFields, setMasterFields] = useState([]);
     const [productFields, setProductFields] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -150,6 +152,7 @@ const CreateProduct = (props) => {
             delete values._id
             delete values.brand
             axiosInstance().post(`/product`, values).then(({ data: { data } }) => {
+                const productId = data._id;
                 setLoading(false);
                 handleClose();
                 if (isAddInBuilder) {
@@ -161,6 +164,9 @@ const CreateProduct = (props) => {
                     delete data._id
                     data.isEditable = true
                     addProductInBuilder([data])
+                }
+                if (isRedirectToDetailPage) {
+                    history.push(`/product/detail/${productId}`)
                 }
             }).catch((error) => {
                 setLoading(false);
