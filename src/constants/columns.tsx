@@ -31,7 +31,12 @@ export const detailPagePath = {
     collaborator: routes?.userDetail?.path,
     rental: routes.rentalManagementDetail.path,
     deliveryPerson: routes?.userDetail?.path,
-    pDFTemplate: routes?.quotePdfTemplateDetail?.path
+    pDFTemplate: routes?.quotePdfTemplateDetail?.path,
+    subMarketSegment: routes?.marketSegment?.path,
+}
+export const hasDetailPageAsPopup = {
+    subMarketSegment: routes?.marketSegment?.path,
+    marketSegment: routes?.marketSegment?.path
 }
 export const disabledColumns = {
     [routes.rentalManagementDetail.title]: [],
