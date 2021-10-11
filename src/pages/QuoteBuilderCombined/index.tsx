@@ -730,6 +730,7 @@ const QuoteBuilders = () => {
             page={page}
             actionWidth={100}
             loading={loading}
+            refreshGrid={fetchQuoteBuilder}
           />
 
           {showDeleteWarningConfirmBox ? (

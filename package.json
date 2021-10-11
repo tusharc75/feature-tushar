@@ -1,6 +1,6 @@
 {
   "name": "oms_frontend",
-  "version": "1.11.0",
+  "version": "1.14.1",
   "private": true,
   "dependencies": {
     "@azure/msal-browser": "^2.14.1",
@@ -150,7 +150,6 @@
     "build": "node --max_old_space_size=4096 scripts/build.js",
     "winBuild": "set \"GENERATE_SOURCEMAP=true\" && node --max_old_space_size=10240 scripts/build.js",
     "sourceMapBuild": "node --max_old_space_size=4096 scripts/build.js",
-    "postbuild": "node uploadSourcemaps.js",
     "test": "node scripts/test.js",
     "commit": "cz",
     "release": "standard-version",

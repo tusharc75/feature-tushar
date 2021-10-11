@@ -18,110 +18,18 @@ import routes from '../../components/Helpers/Routes';
 import { ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
-import { gridLoadingTimeout, gridPageSizes, isObjectEmpty, RESOURCE_LABEL, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../constants/helpers';
 import { CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import CustomAgGrid from '../../components/AgGridComponents/CustomAgGrid';
+import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
-import { entity } from "../../constants/helpers"
 import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import Chip from "@material-ui/core/Chip"
 
-function reducer(state, action) {
-  switch (action.type) {
-    case 'loading':
-      return {
-        ...state,
-        loading: action.loading
-      };
-
-    case 'initialize':
-      return {
-        ...state,
-        dataRows: action.data,
-        rowCount: action.count
-      };
-
-    case 'selection':
-      return {
-        ...state,
-        selectedRecords: action.selectedRecords
-      };
-
-    case 'update':
-      return {
-        ...state,
-        dataRows: action.data,
-        loading: false
-      };
-
-    case 'filter':
-      return {
-        ...state,
-        loading: true,
-        filters: action.filters,
-        page: 0
-      };
-
-    case 'sort':
-      return {
-        ...state,
-        sorting: action.sorting,
-        loading: true
-      };
-
-    case 'search':
-      return {
-        ...state,
-        search: action.search,
-        loading: true
-      };
-
-    case 'pageChange':
-      return {
-        ...state,
-        page: action.page
-      };
-
-    case 'pageSizeChange':
-      return {
-        ...state,
-        limit: action.limit,
-        page: 0,
-        loading: true
-      };
-
-    case 'complete':
-      return {
-        ...state,
-        loading: false
-      };
-
-    default:
-      break;
-  }
-
-  return state;
-}
-
-const intialState = {
-  dataRows: [],
-  rowCount: 0,
-  loading: false,
-  page: 0,
-  limit: 25,
-  pageSizes: gridPageSizes,
-  search: '',
-  filters: {},
-  sorting: [],
-  selectedRecords: []
-};
-
 const AddressResource = () => {
-  const { entityApi } = entity
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, user, selectedEntity }
@@ -371,6 +279,7 @@ const AddressResource = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
+  console.log('permissions.addressResource', permissions)
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -379,9 +288,10 @@ const AddressResource = () => {
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.addressResource}
+            permissions={warehousePermissions}
             module="warehouse"
             api={'warehouse'}
+
             afterImportCompleted={() => {
               fetchWarehouses();
             }}
@@ -492,6 +402,7 @@ const AddressResource = () => {
           actionWidth={150}
           loading={loading}
           renderedFrom="warehousePage"
+          refreshGrid={fetchWarehouses}
         />
 
         {showDeleteConfirmBox && (

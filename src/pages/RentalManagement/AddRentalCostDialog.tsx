@@ -47,10 +47,10 @@ export const AddRentalCostDialog = (props) => {
 
     useEffect(() => {
         setInitialValues({
-            costPerDay: RentalCostData.costing.costPerDay ? RentalCostData.costing.costPerDay : 0,
-            totalCost: RentalCostData.costing.totalCost ? RentalCostData.costing.totalCost : 0,
-            startDate: RentalCostData.costing.startDate ? new Date(RentalCostData.costing.startDate) : new Date(),
-            dueDate: RentalCostData.costing.dueDate ? new Date(RentalCostData.costing.dueDate) : new Date(),
+            costPerDay: RentalCostData?.costing?.costPerDay ? RentalCostData?.costing?.costPerDay : 0,
+            totalCost: RentalCostData?.costing?.totalCost ? RentalCostData?.costing?.totalCost : 0,
+            startDate: RentalCostData?.costing?.startDate ? new Date(RentalCostData?.costing?.startDate) : new Date(),
+            dueDate: RentalCostData?.costing?.dueDate ? new Date(RentalCostData?.costing?.dueDate) : new Date(),
         });
     }, [RentalCostData]);
 

@@ -31,6 +31,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useHistory } from "react-router-dom";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
+import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -64,7 +65,7 @@ const ProductInventory = () => {
         { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "productCategoryRenderer" },
         { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
         { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "dateRenderer" },
-        { field: "bornInDate", headerName: "Born on Date", show: true, cellRenderer: "dateRenderer" },
+        { field: "bornOnDate", headerName: "Born on Date", show: true, cellRenderer: "dateRenderer" },
         { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
@@ -89,7 +90,7 @@ const ProductInventory = () => {
                 id: u._id,
                 serialNumber: u.serialNumber,
                 inServiceDate: u.inServiceDate,
-                bornInDate: u.bornInDate,
+                bornOnDate: u.bornOnDate,
                 status: u.status,
                 warehouse: u.warehouse?.optionLabel,
                 product: u.product?.optionLabel,
@@ -257,6 +258,25 @@ const ProductInventory = () => {
             <Grid item md={4} sm={11} xs={10}>
                 <CustomBreadCrumbs routes={[routes.productInventory]} />
             </Grid>
+            <Grid item md={8} sm={1} xs={2}>
+                <ImportExportLinks
+                    permissions={permissions?.productInventory}
+                    module="product inventory"
+                    api={productInventory.api}
+                    afterImportCompleted={() => {
+                        fetchProductInventory();
+                    }}
+                    isExportAllOrSomeFeature={true}
+                    total={rowCount}
+                    recordsToExport={selectedRecords.length}
+                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    onExportToExcelSuccess={() => {
+                        if (gridApi) gridApi.deselectAll()
+                        else fetchProductInventory()
+                    }}
+                />
+            </Grid>
+
         </Grid>
         <div className="main-container">
             <div className="header-panel">
@@ -356,6 +376,7 @@ const ProductInventory = () => {
                     actionWidth={150}
                     loading={loading}
                     renderedFrom="productInventoryPage"
+                    refreshGrid={fetchProductInventory}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
@@ -386,9 +407,9 @@ const ProductInventory = () => {
         }
         {
             showDeleteConfirmBox &&
-                <ConfirmationDialog
-                    open={showDeleteConfirmBox}
-                    message={`Are you sure you want to delete the ${storedRoutes ? storedRoutes.productInventory?.title?.toLowerCase() : RESOURCE_LABEL.productInventory?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
+            <ConfirmationDialog
+                open={showDeleteConfirmBox}
+                message={`Are you sure you want to delete the ${storedRoutes ? storedRoutes.productInventory?.title?.toLowerCase() : RESOURCE_LABEL.productInventory?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
                 onClose={() => setShowDeleteConfirmBox(false)}
                 onOk={handleDelete}
             />

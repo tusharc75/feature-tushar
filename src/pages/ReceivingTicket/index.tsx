@@ -242,7 +242,7 @@ const ReceivingTicket = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions.receivingTicket.isCreate ? (
+      {permissions.receivingTicket?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
             size="small"
@@ -263,7 +263,7 @@ const ReceivingTicket = () => {
       )}
 
       <GridDeleteIcon
-        hasDeletePermission={permissions.receivingTicket.isDelete}
+        hasDeletePermission={permissions.receivingTicket?.isDelete}
         ownerId={params.data.ownerId}
         userId={user?.user?._id}
         onDelete={() =>
@@ -486,7 +486,7 @@ const ReceivingTicket = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.receivingTicket]} />
+          <CustomBreadCrumbs routes={[{ title: routes.receivingTicket.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <Grid container direction="row">
@@ -496,7 +496,15 @@ const ReceivingTicket = () => {
                   permissions={permissions.receivingTicket}
                   module="receivingTicket"
                   api={receivingTicket.receivingTicketApi}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
+                  isExportAllOrSomeFeature={true}
+                  total={rowCount}
+                  recordsToExport={selectedRecords.length}
+                  ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                  onExportToExcelSuccess={() => {
+                    if (gridApi) gridApi.deselectAll()
+                    else fetchReceivingTickets();
+                  }}
                 />
               </Grid>
             </Grid>
@@ -520,9 +528,9 @@ const ReceivingTicket = () => {
             icon={<FaRegistered className="headerLogo" />}
             heading={routes.receivingTicket.title}
             showTransferEntityDialog={handleTransferEntityDialog}
-            // showCloneReceivingTicketDialog={() => {
-            //   handleShowCloneReceivingTicketDialog()
-            // }}
+          // showCloneReceivingTicketDialog={() => {
+          //   handleShowCloneReceivingTicketDialog()
+          // }}
           >
             {accountDetails.accountId && (
               <Chip
@@ -554,6 +562,7 @@ const ReceivingTicket = () => {
           actionWidth={100}
           loading={loading}
           renderedFrom={'receivingTicketPage'}
+          refreshGrid={fetchReceivingTickets}
         />
 
         {showDeleteWarningConfirmBox ? (
@@ -566,9 +575,8 @@ const ReceivingTicket = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.receivingJobName ? 'Receiving Ticket' : 'Receiving Tickets'}   ${
-              deleteRecord.receivingJobName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.receivingJobName ? 'Receiving Ticket' : 'Receiving Tickets'}   ${deleteRecord.receivingJobName || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

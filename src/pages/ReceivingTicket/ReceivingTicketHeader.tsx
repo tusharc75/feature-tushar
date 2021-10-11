@@ -18,8 +18,6 @@ function ReceivingTicketHeader(props) {
     setAnchorEl(null);
   };
 
-  const [filter, setFilter] = useState('All Receiving Tickets');
-
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
       setFilter(newFilter);
@@ -43,6 +41,9 @@ function ReceivingTicketHeader(props) {
     showTransferEntityDialog
     // showCloneRentalManagementDialog
   } = props;
+
+  const [filter, setFilter] = useState(options[0].key);
+
   return (
     <Grid className={styles.filter_side_container} container>
       <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
@@ -71,12 +72,12 @@ function ReceivingTicketHeader(props) {
             width="300px"
           />
 
-          {ReceivingTicketPermissions.isCreate && ReceivingTicketPermissions.isUpdate && (
+          {ReceivingTicketPermissions?.isCreate && ReceivingTicketPermissions?.isUpdate && (
             <Button variant="contained" color="primary" size="small" className={styles.add_submit_btn} onClick={onCreate} startIcon={<AddOutlined />}>
               Add
             </Button>
           )}
-          {ReceivingTicketPermissions.isDelete && (
+          {ReceivingTicketPermissions?.isDelete && (
             <>
               <Button
                 disabled={canDelete}

@@ -376,6 +376,7 @@ const ProductInventoryDetailsPage = () => {
                       isClientSideGrid={true}
                       loading={loading}
                       renderedFrom="rentalManagementDetailsPageInventory"
+                      refreshGrid={fetchProductInventoryHistory}
                     />
                     : <Box
                       p={2}

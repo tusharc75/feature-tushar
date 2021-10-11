@@ -69,14 +69,16 @@ const FormBuilder = () => {
           <Grid item xs={12} className="d-flex align-items-center gap-1">
             <div className="header-panel d-flex align-items-center gap-1">
               <FaWpforms className="headerLogo" /> <span className="listingHeader">{routes.formBuilder.title}
-            </span>
+              </span>
             </div>
           </Grid>
         </Grid>
 
         <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
           dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={false} allowSelection={false}
-          isClientSideGrid={true} loading={loading} />
+          isClientSideGrid={true} loading={loading}
+          refreshGrid={fetchGetBrandResource}
+        />
 
       </CustomContainer>
     </Fragment>
