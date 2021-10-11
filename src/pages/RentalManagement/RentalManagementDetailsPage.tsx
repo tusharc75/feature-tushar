@@ -39,6 +39,7 @@ import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import HideWhenOffline from "../../components/HideWhenOffline";
 import DeleteButton from "../../components/Helpers/DeleteButton";
+import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 
 const rentalProcessSteps = ["New", "Add Rental Cost", "Additional Cost", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
@@ -273,8 +274,14 @@ const RentalManagementDetailsPage = () => {
       data.data?.products.map((u) => (tempInventory.push({
         ...u,
         id: u._id,
-        productId: u._id,
+        name: u.productName,
         productCategory: u.productCategory?.optionLabel,
+      })));
+      data.data?.packages.map((u) => (tempInventory.push({
+        ...u,
+        id: u._id,
+        name: u.packageName,
+        description: u.packageDescription,
       })));
       fetchDeliveryTicket(tempInventory);
 
@@ -310,7 +317,7 @@ const RentalManagementDetailsPage = () => {
   );
 
   const ProductRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
+    <Link className="link" title={params.value} to={params.data.type === "product" ? `${routes.productDetail.path}/${params.data.id}` : `${routes.packagesDetail.path}/${params.data.id}`}>
       {params.value}
     </Link>
   );
@@ -333,11 +340,15 @@ const RentalManagementDetailsPage = () => {
   const frameworkComponents = {
     nameRenderer: NameRenderer,
     productRenderer: ProductRenderer,
+    commonRenderer: CommonRenderer,
     actionsRenderer: ActionsRenderer,
   };
   const columns = [
-    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
+    { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "productRenderer" },
+    { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
   ];
 
   const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageInventory"));

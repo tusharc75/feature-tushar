@@ -139,6 +139,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                 if (type === "package") {
                                     setPackageDialog(true)
                                     fetchPackageProduct(params.data.id)
+                                    setSelectedProduct({ name: params.data.packageName, id: params.data.id, quantity: params.data.quantity })
                                 }
                                 else {
                                     setQuantityDialog(true);
@@ -179,6 +180,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         tempProduct.find(d => d.id === selectedProduct.id).quantity = selectedProduct.quantity
         setProductData(tempProduct)
         setQuantityDialog(false)
+        setPackageDialog(false)
         if (gridApi) {
             gridApi.setRowData(productData);
         }
@@ -291,8 +293,22 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 <CustomDialogHeader title={"Assign To Package"} onClose={() => setPackageDialog(false)} />
                 <CustomDialogContent>
                     <Box p={2}>
+                        <TextField
+                            size="small"
+                            value={selectedProduct.quantity}
+                            type="number"
+                            onChange={(e) => { setSelectedProduct({ name: selectedProduct.name, id: selectedProduct.id, quantity: parseInt(e.target.value) }) }}
+                            variant="outlined"
+                            required
+                            label="Package Quantity"
+                        />
+                        <div className="detail-box">
+                            <h3 className="form-label-style" title={"Package Details"}>
+                                {"Package Details"}
+                            </h3>
+                        </div>
                         <Grid container spacing={2}>
-                            {packageProductData.map((obj, indx) => (
+                            {packageProductData.length > 0 && packageProductData.map((obj, indx) => (
                                 <Fragment key={obj.id}>
                                     <Grid item xs={5} sm={5}>
                                         <TextField
@@ -329,7 +345,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                         Cancel
                     </Button>
                     <Button
-                        onClick={() => { }}
+                        onClick={handleSubmit}
                         variant="contained"
                         color="primary"
                     >
