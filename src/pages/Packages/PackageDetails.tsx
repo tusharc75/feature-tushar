@@ -3,14 +3,7 @@ import {
   Grid,
   Box,
   Button,
-  Paper,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow
+  Paper
 } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
@@ -28,7 +21,6 @@ import { packages, product } from '../../constants/helpers';
 import ManagePackageDialog from './ManagePackageDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
-import Loader from '../../components/Loader';
 import ProductsTable from './ProductsTable';
 
 const PackageDetails = () => {

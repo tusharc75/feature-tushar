@@ -116,7 +116,7 @@ const Product = () => {
                 });
             }
             catch (e) {
-                console.log(e)
+                console.error(e)
             }
             let column = []
             data.data.forEach((row) => {

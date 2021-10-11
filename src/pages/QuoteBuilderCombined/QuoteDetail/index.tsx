@@ -347,8 +347,6 @@ export default function QuoteDetail() {
             selectedRows
           )
         }
-
-
         setTimeout(() => {
           dispatch({ type: "loading", loading: false });
         }, gridLoadingTimeout);

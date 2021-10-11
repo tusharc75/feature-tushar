@@ -279,7 +279,6 @@ const AddressResource = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  console.log('permissions.addressResource', permissions)
   return (
     <Fragment>
       <Grid container className="headerbox">

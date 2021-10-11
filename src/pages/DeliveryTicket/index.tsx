@@ -77,82 +77,6 @@ const DeliveryTicket = () => {
     selectedRecords,
   } = state;
 
-  // const columns = [
-  //   {
-  //     field: "deliveryJobName",
-  //     headerName: "Delivery Job Name",
-  //     show: true,
-  //     disabled: true,
-  //     cellRenderer: "deliveryJobNameRenderer",
-  //   },
-  //   {
-  //     field: "customerAccount",
-  //     headerName: "Customer Account",
-  //     show: true,
-  //     cellRenderer: "customerAccountNameRenderer",
-  //   },
-  //   {
-  //     field: "status",
-  //     headerName: "Status",
-  //     show: true,
-  //     cellRenderer: "commonRenderer",
-  //   },
-  //   {
-  //     field: "rentalName",
-  //     headerName: "Rental",
-  //     show: true,
-  //     cellRenderer: "rentalRenderer",
-  //   },
-  //   {
-  //     field: "deliveryDate",
-  //     headerName: "Delivery Date",
-  //     show: true,
-  //     cellRenderer: "dateRenderer",
-  //     filter: false,
-  //   },
-  //   {
-  //     field: "deliveryType",
-  //     headerName: "Delivery Type",
-  //     show: true,
-  //     cellRenderer: "commonRenderer",
-  //   },
-  //   {
-  //     field: "deliveryJobID",
-  //     headerName: "Delivery Job ID",
-  //     show: true,
-  //     cellRenderer: "commonRenderer",
-  //   },
-  //   // {
-  //   //   field: "productInventory",
-  //   //   headerName: "Product Inventory",
-  //   //   show: true,
-  //   //   filter: false,
-  //   //   cellRenderer: "productInventoryRenderer",
-  //   // },
-  //   {
-  //     field: "shippingAddress",
-  //     headerName: "Shipping Address",
-  //     show: true,
-  //     cellRenderer: "commonRenderer",
-  //   },
-  //   {
-  //     field: "warehouseName",
-  //     headerName: "Warehouse",
-  //     show: true,
-  //     cellRenderer: "commonRenderer",
-  //   },
-
-  //   {
-  //     field: "pick-UpDate",
-  //     headerName: "Pick-UpDate",
-  //     show: true,
-  //     cellRenderer: "dateRenderer",
-  //     filter: false,
-  //   },
-  //   { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-  //   { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
-  // ];
-
   const fetchGridMetadata = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource["deliveryTicket"]}&entity=${selectedEntity}`)
@@ -160,7 +84,7 @@ const DeliveryTicket = () => {
         let columns = []
         let rendererNames = []
         data.forEach(o => {
-          let currentColumn = getColumnData(deliveryTicketResource, o?.fieldData)
+          let currentColumn = getColumnData(deliveryTicketResource, o?.fieldData, `${routes.deliveryTicket.path}/detail`)
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData]
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -228,50 +152,6 @@ const DeliveryTicket = () => {
     selectedEntity,
   ]);
 
-  const DeliveryJobNameRenderer = (params) => (
-    <>
-      <Link
-        className="text-truncate link"
-        title={params.value}
-        to={`${routes.deliveryTicket.path}/detail/${params.data._id}`}>
-        {params.value}
-      </Link>
-    </>
-  );
-
-  const CustomerAccountNameRenderer = (params) => <>
-    {
-      params.value ? <Link
-        className="link"
-        title={params.value}
-        to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}>
-        {params.value}
-      </Link> : <NoDataCell />
-    }
-  </>
-
-  // const ProductInventoryRenderer = params => <>
-  //   {
-  //     params.value ?
-  //       <Link className="link" to={``} title={params.value}>
-  //         {params.value}
-  //       </Link>
-  //       : <NoDataCell />
-  //   }
-  // </>
-
-  const RentalRenderer = params => <>
-    {
-      params.value ?
-        <Link className="link"
-          to={`${routes.rentalManagement.path}/detail/${params?.data?.rentalId}`}
-          title={params.value}>
-          {params.value}
-        </Link>
-        : <NoDataCell />
-    }
-  </>
-
   const ActionsRenderer = (params) => (
     <>
       <GridDeleteIcon
@@ -287,18 +167,6 @@ const DeliveryTicket = () => {
       />
     </>
   );
-
-  const frameworkComponents = {
-    deliveryJobNameRenderer: DeliveryJobNameRenderer,
-    customerAccountNameRenderer: CustomerAccountNameRenderer,
-    // productInventoryRenderer: ProductInventoryRenderer,
-    rentalRenderer: RentalRenderer,
-    dateRenderer: DateRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-    commonRenderer: CommonRenderer,
-  };
 
   const replaceFieldName = (field) => {
     switch (field) {

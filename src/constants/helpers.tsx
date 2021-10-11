@@ -692,7 +692,6 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
             title: d.resourceLabel || d.name
           };
         } else {
-          debugger;
           console.info(`Custom Error (helper.tsx > getPermissions()) => ${JSON.stringify(d)} resource not found`)
         }
       });
