@@ -650,7 +650,7 @@ function OpportunityDetailsPage() {
                   isAllowedToUpdate={allowedToEdit}
                 />
               )}
-              {permissions?.projectSales?.isRead && (
+              {permissions?.projectStrategy?.isRead && (
                 <ProjectInAccordion
                   recordsPerLine={3}
                   projectSales={projectSales}

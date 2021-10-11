@@ -616,7 +616,7 @@ export default function QuoteDetail() {
                         handleOpenCloneDialog={handleOpenCloneDialog}
                         handleSetSteps={handleSetSteps}
                       />)}
-                      {permissions?.projectSales?.isRead && (
+                      {permissions?.projectStrategy?.isRead && (
                         <ProjectInAccordion
                           recordsPerLine={3}
                           projectSales={relatedTo && relatedTo["Project Sales"]?.Quotes || []}
