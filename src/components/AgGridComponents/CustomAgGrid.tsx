@@ -184,6 +184,7 @@ export default function CustomAgGrid({
         filter={column.filter ?? 'agTextColumnFilter'}
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
+        cellRendererParams={column.cellRendererParams ?? null}
         minWidth={column.width ?? 250}
         flex={1}
         rowDrag={column.rowDrag ?? false}
@@ -202,6 +203,7 @@ export default function CustomAgGrid({
         filter={column.filter ?? 'agTextColumnFilter'}
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
+        cellRendererParams={column.cellRendererParams ?? null}
         minWidth={column.width ?? 250}
         flex={1}
         filterParams={customFilterParams}
