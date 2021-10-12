@@ -26,6 +26,13 @@ jobs:
           npm install
           CI=false npm run build --if-present
           npm run test --if-present
+        env:
+          REACT_APP_API_URL = https://arcelor-mittal.oms-backend.equip-t.com
+          REACT_APP_ENV = production
+          REACT_APP_RELEASE = 1.0.0
+          ERROR_REPORTING_ORGANIZATION = vebholic-pvt-ltd
+          ERROR_REPORTING_PROJECT = om
+          ERROR_REPORTING_API_TOKEN = 9702b27bd9f64ef29e8d55c7293393617d948d3f8b5841f2b429219da44dc1f5
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
