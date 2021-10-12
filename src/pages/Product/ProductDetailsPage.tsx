@@ -393,7 +393,7 @@ const ProductDetailsPage = () => {
 
                                 {permissions?.productInventory?.isCreate && (
                                     <IconButton
-                                        title="Manage Warehouse(s)"
+                                        title="Manage Plant(s)"
                                         color="primary"
                                         size="small"
                                         onClick={() => { setOpenProductInventoryDialog(true) }}
@@ -509,7 +509,7 @@ const ProductDetailsPage = () => {
 
                                             <Box width="100%">
                                                 <Box mx={2} mt={1} display="flex" justifyContent="space-between">
-                                                    <Typography variant="h6">Warehouse</Typography>
+                                                    <Typography variant="h6">Plants</Typography>
                                                     <Typography variant="h6">Qty.</Typography>
                                                 </Box>
                                                 {
