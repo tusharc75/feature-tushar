@@ -20,7 +20,10 @@ import {
   TableBody,
   TableCell,
   makeStyles,
-  Dialog
+  Dialog,
+  InputLabel,
+  Select,
+  MenuItem
 } from "@material-ui/core";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { ControlPoint } from "@material-ui/icons";
@@ -57,6 +60,9 @@ import AssignedEntities from "./AssignedEntities";
 import { isMobile, isTablet } from "react-device-detect";
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import UserSetupDialog from "./UserSetupDialog";
+import moment from "moment";
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
+import DateFnsUtils from "@date-io/date-fns";
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -119,6 +125,14 @@ const UserDetailsPage = () => {
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [showActivity, setActivityShow] = useState(true);
   const [showSetupUserDialog, setShowSetupUserDialog] = useState(false);
+  const [timeFrame, setTimeFrame] = useState<any>('1-year');
+  const [trackingTime, setTrackingTime] = useState({
+    between: {
+      from: new Date(moment().subtract(1, 'year').calendar()),
+      to: new Date()
+    }
+  });
+  const [totalDuration, setTotalDuration] = useState('0');
 
   useEffect(() => {
     if (id) {
@@ -129,10 +143,57 @@ const UserDetailsPage = () => {
       fetchUsers()
       fetchUserRelatedDetail()
       setCurrentTabIndex(0);
+      userTimeTracker()
     }
     userSetup === "true" && setShowSetupUserDialog(true);
     // eslint-disable-next-line
   }, [id]);
+
+  useEffect(() => {
+    switch (timeFrame) {
+      case '1-month':
+        setTrackingTime({
+          between: {
+            from: new Date(moment().subtract('1', 'month').calendar()),
+            to: new Date()
+          }
+        });
+        break;
+
+      case '3-months':
+        setTrackingTime({
+          between: {
+            from: new Date(moment().subtract('3', 'months').calendar()),
+            to: new Date()
+          }
+        });
+        break;
+
+      case '6-months':
+        setTrackingTime({
+          between: {
+            from: new Date(moment().subtract('6', 'months').calendar()),
+            to: new Date()
+          }
+        });
+        break;
+
+      case '1-year':
+        setTrackingTime({
+          between: {
+            from: new Date(moment().subtract('1', 'year').calendar()),
+            to: new Date()
+          }
+        });
+        break;
+      default:
+        break;
+    }
+  }, [timeFrame]);
+
+  useEffect(() => {
+    userTimeTracker()
+  },[trackingTime])
 
   const quickLinks: IQuickLinks[] = [
     {
@@ -149,6 +210,18 @@ const UserDetailsPage = () => {
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
   }
+
+  const msToTime = (ms) => {
+    let seconds = (ms / 1000).toFixed(1);
+    let minutes = (ms / (1000 * 60)).toFixed(1);
+    let hours = (ms / (1000 * 60 * 60)).toFixed(1);
+    let days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
+    if (parseInt(seconds) < 60) return seconds + " Sec";
+    else if (parseInt(minutes) < 60) return minutes + " Min";
+    else if (parseInt(hours) < 24) return hours + " Hrs";
+    else return days + " Days"
+  }
+
   const fetchUserData = async () => {
     setLoading(true);
 
@@ -202,6 +275,29 @@ const UserDetailsPage = () => {
     }).catch((error) => {
       toastConfig.setToastConfig(error);
     });
+  }
+
+  const convertDate = (str) => {
+    let date = new Date(str),
+      month = ("0" + (date.getMonth() + 1)).slice(-2),
+      day = ("0" + date.getDate()).slice(-2);
+    return [month, day, date.getFullYear()].join("-");
+  }
+
+  const userTimeTracker = async () => {
+    const parsedFromTime = convertDate(trackingTime.between.from)
+    const parsedToTime = convertDate(trackingTime.between.to)
+    axiosInstance()
+      .get(`/user-activity/${id}/${parsedFromTime}/${parsedToTime}`)
+      .then(({ data: { data } }) => {
+        const totalTimeInMs = data?.map((time) => time.duration).reduce((total, current) => {
+          total += current
+          return total
+        }, 0);
+        setTotalDuration(msToTime(totalTimeInMs))
+      }).catch((error) => { 
+        toastConfig.setToastConfig(error) 
+      })
   }
 
   const fetchDoa = async () => {
@@ -835,6 +931,90 @@ const UserDetailsPage = () => {
                   </Grid>
                 </>
               }
+              <Box>
+                <Box
+                  width="100%"
+                  padding={1}
+                  bgcolor="grey.200"
+                  display="flex"
+                  justifyContent="space-between"
+                >
+                  <Grid container>
+                    <Grid item xs={8}>
+                      <Box display="flex">
+                        <Box padding="5px">
+                          <Typography variant="subtitle2">
+                            User Time Track
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Box>
+                <Box padding ="10px">
+                <Grid item xs={12} sm={12} md={12}>
+                  <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={4}>
+                        <FormControl fullWidth size="small" variant="outlined">
+                          <InputLabel id="duration">Select Duration</InputLabel>
+                          <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
+                            <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                            <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                            <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                            <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                            <MenuItem value={'custom'}>Custom</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={6} sm={4}>
+                        <KeyboardDatePicker
+                          disabled={timeFrame !== 'custom'}
+                          inputVariant="outlined"
+                          variant="inline"
+                          fullWidth
+                          autoOk
+                          disableFuture
+                          size="small"
+                          openTo="year"
+                          format="dd/MM/yyyy"
+                          maxDate={trackingTime.between.from}
+                          label="From"
+                          views={['year', 'month', 'date']}
+                          value={trackingTime.between.from}
+                          onChange={(date) => {
+                            setTrackingTime({ between: { from: date, to: trackingTime.between.to } });
+                          }}
+                        />
+
+
+                      </Grid>
+                      <Grid item xs={6} sm={4}>
+                        <KeyboardDatePicker
+                          disabled={timeFrame !== 'custom'}
+                          inputVariant="outlined"
+                          variant="inline"
+                          fullWidth
+                          autoOk
+                          disableFuture
+                          size="small"
+                          minDate={trackingTime.between.from}
+                          openTo="year"
+                          format="dd/MM/yyyy"
+                          label="To"
+                          views={['year', 'month', 'date']}
+                          value={trackingTime.between.to}
+                          onChange={(date) => {
+                            setTrackingTime({ between: { to: date, from: trackingTime.between.from } });
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </MuiPickersUtilsProvider>
+                </Grid>
+                </Box>
+                <Typography className="subtitle1 m-2">{parseInt(totalDuration) > 0 ? `Total Time: ${totalDuration}`:"No record found"}</Typography>
+              </Box>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
                   <Box
@@ -1107,32 +1287,32 @@ const UserDetailsPage = () => {
         </FullScreenDialog>
       }
       {
-        showSetupUserDialog && 
-        <UserSetupDialog 
-            open = {showSetupUserDialog}
-            close = {() => {
-              history.push({
-                pathname: `/user/detail/${id}`,
-                search:'',
-              });
-              setShowSetupUserDialog(false)
-              fetchUserData()
-              fetchDoa()
-              
-            }}
-            userIds = {[id]}
-            onSuccess={() => {
-              setShowSetupUserDialog(false)
-              history.push({
-                pathname: `/user/detail/${id}`,
-                search:'',
-              });
-              fetchUserData()
-              fetchDoa()
-            }}
-            fetchUsers = {() => fetchUsers()}
-            userList = {userList}
-            selectedRecords={[{...userData}]}
+        showSetupUserDialog &&
+        <UserSetupDialog
+          open={showSetupUserDialog}
+          close={() => {
+            history.push({
+              pathname: `/user/detail/${id}`,
+              search: '',
+            });
+            setShowSetupUserDialog(false)
+            fetchUserData()
+            fetchDoa()
+
+          }}
+          userIds={[id]}
+          onSuccess={() => {
+            setShowSetupUserDialog(false)
+            history.push({
+              pathname: `/user/detail/${id}`,
+              search: '',
+            });
+            fetchUserData()
+            fetchDoa()
+          }}
+          fetchUsers={() => fetchUsers()}
+          userList={userList}
+          selectedRecords={[{ ...userData }]}
         />
       }
     </>
