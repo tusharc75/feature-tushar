@@ -30,7 +30,7 @@ const ignoreField = ["priceTemplate"]
 
 const CreateProduct = (props) => {
 
-    const { state: { permissions } }: any = useData();
+    const { state: { permissions, user } }: any = useData();
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
     const { productId, handleClose, isClone, isAddInBuilder, addProductInBuilder, openFrom, isRedirectToDetailPage } = props;
@@ -108,9 +108,21 @@ const CreateProduct = (props) => {
                 });
             }
             else {
+                let values = getObjKeys('', _fields)
+                _fields.some((_f) => {
+                    if (_f.fieldName == "currency") {
+                        setCurrencySymbol(
+                            getUniqueCurrencies().find(
+                                (d) => d.currencyCode === user?.user?.currency
+                            )?.symbolNative
+                        );
+                        values["currency"] = user?.user?.currency
+                        return true
+                    }
+                })
                 setInitialData({
                     fields: _fields,
-                    values: getObjKeys('', _fields),
+                    values: values,
                 });
                 EvaluteproductFields(_fields)
             }
