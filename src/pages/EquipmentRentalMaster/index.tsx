@@ -44,7 +44,7 @@ const EquipmentRentalMaster = () => {
         { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "rentalStartDate", headerName: "Rental Start Date", show: true, disabled: true, filter: false, sortable: false, cellRenderer: "commonRenderer" },
         { field: "rentalBackDate", headerName: "Rental Back Date", show: true, disabled: true, filter: false, sortable: false, cellRenderer: "commonRenderer" },
-        { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "warehouse", headerName: "Plants", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
