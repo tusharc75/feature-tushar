@@ -68,7 +68,7 @@ export default function DeliveryTicketDetail(props) {
     { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "dateRenderer" },
     { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
     { field: "inventoryNumber", headerName: "Inventory Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "warehouse", headerName: "Plants", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
   ];
