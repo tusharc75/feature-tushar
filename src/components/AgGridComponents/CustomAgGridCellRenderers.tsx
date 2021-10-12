@@ -4,6 +4,7 @@ import { AiOutlineLoading } from "react-icons/ai";
 import CustomRenderCell from "../Helpers/CustomRenderCell";
 import NoDataCell from "../Helpers/NoDataCell";
 import { dateFormat } from "../../constants/helpers"
+import Avatar from "@material-ui/core/Avatar"
 import { Link } from 'react-router-dom'
 
 export const CommonRenderer = params => <CustomRenderCell value={params.value} />;
@@ -56,6 +57,10 @@ export const LinkRenderer = params => params.value ? (
         `${params?.pathName}/${params?.data[params?.property]}`} title={params?.value}>{params?.value}</Link>
 ) : (
     <NoDataCell />
+)
+
+export const ImageRenderer = params => (
+    <Avatar className="grid-avatar" src={params?.value} />
 )
 
 export const CustomLoadingOverlay = (params) => <div
