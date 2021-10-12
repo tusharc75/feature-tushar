@@ -644,7 +644,7 @@ const ContactDetailsPage = (props) => {
                   />
                 </span>
               )}
-              {permissions?.projectSales?.isRead && accountResource === customerAccount.accountResource && (
+              {permissions?.projectStrategy?.isRead && accountResource === customerAccount.accountResource && (
                 <span id="projectsAccordion">
                   <ProjectInAccordion
                     recordsPerLine={3}

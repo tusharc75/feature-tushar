@@ -914,7 +914,7 @@ export default function AccountDetailPage(props) {
                         />
                       </span>
                     )}
-                    {permissions?.projectSales?.isRead &&
+                    {permissions?.projectStrategy?.isRead &&
                       accountResource == customerAccount.accountResource && (
                         <span id="projectsAccordion">
                           <ProjectInAccordion
