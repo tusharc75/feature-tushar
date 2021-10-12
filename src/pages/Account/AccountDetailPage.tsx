@@ -39,6 +39,7 @@ import {
   sidebarResource,
   customerAccount,
   processFieldName,
+  defaultActivityShow,
 } from "../../constants/helpers";
 import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -127,7 +128,7 @@ export default function AccountDetailPage(props) {
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [showAtLast, setShowAtLast] = useState(false)
   const [additionalFieldName, setAdditionalFieldName] = useState("")
-  const [showActivity, setActivityShow] = useState(true);
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [
     showAccountHierarchyInFullScreenDialog,
     setShowAccountHierarchyInFullScreenDialog,
@@ -969,9 +970,9 @@ export default function AccountDetailPage(props) {
         <div id="activitiesSidebar" className="position-relative">
           {showActivity ?
             <Paper >
-              {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+              {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropright className="icon" />
-              </a>}
+              </span>}
               <Grid container>
                 <Grid item xs={12}>
                   {accountData && (
@@ -1148,9 +1149,9 @@ export default function AccountDetailPage(props) {
               </Grid>
             </Paper>
             :
-            !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+            !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
               <IoIosArrowDropleft className="icon" />
-            </a>}
+            </span>}
         </div>
       </div>
       <div >

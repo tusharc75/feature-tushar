@@ -11,7 +11,7 @@ import { useData } from '../../StateProvider/Provider';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import axiosInstance from './../../axios/axiosInstance';
 import Activity from '../../components/Activity';
-import { getObjKeysWithValues, isObjectEmpty, sidebarResource, customerAccount, processFieldName } from './../../constants/helpers';
+import { getObjKeysWithValues, isObjectEmpty, sidebarResource, customerAccount, processFieldName, defaultActivityShow } from './../../constants/helpers';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageContact from './ManageContact/index';
@@ -61,7 +61,7 @@ const ContactDetailsPage = (props) => {
   const [sectionFields, setSectionFields] = useState([]);
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [showAtLast, setShowAtLast] = useState(false);
-  const [showActivity, setActivityShow] = useState(true);
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [additionalFieldName, setAdditionalFieldName] = useState('');
   const [contactPermissions, setContactPermissions] = useState({
     isCreate: false,
@@ -685,9 +685,9 @@ const ContactDetailsPage = (props) => {
         <div id="activitiesSidebar" className="position-relative">
           {showActivity ?
             <Paper>
-              {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+              {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropright className="icon" />
-              </a>}
+              </span>}
               {!isObjectEmpty(contactData) && (
                 <div>
                   <Activity
@@ -804,9 +804,9 @@ const ContactDetailsPage = (props) => {
                 </Grid>
               )}
             </Paper> :
-            !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+            !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
               <IoIosArrowDropleft className="icon" />
-            </a>}
+            </span>}
         </div>
       </div>
       {showConfirmBox ? (
