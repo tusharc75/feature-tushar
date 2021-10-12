@@ -62,8 +62,8 @@ const AddressResource = () => {
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('addressResourcePage'));
   const columns = [
-    { field: 'warehouseName', headerName: 'Warehouse Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
-    { field: 'warehouseID', headerName: 'Warehouse ID', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'warehouseName', headerName: 'Plants Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
+    { field: 'warehouseID', headerName: 'Plants ID', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'storageType', headerName: 'Storage Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'address', headerName: 'Address', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },

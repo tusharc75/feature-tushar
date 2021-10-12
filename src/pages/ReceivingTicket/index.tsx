@@ -98,7 +98,7 @@ const ReceivingTicket = () => {
     },
     {
       field: 'warehouse',
-      headerName: 'Warehouse',
+      headerName: 'Plants',
       show: true,
       disabled: false,
       cellRenderer: 'WarehouseRenderer'

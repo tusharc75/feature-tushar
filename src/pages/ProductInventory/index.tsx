@@ -288,7 +288,7 @@ const ProductInventory = () => {
                             <Chip
                                 className="ml-3"
                                 color="primary"
-                                label={`Warehouse : ${warehouse.optionLabel}`}
+                                label={`Plants : ${warehouse.optionLabel}`}
                                 onDelete={() => {
                                     setRedirectProduct(null);
                                     setWarehouse(null);
