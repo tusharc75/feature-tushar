@@ -19,7 +19,6 @@ import { ControlPoint } from "@material-ui/icons";
 import ManagePricingDiscountDialog from "./ManagePricingDiscountDialog";
 
 const useStyles = makeStyles((theme) => ({
-
     demo: {
         backgroundColor: theme.palette.background.paper,
         width: "100%",
@@ -101,7 +100,6 @@ const PricingConditionsDetailsPage = () => {
     };
 
     const handleDelete = () => {
-
         axiosInstance().put(`${pricingCondition.pricingConditionApi}/remove`, { "ids": [id] }).then(() => {
             setShowConfirmBox(false);
             history.goBack();
@@ -114,7 +112,6 @@ const PricingConditionsDetailsPage = () => {
     return (
         <>
             <Fragment>
-
                 <Grid container className="headerbox">
                     <CustomBreadCrumbs routes={customizedRoutes} />
                 </Grid>
@@ -161,8 +158,6 @@ const PricingConditionsDetailsPage = () => {
 
                                 </DetailsPageHeader>
                             )}
-
-
                             <Box>
                                 {loading || !pricingConditionsFields.length ? (
                                     <Grid container spacing={2} style={{ padding: "8px" }}>
@@ -174,11 +169,10 @@ const PricingConditionsDetailsPage = () => {
                                     </>
                                 )}
                             </Box>
-
                         </Paper>
                     </Grid>
                     <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
-                        <Paper>
+                        {/* <Paper>
                             <Box
                                 padding={1}
                                 bgcolor="grey.200"
@@ -257,11 +251,9 @@ const PricingConditionsDetailsPage = () => {
                                     )}
                                 </Box>
                             )}
-                        </Paper>
+                        </Paper> */}
                     </Grid>
-
                 </Grid>
-
             </Fragment>
             {showConfirmBox && (
                 <ConfirmationDialog
@@ -274,13 +266,15 @@ const PricingConditionsDetailsPage = () => {
                     onOk={handleDelete}
                 />
             )}
-
             {openUpdateDialog && (
                 <ManagePricingConditionsDialog
                     open={openUpdateDialog}
-                    onSuccess={getPricingConditionsFieldsAndData}
                     onClose={() => {
                         setOpenUpdateDialog(false)
+                    }}
+                    onSuccess={() => {
+                        setOpenUpdateDialog(false)
+                        getPricingConditionsFieldsAndData()
                     }}
                     pricingConditionId={id}
                 />
