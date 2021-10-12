@@ -42,7 +42,7 @@ import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDia
 import RoleEngine from "../../components/Shared/RoleEngine";
 import NewStepper from "../../components/Helpers/NewStepper";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
-import { displayDate, isObjectEmpty, userType } from "../../constants/helpers";
+import { displayDate, isObjectEmpty, userType, defaultActivityShow } from "../../constants/helpers";
 import OpportunityAccordionInUserDetail from "./OpportunityAccordionInUserDetail";
 import LeadAccordionInUserDetailPage from "./LeadAccordionInUserDetailPage";
 import AccountAccordionDetail from "./AccountAccordionInDetail";
@@ -117,7 +117,7 @@ const UserDetailsPage = () => {
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [entities, setEntities] = useState<any[]>([])
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
-  const [showActivity, setActivityShow] = useState(true);
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [showSetupUserDialog, setShowSetupUserDialog] = useState(false);
 
   useEffect(() => {
@@ -978,7 +978,7 @@ const UserDetailsPage = () => {
           <div className="position-relative">
             {showActivity ?
               <Paper className="fixedRightPanel">
-                {!isMobile && !isTablet && <span color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                   <IoIosArrowDropright className="icon" />
                 </span>}
                 <Box className="detailHeader">
@@ -1035,7 +1035,7 @@ const UserDetailsPage = () => {
                 <QuickLinks quickLinks={quickLinks} />
               </Paper>
               :
-              !isMobile && !isTablet && <span className="activityShow" onClick={handleActivityHideShow}>
+              !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropleft className="icon" />
               </span>}
           </div>
