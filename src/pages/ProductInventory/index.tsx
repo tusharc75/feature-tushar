@@ -65,13 +65,13 @@ const ProductInventory = () => {
         { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "productCategoryRenderer" },
         { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
         { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "dateRenderer" },
-        { field: "bornInDate", headerName: "Born on Date", show: true, cellRenderer: "dateRenderer" },
+        { field: "bornOnDate", headerName: "Born on Date", show: true, cellRenderer: "dateRenderer" },
         { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
         { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "inventoryNumber", headerName: "Inventory Number", show: true, cellRenderer: "commonRenderer" },
-        { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "warehouse", headerName: "Plants", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
@@ -90,7 +90,7 @@ const ProductInventory = () => {
                 id: u._id,
                 serialNumber: u.serialNumber,
                 inServiceDate: u.inServiceDate,
-                bornInDate: u.bornInDate,
+                bornOnDate: u.bornOnDate,
                 status: u.status,
                 warehouse: u.warehouse?.optionLabel,
                 product: u.product?.optionLabel,
@@ -288,7 +288,7 @@ const ProductInventory = () => {
                             <Chip
                                 className="ml-3"
                                 color="primary"
-                                label={`Warehouse : ${warehouse.optionLabel}`}
+                                label={`Plants : ${warehouse.optionLabel}`}
                                 onDelete={() => {
                                     setRedirectProduct(null);
                                     setWarehouse(null);

@@ -23,6 +23,8 @@ import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
 import { orderBy, uniqBy } from 'lodash';
 
+export const defaultActivityShow = false;
+
 export const vapidKey = 'BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4';
 
 export const validations = {
@@ -87,63 +89,64 @@ export const formFieldNames = {
 };
 
 export const sidebarResource = {
-  warehouse: 'Warehouse',
-  brand: 'Brand',
-  role: 'Role',
-  product: 'Product',
-  entity: 'Entity',
-  user: 'User',
-  termsAndConditions: 'Terms & Conditions',
-  doa: 'DOA',
-  customerContact: 'Customer Contact',
+
   customerAccount: 'Customer Account',
-  supplierContact: 'Supplier Contact',
-  supplierAccount: 'Supplier Account',
-  account: 'Supplier Account',
-  contact: 'Supplier Contact',
-  pricing: 'Pricing',
-  priceBuilder: 'Price Builder',
-  quoteBuilder: 'Quotes',
-  reminder: 'Reminder',
-  calendar: 'Calendar',
-  flags: 'Flags',
+  user: 'User',
+  customerContact: 'Customer Contact',
+  brand: 'Brand',
+  entity: 'Entity',
+  role: 'Role',
   lead: 'Lead',
   opportunity: 'Opportunity',
-  projectSales: 'Project Sales',
+  field: 'Field',
+  productCategory: 'Product Category',
+  productInventory: 'Product Inventory',
+  priceTemplate: 'Price Template',
+  product: 'Product',
+  productTemplate: 'Product Template',
+  doa: 'DOA',
+  termsAndConditions: 'Terms & Conditions',
+  equiptmentRentalMaster: 'Equiptment Rental Master',
+  projectStrategy: 'Project Sales',
+  productBuilder: 'Product Builder',
+  formBuilder: 'Form Builder',
+  currencyConverter: 'Currency Converter',
+  quoteBuilder: 'Quotes',
+  PNQBuilder: 'PNQ Builder',
+  DOARequest: 'DOA Request',
   task: 'Task',
+  case: 'Case',
   note: 'Note',
+  event: 'Event',
   email: 'Email',
   attachment: 'Attachment',
-  case: 'Case',
-  productTemplate: 'Product Template',
-  productCategory: 'Product Category',
-  priceTemplate: 'Price Template',
-  productBuilder: 'Product Builder',
-  currencyConverter: 'Currency Converter',
-  formBuilder: 'Form Builder',
+  reminder: 'Reminder',
+  calendar: 'Calendar',
+  dashboard: 'Dashboard',
   budget: 'Budget',
   marketSegment: 'Market Segment',
   quotePdfTemplate: 'Quote Pdf Template',
-  field: 'Field',
-  projectStrategy: 'Project Sales',
-  PNQBuilder: 'PNQ Builder',
-  DOARequest: 'DOA Request',
-  event: 'Event',
-  dashboard: 'Dashboard',
-  productInventory: 'Product Inventory',
-  equipmentRentalMaster: "Equiptment Rental Master",
-  rentalManagement: "Rental Management",
+  warehouse: 'Warehouse',
+  rentalManagement: 'Rental Management',
   deliveryTicket: 'Loading Ticket',
   pricingCondition: 'Pricing Condition',
-  repairJob: 'Repair Jobs',
-  receivingTicket: 'Receiving Tickets',
-  salesOrder: "Sales Orders",
-  packages: "Packages"
+  repairJob: 'Repair Job',
+  receivingTicket: 'Receiving Ticket',
+  salesOrder: 'Sales Order',
+  eCommerce: 'e-Commerce',
+  packages: 'Packages',
+
+  supplierContact: 'Supplier Contact',
+  supplierAccount: 'Supplier Account',
+  pricing: 'Pricing',
+  priceBuilder: 'Price Builder',
+  flags: 'Flags',
+  projectSales: 'Project Sales',
 };
 
 export const RESOURCE_LABEL = {
   account: 'Supplier Accounts',
-  warehouse: 'Warehouses',
+  warehouse: 'Plants',
   customerAccount: 'Customer Accounts',
   user: 'Users',
   contact: 'Supplier Contacts',
@@ -181,13 +184,14 @@ export const RESOURCE_LABEL = {
   budget: 'Budgets',
   marketSegment: 'Market Segments',
   quotePdfTemplate: 'Quote PDF Templates',
-  rentalManagement: 'Rental Management',
+  rentalManagement: 'Rental Job',
   deliveryTicket: 'Loading Tickets',
-  pricingCondition: 'Pricing Condition',
+  pricingCondition: 'Pricing Conditions',
   repairJob: 'Repair Jobs',
-  receivingTicket: "Receiving Tickets",
-  salesOrder: "Sales Orders",
-  packages: "Packages"
+  receivingTicket: 'Receiving Tickets',
+  salesOrder: 'Sales Order',
+  eCommerce: 'e-Commerce',
+  packages: 'Packages',
 };
 
 export const lead = {
@@ -689,6 +693,8 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
           routesAndTitle[sidebarFieldsKeys[indexOfPermission]] = {
             title: d.resourceLabel || d.name
           };
+        } else {
+          console.info(`Custom Error (helper.tsx > getPermissions()) => ${JSON.stringify(d)} resource not found`)
         }
       });
     }

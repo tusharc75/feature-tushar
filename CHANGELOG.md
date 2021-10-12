@@ -2,6 +2,47 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.15.0](https://github.com/vebholic/oms_frontend/compare/v1.14.1...v1.15.0) (2021-10-12)
+
+
+### Features
+
+*  changes added for redirect to login after 10 min ideal activity ([24401b3](https://github.com/vebholic/oms_frontend/commit/24401b34deccf6ff5dacc542c88d4de83716c521))
+* - 123 text removed from grid ([04ffe87](https://github.com/vebholic/oms_frontend/commit/04ffe876552e9a8e11c97caaf710fb554af49b54))
+* - added dynamic grid to columns ([eb270b2](https://github.com/vebholic/oms_frontend/commit/eb270b2ec0c8cb1b49d4aaa738cbcfce05dee288))
+* - applying dynamic grid all places ([7573bd1](https://github.com/vebholic/oms_frontend/commit/7573bd150a63307894cff165fe79db95131d032b))
+* - Console.logs removed ([b28db15](https://github.com/vebholic/oms_frontend/commit/b28db1587d090b437ef6130c33e0a07671c99e61))
+* - dynamic grid changes ([92585e6](https://github.com/vebholic/oms_frontend/commit/92585e6a630cc4397d1f71244fd46a93c5a10a57))
+* - OMS-1917 - Link issue fixed in dynamic grid column generate ([acb064f](https://github.com/vebholic/oms_frontend/commit/acb064f0d901151034f1c1eb4806106349b55282))
+* - primaryField done for redirection ([e8a9edf](https://github.com/vebholic/oms_frontend/commit/e8a9edfc2ce6cb9626063efe0bb54ec81103b5c4))
+* - primaryField done for redirection ([0aafda2](https://github.com/vebholic/oms_frontend/commit/0aafda253894dea6697eb65af579744771777f34))
+* - workbox.config file removed ([e9eafe3](https://github.com/vebholic/oms_frontend/commit/e9eafe330ef995bd821adaad5934397c69f3885c))
+* changes in rental job ([d2acb14](https://github.com/vebholic/oms_frontend/commit/d2acb14ed2dad4bccf1d3f0db03b311f4e50ff59))
+* dynamic grid added changes for popup redirect ([ed8fa42](https://github.com/vebholic/oms_frontend/commit/ed8fa4259d4c36d0cee5c49ec10f557ebbc2aa2a))
+* dynamic grid changes added ([d34dda7](https://github.com/vebholic/oms_frontend/commit/d34dda74445643e4b2203512684dbdddfcbd1ff9))
+* dynamic grid changes added ([ac82c16](https://github.com/vebholic/oms_frontend/commit/ac82c165d51ab142d19b5105b5edc4f035ecdbca))
+* rental job ([44a525f](https://github.com/vebholic/oms_frontend/commit/44a525fd79f3854b06bff8950a39b741f991eb8d))
+
+
+### Bug Fixes
+
+* -confirmation Dialog missing in serialized asset Create and edit dialogConfirmation ([04ed658](https://github.com/vebholic/oms_frontend/commit/04ed658b953a7b10f34405956cd6cf1553d0c480))
+* loading issue in rental job ([389a0c7](https://github.com/vebholic/oms_frontend/commit/389a0c75f0d756e4bef04a8db394dc3c9abd0ca9))
+* **postBuild:** Removed postBuild command in package.json ([aaf398f](https://github.com/vebholic/oms_frontend/commit/aaf398f787adc081f28552e90925c55f41ee24af))
+
+### [1.14.1](https://github.com/vebholic/oms_frontend/compare/v1.14.0...v1.14.1) (2021-10-11)
+
+## [1.14.0](https://github.com/vebholic/oms_frontend/compare/v1.13.0...v1.14.0) (2021-10-10)
+
+
+### Features
+
+* - assign warehouse first record not removable issue fixed ([f38686e](https://github.com/vebholic/oms_frontend/commit/f38686ee770d8738cecab8292671187bfe500122))
+* - assign warehouse first record not removable issue fixed ([646c4cb](https://github.com/vebholic/oms_frontend/commit/646c4cbab1dd9b863a46d6921028efc35b495570))
+* - CustomAgGrid code updated ([8b91fbf](https://github.com/vebholic/oms_frontend/commit/8b91fbf99a0a182aa12991e692821e7017127c3b))
+* - minor changes done ([c9bd8bc](https://github.com/vebholic/oms_frontend/commit/c9bd8bcb241271580cf994db01e815f879842ec1))
+* - Receiving ticket list screen breaking issue fixed ([8d5ddec](https://github.com/vebholic/oms_frontend/commit/8d5ddec99ee8b8f3786a86b907f86935a78fe822))
+
 ## [1.13.0](https://github.com/vebholic/oms_frontend/compare/v1.12.0...v1.13.0) (2021-10-09)
 
 

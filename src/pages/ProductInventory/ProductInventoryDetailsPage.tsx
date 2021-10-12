@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, Typography } from "@material-ui/core";
+import { Grid, Box, Button, Paper, Typography, IconButton } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
@@ -386,7 +386,62 @@ const ProductInventoryDetailsPage = () => {
                     </Box>
                   }
                 </Grid>
+
               </Grid>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+            <Paper style={{ overflow: 'hidden' }}>
+              <Box
+                padding={1}
+                bgcolor="grey.200"
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Typography variant="subtitle2">
+                  BOM
+                </Typography>
+              </Box>
+              {(
+                <Box>
+                  {loading ? (
+                    [1].map((i) => (
+                      <BoxWithBorder
+                        key={i}
+                        style={{
+                          margin: "8px",
+                        }}
+                      >
+                        <Box padding={1}>
+                          <Skeleton
+                            variant="text"
+                            width="100px"
+                            height="20px"
+                          />
+                          <Box marginTop={1} />
+                          <Skeleton variant="text" width="100%" height="15px" />
+                        </Box>
+                      </BoxWithBorder>
+                    ))
+                  ) : productInventoryData?.product ? (
+                    <>
+                      <ProductHierarchy
+                        data={[{
+                          productName: productInventoryData?.product?.optionLabel,
+                          _id: productInventoryData?.product?.optionValue
+                        }]}
+                        permissions={permissions?.product}
+                        unassignProduct={() => { }}
+                      />
+                    </>
+                  ) : (
+                    <Box textAlign="center" padding={2} minHeight={150}>
+                      <Typography>No Product has been added </Typography>
+                    </Box>
+                  )}
+                </Box>
+              )}
             </Paper>
           </Grid>
         </Grid>

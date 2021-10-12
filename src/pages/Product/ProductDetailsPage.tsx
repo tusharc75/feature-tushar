@@ -388,12 +388,12 @@ const ProductDetailsPage = () => {
                                 alignItems="center"
                             >
                                 <Typography variant="subtitle2">
-                                    Warehouses ({inventoriesData.length || 0})
+                                    Plants ({inventoriesData.length || 0})
                                 </Typography>
 
                                 {permissions?.productInventory?.isCreate && (
                                     <IconButton
-                                        title="Manage Warehouse(s)"
+                                        title="Manage Plant(s)"
                                         color="primary"
                                         size="small"
                                         onClick={() => { setOpenProductInventoryDialog(true) }}
@@ -509,7 +509,7 @@ const ProductDetailsPage = () => {
 
                                             <Box width="100%">
                                                 <Box mx={2} mt={1} display="flex" justifyContent="space-between">
-                                                    <Typography variant="h6">Warehouse</Typography>
+                                                    <Typography variant="h6">Plants</Typography>
                                                     <Typography variant="h6">Qty.</Typography>
                                                 </Box>
                                                 {
@@ -529,7 +529,7 @@ const ProductDetailsPage = () => {
                                             </Box>
                                         : (
                                             <Box textAlign="center" padding={2} minHeight={150}>
-                                                <Typography>No Warehouses Found</Typography>
+                                                <Typography>No Plants Found</Typography>
                                             </Box>
                                         )}
                                 </Box>
@@ -594,8 +594,8 @@ const ProductDetailsPage = () => {
                         getWarehouses()
                     }}
                     resource={warehouse.warehouseApi}
-                    title="Assign Warehouses"
-                    label='Select Warehouse'
+                    title="Assign Plants"
+                    label='Select Plants'
                     resourceData={inventoriesData} />
                 : null
             }

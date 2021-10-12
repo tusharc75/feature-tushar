@@ -15,6 +15,7 @@ type TableProps = {
 
 const ProductsTable: FC<TableProps> = ({ products, loading }) => {
 
+  console.log('products', products)
   return (
     <div>
       <TableContainer style={{ maxHeight: 400 }} component={Paper}>

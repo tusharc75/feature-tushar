@@ -7,7 +7,9 @@ import {
     CreatedByRenderer,
     UpdatedByRenderer,
     CommonRendererWithCopy,
-    DateRenderer
+    DateRenderer,
+    LinkRenderer,
+    ImageRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
 
 
@@ -30,7 +32,12 @@ export const detailPagePath = {
     collaborator: routes?.userDetail?.path,
     rental: routes.rentalManagementDetail.path,
     deliveryPerson: routes?.userDetail?.path,
-    pDFTemplate: routes?.quotePdfTemplateDetail?.path
+    pDFTemplate: routes?.quotePdfTemplateDetail?.path,
+    subMarketSegment: routes?.marketSegment?.path,
+}
+export const hasDetailPageAsPopup = {
+    subMarketSegment: routes?.marketSegment?.path,
+    marketSegment: routes?.marketSegment?.path
 }
 export const disabledColumns = {
     [routes.rentalManagementDetail.title]: [],
@@ -46,6 +53,12 @@ export const getFrameworkComponents = (rendererNameList, showStaticRenderers = f
                 "commonRenderer": CommonRenderer
             }
         }
+        else if (o === "linkRenderer") {
+            result = {
+                ...result,
+                "linkRenderer": LinkRenderer
+            }
+        }
         else if (o === "commonRendererWithCopy") {
             result = {
                 ...result,
@@ -58,6 +71,13 @@ export const getFrameworkComponents = (rendererNameList, showStaticRenderers = f
                 "dateRenderer": DateRenderer
             }
         }
+        else if (o === "imageRenderer") {
+            result = {
+                ...result,
+                "imageRenderer": ImageRenderer
+            }
+        }
+
     })
     if (showStaticRenderers) {
         result = {
@@ -86,7 +106,7 @@ export const checkStaticField = (renderedFrom, fieldData) => {
 }
 
 export const staticColumns = ["createdBy", "updatedBy"]
-export const getColumnData = (title, field) => {
+export const getColumnData = (title, field, detailScreenRoute = null) => {
     let data = localStorage.getItem("gridMetaData")
 
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
@@ -106,7 +126,7 @@ export const getColumnData = (title, field) => {
             show: gridMetaData[updatedTitle]?.hide && gridMetaData[updatedTitle]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
             disabled: gridMetaData[updatedTitle]?.disabled && gridMetaData[updatedTitle]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false
         }
-        if (field?.fieldName === "firstName") {
+        if (field?.fieldName === "firstName" && field?.primaryField === false) {
             let combinedTitle = camelCase(updatedTitle)
             let pathName = detailPagePath[combinedTitle] ? detailPagePath[combinedTitle] :
                 routes.userDetail.path ? routes.userDetail.path : ""
@@ -118,16 +138,42 @@ export const getColumnData = (title, field) => {
                 }
             }
         }
+        else if (field?.primaryField === true && detailScreenRoute) {
+            return {
+                columnData: {
+                    pivotIndex: 0,
+                    ...commonFieldData,
+                    field: field?.fieldName === "firstName" ? "concatedName" : field.fieldName,
+                    cellRenderer: "linkRenderer",
+                    cellRendererParams: { "pathName": detailScreenRoute, "property": "_id" }
+                },
+                rendererName: 'linkRenderer',
+            }
+        }
         else if (field?.lookup) {
 
-            let joinedFieldName = field?.fieldName.indexOf("_") > 0 ? camelCase(field?.fieldName) : field?.fieldName
-            let pathName = detailPagePath[joinedFieldName] ? detailPagePath[joinedFieldName] :
-                routes[`${joinedFieldName}Detail`]?.path ? routes[`${joinedFieldName}Detail`]?.path : ""
+            let joinedFieldName = field?.fieldName.indexOf(" ") > 0 ? camelCase(field?.fieldName) : field?.fieldName
+            let pathName = ""
+            let isForPopup = false
+            if (hasDetailPageAsPopup[joinedFieldName]) {
+                isForPopup = true
+                pathName = `${hasDetailPageAsPopup[joinedFieldName]}`
+            }
+            else {
+                pathName = detailPagePath[joinedFieldName] ? detailPagePath[joinedFieldName] :
+                    field?.lookupResource && routes[`${camelCase(field?.lookupResource)}Detail`]?.path ?
+                        routes[`${camelCase(field?.lookupResource)}Detail`]?.path :
+                        routes[joinedFieldName]?.path ? routes[joinedFieldName]?.path :
+                            routes[`${joinedFieldName}Detail`]?.path ? routes[`${joinedFieldName}Detail`]?.path : ""
+            }
+
             return {
                 columnData: {
                     ...commonFieldData,
-                    cellRenderer: (params) => params.value ? `<a id="link-a" href='${pathName}/${params.data[joinedFieldName + 'Id']}' title='${params.value}'>${params.value ?? null}</Link >` : "-----",
-                }
+                    cellRenderer: "linkRenderer",
+                    cellRendererParams: { "pathName": pathName, "property": joinedFieldName + 'Id', isForPopup: isForPopup }
+                },
+                rendererName: 'linkRenderer',
             }
         }
         else if (isRenderWithCopy(field?.fieldName)) {
@@ -144,8 +190,9 @@ export const getColumnData = (title, field) => {
                 columnData: {
                     ...commonFieldData,
                     filter: false, sortable: false,
-                    cellRenderer: (params) => `<img src='${params?.value}' id="img-avatar" alt='profile' />`
-                }
+                    cellRenderer: 'imageRenderer'
+                },
+                rendererName: 'imageRenderer'
             }
         }
         else if (field?.type === "date") {
@@ -155,6 +202,16 @@ export const getColumnData = (title, field) => {
                     cellRenderer: "dateRenderer"
                 },
                 rendererName: 'dateRenderer'
+            }
+        }
+        else if (field?.type === "checkBox") {
+            return {
+                columnData: {
+                    ...commonFieldData,
+                    // filter: false, sortable: false,
+                    cellRenderer: "checkboxRenderer"
+                },
+                rendererName: 'checkboxRenderer'
             }
         }
         else {

@@ -438,7 +438,7 @@ const CustomerAccounts = (props) => {
             </Box>
             <Box component="span" mx={1} />
             <Typography variant="subtitle1">Customer Accounts</Typography>
-            {(permissions.isUpdate && isTeamMember) || isManager ? (
+            {(permissions?.isUpdate && isTeamMember) || isManager ? (
               <>
                 <IconButton
                   aria-haspopup="true"
@@ -526,7 +526,7 @@ const CustomerAccounts = (props) => {
                                   }
                                   )
                                 </Typography>
-                                {(permissions.isUpdate && isTeamMember) ||
+                                {(permissions?.isUpdate && isTeamMember) ||
                                   isManager ? (
                                   <IconButton
                                     aria-haspopup="true"
@@ -615,7 +615,7 @@ const CustomerAccounts = (props) => {
                             />
                           )}
                           {
-                            permissions.isRead && (
+                            permissions?.isRead && (
                               <QuotesAccordionInProjectSale
                                 expanded={true}
                                 quotes={quotes.filter((q) => q.customerAccountName === c._id)}

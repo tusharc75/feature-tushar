@@ -12,7 +12,7 @@ import {
   reducer,
   intialState,
 } from "../../../components/AgGridComponents/CustomAgGrid";
-import { quote, customerAccount, supplierAccount, opportunity, quoteBuilder, yyyyMMDD, formatAmountWithCurrency, gridLoadingTimeout, termsAndCondition } from "../../../constants/helpers";
+import { quote, customerAccount, supplierAccount, opportunity, quoteBuilder, yyyyMMDD, formatAmountWithCurrency, gridLoadingTimeout, termsAndCondition, defaultActivityShow } from "../../../constants/helpers";
 import Activity from "../../../components/Activity";
 import { useData } from "../../../StateProvider/Provider";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -100,7 +100,7 @@ export default function QuoteDetail() {
   const [reopenReason, setReopenReason] = useState("");
   const [quoteReOpening, setQuoteReOpening] = useState(false);
   const [editCurrency, setEditCurrency] = useState(false);
-  const [showActivity, setActivityShow] = useState(true);
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [tabValue, setTabValue] = useState(0);
   const [relatedTo, setRelatedTo] = useState({});
   const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([
@@ -347,8 +347,6 @@ export default function QuoteDetail() {
             selectedRows
           )
         }
-
-
         setTimeout(() => {
           dispatch({ type: "loading", loading: false });
         }, gridLoadingTimeout);
@@ -616,7 +614,7 @@ export default function QuoteDetail() {
                         handleOpenCloneDialog={handleOpenCloneDialog}
                         handleSetSteps={handleSetSteps}
                       />)}
-                      {permissions?.projectSales?.isRead && (
+                      {permissions?.projectStrategy?.isRead && (
                         <ProjectInAccordion
                           recordsPerLine={3}
                           projectSales={relatedTo && relatedTo["Project Sales"]?.Quotes || []}
@@ -658,9 +656,9 @@ export default function QuoteDetail() {
           <div className="position-relative">
             {showActivity ?
               <Paper>
-                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                   <IoIosArrowDropright className="icon" />
-                </a>}
+                </span>}
                 {!quoteData ? (
                   <Box>
                     <Skeleton variant="text" width="100px" height="25px" />
@@ -691,9 +689,9 @@ export default function QuoteDetail() {
                   </div>
                 )}
               </Paper> :
-              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+              !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropleft className="icon" />
-              </a>}
+              </span>}
           </div>
         </div>
         {showConfirmBox ? (

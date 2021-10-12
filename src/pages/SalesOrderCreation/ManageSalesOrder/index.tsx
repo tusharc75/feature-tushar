@@ -131,7 +131,6 @@ const ManageSalesOrder = (props) => {
           }
           setSubmitting(false);
           onSuccess(data);
-          console.log(data);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',

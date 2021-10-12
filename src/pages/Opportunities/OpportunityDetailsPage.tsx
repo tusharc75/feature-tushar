@@ -23,7 +23,8 @@ import {
   customerContact,
   getObjKeysWithValues,
   processFieldName,
-  formatAmountWithCurrency
+  formatAmountWithCurrency, 
+  defaultActivityShow
 } from '../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { opportunity, sidebarResource } from '../../constants/helpers';
@@ -62,7 +63,7 @@ function OpportunityDetailsPage() {
   const [supplierContacts, setSupplierContacts] = useState([]);
   const [customerContacts, setCustomerContacts] = useState([]);
   const [quotes, setQuotes] = useState([]);
-  const [showActivity, setActivityShow] = useState(true);
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false);
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
   const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' })
@@ -650,7 +651,7 @@ function OpportunityDetailsPage() {
                   isAllowedToUpdate={allowedToEdit}
                 />
               )}
-              {permissions?.projectSales?.isRead && (
+              {permissions?.projectStrategy?.isRead && (
                 <ProjectInAccordion
                   recordsPerLine={3}
                   projectSales={projectSales}
@@ -684,9 +685,9 @@ function OpportunityDetailsPage() {
         <div className="position-relative">
           {showActivity ?
             <Paper>
-              {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+              {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropright className="icon" />
-              </a>}
+              </span>}
               {!opportunityData ? (
                 <Box>
                   <Skeleton variant="text" width="100px" height="25px" />
@@ -714,9 +715,9 @@ function OpportunityDetailsPage() {
               )}
             </Paper>
             :
-            !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+            !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
               <IoIosArrowDropleft className="icon" />
-            </a>}
+            </span>}
         </div>
       </div>
 
