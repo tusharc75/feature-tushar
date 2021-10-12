@@ -16,7 +16,7 @@ export default function ProductHierarchy({ data, permissions, unassignProduct })
 
     const columns = [
         {
-            title: 'Product Name', field: 'productName',
+            title: 'Product Description', field: 'productName',
             render: (rowData: any) => <div style={{ width: 250 }}>
                 <Link
                     className="link"

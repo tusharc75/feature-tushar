@@ -260,7 +260,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                             disabled
                             type="text"
                             variant="outlined"
-                            label="Product Name"
+                            label="Product Description"
                         />
 
                         <Box my={4} />
