@@ -12,7 +12,7 @@ import routes from '../../components/Helpers/Routes';
 import { useData } from '../../StateProvider/Provider';
 import { SVG } from '../../assets';
 import Activity from '../../components/Activity';
-import { getObjKeysWithValues, lead, processFieldName } from '../../constants/helpers';
+import { getObjKeysWithValues, lead, processFieldName, defaultActivityShow } from '../../constants/helpers';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
@@ -20,7 +20,7 @@ import AccordionOfOpportunity from './AccordionOfOpportunity';
 import ProcessFlow from '../../components/ProcessFlow';
 import { isMobile, isTablet } from 'react-device-detect';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
-import { IoIosArrowDropright,IoIosArrowDropleft } from 'react-icons/io';
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -43,7 +43,7 @@ const LeadDetailsPage = () => {
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [showAtLast, setShowAtLast] = useState(false);
   const [additionalFieldName, setAdditionalFieldName] = useState('');
-  const [showActivity, setActivityShow] = useState(true);
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [leadsPermissions, setLeadsPermissions] = useState({
     isCreate: false,
     isUpdate: false,
@@ -435,9 +435,9 @@ const LeadDetailsPage = () => {
           <div className="position-relative">
             {showActivity ?
               <Paper>
-                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                   <IoIosArrowDropright className="icon" />
-                </a>}
+                </span>}
                 {!leadData ? (
                   <Box>
                     <Skeleton variant="text" width="100px" height="25px" />
@@ -466,9 +466,9 @@ const LeadDetailsPage = () => {
                 )}
               </Paper>
               :
-              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-                <IoIosArrowDropleft className="icon"/>
-              </a>}
+              !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
+                <IoIosArrowDropleft className="icon" />
+              </span>}
           </div>
         </div>
 

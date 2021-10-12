@@ -12,7 +12,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement } from "../../constants/helpers";
+import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow } from "../../constants/helpers";
 import Steps from "./Steps";
 import AddExistingProductInventory from "./AddExistingProductInventory";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
@@ -70,7 +70,7 @@ const RentalManagementDetailsPage = () => {
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [showActivity, setActivityShow] = useState(true);
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [allowedToEdit, setAllowedToEdit] = useState(false)
   const [productInventoryForReceivingTicket, setProductInventoryForReceivingTicket] = useState<any[]>([]);
   const [warehouseForReceivingTicket, setWarehouseForReceivingTicket] = useState<any[]>([]);
@@ -753,9 +753,9 @@ const RentalManagementDetailsPage = () => {
             <HideWhenOffline>
               {showActivity ?
                 <Paper>
-                  {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                  {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                     <IoIosArrowDropright className="icon" />
-                  </a>}
+                  </span>}
                   <Grid container>
                     <Grid item xs={12}>
                       {rentalManagementData && (
@@ -785,9 +785,9 @@ const RentalManagementDetailsPage = () => {
                     </Grid>
                   </Grid>
                 </Paper> :
-                !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+                !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
                   <IoIosArrowDropleft className="icon" />
-                </a>}
+                </span>}
             </HideWhenOffline>
           </div>
         </div>
