@@ -388,7 +388,7 @@ const ProductDetailsPage = () => {
                                 alignItems="center"
                             >
                                 <Typography variant="subtitle2">
-                                    Warehouses ({inventoriesData.length || 0})
+                                    Plants ({inventoriesData.length || 0})
                                 </Typography>
 
                                 {permissions?.productInventory?.isCreate && (
@@ -529,7 +529,7 @@ const ProductDetailsPage = () => {
                                             </Box>
                                         : (
                                             <Box textAlign="center" padding={2} minHeight={150}>
-                                                <Typography>No Warehouses Found</Typography>
+                                                <Typography>No Plants Found</Typography>
                                             </Box>
                                         )}
                                 </Box>
@@ -594,8 +594,8 @@ const ProductDetailsPage = () => {
                         getWarehouses()
                     }}
                     resource={warehouse.warehouseApi}
-                    title="Assign Warehouses"
-                    label='Select Warehouse'
+                    title="Assign Plants"
+                    label='Select Plants'
                     resourceData={inventoriesData} />
                 : null
             }
