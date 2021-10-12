@@ -8,7 +8,8 @@ import {
     UpdatedByRenderer,
     CommonRendererWithCopy,
     DateRenderer,
-    LinkRenderer
+    LinkRenderer,
+    ImageRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
 
 
@@ -70,6 +71,13 @@ export const getFrameworkComponents = (rendererNameList, showStaticRenderers = f
                 "dateRenderer": DateRenderer
             }
         }
+        else if (o === "imageRenderer") {
+            result = {
+                ...result,
+                "imageRenderer": ImageRenderer
+            }
+        }
+
     })
     if (showStaticRenderers) {
         result = {
@@ -182,8 +190,9 @@ export const getColumnData = (title, field, detailScreenRoute = null) => {
                 columnData: {
                     ...commonFieldData,
                     filter: false, sortable: false,
-                    cellRenderer: (params) => `<img src='${params?.value}' id="img-avatar" alt='profile' />`
-                }
+                    cellRenderer: 'imageRenderer'
+                },
+                rendererName: 'imageRenderer'
             }
         }
         else if (field?.type === "date") {
