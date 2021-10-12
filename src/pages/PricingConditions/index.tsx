@@ -104,7 +104,7 @@ const PricingConditions = () => {
     },
     {
       field: "warehouse",
-      headerName: "Warehouse",
+      headerName: "Plants",
       show: true,
       cellRenderer: "commonRenderer"
     },
