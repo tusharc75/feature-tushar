@@ -36,7 +36,7 @@ const ProductListDialog = ({ id, onClose, toastConfig }) => {
       <CustomDialogHeader title="Products" onClose={onClose} />
       <CustomDialogContent>
         <Box p={2}>
-          <ProductsTable products={products} loading={loadingProducts} />
+          <ProductsTable productList={products} />
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>

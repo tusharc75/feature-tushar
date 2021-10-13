@@ -129,7 +129,8 @@ export default function CustomAgGrid({
   selectedRecords = [],
   onSelection = null,
   renderedFrom = null,
-  customGridOptions = null
+  customGridOptions = null,
+  actionLabel = null
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -359,7 +360,7 @@ export default function CustomAgGrid({
                 <AgGridColumn
                   width={actionWidth}
                   field="actions"
-                  headerName="Actions"
+                  headerName={actionLabel ? actionLabel : "Actions"}
                   pinned={isMobile || isTablet ? false : 'right'}
                   lockPinned={isMobile || isTablet ? false : true}
                   resizable={false}
