@@ -38,6 +38,7 @@ const PackageDetails = () => {
   const [products, setProducts] = useState([]);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [quantityUpdateLoading, setQuantityUpdateLoading] = useState(false);
   const [packageFields, setPackageFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
@@ -48,7 +49,6 @@ const PackageDetails = () => {
       fetchPackage();
       getProducts();
     }
-    // eslint-disable-next-line
   }, [id]);
 
   const getRessourceFields = () => {
@@ -113,7 +113,30 @@ const PackageDetails = () => {
       });
   };
 
-
+  const handleUpdateQuantity = (updatedNode) => {
+    let products = packageData?.products
+    products = products.map(o => {
+      let res = { product: o?._id, qty: o?.qty }
+      if (updatedNode?.data?._id === o?._id) {
+        res.qty = (updatedNode?.newValue * 1)
+      }
+      return res
+    })
+    setQuantityUpdateLoading(true);
+    axiosInstance()
+      .post(`${packages.packageApi}/add-products`, {
+        ids: [packageData._id],
+        products: [...products]
+      })
+      .then(() => {
+        setQuantityUpdateLoading(false)
+        fetchPackage()
+      })
+      .catch((err) => {
+        setQuantityUpdateLoading(false)
+        fetchPackage()
+      });
+  }
   return (
     <>
       <Fragment>
@@ -165,6 +188,8 @@ const PackageDetails = () => {
                 packageData?.products ?
                   <ProductsTable
                     productList={packageData?.products}
+                    handleUpdateQuantity={handleUpdateQuantity}
+                    updateLoading={quantityUpdateLoading || packagesLoading}
                   /> : null
               }
 

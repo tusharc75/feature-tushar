@@ -5,13 +5,13 @@ import axiosInstance from '../../axios/axiosInstance'
 import routes from "../../components/Helpers/Routes";
 import { getColumnData, getFrameworkComponents, getStaticFields } from "../../constants/columns"
 
-const ProductsTable = ({ productList = [] }) => {
+const ProductsTable = ({ productList = [], updateLoading = false, handleUpdateQuantity = null }) => {
 
   const [columns, setColumns] = useState([])
   const [gridApi, setGridApi] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
 
   useEffect(() => {
     if (productList) {
@@ -83,7 +83,7 @@ const ProductsTable = ({ productList = [] }) => {
         setColumns([...columns])
       })
   }
-  const ActionsRenderer = (params) => (<span>{params.data?.qty ?? "0"}</span>)
+  const ActionsRenderer = (params) => (<span>{params?.data?.qty}</span>)
   return (
     <>
       {
@@ -99,10 +99,12 @@ const ProductsTable = ({ productList = [] }) => {
             pageSizes={pageSizes}
             page={page}
             actionWidth={150}
-            loading={loading}
+            loading={loading || updateLoading}
             allowSelection={false}
             actionLabel="Quantity"
             renderedFrom="productPage"
+            actionEditable={true}
+            onCellValueChanged={handleUpdateQuantity}
           /> : null}
     </ >
   );
