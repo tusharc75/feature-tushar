@@ -281,7 +281,7 @@ const Filters = (props) => {
                   disableFuture
                   openTo="year"
                   format="MM/dd/yyyy"
-                  maxDate={salesFilter.between.from}
+                  maxDate={salesFilter.between.to}
                   label="From"
                   views={['year', 'month', 'date']}
                   value={salesFilter.between.from}
