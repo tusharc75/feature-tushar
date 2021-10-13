@@ -153,7 +153,7 @@ const RentalManagementDetailsPage = () => {
   };
 
   const handleSaveAdditionalCost = (values) => {
-    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/additional-cost`, { "additionalCost": values.map(d => { return { "type": d.type, "value": d.amount ? Number(d.amount) : 0, "description": d?.description, "uom": d.uom, "qty": d.qty } }) })
+    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/additional-cost`, { "additionalCost": values.map(d => { return { "type": d.type, "value": d.amount ? Number(d.amount) : 0, "description": d?.description, "uom": d.uom, "qty": d.qty ? Number(d.qty) : 0 } }) })
       .then(({ data }) => {
         setAddExistingProductDialog(false)
         // fetchProductInventory()
@@ -570,7 +570,7 @@ const RentalManagementDetailsPage = () => {
               )} */}
               {(currentStep === 1) && (
                 <Formik
-                  initialValues={{ additionalCost: additionalCost || [{ "id": "", "description": "", "uom": "", "qty": "", "type": "", "amount": 0 }] }}
+                  initialValues={{ additionalCost: additionalCost || [{ "id": "", "description": "", "uom": "", "qty": 0, "type": "", "amount": 0 }] }}
                   enableReinitialize={true}
                   onSubmit={() => { }}>
                   {({ values }) => (
@@ -598,7 +598,7 @@ const RentalManagementDetailsPage = () => {
                                     <Grid item md={1}> # </Grid>
                                     <Grid item md={2}> Cost Type </Grid>
                                     <Grid item md={2}> Description </Grid>
-                                    <Grid item md={2}> Qty </Grid>
+                                    <Grid item md={2}> Quantity </Grid>
                                     <Grid item md={2}> Unit of Measure </Grid>
                                     <Grid item md={2}> Amount </Grid>
                                     <Grid item md={1}></Grid>
@@ -646,39 +646,41 @@ const RentalManagementDetailsPage = () => {
                                               />
                                             </Grid>
                                             <Grid item md={2}>
-                                              <TextField
+                                              <Field
+                                                fullWidth
                                                 variant="outlined"
                                                 type="text"
-                                                label="Description"
-                                                required={true}
+                                                size="small"
+                                                component={TextField}
                                                 name="description"
-                                                fullWidth
-                                                margin="dense"
-                                                value={values["description"]}
+                                                placeholder="Description"
+                                                value={userVal.description}
                                                 onChange={(e) => {
                                                   arrayHelpers.replace(index, {
                                                     ...values.additionalCost[index],
                                                     ["description"]: e.target.value
                                                   })
                                                 }}
+                                                required
                                               />
                                             </Grid>
                                             <Grid item md={2}>
-                                              <TextField
-                                                variant="outlined"
-                                                type="number"
-                                                label="Quantity"
-                                                required={true}
-                                                name="qty"
+                                              <Field
                                                 fullWidth
-                                                margin="dense"
-                                                value={values["qty"]}
+                                                variant="outlined"
+                                                type="text"
+                                                size="small"
+                                                component={TextField}
+                                                name="Quantity"
+                                                placeholder="Quantity"
+                                                value={userVal.qty}
                                                 onChange={(e) => {
                                                   arrayHelpers.replace(index, {
                                                     ...values.additionalCost[index],
-                                                    ["qty"]: e.target.value
+                                                    ["qty"]: e.target.value.replace(/[^0-9]/g, '')
                                                   })
                                                 }}
+                                                required
                                               />
                                             </Grid>
                                             <Grid item md={2}>
