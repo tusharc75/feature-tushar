@@ -1,61 +1,110 @@
-import { FC, useEffect } from 'react';
-import { Paper, Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
-import Loader from '../../components/Loader';
+import { useEffect, useReducer, useState } from 'react'
+import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
+import axiosInstance from '../../axios/axiosInstance'
+import routes from "../../components/Helpers/Routes";
+import { getColumnData, getFrameworkComponents, getStaticFields } from "../../constants/columns"
 
-type TableProps = {
-  products: {
-    product: {
-      _id: string;
-      productName: string;
-    };
-    qty: number;
-  }[];
-  loading: boolean;
-};
+const ProductsTable = ({ productList = [] }) => {
 
-const ProductsTable: FC<TableProps> = ({ products, loading }) => {
+  const [columns, setColumns] = useState([])
+  const [gridApi, setGridApi] = useState(null);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  console.log('products', products)
+  useEffect(() => {
+    if (productList) {
+      if (gridApi) {
+        gridApi.setRowData([]);
+      }
+      handleProductsColumnsAndData(productList)
+    }
+  }, [productList])
+
+  const handleProductsColumnsAndData = (data) => {
+    let rows = data.map(u => {
+      const { createdBy, entity, history, ...restProperties } = u;
+      const [firstEntity, ...restEntity] = entity ? entity : [];
+      let res = {
+        ...restProperties,
+        id: u._id,
+        inventoryCount: u?.qty,
+        warehouses: u.warehouse?.map(w => w.warehouseName).join(", "),
+        createdBy: u.createdBy?.user?.concatedName,
+        createdByDate: u.createdBy?.date,
+        updatedBy: u.updatedBy?.user?.concatedName,
+        updatedByDate: u.updatedBy?.date,
+        entity: firstEntity?.optionLabel,
+        entityId: firstEntity?.optionValue,
+        productCategoryChipColor: u.productCategory?.chipColour,
+        restEntity: restEntity,
+      }
+      for (let col in res) {
+        if (res[col] && res[col].optionLabel) {
+          res[col] = res[col].optionLabel;
+        }
+      }
+      return res;
+    })
+    dispatch({ type: 'initialize', data: rows, count: data.length });
+  }
+
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get(`/field?resource=Product`)
+      .then(({ data: { data } }) => {
+        let columns = []
+        let rendererNames = []
+        data.forEach(o => {
+
+          let currentColumn = getColumnData(routes.product.title, o?.fieldData, routes.productDetail.path)
+
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData]
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
+          }
+        })
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent
+        }
+        setFrameWorkComponent({
+          ...tempFrameworkComponent,
+          actionsRenderer: ActionsRenderer
+        })
+        columns = [...columns, ...getStaticFields()]
+        setColumns([...columns])
+      })
+  }
+  const ActionsRenderer = (params) => (<span>{params.data?.qty ?? "0"}</span>)
   return (
-    <div>
-      <TableContainer style={{ maxHeight: 400 }} component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <Typography variant="h6" color="textPrimary">
-                  Product(s)
-                </Typography>
-              </TableCell>
-              <TableCell align="right">
-                <Typography variant="h6" color="textPrimary">
-                  Qty
-                </Typography>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {products.map((row) => (
-              <TableRow key={row?.product._id}>
-                <TableCell>{row?.product.productName}</TableCell>
-                <TableCell align="right">{row?.qty}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <Paper>
-        {loading ? (
-          <Loader minHeight={200} text="Loading..." />
-        ) : (
-          products.length === 0 && (
-            <Box width={'100%'} minHeight={200} textAlign="center" p={5}>
-              <Typography>No Products</Typography>
-            </Box>
-          )
-        )}
-      </Paper>
-    </div>
+    <>
+      {
+        Object.keys(frameWorkComponent).length > 0 ?
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameWorkComponent}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={150}
+            loading={loading}
+            allowSelection={false}
+            actionLabel="Quantity"
+            renderedFrom="productPage"
+          /> : null}
+    </ >
   );
 };
 

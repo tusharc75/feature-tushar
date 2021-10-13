@@ -68,7 +68,13 @@ const PriceTemplate = () => {
       e.preventDefault();
       window.history.pushState(null, null, window.location.pathname);
       if (!isEqual(ref.current.values, initialValues) || !isEqual(initialValues.section, section)) {
-        setShowConfirmDialog(true)
+        if ((id === "0" && priceTemplatePermissions.isCreate) ||
+          (id !== "0" && priceTemplatePermissions.isUpdate)) {
+          setShowConfirmDialog(true)
+        }
+        else {
+          history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path })
+        }
       }
       else {
         history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path })
@@ -298,7 +304,13 @@ const PriceTemplate = () => {
               setIsBreakCrumbPath(path)
               if (hasPermissionToUpdate && (!isEqual(ref.current.values, initialValues) ||
                 !isEqual(initialValues.section, section))) {
-                setShowConfirmDialog(true)
+                if ((id === "0" && priceTemplatePermissions.isCreate) ||
+                  (id !== "0" && priceTemplatePermissions.isUpdate)) {
+                  setShowConfirmDialog(true)
+                }
+                else {
+                  history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path })
+                }
               }
               else history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path })
             }}
@@ -420,8 +432,9 @@ const PriceTemplate = () => {
                     <Grid item xs={12} sm={6} container justify="flex-end">
                       <HistoryButton onClick={() => setShowHistory(true)} />
                       <Box>
-                        {(priceTemplatePermissions.isCreate ||
-                          priceTemplatePermissions.isUpdate) && (
+                        {((id === "0" && priceTemplatePermissions.isCreate) ||
+                          (id !== "0" && priceTemplatePermissions.isUpdate)
+                        ) && (
                             <Button
                               disabled={isUpdating || !hasPermissionToUpdate}
                               size="small"
@@ -441,7 +454,13 @@ const PriceTemplate = () => {
                           onClick={() => {
                             if (hasPermissionToUpdate && (!isEqual(ref.current.values, initialValues) ||
                               !isEqual(initialValues.section, section))) {
-                              setShowConfirmDialog(true)
+                              if ((id === "0" && priceTemplatePermissions.isCreate) ||
+                                (id !== "0" && priceTemplatePermissions.isUpdate)) {
+                                setShowConfirmDialog(true)
+                              }
+                              else {
+                                history.push(routes.priceTemplate.path)
+                              }
                             }
                             else {
                               history.push(routes.priceTemplate.path)
