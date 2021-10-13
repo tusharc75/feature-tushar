@@ -1,7 +1,6 @@
 import { leadDetailPage } from "../routes/Lead"
 import routes from "../components/Helpers/Routes"
 import camelCase from "lodash/camelCase"
-import capitalize from "lodash/capitalize"
 import {
     CommonRenderer,
     CreatedByRenderer,
@@ -23,7 +22,7 @@ export const headerName = {
     owner: "Owner Alies"
 }
 export const isRenderWithCopy = (name) => {
-    return ["mobile", "phone", "email"].indexOf(name) >= 0
+    return ["mobileNumber", "phone", "email"].indexOf(name) >= 0
 }
 export const detailPagePath = {
     leads: leadDetailPage.path,
@@ -119,7 +118,7 @@ export const getColumnData = (title, field, detailScreenRoute = null) => {
         return null
     }
     else {
-        let fieldHeaderName = headerName[field?.fieldName] ?? capitalize(field?.fieldLabel)
+        let fieldHeaderName = headerName[field?.fieldName] ?? field?.fieldLabel
         let commonFieldData = {
             field: field?.fieldName,
             headerName: fieldHeaderName,
@@ -171,12 +170,12 @@ export const getColumnData = (title, field, detailScreenRoute = null) => {
                 columnData: {
                     ...commonFieldData,
                     cellRenderer: "linkRenderer",
-                    cellRendererParams: { "pathName": pathName, "property": joinedFieldName + 'Id', isForPopup: isForPopup }
+                    cellRendererParams: { "pathName": pathName, "property": joinedFieldName + 'Id', isForPopup: isForPopup, "more": `rest${joinedFieldName}` }
                 },
                 rendererName: 'linkRenderer',
             }
         }
-        else if (isRenderWithCopy(field?.fieldName)) {
+        else if (isRenderWithCopy(field?.type)) {
             return {
                 columnData: {
                     ...commonFieldData,
