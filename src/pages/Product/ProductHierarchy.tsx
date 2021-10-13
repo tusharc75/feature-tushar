@@ -23,6 +23,13 @@ export default function ProductHierarchy({ data, permissions, unassignProduct })
                     to={`/product/detail/${rowData?._id}`} >
                     {rowData?.productName || ""}
                 </Link>
+
+            </div>
+        },
+        {
+            title: 'Quantity', field: 'qty',
+            render: (rowData: any) => <div style={{ width: 50 }}>
+                {rowData?.qty || ""}
             </div>
         },
         // {
