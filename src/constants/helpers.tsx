@@ -1108,3 +1108,40 @@ export const setFieldsInAscendingOrder = (fieldsToOrder) => {
 export const generateUniqueId = () => {
   return `id-${new Date().getTime()}`;
 };
+
+export const prepareDataForGrid = (data) => {
+
+  let objectValues = {};
+  let restProperties = {};
+
+  Object.keys(data).forEach((key) => {
+    if (typeof data[key] === "object") {
+
+      if (Array.isArray(data[key])) {
+        if (data[key].length > 0 && data[key][0].hasOwnProperty("optionLabel")) {
+          const [first, ...rest] = data[key];
+
+          restProperties[key] = first["optionLabel"];
+          restProperties[`${key}Id`] = first["optionValue"];
+          restProperties[`rest${key}`] = rest
+        }
+
+      } else {
+        objectValues[key] = data[key];
+      }
+    } else {
+      restProperties[key] = data[key];
+    }
+  })
+
+  let finalObject = { ...restProperties };
+
+  Object.keys(objectValues).forEach(d => {
+    if (objectValues[d].hasOwnProperty("optionLabel")) {
+      finalObject[d] = objectValues[d]["optionLabel"];
+      finalObject[`${d}Id`] = objectValues[d]["optionValue"];
+    }
+  });
+
+  return finalObject;
+}

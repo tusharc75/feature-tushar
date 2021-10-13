@@ -17,6 +17,7 @@ import {
   quoteBuilder,
   formatAmountWithCurrency,
   gridLoadingTimeout,
+  prepareDataForGrid,
 } from "../../constants/helpers";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
@@ -247,18 +248,31 @@ const QuoteBuilders = () => {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData]
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName)
+      if (["quoteName"].find(d => d === o?.fieldData?.fieldName)) {
+        columns = [...columns, {
+          disabled: true,
+          field: "quoteName",
+          headerName: "Quote Name",
+          pivotIndex: 0,
+          show: true,
+          cellRenderer: "quoteNameRenderer"
+        }]
+      }
+      else {
+        let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
+        if (currentColumn !== null) {
+          columns = [...columns, currentColumn?.columnData]
+          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+            rendererNames.push(currentColumn?.rendererName)
+          }
         }
       }
-      return o?.fieldData
     })
+
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
+      quoteNameRenderer: QuoteNameRenderer,
       actionsRenderer: ActionsRenderer
     }
     setFrameWorkComponent({ ...tempFrameworkComponent })
@@ -557,14 +571,6 @@ const QuoteBuilders = () => {
         .get(`${qbApi}${queryString}`)
         .then(({ data: { data, count } }) => {
           let rows = data.map((u) => {
-            const {
-              owner,
-              collaborator,
-              createdBy,
-              updatedBy,
-              customerAccountName,
-              ...restProperties
-            } = u;
 
             let versionCount = Object.keys(u.versions).length;
             let tempStatus = "Building Quote"
@@ -578,32 +584,23 @@ const QuoteBuilders = () => {
               tempStatus = updatedVersion.status
             }
 
-            let res = {
-              ...restProperties,
-              id: u._id,
+            //  Dynamic grid code - start
+            let finalObject = prepareDataForGrid(u);
 
-              owner: u.owner?.optionLabel,
-              ownerId: u.owner?.optionValue,
+            //  Custom props which are required
+            finalObject["id"] = u._id;
+            finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
+            finalObject["createdBy"] = u.createdBy?.user?.concatedName;
+            finalObject["createdByDate"] = u.createdBy?.date;
+            finalObject["updatedBy"] = u.updatedBy?.user?.concatedName;
+            finalObject["updatedByDate"] = u.updatedBy?.date;
+            finalObject["status"] = tempStatus;
+            finalObject["versionCount"] = versionCount;
+            finalObject["versionData"] = versionArray;
 
-              canDelete: u.owner?.optionValue === user?.user._id,
-              expiryDate: u.expiryDate ? displayDate(u.expiryDate) : "",
-
-              customerAccountName: u.customerAccountName?.optionLabel,
-              customerAccountId: u.customerAccountName?.optionValue,
-              status: tempStatus,
-              versionCount: versionCount,
-              versionData: versionArray,
-              currency: u.currency,
-              relatedOpportunity: u.opportunity?.optionLabel,
-              relatedOpportunityId: u.opportunity?.optionValue,
-
-              createdBy: u.createdBy?.user?.concatedName,
-              createdByDate: u.createdBy?.date,
-              updatedBy: u.updatedBy?.user?.concatedName,
-              updatedByDate: u.updatedBy?.date,
-            };
-            return res;
+            return finalObject;
           });
+          //  Dynamic grid code - end
 
           dispatch({ type: "initialize", data: rows, count: count });
           setTimeout(() => {
