@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.16.0](https://github.com/vebholic/oms_frontend/compare/v1.15.0...v1.16.0) (2021-10-13)
+
+
+### Features
+
+* - Add BOM component in serialised assets detail page ([4e9d684](https://github.com/vebholic/oms_frontend/commit/4e9d684ac461ea5b40e6263358fa261c7bad3be8))
+* - PO-60 - By default activities will be closed ([e2e8459](https://github.com/vebholic/oms_frontend/commit/e2e84597d2019da48c37669b5d75a77175ded728))
+* changes in BOM assigning in product details ([3b13117](https://github.com/vebholic/oms_frontend/commit/3b13117acc81167aef2745c534ea91b6fbc94afd))
+* price condition ([0426d27](https://github.com/vebholic/oms_frontend/commit/0426d27d2b5337710fb40bc2907b775cb06e061d))
+* price condition ([da1d56c](https://github.com/vebholic/oms_frontend/commit/da1d56c1a5622cc0459d75bfe98a2bf1f64185a6))
+
+
+### Bug Fixes
+
+* - currency field in product master connected to user currency ([5c0ef98](https://github.com/vebholic/oms_frontend/commit/5c0ef98a840634fa3c5f6908cd553421db0a66d8))
+* - Logo issue in dynamic grid ([a980aae](https://github.com/vebholic/oms_frontend/commit/a980aae6e355e1175b4783fbdf1fddf72b59173a))
+
 ## [1.15.0](https://github.com/vebholic/oms_frontend/compare/v1.14.1...v1.15.0) (2021-10-12)
 
 
