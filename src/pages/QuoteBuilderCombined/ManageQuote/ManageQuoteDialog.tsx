@@ -1840,6 +1840,7 @@ export default function ManageQuoteDialog({
                       collaborators={collaboratorData}
                       owner={ownerData}
                       account={customerAccount}
+                      isAccountFieldDisable={true}
                     />
                   )}
                   {showCreateOpportunity && (

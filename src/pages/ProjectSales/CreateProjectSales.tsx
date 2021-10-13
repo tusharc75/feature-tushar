@@ -534,7 +534,59 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                                             size="small"
                                             imageOrFileUploadCompletePercentage={null}
                                           />
-                                        ) : field.fieldName === "entity" ? (
+                                        ): 
+                                        field.fieldName === "startDate" ? (
+                                          <FormTypes
+                                            {...field}
+                                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
+                                            isNew={Boolean(projectSalesId)}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={field.option}
+                                            maxDate={values.endDate}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange({ [name]: value })
+                                              setFieldValue(name, value)
+                                            }}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+                                            imageOrFileUploadCompletePercentage={null}
+                                          />
+                                        ) :
+                                        field.fieldName === "endDate" ? (
+                                          <FormTypes
+                                            {...field}
+                                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
+                                            isNew={Boolean(projectSalesId)}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={field.option}
+                                            minDate={values.startDate}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange({ [name]: value })
+                                              setFieldValue(name, value)
+                                            }}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+                                            imageOrFileUploadCompletePercentage={null}
+                                          />
+                                        )
+                                         
+                                        : field.fieldName === "entity" ? (
                                           <FormTypes
                                             disabled={Boolean(projectSalesId) && field.disableOnEdit}
                                             multiple
