@@ -122,6 +122,7 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
                 actionWidth={150}
                 allowSelection={false}
                 loading={loading}
+                refreshGrid={getVersionStatus}
             />
         </div>
     )

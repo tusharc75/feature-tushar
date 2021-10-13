@@ -287,6 +287,7 @@ export default function TermsAndCondition(props) {
                     page={page}
                     actionWidth={150}
                     loading={loading}
+                    refreshGrid={fetchTermsAndConditions}
                 />
 
                 {

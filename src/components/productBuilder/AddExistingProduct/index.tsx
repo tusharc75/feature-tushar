@@ -287,6 +287,7 @@ const AddExistingProduct = (props) => {
                     page={page}
                     allowAction={false}
                     loading={loading}
+                    refreshGrid={fetchProduct}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>

@@ -12,7 +12,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement } from "../../constants/helpers";
+import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow } from "../../constants/helpers";
 import Steps from "./Steps";
 import AddExistingProductInventory from "./AddExistingProductInventory";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
@@ -39,6 +39,7 @@ import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import HideWhenOffline from "../../components/HideWhenOffline";
 import DeleteButton from "../../components/Helpers/DeleteButton";
+import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 
 const rentalProcessSteps = ["New", "Add Rental Cost", "Additional Cost", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
@@ -57,6 +58,7 @@ const RentalManagementDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState(false);
+  const [inventoryType, setInventoryType] = useState(null);
   const [rentalManagementFields, setRentalManagementFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
@@ -67,9 +69,8 @@ const RentalManagementDetailsPage = () => {
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
-  const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [showActivity, setActivityShow] = useState(true);
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [allowedToEdit, setAllowedToEdit] = useState(false)
   const [productInventoryForReceivingTicket, setProductInventoryForReceivingTicket] = useState<any[]>([]);
   const [warehouseForReceivingTicket, setWarehouseForReceivingTicket] = useState<any[]>([]);
@@ -263,40 +264,42 @@ const RentalManagementDetailsPage = () => {
 
 
   const fetchProductInventory = () => {
+    let tempInventory = []
     dispatch({ type: "loading", loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
 
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/inventory`).then(({ data }) => {
-      data.data = data.data?.map((u) => ({
+    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/products-packages`).then(({ data }) => {
+      data.data?.products.map((u) => (tempInventory.push({
         ...u,
-        id: u.inventory?._id,
-        productId: u.product?._id,
-        productName: u.product?.productName,
-        productCategory: u.product?.productCategory?.optionLabel,
-        warehouse: u.inventory?.warehouse?.optionLabel,
-        status: u.inventory?.status,
-        assetNumber: u.inventory?.assetNumber,
-        serialNumber: u.inventory?.serialNumber,
-      }));
-      fetchDeliveryTicket(data.data);
+        id: u._id,
+        name: u.productName,
+        productCategory: u.productCategory?.optionLabel,
+      })));
+      data.data?.packages.map((u) => (tempInventory.push({
+        ...u,
+        id: u._id,
+        name: u.packageName,
+        description: u.packageDescription,
+      })));
+      fetchDeliveryTicket(tempInventory);
 
-      let tempWareHouse = []
-      data.data.map(d => {
-        if (!tempWareHouse.some(t => t.optionValue === d.inventory.warehouse.optionValue)) {
-          tempWareHouse.push(d.inventory.warehouse)
-        }
-      })
-      if (data.data > 0 && data.data.every(d => d.inventory?.warehouse?.optionLabel !== null && d.inventory?.warehouse?.optionLabel !== undefined)) {
-        setCurrentStep(4)
-        axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/status `, { "status": "Ready To Ship" }).then(({ data }) => {
-        }).catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-      }
-      setWarehouseList(tempWareHouse)
-      dispatch({ type: "initialize", data: data.data, count: data.count });
+      // let tempWareHouse = []
+      // data.data.map(d => {
+      //   if (!tempWareHouse.some(t => t.optionValue === d.inventory.warehouse.optionValue)) {
+      //     tempWareHouse.push(d.inventory.warehouse)
+      //   }
+      // })
+      // if (data.data > 0 && data.data.every(d => d.inventory?.warehouse?.optionLabel !== null && d.inventory?.warehouse?.optionLabel !== undefined)) {
+      //   setCurrentStep(4)
+      //   axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/status `, { "status": "Ready To Ship" }).then(({ data }) => {
+      //   }).catch((error) => {
+      //     toastConfig.setToastConfig(error);
+      //   });
+      // }
+      // setWarehouseList(tempWareHouse)
+      dispatch({ type: "initialize", data: tempInventory, count: tempInventory.length });
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
       }, gridLoadingTimeout);
@@ -314,7 +317,7 @@ const RentalManagementDetailsPage = () => {
   );
 
   const ProductRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
+    <Link className="link" title={params.value} to={params.data.type === "product" ? `${routes.productDetail.path}/${params.data.id}` : `${routes.packagesDetail.path}/${params.data.id}`}>
       {params.value}
     </Link>
   );
@@ -337,15 +340,15 @@ const RentalManagementDetailsPage = () => {
   const frameworkComponents = {
     nameRenderer: NameRenderer,
     productRenderer: ProductRenderer,
+    commonRenderer: CommonRenderer,
     actionsRenderer: ActionsRenderer,
   };
   const columns = [
-    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "nameRenderer" },
-    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
-    { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "productRenderer" },
+    { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
   ];
 
   const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageInventory"));
@@ -385,8 +388,9 @@ const RentalManagementDetailsPage = () => {
   };
 
   const handleAddProductInventory = (productInventoryArray) => {
-    let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
-    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/inventory`, { "products": tempProductArray })
+    // let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
+    let tempProductArray = productInventoryArray.map(d => { return { "id": d._id, "qty": d.quantity, "type": d.type } })
+    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/products-packages/`, { "productsPackages": tempProductArray })
       .then(({ data }) => {
         setAddExistingProductDialog(false)
         fetchProductInventory()
@@ -504,18 +508,24 @@ const RentalManagementDetailsPage = () => {
                       variant="contained"
                       color="primary"
                       size="small"
-                      onClick={() => { setAddExistingProductDialog(true) }}
+                      onClick={() => {
+                        setAddExistingProductDialog(true);
+                        setInventoryType("product")
+                      }}
                     >
-                      Add Existing Serialized Assets
+                      {`Add ${routes.product.title}`}
                     </Button>
                     <Box mx={1} />
                     <Button
                       variant="contained"
                       color="primary"
                       size="small"
-                      onClick={() => { setShowManageProductInventoryDialog(true) }}
+                      onClick={() => {
+                        setAddExistingProductDialog(true);
+                        setInventoryType("package")
+                      }}
                     >
-                      Add New Serialized Assets
+                      {`Add ${routes.packages.title}`}
                     </Button>
                   </Box>
                   {columns ?
@@ -532,6 +542,7 @@ const RentalManagementDetailsPage = () => {
                       allowAction={true}
                       loading={loading}
                       renderedFrom="rentalManagementDetailsPageInventory"
+                      refreshGrid={fetchProductInventory}
                     />
                     : <Box
                       p={2}
@@ -742,9 +753,9 @@ const RentalManagementDetailsPage = () => {
             <HideWhenOffline>
               {showActivity ?
                 <Paper>
-                  {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                  {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                     <IoIosArrowDropright className="icon" />
-                  </a>}
+                  </span>}
                   <Grid container>
                     <Grid item xs={12}>
                       {rentalManagementData && (
@@ -774,9 +785,9 @@ const RentalManagementDetailsPage = () => {
                     </Grid>
                   </Grid>
                 </Paper> :
-                !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+                !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
                   <IoIosArrowDropleft className="icon" />
-                </a>}
+                </span>}
             </HideWhenOffline>
           </div>
         </div>
@@ -797,6 +808,7 @@ const RentalManagementDetailsPage = () => {
         <AddExistingProductInventory
           addProductInventory={handleAddProductInventory}
           handleProductInventoryClose={() => { setAddExistingProductDialog(false) }}
+          type={inventoryType}
         />
       }
       {
@@ -841,18 +853,7 @@ const RentalManagementDetailsPage = () => {
           }}
         />
       }
-      {
-        showManageProductInventoryDialog &&
-        <ManageProductInventory
-          isClone={null}
-          productInventoryId={null}
-          onClose={() => setShowManageProductInventoryDialog(false)}
-          onSuccess={(data) => {
-            setShowManageProductInventoryDialog(false);
-            handleAddProductInventory([data])
-          }}
-        />
-      }
+
     </>
   );
 };

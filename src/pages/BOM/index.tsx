@@ -26,7 +26,7 @@ const BOMTable = () => {
 
   const columns = [
     {
-      title: 'Product Name',
+      title: 'Product Description',
       field: 'productName',
       render: (rowData: any) => (
         <div style={{ width: 150 }}>

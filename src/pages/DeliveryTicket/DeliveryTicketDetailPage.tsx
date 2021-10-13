@@ -4,7 +4,7 @@ import { Paper, Box, Grid, Button, Typography } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
-import { yyyyMMDD, deliveryTicket, sidebarResource, getObjKeysWithValues } from "../../constants/helpers";
+import { yyyyMMDD, deliveryTicket, sidebarResource, getObjKeysWithValues, defaultActivityShow } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import routes from "../../components/Helpers/Routes";
@@ -44,7 +44,7 @@ export default function DeliveryTicketDetail(props) {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [deliveryTicketFields, setDeliveryTicketFields] = useState([]);
   const [gridApi, setGridApi] = useState(null);
-  const [showActivity, setActivityShow] = useState(true);
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, page, limit, pageSizes } = state;
 
@@ -68,7 +68,7 @@ export default function DeliveryTicketDetail(props) {
     { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "dateRenderer" },
     { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
     { field: "inventoryNumber", headerName: "Inventory Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "warehouse", headerName: "Plants", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
   ];
@@ -349,6 +349,7 @@ export default function DeliveryTicketDetail(props) {
                               actionWidth={150}
                               loading={false}
                               renderedFrom="deliveryTicketDetailInventoryPage"
+                              refreshGrid={fetchProductInventory}
                             />
                           </Grid>
                         </Grid>
@@ -362,9 +363,9 @@ export default function DeliveryTicketDetail(props) {
           <div className="position-relative">
             {showActivity ?
               <Paper>
-                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                   <IoIosArrowDropright className="icon" />
-                </a>}
+                </span>}
                 {!deliveryTicketData ? (
                   <Box>
                     <Skeleton variant="text" width="100px" height="25px" />
@@ -393,9 +394,9 @@ export default function DeliveryTicketDetail(props) {
                   </div>
                 )}
               </Paper> :
-              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+              !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropleft className="icon" />
-              </a>}
+              </span>}
           </div>
 
         </div>

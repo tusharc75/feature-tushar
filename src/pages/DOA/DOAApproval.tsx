@@ -15,7 +15,8 @@ import {
   CustomDialogTransition,
   formatAmountWithCurrency,
   gridLoadingTimeout,
-  gridPageSizes,
+  gridPageSizes, 
+  defaultActivityShow
 } from "../../constants/helpers";
 import { camelCase } from "lodash";
 import { useData } from "../../StateProvider/Provider";
@@ -144,7 +145,7 @@ const DOAApproval = () => {
   const [showAIDialog, setShowAIDialog] = useState(false);
   const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
   const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
-  const [showActivity, setActivityShow] = useState(true);
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   var DOALimit = 0;
   var DOAsetup = false;
   const handleActivityHideShow = () => {
@@ -461,6 +462,7 @@ const DOAApproval = () => {
                     allowAction={false}
                     allowSelection={false}
                     loading={loading}
+                    refreshGrid={fetchQuote}
                   />
                 </div>
               </Grid>
@@ -470,9 +472,9 @@ const DOAApproval = () => {
         <div className="position-relative">
           {showActivity ?
             <Paper>
-              {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+              {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropright className="icon" />
-              </a>}
+              </span>}
               <Activity
                 resourceId={QData?.quoteBuilderId}
                 resource="DOA"
@@ -487,9 +489,9 @@ const DOAApproval = () => {
               />
             </Paper>
             :
-            !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-              <IoIosArrowDropleft className="icon"/>
-            </a>}
+            !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
+              <IoIosArrowDropleft className="icon" />
+            </span>}
         </div>
       </div>
       {

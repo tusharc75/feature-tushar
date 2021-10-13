@@ -419,6 +419,7 @@ const Email = () => {
           actionWidth={150}
           loading={loading}
           renderedFrom="emailPage"
+          refreshGrid={fetchEmails}
         />
 
         {showDeleteWarningConfirmBox ? (

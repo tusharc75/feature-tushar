@@ -23,6 +23,11 @@ const AddRentalCost = (props) => {
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
 
   useEffect(() => {
+    fetchData()
+    // eslint-disable-next-line
+  }, [productInventory]);
+
+  const fetchData = () => {
     dispatch({ type: "loading", loading: true });
     dispatch({
       type: "initialize", data: productInventory.map((u) => ({
@@ -38,8 +43,7 @@ const AddRentalCost = (props) => {
     setTimeout(() => {
       dispatch({ type: "loading", loading: false });
     }, gridLoadingTimeout);
-    // eslint-disable-next-line
-  }, [productInventory]);
+  }
 
   const NameRenderer = (params) => (
     <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data.productInventoryId}`}>
@@ -56,9 +60,9 @@ const AddRentalCost = (props) => {
   const LinkRenderer = (params) => (
     <span className="link" title={params.value}
       onClick={() => {
-      setAddRentalCostData(params.data)
-      setAddRentalCostDialog(true)
-    }}>
+        setAddRentalCostData(params.data)
+        setAddRentalCostDialog(true)
+      }}>
       {params.value}
     </span>
   );
@@ -89,13 +93,11 @@ const AddRentalCost = (props) => {
     actionsRenderer: ActionsRenderer,
   };
   const columns = [
-    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "nameRenderer" },
-    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
-    { field: "costPerDay", headerName: "Cost Per Day", show: true, cellRenderer: "commonRenderer" },
-    { field: "totalCost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
-    { field: "startDate", headerName: "Start Date", show: true, cellRenderer: "dateRenderer" },
-    { field: "dueDate", headerName: "End Date", show: true, cellRenderer: "dateRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "productRenderer" },
+    { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
   ];
 
   return (
@@ -116,6 +118,7 @@ const AddRentalCost = (props) => {
               allowAction={true}
               loading={loading}
               renderedFrom="addRentalCost"
+              refreshGrid={fetchData}
             />
             : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
           }
@@ -134,7 +137,7 @@ const AddRentalCost = (props) => {
             setAddRentalCostDialog(false);
             fetchProductInventory()
           }}
-      />)}
+        />)}
     </>
   );
 }

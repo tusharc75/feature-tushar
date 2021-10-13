@@ -131,6 +131,7 @@ export default function AdditionalData({
               newSequence
             );
           }}
+          refreshGrid={fetchTNC}
         />
       </Box>
       {showManageAdditionalDataDialog && (
