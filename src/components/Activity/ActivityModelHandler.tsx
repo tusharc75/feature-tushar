@@ -3,6 +3,8 @@ import { CreateEvent } from "./Event/CreateEvent";
 import { CreateCase } from "./Case/CreateCase";
 import { CreateNote } from "./Note/CreateNote";
 import { CreateEmail } from "./Email/CreateEmail";
+import ManageAttachment from "./Attachments/ManageAttachment";
+
 import Dialog from "@material-ui/core/Dialog";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
@@ -44,6 +46,9 @@ const ActivityModelHandler = (props) => {
       ) : null}
       {activityType === "email" ? (
         <CreateEmail emailId={activityId} handleClose={handleClose} />
+      ) : null}
+      {activityType === "attachment" ? (
+        <ManageAttachment attachmentId={activityId} handleClose={handleClose} />
       ) : null}
     </Dialog>
   );

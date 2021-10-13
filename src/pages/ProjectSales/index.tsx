@@ -13,11 +13,6 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { gridLoadingTimeout, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import {
-  CommonRenderer,
-  CreatedByRenderer,
-  UpdatedByRenderer,
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import "./style.scss";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
@@ -27,6 +22,7 @@ import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { sidebarResource } from "../../constants/helpers"
+import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
 
 
 function reducer(state, action) {
@@ -137,6 +133,8 @@ const ProjectSales: FC = () => {
   const [showEntityDialog, setShowEntityDialog] = useState(false)
   const [gridApi, setGridApi] = useState(null);
   const [entities, setEntities] = useState([])
+  const [columns, setColumns] = useState([])
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
 
   const [state, dispatch] = useReducer(reducer, intialState);
   const {
@@ -153,34 +151,45 @@ const ProjectSales: FC = () => {
   } = state;
   const columnState = JSON.parse(localStorage.getItem("projectSalesPage"));
 
-  const [columns] = useState([
-    {
-      field: "projectName",
-      headerName: "Name",
-      show: true,
-      disabled: true,
-      cellRenderer: "nameRenderer",
-    },
-    {
-      field: "projectManager",
-      headerName: "Project Manager",
-      show: true,
-      disabled: true,
-      cellRenderer: "projectManager",
-    },
-    {
-      field: "createdBy",
-      headerName: "Created By",
-      show: true,
-      cellRenderer: "createdByRenderer",
-    },
-    {
-      field: "updatedBy",
-      headerName: "Updated By",
-      show: true,
-      cellRenderer: "updatedByRenderer",
-    },
-  ]);
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+
+  const fetchGridColumns = async () => {
+
+    const response = await axiosInstance()
+      .get(`/field?resource=Project Sales`)
+
+    let data = response?.data?.data
+
+    let columns = []
+    let rendererNames = []
+    data.forEach(o => {
+      if (o?.fieldData?.fieldName === "projectName") {
+        o.fieldData.primary = true
+      }
+      let currentColumn = getColumnData(routes.projectSales.title, o?.fieldData)
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData]
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName)
+        }
+      }
+      return o?.fieldData
+    })
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      actionsRenderer: ActionsRenderer
+    }
+    setFrameWorkComponent({ ...tempFrameworkComponent })
+    let staticFields = getStaticFields()
+    staticFields.forEach(field => {
+      columns.push(checkStaticField(routes.projectSales.title, field))
+    })
+    setColumns([...columns])
+  }
+
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
@@ -210,37 +219,11 @@ const ProjectSales: FC = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity]);
 
-  const NameRenderer = (params) => (
-    <Link
-      className="link"
-      to={`/project-sales/detail/${params.data._id}`}
-      title={params.value}
-    >
-      {params.value}
-    </Link>
-  );
-
-  const ProjectManagerRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link
-          className="link"
-          to={`/user/detail/${params.data.projectManagerId}`}
-          title={params.value}
-        >
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
   const ActionsRenderer = (params) => (
     <>
       <Tooltip
-        className={permissions?.projectSales.isCreate ? "" : "cursor-stop"}
-        title={permissions?.projectSales.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+        className={permissions?.projectStrategy?.isCreate ? "" : "cursor-stop"}
+        title={permissions?.projectStrategy?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
         <IconButton
           size="small"
           aria-label="Clone"
@@ -252,14 +235,14 @@ const ProjectSales: FC = () => {
         </IconButton>
       </Tooltip>
       <GridDeleteIcon
-        hasDeletePermission={permissions?.projectSales.isDelete}
+        hasDeletePermission={permissions?.projectStrategy?.isDelete}
         ownerId={params.data.projectManagerId}
         userId={user?.user?._id}
         onDelete={() => showConfirmBox(params.data)}
         entity="Project"
       />
       {
-        permissions?.projectSales.isUpdate && <Tooltip title="Entity">
+        permissions?.projectStrategy?.isUpdate && <Tooltip title="Entity">
           <IconButton
             size="small"
             aria-label="Entity"
@@ -277,15 +260,6 @@ const ProjectSales: FC = () => {
       }
     </>
   );
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    projectManager: ProjectManagerRenderer,
-    commonRenderer: CommonRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-  };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -364,6 +338,12 @@ const ProjectSales: FC = () => {
             ...project,
             projectManager: project.projectManager?.optionLabel,
             projectManagerId: project.projectManager?.optionValue,
+            marketSegment: project?.marketSegment?.optionLabel,
+            marketSegmentId: project?.marketSegment?.optionValue,
+            subMarketSegment: project?.subMarketSegment?.optionLabel,
+            subMarketSegmentId: project?.subMarketSegment?.optionValue,
+            entity: project["entity"] && project["entity"][0] ? project["entity"][0]?.optionLabel : "",
+            entityId: project["entity"] && project["entity"][0] ? project["entity"][0]?.optionValue : "",
             createdBy: project.createdBy?.user?.concatedName,
             createdByDate: project.createdBy?.date,
             updatedBy: project.updatedBy?.user?.concatedName,
@@ -389,7 +369,7 @@ const ProjectSales: FC = () => {
 
   const showConfirmBox = (row) => {
     if (row === null) {
-      if (permissions?.projectSales.isDelete) {
+      if (permissions?.projectStrategy?.isDelete) {
         const myData = selectedRecords.filter(
           (s) => s.projectManagerId === user.user._id
         );
@@ -470,12 +450,14 @@ const ProjectSales: FC = () => {
           </Grid>
           <Grid item md={8} sm={1} xs={2}>
             <ImportExportLinks
-              permissions={permissions.projectSales}
+              permissions={permissions?.projectStrategy}
               module="project-sale(s)"
               api={"project-sales"}
               afterImportCompleted={() => {
                 fetchProjects();
               }}
+              isExportAllOrSomeFeature={true}
+              total={rowCount}
               recordsToExport={selectedRecords.length}
               ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
               onExportToExcelSuccess={() => {
@@ -491,7 +473,7 @@ const ProjectSales: FC = () => {
               userId={user?.user?._id}
               onSearch={handleSearch}
               searchVal={search}
-              permissions={permissions?.projectSales}
+              permissions={permissions?.projectStrategy}
               selectedType={selectedType}
               handleFilterChange={handleProjectFilter}
               onCreate={handleCreate}
@@ -504,20 +486,24 @@ const ProjectSales: FC = () => {
             />
           </div>
 
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            actionWidth={150}
-            page={page}
-            loading={loading}
-            renderedFrom="projectSalesPage"
-          />
+          {
+            Object.keys(frameWorkComponent).length > 0 ?
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameWorkComponent}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                actionWidth={150}
+                page={page}
+                loading={loading}
+                renderedFrom={routes.projectSales.title}
+                refreshGrid={fetchProjects}
+              /> : null
+          }
         </div>
 
         {showDeleteWarningConfirmBox?.show ? (

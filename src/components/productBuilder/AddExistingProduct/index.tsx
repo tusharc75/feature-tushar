@@ -45,18 +45,18 @@ const AddExistingProduct = (props) => {
 
     const EntityNameRenderer = (params) => params.value ? (
         <>
-          <h5 className="createBy d-flex">
-            <Link className="link" title={params.value} to={`${routes.entity.path}/detail/${params.data.entityId}`}>
-              {params.value}
-            </Link>
-            {params.data.restEntity.length > 0 && (
-              <span className="createdAtTime badge-date">{`+${params.data.restEntity.length} more..`}</span>
-            )}
-          </h5>
+            <h5 className="createBy d-flex">
+                <Link className="link" title={params.value} to={`${routes.entity.path}/detail/${params.data.entityId}`}>
+                    {params.value}
+                </Link>
+                {params.data.restEntity.length > 0 && (
+                    <span className="createdAtTime badge-date">{`+${params.data.restEntity.length} more..`}</span>
+                )}
+            </h5>
         </>
-      ) : (
+    ) : (
         <NoDataCell />
-      );
+    );
 
     const frameworkComponents = {
         commonRenderer: CommonRenderer,
@@ -105,7 +105,7 @@ const AddExistingProduct = (props) => {
             setProductList(data.data);
             data.data = data.data?.map((u, index) => {
                 const { entity, ...restProperties } = u;
-                const [firstEntity, ...restEntity] = entity;
+                const [firstEntity, ...restEntity] = entity ? entity : [];
                 let res = {
                     ...restProperties,
                     id: u._id,
@@ -287,6 +287,7 @@ const AddExistingProduct = (props) => {
                     page={page}
                     allowAction={false}
                     loading={loading}
+                    refreshGrid={fetchProduct}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>

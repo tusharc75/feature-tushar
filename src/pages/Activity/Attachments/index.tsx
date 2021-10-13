@@ -396,18 +396,22 @@ export default function Attachment() {
             </Grid>
             <Grid item xs={7} className={styles.filter_side}>
               <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>
-                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} />
-                {
-                  permissions?.attachment?.isCreate ?
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      className={styles.add_submit_btn}
-                      onClick={() => setOpen(true)}
-                      startIcon={<AddOutlined />}>
-                      Add
-                    </Button> : null}
+                <SearchFilter
+                  handleChangeFilter={handleChangeFilter}
+                  filter={filter}
+                  chip={{ size: 'small' }}
+                  activityName="attachment"
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  className={styles.add_submit_btn}
+                  onClick={() => setOpen(true)}
+                  startIcon={<AddOutlined />}
+                >
+                  Add
+                </Button>
                 <Button
                   className={styles.action_submit_btn}
                   variant="outlined"
@@ -458,6 +462,7 @@ export default function Attachment() {
           actionWidth={150}
           loading={loading}
           renderedFrom="attachmentPage"
+          refreshGrid={fetchAttachments}
         />
         {open ? (
           <Dialog

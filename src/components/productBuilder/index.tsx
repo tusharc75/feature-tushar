@@ -190,7 +190,7 @@ const ProductBuilder = (props) => {
       setProduct(data.data);
       data = data.data?.map((u, index) => {
         const { entity, ...restProperties } = u;
-        const [firstEntity, ...restEntity] = entity;
+        const [firstEntity, ...restEntity] = entity ? entity : [];
         let res = {
           ...restProperties,
           id: u._id,
@@ -614,6 +614,14 @@ const ProductBuilder = (props) => {
                   if (isImportedSuccessfully) {
                     fetchProduct(productBuilderId);
                   }
+                }}
+                isExportAllOrSomeFeature={true}
+                total={rowCount}
+                recordsToExport={selectedRecords.length}
+                ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                onExportToExcelSuccess={() => {
+                  if (gridApi) gridApi.deselectAll()
+                  else fetchProduct(productBuilderId)
                 }}
               />
             )}

@@ -126,7 +126,8 @@ export default function QuoteProcess(props) {
         handleOpenUpdateDialog,
         fetchTNC,
         handleVersionUpdate,
-        updatingVersion
+        updatingVersion,
+        globalLoading
     } = props
     const defaultSelectColumns = [
         "Product Description",
@@ -1370,6 +1371,7 @@ export default function QuoteProcess(props) {
                         allowedToEdit={allowedToEdit}
                         DOAData={DOAData}
                         quoteData={quoteData}
+                        globalLoading={globalLoading}
                     />
                 </div>
             </Paper>

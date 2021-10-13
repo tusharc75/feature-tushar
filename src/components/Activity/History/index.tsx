@@ -17,6 +17,8 @@ import TimelineContent from '@material-ui/lab/TimelineContent';
 import TimelineDot from '@material-ui/lab/TimelineDot';
 import TimelineOppositeContent from '@material-ui/lab/TimelineOppositeContent';
 import { displayDate } from "../../../constants/helpers"
+import { Skeleton } from '@material-ui/lab';
+import { Grid } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -77,7 +79,19 @@ export default function HistoryDialog(props) {
             </DialogTitle>
             <DialogContent dividers>
                 {
-                    loading ? <Typography>Fetching Data</Typography> :
+                    loading ?
+                        <>
+                            <DialogContent>
+                                <Skeleton width="100%" height="70px" />
+                                <Grid container spacing={2}>
+                                    {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                                        <Grid key={i} item xs={12} sm={6} md={6}>
+                                            <Skeleton width="100%" height="60px" />
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </DialogContent>
+                        </> :
                         history.length ? <>
                             <Timeline>
                                 {

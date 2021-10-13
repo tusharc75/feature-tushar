@@ -13,11 +13,12 @@ import {
   Typography,
   useMediaQuery,
   ButtonBase,
-  Popover
+  Popover,
+  Tooltip
 } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
-import { Menu as MenuIcon, MoreVert as MoreIcon, Clear as ClearIcon, Notifications, HelpOutline, ExpandMore } from '@material-ui/icons';
+import { Menu as MenuIcon, MoreVert as MoreIcon, Clear as ClearIcon, Notifications, HelpOutline, ExpandMore, Brightness1 } from '@material-ui/icons';
 import io, { Socket } from 'socket.io-client';
 import { useHistory, Link, useLocation } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
@@ -38,6 +39,7 @@ import { CustomChatNotificationCountContext } from '../../StateProvider/CustomCh
 import { backendApi } from '../../config';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import { SET_CART_COUNT } from "../../StateProvider/actionTypes"
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -190,6 +192,7 @@ const Header = ({ toggleDrawer }) => {
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
   const toastConfig = useContext(CustomToastContext);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [notificationList, setNotificationList] = useState([]);
@@ -878,11 +881,21 @@ const Header = ({ toggleDrawer }) => {
 
   const startTour = () => {
     if (['local', 'development'].includes(process.env.REACT_APP_ENV)) {
+
+      const paths = pathname.split("/").filter((x: string) => x)
+      let path: string;
+
+      if (paths.includes("detail")) {
+        paths.splice(paths.length - 1, 1)
+        path = paths.join("/")
+      }
+
       dispatch({
         type: SET_START_TOUR,
         payload: {
-          path: pathname,
-          start: true
+          path: paths.includes("detail") ? `/${path}` : pathname,
+          start: true,
+          stepIndex: 0
         }
       })
     }
@@ -987,6 +1000,14 @@ const Header = ({ toggleDrawer }) => {
 
           <div className={classes.sectionDesktop}>
             <div>
+              {
+                isOffline && <IconButton>
+                  <Tooltip title="You are working offline right now">
+                    <Brightness1 color="error" className="blink" />
+                  </Tooltip>
+                </IconButton>
+              }
+
               {/*Only show cart icon if environment is local || development*/}
               {['local', 'development'].includes(process.env.REACT_APP_ENV) && (
                 <IconButton
@@ -1005,6 +1026,7 @@ const Header = ({ toggleDrawer }) => {
                   </Badge>
                 </IconButton>
               )}
+
               <IconButton
                 id="notificationButton"
                 aria-describedby={fullScreenNotificationId}

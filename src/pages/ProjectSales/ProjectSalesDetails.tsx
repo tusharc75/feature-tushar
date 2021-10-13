@@ -34,7 +34,8 @@ import {
   formatAmountWithCurrency,
   opportunity,
   projectSales,
-  quote,
+  quote, 
+  defaultActivityShow
 } from "../../constants/helpers";
 import Activity from "../../components/Activity";
 import CreateProjectSales from "./CreateProjectSales";
@@ -67,9 +68,9 @@ const ProjectSalesDetails = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogType, setDialogType] = useState("");
-  const [showActivity, setActivityShow] = useState(true);
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
-    routes.projectSales,
+    routes?.projectSales,
   ]);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [loadingGraphData, setLoadingGraphData] = useState(false);
@@ -366,7 +367,7 @@ const ProjectSalesDetails = () => {
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
-                  {(permissions?.projectSales.isUpdate && isTeamMember) ||
+                  {(permissions?.projectStrategy?.isUpdate && isTeamMember) ||
                     isManager ? (
                     <Button
                       variant="contained"
@@ -377,7 +378,7 @@ const ProjectSalesDetails = () => {
                       Edit
                     </Button>
                   ) : null}
-                  {permissions?.projectSales.isDelete && isManager ? (
+                  {permissions?.projectStrategy?.isDelete && isManager ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => {
@@ -458,7 +459,7 @@ const ProjectSalesDetails = () => {
                   justifyContent="space-between"
                 >
                   <Typography variant="subtitle2">Project Team</Typography>
-                  {(permissions?.projectSales.isUpdate && isTeamMember) ||
+                  {(permissions?.projectStrategy?.isUpdate && isTeamMember) ||
                     isManager ? (
                     <IconButton
                       color="primary"
@@ -524,7 +525,7 @@ const ProjectSalesDetails = () => {
                 estimatedAmount={projectSalesData?.amount}
                 marketSegmentId={projectSalesData?.marketSegment?.optionValue}
                 subMarketSegmentId={projectSalesData?.subMarketSegment?.optionValue}
-                permissions={permissions?.projectSales}
+                permissions={permissions?.projectStrategy}
                 fetchProjectData={getSalesData}
                 projectId={id}
                 users={teamUsers}
@@ -534,9 +535,9 @@ const ProjectSalesDetails = () => {
           <div className="position-relative">
             {showActivity ?
               <Paper>
-                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+                {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                   <IoIosArrowDropright className="icon" />
-                </a>}
+                </span>}
                 <Activity
                   resourceId={id}
                   resource={projectSales.projectSalesRoute}
@@ -545,36 +546,16 @@ const ProjectSalesDetails = () => {
                       type: projectSales.projectSalesResource,
                       referenceId: id,
                       access: true,
-                    },
-                    ...opportunities?.map((op) => ({
-                      type: opportunity.opportunityResource,
-                      referenceId: op._id,
-                      access: false,
-                    })),
-                    ...customerAccounts?.map((ca) => ({
-                      type: customerAccount.accountResource,
-                      referenceId: ca._id,
-                      access: false,
-                    })),
-                    ...customerContacts?.map((cc) => ({
-                      type: customerContact.contactResource,
-                      referenceId: cc._id,
-                      access: false,
-                    })),
-                    ...quotes?.map((q) => ({
-                      type: quote.quoteResource,
-                      referenceId: q._id,
-                      access: false,
-                    })),
+                    }
                   ]}
                   handleActivityRefresh={() => { }}
                   emails={[]}
                 />
               </Paper>
               :
-              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+              !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropleft className="icon" />
-              </a>}
+              </span>}
           </div>
 
         </div>

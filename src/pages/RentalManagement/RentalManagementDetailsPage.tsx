@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper } from "@material-ui/core";
-import { Skeleton, Autocomplete } from "@material-ui/lab";
+import { Grid, Box, Button, Paper, Tooltip } from "@material-ui/core";
+import { Skeleton, Autocomplete, Alert } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import { isMobile, isTablet } from "react-device-detect";
 import axiosInstance from "../../axios/axiosInstance";
@@ -12,7 +12,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement } from "../../constants/helpers";
+import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow } from "../../constants/helpers";
 import Steps from "./Steps";
 import AddExistingProductInventory from "./AddExistingProductInventory";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
@@ -36,12 +36,16 @@ import Activity from "../../components/Activity";
 import styles from "./Retal.module.scss";
 import ReceivingTicket from "./ReceivingTicket";
 import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
+import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
+import HideWhenOffline from "../../components/HideWhenOffline";
 import DeleteButton from "../../components/Helpers/DeleteButton";
+import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 
 const rentalProcessSteps = ["New", "Add Rental Cost", "Additional Cost", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
+  const { isOffline, offlineFieldsData, offlineGridData, updateOfflineGridData } = useContext(CustomOfflineContext);
 
   const { id } = useParams();
   const history = useHistory();
@@ -54,6 +58,7 @@ const RentalManagementDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState(false);
+  const [inventoryType, setInventoryType] = useState(null);
   const [rentalManagementFields, setRentalManagementFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
@@ -64,13 +69,13 @@ const RentalManagementDetailsPage = () => {
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
-  const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [showActivity, setActivityShow] = useState(true);
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [allowedToEdit, setAllowedToEdit] = useState(false)
   const [productInventoryForReceivingTicket, setProductInventoryForReceivingTicket] = useState<any[]>([]);
   const [warehouseForReceivingTicket, setWarehouseForReceivingTicket] = useState<any[]>([]);
   const [showReceivingTicketDialog, setShowReceivingTicketDialog] = useState(false);
+  const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false)
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
@@ -91,7 +96,7 @@ const RentalManagementDetailsPage = () => {
     }
 
     if (currentStep > 0) {
-      axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/process-status `, { "processStatus": rentalProcessSteps[currentStep] }).then(({ data }) => {
+      axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/process-status`, { "processStatus": rentalProcessSteps[currentStep] }).then(({ data }) => {
       }).catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -165,9 +170,27 @@ const RentalManagementDetailsPage = () => {
 
   const fetchRentalManagementData = async () => {
     try {
-      const {
-        data: { data },
-      } = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}`);
+      let data;
+
+      if (!isOffline) {
+        const response: any = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}`);
+        data = response?.data?.data;
+      } else {
+        data = offlineGridData?.rentalManagement?.find(d => d._id === id)
+      }
+
+      if (localStorage.getItem("offlineDataToSave")) {
+        const offlineDataToSave = JSON.parse(localStorage.getItem("offlineDataToSave"))
+        if (offlineDataToSave["rentalManagement"]) {
+          setIsInOfflineSaveQueue(offlineDataToSave["rentalManagement"].some(d => d.values._id === id));
+        }
+      }
+
+      try {
+        updateOfflineGridData("rentalManagement", [data], []);
+      } catch (ex) {
+        console.error(`Rental Management: Error while adding/updating data for Offline context. Error: ${ex.message}`)
+      }
 
       handleMainPoints(data);
       setHeadingLbl(data.rentalJobName);
@@ -188,15 +211,18 @@ const RentalManagementDetailsPage = () => {
     }
   };
 
-  const getRentalManagementFields = () => {
-    axiosInstance()
-      .get("/field?resource=Rental Management")
-      .then(({ data }) => {
-        setRentalManagementFields(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const getRentalManagementFields = async () => {
+    try {
+      if (!isOffline) {
+        const response: any = await axiosInstance().get("/field?resource=Rental Management")
+        setRentalManagementFields(response?.data?.data)
+      } else {
+        setRentalManagementFields(offlineFieldsData?.rentalManagement);
+      }
+
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const handleOpenUpdateDialog = () => {
@@ -205,6 +231,12 @@ const RentalManagementDetailsPage = () => {
 
   const handleDelete = () => {
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/remove`, { "ids": [rentalManagementData._id] }).then(() => {
+      try {
+        updateOfflineGridData("rentalManagement", [], [rentalManagementData._id]);
+      } catch (ex) {
+        console.error(`Rental Management: Error while removing data for Offline context. Error: ${ex.message}`)
+      }
+
       setShowConfirmBox(false);
       history.goBack();
     }).catch((error) => {
@@ -232,39 +264,42 @@ const RentalManagementDetailsPage = () => {
 
 
   const fetchProductInventory = () => {
+    let tempInventory = []
     dispatch({ type: "loading", loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/inventory `).then(({ data }) => {
-      data.data = data.data?.map((u) => ({
-        ...u,
-        id: u.inventory?._id,
-        productId: u.product?._id,
-        productName: u.product?.productName,
-        productCategory: u.product?.productCategory?.optionLabel,
-        warehouse: u.inventory?.warehouse?.optionLabel,
-        status: u.inventory?.status,
-        assetNumber: u.inventory?.assetNumber,
-        serialNumber: u.inventory?.serialNumber,
-      }));
-      fetchDeliveryTicket(data.data);
 
-      let tempWareHouse = []
-      data.data.map(d => {
-        if (!tempWareHouse.some(t => t.optionValue === d.inventory.warehouse.optionValue)) {
-          tempWareHouse.push(d.inventory.warehouse)
-        }
-      })
-      if (data.data > 0 && data.data.every(d => d.inventory?.warehouse?.optionLabel !== null && d.inventory?.warehouse?.optionLabel !== undefined)) {
-        setCurrentStep(4)
-        axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/status `, { "status": "Ready To Ship" }).then(({ data }) => {
-        }).catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-      }
-      setWarehouseList(tempWareHouse)
-      dispatch({ type: "initialize", data: data.data, count: data.count });
+    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/products-packages`).then(({ data }) => {
+      data.data?.products.map((u) => (tempInventory.push({
+        ...u,
+        id: u._id,
+        name: u.productName,
+        productCategory: u.productCategory?.optionLabel,
+      })));
+      data.data?.packages.map((u) => (tempInventory.push({
+        ...u,
+        id: u._id,
+        name: u.packageName,
+        description: u.packageDescription,
+      })));
+      fetchDeliveryTicket(tempInventory);
+
+      // let tempWareHouse = []
+      // data.data.map(d => {
+      //   if (!tempWareHouse.some(t => t.optionValue === d.inventory.warehouse.optionValue)) {
+      //     tempWareHouse.push(d.inventory.warehouse)
+      //   }
+      // })
+      // if (data.data > 0 && data.data.every(d => d.inventory?.warehouse?.optionLabel !== null && d.inventory?.warehouse?.optionLabel !== undefined)) {
+      //   setCurrentStep(4)
+      //   axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/status `, { "status": "Ready To Ship" }).then(({ data }) => {
+      //   }).catch((error) => {
+      //     toastConfig.setToastConfig(error);
+      //   });
+      // }
+      // setWarehouseList(tempWareHouse)
+      dispatch({ type: "initialize", data: tempInventory, count: tempInventory.length });
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
       }, gridLoadingTimeout);
@@ -282,7 +317,7 @@ const RentalManagementDetailsPage = () => {
   );
 
   const ProductRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
+    <Link className="link" title={params.value} to={params.data.type === "product" ? `${routes.productDetail.path}/${params.data.id}` : `${routes.packagesDetail.path}/${params.data.id}`}>
       {params.value}
     </Link>
   );
@@ -305,15 +340,15 @@ const RentalManagementDetailsPage = () => {
   const frameworkComponents = {
     nameRenderer: NameRenderer,
     productRenderer: ProductRenderer,
+    commonRenderer: CommonRenderer,
     actionsRenderer: ActionsRenderer,
   };
   const columns = [
-    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "nameRenderer" },
-    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
-    { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "productRenderer" },
+    { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
   ];
 
   const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageInventory"));
@@ -326,7 +361,6 @@ const RentalManagementDetailsPage = () => {
       });
     });
   }
-
 
   const fetchDeliveryTicket = (values) => {
     setProductInventory([])
@@ -354,8 +388,9 @@ const RentalManagementDetailsPage = () => {
   };
 
   const handleAddProductInventory = (productInventoryArray) => {
-    let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
-    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/inventory`, { "products": tempProductArray })
+    // let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
+    let tempProductArray = productInventoryArray.map(d => { return { "id": d._id, "qty": d.quantity, "type": d.type } })
+    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/products-packages/`, { "productsPackages": tempProductArray })
       .then(({ data }) => {
         setAddExistingProductDialog(false)
         fetchProductInventory()
@@ -408,12 +443,12 @@ const RentalManagementDetailsPage = () => {
                     </Box>
                   </div>
                 ) : (
-
                   <DetailsPageHeader
                     heading={headingLbl}
                     mainPoints={mainPoints}
                     showHeading={true}
                   >
+
                     {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
                       <Button
                         variant="contained"
@@ -425,18 +460,19 @@ const RentalManagementDetailsPage = () => {
                       </Button>
                     )}
 
-                    {permissions?.rentalManagement?.isDelete &&
-                      rentalManagementData?.owner?.optionValue &&
-                      user?.user?._id &&
-                      rentalManagementData.owner.optionValue === user.user._id ? (
-                      <DeleteButton
-                        text="Delete"
-                        onClick={() => setShowConfirmBox(true)}
-                      />
-                    ) : null}
+                    <HideWhenOffline>
+                      {permissions?.rentalManagement?.isDelete &&
+                        rentalManagementData?.owner?.optionValue &&
+                        user?.user?._id &&
+                        rentalManagementData.owner.optionValue === user.user._id ? (
+                        <DeleteButton
+                          text="Delete"
+                          onClick={() => setShowConfirmBox(true)}
+                        />
+                      ) : null}
+                    </HideWhenOffline>
                   </DetailsPageHeader>
                 )}
-
 
                 <Box>
                   {loadingDetails || !rentalManagementFields.length ? (
@@ -445,6 +481,12 @@ const RentalManagementDetailsPage = () => {
                     </Grid>
                   ) : (
                     <>
+                      {
+                        isInOfflineSaveQueue && <div className="px-3">
+                          <Alert variant="filled" severity="info">Updates are in offline state, it will be affected once you will be in network</Alert>
+                        </div>
+                      }
+
                       <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
                     </>
                   )}
@@ -466,18 +508,24 @@ const RentalManagementDetailsPage = () => {
                       variant="contained"
                       color="primary"
                       size="small"
-                      onClick={() => { setAddExistingProductDialog(true) }}
+                      onClick={() => {
+                        setAddExistingProductDialog(true);
+                        setInventoryType("product")
+                      }}
                     >
-                      Add Existing Serialized Assets
+                      {`Add ${routes.product.title}`}
                     </Button>
                     <Box mx={1} />
                     <Button
                       variant="contained"
                       color="primary"
                       size="small"
-                      onClick={() => { setShowManageProductInventoryDialog(true) }}
+                      onClick={() => {
+                        setAddExistingProductDialog(true);
+                        setInventoryType("package")
+                      }}
                     >
-                      Add New Serialized Assets
+                      {`Add ${routes.packages.title}`}
                     </Button>
                   </Box>
                   {columns ?
@@ -494,6 +542,7 @@ const RentalManagementDetailsPage = () => {
                       allowAction={true}
                       loading={loading}
                       renderedFrom="rentalManagementDetailsPageInventory"
+                      refreshGrid={fetchProductInventory}
                     />
                     : <Box
                       p={2}
@@ -701,43 +750,45 @@ const RentalManagementDetailsPage = () => {
             </div>
           </div>
           <div className="position-relative">
-            {showActivity ?
-              <Paper>
-                {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
-                  <IoIosArrowDropright className="icon" />
-                </a>}
-                <Grid container>
-                  <Grid item xs={12}>
-                    {rentalManagementData && (
-                      <div>
-                        <Activity
-                          resourceId={rentalManagementData._id}
-                          resource={rentalManagement.resource}
-                          restrictedAddActivities={
-                            permissions &&
-                              permissions["rentalManagement"] &&
-                              permissions["rentalManagement"].isUpdate
-                              ? []
-                              : ["Attachment", "Case"]
-                          }
-                          relatedTo={[
-                            {
-                              type: rentalManagement,
-                              referenceId: rentalManagementData._id,
-                              access: true,
-                            },
-                          ]}
-                          handleActivityRefresh={() => { }}
-                          emails={[]}
-                        />
-                      </div>
-                    )}
+            <HideWhenOffline>
+              {showActivity ?
+                <Paper>
+                  {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
+                    <IoIosArrowDropright className="icon" />
+                  </span>}
+                  <Grid container>
+                    <Grid item xs={12}>
+                      {rentalManagementData && (
+                        <div>
+                          <Activity
+                            resourceId={rentalManagementData._id}
+                            resource={rentalManagement.resource}
+                            restrictedAddActivities={
+                              permissions &&
+                                permissions["rentalManagement"] &&
+                                permissions["rentalManagement"].isUpdate
+                                ? []
+                                : ["Attachment", "Case"]
+                            }
+                            relatedTo={[
+                              {
+                                type: rentalManagement,
+                                referenceId: rentalManagementData._id,
+                                access: true,
+                              },
+                            ]}
+                            handleActivityRefresh={() => { }}
+                            emails={[]}
+                          />
+                        </div>
+                      )}
+                    </Grid>
                   </Grid>
-                </Grid>
-              </Paper> :
-              !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
-                <IoIosArrowDropleft className="icon" />
-              </a>}
+                </Paper> :
+                !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
+                  <IoIosArrowDropleft className="icon" />
+                </span>}
+            </HideWhenOffline>
           </div>
         </div>
 
@@ -745,7 +796,7 @@ const RentalManagementDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this rental management ?`
+          message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ?`
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -757,20 +808,25 @@ const RentalManagementDetailsPage = () => {
         <AddExistingProductInventory
           addProductInventory={handleAddProductInventory}
           handleProductInventoryClose={() => { setAddExistingProductDialog(false) }}
-        />}
-      {openUpdateDialog && (
-        <ManageRentalManagementDialog
-          isClone={false}
-          open={openUpdateDialog}
-          rentalManagementId={id}
-          onClose={() => setOpenUpdateDialog(false)}
-          onSuccess={() => {
-            setOpenUpdateDialog(false);
-            fetchRentalManagementData();
-          }}
+          type={inventoryType}
         />
-      )}
-      {showDeliveryTicketDialog &&
+      }
+      {
+        openUpdateDialog && (
+          <ManageRentalManagementDialog
+            isClone={false}
+            open={openUpdateDialog}
+            rentalManagementId={id}
+            rentalManagementData={rentalManagementData}
+            onClose={() => setOpenUpdateDialog(false)}
+            onSuccess={() => {
+              setOpenUpdateDialog(false);
+              fetchRentalManagementData();
+            }}
+          />)
+      }
+      {
+        showDeliveryTicketDialog &&
         <ManageDeliveryTicket
           onClose={() => setShowDeliveryTicketDialog(false)}
           productInventoryForDeliveryTicket={productInventoryForDeliveryTicket}
@@ -782,32 +838,22 @@ const RentalManagementDetailsPage = () => {
           }}
         />
       }
-      {showReceivingTicketDialog && <ManageReceivingTicket
-        open={showReceivingTicketDialog}
-        isClone={false}
-        receivingTicketId={null}
-        productInventoryForReceivingTicket={productInventoryForReceivingTicket}
-        warehouseId={warehouseForReceivingTicket}
-        rentalData={rentalManagementData}
-        onClose={() => setShowReceivingTicketDialog(false)}
-        onSuccess={() => {
-          setShowReceivingTicketDialog(false)
-          fetchProductInventory()
-        }}
-
-      />
-
-      }
-      {showManageProductInventoryDialog &&
-        <ManageProductInventory
-          isClone={null}
-          productInventoryId={null}
-          onClose={() => setShowManageProductInventoryDialog(false)}
-          onSuccess={(data) => {
-            setShowManageProductInventoryDialog(false);
-            handleAddProductInventory([data])
+      {
+        showReceivingTicketDialog && <ManageReceivingTicket
+          open={showReceivingTicketDialog}
+          isClone={false}
+          receivingTicketId={null}
+          productInventoryForReceivingTicket={productInventoryForReceivingTicket}
+          warehouseId={warehouseForReceivingTicket}
+          rentalData={rentalManagementData}
+          onClose={() => setShowReceivingTicketDialog(false)}
+          onSuccess={() => {
+            setShowReceivingTicketDialog(false)
+            fetchProductInventory()
           }}
-        />}
+        />
+      }
+
     </>
   );
 };

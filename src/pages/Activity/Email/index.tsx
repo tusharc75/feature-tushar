@@ -351,22 +351,25 @@ const Email = () => {
             <Grid item xs={6} className={styles.filter_side}>
               <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>
                 {/* <Box style={{ width: '70%' }}> */}
-                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} />
-                {
-                  permissions?.email?.isCreate ?
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      className={styles.add_submit_btn}
-                      onClick={() => {
-                        setOpen(true);
-                      }}
-                      startIcon={<AddOutlined />}
-                    >
-                      Add
-                    </Button> : null
-                }
+                <SearchFilter
+                  handleChangeFilter={handleChangeFilter}
+                  filter={filter}
+                  chip={{ size: 'small' }}
+                  activityName="email"
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  className={styles.add_submit_btn}
+                  onClick={() => {
+                    setOpen(true);
+                  }}
+                  startIcon={<AddOutlined />}
+                >
+                  Add
+                </Button>
+
                 {/* </Box> */}
                 <Button
                   className={styles.action_submit_btn}
@@ -417,6 +420,7 @@ const Email = () => {
           actionWidth={150}
           loading={loading}
           renderedFrom="emailPage"
+          refreshGrid={fetchEmails}
         />
 
         {showDeleteWarningConfirmBox ? (

@@ -246,22 +246,20 @@ const Note = () => {
             </Grid>
             <Grid item xs={6} className={styles.filter_side}>
               <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>
-                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} />
-                {
-                  permissions?.note?.isCreate ?
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      className={styles.add_submit_btn}
-                      onClick={() => {
-                        setIsNew(true);
-                        setShowCreateDialog(true);
-                      }}
-                      startIcon={<AddOutlined />}
-                    >
-                      Add
-                    </Button> : null}
+                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="note" />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  className={styles.add_submit_btn}
+                  onClick={() => {
+                    setIsNew(true);
+                    setShowCreateDialog(true);
+                  }}
+                  startIcon={<AddOutlined />}
+                >
+                  Add
+                </Button>
                 {/* </Box> */}
                 <Button
                   className={styles.action_submit_btn}
@@ -316,6 +314,7 @@ const Note = () => {
           isClientSideGrid={true}
           loading={loading}
           renderedFrom="notesPage"
+          refreshGrid={fetchNotes}
         />
 
         {noteId !== undefined && <ActivityModelHandler activityType="note" activityId={noteId} onClose={() => setNoteId(undefined)} />}

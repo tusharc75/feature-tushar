@@ -18,110 +18,18 @@ import routes from '../../components/Helpers/Routes';
 import { ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
-import { gridLoadingTimeout, gridPageSizes, isObjectEmpty, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../constants/helpers';
 import { CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import CustomAgGrid from '../../components/AgGridComponents/CustomAgGrid';
+import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
-import { entity } from "../../constants/helpers"
 import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import Chip from "@material-ui/core/Chip"
 
-function reducer(state, action) {
-  switch (action.type) {
-    case 'loading':
-      return {
-        ...state,
-        loading: action.loading
-      };
-
-    case 'initialize':
-      return {
-        ...state,
-        dataRows: action.data,
-        rowCount: action.count
-      };
-
-    case 'selection':
-      return {
-        ...state,
-        selectedRecords: action.selectedRecords
-      };
-
-    case 'update':
-      return {
-        ...state,
-        dataRows: action.data,
-        loading: false
-      };
-
-    case 'filter':
-      return {
-        ...state,
-        loading: true,
-        filters: action.filters,
-        page: 0
-      };
-
-    case 'sort':
-      return {
-        ...state,
-        sorting: action.sorting,
-        loading: true
-      };
-
-    case 'search':
-      return {
-        ...state,
-        search: action.search,
-        loading: true
-      };
-
-    case 'pageChange':
-      return {
-        ...state,
-        page: action.page
-      };
-
-    case 'pageSizeChange':
-      return {
-        ...state,
-        limit: action.limit,
-        page: 0,
-        loading: true
-      };
-
-    case 'complete':
-      return {
-        ...state,
-        loading: false
-      };
-
-    default:
-      break;
-  }
-
-  return state;
-}
-
-const intialState = {
-  dataRows: [],
-  rowCount: 0,
-  loading: false,
-  page: 0,
-  limit: 25,
-  pageSizes: gridPageSizes,
-  search: '',
-  filters: {},
-  sorting: [],
-  selectedRecords: []
-};
-
 const AddressResource = () => {
-  const { entityApi } = entity
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, user, selectedEntity }
@@ -137,7 +45,7 @@ const AddressResource = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
-  const [addressResourceId, setAddressResourceId] = useState(null);
+  const [addressResource, setAddressResource] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [showEntityDialog, setShowEntityDialog] = useState(false)
   const [warehouseId, setWarehouseId] = useState("")
@@ -154,8 +62,8 @@ const AddressResource = () => {
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('addressResourcePage'));
   const columns = [
-    { field: 'warehouseName', headerName: 'Warehouse Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
-    { field: 'warehouseID', headerName: 'Warehouse ID', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'warehouseName', headerName: 'Plants Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
+    { field: 'warehouseID', headerName: 'Plants ID', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'storageType', headerName: 'Storage Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'address', headerName: 'Address', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
@@ -171,6 +79,8 @@ const AddressResource = () => {
     });
   }
   //  Grid Variables - End
+
+  const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
   useEffect(() => {
     if (permissions && permissions.warehouse) {
@@ -227,7 +137,7 @@ const AddressResource = () => {
       <span
         className="link"
         onClick={() => {
-          setAddressResourceId(params.data.id);
+          setAddressResource(params.data);
           setOpen({ open: true, isClone: false });
         }}
       >
@@ -245,7 +155,7 @@ const AddressResource = () => {
           size="small"
           aria-label="Clone"
           onClick={() => {
-            setAddressResourceId(params.data.id);
+            setAddressResource(params.data);
             setOpen({ open: true, isClone: true })
           }}>
           <FileCopyIcon fontSize="small" color="primary" />
@@ -373,15 +283,24 @@ const AddressResource = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.address.title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.warehouse.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.addressResource}
+            permissions={warehousePermissions}
             module="warehouse"
             api={'warehouse'}
+
             afterImportCompleted={() => {
               fetchWarehouses();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords.length}
+            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            onExportToExcelSuccess={() => {
+              if (gridApi) gridApi.deselectAll()
+              else fetchWarehouses()
             }}
           />
         </Grid>
@@ -390,16 +309,16 @@ const AddressResource = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-              <FaWarehouse size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.address.title}</span>
+              <FaWarehouse size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.warehouse.title}</span>
             </Grid>
             <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
-                <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
+                <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} placeholder={`Search ${routes.warehouse.title}`} />
                 {warehousePermissions.isCreate && (
                   <Button
                     className={styles.add_submit_btn}
                     onClick={() => {
-                      setAddressResourceId(null);
+                      setAddressResource(null);
                       setOpen({ open: true, isClone: false });
                     }}
                     variant="contained"
@@ -482,20 +401,24 @@ const AddressResource = () => {
           actionWidth={150}
           loading={loading}
           renderedFrom="warehousePage"
+          refreshGrid={fetchWarehouses}
         />
 
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete product category  ${deleteRecord?._id ? deleteRecord?.name : ''}?`}
-            onClose={() => setShowDeleteConfirmBox(false)}
+            message={`Are you sure you want to delete ${routes.warehouse.title.toLowerCase()} ${deleteRecord ? deleteRecord?._id ? deleteRecord?.warehouseName : "" : ""}?`}
+            onClose={() => {
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false)
+            }}
             onOk={handleDelete}
           />
         )}
 
         {open?.open && (
           <ManageWarehouse
-            addressResourceId={addressResourceId}
+            addressResource={addressResource}
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });

@@ -19,16 +19,12 @@ import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import { SiConvertio } from 'react-icons/si';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
-import {
-  CommonRenderer,
-  CreatedByRenderer,
-  UpdatedByRenderer,
-  CommonRendererWithCopy
-} from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import './style.scss';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 
 const LeadTypes = [
   {
@@ -64,6 +60,7 @@ const Leads = () => {
   });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
+  const { isOffline, offlineGridData, updateOfflineGridData } = useContext(CustomOfflineContext);
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -74,17 +71,18 @@ const Leads = () => {
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const [columns, setColumns] = useState([
-    { field: 'concatedName', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
-    { field: 'relatedOpportunity', headerName: 'Related Opportunity', show: true, cellRenderer: 'relatedOpportunityRenderer' },
-    { field: 'title', headerName: 'Title', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'company', headerName: 'Company', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-    { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
-    { field: 'phone', headerName: 'Phone', show: true, cellRenderer: 'commonRendererWithCopy' },
-    { field: 'mobile', headerName: 'Mobile', show: true, cellRenderer: 'commonRendererWithCopy' },
-    { field: 'email', headerName: 'Email', show: true, cellRenderer: 'commonRendererWithCopy' },
-    { field: 'owner', headerName: 'Owner Alies', show: true, cellRenderer: 'commonRenderer' }
+    // { field: 'concatedName', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
+    // { field: 'relatedOpportunity', headerName: 'Related Opportunity', show: true, cellRenderer: 'relatedOpportunityRenderer' },
+    // { field: 'title', headerName: 'Title', show: true, cellRenderer: 'commonRenderer' },
+    // { field: 'company', headerName: 'Company', show: true, cellRenderer: 'commonRenderer' },
+    // { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
+    // { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
+    // { field: 'phone', headerName: 'Phone', show: true, cellRenderer: 'commonRendererWithCopy' },
+    // { field: 'mobile', headerName: 'Mobile', show: true, cellRenderer: 'commonRendererWithCopy' },
+    // { field: 'email', headerName: 'Email', show: true, cellRenderer: 'commonRendererWithCopy' },
+    // { field: 'owner', headerName: 'Owner Alies', show: true, cellRenderer: 'commonRenderer' }
   ]);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
 
   if (columnState) {
     columns.map((item) => {
@@ -110,6 +108,9 @@ const Leads = () => {
       setLeadsPermissions(permissions[leadResource]);
     }
   }, [permissions]);
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -128,23 +129,33 @@ const Leads = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity]);
 
-  const NameRenderer = (params) => (
-    <Link className="link" to={`${leadDetailPage.path}/${params.data._id}`} title={params.value}>
-      {params.value}
-    </Link>
-  );
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get(`/field?resource=Lead&entity=${selectedEntity}`)
+      .then(({ data: { data } }) => {
+        let columns = []
+        let rendererNames = []
+        data.forEach(o => {
 
-  const RelatedOpportunityRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
+          let currentColumn = getColumnData(leadResource, o?.fieldData, leadDetailPage.path)
+
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData]
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
+          }
+        })
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+          actionsRenderer: ActionsRenderer
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        columns = [...columns, ...getStaticFields()]
+        setColumns([...columns])
+      })
+  }
 
   const ActionsRenderer = (params) => (
     <>
@@ -171,16 +182,6 @@ const Leads = () => {
       />
     </>
   );
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    relatedOpportunityRenderer: RelatedOpportunityRenderer,
-    commonRenderer: CommonRenderer,
-    commonRendererWithCopy: CommonRendererWithCopy,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer
-  };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -242,7 +243,7 @@ const Leads = () => {
     return deepFilter;
   };
 
-  const fetchLeads = () => {
+  const fetchLeads = async () => {
     if (selectedEntity) {
       const queryString = getQueryString();
       dispatch({ type: 'loading', loading: true });
@@ -250,42 +251,64 @@ const Leads = () => {
       if (gridApi) {
         gridApi.setRowData([]);
       }
+      try {
 
-      axiosInstance()
-        .get(`${leadApi}${queryString}`)
-        .then(({ data: { data, count } }) => {
-          let rows = data.map((u) => {
-            const { owner, collaborator, createdBy, updatedBy, staticData, ...restProperties } = u;
+        let data, count;
 
-            let res = {
-              ...restProperties,
-              id: u._id,
+        if (!isOffline) {
+          const response: any = await axiosInstance().get(`${leadApi}${queryString}`);
 
-              owner: u.owner?.optionLabel,
-              ownerId: u.owner?.optionValue,
-              isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id),
+          data = response?.data?.data;
+          count = response?.data?.count;
+        }
+        else {
+          data = offlineGridData[leadResource] || [];
+          count = offlineGridData[leadResource]?.length || 0;
+        }
 
-              convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
-              relatedOpportunity: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?.opportunityName,
-              relatedOpportunityId: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?._id,
+        try {
+          updateOfflineGridData(leadResource, data);
+        } catch (ex) {
+          console.error(`Lead: Error while storing data for Offline context. Error: ${ex.message}`)
+        }
 
-              createdBy: u.createdBy?.user?.concatedName,
-              createdByDate: u.createdBy?.date,
-              updatedBy: u.updatedBy?.user?.concatedName,
-              updatedByDate: u.updatedBy?.date
-            };
-            return res;
-          });
+        let rows = data.map((u) => {
+          const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
 
-          dispatch({ type: 'initialize', data: rows, count: count });
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          dispatch({ type: 'loading', loading: false });
+          let res = {
+            ...restProperties,
+            id: u._id,
+
+            owner: u.owner?.optionLabel,
+            ownerId: u.owner?.optionValue,
+            subMarketSegment: u?.subMarketSegment?.optionLabel,
+            subMarketSegmentId: u?.subMarketSegment?.optionValue,
+
+            marketSegment: u.marketSegment?.optionLabel,
+            marketSegmentId: u.marketSegment?.optionValue,
+            isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id),
+
+            convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
+            relatedOpportunity: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?.opportunityName,
+            relatedOpportunityId: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?._id,
+
+            createdBy: u.createdBy?.user?.concatedName,
+            createdByDate: u.createdBy?.date,
+            updatedBy: u.updatedBy?.user?.concatedName,
+            updatedByDate: u.updatedBy?.date
+          };
+          return res;
         });
+
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+
+      } catch (error) {
+        dispatch({ type: "loading", loading: false });
+        toastConfig.setToastConfig(error);
+      }
     }
   };
 
@@ -464,6 +487,8 @@ const Leads = () => {
             afterImportCompleted={() => {
               fetchLeads();
             }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
             recordsToExport={selectedRecords.length}
             ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
@@ -504,20 +529,24 @@ const Leads = () => {
           />
         </div>
 
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={150}
-          loading={loading}
-          renderedFrom={leadResource}
-        />
+        {
+          Object.keys(frameWorkComponent).length > 0 ?
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={150}
+              loading={loading}
+              renderedFrom={leadResource}
+              refreshGrid={fetchLeads}
+            /> : null
+        }
 
         {isOpen?.open && (
           <ManageLeadDialog

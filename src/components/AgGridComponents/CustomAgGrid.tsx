@@ -5,9 +5,10 @@ import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AgGridHeaderHeight, AgGridFloatingFiltersHeight, AgGridRowHeight, gridPageSizes } from '../../constants/helpers';
 import CustomGridHeaderOptions from './CustomGridHeaderOptions';
-import { CustomLoadingOverlay } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import { CustomLoadingOverlay, CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter';
 import { orderBy } from 'lodash';
+import { checkStaticField, staticColumns } from "../../constants/columns"
 
 export function reducer(state, action) {
   switch (action.type) {
@@ -183,9 +184,12 @@ export default function CustomAgGrid({
         filter={column.filter ?? 'agTextColumnFilter'}
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
+        cellRendererParams={column.cellRendererParams ?? null}
         minWidth={column.width ?? 250}
         flex={1}
         rowDrag={column.rowDrag ?? false}
+        hide={staticColumns.indexOf(column.field) >= 0 ? checkStaticField(renderedFrom, column.field) :
+          (column.hasOwnProperty("show") && !column?.show) ? true : false}
       // floatingFilterComponent={column.floatingFilterComponent ?? null}
       // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
       //   suppressFilterButton: true,
@@ -199,9 +203,11 @@ export default function CustomAgGrid({
         filter={column.filter ?? 'agTextColumnFilter'}
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
+        cellRendererParams={column.cellRendererParams ?? null}
         minWidth={column.width ?? 250}
         flex={1}
         filterParams={customFilterParams}
+        hide={(column.hasOwnProperty("show") && !column?.show) ? true : false}
         comparator={() => {
           return 0;
         }}
@@ -231,6 +237,7 @@ export default function CustomAgGrid({
             columnApi={columnApi}
             refreshGrid={refreshGrid}
             renderedFrom={renderedFrom}
+            isClientSideGrid={isClientSideGrid}
           />
 
           <div className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
@@ -247,6 +254,7 @@ export default function CustomAgGrid({
               rowHeight={AgGridRowHeight}
               frameworkComponents={{
                 ...frameworkComponents,
+                commonRenderer: frameworkComponents["commonRenderer"] ?? CommonRenderer,
                 customLoadingOverlay: CustomLoadingOverlay,
                 customFloatingFilter: CustomFloatingFilter
                 // customLoadingCellRenderer: CustomLoadingCellRenderer,

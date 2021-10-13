@@ -29,9 +29,10 @@ export default (history = null, passedHeaders = null) => {
     function clearTokenAndRedirectToHome() {
         localStorage.removeItem('token');
 
-        // if (history) {
-        //     history.push('/');
-        // }
+        if (history) {
+            history.push("/");
+            history.push("/login");
+        }
         // else {
         //     // history.push('/');
         //     //@ts-ignore
@@ -81,9 +82,11 @@ export default (history = null, passedHeaders = null) => {
             }
 
             if (error.message == "Network Error") {
-                return new Promise((resolve, reject) => {
-                    reject({ open: true, type: "error", message: "Api Not Working" });
-                })
+                if (navigator.onLine) {
+                    return new Promise((resolve, reject) => {
+                        reject({ open: true, type: "error", message: "Api Not Working" });
+                    })
+                }
             }
 
             if (!error.response) {
@@ -113,6 +116,9 @@ export default (history = null, passedHeaders = null) => {
                         reject({ open: true, type: "error", message: error.response.data.error || error.response.data.message });
                     });
 
+                }
+                else if (error.response.status === 511) {
+                    clearTokenAndRedirectToHome();
                 }
                 else {
                     return new Promise((resolve, reject) => {

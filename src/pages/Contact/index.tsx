@@ -22,12 +22,6 @@ import { useHistory } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { Chip } from '@material-ui/core';
 import routes from './../../components/Helpers/Routes';
-import {
-  CommonRenderer,
-  CreatedByRenderer,
-  UpdatedByRenderer,
-  CommonRendererWithCopy
-} from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import contactClass from './contact.module.scss'
@@ -39,6 +33,7 @@ import { sidebarResource } from "../../constants/helpers"
 import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
 
 const ContactTypes = [
   {
@@ -90,6 +85,8 @@ export default function Contact(props) {
 
   const [filter, setFilter] = useState('All Contacts');
   const [entities, setEntities] = useState([])
+  const [columns, setColumns] = useState([])
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -97,17 +94,44 @@ export default function Contact(props) {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const columnState = JSON.parse(localStorage.getItem(contactResource));
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
-  const columns = [
-    { field: 'concatedName', headerName: 'Name', show: true, disabled: true, cellRenderer: 'concatedNameRenderer' },
-    { field: 'relatedLead', headerName: 'Related Lead', show: true, cellRenderer: 'relatedLeadRenderer' },
-    { field: 'entity', headerName: 'Entity Name', show: true, cellRenderer: 'entityRenderer' },
-    { field: 'phone', headerName: 'Phone', show: true, cellRenderer: 'commonRendererWithCopy' },
-    { field: 'email', headerName: 'Email', show: true, cellRenderer: 'commonRendererWithCopy' },
-    { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-    { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
-    { field: 'accountName', headerName: 'Account Name', show: true, cellRenderer: 'accountNameRenderer' }
-  ];
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+
+  const fetchGridColumns = async () => {
+
+    const response = await axiosInstance()
+      .get(`/field?resource=${sidebarResource[contactResource]}`)
+
+    let data = response?.data?.data
+
+    let columns = []
+    let rendererNames = []
+    data.forEach(o => {
+      if (o?.fieldData?.fieldName === "accountName") {
+        o.fieldData.primary = true
+      }
+      let currentColumn = getColumnData(contactResource, o?.fieldData, `/${contactRoute}/detail`)
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData]
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName)
+        }
+      }
+      return o?.fieldData
+    })
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      actionsRenderer: ActionsRenderer
+    }
+    setFrameWorkComponent({ ...tempFrameworkComponent })
+    let staticFields = getStaticFields()
+    staticFields.forEach(field => {
+      columns.push(checkStaticField(routes.projectSales.title, field))
+    })
+    setColumns([...columns])
+  }
   //  Grid Variables - End
   if (columnState) {
     columns.map((item) => {
@@ -169,62 +193,6 @@ export default function Contact(props) {
     return entityList.includes(id);
   }
 
-  const ConcatedNameRenderer = (params) => (
-    <Link className="link" to={`/${contactRoute}/detail/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
-
-  const EntityRenderer = (params) => (
-    <h5 className="createBy d-flex">
-      {params.data?.firstEntity ?
-        <Link className="link" title={params.data.firstEntity} to={`${routes.entity.path}/detail/${params.data.firstEntityId}`}>
-          {params.data.firstEntity}
-        </Link>
-        :
-        <NoDataCell />
-      }
-      {params.data?.restEntity?.length > 0 && (
-        <span className="createdAtTime badge-date">{`+${params.data.restEntity.length} more..`}</span>
-      )}
-    </h5>
-  )
-
-
-  const RelatedLeadRenderer = (params) =>
-    params.value ? (
-      params?.data?.relatedLeadEntity === selectedEntity ?
-        <Link className="link" to={`${routes.leadDetail.path}/${params.data.relatedLeadId}`} title={params.value}>
-          {params.value}
-        </Link>
-        :
-        hasAccessToEntity(params?.data?.relatedLeadEntity) ?
-          <span
-            className="link"
-            onClick={() => {
-              handleEntityChange(params.data?.relatedLeadEntity)
-              history.push(`${routes.leadDetail.path}/${params.data.relatedLeadId}`)
-            }}
-            title={params.value}
-          >
-            {params.value}
-          </span>
-          :
-          <span
-            title={params.value}
-          >
-            <CustomRenderCell value={params.value} />
-          </span>
-    ) : (
-      <NoDataCell />
-    );
-
-  const AccountNameRenderer = (params) => (
-    <Link className="link" to={`/${account.accountRoute}/detail/${params.data.accountId}`}>
-      {params.value}
-    </Link>
-  );
-
   const ActionsRenderer = (params) => (
     <>
       <Tooltip
@@ -263,10 +231,10 @@ export default function Contact(props) {
             onClick={() => {
               setContactId(params.data._id)
               setShowEntityDialog(true)
-              if (params?.data?.firstEntityId) {
+              if (params?.data?.entityId) {
                 let entities = []
-                if (params?.data?.firstEntityId) {
-                  entities.push(params?.data?.firstEntityId)
+                if (params?.data?.entityId) {
+                  entities.push(params?.data?.entityId)
                 }
                 if (params?.data?.restEntity) {
                   let restEntities = params?.data?.restEntity.map(o => o?.optionValue)
@@ -285,18 +253,6 @@ export default function Contact(props) {
       }
     </>
   );
-
-  const frameworkComponents = {
-    concatedNameRenderer: ConcatedNameRenderer,
-    relatedLeadRenderer: RelatedLeadRenderer,
-    commonRenderer: CommonRenderer,
-    commonRendererWithCopy: CommonRendererWithCopy,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    accountNameRenderer: AccountNameRenderer,
-    actionsRenderer: ActionsRenderer,
-    entityRenderer: EntityRenderer,
-  };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -388,17 +344,20 @@ export default function Contact(props) {
 
             canDelete: u.owner?.optionValue === user?.user._id,
 
-            accountId: u.accountName?.optionValue,
+            accountNameId: u.accountName?.optionValue,
             accountName: u.accountName?.optionLabel,
 
-            firstEntity: firstEntity?.optionLabel ?? '',
-            firstEntityId: firstEntity?.optionValue ?? '',
+            entity: firstEntity?.optionLabel ?? '',
+            entityId: firstEntity?.optionValue ?? '',
             restEntity: restEntity,
             relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
             relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
             relatedLeadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
             owner: u.owner?.optionLabel,
             ownerId: u.owner?.optionValue,
+
+            reportsTo: u.reportsTo?.optionLabel,
+            reportsToId: u.reportsTo?.optionValue,
 
             createdBy: u.createdBy?.user?.concatedName,
             createdByDate: u.createdBy?.date,
@@ -502,6 +461,8 @@ export default function Contact(props) {
             afterImportCompleted={() => {
               getContacts();
             }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
             recordsToExport={selectedRecords.length}
             ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
@@ -519,11 +480,11 @@ export default function Contact(props) {
               <Grid container>
                 <Grid item md={4} sm={4} xs={12} className="d-flex align-items-center gap-1" >
                   <MdContacts className="headerLogo" />
-                  <span className="listingHeader">{routes[contactResource].title}</span>
+                  <span id="resourceHeader" className="listingHeader">{routes[contactResource].title}</span>
                 </Grid>
                 <Grid item md={4} sm={4} xs={12}>
                   {ContactTypes && (
-                    <ToggleButtonGroup size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
+                    <ToggleButtonGroup id="resourceTypeSelector" size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
                       {ContactTypes.map((k, index) => {
                         return (
                           <ToggleButton value={k.key} key={index}>
@@ -550,7 +511,7 @@ export default function Contact(props) {
               </Grid>
             </Grid>
             <Grid item md={6} sm={6} xs={12} className={styles.filter_side}>
-              <Box className={styles.filter_side_header} component="div">
+              <Box id="resourceOperations" className={styles.filter_side_header} component="div">
                 <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} value={search} size="small" />
                 {contactPermissions.isCreate && (
                   <>
@@ -618,8 +579,8 @@ export default function Contact(props) {
                               let entities = []
                               selectedRecords.map(current => {
 
-                                if (current?.firstEntityId) {
-                                  entities = [...entities, current?.firstEntityId]
+                                if (current?.entityId) {
+                                  entities = [...entities, current?.entityId]
                                 }
                                 if (current?.restEntity) {
                                   let restEntities = current?.restEntity.map(o => o?.optionValue)
@@ -643,20 +604,24 @@ export default function Contact(props) {
           </Grid>
         </div>
         <Box component="div">
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            actionWidth={170}
-            page={page}
-            loading={loading}
-            renderedFrom={contactResource}
-          />
+          {
+            Object.keys(frameWorkComponent).length > 0 ?
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameWorkComponent}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                actionWidth={170}
+                page={page}
+                loading={loading}
+                renderedFrom={contactResource}
+                refreshGrid={getContacts}
+              /> : null
+          }
 
           {showDeleteWarningConfirmBox?.show ? (
             <MessageDialog

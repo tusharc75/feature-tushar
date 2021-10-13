@@ -39,6 +39,7 @@ import {
   sidebarResource,
   customerAccount,
   processFieldName,
+  defaultActivityShow,
 } from "../../constants/helpers";
 import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -95,7 +96,7 @@ export default function AccountDetailPage(props) {
   } = props;
 
   const {
-    state: { user, permissions, selectedEntity }, dispatch
+    state: { user, permissions, selectedEntity, tour }, dispatch
   }: any = useData();
 
   const [headingLbl, setHeadingLbl] = useState("");
@@ -127,7 +128,7 @@ export default function AccountDetailPage(props) {
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [showAtLast, setShowAtLast] = useState(false)
   const [additionalFieldName, setAdditionalFieldName] = useState("")
-  const [showActivity, setActivityShow] = useState(true);
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [
     showAccountHierarchyInFullScreenDialog,
     setShowAccountHierarchyInFullScreenDialog,
@@ -198,6 +199,21 @@ export default function AccountDetailPage(props) {
       setGraphData({ edges: [], nodes: [], colorPalette: null });
     };
   }, [tabValue]);
+
+  useEffect(() => {
+
+    if (tour.start && tour.path === "/customer-account/detail"
+      || tour.path === "/supplier-account/detail") {
+      if (tour.stepIndex === 6) {
+        setTabValue(0)
+      } else if (tour.stepIndex === 7) {
+        setTabValue(1)
+      } else if (tour.stepIndex === 8) {
+        setTabValue(2)
+      }
+    }
+
+  }, [tour])
 
   useEffect(() => {
     if (steps.length > 0) {
@@ -707,12 +723,23 @@ export default function AccountDetailPage(props) {
     }))
   }
 
+  const tourPaths = ["/customer-account/detail", "/supplier-account/detail"]
+
   return (
     <>
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={customizedRoutes} />
       </Grid>
-      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+      <div
+        className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}
+        style={{
+          height:
+            tour.start && tourPaths.includes(tour.path)
+              && tour.stepIndex > 0 && tour.stepIndex < 9
+              ? "auto"
+              : "calc(100vh - 98px)"
+        }}
+      >
         <div>
           <Paper>
             {
@@ -728,6 +755,7 @@ export default function AccountDetailPage(props) {
                   permissions[accountResource].approveAccount && (
                     <>
                       <Button
+                        id="detailApproveButton"
                         variant="contained"
                         size="small"
                         color={
@@ -752,6 +780,7 @@ export default function AccountDetailPage(props) {
                   canEdit && (
                     <>
                       <Button
+                        id="detailEditButton"
                         variant="contained"
                         color="primary"
                         size="small"
@@ -769,6 +798,7 @@ export default function AccountDetailPage(props) {
                   user?.user?._id &&
                   accountData.owner.optionValue === user.user._id ? (
                   <DeleteButton
+                    id="detailDeleteButton"
                     text="Delete"
                     onClick={() => setShowConfirmBox(true)}
                   />
@@ -808,6 +838,11 @@ export default function AccountDetailPage(props) {
                     indicatorColor="primary"
                     textColor="primary"
                     aria-label="icon tabs example"
+                    TabIndicatorProps={{
+                      style: {
+                        height: 0
+                      }
+                    }}
                   >
                     <Tab
                       label="Details"
@@ -821,8 +856,8 @@ export default function AccountDetailPage(props) {
                     />
                     <Tab
                       label="OM-Neurons"
-                      aria-controls="a11y-tabpanel-1"
-                      id="a11y-tab-1"
+                      aria-controls="a11y-tabpanel-2"
+                      id="a11y-tab-2"
                     />
                   </Tabs>
                   <TabPanel value={tabValue} index={0}>
@@ -859,52 +894,18 @@ export default function AccountDetailPage(props) {
                   </TabPanel>
                   <div className="p-3">
                     {permissions?.opportunity?.isRead && (
-                      <OpportunityInAccordian
-                        opportunityPermissions={permissions.opportunity}
-                        opportunities={opportunities}
-                        onNewOpportunityAdd={() => {
-                          fetchRelatedData();
-                        }}
-                        accountId={accountData._id}
-                        accountName={accountData.accountName}
-                        recordsPerLine={3}
-                        resource={accountResource}
-                        isRedirect={false}
-                        isAllowedToUpdate={
-                          permissions &&
-                          permissions[accountResource] &&
-                          permissions[accountResource].isUpdate &&
-                          canEdit
-                        }
-                      />
-                    )}
-                    {permissions?.projectSales?.isRead &&
-                      accountResource == customerAccount.accountResource && (
-                        <ProjectInAccordion
+                      <span id='opportunityAccordion'>
+                        <OpportunityInAccordian
+                          opportunityPermissions={permissions.opportunity}
+                          opportunities={opportunities}
+                          onNewOpportunityAdd={() => {
+                            fetchRelatedData();
+                          }}
+                          accountId={accountData._id}
+                          accountName={accountData.accountName}
                           recordsPerLine={3}
-                          projectSales={projectSales}
-                          type={typeCreateProjectSalesDialog}
-                          fetchData={fetchRelatedData}
-                          permissions={permissions}
-                          isAddProjectSale={true}
-                          isAllowedToEdit={
-                            permissions &&
-                            permissions[accountResource] &&
-                            permissions[accountResource].isUpdate &&
-                            canEdit
-                          }
-                        />
-                      )}
-                    {permissions?.quoteBuilder?.isRead &&
-                      accountResource == customerAccount.accountResource && (
-                        <QuotesInAccordion
-                          recordsPerLine={3}
-                          quotes={quotes}
-                          fetchData={fetchRelatedData}
-                          quoteBuilderPermission={permissions.quoteBuilder}
-                          accountId={id}
-                          accountResource={accountResource}
-                          isRenderedFromCustomerAccount={true}
+                          resource={accountResource}
+                          isRedirect={false}
                           isAllowedToUpdate={
                             permissions &&
                             permissions[accountResource] &&
@@ -912,6 +913,46 @@ export default function AccountDetailPage(props) {
                             canEdit
                           }
                         />
+                      </span>
+                    )}
+                    {permissions?.projectStrategy?.isRead &&
+                      accountResource == customerAccount.accountResource && (
+                        <span id="projectsAccordion">
+                          <ProjectInAccordion
+                            recordsPerLine={3}
+                            projectSales={projectSales}
+                            type={typeCreateProjectSalesDialog}
+                            fetchData={fetchRelatedData}
+                            permissions={permissions}
+                            isAddProjectSale={true}
+                            isAllowedToEdit={
+                              permissions &&
+                              permissions[accountResource] &&
+                              permissions[accountResource].isUpdate &&
+                              canEdit
+                            }
+                          />
+                        </span>
+                      )}
+                    {permissions?.quoteBuilder?.isRead &&
+                      accountResource == customerAccount.accountResource && (
+                        <span id="quotesAccordion">
+                          <QuotesInAccordion
+                            recordsPerLine={3}
+                            quotes={quotes}
+                            fetchData={fetchRelatedData}
+                            quoteBuilderPermission={permissions.quoteBuilder}
+                            accountId={id}
+                            accountResource={accountResource}
+                            isRenderedFromCustomerAccount={true}
+                            isAllowedToUpdate={
+                              permissions &&
+                              permissions[accountResource] &&
+                              permissions[accountResource].isUpdate &&
+                              canEdit
+                            }
+                          />
+                        </span>
                       )}
                     {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
                     {/* {permissions?.lead?.isRead && accountData.staticData?.lead && (
@@ -926,12 +967,12 @@ export default function AccountDetailPage(props) {
             </Box>
           </Paper>
         </div>
-        <div className="position-relative">
+        <div id="activitiesSidebar" className="position-relative">
           {showActivity ?
-            <Paper>
-              {!isMobile && !isTablet && <a color="primary" className="activityHide" onClick={handleActivityHideShow}>
+            <Paper >
+              {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropright className="icon" />
-              </a>}
+              </span>}
               <Grid container>
                 <Grid item xs={12}>
                   {accountData && (
@@ -1033,7 +1074,7 @@ export default function AccountDetailPage(props) {
                       <BoxWithBorder
                         style={{ marginTop: "3%", padding: "0px" }}
                       >
-                        <div className={`${accountClass.detail_page_div3}`}>
+                        <div id="contactsAccordion" className={`${accountClass.detail_page_div3}`}>
                           <div className={`${accountClass.leads_data}`}>
                             <Typography
                               color="primary"
@@ -1108,9 +1149,9 @@ export default function AccountDetailPage(props) {
               </Grid>
             </Paper>
             :
-            !isMobile && !isTablet && <a className="activityShow" onClick={handleActivityHideShow}>
+            !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
               <IoIosArrowDropleft className="icon" />
-            </a>}
+            </span>}
         </div>
       </div>
       <div >

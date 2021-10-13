@@ -2,9 +2,6 @@ import MaterialTable from 'material-table';
 import { Link } from 'react-router-dom'
 import { materialTableIcons } from '../../constants/helpers';
 import { Box } from '@material-ui/core';
-import Tooltip from "@material-ui/core/Tooltip";
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
 
 export default function ProductHierarchy({ data, permissions, unassignProduct }) {
     const options: any = {
@@ -19,7 +16,7 @@ export default function ProductHierarchy({ data, permissions, unassignProduct })
 
     const columns = [
         {
-            title: 'Product Name', field: 'productName',
+            title: 'Product Description', field: 'productName',
             render: (rowData: any) => <div style={{ width: 250 }}>
                 <Link
                     className="link"

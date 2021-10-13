@@ -33,7 +33,7 @@ const routes = {
     path: "/entity",
     data: {},
   },
-  entityDetails: {
+  entityDetail: {
     title: storedRoutes ? storedRoutes.entity?.title : RESOURCE_LABEL.entity,
     path: "/entity/detail",
     data: {},
@@ -130,11 +130,11 @@ const routes = {
     path: "/profile",
   },
   projectSales: {
-    title: storedRoutes ? storedRoutes.projectSales?.title : RESOURCE_LABEL.projectStrategy,
+    title: storedRoutes ? storedRoutes.projectStrategy?.title : RESOURCE_LABEL.projectStrategy,
     path: "/project-sales",
   },
   projectSalesDetail: {
-    title: storedRoutes ? storedRoutes.projectSales?.title : RESOURCE_LABEL.projectStrategy,
+    title: storedRoutes ? storedRoutes.projectStrategy?.title : RESOURCE_LABEL.projectStrategy,
     path: "/project-sales/detail",
   },
   priceTemplate: {
@@ -245,8 +245,8 @@ const routes = {
     title: "Products",
     path: "/product-list",
   },
-  address: {
-    title: (storedRoutes && storedRoutes.address && storedRoutes.address.title) ? storedRoutes.address.title : RESOURCE_LABEL.warehouse,
+  warehouse: {
+    title: (storedRoutes && storedRoutes.warehouse && storedRoutes.warehouse.title) ? storedRoutes.warehouse.title : RESOURCE_LABEL.warehouse,
     path: "/warehouse",
   },
   deliveryTicket: {
@@ -280,6 +280,14 @@ const routes = {
   salesOrderDetail: {
     title: storedRoutes ? storedRoutes.salesOrder?.title : RESOURCE_LABEL.salesOrder,
     path: "/sales-order/detail",
+  },
+  packages: {
+    title: storedRoutes ? storedRoutes.packages?.title : RESOURCE_LABEL.packages,
+    path: "/packages",
+  },
+  packagesDetail: {
+    title: storedRoutes ? storedRoutes.packages?.title : RESOURCE_LABEL.packages,
+    path: "/packages/detail",
   },
 };
 

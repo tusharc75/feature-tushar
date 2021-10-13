@@ -104,6 +104,9 @@ import ReceivingTicketDetails from "./pages/ReceivingTicket/ReceivingTicketDetai
 import PricingConditionsDetailsPage from "./pages/PricingConditions/PricingConditionsDetailsPage";
 import SalesOrder from "./pages/SalesOrderCreation";
 import SalesOrderDetails from "./pages/SalesOrderCreation/SalesOrderDetails";
+import PackageList from "./pages/Packages";
+import PackageDetails from "./pages/Packages/PackageDetails";
+import BOMTable from "./pages/BOM";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -117,6 +120,7 @@ function App() {
   }: any = useData();
 
   const history = useHistory();
+
   history.listen(() => {
     let isSlowInternetConnection = localStorage.getItem("slowInternetConnection")
     if (isSlowInternetConnection == "true") {
@@ -130,7 +134,7 @@ function App() {
       localStorage.setItem("slowInternetConnection", "false")
     }
   });
-  ReactGA.initialize(TRACKING_ID);
+  // ReactGA.initialize(TRACKING_ID);
 
   window.addEventListener('load', function (e) {
     //@ts-ignore
@@ -147,7 +151,13 @@ function App() {
   }, false);
 
   window.addEventListener('offline', function (e) {
-    setIsOffline(true);
+    const pathnames = history.location.pathname.split("/").filter((x) => x);
+
+    if (!(history.location.pathname === "/" || [
+      "rental-management"
+    ].indexOf(pathnames[0]) >= 0)) {
+      setIsOffline(true);
+    }
   }, false);
 
   const getNotification = async () => {
@@ -518,7 +528,7 @@ function App() {
             <PrivateRoute exact path={routes.currencyConverter.path}>
               <CurrencyConverter />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.address.path}>
+            <PrivateRoute exact path={routes.warehouse.path}>
               <Warehouse />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>
@@ -552,8 +562,11 @@ function App() {
             <PrivateRoute exact path="/product-list">
               <Products />
             </PrivateRoute>
-            <PrivateRoute exact path="/product/details/:id">
+            <PrivateRoute exact path={`${routes.productDetail.path}/:id`}>
               <ProductDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.productDetail.path}/:id/bom`}>
+              <BOMTable />
             </PrivateRoute>
             <PrivateRoute exact path="/product/my-cart">
               <MyOwnCart />
@@ -594,6 +607,12 @@ function App() {
             <PrivateRoute exact path={`${routes.salesOrderDetail.path}/:id`} >
               <SalesOrderDetails />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.packages.path}>
+              <PackageList />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.packagesDetail.path}/:id`} >
+              <PackageDetails />
+            </PrivateRoute>
 
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
@@ -613,11 +632,10 @@ function App() {
           /> : (toast.toastConfig.type === "notFoundError" ? <RecordDeletedDialog /> : "")
         )
       }
-
-      {
+      {/* {
         isOffline ?
           <OfflineStatusDialog /> : null
-      }
+      } */}
     </ThemeProvider>
   );
 }

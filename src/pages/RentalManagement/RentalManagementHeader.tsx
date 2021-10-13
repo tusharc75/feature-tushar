@@ -14,6 +14,8 @@ import { ExpandMore } from "@material-ui/icons";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import styles from "../Leads/Header.module.scss";
+import HideWhenOffline from "../../components/HideWhenOffline";
+import routes from "../../components/Helpers/Routes";
 
 function RentalManagementHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -26,7 +28,7 @@ function RentalManagementHeader(props) {
     setAnchorEl(null);
   };
 
-  const [filter, setFilter] = useState("All Rental Managements");
+  const [filter, setFilter] = useState(`All ${routes.rentalManagement.title}`);
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
@@ -56,35 +58,40 @@ function RentalManagementHeader(props) {
     <Grid className={styles.filter_side_container} container>
       <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
         {icon} <span className="listingHeader">{heading}</span>
-        {options && (
-          <ToggleButtonGroup
-            size="small"
-            className="ml-2"
-            value={filter}
-            exclusive
-            onChange={handleFilter}
-          >
-            {options.map((k, index) => {
-              return (
-                <ToggleButton value={k.key} key={index}>
-                  {k.key}
-                </ToggleButton>
-              );
-            })}
-          </ToggleButtonGroup>
-        )}
+        <HideWhenOffline>
+          {options && (
+            <ToggleButtonGroup
+              size="small"
+              className="ml-2"
+              value={filter}
+              exclusive
+              onChange={handleFilter}
+            >
+              {options.map((k, index) => {
+                return (
+                  <ToggleButton value={k.key} key={index}>
+                    {k.key}
+                  </ToggleButton>
+                );
+              })}
+            </ToggleButtonGroup>
+          )}
+        </HideWhenOffline>
+
         {children}
       </Grid>
       <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
         <Box className={styles.filter_side_header} component="div">
-          <SearchBox
-            onSearch={onSearch}
-            searchbox={styles.search_box_input}
-            value={searchVal}
-            size="small"
-            placeholder="Search Rental Managements"
-            width="300px"
-          />
+          <HideWhenOffline>
+            <SearchBox
+              onSearch={onSearch}
+              searchbox={styles.search_box_input}
+              value={searchVal}
+              size="small"
+              placeholder={`Search ${routes.rentalManagement.title}`}
+              width="300px"
+            />
+          </HideWhenOffline>
 
           {RentalManagementPermissions.isCreate && RentalManagementPermissions.isUpdate && (
             <Button
@@ -98,49 +105,52 @@ function RentalManagementHeader(props) {
               Add
             </Button>
           )}
-          {RentalManagementPermissions.isDelete && (
-            <>
-              <Button
-                disabled={canDelete}
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                className={styles.action_submit_btn}
-                aria-controls="action-menu"
-              >
-                Actions <ExpandMore />
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    showConfirmBox(null);
-                  }}
-                >
-                  Delete
-                </MenuItem>
-                {
-                  RentalManagementPermissions.isUpdate && <MenuItem
-                  disabled={selectedRecords.find((d) => d.canDelete === false)}
-                    onClick={() => {
-                      closeActions();
-                      showTransferEntityDialog();
+
+          <HideWhenOffline>
+            {
+              RentalManagementPermissions.isDelete && (
+                <>
+                  <Button
+                    disabled={canDelete}
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    className={styles.action_submit_btn}
+                    aria-controls="action-menu"
+                  >
+                    Actions <ExpandMore />
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "left",
                     }}
-                  >Transfer Entity</MenuItem>
-                }
-                {/* <MenuItem
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      onClick={() => {
+                        closeActions();
+                        showConfirmBox(null);
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
+                    {
+                      RentalManagementPermissions.isUpdate && <MenuItem
+                        disabled={selectedRecords.find((d) => d.canDelete === false)}
+                        onClick={() => {
+                          closeActions();
+                          showTransferEntityDialog();
+                        }}
+                      >Transfer Entity</MenuItem>
+                    }
+                    {/* <MenuItem
                   disabled={selectedRecords.length !== 1}
                   onClick={() => {
                     closeActions();
@@ -149,9 +159,11 @@ function RentalManagementHeader(props) {
                 >
                   Clone
                 </MenuItem> */}
-              </Menu>
-            </>
-          )}
+                  </Menu>
+                </>
+              )
+            }
+          </HideWhenOffline>
         </Box>
       </Grid>
     </Grid>

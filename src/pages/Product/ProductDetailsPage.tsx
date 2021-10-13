@@ -17,7 +17,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { product } from "../../constants/helpers";
+import { product, warehouse } from "../../constants/helpers";
 import CreateProduct from "../../components/Product/CreateProduct";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import DeleteButton from "../../components/Helpers/DeleteButton";
@@ -27,7 +27,8 @@ import ManageProductInventory from "../ProductInventory/ManageProductInventory"
 import { extractFields } from "../../constants/formulaUtility";
 import ProductHierarchy from "./ProductHierarchy"
 import HtmlTooltip from "../../components/CustomTooltipTitle";
-import AssingAssetsDialog from "./AssingAssetsDialog";
+import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
+
 
 const ProductDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -40,6 +41,7 @@ const ProductDetailsPage = () => {
     const [headingLabel, setHeadingLabel] = useState("");
     const [loading, setLoading] = useState(false);
     const [loadingWarehouse, setLoadingWarehouse] = useState(false);
+    const [loadingBOMData, setLoadingBOMData] = useState(false);
     const [productData, setProductData] = useState(null);
     const [showConfirmBox, setShowConfirmBox] = useState(false);
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -127,6 +129,7 @@ const ProductDetailsPage = () => {
 
     const getProductTree = () => {
         if (productData?._id) {
+            setLoadingBOMData(true)
             axiosInstance()
                 .get(`/product/bom/${productData?._id}`)
                 .then(({ data: { data } }) => {
@@ -137,6 +140,9 @@ const ProductDetailsPage = () => {
                         return o
                     })
                     setBOMData([...data])
+                    setLoadingBOMData(false)
+                }).catch(err => {
+                    setLoadingBOMData(false)
                 })
         }
     }
@@ -298,7 +304,7 @@ const ProductDetailsPage = () => {
                         </Paper>
                     </Grid>
                     <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
-                        <Paper>
+                        <Paper style={{ overflow: 'hidden' }}>
                             <Box
                                 padding={1}
                                 bgcolor="grey.200"
@@ -312,7 +318,7 @@ const ProductDetailsPage = () => {
 
                                 {permissions.product.isUpdate && (
                                     <IconButton
-                                        title="Assign users"
+                                        title="Manage Product(s)"
                                         color="primary"
                                         size="small"
                                         onClick={() => { setOpenAssignProductDialog(true) }}
@@ -322,8 +328,8 @@ const ProductDetailsPage = () => {
                                 )}
                             </Box>
                             {(
-                                <Box>
-                                    {loading ? (
+                                <Box style={{ paddingBottom: "8px" }}>
+                                    {loading || loadingBOMData ? (
                                         [1, 2].map((i) => (
                                             <BoxWithBorder
                                                 key={i}
@@ -354,17 +360,26 @@ const ProductDetailsPage = () => {
                                                 permissions={permissions.product}
                                                 unassignProduct={unassignProduct}
                                             />
-                                            <Box marginY={1} />
+                                            <Box px={1} my={1} >
+
+                                                <Button
+                                                    fullWidth
+                                                    variant="outlined"
+                                                    color='primary'
+                                                    onClick={() => history.push(`${routes.productDetail.path}/${id}/bom`, { productName: productData.productName })}>
+                                                    View All
+                                                </Button>
+                                            </Box>
                                         </>
                                     ) : (
-                                        <Box textAlign="center" padding={2}>
+                                        <Box textAlign="center" padding={2} minHeight={150}>
                                             <Typography>No Product has been assigned </Typography>
                                         </Box>
                                     )}
                                 </Box>
                             )}
                         </Paper>
-                        <Paper>
+                        <Paper className="mt-2" style={{ overflow: 'hidden' }}>
                             <Box
                                 padding={1}
                                 bgcolor="grey.200"
@@ -373,12 +388,12 @@ const ProductDetailsPage = () => {
                                 alignItems="center"
                             >
                                 <Typography variant="subtitle2">
-                                    Warehouses ({inventoriesData.length || 0})
+                                    Plants ({inventoriesData.length || 0})
                                 </Typography>
 
                                 {permissions?.productInventory?.isCreate && (
                                     <IconButton
-                                        title="Assign users"
+                                        title="Manage Plant(s)"
                                         color="primary"
                                         size="small"
                                         onClick={() => { setOpenProductInventoryDialog(true) }}
@@ -388,8 +403,8 @@ const ProductDetailsPage = () => {
                                 )}
                             </Box>
                             {(
-                                <Box>
-                                    {loading ? (
+                                <Box style={{ paddingBottom: "8px" }}>
+                                    {loading || loadingWarehouse ? (
                                         [1, 2].map((i) => (
                                             <BoxWithBorder
                                                 key={i}
@@ -410,90 +425,91 @@ const ProductDetailsPage = () => {
                                         ))
 
                                     ) : inventoriesData.length ?
-                                        productData?.serializedProduct ? inventoriesData.map(({ inventory, warehouse, status }, i) => (
-                                            <Box key={i}>
-                                                <Box
-                                                    display="flex"
-                                                    p="8px"
-                                                    m="8px 8px 0 8px"
-                                                    bgcolor="#fff"
-                                                    borderRadius="3px"
-                                                    border="1px solid #c9c0c0">
-                                                    <Grid>
-                                                        <Grid item xs={8}>
-                                                            <Box display="flex" alignItems="center">
-                                                                <Box >
-                                                                    <IconButton size='small' onClick={() => {
-                                                                        if (selectedWarehouse !== warehouse) {
-                                                                            setSelectedWarehouse(warehouse)
-                                                                        } else {
-                                                                            setSelectedWarehouse(null)
+                                        productData?.serializedProduct
+                                            ? inventoriesData.map(({ inventory, warehouse, status }, i) => (
+                                                <Box key={i}>
+                                                    <Box
+                                                        display="flex"
+                                                        p="8px"
+                                                        m="8px 8px 0 8px"
+                                                        bgcolor="#fff"
+                                                        borderRadius="3px"
+                                                        border="1px solid #c9c0c0">
+                                                        <Grid>
+                                                            <Grid item xs={8}>
+                                                                <Box display="flex" alignItems="center">
+                                                                    <Box >
+                                                                        <IconButton size='small' onClick={() => {
+                                                                            if (selectedWarehouse !== warehouse) {
+                                                                                setSelectedWarehouse(warehouse)
+                                                                            } else {
+                                                                                setSelectedWarehouse(null)
 
-                                                                        }
-                                                                    }}>
-                                                                        {selectedWarehouse === warehouse ? <ExpandLess /> : <ExpandMore />}
-                                                                    </IconButton>
-                                                                </Box>
-                                                                <Box ml={1} display="flex" alignItems='center'>
-                                                                    <Typography
-                                                                        variant="subtitle2"
-                                                                        color="primary"
-                                                                        className="d-flex align-items-center"
-                                                                        style={{ display: 'inline-block', whiteSpace: 'nowrap' }}
-                                                                    >
-                                                                        {warehouse} ({inventory.length || 0})
-                                                                    </Typography>
-                                                                    <Box mx={1} />
-                                                                    <HtmlTooltip arrow interactive title={
-                                                                        <>
-                                                                            <Typography>Inventory Status: </Typography>
-                                                                            {status.map((s) => (
-                                                                                <Typography>
-                                                                                    {`(${s.count}) ${s.status}`}
-                                                                                </Typography>
-                                                                            ))}
-                                                                        </>
-                                                                    }>
-                                                                        <IconButton size="small">
-                                                                            <InfoOutlined />
+                                                                            }
+                                                                        }}>
+                                                                            {selectedWarehouse === warehouse ? <ExpandLess /> : <ExpandMore />}
                                                                         </IconButton>
-                                                                    </HtmlTooltip>
+                                                                    </Box>
+                                                                    <Box ml={1} display="flex" alignItems='center'>
+                                                                        <Typography
+                                                                            variant="subtitle2"
+                                                                            color="primary"
+                                                                            className="d-flex align-items-center"
+                                                                            style={{ display: 'inline-block', whiteSpace: 'nowrap' }}
+                                                                        >
+                                                                            {warehouse} ({inventory.length || 0})
+                                                                        </Typography>
+                                                                        <Box mx={1} />
+                                                                        <HtmlTooltip arrow interactive title={
+                                                                            <>
+                                                                                <Typography>Inventory Status: </Typography>
+                                                                                {status.map((s) => (
+                                                                                    <Typography>
+                                                                                        {`(${s.count}) ${s.status}`}
+                                                                                    </Typography>
+                                                                                ))}
+                                                                            </>
+                                                                        }>
+                                                                            <IconButton size="small">
+                                                                                <InfoOutlined />
+                                                                            </IconButton>
+                                                                        </HtmlTooltip>
+                                                                    </Box>
                                                                 </Box>
-                                                            </Box>
+                                                            </Grid>
                                                         </Grid>
-                                                    </Grid>
+                                                    </Box>
+                                                    <Box p={1}>
+                                                        {selectedWarehouse === warehouse && inventory?.slice(0, 6).map((i, index) => (
+                                                            <Fragment key={i._id}>
+                                                                {i?.serialNumber ? index === 5 ?
+                                                                    <Chip
+                                                                        label={"show more"}
+                                                                        // color="secondary"
+                                                                        style={{ marginRight: '2px', background: "#1aa3ff" }}
+                                                                        onClick={() => {
+                                                                            history.push(`${routes.productInventory.path}`, {
+                                                                                warehouse: productWarehouseData.find(d => d?.warehouse?.optionLabel === selectedWarehouse).warehouse,
+                                                                                product: { "id": id, "name": headingLabel },
+                                                                            })
+                                                                        }} />
+                                                                    : <Chip
+                                                                        label={i?.serialNumber}
+                                                                        // color="secondary"
+                                                                        style={{ marginRight: '2px', background: ["New", "Available"].indexOf(i?.status) >= 0 ? "#b9ffce" : "#ffb4b4" }}
+                                                                        onClick={() => {
+                                                                            history.push({ pathname: `${routes.productInventoryDetail.path}/${i._id}` })
+                                                                        }} /> : null
+                                                                }
+                                                            </Fragment>
+                                                        ))}
+                                                    </Box>
                                                 </Box>
-                                                <Box p={1}>
-                                                    {selectedWarehouse === warehouse && inventory?.slice(0, 6).map((i, index) => (
-                                                        <Fragment key={i._id}>
-                                                            {i?.serialNumber ? index === 5 ?
-                                                                <Chip
-                                                                    label={"show more"}
-                                                                    // color="secondary"
-                                                                    style={{ marginRight: '2px', background: "#1aa3ff" }}
-                                                                    onClick={() => {
-                                                                        history.push(`${routes.productInventory.path}`, {
-                                                                            warehouse: productWarehouseData.find(d => d?.warehouse?.optionLabel === selectedWarehouse).warehouse,
-                                                                            product: { "id": id, "name": headingLabel },
-                                                                        })
-                                                                    }} />
-                                                                : <Chip
-                                                                    label={i?.serialNumber}
-                                                                    // color="secondary"
-                                                                    style={{ marginRight: '2px', background: ["New", "Available"].indexOf(i?.status) >= 0 ? "#b9ffce" : "#ffb4b4" }}
-                                                                    onClick={() => {
-                                                                        history.push({ pathname: `${routes.productInventoryDetail.path}/${i._id}` })
-                                                                    }} /> : null
-                                                            }
-                                                        </Fragment>
-                                                    ))}
-                                                </Box>
-                                            </Box>
-                                        )) :
+                                            )) :
 
                                             <Box width="100%">
                                                 <Box mx={2} mt={1} display="flex" justifyContent="space-between">
-                                                    <Typography variant="h6">Warehouse</Typography>
+                                                    <Typography variant="h6">Plants</Typography>
                                                     <Typography variant="h6">Qty.</Typography>
                                                 </Box>
                                                 {
@@ -512,8 +528,8 @@ const ProductDetailsPage = () => {
                                                 }
                                             </Box>
                                         : (
-                                            <Box textAlign="center" padding={2}>
-                                                <Typography>No Warehouses Found</Typography>
+                                            <Box textAlign="center" padding={2} minHeight={150}>
+                                                <Typography>No Plants Found</Typography>
                                             </Box>
                                         )}
                                 </Box>
@@ -570,14 +586,17 @@ const ProductDetailsPage = () => {
                         setOpenProductInventoryDialog(false)
                         getWarehouses()
                     }}
-                /> : <AssingAssetsDialog
-                    productId={id}
+                /> : <AssignQuantityDialog
+                    ids={id}
                     onClose={() => setOpenProductInventoryDialog(false)}
                     onSuccess={() => {
                         setOpenProductInventoryDialog(false)
                         getWarehouses()
                     }}
-                />
+                    resource={warehouse.warehouseApi}
+                    title="Assign Plants"
+                    label='Select Plants'
+                    resourceData={inventoriesData} />
                 : null
             }
         </>

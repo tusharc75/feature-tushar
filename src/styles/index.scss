@@ -164,10 +164,31 @@ a {
   color: inherit;
 }
 
+#link-a {
+  color: var(--link) !important;
+}
+
+#link-a:hover {
+  text-decoration: underline !important;
+  cursor: pointer !important;
+}
+
 .text-truncate {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+#img-avatar {
+  vertical-align: middle;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.grid-avatar {
+  width: 25px !important;
+  height: 25px !important;
 }
 
 /* body::-webkit-scrollbar {
@@ -483,10 +504,12 @@ body::-webkit-scrollbar-thumb {
 
 .text-error {
   color: var(--error);
+  font-size: 1.5rem;
 }
 
 .text-success {
   color: var(--success);
+  font-size: 1.5rem;
 }
 
 .text-center {
@@ -498,7 +521,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .main-container {
-  height: calc(100vh - 110px);
+  min-height: calc(100vh - 110px);
   position: relative;
   overflow: auto;
   z-index: 1;
