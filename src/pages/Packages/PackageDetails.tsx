@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import {
   Grid,
   Box,
@@ -32,7 +32,7 @@ const PackageDetails = () => {
     state: { user, permissions }
   }: any = useData();
   const [headingLabel, setHeadingLabel] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [packagesLoading, setPackagesLoading] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [packageData, setPackageData] = useState(null);
   const [products, setProducts] = useState([]);
@@ -52,21 +52,21 @@ const PackageDetails = () => {
   }, [id]);
 
   const getRessourceFields = () => {
-    setLoading(true);
+    setPackagesLoading(true);
     axiosInstance()
       .get('/field?resource=Packages')
       .then(({ data: { data } }) => {
         setPackageFields(data);
-        setLoading(false);
+        setPackagesLoading(false);
       })
       .catch((err) => {
-        setLoading(false);
+        setPackagesLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
 
   const fetchPackage = () => {
-    setLoading(true);
+    setPackagesLoading(true);
     axiosInstance()
       .get(`${routes.packages.path}/${id}`)
       .then(({ data: { data } }) => {
@@ -76,7 +76,7 @@ const PackageDetails = () => {
         getRessourceFields();
       })
       .catch((err) => {
-        setLoading(false);
+        setPackagesLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -113,6 +113,7 @@ const PackageDetails = () => {
       });
   };
 
+
   return (
     <>
       <Fragment>
@@ -120,7 +121,7 @@ const PackageDetails = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8}>
+          <Grid item xs={12} sm={12} md={12} lg={12}>
             <Paper>
               {!packageData ? (
                 <div>
@@ -143,7 +144,7 @@ const PackageDetails = () => {
               )}
 
               <Box>
-                {loading || !packageFields.length ? (
+                {packagesLoading || !packageFields.length ? (
                   <Grid container spacing={2} style={{ padding: '8px' }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
                   </Grid>
@@ -160,11 +161,14 @@ const PackageDetails = () => {
                   Assign Product(s)
                 </Button>
               </Box>
-              <ProductsTable products={products} loading={loadingProducts} />
+              {
+                packageData?.products ?
+                  <ProductsTable
+                    productList={packageData?.products}
+                  /> : null
+              }
+
             </Box>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4}>
-            {/** RIGHT SIDE OF THE SCREEN **/}
           </Grid>
         </Grid>
       </Fragment>
@@ -199,6 +203,7 @@ const PackageDetails = () => {
           onSuccess={() => {
             setShowProductAssignDialog(false)
             getProducts()
+            fetchPackage()
           }}
           resource={product.api}
           title="Assign Products"
