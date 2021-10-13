@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { backendApi } from './../config';
-import { SET_SELECTED_ENTITY, SET_USER } from '../StateProvider/actionTypes';
 
 const ERROR_CODE = {
     permissionError: '1001',
