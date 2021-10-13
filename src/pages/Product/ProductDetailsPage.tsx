@@ -567,7 +567,7 @@ const ProductDetailsPage = () => {
                     productsDialogOpen={openAssignProductDialog}
                     productId={id}
                     handleCloseDialog={() => setOpenAssignProductDialog(false)}
-                    assignedProducts={frequentlyBoughtProduct}
+                    assignedProducts={BOMData}
                     onSuccess={() => {
                         getFrequentlyBoughtProduct();
                         getProductTree()

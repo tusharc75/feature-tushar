@@ -1,6 +1,7 @@
 const path = require('path');
 const { upload } = require('sentry-files');
 const { version } = require('./package.json');
+require('dotenv').config();
 
 function getFiles() {
   const BUILD_DIR = 'build';
@@ -18,9 +19,9 @@ function getFiles() {
 
 upload({
   version: version,
-  organization: 'vebholic-pvt-ltd',
-  project: 'om',
-  token: '9702b27bd9f64ef29e8d55c7293393617d948d3f8b5841f2b429219da44dc1f5',
+  organization: process.env.ERROR_REPORTING_ORGANIZATION,
+  project: process.env.ERROR_REPORTING_PROJECT,
+  token: process.env.ERROR_REPORTING_API_TOKEN,
   files: getFiles()
 })
   .then((data) => console.log('----- SUCCESS ----\n', data))
