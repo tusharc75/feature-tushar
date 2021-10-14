@@ -19,8 +19,7 @@ const ProductListDialog = ({ id, onClose, toastConfig }) => {
         axiosInstance()
           .get(`${packages.packageApi}/get-products/${id}`)
           .then(({ data: { data } }) => {
-            const newArr = data.length > 0 ? data.map((product: any) => ({ product: product.productId, qty: product.qty })) : [];
-            setProducts(newArr);
+            setProducts(data);
             setLoadingProducts(false);
           })
           .catch((err) => {
