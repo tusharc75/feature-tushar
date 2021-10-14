@@ -39,7 +39,10 @@ import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import HideWhenOffline from "../../components/HideWhenOffline";
 import DeleteButton from "../../components/Helpers/DeleteButton";
-import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
+import { GiMineExplosion } from 'react-icons/gi'
+import HtmlTooltip from '../../components/CustomTooltipTitle'
 
 const rentalProcessSteps = ["New", "Additional Cost", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
@@ -275,13 +278,13 @@ const RentalManagementDetailsPage = () => {
       data.data?.products.map((u) => (tempInventory.push({
         ...u,
         id: u._id,
-        name: u.productName,
+        detail: u.productName,
         productCategory: u.productCategory?.optionLabel,
       })));
       data.data?.packages.map((u) => (tempInventory.push({
         ...u,
         id: u._id,
-        name: u.packageName,
+        detail: u.packageName,
         description: u.packageDescription,
       })));
       fetchDeliveryTicket(tempInventory);
@@ -330,11 +333,22 @@ const RentalManagementDetailsPage = () => {
         ownerId={user?.user?._id}
         userId={user?.user?._id}
         onDelete={() => {
-          handleRemoveProductInventory(params.data.inventory._id)
+          handleRemoveProductInventory([{
+            id: params.data.id,
+            type: params.data?.type.toLowerCase()
+          }])
         }
         }
         entity="rentalManagement"
       />
+      {params.data.type === "Package" &&
+        <IconButton
+          onClick={() => explodePackage(params.data.id)}
+          size="small"
+          color='primary'
+        >
+          <GiMineExplosion />
+        </IconButton>}
     </>
   );
 
@@ -343,13 +357,19 @@ const RentalManagementDetailsPage = () => {
     productRenderer: ProductRenderer,
     commonRenderer: CommonRenderer,
     actionsRenderer: ActionsRenderer,
+    dateRenderer: DateRenderer,
   };
   const columns = [
-    { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "productRenderer" },
-    { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "startDate", headerName: "Start Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
+    { field: "endDate", headerName: "End Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
+    { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+    { field: "UOM", headerName: "UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Gram", "Liter"] }, editable: true },
+    { field: "pricingMethod", headerName: "Pricing Method", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Per Day", "Per Week", "Per Month"] }, editable: true },
+    { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+    { field: "discount", headerName: "Discount", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+    { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
   ];
 
   const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageInventory"));
@@ -390,12 +410,20 @@ const RentalManagementDetailsPage = () => {
 
   const handleAddProductInventory = (productInventoryArray) => {
     // let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
-    let tempProductArray = productInventoryArray.map(d => {
-      return {
-        "id": d._id, "qty": d.quantity > 0 ? Number(d.quantity) : 0, "type": d.type, "startDate": "", "endDate": "", "UOM": "", "pricingMethod": "", "price": d.mrp ? Number(d.mrp) : 0, "discount": 0, "finalPrice": 0
-      }
-    })
-    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/products-packages/`, { "productsPackages": tempProductArray })
+    let tempProductArray = productInventoryArray.map(d => ({
+      "id": d.id,
+      "qty": parseInt(d.quantity || d.qty) || 0,
+      "type": d.type.toLowerCase(),
+      "detail": d.detail,
+      "pricingMethod": d.pricingMethod,
+      "UOM": d.UOM,
+      "finalPrice": parseInt(d.finalPrice) || 0,
+      "price": parseInt(d.price) || 0,
+      "discount": parseInt(d.discount) || 0,
+      "startDate": d.startDate,
+      "endDate": d.endDate,
+    }))
+    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": tempProductArray })
       .then(({ data }) => {
         setAddExistingProductDialog(false)
         fetchProductInventory()
@@ -411,8 +439,54 @@ const RentalManagementDetailsPage = () => {
   }
 
   const handleRemoveProductInventory = (productInventoryId) => {
-    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/inventory/remove`, { "products": [productInventoryId] })
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/remove`, {
+      ids: productInventoryId
+    })
       .then(({ data }) => {
+        fetchProductInventory()
+      }).catch((error) => {
+        toastConfig.setToastConfig(error)
+      });
+  }
+
+  const explodePackage = (packageId) => {
+    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/products-packages/explode/${packageId}`)
+      .then(() => {
+        fetchProductInventory()
+      }).catch((error) => {
+        toastConfig.setToastConfig(error)
+      });
+  }
+
+  const updateProductData = (data) => {
+
+    let updatedArr = dataRows.map(d => {
+      if (d.id === data.id) {
+        if (data.endData || data.startDate) {
+          data["endDate"] = new Date(data.endDate)
+          data["startDate"] = new Date(data.startDate)
+        }
+        return data
+      } else {
+        return d
+      }
+    }).map(d => ({
+      "id": d.id,
+      "qty": parseInt(d.quantity || d.qty) || 0,
+      "type": d.type.toLowerCase(),
+      "detail": d.detail,
+      "pricingMethod": d.pricingMethod,
+      "UOM": d.UOM,
+      "finalPrice": parseInt(d.finalPrice) || 0,
+      "price": parseInt(d.price) || 0,
+      "discount": parseInt(d.discount) || 0,
+      "startDate": d.startDate,
+      "endDate": d.endDate,
+    }))
+
+
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": updatedArr })
+      .then(() => {
         fetchProductInventory()
       }).catch((error) => {
         toastConfig.setToastConfig(error)
@@ -498,7 +572,8 @@ const RentalManagementDetailsPage = () => {
                 </Box>
               </Paper>
             </div>
-            <div>
+            <Box my={1} />
+            <Paper>
               <Steps
                 className={styles.steps_box}
                 isNextStep={!Boolean(productInventory.length)}
@@ -508,33 +583,56 @@ const RentalManagementDetailsPage = () => {
               />
               {(currentStep === 0) && (
                 <>
-                  <Box display="flex" mb={1}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={() => {
-                        setAddExistingProductDialog(true);
-                        setInventoryType("product")
-                      }}
-                    >
-                      {`Add ${routes.product.title}`}
-                    </Button>
-                    <Box mx={1} />
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={() => {
-                        setAddExistingProductDialog(true);
-                        setInventoryType("package")
-                      }}
-                    >
-                      {`Add ${routes.packages.title}`}
-                    </Button>
+                  <Box display="flex" justifyContent="space-between" m={1}>
+                    <Box display="flex">
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          setAddExistingProductDialog(true);
+                          setInventoryType("product")
+                        }}
+                      >
+                        {`Add ${routes.product.title}`}
+                      </Button>
+                      <Box mx={1} />
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          setAddExistingProductDialog(true);
+                          setInventoryType("package")
+                        }}
+                      >
+                        {`Add ${routes.packages.title}`}
+                      </Button>
+                    </Box>
+                    <div>
+                      <HtmlTooltip title={Boolean(selectedRecords.length) ? "Delete selected records" : "Select records to delete"}>
+                        <span>
+
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            disabled={!Boolean(selectedRecords.length)}
+                            onClick={() => {
+                              handleRemoveProductInventory(selectedRecords.map(rec => ({
+                                id: rec._id ?? rec.id,
+                                type: rec.type.toLowerCase()
+                              })))
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </span>
+                      </HtmlTooltip>
+                    </div>
                   </Box>
                   {columns ?
-                    <CustomAgGrid
+                    <CustomAgGridEditable
                       columns={columns}
                       dataRows={dataRows}
                       frameworkComponents={frameworkComponents}
@@ -544,8 +642,10 @@ const RentalManagementDetailsPage = () => {
                       limit={limit}
                       pageSizes={pageSizes}
                       page={page}
+                      actionWidth={150}
                       allowAction={true}
                       loading={loading}
+                      onCellValueChanged={(row) => { updateProductData(row.data) }}
                       renderedFrom="rentalManagementDetailsPageInventory"
                       refreshGrid={fetchProductInventory}
                     />
@@ -817,7 +917,7 @@ const RentalManagementDetailsPage = () => {
                   handleReceivingTicketDialog={handleReceivingTicketDialog}
                 />
               )}
-            </div>
+            </Paper>
           </div>
           <div className="position-relative">
             <HideWhenOffline>
