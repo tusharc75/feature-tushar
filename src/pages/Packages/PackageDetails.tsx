@@ -186,7 +186,7 @@ const PackageDetails = () => {
                   module="packages-products"
                   api={packages.packageApi}
                   afterImportCompleted={() => {
-                    fetchPackage();
+                    getProducts();
                   }}
                   isExportAllOrSomeFeature={true}
                   total={products?.length}
