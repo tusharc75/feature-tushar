@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import {
   Grid,
   Box,
@@ -32,12 +32,13 @@ const PackageDetails = () => {
     state: { user, permissions }
   }: any = useData();
   const [headingLabel, setHeadingLabel] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [packagesLoading, setPackagesLoading] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [packageData, setPackageData] = useState(null);
   const [products, setProducts] = useState([]);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [quantityUpdateLoading, setQuantityUpdateLoading] = useState(false);
   const [packageFields, setPackageFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
@@ -48,25 +49,24 @@ const PackageDetails = () => {
       fetchPackage();
       getProducts();
     }
-    // eslint-disable-next-line
   }, [id]);
 
   const getRessourceFields = () => {
-    setLoading(true);
+    setPackagesLoading(true);
     axiosInstance()
       .get('/field?resource=Packages')
       .then(({ data: { data } }) => {
         setPackageFields(data);
-        setLoading(false);
+        setPackagesLoading(false);
       })
       .catch((err) => {
-        setLoading(false);
+        setPackagesLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
 
   const fetchPackage = () => {
-    setLoading(true);
+    setPackagesLoading(true);
     axiosInstance()
       .get(`${routes.packages.path}/${id}`)
       .then(({ data: { data } }) => {
@@ -76,7 +76,7 @@ const PackageDetails = () => {
         getRessourceFields();
       })
       .catch((err) => {
-        setLoading(false);
+        setPackagesLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -103,8 +103,7 @@ const PackageDetails = () => {
     axiosInstance()
       .get(`${packages.packageApi}/get-products/${id}`)
       .then(({ data: { data } }) => {
-        const newArr = data.length > 0 ? data.map((product: any) => ({ product: product.productId, qty: product.qty })) : [];
-        setProducts(newArr);
+        setProducts(data);
         setLoadingProducts(false)
       })
       .catch((err) => {
@@ -113,6 +112,29 @@ const PackageDetails = () => {
       });
   };
 
+  const handleUpdateQuantity = (updatedNode) => {
+    let products = packageData?.products
+    products = products.map(o => {
+      let res = { product: o?._id, qty: o?.qty }
+      if (updatedNode?.data?._id === o?._id) {
+        res.qty = (updatedNode?.newValue * 1)
+      }
+      return res
+    })
+    setQuantityUpdateLoading(true);
+    axiosInstance()
+      .post(`${packages.packageApi}/add-products`, {
+        ids: [packageData._id],
+        products: [...products]
+      })
+      .then(() => {
+        setQuantityUpdateLoading(false)
+        getProducts()
+      })
+      .catch((err) => {
+        setQuantityUpdateLoading(false)
+      });
+  }
   return (
     <>
       <Fragment>
@@ -120,7 +142,7 @@ const PackageDetails = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8}>
+          <Grid item xs={12} sm={12} md={12} lg={12}>
             <Paper>
               {!packageData ? (
                 <div>
@@ -143,7 +165,7 @@ const PackageDetails = () => {
               )}
 
               <Box>
-                {loading || !packageFields.length ? (
+                {packagesLoading || !packageFields.length ? (
                   <Grid container spacing={2} style={{ padding: '8px' }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
                   </Grid>
@@ -160,11 +182,16 @@ const PackageDetails = () => {
                   Assign Product(s)
                 </Button>
               </Box>
-              <ProductsTable products={products} loading={loadingProducts} />
+              {
+                products.length ?
+                  <ProductsTable
+                    productList={products}
+                    handleUpdateQuantity={handleUpdateQuantity}
+                    updateLoading={quantityUpdateLoading || packagesLoading}
+                  /> : null
+              }
+
             </Box>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4}>
-            {/** RIGHT SIDE OF THE SCREEN **/}
           </Grid>
         </Grid>
       </Fragment>

@@ -44,7 +44,7 @@ import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGrid
 import { GiMineExplosion } from 'react-icons/gi'
 import HtmlTooltip from '../../components/CustomTooltipTitle'
 
-const rentalProcessSteps = ["New", "Add Rental Cost", "Additional Cost", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
+const rentalProcessSteps = ["New", "Additional Cost", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -94,7 +94,7 @@ const RentalManagementDetailsPage = () => {
   }, [id]);
 
   useEffect(() => {
-    if (currentStep === 3 && additionalCost.length > 0) {
+    if (currentStep === 2 && additionalCost.length > 0) {
       handleSaveAdditionalCost(additionalCost)
     }
 
@@ -156,7 +156,7 @@ const RentalManagementDetailsPage = () => {
   };
 
   const handleSaveAdditionalCost = (values) => {
-    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/additional-cost`, { "additionalCost": values.map(d => { return { "type": d.type, "value": d.amount ? Number(d.amount) : 0 } }) })
+    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/additional-cost`, { "additionalCost": values.map(d => { return { "type": d.type, "value": d.amount ? Number(d.amount) : 0, "description": d?.description, "uom": d.uom, "qty": d.qty ? Number(d.qty) : 0 } }) })
       .then(({ data }) => {
         setAddExistingProductDialog(false)
         // fetchProductInventory()
@@ -199,7 +199,7 @@ const RentalManagementDetailsPage = () => {
       setHeadingLbl(data.rentalJobName);
       setCustomizedRoutes([routes.rentalManagement, { title: `${data.rentalJobName}` }]);
       setRentalManagementData(data);
-      setAdditionalCost(data?.additionalCost?.map(d => { return { "id": d?._id, "type": d.type, "amount": d?.value } }))
+      setAdditionalCost(data?.additionalCost?.map(d => { return { "id": d?._id, "type": d.type, "amount": d?.value, "description": d?.description, "uom": d.uom, "qty": d.qty, } }))
       setCurrentStep(rentalProcessSteps.indexOf(data?.processStatus) !== -1 ? rentalProcessSteps.indexOf(data?.processStatus) : 0)
       setLoadingDetails(false);
       setCurrencySymbol(
@@ -261,6 +261,7 @@ const RentalManagementDetailsPage = () => {
   }
 
   const costTypeList = ["Repair", "Delivery", "Assembly"]
+  const uomTypeList = ["litre", "gram"]
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
@@ -576,7 +577,7 @@ const RentalManagementDetailsPage = () => {
               <Steps
                 className={styles.steps_box}
                 isNextStep={!Boolean(productInventory.length)}
-                steps={rentalProcessSteps.slice(0, 5)}
+                steps={rentalProcessSteps.slice(0, 4)}
                 currentStep={currentStep}
                 setCurrentStep={setCurrentStep}
               />
@@ -657,7 +658,7 @@ const RentalManagementDetailsPage = () => {
                   }
                 </>
               )}
-              {(currentStep === 1) && (
+              {/* {(currentStep === 1) && (
                 <AddRentalCost
                   rentalEndDate={rentalManagementData?.rentalEndDate}
                   rentalStartDate={rentalManagementData?.rentalStartDate}
@@ -666,10 +667,10 @@ const RentalManagementDetailsPage = () => {
                   currencySymbol={currencySymbol}
                   fetchProductInventory={fetchProductInventory}
                 />
-              )}
-              {(currentStep === 2) && (
+              )} */}
+              {(currentStep === 1) && (
                 <Formik
-                  initialValues={{ additionalCost: additionalCost || [{ "id": "", "type": "", "amount": 0 }] }}
+                  initialValues={{ additionalCost: additionalCost || [{ "id": "", "description": "", "uom": "", "qty": 0, "type": "", "amount": 0 }] }}
                   enableReinitialize={true}
                   onSubmit={() => { }}>
                   {({ values }) => (
@@ -695,9 +696,12 @@ const RentalManagementDetailsPage = () => {
                                     alignItems="center"
                                   >
                                     <Grid item md={1}> # </Grid>
-                                    <Grid item md={5}> Cost Type </Grid>
-                                    <Grid item md={4}> Amount </Grid>
-                                    <Grid item md={2}></Grid>
+                                    <Grid item md={2}> Cost Type </Grid>
+                                    <Grid item md={2}> Description </Grid>
+                                    <Grid item md={2}> Quantity </Grid>
+                                    <Grid item md={2}> Unit of Measure </Grid>
+                                    <Grid item md={2}> Amount </Grid>
+                                    <Grid item md={1}></Grid>
 
                                   </Grid>
                                 </Box>
@@ -718,8 +722,7 @@ const RentalManagementDetailsPage = () => {
                                             key={index}
                                           >
                                             <Grid item md={1}>{index + 1}</Grid>
-                                            <Grid item md={5}>
-
+                                            <Grid item md={2}>
                                               <Autocomplete
                                                 size="small"
                                                 style={{ minWidth: 200 }}
@@ -742,8 +745,69 @@ const RentalManagementDetailsPage = () => {
                                                 />}
                                               />
                                             </Grid>
+                                            <Grid item md={2}>
+                                              <Field
+                                                fullWidth
+                                                variant="outlined"
+                                                type="text"
+                                                size="small"
+                                                component={TextField}
+                                                name="description"
+                                                placeholder="Description"
+                                                value={userVal.description}
+                                                onChange={(e) => {
+                                                  arrayHelpers.replace(index, {
+                                                    ...values.additionalCost[index],
+                                                    ["description"]: e.target.value
+                                                  })
+                                                }}
+                                                required
+                                              />
+                                            </Grid>
+                                            <Grid item md={2}>
+                                              <Field
+                                                fullWidth
+                                                variant="outlined"
+                                                type="text"
+                                                size="small"
+                                                component={TextField}
+                                                name="Quantity"
+                                                placeholder="Quantity"
+                                                value={userVal.qty}
+                                                onChange={(e) => {
+                                                  arrayHelpers.replace(index, {
+                                                    ...values.additionalCost[index],
+                                                    ["qty"]: e.target.value.replace(/[^0-9]/g, '')
+                                                  })
+                                                }}
+                                                required
+                                              />
+                                            </Grid>
+                                            <Grid item md={2}>
+                                              <Autocomplete
+                                                size="small"
+                                                style={{ minWidth: 200 }}
+                                                value={userVal.uom}
+                                                options={uomTypeList}
+                                                getOptionLabel={(option: any) => option ? option : ""}
+                                                onChange={(_, newValue) => {
+                                                  arrayHelpers.replace(index, {
+                                                    ...values.additionalCost[index],
+                                                    ["uom"]: newValue,
+                                                  });
+                                                }}
+
+                                                renderInput={(params) => <TextField
+                                                  {...params}
+                                                  variant="outlined"
+                                                  name="nameField"
+                                                  label="UOM"
+                                                  required
+                                                />}
+                                              />
+                                            </Grid>
                                             {
-                                              <Grid item md={4}>
+                                              <Grid item md={2}>
                                                 <Field
                                                   fullWidth
                                                   InputProps={{
@@ -771,13 +835,15 @@ const RentalManagementDetailsPage = () => {
                                                 />
                                               </Grid>
                                             }
-                                            <Grid item md={2}>
+                                            <Grid item md={1}>
                                               <ButtonGroup size="small" aria-label="small outlined button group">
                                                 <IconButton
                                                   size="small"
                                                   aria-label="add"
                                                   onClick={() => {
-                                                    arrayHelpers.push({ "id": "", "type": "", "amount": 0 })
+                                                    arrayHelpers.push({
+                                                      "id": "", "description": "", "uom": "", "qty": "", "type": "", "amount": 0
+                                                    })
                                                   }
                                                   } >
                                                   <Add />
@@ -796,7 +862,7 @@ const RentalManagementDetailsPage = () => {
                                             color="primary"
                                             size="large"
                                             onClick={() => {
-                                              arrayHelpers.push({ "id": "", "type": "", "amount": 0 })
+                                              arrayHelpers.push({ "id": "", "description": "", "uom": "", "qty": "", "type": "", "amount": 0 })
                                             }}
                                           >
                                             Add Cost Type
@@ -833,7 +899,7 @@ const RentalManagementDetailsPage = () => {
                 </Formik>
 
               )}
-              {(currentStep === 3) && (
+              {(currentStep === 2) && (
                 <DeliveryTicket
                   rentalManagementId={id}
                   warehouselist={warehouseList}
@@ -842,7 +908,7 @@ const RentalManagementDetailsPage = () => {
                   handleDeliveryTicketDialog={handleDeliveryTicketDialog}
                 />
               )}
-              {(currentStep === 4 || currentStep === 5) && (
+              {(currentStep === 3 || currentStep === 4) && (
                 <ReceivingTicket
                   rentalManagementId={id}
                   warehouselist={warehouseList}
@@ -866,7 +932,7 @@ const RentalManagementDetailsPage = () => {
                         <div>
                           <Activity
                             resourceId={rentalManagementData._id}
-                            resource={routes.rentalManagement}
+                            resource={rentalManagement.resource}
                             restrictedAddActivities={
                               permissions &&
                                 permissions["rentalManagement"] &&
@@ -912,6 +978,7 @@ const RentalManagementDetailsPage = () => {
         <AddExistingProductInventory
           addProductInventory={handleAddProductInventory}
           handleProductInventoryClose={() => { setAddExistingProductDialog(false) }}
+          productInventory={productInventory}
           type={inventoryType}
         />
       }

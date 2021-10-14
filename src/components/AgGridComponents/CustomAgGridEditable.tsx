@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TablePagination } from "@material-ui/core";
 import { AgGridReact, AgGridColumn } from "ag-grid-react";
 import { isMobile, isTablet } from "react-device-detect";
@@ -136,13 +136,25 @@ export default function CustomAgGridEditable({
   forProductBuilder = false,
   fromProductGrid = false,
   currency = null,
-  renderedFrom = null
+  renderedFrom = null,
+  selectedRecords = [],
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
 
   const [clientSideGridApi, setClientSideGridApi] = useState(null);
   const enableRowDrag = columns.some((d) => d.rowDrag);
+
+  useEffect(() => {
+    if (clientSideGridApi && selectedRecords.length) {
+      clientSideGridApi.forEachNode(function (node) {
+        node.setSelected(
+          selectedRecords.some((o) => o._id === node.data._id)
+        );
+      });
+    }
+
+  }, [clientSideGridApi, selectedRecords])
 
   //  If you want to do something once grid binding done
   const onGridReady = (params) => {

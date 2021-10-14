@@ -521,6 +521,9 @@ export default function Account(props) {
             parentAccount: parentAccount?.optionLabel,
             parentAccountId: parentAccount?.optionValue,
 
+            newAccount: u?.newAccount?.optionLabel,
+            newAccountId: u?.newAccount?.optionValue,
+
             entity: firstEntity?.optionLabel ?? '',
             entityId: firstEntity?.optionValue ?? '',
             restEntity: restEntity,
@@ -534,7 +537,6 @@ export default function Account(props) {
           };
           return res;
         });
-
         dispatch({ type: 'initialize', data: rows, count: count });
 
         setTimeout(() => {

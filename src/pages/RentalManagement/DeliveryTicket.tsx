@@ -11,6 +11,8 @@ import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import AddSerializedAsset from "./AddSerializedAsset";
+import { rentalManagement } from "../../constants/helpers";
 
 const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDeliveryTicketDialog, rentalManagementId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -20,6 +22,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const [downlodingFile, setDownlodingFile] = useState(false)
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
 
   useEffect(() => {
 
@@ -93,12 +96,12 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
     { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-     { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "TicketRenderer" },
+    { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "TicketRenderer" },
     { field: "costPerDay", headerName: "Cost Per Day", show: true, cellRenderer: "commonRenderer" },
     { field: "totalCost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
     { field: "startDate", headerName: "Start Date", show: true, cellRenderer: "dateRenderer" },
     { field: "dueDate", headerName: "End Date", show: true, cellRenderer: "dateRenderer" },
- ];
+  ];
 
   const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageDeliveryTicket"));
   if (columnState) {
@@ -111,28 +114,25 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
     });
   }
 
+  const handleAddSerializedAsset = (productInventoryArray) => {
+    let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id } })
+    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`, { "products": tempProductArray })
+      .then(({ data }) => {
+        setAddSerializedAssetDialog(false)
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
+      }).catch((error) => {
+        setAddSerializedAssetDialog(false)
+        toastConfig.setToastConfig(error)
+      });
+  };
+
   return (<>
 
     <Box display="flex" justifyContent="flex-end">
-
-      {/* <Autocomplete
-          id="combo-box-demo"
-          size="small"
-          style={{ minWidth: 300 }}
-          value={warehouse}
-          options={warehouselist}
-          getOptionLabel={(option: any) => option ? option?.optionLabel : ""}
-          onChange={(event, newValue) => {
-            setWarehouse(newValue)
-          }}
-          placeholder="Select Warehouse"
-          renderInput={(params) => <TextField
-            {...params}
-            variant="outlined"
-            label="Select Warehouse"
-            name="warehouseField"
-          />}
-        /> */}
       <Button
         onClick={() => {
           setDownlodingFile(true);
@@ -175,6 +175,19 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
         color="primary"
         type="button"
         size="small"
+        disabled={(selectedRecords.length === 0)}
+        onClick={() => {
+          setAddSerializedAssetDialog(true)
+        }}
+      >
+        {`Assign ${routes.productInventory.title}`}
+      </Button>
+      <Box mx={1} />
+      <Button
+        variant="contained"
+        color="primary"
+        type="button"
+        size="small"
         disabled={(selectedRecords.length === 0) || currentStep === 4}
         onClick={() => {
           handleDeliveryTicketDialog(selectedRecords, warehouse)
@@ -205,6 +218,14 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
 
       }
     </Grid>
+    {addSerializedAssetDialog &&
+      <AddSerializedAsset
+        addSerializedAsset={handleAddSerializedAsset}
+        handleSerializedAssetClose={() => { setAddSerializedAssetDialog(false) }}
+        selectedProducts={selectedRecords}
+      // type={inventoryType}
+      />
+    }
   </>
   );
 }

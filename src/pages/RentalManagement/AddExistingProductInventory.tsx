@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import { Box, FormControl, IconButton, InputLabel, MenuItem, Select, TextField, Tooltip } from "@material-ui/core";
@@ -18,15 +17,16 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import Dialog from "@material-ui/core/Dialog/Dialog";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import { AddOutlined } from "@material-ui/icons";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { Autocomplete } from "@material-ui/lab";
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import DateUtils from '@date-io/date-fns';
 
+import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
+import { AddOutlined } from "@material-ui/icons";
 
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type }) => {
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory }) => {
     const toastConfig = useContext(CustomToastContext)
     const [quantityDialog, setQuantityDialog] = useState(false);
     const [packageDialog, setPackageDialog] = useState(false);
@@ -59,14 +59,15 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     }, []);
 
     const columns = type === "product" ? [
-        { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
+        { field: "entity", headerName: "Entity", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
     ] : [
-        { field: "packageName", headerName: "Package Name", show: true, cellRenderer: "commonRenderer" },
+        { field: "packageName", headerName: "Package Name", show: true, cellRenderer: "nameRenderer" },
         { field: "packageDescription", headerName: "Package Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
     ];
 
     const fetchPackageProduct = (packageId) => {
@@ -93,7 +94,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         axiosInstance().get(`${packages.packageApi}`).then(({ data }) => {
-            data.data = data.data?.map((u) => ({
+            data.data = data.data?.filter(d => !productInventory.some(obj => obj.id === d._id)).map((u) => ({
                 ...u,
                 id: u._id,
                 type: type,
@@ -118,7 +119,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         axiosInstance().get(`${product.api}`).then(({ data }) => {
-            data.data = data.data?.filter(u => u?.serializedProduct)
+            data.data = data.data?.filter(u => u?.serializedProduct && !productInventory.some(obj => obj.id === u._id))
                 .map((u) => ({
                     ...u,
                     id: u._id,
@@ -181,11 +182,15 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     );
 
     const NameRenderer = (params) => (
-        <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
-            {params.value}
-        </Link>
-    );
+        <span
+            className="cursor-pointer link ml-1"
+            onClick={() => {
+                setPackageDialog(true)
+                fetchPackageProduct(params.data.id)
+                setSelectedProduct({ ...selectedProduct, detail: params.data.packageName, id: params.data.id, quantity: params.data.quantity })
 
+            }}>{params.value}</span>
+    );
 
     const handleSearch = (e) => {
         dispatch({ type: "search", search: e.target.value });
@@ -196,7 +201,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         updatedByRenderer: UpdatedByRenderer,
         nameRenderer: NameRenderer,
         commonRenderer: CommonRenderer,
-        actionsRenderer: ActionsRenderer,
     };
 
     const handleSubmit = () => {
@@ -222,6 +226,11 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         }, gridLoadingTimeout);
     }
 
+    const onCellValueChanged = (params) => {
+
+    };
+
+
     const getRowStyleScheduled = (params) => {
         if (["Available", "New"].indexOf(params?.data?.status) >= 0) {
             return {
@@ -230,8 +239,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         }
         return null;
     };
-
-
 
     const handleAddToInventory = () => {
         let tempData = selectedRecords.map(rec => ({

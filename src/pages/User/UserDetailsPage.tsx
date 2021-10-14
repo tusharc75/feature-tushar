@@ -978,7 +978,7 @@ const UserDetailsPage = () => {
                           size="small"
                           openTo="year"
                           format="dd/MM/yyyy"
-                          maxDate={trackingTime.between.from}
+                          maxDate={trackingTime.between.to}
                           label="From"
                           views={['year', 'month', 'date']}
                           value={trackingTime.between.from}
