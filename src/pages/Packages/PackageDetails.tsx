@@ -22,6 +22,8 @@ import ManagePackageDialog from './ManagePackageDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
 import ProductsTable from './ProductsTable';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import styles from './packages.module.scss'
 
 const PackageDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -103,7 +105,7 @@ const PackageDetails = () => {
     axiosInstance()
       .get(`${packages.packageApi}/get-products/${id}`)
       .then(({ data: { data } }) => {
-        const newArr = data.length > 0 ? data.map((product: any) => ({ product: product.productId, qty: product.qty })) : [];
+        const newArr = data.length > 0 ? data.filter(d => Object.keys(d).length > 0).map((product: any) => ({ product: { id: product._id, productName: product.productName }, qty: product.qty })) : [];
         setProducts(newArr);
         setLoadingProducts(false)
       })
@@ -116,62 +118,78 @@ const PackageDetails = () => {
 
   return (
     <>
-      <Fragment>
-        <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={customizedRoutes} />
-        </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={12} lg={12}>
-            <Paper>
-              {!packageData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                    <Box marginX={1} />
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  </Box>
-                </div>
-              ) : (
-                <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
-                  {permissions?.packages?.isUpdate && (
-                    <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                      Edit
-                    </Button>
-                  )}
-                  {permissions?.packages?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-                </DetailsPageHeader>
-              )}
-
-              <Box>
-                {packagesLoading || !packageFields.length ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <>
-                    <DetailsPage data={packageData} fields={packageFields} />
-                  </>
+      <Grid container className="headerbox">
+        <CustomBreadCrumbs routes={customizedRoutes} />
+      </Grid>
+      <Grid container spacing={1} className="detail-container">
+        <Grid item xs={12} sm={12} md={12} lg={12}>
+          <Paper>
+            {!packageData ? (
+              <div>
+                <Skeleton variant="text" width="150px" height="40px" />
+                <Box display="flex">
+                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                  <Box marginX={1} />
+                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                </Box>
+              </div>
+            ) : (
+              <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
+                {permissions?.packages?.isUpdate && (
+                  <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                    Edit
+                  </Button>
                 )}
-              </Box>
-            </Paper>
-            <Box mt={2}>
-              <Box mb={1} display="flex" justifyContent="flex-end">
+                {permissions?.packages?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              </DetailsPageHeader>
+            )}
+
+            <Box>
+              {packagesLoading || !packageFields.length ? (
+                <Grid container spacing={2} style={{ padding: '8px' }}>
+                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                </Grid>
+              ) : (
+                <>
+                  <DetailsPage data={packageData} fields={packageFields} />
+                </>
+              )}
+            </Box>
+          </Paper>
+          <Box mt={2} className="bg-white">
+            <Box mb={1}>
+              <div className={`p-2 gap-3 ${styles.package_grid_template}`}>
+                <h3>Product(s)</h3>
+                <ImportExportLinks
+                  permissions={permissions?.packages}
+                  module="packages-products"
+                  api={packages.packageApi}
+                  afterImportCompleted={() => {
+                    fetchPackage();
+                  }}
+                  isExportAllOrSomeFeature={true}
+                  total={packageData?.products?.length}
+                  recordsToExport={packageData?.products.length}
+                  ids={[]}
+                  additionalParams={`refrenceId=${id}`}
+                  isBackgroundWhite={true}
+                />
                 <Button className="text-transform-none" variant="outlined" color="primary" startIcon={<Add />} size="small" onClick={() => setShowProductAssignDialog(true)}>
                   Assign Product(s)
                 </Button>
-              </Box>
-              {
-                packageData?.products ?
-                  <ProductsTable
-                    productList={packageData?.products}
-                  /> : null
-              }
-
+              </div>
             </Box>
-          </Grid>
+            {
+              packageData?.products ?
+                <ProductsTable
+                  productList={packageData?.products}
+                /> : null
+            }
+
+          </Box>
         </Grid>
-      </Fragment>
+      </Grid>
+
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}

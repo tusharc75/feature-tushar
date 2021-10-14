@@ -28,16 +28,6 @@ import ProductListDialog from './ProductListDialog';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 
 let packagesTimeout;
-const PackagesType = [
-    {
-        key: 'All Packages',
-        value: 1
-    },
-    {
-        key: 'My Packages',
-        value: 2
-    }
-];
 
 const PackageList = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -471,7 +461,7 @@ const PackageList = () => {
                         <PackageHeader
                             selectedRecords={selectedRecords}
                             onTypeChange={handlePackageTypeSel}
-                            options={PackagesType}
+                            options={[]}
                             onSearch={handleSearch}
                             searchVal={search}
                             packagePermissions={permissions?.packages}
