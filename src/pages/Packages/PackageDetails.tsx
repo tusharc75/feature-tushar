@@ -40,6 +40,7 @@ const PackageDetails = () => {
   const [products, setProducts] = useState([]);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [quantityUpdateLoading, setQuantityUpdateLoading] = useState(false);
   const [packageFields, setPackageFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
@@ -50,7 +51,6 @@ const PackageDetails = () => {
       fetchPackage();
       getProducts();
     }
-    // eslint-disable-next-line
   }, [id]);
 
   const getRessourceFields = () => {
@@ -105,8 +105,7 @@ const PackageDetails = () => {
     axiosInstance()
       .get(`${packages.packageApi}/get-products/${id}`)
       .then(({ data: { data } }) => {
-        const newArr = data.length > 0 ? data.filter(d => Object.keys(d).length > 0).map((product: any) => ({ product: { id: product._id, productName: product.productName }, qty: product.qty })) : [];
-        setProducts(newArr);
+        setProducts(data);
         setLoadingProducts(false)
       })
       .catch((err) => {
@@ -115,7 +114,29 @@ const PackageDetails = () => {
       });
   };
 
-
+  const handleUpdateQuantity = (updatedNode) => {
+    let productsToSend = [...products];
+    productsToSend = productsToSend.map(o => {
+      let res = { product: o?._id, qty: o?.qty }
+      if (updatedNode?.data?._id === o?._id) {
+        res.qty = (updatedNode?.newValue * 1)
+      }
+      return res
+    })
+    setQuantityUpdateLoading(true);
+    axiosInstance()
+      .post(`${packages.packageApi}/add-products`, {
+        ids: [packageData._id],
+        products: [...productsToSend]
+      })
+      .then(() => {
+        setQuantityUpdateLoading(false)
+        getProducts()
+      })
+      .catch((err) => {
+        setQuantityUpdateLoading(false)
+      });
+  }
   return (
     <>
       <Grid container className="headerbox">
@@ -168,8 +189,8 @@ const PackageDetails = () => {
                     fetchPackage();
                   }}
                   isExportAllOrSomeFeature={true}
-                  total={packageData?.products?.length}
-                  recordsToExport={packageData?.products.length}
+                  total={products?.length}
+                  recordsToExport={products.length}
                   ids={[]}
                   additionalParams={`refrenceId=${id}`}
                   isBackgroundWhite={true}
@@ -179,56 +200,72 @@ const PackageDetails = () => {
                 </Button>
               </div>
             </Box>
+
             {
-              packageData?.products ?
+              products.length ?
                 <ProductsTable
-                  productList={packageData?.products}
+                  productList={products}
+                  handleUpdateQuantity={handleUpdateQuantity}
+                  updateLoading={quantityUpdateLoading || packagesLoading}
                 /> : null
             }
 
           </Box>
+
+          {/* {
+            packageData?.products ?
+              <ProductsTable
+                productList={packageData?.products}
+              /> : null
+          } */}
+
         </Grid>
       </Grid>
 
-      {showConfirmBox && (
-        <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete this package: ${headingLabel} ?`}
-          onClose={() => {
-            setShowConfirmBox(false);
-          }}
-          onOk={handleDelete}
-        />
-      )}
-      {openUpdateDialog && (
-        <ManagePackageDialog
-          open={openUpdateDialog}
-          isClone={false}
-          packageId={id}
-          onClose={() => {
-            setOpenUpdateDialog(false);
-          }}
-          onSuccess={() => {
-            fetchPackage();
-            setOpenUpdateDialog(false);
-          }}
-        />
-      )}
-      {showProductAssignDialog && (
-        <AssignQuantityDialog
-          ids={[id]}
-          onClose={() => setShowProductAssignDialog(false)}
-          onSuccess={() => {
-            setShowProductAssignDialog(false)
-            getProducts()
-            fetchPackage()
-          }}
-          resource={product.api}
-          title="Assign Products"
-          label='Select Product'
-          resourceData={products}
-        />
-      )}
+      {
+        showConfirmBox && (
+          <ConfirmationDialog
+            open={showConfirmBox}
+            message={`Are you sure you want to delete this package: ${headingLabel} ?`}
+            onClose={() => {
+              setShowConfirmBox(false);
+            }}
+            onOk={handleDelete}
+          />
+        )
+      }
+      {
+        openUpdateDialog && (
+          <ManagePackageDialog
+            open={openUpdateDialog}
+            isClone={false}
+            packageId={id}
+            onClose={() => {
+              setOpenUpdateDialog(false);
+            }}
+            onSuccess={() => {
+              fetchPackage();
+              setOpenUpdateDialog(false);
+            }}
+          />
+        )
+      }
+      {
+        showProductAssignDialog && (
+          <AssignQuantityDialog
+            ids={[id]}
+            onClose={() => setShowProductAssignDialog(false)}
+            onSuccess={() => {
+              getProducts();
+              setShowProductAssignDialog(false);
+            }}
+            resource={product.api}
+            title="Assign Products"
+            label='Select Product'
+            resourceData={products}
+          />
+        )
+      }
     </>
   );
 };

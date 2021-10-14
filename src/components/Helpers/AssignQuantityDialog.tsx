@@ -51,20 +51,20 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
     if (existingResourceData.length > 0) {
       let existingData = [];
       if (resource.includes('product')) {
-        existingData = existingResourceData.map(({ product, qty }) => ({
-          id: product._id,
+        existingData = existingResourceData.map((product) => ({
+          id: product?._id,
           resource: {
-            name: product.productName,
-            id: product._id
+            name: product?.productName,
+            id: product?._id
           },
-          qty
+          qty: product?.qty
         }));
       } else {
         existingData = existingResourceData.map(({ wareHouse, qty }) => ({
-          id: wareHouse._id,
+          id: wareHouse?._id,
           resource: {
-            name: wareHouse.warehouseName,
-            id: wareHouse._id
+            name: wareHouse?.warehouseName,
+            id: wareHouse?._id
           },
           qty
         }));
@@ -103,13 +103,12 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
           if (existingResourceData.length > 0) {
             existingData = existingResourceData.map((r) => {
               if (resource.includes('warehouse')) {
-                return r.wareHouse._id;
+                return r?.wareHouse?._id;
               } else {
-                return r.product._id;
+                return r?.product?._id;
               }
             });
           }
-
 
           let newData = [];
           if (resource.includes('warehouse')) {
@@ -130,7 +129,6 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
               newData = data.map((_d) => ({ id: _d._id, name: _d.productName }));
             }
           }
-
           setResourceData(newData);
         })
         .catch((err) => {
@@ -250,12 +248,12 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
                       <IconButton
                         size="small"
                         color="primary"
-                        disabled={!Boolean(form.resource) || !Boolean(form.qty)}
+                        // disabled={!Boolean(form.resource) || !Boolean(form.qty)}
                         onClick={() => {
                           setFormData((prevState) => prevState.filter((s) => s.id !== form.id));
                         }}
                       >
-                        <Delete color={!Boolean(form.resource) || !Boolean(form.qty) ? 'disabled' : `error`} />
+                        <Delete color="error" />
                       </IconButton>
                     </Box>
                     {/* )} */}

@@ -67,6 +67,13 @@ export const LinkRenderer = params => params.value ? (
     <NoDataCell />
 )
 
+export const NameRenderer = params => params.value ? (
+    <Link className="link"
+        to={`${params?.pathName}/${params?.data?._id}`} title={params?.value}>{params?.value}</Link>
+) : (
+    <NoDataCell />
+)
+
 export const ImageRenderer = params => (
     <Avatar className="grid-avatar" src={params?.value} />
 )
