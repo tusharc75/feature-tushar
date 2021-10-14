@@ -145,7 +145,8 @@ export const getColumnData = (title, field, detailScreenRoute = null) => {
                     field: "concatedName",
                     cellRenderer: "nameRenderer",
                     cellRendererParams: { pathName: pathName }
-                }
+                },
+                rendererName: 'nameRenderer',
             }
         }
         else if (field?.primaryField === true && detailScreenRoute) {

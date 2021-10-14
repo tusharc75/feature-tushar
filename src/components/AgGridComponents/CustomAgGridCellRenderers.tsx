@@ -71,10 +71,6 @@ export const NameRenderer = params => params.value ? (
     <>
         <Link className="link"
             to={`${params?.pathName}/${params?.data?._id}`} title={params?.value}>{params?.value}</Link>
-
-        {
-            params.value
-        }
     </>
 ) : (
     <NoDataCell />
