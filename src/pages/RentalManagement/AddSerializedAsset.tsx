@@ -17,6 +17,7 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import Dialog from "@material-ui/core/Dialog/Dialog";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 
 const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, selectedProducts }) => {
     const toastConfig = useContext(CustomToastContext)
@@ -38,7 +39,7 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
         { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
         { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
-        { field: "warehouse", headerName: "Warehouse", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "plant", headerName: "Plant", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
     ];
 
@@ -147,45 +148,47 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
             open={true}
         >
             <CustomDialogHeader title={"Add Serialized Assets"} onClose={handleSerializedAssetClose} ></CustomDialogHeader>
-            <div className="listing-grid p-3">
-                <Box mb={2}>
-                    <Grid container >
-                        <Grid item xs={12} sm={6}>
-                            {selectedProducts.map(d => <span>{d.productName ? `  ${d.productName} (${d.qty})  |` : ""}
-                            </span>)}
+            <CustomDialogContent>
+                <div className="listing-grid p-3">
+                    <Box mb={2}>
+                        <Grid container >
+                            <Grid item xs={12} sm={6}>
+                                {selectedProducts.map(d => <span>{d.productName ? `  ${d.productName} (${d.qty})  |` : ""}
+                                </span>)}
+                            </Grid>
+                            <Grid item xs={12} sm={6} container justify="flex-end">
+                                <SearchBox
+                                    onSearch={handleSearch}
+                                    searchbox="terms_header_search_bar"
+                                    width="300px"
+                                    value={search}
+                                />
+                                <Box ml={1} mt={1} >
+                                    <Button size="small" color="primary" onClick={() => addSerializedAsset(selectedRecords)} variant="contained" disabled={selectedRecords.length > 0 ? false : true}  >
+                                        {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
+                                        Add</Button>
+                                </Box>
+                            </Grid>
                         </Grid>
-                        <Grid item xs={12} sm={6} container justify="flex-end">
-                            <SearchBox
-                                onSearch={handleSearch}
-                                searchbox="terms_header_search_bar"
-                                width="300px"
-                                value={search}
-                            />
-                            <Box ml={1} mt={1} >
-                                <Button size="small" color="primary" onClick={() => addSerializedAsset(selectedRecords)} variant="contained" disabled={selectedRecords.length > 0 ? false : true}  >
-                                    {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
-                                    Add</Button>
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </Box>
-                {columns ?
-                    <CustomAgGrid
-                        columns={columns}
-                        dataRows={dataRows}
-                        frameworkComponents={frameworkComponents}
-                        setGridApi={setGridApi}
-                        dispatch={dispatch}
-                        rowCount={rowCount}
-                        limit={limit}
-                        pageSizes={pageSizes}
-                        page={page}
-                        allowAction={false}
-                        loading={loading}
-                        customGridOptions={{ getRowStyle: getRowStyleScheduled }}
-                    />
-                    : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
-            </div>
+                    </Box>
+                    {columns ?
+                        <CustomAgGrid
+                            columns={columns}
+                            dataRows={dataRows}
+                            frameworkComponents={frameworkComponents}
+                            setGridApi={setGridApi}
+                            dispatch={dispatch}
+                            rowCount={rowCount}
+                            limit={limit}
+                            pageSizes={pageSizes}
+                            page={page}
+                            allowAction={false}
+                            loading={loading}
+                            customGridOptions={{ getRowStyle: getRowStyleScheduled }}
+                        />
+                        : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+                </div>
+            </CustomDialogContent>
         </Dialog>
         )}
     </Fragment>
