@@ -392,7 +392,7 @@ const RentalManagementDetailsPage = () => {
     // let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
     let tempProductArray = productInventoryArray.map(d => {
       return {
-        "id": d._id, "qty": d.quantity > 0 ? Number(d.quantity) : 0, "type": d.type,
+        "id": d._id, "qty": d.quantity > 0 ? Number(d.quantity) : 0, "type": d.type, "startDate": "", "endDate": "", "UOM": "", "pricingMethod": "", "price": d.mrp ? Number(d.mrp) : 0, "discount": 0, "finalPrice": 0
       }
     })
     axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/products-packages/`, { "productsPackages": tempProductArray })
