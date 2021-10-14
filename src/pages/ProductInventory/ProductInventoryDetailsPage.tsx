@@ -50,6 +50,7 @@ const ProductInventoryDetailsPage = () => {
   const [statusOptions, setStatusOptions] = useState([])
   const [showReasonDialog, setShowReasonDialog] = useState(false)
   const [updateLoading, setUpdateLoading] = useState(false)
+  const [loadingBOMData, setLoadingBOMData] = useState(false)
   const [customField, setCustomField] = useState({
     fieldData: {
       fieldLabel: "Scraping Reason",
@@ -113,6 +114,7 @@ const ProductInventoryDetailsPage = () => {
     fetchProductInventoryHistory();
   }
 
+
   const handleMainPoints = (data) => {
     let mainPoint = {};
     // mainPoint['Account Name'] = data?.accountName?.optionLabel || '';
@@ -124,17 +126,15 @@ const ProductInventoryDetailsPage = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    axiosInstance().get(`/history/inventory/${id}`).then(({ data }) => {
-      data.data = data.data?.map((u) => ({
+    axiosInstance().get(`/history/inventory/${id}`).then(({ data: { data } }) => {
+      data = data?.map((u) => ({
         ...u,
         id: u.inventory?._id,
         reference: u.reference?.optionLabel,
         referenceId: u.reference?.optionValue
       }));
-      dispatch({ type: "initialize", data: data.data, count: data.data.length });
-      setTimeout(() => {
-        dispatch({ type: "loading", loading: false });
-      }, gridLoadingTimeout);
+      dispatch({ type: "initialize", data: data, count: data.length });
+      dispatch({ type: "loading", loading: false });
     }).catch((error) => {
       toastConfig.setToastConfig(error);
       dispatch({ type: "loading", loading: false });
@@ -181,6 +181,7 @@ const ProductInventoryDetailsPage = () => {
 
   const getProductTree = () => {
     if (productId) {
+      setLoadingBOMData(true)
       axiosInstance()
         .get(`/product/bom/${productId}`)
         .then(({ data: { data } }) => {
@@ -191,6 +192,9 @@ const ProductInventoryDetailsPage = () => {
             return o
           })
           setBOMData([...data])
+          setLoadingBOMData(false)
+        }).catch(err => {
+          setLoadingBOMData(false)
         })
     }
   }
@@ -405,7 +409,7 @@ const ProductInventoryDetailsPage = () => {
               </Box>
               {(
                 <Box>
-                  {loading ? (
+                  {loading || loadingBOMData ? (
                     [1].map((i) => (
                       <BoxWithBorder
                         key={i}
@@ -424,16 +428,22 @@ const ProductInventoryDetailsPage = () => {
                         </Box>
                       </BoxWithBorder>
                     ))
-                  ) : productInventoryData?.product ? (
+                  ) : BOMData.length ? (
                     <>
                       <ProductHierarchy
-                        data={[{
-                          productName: productInventoryData?.product?.optionLabel,
-                          _id: productInventoryData?.product?.optionValue
-                        }]}
+                        data={BOMData}
                         permissions={permissions?.product}
                         unassignProduct={() => { }}
                       />
+                      <Box px={1} my={1} >
+                        <Button
+                          fullWidth
+                          variant="outlined"
+                          color='primary'
+                          onClick={() => history.push(`${routes.productDetail.path}/${productId}/bom`, { productName: productInventoryData?.product?.optionLabel })}>
+                          View All
+                        </Button>
+                      </Box>
                     </>
                   ) : (
                     <Box textAlign="center" padding={2} minHeight={150}>

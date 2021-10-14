@@ -103,8 +103,7 @@ const PackageDetails = () => {
     axiosInstance()
       .get(`${packages.packageApi}/get-products/${id}`)
       .then(({ data: { data } }) => {
-        const newArr = data.length > 0 ? data.map((product: any) => ({ product: product.productId, qty: product.qty })) : [];
-        setProducts(newArr);
+        setProducts(data);
         setLoadingProducts(false)
       })
       .catch((err) => {
@@ -130,11 +129,10 @@ const PackageDetails = () => {
       })
       .then(() => {
         setQuantityUpdateLoading(false)
-        fetchPackage()
+        getProducts()
       })
       .catch((err) => {
         setQuantityUpdateLoading(false)
-        fetchPackage()
       });
   }
   return (
@@ -185,9 +183,9 @@ const PackageDetails = () => {
                 </Button>
               </Box>
               {
-                packageData?.products ?
+                products.length ?
                   <ProductsTable
-                    productList={packageData?.products}
+                    productList={products}
                     handleUpdateQuantity={handleUpdateQuantity}
                     updateLoading={quantityUpdateLoading || packagesLoading}
                   /> : null
@@ -228,7 +226,6 @@ const PackageDetails = () => {
           onSuccess={() => {
             setShowProductAssignDialog(false)
             getProducts()
-            fetchPackage()
           }}
           resource={product.api}
           title="Assign Products"

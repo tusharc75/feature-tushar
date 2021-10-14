@@ -8,7 +8,8 @@ import {
     CommonRendererWithCopy,
     DateRenderer,
     LinkRenderer,
-    ImageRenderer
+    ImageRenderer,
+    NameRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
 
 
@@ -18,12 +19,12 @@ export const staticFrameworkRender = {
 }
 
 export const headerName = {
-    firstName: "Name",
-    owner: "Owner Alies"
+    firstName: "Name"
 }
 export const isRenderWithCopy = (name) => {
     return ["mobileNumber", "phone", "email"].indexOf(name) >= 0
 }
+const hideColumns = ["salutation", "middleName", "lastName", "suffix"]
 export const detailPagePath = {
     leads: leadDetailPage.path,
     owner: routes?.userDetail?.path,
@@ -76,6 +77,12 @@ export const getFrameworkComponents = (rendererNameList, showStaticRenderers = f
                 "imageRenderer": ImageRenderer
             }
         }
+        else if (o === "nameRenderer") {
+            result = {
+                ...result,
+                "nameRenderer": NameRenderer
+            }
+        }
 
     })
     if (showStaticRenderers) {
@@ -117,6 +124,9 @@ export const getColumnData = (title, field, detailScreenRoute = null) => {
     if (gridMetaData[updatedTitle]?.hidden && gridMetaData[updatedTitle]?.hidden.indexOf(field?.fieldName) >= 0) {
         return null
     }
+    else if (hideColumns.indexOf(field?.fieldName) >= 0) {
+        return null
+    }
     else {
         let fieldHeaderName = headerName[field?.fieldName] ?? field?.fieldLabel
         let commonFieldData = {
@@ -133,7 +143,8 @@ export const getColumnData = (title, field, detailScreenRoute = null) => {
                 columnData: {
                     ...commonFieldData,
                     field: "concatedName",
-                    cellRenderer: (params) => `<a id="link-a" href='${pathName}/${params?.data?._id}' title='${params?.value}'>${params?.value}</a >`,
+                    cellRenderer: "nameRenderer",
+                    cellRendererParams: { pathName: pathName }
                 }
             }
         }
