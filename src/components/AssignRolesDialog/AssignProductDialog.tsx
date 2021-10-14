@@ -115,7 +115,7 @@ const AssignProductDialog = ({
         }
 
         const queryString = getQueryString();
-        axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
+        axiosInstance().get(`${product.api}/bom/${productId}`).then(({ data }) => {
             // let tData = data.filter(o => o._id !== productId)
             // tData = tData.map(obj => ({ ...obj, isChecked: assignedProducts.some(item => item?._id === obj?._id) ? true : false }))
             data.data = data.data?.map((u) => ({
