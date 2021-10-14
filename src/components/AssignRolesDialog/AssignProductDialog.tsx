@@ -115,7 +115,7 @@ const AssignProductDialog = ({
         }
 
         const queryString = getQueryString();
-        axiosInstance().get(`${product.api}/bom/${productId}`).then(({ data }) => {
+        axiosInstance().get(`${product.api}/bom/${productId}/available-products`).then(({ data }) => {
             // let tData = data.filter(o => o._id !== productId)
             // tData = tData.map(obj => ({ ...obj, isChecked: assignedProducts.some(item => item?._id === obj?._id) ? true : false }))
             data.data = data.data?.map((u) => ({
@@ -125,7 +125,7 @@ const AssignProductDialog = ({
             }));
             setProductsConst(data.data)
             // setSelectedProducts(assignedProducts.map(obj => obj._id))
-            dispatch({ type: "initialize", data: data.data, count: data.count });
+            dispatch({ type: "initialize", data: data.data, count: data.data.length });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
                 dispatch({ type: "selection", selectedRecords: data.data.filter(obj => assignedProducts.some(item => item?._id === obj?._id)) });
@@ -242,7 +242,7 @@ const AssignProductDialog = ({
                     <div className="header-panel">
                         <Grid container className={styles.filter_side_container}>
                             <Grid item xs={6} className="d-flex align-items-center gap-1">
-                                {
+                                {/* {
                                     options && <ToggleButtonGroup size="small" className="ml-2"
                                         value={filter}
                                         exclusive
@@ -254,7 +254,7 @@ const AssignProductDialog = ({
                                             );
                                         })}
                                     </ToggleButtonGroup>
-                                }
+                                } */}
                             </Grid>
                             <Grid xs={6} container className={styles.filter_side} >
                                 <Box className={styles.filter_side_header} component="div" >
