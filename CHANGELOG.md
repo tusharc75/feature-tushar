@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.17.0](https://github.com/vebholic/oms_frontend/compare/v1.16.0...v1.17.0) (2021-10-14)
+
+
+### Features
+
+* - .gitignore updated, .yml file deleted ([81474c6](https://github.com/vebholic/oms_frontend/commit/81474c6586d9aac04667304225f8182f15ebc4b4))
+* - .gitignore updated, .yml file deleted ([3c85a5c](https://github.com/vebholic/oms_frontend/commit/3c85a5c56bdca120ff33ae0811d4b7cb12bfde60))
+* - Dynamic ag grid issues fixed ([28e433e](https://github.com/vebholic/oms_frontend/commit/28e433efbb2edda3079474b5db23083312ffbc6b))
+* - Rental management history api fixed, euro currency issue fixed ([01393a4](https://github.com/vebholic/oms_frontend/commit/01393a4d85e523ce9cbcd3ed8bfc8eaa4bf9d1e3))
+* - stable reverse merge done ([68ce386](https://github.com/vebholic/oms_frontend/commit/68ce3863fe0d8dd8e184e63a582e7a117ec69d05))
+* add product or package ([4c6e7fe](https://github.com/vebholic/oms_frontend/commit/4c6e7fe294ae16f71870ea8361204cf050555a2f))
+* **index.tsx:** changes in sentry setup ([f17c7ca](https://github.com/vebholic/oms_frontend/commit/f17c7caed531ec96ee37c265e4e1159f3bf5ccbc))
+* **index.tsx:** changes in sentry setup ([48d947c](https://github.com/vebholic/oms_frontend/commit/48d947c57232d4699fbd5b5b9040aceb80b1013d))
+* po-54 ([64b0b7a](https://github.com/vebholic/oms_frontend/commit/64b0b7a63765a5b8245e0f098bef522342b97ce6))
+* rental management ([46a4673](https://github.com/vebholic/oms_frontend/commit/46a467345cc8dc332a16fd0388dc680492ca28c8))
+
+
+### Bug Fixes
+
+* changes added ([c0adc4c](https://github.com/vebholic/oms_frontend/commit/c0adc4c330f608591e44a1c4ba9e15c793095526))
+* date range fix ([7366a86](https://github.com/vebholic/oms_frontend/commit/7366a86de070406c72b33b8ec3b88b114f686608))
+* **Email:** Two add button showing issue ([e0a2159](https://github.com/vebholic/oms_frontend/commit/e0a2159ffaf93f6fe328e9e3b7a062ac0b7a99e9))
+
 ## [1.16.0](https://github.com/vebholic/oms_frontend/compare/v1.15.0...v1.16.0) (2021-10-13)
 
 
