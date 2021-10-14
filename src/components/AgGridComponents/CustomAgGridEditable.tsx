@@ -13,6 +13,7 @@ import { CustomLoadingOverlay, CommonRenderer } from "../../components/AgGridCom
 import CustomFloatingFilter from "../../components/AgGridComponents/CustomAgGridFilter";
 import { orderBy } from "lodash";
 import NumericEditor from "./NumericEditor";
+import DateEditor from "./DateEditor";
 
 export function reducer(state, action) {
   switch (action.type) {
@@ -221,6 +222,7 @@ export default function CustomAgGridEditable({
         editable={column.editable ?? false}
         cellEditor={column.cellEditor}
         singleClickEdit={true}
+        cellEditorParams={column.cellEditorParams ?? {}}
       // floatingFilterComponent={column.floatingFilterComponent ?? null}
       // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
       //   suppressFilterButton: true,
@@ -243,6 +245,7 @@ export default function CustomAgGridEditable({
         editable={column.editable ?? false}
         cellEditor={column.cellEditor}
         singleClickEdit={true}
+        cellEditorParams={column.cellEditorParams ?? {}}
       // floatingFilterComponent={column.floatingFilterComponent ?? null}
       // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
       //   suppressFilterButton: true,
@@ -301,6 +304,7 @@ export default function CustomAgGridEditable({
                 customLoadingOverlay: CustomLoadingOverlay,
                 customFloatingFilter: CustomFloatingFilter,
                 numericCellEditor: NumericEditor,
+                dateEditor: DateEditor
                 // customLoadingCellRenderer: CustomLoadingCellRenderer,
                 // customNoRowsOverlay: CustomNoRowsOverlay
               }}
@@ -389,6 +393,7 @@ export default function CustomAgGridEditable({
               suppressPaginationPanel={true}
               paginationPageSize={limit}
               rowDragManaged={enableRowDrag}
+            // stopEditingWhenCellsLoseFocus={true}
             >
               {allowSelection && (
                 <AgGridColumn
