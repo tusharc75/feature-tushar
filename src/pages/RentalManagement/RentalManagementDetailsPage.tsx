@@ -418,14 +418,14 @@ const RentalManagementDetailsPage = () => {
       "id": d.id,
       "qty": parseInt(d.quantity || d.qty) || 0,
       "type": d.type.toLowerCase(),
-      "detail": d.detail,
-      "pricingMethod": d.pricingMethod,
-      "UOM": d.UOM,
+      "detail": d.detail || "",
+      "pricingMethod": d.pricingMethod || "",
+      "UOM": d.UOM || "",
       "finalPrice": parseInt(d.finalPrice) || 0,
-      "price": parseInt(d.price) || 0,
+      "price": parseInt(d.mrp) || parseInt(d.price) || 0,
       "discount": parseInt(d.discount) || 0,
-      "startDate": d.startDate,
-      "endDate": d.endDate,
+      "startDate": d.startDate || new Date(),
+      "endDate": d.endDate || new Date(),
     }))
     axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": tempProductArray })
       .then(() => {
