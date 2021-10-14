@@ -3,7 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-import { Box, FormControl, IconButton, InputLabel, MenuItem, Select, TextField, Tooltip } from "@material-ui/core";
+import { Box, CircularProgress, FormControl, IconButton, InputLabel, MenuItem, Select, TextField, Tooltip } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
@@ -26,7 +26,7 @@ import DateUtils from '@date-io/date-fns';
 import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
 import { AddOutlined } from "@material-ui/icons";
 
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory }) => {
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts }) => {
     const toastConfig = useContext(CustomToastContext)
     const [quantityDialog, setQuantityDialog] = useState(false);
     const [packageDialog, setPackageDialog] = useState(false);
@@ -280,7 +280,14 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                         value={search}
                                     />
                                     <Box ml={1} mt={1} >
-                                        <Button size="small" color="primary" onClick={handleAddToInventory} variant="contained" disabled={selectedRecords.length > 0 ? false : true}  >
+                                        <Button
+                                            size="small"
+                                            color="primary"
+                                            onClick={handleAddToInventory}
+                                            variant="contained"
+                                            disabled={!Boolean(selectedRecords.length) || isAddingProducts}
+                                            endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />}
+                                        >
                                             {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
                                             Add</Button>
                                     </Box>

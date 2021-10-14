@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, Tooltip } from "@material-ui/core";
+import { Grid, Box, Button, Paper, Tooltip, CircularProgress } from "@material-ui/core";
 import { Skeleton, Autocomplete, Alert } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import { isMobile, isTablet } from "react-device-detect";
@@ -59,6 +59,8 @@ const RentalManagementDetailsPage = () => {
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [isDeleting, setDeleting] = useState(false);
+  const [isAddingProducts, setAddingProducts] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState(false);
   const [inventoryType, setInventoryType] = useState(null);
@@ -410,6 +412,7 @@ const RentalManagementDetailsPage = () => {
 
   const handleAddProductInventory = (productInventoryArray) => {
     // let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
+    setAddingProducts(true)
     let tempProductArray = productInventoryArray.map(d => ({
       "id": d.id,
       "qty": parseInt(d.quantity || d.qty) || 0,
@@ -424,27 +427,27 @@ const RentalManagementDetailsPage = () => {
       "endDate": d.endDate,
     }))
     axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": tempProductArray })
-      .then(({ data }) => {
+      .then(() => {
         setAddExistingProductDialog(false)
         fetchProductInventory()
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
-        });
+        setAddingProducts(false)
       }).catch((error) => {
         setAddExistingProductDialog(false)
         toastConfig.setToastConfig(error)
+        setAddingProducts(false)
       });
   }
 
   const handleRemoveProductInventory = (productInventoryId) => {
+    setDeleting(true)
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/remove`, {
       ids: productInventoryId
     })
-      .then(({ data }) => {
+      .then(() => {
+        setDeleting(false)
         fetchProductInventory()
       }).catch((error) => {
+        setDeleting(false)
         toastConfig.setToastConfig(error)
       });
   }
@@ -617,13 +620,15 @@ const RentalManagementDetailsPage = () => {
                             variant="contained"
                             color="primary"
                             size="small"
-                            disabled={!Boolean(selectedRecords.length)}
+                            disabled={!Boolean(selectedRecords.length) || isDeleting}
                             onClick={() => {
                               handleRemoveProductInventory(selectedRecords.map(rec => ({
                                 id: rec._id ?? rec.id,
                                 type: rec.type.toLowerCase()
                               })))
                             }}
+
+                            endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
                           >
                             Delete
                           </Button>
@@ -976,6 +981,7 @@ const RentalManagementDetailsPage = () => {
       )}
       {addExistingProductDialog &&
         <AddExistingProductInventory
+          isAddingProducts={isAddingProducts}
           addProductInventory={handleAddProductInventory}
           handleProductInventoryClose={() => { setAddExistingProductDialog(false) }}
           productInventory={productInventory}
