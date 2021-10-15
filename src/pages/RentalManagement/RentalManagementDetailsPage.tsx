@@ -40,6 +40,7 @@ import { CustomOfflineContext } from "../../StateProvider/OfflineContext/Offline
 import HideWhenOffline from "../../components/HideWhenOffline";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
 import { GiMineExplosion } from 'react-icons/gi'
 import HtmlTooltip from '../../components/CustomTooltipTitle'
@@ -278,17 +279,20 @@ const RentalManagementDetailsPage = () => {
     }
 
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/products-packages`).then(({ data }) => {
-      data.data?.products.map((u) => (tempInventory.push({
+      data.data?.products.map((u: any) => (tempInventory.push({
         ...u,
         id: u._id,
         detail: u.productName,
         productCategory: u.productCategory?.optionLabel,
+        package: u.hasOwnProperty("package") ? u.package.packageName : "",
+        packageId: u.hasOwnProperty("package") ? u.package._id : ""
       })));
       data.data?.packages.map((u) => (tempInventory.push({
         ...u,
         id: u._id,
         detail: u.packageName,
         description: u.packageDescription,
+
       })));
       fetchDeliveryTicket(tempInventory);
 
@@ -329,6 +333,12 @@ const RentalManagementDetailsPage = () => {
     </Link>
   );
 
+  const PackageNameRenderer = (params) => (
+    params.value ? <Link className="link" title={params.value} to={`${routes.packagesDetail.path}/${params.data.packageId}`}>
+      {params.value}
+    </Link> : <NoDataCell />
+  );
+
   const ActionsRenderer = (params) => (
     <>
       <GridDeleteIcon
@@ -345,19 +355,23 @@ const RentalManagementDetailsPage = () => {
         entity="rentalManagement"
       />
       {params.data.type === "Package" &&
-        <IconButton
-          onClick={() => explodePackage(params.data.id)}
-          size="small"
-          color='primary'
-        >
-          <GiMineExplosion />
-        </IconButton>}
+        <HtmlTooltip title="Explode package">
+          <IconButton
+            onClick={() => explodePackage(params.data.id)}
+            size="small"
+            color='primary'
+          >
+            <GiMineExplosion />
+          </IconButton>
+        </HtmlTooltip>
+      }
     </>
   );
 
   const frameworkComponents = {
     nameRenderer: NameRenderer,
     productRenderer: ProductRenderer,
+    packageNameRenderer: PackageNameRenderer,
     commonRenderer: CommonRenderer,
     actionsRenderer: ActionsRenderer,
     dateRenderer: DateRenderer,
@@ -365,6 +379,7 @@ const RentalManagementDetailsPage = () => {
   const columns = [
     { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "productRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "package", headerName: "Package", show: true, disabled: true, cellRenderer: "packageNameRenderer" },
     { field: "startDate", headerName: "Start Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
     { field: "endDate", headerName: "End Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
     { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
