@@ -1882,7 +1882,7 @@ const FormTypes = (props) => {
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
-        onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value.trim())}
+        onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value.trim())} 
       />
     </InfoLabel>
   ) : type === 'date' ? (
