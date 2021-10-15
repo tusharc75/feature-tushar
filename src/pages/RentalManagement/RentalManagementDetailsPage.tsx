@@ -58,6 +58,7 @@ const RentalManagementDetailsPage = () => {
   const [headingLbl, setHeadingLbl] = useState("");
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [rentalManagementData, setRentalManagementData] = useState(null);
+  const [deleteData, setDeleteData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [isDeleting, setDeleting] = useState(false);
   const [isAddingProducts, setAddingProducts] = useState(false);
@@ -335,7 +336,7 @@ const RentalManagementDetailsPage = () => {
         ownerId={user?.user?._id}
         userId={user?.user?._id}
         onDelete={() => {
-          handleRemoveProductInventory([{
+          deleteInventories([{
             id: params.data.id,
             type: params.data?.type.toLowerCase()
           }])
@@ -438,6 +439,11 @@ const RentalManagementDetailsPage = () => {
       });
   }
 
+
+  const deleteInventories = (data) => {
+    setDeleteData(data)
+  }
+
   const handleRemoveProductInventory = (productInventoryId) => {
     setDeleting(true)
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/remove`, {
@@ -446,9 +452,11 @@ const RentalManagementDetailsPage = () => {
       .then(() => {
         setDeleting(false)
         fetchProductInventory()
+        setDeleteData(null)
       }).catch((error) => {
         setDeleting(false)
         toastConfig.setToastConfig(error)
+        setDeleteData(null)
       });
   }
 
@@ -622,10 +630,11 @@ const RentalManagementDetailsPage = () => {
                             size="small"
                             disabled={!Boolean(selectedRecords.length) || isDeleting}
                             onClick={() => {
-                              handleRemoveProductInventory(selectedRecords.map(rec => ({
+                              const dataToDelete = selectedRecords.map(rec => ({
                                 id: rec._id ?? rec.id,
                                 type: rec.type.toLowerCase()
-                              })))
+                              }))
+                              setDeleteData(dataToDelete)
                             }}
 
                             endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
@@ -1030,7 +1039,13 @@ const RentalManagementDetailsPage = () => {
           }}
         />
       }
-
+      {deleteData && <ConfirmationDialog
+        open={true}
+        message={`Are you sure you want to delete the record(s)?`}
+        onClose={() => setDeleteData(null)}
+        onOk={() => handleRemoveProductInventory(deleteData)}
+        okBtnLoading={isDeleting}
+      />}
     </>
   );
 };
