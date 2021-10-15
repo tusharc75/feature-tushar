@@ -324,7 +324,7 @@ const RentalManagementDetailsPage = () => {
   );
 
   const ProductRenderer = (params) => (
-    <Link className="link" title={params.value} to={params.data.type === "product" ? `${routes.productDetail.path}/${params.data.id}` : `${routes.packagesDetail.path}/${params.data.id}`}>
+    <Link className="link" title={params.value} to={params.data.type === "Product" ? `${routes.productDetail.path}/${params.data.id}` : `${routes.packagesDetail.path}/${params.data.id}`}>
       {params.value}
     </Link>
   );
@@ -363,7 +363,7 @@ const RentalManagementDetailsPage = () => {
     dateRenderer: DateRenderer,
   };
   const columns = [
-    { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "productRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "startDate", headerName: "Start Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
     { field: "endDate", headerName: "End Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
