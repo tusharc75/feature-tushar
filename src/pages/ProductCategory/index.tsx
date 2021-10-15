@@ -183,7 +183,7 @@ const ProductCategory = () => {
 
     const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
         <Chip
-            className="ml-3 linkableChip"
+            className="ml-3 link"
             style={{ backgroundColor: `${params.data.chipColour}` }}
             label={`${params.value}`}
             onClick={() => {
