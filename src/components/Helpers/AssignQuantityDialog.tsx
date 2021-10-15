@@ -33,7 +33,7 @@ interface ResourceType {
   id: string;
 }
 
-const AssingQuantityDialog: FC<DialogProps> = (props) => {
+const AssignQuantityDialog: FC<DialogProps> = (props) => {
   const { ids, onClose, onSuccess, title, label, resource, resourceData: existingResourceData } = props;
   const { setToastConfig } = useContext(CustomToastContext);
   const [resourceData, setResourceData] = useState<ResourceType[]>([]);
@@ -248,12 +248,12 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
                       <IconButton
                         size="small"
                         color="primary"
-                        disabled={!Boolean(form.resource) || !Boolean(form.qty)}
+                        // disabled={!Boolean(form.resource) || !Boolean(form.qty)}
                         onClick={() => {
                           setFormData((prevState) => prevState.filter((s) => s.id !== form.id));
                         }}
                       >
-                        <Delete color={!Boolean(form.resource) || !Boolean(form.qty) ? 'disabled' : `error`} />
+                        <Delete color="error" />
                       </IconButton>
                     </Box>
                     {/* )} */}
@@ -281,4 +281,4 @@ const AssingQuantityDialog: FC<DialogProps> = (props) => {
   );
 };
 
-export default AssingQuantityDialog;
+export default AssignQuantityDialog;

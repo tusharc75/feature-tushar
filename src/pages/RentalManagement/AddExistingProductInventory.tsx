@@ -3,7 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-import { Box, IconButton, TextField, Tooltip } from "@material-ui/core";
+import { Box, CircularProgress, IconButton, TextField, Tooltip } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { gridLoadingTimeout, CustomDialogTransition, product, packages } from '../../constants/helpers';
@@ -20,7 +20,7 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
 
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory }) => {
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts }) => {
     const toastConfig = useContext(CustomToastContext)
     const [quantityDialog, setQuantityDialog] = useState(false);
     const [packageDialog, setPackageDialog] = useState(false);
@@ -188,7 +188,13 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                     value={search}
                                 />
                                 <Box ml={1} mt={1} >
-                                    <Button size="small" color="primary" onClick={() => addProductInventory(selectedRecords)} variant="contained" disabled={selectedRecords.length > 0 ? false : true}  >
+                                    <Button
+                                        size="small"
+                                        color="primary"
+                                        onClick={() => addProductInventory(selectedRecords)}
+                                        variant="contained"
+                                        disabled={!Boolean(selectedRecords.length) || isAddingProducts}
+                                        endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
                                         {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
                                         Add</Button>
                                 </Box>
