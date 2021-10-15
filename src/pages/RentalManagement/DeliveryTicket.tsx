@@ -89,14 +89,22 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
     )
   );
 
+  const ProductRenderer = (params) => (
+    <Link className="link" title={params.value} to={params.data.type === "Product" ? `${routes.productDetail.path}/${params.data.id}` : `${routes.packagesDetail.path}/${params.data.id}`}>
+      {params.value}
+    </Link>
+  );
+
   const frameworkComponents = {
     nameRenderer: NameRenderer,
+    productRenderer: ProductRenderer,
     commonRenderer: CommonRenderer,
     dateRenderer: DateRenderer,
     serializedAssetRenderer: SerializedAssetRenderer
   };
+
   const columns = [
-    { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "productRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "serializedAsset", headerName: "Serialized Asset", show: true, disabled: true, cellRenderer: "serializedAssetRenderer" },
     { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "TicketRenderer" },
