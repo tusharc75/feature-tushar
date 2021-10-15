@@ -155,14 +155,20 @@ export default function Account(props) {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      if (o?.fieldData?.fieldName === "accountName") {
-        o.fieldData.primary = true
+      if (["accountName"].indexOf(o?.fieldData?.fieldName) === 0) {
+        columns = [...columns, {
+          pivotIndex: 0,
+          field: 'accountName', headerName: 'Account Name', show: true, disabled: true,
+          cellRenderer: 'accountNameRenderer'
+        }]
       }
-      let currentColumn = getColumnData(accountResource, o?.fieldData, `/${accountRoute}/detail`)
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData]
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName)
+      else {
+        let currentColumn = getColumnData(accountResource, o?.fieldData, `/${accountRoute}/detail`)
+        if (currentColumn !== null) {
+          columns = [...columns, currentColumn?.columnData]
+          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+            rendererNames.push(currentColumn?.rendererName)
+          }
         }
       }
       return o?.fieldData
@@ -170,9 +176,15 @@ export default function Account(props) {
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
+      accountNameRenderer: AccountNameRenderer,
+      masterAccountRenderer: MasterAccountRenderer,
+      leadRenderer: LeadRenderer,
       actionsRenderer: ActionsRenderer
     }
     setFrameWorkComponent({ ...tempFrameworkComponent })
+    columns = [...columns,
+    { field: 'lead', headerName: 'Related Lead', show: true, cellRenderer: 'leadRenderer' },
+    { field: 'masterAccount', headerName: 'Master Account', show: true, cellRenderer: 'masterAccountRenderer', filter: false, sortable: false }]
     let staticFields = getStaticFields()
     staticFields.forEach(field => {
       columns.push(checkStaticField(routes.projectSales.title, field))

@@ -1000,3 +1000,7 @@ body::-webkit-scrollbar-thumb {
     box-shadow: 1px 3px 3px #ab9b9b;
   }
 }
+
+.linkableChip {
+  color: var(--link) !important;
+}

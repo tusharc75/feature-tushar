@@ -149,13 +149,28 @@ const Leads = () => {
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
+          relatedOpportunityRenderer: RelatedOpportunityRenderer,
           actionsRenderer: ActionsRenderer
         }
         setFrameWorkComponent({ ...tempFrameworkComponent })
-        columns = [...columns, ...getStaticFields()]
+        columns = [...columns,
+        { field: 'relatedOpportunity', headerName: 'Related Opportunity', show: true, cellRenderer: 'relatedOpportunityRenderer' },
+        ...getStaticFields()]
         setColumns([...columns])
       })
   }
+
+  const RelatedOpportunityRenderer = (params) => (
+    <>
+      {params.value ? (
+        <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
+          {params.value}
+        </Link>
+      ) : (
+        <NoDataCell />
+      )}
+    </>
+  );
 
   const ActionsRenderer = (params) => (
     <>

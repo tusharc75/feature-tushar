@@ -165,10 +165,7 @@ const ProjectSales: FC = () => {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      if (o?.fieldData?.fieldName === "projectName") {
-        o.fieldData.primary = true
-      }
-      let currentColumn = getColumnData(routes.projectSales.title, o?.fieldData)
+      let currentColumn = getColumnData(routes.projectSales.title, o?.fieldData, 'project-sales/detail')
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData]
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
