@@ -32,6 +32,7 @@ import routes from "../Helpers/Routes";
 import styles from "../../pages/Leads/Header.module.scss";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { AddOutlined, RemoveOutlined } from "@material-ui/icons";
+import CustomAgGridEditable from "../AgGridComponents/CustomAgGridEditable";
 
 const options = [
     {
@@ -68,7 +69,7 @@ const AssignProductDialog = ({
     const [columns, setColumns] = useState([
         { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'commonRenderer' },
         { field: 'productNumber', headerName: 'Product Number', show: true, cellRenderer: 'commonRenderer' },
-        { field: 'quantity', headerName: 'Quantity', show: true, cellRenderer: 'commonRenderer' },
+        { field: 'quantity', headerName: 'Quantity', show: true, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
     ]);
     const [filter, setFilter] = useState(`All ${routes.product.title}`);
 
@@ -114,20 +115,22 @@ const AssignProductDialog = ({
         }
 
         const queryString = getQueryString();
-        axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
+        axiosInstance().get(`${product.api}/bom/${productId}/available-products`).then(({ data }) => {
             // let tData = data.filter(o => o._id !== productId)
             // tData = tData.map(obj => ({ ...obj, isChecked: assignedProducts.some(item => item?._id === obj?._id) ? true : false }))
             data.data = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
-                quantity: 0,
+                quantity: assignedProducts.some(item => item?._id === u?._id) ? assignedProducts.find(item => item?._id === u?._id).qty : 0,
             }));
             setProductsConst(data.data)
             // setSelectedProducts(assignedProducts.map(obj => obj._id))
-            dispatch({ type: "initialize", data: data.data, count: data.count });
+            dispatch({ type: "initialize", data: data.data, count: data.data.length });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
+                dispatch({ type: "selection", selectedRecords: data.data.filter(obj => assignedProducts.some(item => item?._id === obj?._id)) });
             }, gridLoadingTimeout);
+
         })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
@@ -187,7 +190,7 @@ const AssignProductDialog = ({
                 "bom": selectedRecords.filter(d => d.quantity > 0).map(d => {
                     return ({
                         "product": d.id,
-                        "qty": d.quantity
+                        "qty": Number(d.quantity)
                     })
                 })
             };
@@ -222,6 +225,9 @@ const AssignProductDialog = ({
         }
     };
 
+    const onCellValueChanged = (row) => {
+    }
+
     return (
         <Dialog
             fullWidth
@@ -236,7 +242,7 @@ const AssignProductDialog = ({
                     <div className="header-panel">
                         <Grid container className={styles.filter_side_container}>
                             <Grid item xs={6} className="d-flex align-items-center gap-1">
-                                {
+                                {/* {
                                     options && <ToggleButtonGroup size="small" className="ml-2"
                                         value={filter}
                                         exclusive
@@ -248,7 +254,7 @@ const AssignProductDialog = ({
                                             );
                                         })}
                                     </ToggleButtonGroup>
-                                }
+                                } */}
                             </Grid>
                             <Grid xs={6} container className={styles.filter_side} >
                                 <Box className={styles.filter_side_header} component="div" >
@@ -265,7 +271,7 @@ const AssignProductDialog = ({
                         </Grid>
                     </div>
                     {columns ?
-                        <CustomAgGrid
+                        <CustomAgGridEditable
                             columns={columns}
                             dataRows={dataRows}
                             frameworkComponents={frameworkComponents}
@@ -275,10 +281,12 @@ const AssignProductDialog = ({
                             limit={limit}
                             pageSizes={pageSizes}
                             page={page}
-                            actionWidth={200}
+                            allowAction={false}
                             loading={loading}
                             renderedFrom="productDetailsPage"
-                        // refreshGrid={fetchProduct}
+                            refreshGrid={fetchProduct}
+                            onCellValueChanged={onCellValueChanged}
+                            selectedRecords={selectedRecords}
                         />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </>

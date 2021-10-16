@@ -1,14 +1,12 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-import { Box, IconButton, TextField, Tooltip } from "@material-ui/core";
+import { Box, CircularProgress, IconButton, TextField, Tooltip } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
-import routes from "../../components/Helpers/Routes";
-import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, product, packages } from '../../constants/helpers';
+import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
+import { gridLoadingTimeout, CustomDialogTransition, product, packages } from '../../constants/helpers';
 import {
     CommonRenderer,
     CreatedByRenderer,
@@ -18,12 +16,11 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import Dialog from "@material-ui/core/Dialog/Dialog";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import { AddOutlined } from "@material-ui/icons";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
-import { Autocomplete } from "@material-ui/lab";
+import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
 
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type }) => {
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts }) => {
     const toastConfig = useContext(CustomToastContext)
     const [quantityDialog, setQuantityDialog] = useState(false);
     const [packageDialog, setPackageDialog] = useState(false);
@@ -45,15 +42,15 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     }, []);
 
     const columns = type === "product" ? [
-        { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
-        { field: "priceTemplate", headerName: "Price Template", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "entity", headerName: "Entity", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
     ] : [
-        { field: "packageName", headerName: "Package Name", show: true, cellRenderer: "commonRenderer" },
+        { field: "packageName", headerName: "Package Name", show: true, cellRenderer: "nameRenderer" },
         { field: "packageDescription", headerName: "Package Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
     ];
 
     const fetchPackageProduct = (packageId) => {
@@ -80,7 +77,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         axiosInstance().get(`${packages.packageApi}`).then(({ data }) => {
-            data.data = data.data?.map((u) => ({
+            data.data = data.data?.filter(d => !productInventory.some(obj => obj.id === d._id)).map((u) => ({
                 ...u,
                 id: u._id,
                 type: type,
@@ -105,7 +102,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         axiosInstance().get(`${product.api}`).then(({ data }) => {
-            data.data = data.data?.filter(u => u?.serializedProduct)
+            data.data = data.data?.filter(u => u?.serializedProduct && !productInventory.some(obj => obj.id === u._id))
                 .map((u) => ({
                     ...u,
                     id: u._id,
@@ -126,41 +123,16 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         });
     };
 
-    const ActionsRenderer = (params) => (
-        <>
-            {
-                permissions.rentalManagement.isUpdate && (
-
-                    <Tooltip title={`Add ${type}`}>
-                        <IconButton
-                            size="small"
-                            aria-label={`Add ${type}`}
-                            onClick={() => {
-                                if (type === "package") {
-                                    setPackageDialog(true)
-                                    fetchPackageProduct(params.data.id)
-                                    setSelectedProduct({ name: params.data.packageName, id: params.data.id, quantity: params.data.quantity })
-                                }
-                                else {
-                                    setQuantityDialog(true);
-                                    setSelectedProduct({ name: params.data.productName, id: params.data.id, quantity: params.data.quantity })
-                                }
-                            }}
-                        >
-                            <AddOutlined fontSize="small" color="primary" />
-                        </IconButton>
-                    </Tooltip>
-                )
-            }
-        </>
-    );
-
     const NameRenderer = (params) => (
-        <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
-            {params.value}
-        </Link>
-    );
+        <span
+            className="cursor-pointer link ml-1"
+            onClick={() => {
+                setPackageDialog(true)
+                fetchPackageProduct(params.data.id)
+                setSelectedProduct({ name: params.data.packageName, id: params.data.id, quantity: params.data.quantity })
 
+            }}>{params.value}</span>
+    );
 
     const handleSearch = (e) => {
         dispatch({ type: "search", search: e.target.value });
@@ -171,7 +143,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         updatedByRenderer: UpdatedByRenderer,
         nameRenderer: NameRenderer,
         commonRenderer: CommonRenderer,
-        actionsRenderer: ActionsRenderer,
     };
 
     const handleSubmit = () => {
@@ -190,13 +161,8 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         }, gridLoadingTimeout);
     }
 
-    const getRowStyleScheduled = (params) => {
-        if (["Available", "New"].indexOf(params?.data?.status) >= 0) {
-            return {
-                'background-color': "#d3ffe0",
-            }
-        }
-        return null;
+    const onCellValueChanged = (params) => {
+
     };
 
     return (<Fragment>
@@ -222,7 +188,13 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                     value={search}
                                 />
                                 <Box ml={1} mt={1} >
-                                    <Button size="small" color="primary" onClick={() => addProductInventory(selectedRecords)} variant="contained" disabled={selectedRecords.length > 0 ? false : true}  >
+                                    <Button
+                                        size="small"
+                                        color="primary"
+                                        onClick={() => addProductInventory(selectedRecords)}
+                                        variant="contained"
+                                        disabled={!Boolean(selectedRecords.length) || isAddingProducts}
+                                        endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
                                         {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
                                         Add</Button>
                                 </Box>
@@ -230,7 +202,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                         </Grid>
                     </Box>
                     {columns ?
-                        <CustomAgGrid
+                        <CustomAgGridEditable
                             columns={columns}
                             dataRows={dataRows}
                             frameworkComponents={frameworkComponents}
@@ -240,81 +212,32 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                             limit={limit}
                             pageSizes={pageSizes}
                             page={page}
-                            allowAction={true}
+                            allowAction={false}
                             loading={loading}
-                            customGridOptions={{ getRowStyle: getRowStyleScheduled }}
                             isClientSideGrid={true}
+                            onCellValueChanged={onCellValueChanged}
                         />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </div>
             </Dialog>
             )}
-            {quantityDialog && <Dialog open fullWidth maxWidth="sm" onClose={() => { setQuantityDialog(false) }}>
-                <CustomDialogHeader title="Assign To Product" onClose={() => { setQuantityDialog(false) }} />
-                <CustomDialogContent>
-                    <Box p={2}>
-                        <TextField
-                            size="small"
-                            fullWidth
-                            value={selectedProduct.name}
-                            disabled
-                            type="text"
-                            variant="outlined"
-                            label="Product Description"
-                        />
-
-                        <Box my={4} />
-                        <TextField
-                            size="small"
-                            fullWidth
-                            value={selectedProduct.quantity}
-                            type="number"
-                            onChange={(e) => { setSelectedProduct({ name: selectedProduct.name, id: selectedProduct.id, quantity: parseInt(e.target.value) }) }}
-                            variant="outlined"
-                            required
-                            label="Quantity"
-                        />
-                    </Box>
-                </CustomDialogContent>
-                <CustomDialogFooter>
-                    <Button variant="outlined" color="primary" onClick={() => { setQuantityDialog(false) }}>
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSubmit}
-                        variant="contained"
-                        color="primary"
-                    >
-                        Save
-                    </Button>
-                </CustomDialogFooter>
-            </Dialog>
-            }
             {packageDialog && <Dialog open fullWidth maxWidth="md" onClose={() => setPackageDialog(false)}>
                 <CustomDialogHeader title={"Assign To Package"} onClose={() => setPackageDialog(false)} />
                 <CustomDialogContent>
                     <Box p={2}>
-                        <TextField
-                            size="small"
-                            value={selectedProduct.quantity}
-                            type="number"
-                            onChange={(e) => { setSelectedProduct({ name: selectedProduct.name, id: selectedProduct.id, quantity: parseInt(e.target.value) }) }}
-                            variant="outlined"
-                            required
-                            label="Package Quantity"
-                        />
                         <div className="detail-box">
                             <h3 className="form-label-style" title={"Package Details"}>
                                 {"Package Details"}
                             </h3>
                         </div>
                         <Grid container spacing={2}>
-                            {packageProductData.length > 0 && packageProductData.map((obj, indx) => (
+                            {packageProductData?.length > 0 && packageProductData?.map((obj, indx) => (
                                 <Fragment key={obj.id}>
                                     <Grid item xs={5} sm={5}>
                                         <TextField
                                             size="small"
                                             fullWidth
-                                            value={obj.product.productName}
+                                            value={obj?.product?.productName}
                                             type="text"
                                             disabled
                                             variant="outlined"
@@ -325,7 +248,8 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                         <TextField
                                             size="small"
                                             fullWidth
-                                            value={obj.qty}
+                                            value={obj?.qty}
+                                            disabled
                                             type="number"
                                             onChange={(e) => {
                                                 const val = parseInt(e.target.value);
