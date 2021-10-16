@@ -129,7 +129,10 @@ export default function CustomAgGrid({
   selectedRecords = [],
   onSelection = null,
   renderedFrom = null,
-  customGridOptions = null
+  customGridOptions = null,
+  actionLabel = null,
+  actionEditable = false,
+  onCellValueChanged = () => { }
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -337,7 +340,6 @@ export default function CustomAgGrid({
               suppressPaginationPanel={true}
               paginationPageSize={limit}
               rowDragManaged={enableRowDrag}
-
             >
               {allowSelection && (
                 <AgGridColumn
@@ -359,14 +361,15 @@ export default function CustomAgGrid({
                 <AgGridColumn
                   width={actionWidth}
                   field="actions"
-                  headerName="Actions"
+                  headerName={actionLabel ? actionLabel : "Actions"}
                   pinned={isMobile || isTablet ? false : 'right'}
                   lockPinned={isMobile || isTablet ? false : true}
                   resizable={false}
                   sortable={false}
+                  editable={actionEditable}
                   filter={false}
+                  onCellValueChanged={onCellValueChanged}
                   cellRenderer="actionsRenderer"
-
                 ></AgGridColumn>
               )}
             </AgGridReact>

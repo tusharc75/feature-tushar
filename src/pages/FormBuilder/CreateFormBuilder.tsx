@@ -44,7 +44,7 @@ const CreateFormBuilder = () => {
     const onBackButtonEvent = (e) => {
         e.preventDefault();
         window.history.pushState(null, null, window.location.pathname);
-        setShowConfirmDialog(true)
+        if (formBuilderPermissions.isUpdate) setShowConfirmDialog(true)
     }
 
     useEffect(() => {
@@ -129,7 +129,7 @@ const CreateFormBuilder = () => {
             <CustomBreadCrumbs routes={[routes.formBuilder, { title: resource }]}
                 isConfirmBeforeClick={true}
                 onBreadCrumbClick={(path) => {
-                    if (!isEqual(orisection, section)) {
+                    if ((!isEqual(orisection, section)) && formBuilderPermissions.isUpdate) {
                         setShowConfirmDialog(true)
                     }
                     else history.push({ pathname: routes.formBuilder.path })
@@ -161,7 +161,7 @@ const CreateFormBuilder = () => {
                                 <Box ml={1} >
                                     <Button color="primary" variant="contained" size="small"
                                         onClick={() => {
-                                            if (!isEqual(orisection, section)) {
+                                            if ((!isEqual(orisection, section)) && formBuilderPermissions.isUpdate) {
                                                 setShowConfirmDialog(true)
                                             }
                                             else {

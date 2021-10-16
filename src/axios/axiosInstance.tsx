@@ -96,12 +96,14 @@ export default (history = null, passedHeaders = null) => {
             }
 
             if (error.response.data && error.response.data.code && Object.values(ERROR_CODE).some(s => s === error.response.data.code)) {
-                localStorage.removeItem("selectedEntity");
+                
 
                 if (window.confirm((`${error.response.data.error}\n\nPress Ok to redirect to home\nPress Cancel to stay here`))) {
+                    localStorage.removeItem("selectedEntity");
                     //@ts-ignore
                     window.location = "/";
                 }
+                
             } else if (error.response.data && error.response.data.code && error.response.data.code === "1005") {
                 return new Promise((resolve, reject) => {
                     reject({ open: true, type: "notFoundError", message: "" });

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useRef, useEffect, useState, useContext, Fragment } from "react";
 import {
     Box,
     Button,
@@ -28,16 +28,20 @@ import CustomButton from "../../components/Helpers/CustomButton";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import PropTypes from "prop-types";
-import AddIcon from "@material-ui/icons/AddCircle";
-import InfoIcon from "@material-ui/icons/Info";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, isFieldNotTouched } from "../../constants/helpers";
-import CreateProductCategory from "../ProductCategory/CreateProductCategory";
-import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialog";
 import { useData } from "../../StateProvider/Provider";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
+import { isEqual } from 'lodash';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import TextField from '@material-ui/core/TextField';
+import MultipleEntry from './MultipleEntry';
 
-const arr = [...Array(9).keys()];
+const arr = [...Array(10).keys()];
+
 export default function ManagePricingConditionsDialog({
     open,
     onSuccess,
@@ -46,156 +50,65 @@ export default function ManagePricingConditionsDialog({
 }) {
     const { pricingConditionApi } = pricingCondition;
     const toastConfig = useContext(CustomToastContext);
-
-
-    const [pricingConditionData, setEntityData] = useState({
-        fields: [],
-        initialValues: {},
-    });
-    const {
-        state: { permissions },
-    }: any = useData();
-
+    const [initialData, setInitialData] = useState({ fields: [], values: {}, });
+    const { state: { permissions } }: any = useData();
     const [formsData, setFormsData] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [currencySymbol, setCurrencySymbol] = useState(null);
-
-    const [showAddProductCategoryDialog, setShowAddProductCategoryDialog] = useState(false);
-    const [productCategoryDataSource, setProductCategoryDataSource] = useState([]);
-    const [newProductCategoryId, setNewProductCategoryId] = useState(null);
-
-    const [salesRepDataSource, setSalesRepDataSource] = useState([])
-    const [usersDataSource, setUsersDataSource] = useState([]);
-
-    const [showAddMarketSegmentDialog, setShowAddMarketSegmentDialog] = useState(false);
-
-    const [mainMarketSegmentDataSource, setMainMarketSegmentDataSource] = useState([]);
-    const [marketSegmentDataSource, setMarketSegmentDataSource] = useState([]);
-    const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
-    const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
-    const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-    const [formValues, setFormValues] = useState({})
+    const [dayWiseRent, setDayWiseRent] = useState([]);
+    const [groupQtyDiscount, setGroupQtyDiscount] = useState([]);
+
+    const ref = useRef(null);
 
     useEffect(() => {
         getPricingConditionsFields();
     }, [])
 
     useEffect(() => {
-        setFormsData(setFieldsInAscendingOrder(pricingConditionData.fields));
-    }, [pricingConditionData.fields]);
-
-    const onSalesRepDropdownOpen = (selectedEntity) => {
-        if (selectedEntity) {
-            let newTempArray = [];
-
-            [selectedEntity].forEach(d => {
-                usersDataSource.forEach(item => {
-                    if (item.entities?.find(s => s.entity === d)) {
-                        if (!newTempArray.find(s => s.optionValue === item.optionValue)) {
-                            newTempArray.push(item)
-                        }
-                    }
-                })
-            })
-            setSalesRepDataSource(newTempArray)
-        }
-        else {
-            setSalesRepDataSource(usersDataSource);
-        }
-    };
+        setFormsData(setFieldsInAscendingOrder(initialData.fields));
+    }, [initialData.fields]);
 
     const getPricingConditionsFields = () => {
-        axiosInstance()
-            .get(`/field?resource=Pricing Condition`)
-            .then(({ data: { data } }) => {
+        axiosInstance().get(`/field?resource=Pricing Condition`).then(({ data: { data } }) => {
+            const filterData = pricingConditionId
+                ? data.filter((d) => d.isUpdate)
+                : data.filter((d) => d.isCreate);
 
-                const filterData = pricingConditionId
-                    ? data.filter((d) => d.isUpdate)
-                    : data.filter((d) => d.isCreate);
-
-                //  Initialize market segment dropdown which have parentMarketSegment === "" or that record have child
-                const marketSegmentDropdownData = filterData.map(m => m.fieldData).find(
-                    (d) => d.fieldName === formFieldNames.marketSegment
-                );
-                if (marketSegmentDropdownData) {
-                    setMainMarketSegmentDataSource(marketSegmentDropdownData.option);
-
-                    let initializeMarketSegmentDataSource = [];
-                    marketSegmentDropdownData.option.forEach(option => {
-                        if (option.parentMarketSegment === "" || marketSegmentDropdownData.option.some(s => s.parentMarketSegment === option.optionValue)) {
-                            initializeMarketSegmentDataSource.push(option);
-                        }
-                    })
-                    setMarketSegmentDataSource(initializeMarketSegmentDataSource);
-                }
-
-                //  Check sales rep field
-                const salesRepDropdownData = filterData.map(m => m.fieldData).find(
-                    (d) => d.fieldName === "salesRep"
-                );
-                if (salesRepDropdownData) {
-                    setUsersDataSource(salesRepDropdownData.option);
-                }
-
-                if (pricingConditionId) {
-                    let newFields = [];
-
-                    axiosInstance().get(`${pricingConditionApi}/${pricingConditionId}`).then(({ data: { data } }) => {
-                        data.year = new Date(`${data.year}-01-01`);
-
-                        filterData.map((_f) => {
-
-                            if (_f.fieldData.fieldName === "currency") {
-                                setCurrencySymbol(
-                                    getUniqueCurrencies().find(
-                                        (d) => d.currencyCode === data["currency"]
-                                    )?.symbolNative
-                                );
-                            }
-
-                            newFields.push(_f.fieldData);
-                        });
-
-                        if (marketSegmentDropdownData) {
-                            setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data.marketSegment));
-                        }
-
-                        setEntityData({
-                            fields: newFields,
-                            initialValues: getObjKeysWithValues(data, newFields)
-                        });
-                        setFormValues(getObjKeysWithValues(data, newFields))
-                    }).catch((error) => {
-                        toastConfig.setToastConfig(error);
+            if (pricingConditionId) {
+                let newFields = [];
+                axiosInstance().get(`${pricingConditionApi}/${pricingConditionId}`).then(({ data: { data } }) => {
+                    filterData.map((_f) => {
+                        newFields.push(_f.fieldData);
                     });
-                }
-                else {
-                    setEntityData({
-                        fields: filterData.map(m => m.fieldData),
-                        initialValues: getObjKeys("", filterData.map(m => m.fieldData)),
+                    setDayWiseRent(data.dayWiseRent ? data.dayWiseRent : [])
+                    setGroupQtyDiscount(data.groupQtyDiscount ? data.groupQtyDiscount : [])
+                    setInitialData({
+                        fields: newFields,
+                        values: data
                     });
-                    setFormValues(getObjKeys("", filterData.map(m => m.fieldData)))
-                }
-
-                if (filterData.length > 0) {
-                    const productCategoryDropdownData = filterData.map(m => m.fieldData).find(
-                        (d) => d.fieldName === "productCategory"
-                    );
-
-                    if (productCategoryDropdownData) {
-                        setProductCategoryDataSource(productCategoryDropdownData.option);
-                    }
-                }
-            });
+                }).catch((error) => {
+                    toastConfig.setToastConfig(error);
+                });
+            }
+            else {
+                setInitialData({
+                    fields: filterData.map(m => m.fieldData),
+                    values: getObjKeys("", filterData.map(m => m.fieldData)),
+                });
+            }
+        });
     };
-
-    const marketSegmentChange = (marketSegmentId: string) => {
-        setSubMarketSegmentDataSource(marketSegmentId ? mainMarketSegmentDataSource.filter(d => d.parentMarketSegment === marketSegmentId) : []);
-    }
 
     const onSubmit = (values) => {
         setLoading(true);
+        values.dayWiseRent = [];
+        if (values.rentType === "Variable") {
+            values.dayWiseRent = dayWiseRent;
+        }
+        values.groupQtyDiscount = [];
+        if (values.amountType === "Group Flat" || values.amountType === "Group Percentage") {
+            values.groupQtyDiscount = groupQtyDiscount;
+        }
         if (pricingConditionId) {
             values._id = pricingConditionId;
             axiosInstance().put(pricingConditionApi, values).then(({ data }) => {
@@ -204,7 +117,6 @@ export default function ManagePricingConditionsDialog({
                     type: "success",
                     message: data.message,
                 });
-
                 setLoading(false);
                 onSuccess()
             }).catch((error) => {
@@ -229,44 +141,6 @@ export default function ManagePricingConditionsDialog({
         }
     };
 
-    const initializeProductCategoryDropdown = (values, productCategorySource) => {
-        if (values && values.hasOwnProperty("productCategory")) {
-            const getNewAddedProductCategory = productCategorySource.find(
-                (d) => d?.optionValue === newProductCategoryId
-            );
-            if (getNewAddedProductCategory) {
-                values["productCategory"] = getNewAddedProductCategory.optionValue;
-            }
-            return values;
-        }
-        return values;
-    };
-
-    const initializeMarketSegmentDropdown = (values, marketSegmentSource) => {
-        if (values && values.hasOwnProperty(formFieldNames.marketSegment)) {
-            const getNewAddedMarketSegment = marketSegmentSource.find(
-                (d) => d?.optionValue === newMarketSegmentId
-            );
-            if (getNewAddedMarketSegment) {
-                values[formFieldNames.marketSegment] = getNewAddedMarketSegment.optionValue;
-            }
-            return values;
-        }
-        return values;
-    };
-
-    const initializeSubMarketSegmentDropdown = (values, subMarketSegmentSource) => {
-        if (values && values.hasOwnProperty(formFieldNames.subMarketSegment)) {
-            const getNewAddedSubMarketSegment = subMarketSegmentSource.find(
-                (d) => d?.optionValue === newSubMarketSegmentId
-            );
-            if (getNewAddedSubMarketSegment) {
-                values[formFieldNames.subMarketSegment] = getNewAddedSubMarketSegment.optionValue;
-            }
-            return values;
-        }
-        return values;
-    };
     const handleScroll = (errors) => {
         const err = Object.keys(errors);
         if (err.length) {
@@ -281,12 +155,7 @@ export default function ManagePricingConditionsDialog({
             });
         }
     }
-    const handleValuesChange = (data) => {
-        setFormValues((prevState) => ({
-            ...prevState,
-            ...data
-        }))
-    }
+
 
     return (
         <>
@@ -297,34 +166,37 @@ export default function ManagePricingConditionsDialog({
                 TransitionComponent={CustomDialogTransition}
                 aria-labelledby="customized-dialog-title"
                 open={open}
-                onClose={(e, reason) => {
-                    if (reason !== 'backdropClick') {
+                onClose={(e) => {
+                    if (!isEqual(ref.current.values, initialData.values)) {
                         setShowConfirmDialog(true)
+                    }
+                    else {
+                        onClose()
                     }
                 }}
             >
                 <CustomDialogHeader
-                    title={
-                        pricingConditionId
-                            ? `Editing ${pricingConditionData.initialValues && pricingConditionData.initialValues["name"] ? pricingConditionData.initialValues["name"] : ""}`
-                            : "Create Pricing Conditions"
-                    }
+                    title={pricingConditionId ? `Edit Pricing Conditions` : "Create Pricing Conditions"}
                     onClose={() => {
-                        if (isFieldNotTouched(pricingConditionData, formValues)) onClose()
-                        else setShowConfirmDialog(true)
+                        if (!isEqual(ref.current.values, initialData.values)) {
+                            setShowConfirmDialog(true)
+                        }
+                        else {
+                            onClose()
+                        }
                     }}
                 />
-
-                {pricingConditionData.fields.length === 0 && (
+                {initialData.fields.length === 0 && (
                     <CustomDialogContent>
                         <CommonSkeleton lenArray={arr} />
                     </CustomDialogContent>
                 )}
-                {pricingConditionData.fields.length > 0 && (
+                {initialData.fields.length > 0 && (
                     <Formik
-                        initialValues={pricingConditionData.initialValues}
-                        validationSchema={yupSchema(pricingConditionData.fields)}
+                        initialValues={initialData.values}
+                        validationSchema={yupSchema(initialData.fields)}
                         validateOnMount
+                        innerRef={ref}
                         onSubmit={onSubmit}
                     >
                         {({
@@ -341,438 +213,188 @@ export default function ManagePricingConditionsDialog({
                                 <CustomDialogContent>
                                     <Form>
                                         <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
-                                        {formsData &&
-                                            formsData.map((form, index1) => {
-                                                return form.name ? (
-                                                    <div key={index1}>
-                                                        <h2 className="form-label-style">{form.name}</h2>
-                                                        <Box marginY={2}>
-                                                            <Grid spacing={3} container>
-                                                                {form.sectionFields.map((field, index2) => (
-                                                                    <Grid key={index2} item xs={12} sm={6} md={6}>
-                                                                        {
-                                                                            field.fieldName === "entity" ? (
-                                                                                <FormTypes
-                                                                                    values={values}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    label={field.fieldLabel}
-                                                                                    name={field.fieldName}
-                                                                                    type={field.type}
-                                                                                    options={field.option}
-                                                                                    fullWidth
-                                                                                    isTooltip={field?.isTooltip || false}
-                                                                                    tooltipMessage={field?.tooltipMessage}
-                                                                                    size="small"
-                                                                                    onChange={(e, value) => {
-                                                                                        setFieldValue(
-                                                                                            field.fieldName,
-                                                                                            value ? value.optionValue : ""
-                                                                                        );
-                                                                                        setFieldValue("salesRep", "");
-                                                                                        handleValuesChange({
-                                                                                            [field.fieldName]: value ? value.optionValue : "",
-                                                                                            salesRep: ""
-                                                                                        })
-                                                                                    }}
-                                                                                />
-                                                                            ) : field.fieldName === "currency" ? (
-                                                                                <FormTypes
-                                                                                    // {...rest}
-                                                                                    values={values}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    label={field.fieldLabel}
-                                                                                    name={field.fieldName}
-                                                                                    type={field.type}
-                                                                                    options={field.option}
-                                                                                    setFieldValue={(name, value) => {
-                                                                                        handleValuesChange({ [name]: value })
-                                                                                        setFieldValue(name, value)
-                                                                                    }}
-                                                                                    required={field.required}
-                                                                                    fullWidth
-                                                                                    isTooltip={field?.isTooltip || false}
-                                                                                    tooltipMessage={field?.tooltipMessage}
-                                                                                    size="small"
-                                                                                    onChange={(e, val) => {
-                                                                                        if (val && val.currencyCode) {
-                                                                                            setFieldValue(
-                                                                                                field.fieldName,
-                                                                                                val.currencyCode
-                                                                                            );
-                                                                                            handleValuesChange({ [field.fieldName]: val.currencyCode })
-                                                                                            setCurrencySymbol(val.symbolNative);
-                                                                                        } else {
-                                                                                            setFieldValue(field.fieldName, "");
-                                                                                            handleValuesChange({ [field.fieldName]: "" })
-                                                                                            setCurrencySymbol(null);
-                                                                                        }
-                                                                                    }}
-                                                                                />
-                                                                            ) : field.fieldName === "productCategory" ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                                                                <Grid container spacing={1}>
-                                                                                    <Grid
-                                                                                        item
-                                                                                        xs={
-                                                                                            //  TODO: Product category is not added in role, once implementation is done, please uncomment below lines
-                                                                                            permissions.productCategory.isCreate ? 10
-                                                                                                : 11
-                                                                                        }
-                                                                                        sm={
-                                                                                            permissions.productCategory.isCreate ? 10
-                                                                                                : 11
-                                                                                        }
-                                                                                        md={
-                                                                                            permissions.productCategory.isCreate ? 10
-                                                                                                : 11
-                                                                                        }
-                                                                                    >
-                                                                                        <FormTypes
-                                                                                            fields={pricingConditionData.fields}
-                                                                                            fieldData={field}
-                                                                                            disabled={(Boolean(pricingConditionId) && field.disableOnEdit)}
-                                                                                            errors={errors}
-                                                                                            touched={touched}
-                                                                                            label={field.fieldLabel}
-                                                                                            name={field.fieldName}
-                                                                                            type={field.type}
-                                                                                            setFieldValue={(name, value) => {
-                                                                                                handleValuesChange({ [name]: value })
-                                                                                                setFieldValue(name, value)
-                                                                                            }}
-                                                                                            required={field.required}
-                                                                                            fullWidth
-                                                                                            isTooltip={field.isTooltip}
-                                                                                            tooltipMessage={field.tooltipMessage}
-                                                                                            onChange={(e, val) => {
-                                                                                                setNewProductCategoryId(null);
-                                                                                                setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                                                                handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
-                                                                                                // handleChangeCategory(val && val.optionValue ? val.optionValue : "",
-                                                                                                //     val && val.optionLabel ? val.optionLabel : "", true)
-                                                                                            }}
-                                                                                            size="small"
-                                                                                            values={
-                                                                                                newProductCategoryId
-                                                                                                    ? initializeProductCategoryDropdown(
-                                                                                                        values,
-                                                                                                        productCategoryDataSource
-                                                                                                    )
-                                                                                                    : values
-                                                                                            }
-                                                                                            options={productCategoryDataSource}
-                                                                                            doNotShowInfoTooltip={true}
-                                                                                        />
-                                                                                    </Grid>
-                                                                                    {
-                                                                                        permissions.productCategory.isCreate && (
-                                                                                            <Grid item xs={1} sm={1} md={1}>
-                                                                                                <Tooltip
-                                                                                                    title="Add Product Category"
-                                                                                                    className="mt-1"
-                                                                                                >
-                                                                                                    <IconButton
-                                                                                                        onClick={() => { setShowAddProductCategoryDialog(true); }}
-                                                                                                        disabled={(Boolean(pricingConditionId) && field.disableOnEdit)}
-                                                                                                        size="small"
-                                                                                                    >
-                                                                                                        <AddIcon color={(Boolean(pricingConditionId) && field.disableOnEdit) ? "disabled" : "primary"} />
-                                                                                                    </IconButton>
-                                                                                                </Tooltip>
-                                                                                            </Grid>
-                                                                                        )
-                                                                                    }
-                                                                                    {field?.tooltipMessage ? (
-                                                                                        <Grid item xs={1} sm={1} md={1}>
-                                                                                            <Tooltip
-                                                                                                title={
-                                                                                                    field?.tooltipMessage ?? ""
-                                                                                                }
-                                                                                            >
-                                                                                                <InfoIcon color="disabled" />
-                                                                                            </Tooltip>
-                                                                                        </Grid>
-                                                                                    ) : null}
-                                                                                </Grid>
-                                                                            </Grid>
-                                                                                : field.fieldName === formFieldNames.marketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                                                                    <Grid container spacing={1}>
-                                                                                        <Grid
-                                                                                            item
-                                                                                            xs={
-                                                                                                permissions.marketSegment.isCreate ? 10
-                                                                                                    : 11
-                                                                                            }
-                                                                                            sm={
-                                                                                                permissions.marketSegment.isCreate ? 10
-                                                                                                    : 11
-                                                                                            }
-                                                                                            md={
-                                                                                                permissions.marketSegment.isCreate ? 10
-                                                                                                    : 11
-                                                                                            }
-                                                                                        >
-                                                                                            <FormTypes
-                                                                                                fields={pricingConditionData.fields}
-                                                                                                fieldData={field}
-                                                                                                disabled={(Boolean(pricingConditionId) && field.disableOnEdit)}
-                                                                                                errors={errors}
-                                                                                                touched={touched}
-                                                                                                label={field.fieldLabel}
-                                                                                                name={field.fieldName}
-                                                                                                type={field.type}
-                                                                                                setFieldValue={(name, value) => {
-                                                                                                    handleValuesChange({ [name]: value })
-                                                                                                    setFieldValue(name, value)
-                                                                                                }}
-                                                                                                required={field.required}
-                                                                                                fullWidth
-                                                                                                isTooltip={field.isTooltip}
-                                                                                                tooltipMessage={field.tooltipMessage}
-                                                                                                onChange={(e, val) => {
-                                                                                                    setNewMarketSegmentId(null);
-                                                                                                    setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                                                                    setNewSubMarketSegmentId(null);
-                                                                                                    setFieldValue(formFieldNames.subMarketSegment, "")
-                                                                                                    handleValuesChange({
-                                                                                                        [field.fieldName]: val && val.optionValue ? val.optionValue : "",
-                                                                                                        [formFieldNames.subMarketSegment]: ""
-                                                                                                    })
-                                                                                                    marketSegmentChange(val && val.optionValue ? val.optionValue : "");
-                                                                                                }}
-                                                                                                size="small"
-                                                                                                values={
-                                                                                                    newMarketSegmentId
-                                                                                                        ? initializeMarketSegmentDropdown(
-                                                                                                            values,
-                                                                                                            marketSegmentDataSource
-                                                                                                        )
-                                                                                                        : values
-                                                                                                }
-                                                                                                options={marketSegmentDataSource}
-                                                                                                doNotShowInfoTooltip={true}
-                                                                                            />
-                                                                                        </Grid>
-                                                                                        {
-                                                                                            // permissions.productCategory
-                                                                                            //     .isCreate
-                                                                                            permissions.marketSegment.isCreate && (
-                                                                                                <Grid item xs={1} sm={1} md={1}>
-                                                                                                    <Tooltip
-                                                                                                        title="Add Market Segment"
-                                                                                                        className="mt-1"
-                                                                                                    >
-                                                                                                        <IconButton
-                                                                                                            onClick={() => { setShowAddMarketSegmentDialog(true); }}
-                                                                                                            disabled={(Boolean(pricingConditionId) && field.disableOnEdit)}
-                                                                                                            size="small"
-                                                                                                        >
-                                                                                                            <AddIcon color={(Boolean(pricingConditionId) && field.disableOnEdit) ? "disabled" : "primary"} />
-                                                                                                        </IconButton>
-                                                                                                    </Tooltip>
-                                                                                                </Grid>
-                                                                                            )
-                                                                                        }
-                                                                                        {field?.tooltipMessage ? (
-                                                                                            <Grid item xs={1} sm={1} md={1}>
-                                                                                                <Tooltip
-                                                                                                    title={
-                                                                                                        field?.tooltipMessage ?? ""
-                                                                                                    }
-                                                                                                >
-                                                                                                    <InfoIcon color="disabled" />
-                                                                                                </Tooltip>
-                                                                                            </Grid>
-                                                                                        ) : null}
-                                                                                    </Grid>
-                                                                                </Grid> : field.fieldName === formFieldNames.subMarketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                                                                    <Grid container spacing={1}>
-                                                                                        <Grid
-                                                                                            item
-                                                                                            xs={
-                                                                                                permissions.marketSegment.isCreate ? 10
-                                                                                                    : 11
-                                                                                            }
-                                                                                            sm={
-                                                                                                permissions.marketSegment.isCreate ? 10
-                                                                                                    : 11
-                                                                                            }
-                                                                                            md={
-                                                                                                permissions.marketSegment.isCreate ? 10
-                                                                                                    : 11
-                                                                                            }
-                                                                                        >
-                                                                                            <FormTypes
-                                                                                                fields={pricingConditionData.fields}
-                                                                                                fieldData={field}
-                                                                                                disabled={(Boolean(pricingConditionId) && field.disableOnEdit)}
-                                                                                                errors={errors}
-                                                                                                touched={touched}
-                                                                                                label={field.fieldLabel}
-                                                                                                name={field.fieldName}
-                                                                                                type={field.type}
-                                                                                                setFieldValue={(name, value) => {
-                                                                                                    handleValuesChange({ [name]: value })
-                                                                                                    setFieldValue(name, value)
-                                                                                                }}
-                                                                                                required={field.required}
-                                                                                                fullWidth
-                                                                                                isTooltip={field.isTooltip}
-                                                                                                tooltipMessage={field.tooltipMessage}
-                                                                                                onChange={(e, val) => {
-                                                                                                    setNewSubMarketSegmentId(null);
-                                                                                                    setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                                                                    handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
-                                                                                                }}
-                                                                                                size="small"
-                                                                                                values={
-                                                                                                    newSubMarketSegmentId
-                                                                                                        ? initializeSubMarketSegmentDropdown(
-                                                                                                            values,
-                                                                                                            subMarketSegmentDataSource
-                                                                                                        )
-                                                                                                        : values
-                                                                                                }
-                                                                                                options={subMarketSegmentDataSource}
-                                                                                                doNotShowInfoTooltip={true}
-                                                                                            />
-                                                                                        </Grid>
-                                                                                        {
-                                                                                            permissions.marketSegment.isCreate && (
-                                                                                                <Grid item xs={1} sm={1} md={1}>
-                                                                                                    <Tooltip
-                                                                                                        title="Add Sub Market Segment"
-                                                                                                        className="mt-1"
-                                                                                                    >
-                                                                                                        <IconButton
-                                                                                                            onClick={() => {
-                                                                                                                setShowAddMarketSegmentDialog(true);
-                                                                                                            }}
-                                                                                                            disabled={(Boolean(pricingConditionId) && field.disableOnEdit)}
-                                                                                                            size="small"
-                                                                                                        >
-                                                                                                            <AddIcon color={(Boolean(pricingConditionId) && field.disableOnEdit) ? "disabled" : "primary"} />
-                                                                                                        </IconButton>
-                                                                                                    </Tooltip>
-                                                                                                </Grid>
-                                                                                            )
-                                                                                        }
-                                                                                        {field?.tooltipMessage ? (
-                                                                                            <Grid item xs={1} sm={1} md={1}>
-                                                                                                <Tooltip
-                                                                                                    title={
-                                                                                                        field?.tooltipMessage ?? ""
-                                                                                                    }
-                                                                                                >
-                                                                                                    <InfoIcon color="disabled" />
-                                                                                                </Tooltip>
-                                                                                            </Grid>
-                                                                                        ) : null}
-                                                                                    </Grid>
-                                                                                </Grid> : field.fieldName === "salesRep" ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                                                                    <Grid container spacing={1}>
-                                                                                        <Grid
-                                                                                            item
-                                                                                            xs={11}
-                                                                                            sm={11}
-                                                                                            md={11}
-                                                                                        >
-                                                                                            <FormTypes
-                                                                                                fields={pricingConditionData.fields}
-                                                                                                fieldData={field}
-                                                                                                errors={errors}
-                                                                                                touched={touched}
-                                                                                                label={field.fieldLabel}
-                                                                                                name={field.fieldName}
-                                                                                                type={field.type}
-                                                                                                // setFieldValue={(name, value) => {
-                                                                                                //     handleValuesChange({[name]: value })
-                                                                                                // setFieldValue(name, value)
-                                                                                                //             }}
-                                                                                                required={field.required}
-                                                                                                fullWidth
-                                                                                                isTooltip={field.isTooltip}
-                                                                                                tooltipMessage={field.tooltipMessage}
-                                                                                                onChange={(e, val) => {
-                                                                                                    setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                                                                    handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
-                                                                                                }}
-                                                                                                size="small"
-                                                                                                values={values}
-                                                                                                options={salesRepDataSource}
-                                                                                                doNotShowInfoTooltip={true}
-                                                                                                onOpen={() => { onSalesRepDropdownOpen(values["entity"]) }}
-                                                                                            />
-                                                                                        </Grid>
-                                                                                        {field?.tooltipMessage ? (
-                                                                                            <Grid item xs={1} sm={1} md={1}>
-                                                                                                <Tooltip
-                                                                                                    title={
-                                                                                                        field?.tooltipMessage ?? ""
-                                                                                                    }
-                                                                                                >
-                                                                                                    <InfoIcon color="disabled" />
-                                                                                                </Tooltip>
-                                                                                            </Grid>
-                                                                                        ) : null}
-                                                                                    </Grid>
-                                                                                </Grid> : (
-                                                                                    <FormTypes
-                                                                                        // {...rest}
-                                                                                        values={values}
-                                                                                        errors={errors}
-                                                                                        touched={touched}
-                                                                                        label={field.fieldLabel}
-                                                                                        name={field.fieldName}
-                                                                                        type={field.type}
-                                                                                        options={field.option}
-                                                                                        setFieldValue={(name, value) => {
-                                                                                            handleValuesChange({ [name]: value })
-                                                                                            setFieldValue(name, value)
-                                                                                        }}
-                                                                                        required={field.required}
-                                                                                        fullWidth
-                                                                                        isTooltip={field?.isTooltip || false}
-                                                                                        tooltipMessage={field?.tooltipMessage}
-                                                                                        size="small"
-                                                                                        imageOrFileUploadCompletePercentage={null}
-                                                                                    />
-                                                                                )}
-                                                                    </Grid>
-                                                                ))}
+                                        {formsData && formsData.map((form, index) => {
+                                            return <div key={index}>
+                                                <h2 className="form-label-style">{form.name}</h2>
+                                                <Box marginY={2}>
+                                                    <Grid spacing={3} container>
+                                                        {form.sectionFields.map((field, index2) => (
+                                                            <Grid key={index2} item xs={12} sm={6} md={6}>
+                                                                <FormTypes
+                                                                    // {...rest}
+                                                                    values={values}
+                                                                    errors={errors}
+                                                                    touched={touched}
+                                                                    label={field.fieldLabel}
+                                                                    name={field.fieldName}
+                                                                    type={field.type}
+                                                                    options={field.option}
+                                                                    setFieldValue={(name, value) => {
+                                                                        setFieldValue(name, value)
+                                                                    }}
+                                                                    required={field.required}
+                                                                    fullWidth
+                                                                    isTooltip={field?.isTooltip || false}
+                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                    size="small"
+                                                                    imageOrFileUploadCompletePercentage={null}
+                                                                />
                                                             </Grid>
-                                                        </Box>
-                                                    </div>
-                                                ) : (
-                                                    form.sectionFields.map((field) => (
-                                                        <FormTypes
-                                                            // {...rest}
-                                                            values={values}
-                                                            errors={errors}
-                                                            touched={touched}
-                                                            label={field.fieldLabel}
-                                                            name={field.fieldName}
-                                                            type={field.type}
-                                                            options={field.option}
-                                                            setFieldValue={(name, value) => {
-                                                                handleValuesChange({ [name]: value })
-                                                                setFieldValue(name, value)
-                                                            }}
-                                                            required={field.required}
+                                                        ))}
+                                                    </Grid>
+                                                </Box>
+                                            </div>
+                                        })}
+                                        <Box>
+                                            <Grid spacing={3} container>
+                                                {values.conditionType === "Price" ?
+                                                    <Grid item xs={12} sm={6} md={6}>
+                                                        <TextField
+                                                            id="mrp"
+                                                            name="mrp"
+                                                            variant="outlined"
+                                                            margin="dense"
                                                             fullWidth
-                                                            isTooltip={field?.isTooltip || false}
-                                                            tooltipMessage={field?.tooltipMessage}
-                                                            size="small"
-                                                            style={{ visibility: "hidden" }}
+                                                            label="Rate"
+                                                            type="number"
+                                                            value={values['mrp']}
+                                                            onChange={(e) => setFieldValue('mrp', e.target.value)}
                                                         />
-                                                    ))
-                                                );
-                                            })}
+                                                    </Grid>
+                                                    :
+                                                    values.conditionType === "Rent" ?
+                                                        <Fragment>
+                                                            <Grid item xs={12} sm={6} md={6}>
+                                                                <FormControl fullWidth margin="dense" variant="outlined">
+                                                                    <InputLabel id="demo-simple-select-outlined-label">Rent Type</InputLabel>
+                                                                    <Select
+                                                                        labelId="demo-simple-select-outlined-label"
+                                                                        id="demo-simple-select-outlined"
+                                                                        value={values['rentType']}
+                                                                        onChange={(e) => {
+                                                                            setFieldValue('rentType', e.target.value)
+                                                                        }}
+                                                                        name="rentType"
+                                                                    >
+                                                                        <MenuItem value="Fixed">Fixed</MenuItem>
+                                                                        <MenuItem value="Variable">Variable</MenuItem>
+                                                                    </Select>
+                                                                </FormControl>
+                                                            </Grid>
+                                                            {values.rentType === "Fixed" ?
+                                                                <Grid item xs={12} sm={6} md={6}>
+                                                                    <TextField
+                                                                        id="rentRate"
+                                                                        name="rentRate"
+                                                                        variant="outlined"
+                                                                        margin="dense"
+                                                                        fullWidth
+                                                                        label="Rent Per Day"
+                                                                        type="number"
+                                                                        value={values['rentRate']}
+                                                                        onChange={(e) => setFieldValue('rentRate', e.target.value)}
+                                                                    />
+                                                                </Grid>
+                                                                : null
+                                                            }
+                                                        </Fragment> :
+                                                        <Fragment>
+                                                            {(values.conditionType === "Discount" || values.conditionType === "Charge" || values.conditionType === "Tax") &&
+                                                                <Grid item xs={12} sm={6} md={6}>
+                                                                    <FormControl fullWidth margin="dense" variant="outlined">
+                                                                        <InputLabel id="demo-simple-select-outlined-label">{values.conditionType} Type</InputLabel>
+                                                                        <Select
+                                                                            labelId="demo-simple-select-outlined-label"
+                                                                            id="demo-simple-select-outlined"
+                                                                            value={values['amountType']}
+                                                                            onChange={(e) => {
+                                                                                setFieldValue('amountType', e.target.value)
+                                                                            }}
+                                                                            label="Type"
+                                                                            name="amountType"
+                                                                        >
+                                                                            <MenuItem value="Flat">Flat</MenuItem>
+                                                                            <MenuItem value="Percentage">Percentage</MenuItem>
+                                                                            {values.conditionType === "Discount" &&
+                                                                                <MenuItem value="Group Flat">Group Flat</MenuItem>
+                                                                            }
+                                                                            {values.conditionType === "Discount" &&
+                                                                                <MenuItem value="Group Percentage">Group Percentage</MenuItem>
+                                                                            }
+                                                                        </Select>
+                                                                    </FormControl>
+                                                                </Grid>
+                                                            }
+                                                            {(values.amountType === "Flat" || values.amountType === "Percentage") &&
+                                                                <Grid item xs={12} sm={6} md={6}>
+                                                                    <TextField
+                                                                        id="amount"
+                                                                        name="amount"
+                                                                        variant="outlined"
+                                                                        margin="dense"
+                                                                        fullWidth
+                                                                        label={values.conditionType + (values.amountType === "Flat" ? " Amount" : " Percentage")}
+                                                                        type="number"
+                                                                        value={values['amount']}
+                                                                        onChange={(e) => setFieldValue('amount', e.target.value)}
+                                                                    />
+                                                                </Grid>
+                                                            }
+                                                        </Fragment>
+                                                }
+                                                {(values.conditionType === "Discount" && (values.amountType === "Flat" || values.amountType === "Percentage")) &&
+                                                    <Fragment>
+                                                        <Grid item xs={12} sm={6} md={6}>
+                                                            <TextField
+                                                                id="minTransAmount"
+                                                                name="minTransAmount"
+                                                                variant="outlined"
+                                                                margin="dense"
+                                                                fullWidth
+                                                                label="Minimum Transaction Amount"
+                                                                type="number"
+                                                                value={values['minTransAmount']}
+                                                                onChange={(e) => setFieldValue('minTransAmount', e.target.value)}
+                                                            />
+                                                        </Grid>
+                                                        <Grid item xs={12} sm={6} md={6}>
+                                                            <TextField
+                                                                id="maxDiscount"
+                                                                name="maxDiscount"
+                                                                variant="outlined"
+                                                                margin="dense"
+                                                                fullWidth
+                                                                label="Maximum Discount"
+                                                                type="number"
+                                                                value={values['maxDiscount']}
+                                                                onChange={(e) => setFieldValue('maxDiscount', e.target.value)}
+                                                            />
+                                                        </Grid>
+                                                    </Fragment>
+                                                }
+                                            </Grid>
+                                            {(values.conditionType === "Rent" && values.rentType === "Variable") &&
+                                                <MultipleEntry
+                                                    list={dayWiseRent}
+                                                    setList={setDayWiseRent}
+                                                    fieldNames={["day", "rate"]}
+                                                    fieldLabels={["Till Days", "Per Day Rate"]}
+                                                    label="Day Wise Rent"
+                                                />
+                                            }
+                                            {(values.conditionType === "Discount" && (values.amountType === "Group Flat" || values.amountType === "Group Percentage")) &&
+                                                <MultipleEntry
+                                                    list={dayWiseRent}
+                                                    setList={setDayWiseRent}
+                                                    fieldNames={["qty", "amount"]}
+                                                    fieldLabels={values.amountType === "Group Flat" ? ["Quantity", "Discount Amount"]
+                                                        : ["Quantity", "Discount Percentage"]}
+                                                    label="Group Discount"
+                                                />
+                                            }
+                                        </Box>
                                     </Form>
-
                                 </CustomDialogContent>
-
                                 <CustomDialogFooter>
                                     <Button
                                         type="button"
@@ -780,29 +402,21 @@ export default function ManagePricingConditionsDialog({
                                         color="primary"
                                         size="small"
                                         onClick={() => {
-                                            if (isFieldNotTouched(pricingConditionData, values)) onClose()
-                                            else setShowConfirmDialog(true)
+                                            if (!isEqual(ref.current.values, initialData.values)) {
+                                                setShowConfirmDialog(true)
+                                            }
+                                            else {
+                                                onClose()
+                                            }
                                         }}
                                     >
                                         Cancel
                                     </Button>
-
                                     <CustomButton
                                         loading={loading}
                                         variant="contained"
                                         color="primary"
-                                        disabled={
-                                            loading ||
-                                            Object.values(
-                                                simplifyValues(
-                                                    pricingConditionData.initialValues,
-                                                    pricingConditionData.fields
-                                                )
-                                            ).toString() ===
-                                            Object.values(
-                                                simplifyValues(values, pricingConditionData.fields)
-                                            ).toString()
-                                        }
+                                        disabled={loading || isEqual(ref?.current?.values, initialData?.values)}
                                         onClick={(e) => {
                                             e.preventDefault();
                                             handleScroll(errors)
@@ -831,124 +445,9 @@ export default function ManagePricingConditionsDialog({
                             </>
                         )}
                     </Formik>
-                )}
-            </Dialog>
-
-            {
-                showAddProductCategoryDialog && <CreateProductCategory
-                    productCategoryId={null}
-                    onClose={() => setShowAddProductCategoryDialog(false)}
-                    onSuccess={(data) => {
-                        if (data?._id) {
-                            setProductCategoryDataSource((prevState) => {
-                                return [
-                                    ...prevState,
-                                    {
-                                        optionValue: data._id,
-                                        optionLabel: data.name,
-                                        order: productCategoryDataSource.length,
-                                        default: false
-                                    },
-                                ];
-                            });
-                            setNewProductCategoryId(data._id);
-                        }
-                        setShowAddProductCategoryDialog(false);
-                    }}
-                />
-            }
-            {
-                showAddMarketSegmentDialog && <ManageMarketSegmentDialog
-                    marketSegmentId={null}
-                    onClose={() => {
-                        setShowAddMarketSegmentDialog(false);
-                    }}
-                    onSuccess={(data) => {
-                        if (data?._id) {
-                            setMainMarketSegmentDataSource((prevState) => {
-                                return [
-                                    ...prevState,
-                                    {
-                                        optionValue: data._id,
-                                        optionLabel: data.name,
-                                        order: mainMarketSegmentDataSource.length,
-                                        default: false,
-                                        parentMarketSegment: data.parentMarketSegment
-                                    }
-                                ];
-                            });
-
-                            //  If no parent selected, consider that as parent and add it in Market Segment
-                            if (data.parentMarketSegment === "") {
-                                setMarketSegmentDataSource((prevState) => {
-                                    return [
-                                        ...prevState,
-                                        {
-                                            optionValue: data._id,
-                                            optionLabel: data.name,
-                                            order: marketSegmentDataSource.length,
-                                            default: false,
-                                            parentMarketSegment: data.parentMarketSegment
-                                        }
-                                    ];
-                                });
-                                setSubMarketSegmentDataSource([]);
-                                setNewMarketSegmentId(data._id);
-                                setNewSubMarketSegmentId(null);
-                            } else {
-                                //  If parent selected, consider that as a child
-                                if (marketSegmentDataSource.some(d => d?.optionValue === data.parentMarketSegment)) {
-                                    setSubMarketSegmentDataSource([
-                                        ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
-                                        {
-                                            optionValue: data._id,
-                                            optionLabel: data.name,
-                                            order: subMarketSegmentDataSource.length,
-                                            default: false,
-                                            parentMarketSegment: data.parentMarketSegment
-                                        }]
-                                    );
-                                } else {
-
-                                    let initializeMarketSegmentDataSource = [];
-                                    mainMarketSegmentDataSource.forEach(option => {
-                                        if (option.parentMarketSegment === "" || mainMarketSegmentDataSource.some(s => s.parentMarketSegment === option.optionValue)) {
-                                            initializeMarketSegmentDataSource.push(option);
-                                        }
-                                    })
-
-                                    if (!initializeMarketSegmentDataSource.some(s => s.optionValue === data.parentMarketSegment)) {
-                                        const getMarketSegment = mainMarketSegmentDataSource.find(d => d?.optionValue === data.parentMarketSegment);
-
-                                        initializeMarketSegmentDataSource.push({
-                                            optionValue: getMarketSegment.optionValue,
-                                            optionLabel: getMarketSegment.optionLabel,
-                                            order: initializeMarketSegmentDataSource.length,
-                                            default: false,
-                                            parentMarketSegment: getMarketSegment.parentMarketSegment
-                                        })
-                                    }
-                                    setMarketSegmentDataSource(initializeMarketSegmentDataSource);
-
-                                    setSubMarketSegmentDataSource([
-                                        ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
-                                        {
-                                            optionValue: data._id,
-                                            optionLabel: data.name,
-                                            order: subMarketSegmentDataSource.length,
-                                            default: false,
-                                            parentMarketSegment: data.parentMarketSegment
-                                        }]
-                                    );
-                                }
-                                setNewMarketSegmentId(data.parentMarketSegment);
-                                setNewSubMarketSegmentId(data._id);
-                            }
-                        }
-                        setShowAddMarketSegmentDialog(false);
-                    }}
-                />
-            }
+                )
+                }
+            </Dialog >
         </>
     );
 }

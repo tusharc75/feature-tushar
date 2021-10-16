@@ -31,8 +31,16 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.info.light, //  textDark
     fontSize: 15,
   },
+  darkLinks: {
+    color: theme.palette.info.dark, //  textDark
+    fontSize: 15,
+  },
   linkDivider: {
     backgroundColor: "#ffffff42", //  darkBg
+    margin: "0 10px",
+  },
+  darkLinkDivider: {
+    backgroundColor: "grey", //  darkBg
     margin: "0 10px",
   },
   delBtn: {
@@ -48,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ImportExportLinks({ ids = [], permissions, module, api,
   afterImportCompleted, recordsToExport = 0, exportSelectedRecords = null, isExportAllOrSomeFeature = false,
-  onExportToExcelSuccess = () => { }, total = 0
+  onExportToExcelSuccess = () => { }, total = 0, additionalParams = null, isBackgroundWhite = false
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery("(max-width: 960px)");
@@ -75,8 +83,16 @@ export default function ImportExportLinks({ ids = [], permissions, module, api,
 
       let formData = new FormData();
       formData.append("file", file);
+
+
+      let importApi = `${api}/import`;
+
+      if (additionalParams) {
+        importApi = `${importApi}?${additionalParams}`
+      }
+
       axiosInstance()
-        .post(`${api}/import`, formData, {
+        .post(importApi, formData, {
           responseType: "blob",
           headers: { "Content-Type": "multipart/form-data" },
 
@@ -113,6 +129,11 @@ export default function ImportExportLinks({ ids = [], permissions, module, api,
    */
   const exportToExcel = () => {
     let exportApi = `${api}/template?export=true`
+
+    if (additionalParams) {
+      exportApi = `${exportApi}&${additionalParams}`;
+    }
+
     if (recordsToExport > 0 && recordsToExport < total) {
       if (exportSelectedRecords) {
         exportSelectedRecords()
@@ -149,8 +170,14 @@ export default function ImportExportLinks({ ids = [], permissions, module, api,
    * DOWNLOAD TEMPLATE
    */
   const downloadTemplate = () => {
+    let exportApi = `${api}/template`
+
+    if (additionalParams) {
+      exportApi = `${exportApi}?${additionalParams}`;
+    }
+
     axiosInstance()
-      .get(`${api}/template`, { responseType: "arraybuffer" })
+      .get(exportApi, { responseType: "arraybuffer" })
       .then((response) => {
         const fileName = response.headers["content-disposition"].split(
           "filename="
@@ -185,7 +212,7 @@ export default function ImportExportLinks({ ids = [], permissions, module, api,
         {permissions?.isCreate && <>
           <label
             htmlFor="importFromExcel"
-            className={`${classes.links} cursor-pointer`}
+            className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}
           >
             {ImportInput}
             Import from Excel
@@ -193,13 +220,13 @@ export default function ImportExportLinks({ ids = [], permissions, module, api,
           <Divider
             orientation="vertical"
             flexItem
-            className={classes.linkDivider}
+            className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider}
           />
         </>
         }
         <label
           onClick={exportToExcel}
-          className={`${classes.links} cursor-pointer`}
+          className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}
         >
           Export to Excel {
             isExportAllOrSomeFeature ? ((recordsToExport === 0 || recordsToExport === total) ? "(All)" : `(${recordsToExport})`)
@@ -209,11 +236,11 @@ export default function ImportExportLinks({ ids = [], permissions, module, api,
         <Divider
           orientation="vertical"
           flexItem
-          className={classes.linkDivider}
+          className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider}
         />
         <label
           onClick={downloadTemplate}
-          className={`${classes.links} cursor-pointer`}
+          className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}
         >
           Download Template
         </label>

@@ -33,3 +33,4 @@ yarn.lock
 package-lock.json
 
 __tests__
+/.github

@@ -58,7 +58,7 @@ const LookupResource = [
   { name: 'Product Template', value: 'Product Template' },
   { name: 'Quote Pdf Template', value: 'Quote Pdf Template' },
   { name: 'Terms & Conditions', value: 'Terms & Conditions' },
-  { name: 'Warehouse', value: 'Warehouse' },
+  { name: 'Plants', value: 'Warehouse' },
   { name: 'Budget', value: 'Budget' },
   { name: 'Market Segment', value: 'Market Segment' },
   { name: 'Rental Management', value: 'Rental Management' },

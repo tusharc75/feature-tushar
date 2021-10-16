@@ -23,6 +23,8 @@ import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
 import { orderBy, uniqBy } from 'lodash';
 
+export const defaultActivityShow = false;
+
 export const vapidKey = 'BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4';
 
 export const validations = {
@@ -228,7 +230,8 @@ export const quoteBuilder = {
 
 export const rentalManagement = {
   rentalManagementResource: 'rentalManagement',
-  rentalManagementApi: '/rental-management'
+  rentalManagementApi: '/rental-management',
+  resource: "rental-management"
 };
 
 export const deliveryTicket = {
@@ -800,52 +803,49 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
   if (filterCountries.length > 1) {
     switch (currencyCode) {
       case 'AUD':
-        currencyData = filterCountries.find((f) => f.country === 'Australia');
+        currencyData = filterCountries.find((f) => f.country === 'Australia') ?? filterCountries[0];
         break;
 
       case 'CHF':
-        currencyData = filterCountries.find((f) => f.country === 'Switzerland');
+        currencyData = filterCountries.find((f) => f.country === 'Switzerland') ?? filterCountries[0];
         break;
 
       case 'EUR':
-        currencyData = filterCountries.find((f) => f.country === 'France');
+        currencyData = filterCountries.find((f) => f.country === 'France') ?? filterCountries[0];
         break;
 
       case 'GBP':
-        currencyData = filterCountries.find((f) => f.country === 'United Kingdom');
+        currencyData = filterCountries.find((f) => f.country === 'United Kingdom') ?? filterCountries[0];
         break;
 
       case 'NOK':
-        currencyData = filterCountries.find((f) => f.country === 'Norway');
+        currencyData = filterCountries.find((f) => f.country === 'Norway') ?? filterCountries[0];
         break;
 
       case 'NZD':
-        currencyData = filterCountries.find((f) => f.country === 'New Zeland');
+        currencyData = filterCountries.find((f) => f.country === 'New Zeland') ?? filterCountries[0];
         break;
 
       case 'XAF':
-        currencyData = filterCountries.find((f) => f.country === 'Cameroon');
+        currencyData = filterCountries.find((f) => f.country === 'Cameroon') ?? filterCountries[0];
         break;
 
       case 'XCD':
-        currencyData = filterCountries.find((f) => f.country === 'Dominica');
+        currencyData = filterCountries.find((f) => f.country === 'Dominica') ?? filterCountries[0];
         break;
 
       case 'XOF':
-        currencyData = filterCountries.find((f) => f.country === 'Benin');
+        currencyData = filterCountries.find((f) => f.country === 'Benin') ?? filterCountries[0];
         break;
 
       case 'XPF':
-        currencyData = filterCountries.find((f) => f.country === 'French Polynesia');
+        currencyData = filterCountries.find((f) => f.country === 'French Polynesia') ?? filterCountries[0];
         break;
     }
 
-    //  just for safe side, if no record found, change the value to initial state;
-    if (!currencyData) {
-      currencyData = filterCountries[0];
+    if (currencyData.languages.length === 0) {
+      currencyData.languages = [...new Set(filterCountries.map((m) => m.languages).flat())];
     }
-
-    currencyData.languages = [...new Set(filterCountries.map((m) => m.languages).flat())];
   }
 
   // Check if that currency's country has multiple language,
@@ -1108,3 +1108,40 @@ export const setFieldsInAscendingOrder = (fieldsToOrder) => {
 export const generateUniqueId = () => {
   return `id-${new Date().getTime()}`;
 };
+
+export const prepareDataForGrid = (data) => {
+
+  let objectValues = {};
+  let restProperties = {};
+
+  Object.keys(data).forEach((key) => {
+    if (typeof data[key] === "object") {
+
+      if (Array.isArray(data[key])) {
+        if (data[key].length > 0 && data[key][0].hasOwnProperty("optionLabel")) {
+          const [first, ...rest] = data[key];
+
+          restProperties[key] = first["optionLabel"];
+          restProperties[`${key}Id`] = first["optionValue"];
+          restProperties[`rest${key}`] = rest
+        }
+
+      } else {
+        objectValues[key] = data[key];
+      }
+    } else {
+      restProperties[key] = data[key];
+    }
+  })
+
+  let finalObject = { ...restProperties };
+
+  Object.keys(objectValues).forEach(d => {
+    if (objectValues[d].hasOwnProperty("optionLabel")) {
+      finalObject[d] = objectValues[d]["optionLabel"];
+      finalObject[`${d}Id`] = objectValues[d]["optionValue"];
+    }
+  });
+
+  return finalObject;
+}

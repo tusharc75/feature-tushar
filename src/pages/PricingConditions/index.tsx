@@ -18,9 +18,7 @@ import {
   pricingCondition,
 } from "../../constants/helpers";
 import routes from "./../../components/Helpers/Routes";
-import {
-  CommonRenderer,
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid, {
   reducer,
   intialState,
@@ -34,11 +32,9 @@ import { Link } from "react-router-dom";
 
 let timeout;
 const PricingConditions = () => {
-  const {
-    state: { permissions },
-  }: any = useData();
-  const { pricingConditionApi } = pricingCondition;
 
+  const { state: { permissions } }: any = useData();
+  const { pricingConditionApi } = pricingCondition;
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -66,11 +62,9 @@ const PricingConditions = () => {
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
-
     if (timeout) {
       clearTimeout(timeout);
     }
-
     timeout = setTimeout(() => {
       fetchPriceConditionList()
     }, millisec);
@@ -91,30 +85,19 @@ const PricingConditions = () => {
       cellRenderer: "nameRenderer"
     },
     {
-      field: "customer",
-      headerName: "Customer",
+      field: "description",
+      headerName: "Description",
       show: true,
       cellRenderer: "commonRenderer"
     },
     {
-      field: "product",
-      headerName: "Product",
-      show: true,
-      cellRenderer: "commonRenderer"
-    },
-    {
-      field: "warehouse",
-      headerName: "Warehouse",
-      show: true,
-      cellRenderer: "commonRenderer"
-    },
-    {
-      field: "currency",
-      headerName: "Currency",
+      field: "conditionType",
+      headerName: "Condition Type",
       show: true,
       cellRenderer: "commonRenderer"
     },
   ];
+
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
@@ -162,9 +145,7 @@ const PricingConditions = () => {
 
   const replaceFieldNameForSorting = (field) => {
     const updatedField = replaceFieldName(field);
-
     if (field !== updatedField) return updatedField;
-
     switch (field) {
       case "product":
         return "product.optionLabel";
@@ -182,25 +163,19 @@ const PricingConditions = () => {
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-
     const updatedFilters = [];
-
     if (!isObjectEmpty(filters)) {
-
       Object.keys(filters).forEach(field => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
         })
       });
-
       deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
     }
-
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
@@ -219,18 +194,14 @@ const PricingConditions = () => {
       .get(`/pricing-condition${queryString}`)
       .then(({ data }) => {
         let rows = data.data.map((item) => {
-          const { createdBy, updatedBy, product, warehouse, customer, ...restProperties } =
-            item;
+          const { createdBy, updatedBy, ...restProperties } = item;
           let res = {
             ...restProperties,
             id: item._id,
-            product: product?.optionLabel ?? "",
-            warehouse: warehouse?.optionLabel ?? "",
-            customer: customer?.optionLabel ?? "",
           };
           return res;
         });
-
+        console.log(rows)
         dispatch({ type: "initialize", data: rows, count: data.count });
         setTimeout(() => {
           dispatch({ type: "loading", loading: false });
@@ -243,7 +214,6 @@ const PricingConditions = () => {
   };
 
   const onSuccess = () => {
-    // Add code of getting grid data again
     fetchPriceConditionList();
     setShowManagePriceConditionDialog({ show: false, id: null });
   };

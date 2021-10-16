@@ -167,7 +167,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                                     onClose={handleCloseMenu}
                                 >
                                     <MenuItem
-                                        disabled={!permissions.projectSales.isCreate}
+                                        disabled={!permissions?.projectStrategy?.isCreate}
                                         onClick={() => {
                                             setShowCreateProjectSalesDialog(true);
                                             handleCloseMenu();
@@ -176,7 +176,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                                         Create New
                                     </MenuItem>
                                     <MenuItem
-                                        disabled={!permissions.projectSales.isUpdate}
+                                        disabled={!permissions?.projectStrategy?.isUpdate}
                                         onClick={() => {
                                             setShowAddProjectSalesDialog(true)
                                             handleCloseMenu();

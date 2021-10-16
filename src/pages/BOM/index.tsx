@@ -16,7 +16,7 @@ const BOMTable = () => {
   const [BOMData, setBOMData] = useState([]);
 
   const options: any = {
-    search: false,
+    search: true,
     paging: false,
     sorting: false,
     draggable: false,
@@ -26,7 +26,7 @@ const BOMTable = () => {
 
   const columns = [
     {
-      title: 'Product Name',
+      title: 'Product Description',
       field: 'productName',
       render: (rowData: any) => (
         <div style={{ width: 150 }}>
@@ -142,10 +142,15 @@ const BOMTable = () => {
       </div>
       <div className="main-container">
         {BOMData.length === 1 ? (
-          <MaterialTable icons={materialTableIcons} data={BOMData} columns={columns} options={options} />
+          <MaterialTable icons={materialTableIcons} data={BOMData} columns={columns}
+            options={{
+              search: true,
+              filtering: true
+            }} />
         ) : (
           <Box margin={1}>
             <MaterialTable
+
               isLoading={loadingBOMData}
               icons={materialTableIcons}
               data={BOMData}
@@ -153,7 +158,11 @@ const BOMTable = () => {
               parentChildData={(row, rows) => {
                 return rows.find((a) => a._id === row.parent);
               }}
-              options={options}
+              options={{
+                search: true,
+                filtering: true
+              }}
+            // options={options}
             />
           </Box>
         )}

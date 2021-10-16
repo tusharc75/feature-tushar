@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TablePagination } from "@material-ui/core";
 import { AgGridReact, AgGridColumn } from "ag-grid-react";
 import { isMobile, isTablet } from "react-device-detect";
@@ -13,6 +13,7 @@ import { CustomLoadingOverlay, CommonRenderer } from "../../components/AgGridCom
 import CustomFloatingFilter from "../../components/AgGridComponents/CustomAgGridFilter";
 import { orderBy } from "lodash";
 import NumericEditor from "./NumericEditor";
+import DateEditor from "./DateEditor";
 
 export function reducer(state, action) {
   switch (action.type) {
@@ -135,13 +136,25 @@ export default function CustomAgGridEditable({
   forProductBuilder = false,
   fromProductGrid = false,
   currency = null,
-  renderedFrom = null
+  renderedFrom = null,
+  selectedRecords = [],
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
 
   const [clientSideGridApi, setClientSideGridApi] = useState(null);
   const enableRowDrag = columns.some((d) => d.rowDrag);
+
+  useEffect(() => {
+    if (clientSideGridApi && selectedRecords.length) {
+      clientSideGridApi.forEachNode(function (node) {
+        node.setSelected(
+          selectedRecords.some((o) => o._id === node.data._id)
+        );
+      });
+    }
+
+  }, [clientSideGridApi, selectedRecords])
 
   //  If you want to do something once grid binding done
   const onGridReady = (params) => {
@@ -221,6 +234,7 @@ export default function CustomAgGridEditable({
         editable={column.editable ?? false}
         cellEditor={column.cellEditor}
         singleClickEdit={true}
+        cellEditorParams={column.cellEditorParams ?? {}}
       // floatingFilterComponent={column.floatingFilterComponent ?? null}
       // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
       //   suppressFilterButton: true,
@@ -243,6 +257,7 @@ export default function CustomAgGridEditable({
         editable={column.editable ?? false}
         cellEditor={column.cellEditor}
         singleClickEdit={true}
+        cellEditorParams={column.cellEditorParams ?? {}}
       // floatingFilterComponent={column.floatingFilterComponent ?? null}
       // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
       //   suppressFilterButton: true,
@@ -301,6 +316,7 @@ export default function CustomAgGridEditable({
                 customLoadingOverlay: CustomLoadingOverlay,
                 customFloatingFilter: CustomFloatingFilter,
                 numericCellEditor: NumericEditor,
+                dateEditor: DateEditor
                 // customLoadingCellRenderer: CustomLoadingCellRenderer,
                 // customNoRowsOverlay: CustomNoRowsOverlay
               }}
@@ -389,6 +405,7 @@ export default function CustomAgGridEditable({
               suppressPaginationPanel={true}
               paginationPageSize={limit}
               rowDragManaged={enableRowDrag}
+            // stopEditingWhenCellsLoseFocus={true}
             >
               {allowSelection && (
                 <AgGridColumn

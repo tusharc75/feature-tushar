@@ -4,6 +4,7 @@ import { AiOutlineLoading } from "react-icons/ai";
 import CustomRenderCell from "../Helpers/CustomRenderCell";
 import NoDataCell from "../Helpers/NoDataCell";
 import { dateFormat } from "../../constants/helpers"
+import Avatar from "@material-ui/core/Avatar"
 import { Link } from 'react-router-dom'
 
 export const CommonRenderer = params => <CustomRenderCell value={params.value} />;
@@ -52,10 +53,29 @@ export const UpdatedByRenderer = params => params.value ? (
 )
 
 export const LinkRenderer = params => params.value ? (
-    <Link className="link" to={params?.isForPopup ? `${params?.pathName}?id=${params?.data[params?.property]}` :
-        `${params?.pathName}/${params?.data[params?.property]}`} title={params?.value}>{params?.value}</Link>
+    <>
+        <Link className="link" to={params?.isForPopup ? `${params?.pathName}?id=${params?.data[params?.property]}` :
+            `${params?.pathName}/${params?.data[params?.property]}`} title={params?.value}>{params?.value}</Link>
+
+        {
+            params["more"] && params.data[params["more"]]?.length > 0 && (
+                <span className="createdAtTime badge-date">{`+${params.data[params["more"]].length} more..`}</span>
+            )
+        }
+    </>
 ) : (
     <NoDataCell />
+)
+
+export const NameRenderer = params => params.value ? (
+    <Link className="link"
+        to={`${params?.pathName}/${params?.data?._id}`} title={params?.value}>{params?.value}</Link>
+) : (
+    <NoDataCell />
+)
+
+export const ImageRenderer = params => (
+    <Avatar className="grid-avatar" src={params?.value} />
 )
 
 export const CustomLoadingOverlay = (params) => <div

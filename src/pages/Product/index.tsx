@@ -204,7 +204,7 @@ const Product = () => {
             });
             if (column.length) {
                 column.splice(4, 0, { field: "inventoryCount", headerName: "Inventory Count", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" },
-                    { field: "warehouses", headerName: "Warehouses", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" })
+                    { field: "warehouses", headerName: "Plants", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" })
                 column.push(
                     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer", leval: "price-builder-custom" },
                     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer", leval: "price-builder-custom" },
