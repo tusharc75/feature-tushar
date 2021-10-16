@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.19.0](https://github.com/vebholic/oms_frontend/compare/v1.18.0...v1.19.0) (2021-10-16)
+
+
+### Features
+
+* - socket.io-client version fixed ([c7eac43](https://github.com/vebholic/oms_frontend/commit/c7eac43e80eccabedf9b94b00821e4e261322711))
+* **rentalmanagement:** add packages column for package products ([9d0f87c](https://github.com/vebholic/oms_frontend/commit/9d0f87c3f04d75abb77bee9664396bc2ffab95f5))
+* **rentalmanagementdetails.tsx:** confirm on delte ([55db778](https://github.com/vebholic/oms_frontend/commit/55db7781f6947edec6471c1364226ba506692e06))
+* **rentalmanagementdetails.tsx:** link detail ([575084b](https://github.com/vebholic/oms_frontend/commit/575084b6d03377361db6106b65162731ce5aec11))
+
+
+### Bug Fixes
+
+* **URL:** white spaces removed from URL type field ([cbb443f](https://github.com/vebholic/oms_frontend/commit/cbb443f45f213f1f733ca92b51c30717c6cb4ce7))
+
 ## [1.18.0](https://github.com/vebholic/oms_frontend/compare/v1.17.0...v1.18.0) (2021-10-15)
 
 
