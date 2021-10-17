@@ -44,9 +44,9 @@ const ReceivingTicket = ({ warehouselist, productInventory, currentStep, handleR
       dispatch({
         type: "initialize", data: productInventory.map((u) => ({
           ...u,
-          productName: u.productName || "",
-          inventoryId: u?.inventory._id,
-          productId: u?.product._id,
+          productName: u?.productName || "",
+          inventoryId: u?.inventory?._id,
+          productId: u?.product?._id,
           costPerDay: u.costing?.costPerDay,
           totalCost: u.costing?.totalCost,
           startDate: u.costing?.startDate,

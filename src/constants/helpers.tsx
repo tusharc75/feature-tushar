@@ -1132,6 +1132,7 @@ export const prepareDataForGrid = (data) => {
     } else {
       restProperties[key] = data[key];
     }
+
   })
 
   let finalObject = { ...restProperties };
@@ -1143,5 +1144,14 @@ export const prepareDataForGrid = (data) => {
     }
   });
 
+  if (data?.createdBy) {
+    finalObject["createdBy"] = data.createdBy?.user?.concatedName
+    finalObject["createdByDate"] = data.createdBy?.date
+  }
+  if (data?.updatedBy) {
+    finalObject["updatedBy"] = data?.updatedBy?.user?.concatedName
+    finalObject["updatedByDate"] = data?.updatedBy?.date
+  }
+  finalObject["id"] = data?._id
   return finalObject;
 }
