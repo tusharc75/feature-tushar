@@ -85,19 +85,21 @@ const CreateFormBuilder = () => {
             })
         })
         if ((resource.toString()).toLowerCase() === "product") {
-            var otherField = []
-            await axiosInstance().get(`/product-template/allfields`).then(({ data: { data } }) => {
-                otherField = data;
-            }).catch((error) => {
-            });
-            const result = checkUniqueValidation(data, otherField);
-            if (result.error) {
-                toastConfig.setToastConfig({
-                    open: true,
-                    type: "error",
-                    message: result.message,
+            if (data.filter((e) => e.fieldName === "productTemplate").length) {
+                var otherField = []
+                await axiosInstance().get(`/product-template/allfields`).then(({ data: { data } }) => {
+                    otherField = data;
+                }).catch((error) => {
                 });
-                return false;
+                const result = checkUniqueValidation(data, otherField);
+                if (result.error) {
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: "error",
+                        message: result.message,
+                    });
+                    return false;
+                }
             }
         }
         const result = checkFormulaLoop(data);
