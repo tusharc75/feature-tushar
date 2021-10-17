@@ -40,6 +40,7 @@ import { CustomOfflineContext } from "../../StateProvider/OfflineContext/Offline
 import HideWhenOffline from "../../components/HideWhenOffline";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
 import { GiMineExplosion } from 'react-icons/gi'
 import HtmlTooltip from '../../components/CustomTooltipTitle'
@@ -58,6 +59,7 @@ const RentalManagementDetailsPage = () => {
   const [headingLbl, setHeadingLbl] = useState("");
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [rentalManagementData, setRentalManagementData] = useState(null);
+  const [deleteData, setDeleteData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [isDeleting, setDeleting] = useState(false);
   const [isAddingProducts, setAddingProducts] = useState(false);
@@ -277,17 +279,20 @@ const RentalManagementDetailsPage = () => {
     }
 
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/products-packages`).then(({ data }) => {
-      data.data?.products.map((u) => (tempInventory.push({
+      data.data?.products.map((u: any) => (tempInventory.push({
         ...u,
         id: u._id,
         detail: u.productName,
         productCategory: u.productCategory?.optionLabel,
+        package: u.hasOwnProperty("package") ? u.package.packageName : "",
+        packageId: u.hasOwnProperty("package") ? u.package._id : ""
       })));
       data.data?.packages.map((u) => (tempInventory.push({
         ...u,
         id: u._id,
         detail: u.packageName,
         description: u.packageDescription,
+
       })));
       fetchDeliveryTicket(tempInventory);
 
@@ -323,9 +328,15 @@ const RentalManagementDetailsPage = () => {
   );
 
   const ProductRenderer = (params) => (
-    <Link className="link" title={params.value} to={params.data.type === "product" ? `${routes.productDetail.path}/${params.data.id}` : `${routes.packagesDetail.path}/${params.data.id}`}>
+    <Link className="link" title={params.value} to={params.data.type === "Product" ? `${routes.productDetail.path}/${params.data.id}` : `${routes.packagesDetail.path}/${params.data.id}`}>
       {params.value}
     </Link>
+  );
+
+  const PackageNameRenderer = (params) => (
+    params.value ? <Link className="link" title={params.value} to={`${routes.packagesDetail.path}/${params.data.packageId}`}>
+      {params.value}
+    </Link> : <NoDataCell />
   );
 
   const ActionsRenderer = (params) => (
@@ -335,7 +346,7 @@ const RentalManagementDetailsPage = () => {
         ownerId={user?.user?._id}
         userId={user?.user?._id}
         onDelete={() => {
-          handleRemoveProductInventory([{
+          deleteInventories([{
             id: params.data.id,
             type: params.data?.type.toLowerCase()
           }])
@@ -344,26 +355,31 @@ const RentalManagementDetailsPage = () => {
         entity="rentalManagement"
       />
       {params.data.type === "Package" &&
-        <IconButton
-          onClick={() => explodePackage(params.data.id)}
-          size="small"
-          color='primary'
-        >
-          <GiMineExplosion />
-        </IconButton>}
+        <HtmlTooltip title="Explode package">
+          <IconButton
+            onClick={() => explodePackage(params.data.id)}
+            size="small"
+            color='primary'
+          >
+            <GiMineExplosion />
+          </IconButton>
+        </HtmlTooltip>
+      }
     </>
   );
 
   const frameworkComponents = {
     nameRenderer: NameRenderer,
     productRenderer: ProductRenderer,
+    packageNameRenderer: PackageNameRenderer,
     commonRenderer: CommonRenderer,
     actionsRenderer: ActionsRenderer,
     dateRenderer: DateRenderer,
   };
   const columns = [
-    { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "productRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "package", headerName: "Package", show: true, disabled: true, cellRenderer: "packageNameRenderer" },
     { field: "startDate", headerName: "Start Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
     { field: "endDate", headerName: "End Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
     { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
@@ -438,6 +454,11 @@ const RentalManagementDetailsPage = () => {
       });
   }
 
+
+  const deleteInventories = (data) => {
+    setDeleteData(data)
+  }
+
   const handleRemoveProductInventory = (productInventoryId) => {
     setDeleting(true)
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/remove`, {
@@ -446,9 +467,11 @@ const RentalManagementDetailsPage = () => {
       .then(() => {
         setDeleting(false)
         fetchProductInventory()
+        setDeleteData(null)
       }).catch((error) => {
         setDeleting(false)
         toastConfig.setToastConfig(error)
+        setDeleteData(null)
       });
   }
 
@@ -622,10 +645,11 @@ const RentalManagementDetailsPage = () => {
                             size="small"
                             disabled={!Boolean(selectedRecords.length) || isDeleting}
                             onClick={() => {
-                              handleRemoveProductInventory(selectedRecords.map(rec => ({
+                              const dataToDelete = selectedRecords.map(rec => ({
                                 id: rec._id ?? rec.id,
                                 type: rec.type.toLowerCase()
-                              })))
+                              }))
+                              setDeleteData(dataToDelete)
                             }}
 
                             endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
@@ -1030,7 +1054,13 @@ const RentalManagementDetailsPage = () => {
           }}
         />
       }
-
+      {deleteData && <ConfirmationDialog
+        open={true}
+        message={`Are you sure you want to delete the record(s)?`}
+        onClose={() => setDeleteData(null)}
+        onOk={() => handleRemoveProductInventory(deleteData)}
+        okBtnLoading={isDeleting}
+      />}
     </>
   );
 };

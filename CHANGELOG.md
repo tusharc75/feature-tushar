@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.19.1](https://github.com/vebholic/oms_frontend/compare/v1.19.0...v1.19.1) (2021-10-17)
+
+## [1.19.0](https://github.com/vebholic/oms_frontend/compare/v1.18.0...v1.19.0) (2021-10-16)
+
+
+### Features
+
+* - socket.io-client version fixed ([c7eac43](https://github.com/vebholic/oms_frontend/commit/c7eac43e80eccabedf9b94b00821e4e261322711))
+* **rentalmanagement:** add packages column for package products ([9d0f87c](https://github.com/vebholic/oms_frontend/commit/9d0f87c3f04d75abb77bee9664396bc2ffab95f5))
+* **rentalmanagementdetails.tsx:** confirm on delte ([55db778](https://github.com/vebholic/oms_frontend/commit/55db7781f6947edec6471c1364226ba506692e06))
+* **rentalmanagementdetails.tsx:** link detail ([575084b](https://github.com/vebholic/oms_frontend/commit/575084b6d03377361db6106b65162731ce5aec11))
+
+
+### Bug Fixes
+
+* **URL:** white spaces removed from URL type field ([cbb443f](https://github.com/vebholic/oms_frontend/commit/cbb443f45f213f1f733ca92b51c30717c6cb4ce7))
+
+## [1.18.0](https://github.com/vebholic/oms_frontend/compare/v1.17.0...v1.18.0) (2021-10-15)
+
+
+### Features
+
+* - PO-74 - Import export added ([9ea26f7](https://github.com/vebholic/oms_frontend/commit/9ea26f7192269d2a7bbcc11d2345c0235ac7d7e2))
+* - PO-74 - Import export added ([8315a8b](https://github.com/vebholic/oms_frontend/commit/8315a8b14efd04479e3993dd83c0b63f015ccf93))
+* - PO-74 - Import export added ([3f888c2](https://github.com/vebholic/oms_frontend/commit/3f888c217031baca40e3a5723713743bd9ad7e0a))
+* rental job ([385991e](https://github.com/vebholic/oms_frontend/commit/385991e2ad1889e810c1f1de9306c7e2df76dbdc))
+* rental job changes ([e60c304](https://github.com/vebholic/oms_frontend/commit/e60c304da71e89919782a13dc898f1a268d96255))
+* **rentalmanagementdetailspage.tsx:** changes in grid ([58860b2](https://github.com/vebholic/oms_frontend/commit/58860b26b616d4e58d38ff7edae921f3024fb26d))
+* show quantity field editable product grid in package ([af20a00](https://github.com/vebholic/oms_frontend/commit/af20a0029d829e3bc62307626fde383044c3c761))
+
+
+### Bug Fixes
+
+* **addexisitingproductinventory.tsx:** conflict fix ([a2e5bd9](https://github.com/vebholic/oms_frontend/commit/a2e5bd9387a4c3a5cd121263897e4e7d5f58f164))
+* addserializedasset ([a305931](https://github.com/vebholic/oms_frontend/commit/a305931b39dea95e65024bcf6f04b37cbb3c65a4))
+* assign bom in product details ([9a9184e](https://github.com/vebholic/oms_frontend/commit/9a9184e3809aa377f9d7570b2345eb5bb0da6cdb))
+* available products in product details bom ([bb87620](https://github.com/vebholic/oms_frontend/commit/bb8762072f64c2926811f4e46b0760de97820def))
+* changes added ([5eac971](https://github.com/vebholic/oms_frontend/commit/5eac971c0b8b251a9b3e7b38459a97d0b3bbecb0))
+* changes added ([11123f0](https://github.com/vebholic/oms_frontend/commit/11123f064b52cd3e363d873cab5d8fd05f6764a0))
+* changes added ([af4da03](https://github.com/vebholic/oms_frontend/commit/af4da0323e2608ed6c1ed494cc2f04fb0c78b86d))
+* changes added ([19a804b](https://github.com/vebholic/oms_frontend/commit/19a804b0859e35a72df56b275b4100cf4e79fd60))
+* changes added ([d716fcd](https://github.com/vebholic/oms_frontend/commit/d716fcd2c0f6742f047f597da4f333ddbcc67363))
+* **rentalscreen:** small ui fix ([4a83e72](https://github.com/vebholic/oms_frontend/commit/4a83e729724c058e7057ca3d750d004c3216d9fc))
+
 ## [1.17.0](https://github.com/vebholic/oms_frontend/compare/v1.16.0...v1.17.0) (2021-10-14)
 
 
