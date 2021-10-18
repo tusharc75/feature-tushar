@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.19.2](https://github.com/vebholic/oms_frontend/compare/v1.19.1...v1.19.2) (2021-10-18)
+
+
+### Bug Fixes
+
+* price builder and bug fix ([cffcb45](https://github.com/vebholic/oms_frontend/commit/cffcb45aada416365296e89566b6e34b7a8e9967))
+
 ### [1.19.1](https://github.com/vebholic/oms_frontend/compare/v1.19.0...v1.19.1) (2021-10-17)
 
 ## [1.19.0](https://github.com/vebholic/oms_frontend/compare/v1.18.0...v1.19.0) (2021-10-16)
