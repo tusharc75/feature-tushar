@@ -126,7 +126,11 @@ export const CreateEmail = ({
   const [stateQuoteBuilderAttachments, setStateQuoteBuilderAttachments] = useState([])
 
   useEffect(() => {
-    setStateQuoteBuilderAttachments(qouteBuilderAttachments)
+    if (qouteBuilderAttachments && qouteBuilderAttachments.length > 0) {
+      if (stateQuoteBuilderAttachments.length == 0) {
+        setStateQuoteBuilderAttachments(qouteBuilderAttachments)
+      }
+    }
   }, [qouteBuilderAttachments])
 
   useEffect(() => {
@@ -845,6 +849,7 @@ export const CreateEmail = ({
                 <CustomDialogFooter>
                   {/* <Typography color="textSecondary"> {!emailId && <> Mail will sent from {azureAccount?.username} </>}</Typography> */}
                   <Button color="primary" size="small"
+                    disabled={sending}
                     onClick={() => {
                       if (isFieldNotTouched(initialValues, values)) handleClose()
                       else setShowConfirmDialog(true)
