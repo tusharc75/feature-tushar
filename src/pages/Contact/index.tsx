@@ -367,7 +367,7 @@ export default function Contact(props) {
       .get(`${contactApi}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          const { owner, collaborator, createdBy, updatedBy, accountName, staticData, entity, ...restProperties } = u;
+
           let finalObject = prepareDataForGrid(u);
           return {
             ...finalObject,

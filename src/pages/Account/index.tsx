@@ -488,8 +488,6 @@ export default function Account(props) {
       .get(`${accountApi}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          const { owner, collaborator, createdBy, updatedBy, staticData, parentAccount, parentHierarchy, entity, ...restProperties } = u;
-
           let finalObject = prepareDataForGrid(u);
           let res = {
             ...finalObject,

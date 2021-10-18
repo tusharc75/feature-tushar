@@ -130,45 +130,6 @@ function Budget() {
 
   const columnState = JSON.parse(localStorage.getItem("budgetPage"));
 
-  // const columns = [
-  //   {
-  //     field: "name",
-  //     headerName: "Name",
-  //     show: true,
-  //     disabled: true,
-  //     cellRenderer: "nameRenderer"
-  //   },
-  //   {
-  //     field: "year",
-  //     headerName: "Year",
-  //     show: true,
-  //     cellRenderer: "commonRenderer"
-  //   },
-  //   {
-  //     field: "entity",
-  //     headerName: "Entity",
-  //     show: true,
-  //     cellRenderer: "commonRenderer"
-  //   },
-  //   {
-  //     field: "marketSegment",
-  //     headerName: "Market Segment",
-  //     show: true,
-  //     cellRenderer: "commonRenderer"
-  //   },
-  //   {
-  //     field: "subMarketSegment",
-  //     headerName: "Sub Market Segment",
-  //     show: true,
-  //     cellRenderer: "commonRenderer"
-  //   },
-  //   {
-  //     field: "productCategory",
-  //     headerName: "Product Category",
-  //     show: true,
-  //     cellRenderer: "commonRenderer"
-  //   }
-  // ];
 
   if (columnState) {
     columns.map((item) => {
@@ -221,12 +182,6 @@ function Budget() {
       }
     </>
   )
-
-  // const frameworkComponents = {
-  //   nameRenderer: NameRenderer,
-  //   commonRenderer: CommonRenderer,
-  //   actionsRenderer: ActionsRenderer
-  // };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -294,15 +249,8 @@ function Budget() {
       .get(`/budget${queryString}`)
       .then(({ data }) => {
         let rows = data.data.map((item) => {
-          // const { createdBy, updatedBy, productCategory, marketSegment, subMarketSegment, entity, ...restProperties } =
-          //   item;
           let res = {
             ...prepareDataForGrid(item),
-            // id: item._id,
-            // productCategory: productCategory?.optionLabel ?? "",
-            // marketSegment: marketSegment?.optionLabel ?? "",
-            // subMarketSegment: subMarketSegment?.optionLabel ?? "",
-            // entity: entity?.optionLabel ?? ""
           };
           return res;
         });
