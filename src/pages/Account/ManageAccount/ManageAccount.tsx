@@ -463,16 +463,6 @@ export default function ManageAccount(props) {
                                         setFieldValue={(name, value) => {
                                           handleValuesChange(field.fieldName, value)
                                           setFieldValue(name, value)
-                                          if (
-                                            values.isShippingAddressSameAsBillingAddress ===
-                                            true
-                                          ) {
-                                            handleValuesChange("shippingAddress", value ?? "")
-                                            setFieldValue(
-                                              "shippingAddress",
-                                              value ?? ""
-                                            );
-                                          }
                                         }}
                                         required={field.required}
                                         fullWidth
