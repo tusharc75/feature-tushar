@@ -63,6 +63,7 @@ const LookupResource = [
   { name: 'Market Segment', value: 'Market Segment' },
   { name: 'Rental Management', value: 'Rental Management' },
   { name: 'Loading Ticket', value: 'Loading Ticket' },
+  { name: 'Packages', value: 'Packages' },
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields }) => {
@@ -544,7 +545,31 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       />
                       {values['lookup'] && (
                         <Box pt={1} pb={1}>
-                          <FormControl fullWidth margin="dense" variant="outlined">
+                          <Autocomplete
+                            id="lookupResource"
+                            options={LookupResource && LookupResource.map((_lookupResource) => {
+                              return _lookupResource.value;
+                            })}
+                            getOptionLabel={(option) => option}
+                            value={values['lookupResource']}
+                            onChange={(e: any, value) => {
+                              setFieldValue('lookupResource', value)
+                              handleValuesChange({ lookupResource: value })
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                margin="dense"
+                                variant="outlined"
+                                label="Lookup Resource"
+                                placeholder="Lookup Resource"
+                                name="lookupResource"
+                                error={touched['lookupResource'] && Boolean(errors['lookupResource'])}
+                                helperText={touched['lookupResource'] && errors['lookupResource']}
+                              />
+                            )}
+                          />
+                          {/* <FormControl fullWidth margin="dense" variant="outlined">
                             <InputLabel id="demo-simple-select-outlined-label">Lookup Resource</InputLabel>
                             <Select
                               labelId="demo-simple-select-outlined-label"
@@ -561,7 +586,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                                 <MenuItem value={_data.value}>{_data.name}</MenuItem>
                               ))}
                             </Select>
-                          </FormControl>
+                          </FormControl> */}
                         </Box>
                       )}
                     </Fragment>

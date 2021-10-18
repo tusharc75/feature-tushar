@@ -20,11 +20,13 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
+import axiosInstance from '../../../axios/axiosInstance'
 
 export const Option = ({ values, setFieldValue, fields, _id }) => {
 
   const defaultOption = [{ "optionLabel": "Option 1", "optionValue": "Option 1" }];
   const [options, setOptions] = useState(values.option ? values.option.length == 0 ? defaultOption : values.option : defaultOption);
+  const [lookupOption, setlookupOption] = useState([]);
 
   const onChangeValue = (index, field, value) => {
     let data = [...values["option"]];
@@ -127,7 +129,21 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
 
   useEffect(() => {
     setFieldValue("option", options);
+    if (values["isDependentDropdown"] && values["dropdowDependentOn"]) {
+      GetLookupOption(values["dropdowDependentOn"])
+    }
   }, [options]);
+
+  const GetLookupOption = async (dropdowDependentOn) => {
+    const _filter = fields.filter((_f) => _f.fieldName === dropdowDependentOn)
+    if (_filter.length) {
+      if (_filter[0].lookup) {
+        axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=` + _filter[0].lookupResource).then(({ data: { data } }) => {
+          setlookupOption(data[_filter[0].lookupResource])
+        })
+      }
+    }
+  }
 
   return (<DndProvider backend={HTML5Backend}>
     <Box pt={2} pb={2}>
@@ -152,12 +168,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
             <Grid item xs={12} sm={6} md={6}>
               <Autocomplete
                 id="tags-filled"
-                options={
-                  fields &&
-                  fields.filter(
-                    (_f) => _f._id !== _id && _f.type === "dropDown" && !_f.lookup
-                  )
-                }
+                options={fields && fields.filter((_f) => _f._id !== _id && _f.type === "dropDown")}
                 getOptionLabel={(option: any) =>
                   option ? option.fieldLabel : ""
                 }
@@ -181,6 +192,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
                     "dropdowDependentOn",
                     val && val.fieldName ? val.fieldName : ""
                   );
+                  GetLookupOption(val && val.fieldName ? val.fieldName : "")
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -246,6 +258,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
               values={values}
               AddRemoveValue={AddRemoveValue}
               fields={fields}
+              lookupOption={lookupOption}
             />
           ))}
       </Box>
@@ -315,7 +328,7 @@ interface DragItem {
 }
 
 const Card = (props) => {
-  const { index, id, data, moveCard, onChangeValue, values, AddRemoveValue, fields } = props;
+  const { index, id, data, moveCard, onChangeValue, values, AddRemoveValue, fields, lookupOption } = props;
 
   const ref = useRef<HTMLDivElement>(null);
   const [{ handlerId }, drop] = useDrop({
@@ -386,34 +399,41 @@ const Card = (props) => {
               }
             />
           </Grid>
-          {values["isDependentDropdown"] &&
-            values["dropdowDependentOn"] !== "" && (
-              <Grid item xs={4}>
-                <Select
-                  id="demo-simple-select-outlined"
-                  fullWidth
-                  variant="outlined"
-                  margin="dense"
-                  value={data[values["dropdowDependentOn"]]}
-                  onChange={(e) =>
-                    onChangeValue(
-                      index,
-                      values["dropdowDependentOn"],
-                      e.target.value
-                    )
-                  }
-                >
-                  {(values["dropdowDependentOn"] && fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"]).length) &&
-                    fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"])[0].option &&
-                    fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"])[0].option.map((_option) => {
+          {values["isDependentDropdown"] && values["dropdowDependentOn"] && values["dropdowDependentOn"] !== "" && (
+            <Grid item xs={4}>
+              <Select
+                id="demo-simple-select-outlined"
+                fullWidth
+                variant="outlined"
+                margin="dense"
+                value={data[values["dropdowDependentOn"]]}
+                onChange={(e) =>
+                  onChangeValue(
+                    index,
+                    values["dropdowDependentOn"],
+                    e.target.value
+                  )
+                }
+              >
+                {(values["dropdowDependentOn"] && fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"]).length) ?
+                  fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"])[0].lookup ?
+                    lookupOption && lookupOption.map((_option) => {
+                      return (<MenuItem key={_option.optionLabel} value={_option.optionValue}>
+                        {_option.optionLabel}
+                      </MenuItem>
+                      )
+                    })
+                    : fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"])[0].option
+                    && fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"])[0].option.map((_option) => {
                       return (<MenuItem key={_option.optionLabel} value={_option.optionLabel}>
                         {_option.optionLabel}
                       </MenuItem>
                       );
                     })
-                  }
-                </Select>
-                {/* <TextField
+                  : null
+                }
+              </Select>
+              {/* <TextField
                   id="standard-basic"
                   variant="outlined"
                   margin="dense"
@@ -428,8 +448,8 @@ const Card = (props) => {
                     )
                   }
                 /> */}
-              </Grid>
-            )}
+            </Grid>
+          )}
           <Grid item xs={2}>
             <IconButton
               aria-label="setting"
