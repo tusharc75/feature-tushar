@@ -43,6 +43,11 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
                 if (d.productName) {
                     tempProducts.push({ "id": d._id, "name": d.productName, "qty": d.qty })
                 }
+                if (d.packageName && d?.products?.length > 0) {
+                    d.products.map(u => {
+                        tempProducts.push({ "id": d?.productDetail?._id, "name": u?.productDetail?.productName || "a", "qty": u.qty })
+                    })
+                }
             })
         }
         else {
@@ -50,6 +55,11 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
             selectedProducts.map(d => {
                 if (d.productName) {
                     tempProducts.push({ "id": d._id, "name": d.productName, "qty": d.qty - selectedRecords.filter(obj => obj.product.optionValue === d._id).length })
+                }
+                if (d.packageName && d?.products?.length > 0) {
+                    d.products.map(u => {
+                        tempProducts.push({ "id": u?.productDetail?._id, "name": u?.productDetail?.productName || "a", "qty": u.qty - selectedRecords.filter(obj => obj.product.optionValue === u?.productDetail?._id).length })
+                    })
                 }
                 if (d.qty - selectedRecords.filter(obj => obj.product.optionValue === d._id).length <= -1) {
                     let tempSelectedRecoeds = selectedRecords

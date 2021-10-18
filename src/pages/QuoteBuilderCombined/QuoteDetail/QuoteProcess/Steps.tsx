@@ -549,7 +549,9 @@ const Steps = (props) => {
                                   loading || globalLoading ||
                                   !nextStep ||
                                   versionStatus.includes("Sent for DOA") ||
-                                  versionStatus.includes("Accepted  by DOA")
+                                  versionStatus.includes("Accepted  by DOA") ||
+                                  steps[currentStep] === "DOA Process" ||
+                                  approvedQuote.approved
                                   // || versionStatus.includes("Sent to Customer") ||
                                   // steps[currentStep] === "Send To Customer" ||
                                   // versionStatus === "Sent to Customer"
@@ -631,6 +633,7 @@ const Steps = (props) => {
                             !nextStep ||
                             versionStatus.includes("Sent for DOA") ||
                             versionStatus.includes("Accepted  by DOA") ||
+                            steps[currentStep] === "DOA Process" ||
                             approvedQuote.approved
                           }
                           endIcon={<IoIosArrowDroprightCircle />}
