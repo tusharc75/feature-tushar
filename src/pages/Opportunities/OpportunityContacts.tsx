@@ -163,7 +163,7 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                         </Box>
                         <Box padding="5px">
                             <Typography variant="subtitle2">
-                                {title} {contacts && contacts.length > 0 ? `(${contacts.length})` : ''}
+                                {title} {`(${contacts.length})`}
                             </Typography>
                         </Box>
                     </Box>
