@@ -238,16 +238,6 @@ const Opportunities = () => {
     </>
   );
 
-  const frameworkComponents = {
-    opportunityNameRenderer: OpportunityNameRenderer,
-    supplierAccountNameRenderer: SupplierAccountNameRenderer,
-    customerAccountNameRenderer: CustomerAccountNameRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-    commonRenderer: CommonRenderer
-  };
-
   const replaceFieldName = (field) => {
     switch (field) {
       case 'createdBy':

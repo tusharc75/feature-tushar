@@ -1,6 +1,5 @@
 import { useState, FC, useReducer, useEffect, useContext, Fragment } from "react";
 import { Grid } from "@material-ui/core";
-import { Link } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "../../components/Helpers/Routes";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -11,7 +10,6 @@ import { useData } from "../../StateProvider/Provider";
 import CreateProjectSales from "./CreateProjectSales";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { gridLoadingTimeout, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
-import NoDataCell from "../../components/Helpers/NoDataCell";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import "./style.scss";
