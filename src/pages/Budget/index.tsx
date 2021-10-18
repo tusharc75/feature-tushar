@@ -16,6 +16,7 @@ import {
   isObjectEmpty,
   gridLoadingTimeout,
   budget,
+  prepareDataForGrid
 } from "../../constants/helpers";
 import routes from "./../../components/Helpers/Routes";
 import {
@@ -31,10 +32,14 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import { useLocation } from "react-router-dom";
+import queryString from "query-string";
 
 let timeout;
 function Budget() {
 
+  const location = useLocation()
   const {
     state: { permissions },
   }: any = useData();
@@ -49,6 +54,8 @@ function Budget() {
     id: null,
     isClone: false
   });
+  const [columns, setColumns] = useState([])
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
 
   const [gridApi, setGridApi] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -82,47 +89,48 @@ function Budget() {
     fetchBudgetList();
   }, [page, limit, filters, sorting]);
 
+  useEffect(() => {
+    const parsedParams = queryString.parse(location?.search);
+    if (parsedParams?.id) {
+      setShowManageBudgetDialog({ show: true, id: parsedParams?.id, isClone: false });
+    }
+  }, [location])
+
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get(`/field?resource=Budget`)
+      .then(({ data: { data } }) => {
+        let columns = []
+        let rendererNames = []
+        data.forEach(o => {
+
+          let currentColumn = getColumnData(routes.budget.title, o?.fieldData, routes.budget.path, true)
+
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData]
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
+          }
+        })
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+          actionsRenderer: ActionsRenderer
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        columns = [...columns, ...getStaticFields()]
+        setColumns([...columns])
+      })
+  }
+
   const columnState = JSON.parse(localStorage.getItem("budgetPage"));
 
-  const columns = [
-    {
-      field: "name",
-      headerName: "Name",
-      show: true,
-      disabled: true,
-      cellRenderer: "nameRenderer"
-    },
-    {
-      field: "year",
-      headerName: "Year",
-      show: true,
-      cellRenderer: "commonRenderer"
-    },
-    {
-      field: "entity",
-      headerName: "Entity",
-      show: true,
-      cellRenderer: "commonRenderer"
-    },
-    {
-      field: "marketSegment",
-      headerName: "Market Segment",
-      show: true,
-      cellRenderer: "commonRenderer"
-    },
-    {
-      field: "subMarketSegment",
-      headerName: "Sub Market Segment",
-      show: true,
-      cellRenderer: "commonRenderer"
-    },
-    {
-      field: "productCategory",
-      headerName: "Product Category",
-      show: true,
-      cellRenderer: "commonRenderer"
-    }
-  ];
+
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
@@ -174,12 +182,6 @@ function Budget() {
       }
     </>
   )
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    commonRenderer: CommonRenderer,
-    actionsRenderer: ActionsRenderer
-  };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -247,15 +249,8 @@ function Budget() {
       .get(`/budget${queryString}`)
       .then(({ data }) => {
         let rows = data.data.map((item) => {
-          const { createdBy, updatedBy, productCategory, marketSegment, subMarketSegment, entity, ...restProperties } =
-            item;
           let res = {
-            ...restProperties,
-            id: item._id,
-            productCategory: productCategory?.optionLabel ?? "",
-            marketSegment: marketSegment?.optionLabel ?? "",
-            subMarketSegment: subMarketSegment?.optionLabel ?? "",
-            entity: entity?.optionLabel ?? ""
+            ...prepareDataForGrid(item),
           };
           return res;
         });
@@ -417,21 +412,24 @@ function Budget() {
             </Grid>
           </div>
           <Box component="div">
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={100}
-              loading={loading}
-              renderedFrom="budgetPage"
-              refreshGrid={fetchBudgetList}
-            />
+            {
+              Object.keys(frameWorkComponent).length > 0 ?
+                <CustomAgGrid
+                  columns={columns}
+                  dataRows={dataRows}
+                  frameworkComponents={frameWorkComponent}
+                  setGridApi={setGridApi}
+                  dispatch={dispatch}
+                  rowCount={rowCount}
+                  limit={limit}
+                  pageSizes={pageSizes}
+                  page={page}
+                  actionWidth={100}
+                  loading={loading}
+                  renderedFrom={routes.budget.title}
+                  refreshGrid={fetchBudgetList}
+                /> : null
+            }
           </Box>
         </CustomContainer>
 

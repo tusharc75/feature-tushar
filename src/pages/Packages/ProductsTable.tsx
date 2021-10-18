@@ -3,6 +3,7 @@ import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import axiosInstance from '../../axios/axiosInstance'
 import routes from "../../components/Helpers/Routes";
+import { prepareDataForGrid } from "../../constants/helpers"
 import { getColumnData, getFrameworkComponents, getStaticFields } from "../../constants/columns"
 
 const ProductsTable = ({ productList = [], updateLoading = false, handleUpdateQuantity = null }) => {
@@ -24,21 +25,11 @@ const ProductsTable = ({ productList = [], updateLoading = false, handleUpdateQu
 
   const handleProductsColumnsAndData = (data) => {
     let rows = data.map(u => {
-      const { createdBy, entity, history, ...restProperties } = u;
-      const [firstEntity, ...restEntity] = entity ? entity : [];
       let res = {
-        ...restProperties,
-        id: u._id,
+        ...prepareDataForGrid(u),
         inventoryCount: u?.qty,
         warehouses: u.warehouse?.map(w => w.warehouseName).join(", "),
-        createdBy: u.createdBy?.user?.concatedName,
-        createdByDate: u.createdBy?.date,
-        updatedBy: u.updatedBy?.user?.concatedName,
-        updatedByDate: u.updatedBy?.date,
-        entity: firstEntity?.optionLabel,
-        entityId: firstEntity?.optionValue,
         productCategoryChipColor: u.productCategory?.chipColour,
-        restEntity: restEntity,
       }
       for (let col in res) {
         if (res[col] && res[col].optionLabel) {
