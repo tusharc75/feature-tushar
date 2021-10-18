@@ -31,7 +31,9 @@ import { sidebarResource } from "../../constants/helpers"
 import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
+import NoDataCell from '../../components/Helpers/NoDataCell';
 
 const ContactTypes = [
   {
@@ -106,9 +108,6 @@ export default function Contact(props) {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      if (o?.fieldData?.fieldName === "accountName") {
-        o.fieldData.primary = true
-      }
       let currentColumn = getColumnData(contactResource, o?.fieldData, `/${contactRoute}/detail`)
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData]
@@ -121,7 +120,13 @@ export default function Contact(props) {
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
+      relatedLeadRenderer: RelatedLeadRenderer,
       actionsRenderer: ActionsRenderer
+    }
+    if (contactResource.includes("customer")) {
+      columns = [...columns,
+      { field: 'relatedLead', headerName: 'Related Lead', show: true, cellRenderer: 'relatedLeadRenderer' },
+      ]
     }
     setFrameWorkComponent({ ...tempFrameworkComponent })
     let staticFields = getStaticFields()
@@ -190,6 +195,34 @@ export default function Contact(props) {
     const entityList = user.entity?.map((entity) => entity._id);
     return entityList.includes(id);
   }
+
+  const RelatedLeadRenderer = (params) =>
+    params.value ? (
+      params?.data?.relatedLeadEntity === selectedEntity ?
+        <Link className="link" to={`${routes.leadDetail.path}/${params.data.relatedLeadId}`} title={params.value}>
+          {params.value}
+        </Link>
+        :
+        hasAccessToEntity(params?.data?.relatedLeadEntity) ?
+          <span
+            className="link"
+            onClick={() => {
+              handleEntityChange(params.data?.relatedLeadEntity)
+              history.push(`${routes.leadDetail.path}/${params.data.relatedLeadId}`)
+            }}
+            title={params.value}
+          >
+            {params.value}
+          </span>
+          :
+          <span
+            title={params.value}
+          >
+            <CustomRenderCell value={params.value} />
+          </span>
+    ) : (
+      <NoDataCell />
+    );
 
   const ActionsRenderer = (params) => (
     <>

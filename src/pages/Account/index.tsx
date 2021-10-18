@@ -165,8 +165,12 @@ export default function Account(props) {
     }
     setFrameWorkComponent({ ...tempFrameworkComponent })
     columns = [...columns,
-    { field: 'lead', headerName: 'Related Lead', show: true, cellRenderer: 'leadRenderer' },
     { field: 'masterAccount', headerName: 'Master Account', show: true, cellRenderer: 'masterAccountRenderer', filter: false, sortable: false }]
+    if (accountResource.includes("customer")) {
+      columns = [...columns,
+      { field: 'lead', headerName: 'Related Lead', show: true, cellRenderer: 'leadRenderer' }
+      ]
+    }
     let staticFields = getStaticFields()
     staticFields.forEach(field => {
       columns.push(checkStaticField(routes.projectSales.title, field))
