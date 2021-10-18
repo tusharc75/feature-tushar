@@ -62,13 +62,14 @@ const DetailsPageHeader = (props) => {
   const classes = useStyles();
   return (
     <>
-      <Paper elevation={0}>
+      <Paper elevation={0} className={"mainHeader"}>
         <Grid container justify="space-between" className="detailHeader">
           <Grid item className="d-flex align-items-center">
             {loading ? (
               <Skeleton width={100} />
             ) : showHeading ? (
               <>
+                <Grid className={"mobileHeading"}>
                 <Typography
                   className="text-capitalize"
                   style={{ display: "inline-block" }}
@@ -79,6 +80,7 @@ const DetailsPageHeader = (props) => {
                 >
                   <span className="d-flex align-items-center"><span className="listingHeader">{heading}
                   </span>
+
                     {
                       isApproved && <Tooltip title="Approved"><FcApproval title="Approved" size={20} /></Tooltip>
                     }
@@ -92,6 +94,7 @@ const DetailsPageHeader = (props) => {
                     }
                   </span>
                 </Typography>
+                </Grid>
               </>
             ) : null}
           </Grid>

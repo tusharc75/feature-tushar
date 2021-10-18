@@ -26,6 +26,7 @@ import ButtonGroup from "@material-ui/core/ButtonGroup/ButtonGroup";
 import Add from "@material-ui/icons/Add";
 import Delete from "@material-ui/icons/Delete";
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import { MdEdit, MdDelete } from 'react-icons/md';
 import DeliveryTicket from "./DeliveryTicket";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementDialog";
@@ -555,25 +556,52 @@ const RentalManagementDetailsPage = () => {
                   >
 
                     {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={handleOpenUpdateDialog}
-                      >
-                        Edit
-                      </Button>
+                        <Button
+                            className="buttonStyleBigScreen"
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={handleOpenUpdateDialog}
+                        >
+                          Edit
+                        </Button>
+                    )}
+                    {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
+                        <Button
+                            className="buttonStyleSmallScreen"
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={handleOpenUpdateDialog}
+                        >
+                          <MdEdit size={24} />
+                        </Button>
                     )}
 
                     <HideWhenOffline>
                       {permissions?.rentalManagement?.isDelete &&
-                        rentalManagementData?.owner?.optionValue &&
-                        user?.user?._id &&
-                        rentalManagementData.owner.optionValue === user.user._id ? (
-                        <DeleteButton
-                          text="Delete"
-                          onClick={() => setShowConfirmBox(true)}
-                        />
+                      rentalManagementData?.owner?.optionValue &&
+                      user?.user?._id &&
+                      rentalManagementData.owner.optionValue === user.user._id ? (
+                          <DeleteButton
+
+                              text="Delete"
+                              className={"buttonDeleteBigScreen"}
+                              onClick={() => setShowConfirmBox(true)}
+                          />
+                      ) : null}
+                    </HideWhenOffline>
+                    <HideWhenOffline>
+                      {permissions?.rentalManagement?.isDelete &&
+                      rentalManagementData?.owner?.optionValue &&
+                      user?.user?._id &&
+                      rentalManagementData.owner.optionValue === user.user._id ? (
+                          <Button
+                              className="buttonDeleteSmallScreen"
+                              onClick={() => setShowConfirmBox(true)}
+                          >
+                            <MdDelete size={24}/>
+                          </Button>
                       ) : null}
                     </HideWhenOffline>
                   </DetailsPageHeader>

@@ -5,6 +5,7 @@ import { Paper, Box, Tabs, Tab, Grid, Button, DialogTitle, Dialog, DialogActions
 import { Skeleton } from "@material-ui/lab";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../../components/DetailsPageHeader";
 import DeleteButton from "../../../components/Helpers/DeleteButton";
@@ -28,6 +29,7 @@ import ProjectInAccordion from "../../../components/ProjectInAccordion/ProjectIn
 import QuoteProcess from './QuoteProcess';
 import QuoteDetailPage from './QuoteDetailPage';
 import AllVersionStatus from './AllVersionStatus';
+
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -519,8 +521,22 @@ export default function QuoteDetail() {
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
+                      className={"deleteButton"}
                     />
                   ) : null}
+
+                  {permissions[qbResource].isDelete &&
+                  quoteData?.owner.optionValue &&
+                  user?.user?._id &&
+                  quoteData.owner.optionValue === user.user._id ? (
+                      <MdDelete
+                          size={24}
+                          onClick={() => setShowConfirmBox(true)}
+                          className={"deleteIconNew"}
+
+                      />
+                  ) : null}
+
 
                 </DetailsPageHeader>
               )}
@@ -590,6 +606,50 @@ export default function QuoteDetail() {
                       {...a11yProps(1)}
                     />
                   </Tabs>
+
+
+                  <Grid className={"DetailCube"}>
+                    <Tabs
+                        className="zzzz"
+                        value={tabValue}
+                        onChange={handleMainTabChange}
+                        textColor="primary"
+                        TabIndicatorProps={{
+                          style: {
+                            display: "none",
+                          },
+                        }}
+                    >
+                      <Tab
+                          style={{
+                            background: tabValue === 0 ? "#163340" : "",
+                            color: tabValue === 0 ? "white" : "#163340",
+                            display: "none"
+                          }}
+                          label={
+                            <div className="d-flex align-items-center tab-font ">
+                              <InfoIcon className="mr-1" fontSize="inherit" /> All
+                              Version Status
+                            </div>
+                          }
+                          {...a11yProps(0)}
+                      />
+                      <Tab
+                          style={{
+                            background: tabValue === 1 ? "#163340" : "",
+                            color: tabValue === 1 ? "white" : "#163340",
+                          }}
+                          label={
+                            <div className="d-flex align-items-center tab-font">
+                              <FaWpforms className="mr-1" fontSize="inherit" />{" "}
+                              Details
+                            </div>
+                          }
+                          {...a11yProps(0)}
+                      />
+                    </Tabs>
+
+                  </Grid>
 
                   <TabPanel value={tabValue} index={0}>
                     {(quoteData && <AllVersionStatus

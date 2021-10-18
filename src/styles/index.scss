@@ -1000,3 +1000,9 @@ body::-webkit-scrollbar-thumb {
     box-shadow: 1px 3px 3px #ab9b9b;
   }
 }
+@media only screen and (max-width: 560px){
+  .grid-without-activity {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
