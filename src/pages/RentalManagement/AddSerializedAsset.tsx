@@ -45,7 +45,7 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
                 }
                 if (d.packageName && d?.products?.length > 0) {
                     d.products.map(u => {
-                        tempProducts.push({ "id": d?.productDetail?._id, "name": u?.productDetail?.productName || "a", "qty": u.qty })
+                        tempProducts.push({ "id": d?.productDetail?._id, "name": u?.productDetail?.productName || "", "qty": u.qty })
                     })
                 }
             })
@@ -58,7 +58,7 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
                 }
                 if (d.packageName && d?.products?.length > 0) {
                     d.products.map(u => {
-                        tempProducts.push({ "id": u?.productDetail?._id, "name": u?.productDetail?.productName || "a", "qty": u.qty - selectedRecords.filter(obj => obj.product.optionValue === u?.productDetail?._id).length })
+                        tempProducts.push({ "id": u?.productDetail?._id, "name": u?.productDetail?.productName || "", "qty": u.qty - selectedRecords.filter(obj => obj.product.optionValue === u?.productDetail?._id).length })
                     })
                 }
                 if (d.qty - selectedRecords.filter(obj => obj.product.optionValue === d._id).length <= -1) {
@@ -191,7 +191,7 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
             aria-labelledby="customized-dialog-title"
             open={true}
         >
-            <CustomDialogHeader title={"Add Serialized Assets"} onClose={handleSerializedAssetClose} ></CustomDialogHeader>
+            <CustomDialogHeader title={`Add ${routes.productInventory.title}`} onClose={handleSerializedAssetClose} ></CustomDialogHeader>
             <CustomDialogContent>
                 <div className="listing-grid p-3">
                     <Box mb={2}>
