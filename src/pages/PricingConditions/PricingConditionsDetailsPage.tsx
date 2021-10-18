@@ -63,6 +63,7 @@ function PricingConditionsDetailsPage() {
     const [formsData, setFormsData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [isProductMasterUnit, setIsProductMasterUnit] = React.useState(false);
     const [units, setUnits] = React.useState([]);
     const [discount, setDiscount] = useState([]);
     const [tax, setTax] = useState([]);
@@ -85,7 +86,8 @@ function PricingConditionsDetailsPage() {
         axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
             const unitField = data.filter((e) => e.fieldData.fieldName === "unit");
             if (unitField.length) {
-                setUnits(unitField[0].fieldData.option)
+                setUnits(unitField[0].fieldData.option);
+                setIsProductMasterUnit(true);
             }
         })
     }, []);
@@ -217,6 +219,13 @@ function PricingConditionsDetailsPage() {
         setTax(_tax)
     }
 
+
+    const handleChangeProduct = (product) => {
+        if (!isProductMasterUnit) {
+
+        }
+    }
+
     const classes = useStyles();
     return (<Fragment>
         <Grid container className="headerbox">
@@ -313,27 +322,52 @@ function PricingConditionsDetailsPage() {
                                         <Box marginY={2}>
                                             <Grid spacing={3} container>
                                                 {form.sectionFields.map((field, index2) => (
-                                                    <Grid key={index2} item xs={12} sm={4} md={4}>
-                                                        <FormTypes
-                                                            // {...rest}
-                                                            values={values}
-                                                            errors={errors}
-                                                            touched={touched}
-                                                            label={field.fieldLabel}
-                                                            name={field.fieldName}
-                                                            type={field.type}
-                                                            options={field.option}
-                                                            setFieldValue={(name, value) => {
-                                                                setFieldValue(name, value)
-                                                            }}
-                                                            required={field.required}
-                                                            fullWidth
-                                                            isTooltip={field?.isTooltip || false}
-                                                            tooltipMessage={field?.tooltipMessage}
-                                                            size="small"
-                                                            imageOrFileUploadCompletePercentage={null}
-                                                        />
-                                                    </Grid>
+                                                    field.fieldName === "product" ?
+                                                        <Grid key={field.fieldName} item xs={12} sm={4} md={4}>
+                                                            <FormTypes
+                                                                {...field}
+                                                                multiple
+                                                                values={values}
+                                                                errors={errors}
+                                                                touched={touched}
+                                                                label={field.fieldLabel}
+                                                                name={field.fieldName}
+                                                                type={field.type}
+                                                                options={field.option}
+                                                                fullWidth
+                                                                isTooltip={field?.isTooltip || false}
+                                                                tooltipMessage={field?.tooltipMessage}
+                                                                size="small"
+                                                                onChange={(e, value) => {
+                                                                    setFieldValue(
+                                                                        field.fieldName,
+                                                                        value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
+                                                                    );
+                                                                    handleChangeProduct(value.filter((v) => v.optionValue).map((val) => val.optionValue))
+                                                                }}
+                                                            />
+                                                        </Grid> :
+                                                        <Grid key={index2} item xs={12} sm={4} md={4}>
+                                                            <FormTypes
+                                                                // {...rest}
+                                                                values={values}
+                                                                errors={errors}
+                                                                touched={touched}
+                                                                label={field.fieldLabel}
+                                                                name={field.fieldName}
+                                                                type={field.type}
+                                                                options={field.option}
+                                                                setFieldValue={(name, value) => {
+                                                                    setFieldValue(name, value)
+                                                                }}
+                                                                required={field.required}
+                                                                fullWidth
+                                                                isTooltip={field?.isTooltip || false}
+                                                                tooltipMessage={field?.tooltipMessage}
+                                                                size="small"
+                                                                imageOrFileUploadCompletePercentage={null}
+                                                            />
+                                                        </Grid>
                                                 ))}
                                                 {index === formsData.length - 1 && <Fragment>
                                                     <Grid item xs={12} sm={4} md={4} className="pt-1">
