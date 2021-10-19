@@ -106,7 +106,7 @@ const Product = () => {
                         entityId: firstEntity?.optionValue,
                         productCategoryChipColor: u.productCategory?.chipColour,
                         restEntity: restEntity,
-                        serializedProduct: u.serializedProduct.toString()
+                        serializedProduct: u.serializedProduct && u.serializedProduct.toString()
                     }
                     for (let col in res) {
                         if (res[col] && res[col].optionLabel) {
