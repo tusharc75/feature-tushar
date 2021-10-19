@@ -1,310 +1,870 @@
-import { useState, useEffect, useContext, Fragment } from "react";
-import { Grid, Box, Button, Paper, Typography, IconButton, ListItemSecondaryAction, ListItem, List, ListItemText, makeStyles } from "@material-ui/core";
-import { Skeleton } from "@material-ui/lab";
-import { useParams, useHistory } from "react-router-dom";
+import React, { useRef, useEffect, useState, useContext, Fragment } from "react";
+import {
+    Box,
+    Button,
+    Grid,
+    Chip,
+    IconButton,
+    Tooltip,
+    InputAdornment,
+} from "@material-ui/core";
+import { Formik, Form } from "formik";
 import axiosInstance from "../../axios/axiosInstance";
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import DetailsPageHeader from "../../components/DetailsPageHeader";
-import DetailsPage from "../../components/Shared/DetailsPage";
-import { useData } from "../../StateProvider/Provider";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
+import {
+    getObjKeys,
+    yupSchema,
+    getObjKeysWithValues,
+    simplifyValues,
+    pricingCondition,
+    setFieldsInAscendingOrder,
+    getUniqueCurrencies,
+    formFieldNames,
+} from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { pricingCondition } from "../../constants/helpers";
-import DeleteButton from "../../components/Helpers/DeleteButton";
-import ManagePricingConditionsDialog from "./ManagePricingConditionsDialog";
+import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
+import FormTypes from "../../components/Helpers/FormTypes";
+import CustomButton from "../../components/Helpers/CustomButton";
+import { useData } from "../../StateProvider/Provider";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import TextField from '@material-ui/core/TextField';
+import MultipleEntry from './MultipleEntry';
+import { useParams, useHistory } from "react-router-dom";
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from "../../components/Helpers/Routes";
-import BoxWithBorder from "../../components/BoxWithBorder";
-import { ControlPoint } from "@material-ui/icons";
-import ManagePricingDiscountDialog from "./ManagePricingDiscountDialog";
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { result, find, startCase, isEqual } from 'lodash';
+import { Delete } from "@material-ui/icons";
+import Badge from '@material-ui/core/Badge';
+import { makeStyles } from '@material-ui/core/styles';
 
-const useStyles = makeStyles((theme) => ({
+const rentType = ["perHour", "perDay", "perWeek", "perFortnight", "perMonth", "perYear"]
 
-    demo: {
-        backgroundColor: theme.palette.background.paper,
-        width: "100%",
+const useStyles = makeStyles(() => ({
+    screenHeightAuto: {
+        height: 'calc(100vh - 195px)',
+        overflow: 'auto',
+        padding: "12px"
     },
-    title: {
-        margin: theme.spacing(4, 0, 2),
-    },
-    list: {
-        width: "100%",
-        padding: 0,
-    },
+
 }));
 
-const PricingConditionsDetailsPage = () => {
-    const toastConfig = useContext(CustomToastContext);
+function PricingConditionsDetailsPage() {
 
-    const { id } = useParams();
     const history = useHistory();
-    const {
-        state: { user, permissions }
-    }: any = useData();
-    const classes = useStyles();
-    const [headingLabel, setHeadingLabel] = useState("");
+    const { id } = useParams();
+    const { pricingConditionApi } = pricingCondition;
+    const toastConfig = useContext(CustomToastContext);
+    const [initialData, setInitialData] = useState({ fields: [], values: {}, });
+    const { state: { permissions } }: any = useData();
+    const [formsData, setFormsData] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [pricingConditionsData, setPricingConditionsData] = useState(null);
-    const [showConfirmBox, setShowConfirmBox] = useState(false);
-    const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-    const [openPricingConditionDialog, setOpenPricingConditionDialog] = useState(false);
-    const [pricingConditionsFields, setPricingConditionsFields] = useState([]);
-    const [mainPoints, setMainPoints] = useState(null);
-    const [customizedRoutes, setCustomizedRoutes] = useState([]);
-    const [currency, setCurrency] = useState(null);
-    const [discountType, setDiscountType] = useState(null);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [isProductMasterUnit, setIsProductMasterUnit] = React.useState(false);
+    const [units, setUnits] = React.useState([]);
+    const [discount, setDiscount] = useState([]);
+    const [tax, setTax] = useState([]);
+    const [charge, setCharge] = useState([]);
 
+    const [pricingConditionsPermissions, setpriceTemplatePermissions] = useState({
+        isCreate: false,
+        isUpdate: false,
+        isRead: false,
+        isDelete: false,
+    });
+
+    const ref = useRef(null);
 
     useEffect(() => {
-        if (id) {
-            getPricingConditionsFieldsAndData();
-        }
-        // eslint-disable-next-line
-    }, [id]);
+        getPricingConditionsFields();
+    }, [])
 
-    const handleMainPoints = (data) => {
-        let mainPoint = {};
-        mainPoint['Quantity'] = data?.qty || '';
-        mainPoint['MRP'] = data?.mrp || '';
-        setMainPoints(mainPoint);
-    };
+    useEffect(() => {
+        axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
+            const unitField = data.filter((e) => e.fieldData.fieldName === "unit");
+            if (unitField.length) {
+                setUnits(unitField[0].fieldData.option);
+                setIsProductMasterUnit(true);
+            }
+        })
+    }, []);
 
-    const getPricingConditionsFieldsAndData = () => {
-        setLoading(true);
-        axiosInstance()
-            .get("/field?resource=Pricing Condition")
-            .then(({ data: { data } }) => {
-                setPricingConditionsFields(data)
-            })
-            .catch((err) => {
-                toastConfig.setToastConfig(err);
-            });
+    useEffect(() => {
+        setFormsData(setFieldsInAscendingOrder(initialData.fields));
+    }, [initialData.fields]);
 
-        axiosInstance()
-            .get(`${pricingCondition.pricingConditionApi}/${id}`)
-            .then(({ data: { data } }) => {
-                handleMainPoints(data);
-                setHeadingLabel(data.conditionName);
-                setPricingConditionsData(data);
-                setCurrency(data.currency)
-                setDiscountType(data.type)
-                setCustomizedRoutes([routes.pricingCondition, { title: data.conditionName }]);
-                setLoading(false);
-            })
-            .catch((err) => {
-                toastConfig.setToastConfig(err);
-            });
-    };
-
-    const handleOpenUpdateDialog = () => {
-        setOpenUpdateDialog(true);
-    };
-
-    const handleDelete = () => {
-
-        axiosInstance().put(`${pricingCondition.pricingConditionApi}/remove`, { "ids": [id] }).then(() => {
-            setShowConfirmBox(false);
-            history.goBack();
-        }).catch((error) => {
-            toastConfig.setToastConfig(error)
-            setShowConfirmBox(false);
+    const getPricingConditionsFields = () => {
+        axiosInstance().get(`/field?resource=Pricing Condition`).then(({ data: { data } }) => {
+            const filterData = id === "0"
+                ? data.filter((d) => d.isCreate)
+                : data.filter((d) => d.isUpdate);
+            if (id === "0") {
+                setInitialData({
+                    fields: filterData.map(m => m.fieldData),
+                    values: getObjKeys("", filterData.map(m => m.fieldData)),
+                });
+            }
+            else {
+                let newFields = [];
+                axiosInstance().get(`${pricingConditionApi}/${id}`).then(({ data: { data } }) => {
+                    filterData.map((_f) => {
+                        newFields.push(_f.fieldData);
+                    });
+                    setDiscount(data.discount ? data.discount : [])
+                    setCharge(data.charge ? data.charge : [])
+                    setTax(data.tax ? data.tax : [])
+                    setInitialData({
+                        fields: newFields,
+                        values: data
+                    });
+                }).catch((error) => {
+                    toastConfig.setToastConfig(error);
+                });
+            }
         });
+    };
+
+    const onSubmit = (values) => {
+        setLoading(true);
+        if (values.conditionType === "Discount") {
+            values.discount = discount;
+        }
+        else {
+            delete values.discount;
+        }
+        if (values.conditionType === "Charge") {
+            values.charge = charge;
+        }
+        else {
+            delete values.charge;
+        }
+        if (values.conditionType === "Tax") {
+            values.tax = tax;
+        }
+        else {
+            delete values.tax;
+        }
+        if (id === "0") {
+            axiosInstance().post(pricingConditionApi, values).then(({ data }) => {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: data.message,
+                });
+                setLoading(false);
+                history.push({ pathname: routes.pricingCondition.path })
+            }).catch((error) => {
+                setLoading(false);
+                toastConfig.setToastConfig(error);
+            });
+        }
+        else {
+            values._id = id;
+            axiosInstance().put(pricingConditionApi, values).then(({ data }) => {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: data.message,
+                });
+                setLoading(false);
+                history.push({ pathname: routes.pricingCondition.path })
+            }).catch((error) => {
+                setLoading(false);
+                toastConfig.setToastConfig(error);
+            });
+        }
+    };
+
+
+    const convertLabeltoValue = (value) => {
+        const result = []
+        value.forEach((_v) => {
+            let _data = getUniqueCurrencies().filter((data) => data.currencyCode === _v || data.currencyCode + " - " + data.currencyName + " - (" + data.symbolNative + ")" === _v)
+            if (_data.length) {
+                result.push(_data[0].currencyCode)
+            }
+        })
+        return result;
     }
 
-    return (
-        <>
-            <Fragment>
+    const convertValuetoLabel = (value) => {
+        const result = []
+        value.forEach((_v) => {
+            let _data = getUniqueCurrencies().filter((data) => data.currencyCode === _v)
+            if (_data.length) {
+                result.push(_data[0].currencyCode + " - " + _data[0].currencyName + " - (" + _data[0].symbolNative + ")")
+            }
+        })
+        return result;
+    }
 
-                <Grid container className="headerbox">
-                    <CustomBreadCrumbs routes={customizedRoutes} />
-                </Grid>
-                <Grid container spacing={1} className="detail-container">
-                    <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
-                        <Paper>
-                            {!pricingConditionsData ? (
-                                <div>
-                                    <Skeleton variant="text" width="150px" height="40px" />
-                                    <Box display="flex">
-                                        <Skeleton
-                                            style={{ borderRadius: 6 }}
-                                            width="120px"
-                                            height="80px"
-                                        />
-                                        <Box marginX={1} />
-                                        <Skeleton
-                                            style={{ borderRadius: 6 }}
-                                            width="120px"
-                                            height="80px"
-                                        />
-                                    </Box>
-                                </div>
-                            ) : (
+    const handleChangeValue = (index, fieldName, value) => {
+        const _list = [...discount];
+        _list[index][fieldName] = value;
+        setDiscount(_list)
+    }
 
-                                <DetailsPageHeader
-                                    heading={headingLabel}
-                                    mainPoints={mainPoints}
-                                    showHeading={true}
-                                >
-                                    {permissions?.pricingCondition?.isUpdate && (
-                                        <Button
+    const handleChangeChargeValue = (index, fieldName, value) => {
+        const _charge = [...charge];
+        _charge[index][fieldName] = value;
+        setCharge(_charge)
+    }
+
+    const handleChangeTaxValue = (index, fieldName, value) => {
+        const _tax = [...tax];
+        _tax[index][fieldName] = value;
+        setTax(_tax)
+    }
+
+
+    const handleChangeProduct = (product) => {
+        if (!isProductMasterUnit) {
+
+        }
+    }
+
+    const classes = useStyles();
+    return (<Fragment>
+        <Grid container className="headerbox">
+            <Grid item md={4} sm={11} xs={10}>
+                <CustomBreadCrumbs
+                    routes={[
+                        {
+                            title: routes.pricingCondition.title,
+                            path: routes.pricingCondition.path,
+                        },
+                        {
+                            title: id === "0" ? "New" : initialData && initialData.values["conditionName"],
+                        },
+                    ]}
+                    onBreadCrumbClick={() => {
+                        if (!isEqual(ref.current.values, initialData.values)) {
+                            if ((id === "0" && pricingConditionsPermissions.isCreate) ||
+                                (id !== "0" && pricingConditionsPermissions.isUpdate)) {
+                                setShowConfirmDialog(true)
+                            }
+                            else {
+                                history.push({ pathname: routes.pricingCondition.path })
+                            }
+                        }
+                        else history.push({ pathname: routes.pricingCondition.path })
+                    }}
+                />
+            </Grid>
+        </Grid>
+        <div className="main-container p-2" >
+            {initialData && initialData.fields && initialData.fields.length > 0 ? (
+                <Formik
+                    initialValues={initialData.values}
+                    validationSchema={yupSchema(initialData.fields)}
+                    validateOnMount
+                    innerRef={ref}
+                    onSubmit={onSubmit}
+                >
+                    {({
+                        submitForm,
+                        values,
+                        errors,
+                        touched,
+                        setFieldValue,
+                        setFieldTouched,
+                        setErrors,
+                        setValues,
+                    }) => (
+                        <Form>
+                            <Grid container>
+                                <Grid item md={6} sm={6} xs={6}>
+                                    <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                                </Grid>
+                                <Grid container justify="flex-end" item md={6} sm={6} xs={6}>
+                                    <Box ml={1}>
+                                        <CustomButton
+                                            loading={loading}
                                             variant="contained"
                                             color="primary"
                                             size="small"
-                                            onClick={handleOpenUpdateDialog}
+                                            disabled={loading || isEqual(ref?.current?.values, initialData?.values)}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                submitForm();
+                                            }}
                                         >
-                                            Edit
+                                            Save
+                                        </CustomButton>
+                                    </Box>
+                                    <Box ml={1}>
+                                        <Button
+                                            type="button"
+                                            variant="outlined"
+                                            color="primary"
+                                            size="small"
+                                            onClick={() => {
+                                                if (!isEqual(ref.current.values, initialData.values)) {
+                                                    setShowConfirmDialog(true)
+                                                }
+                                                else {
+                                                    history.push(routes.pricingCondition.path)
+                                                }
+                                            }}
+                                        >
+                                            Close
                                         </Button>
-                                    )}
-                                    {permissions?.pricingCondition?.isDelete &&
-                                        <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                            <Box className={classes.screenHeightAuto}>
+                                {formsData && formsData.map((form, index) => {
+                                    return <div key={index}>
+                                        <h2 className="form-label-style">{form.name}</h2>
+                                        <Box marginY={2}>
+                                            <Grid spacing={3} container>
+                                                {form.sectionFields.map((field, index2) => (
+                                                    field.fieldName === "product" ?
+                                                        <Grid key={field.fieldName} item xs={12} sm={4} md={4}>
+                                                            <FormTypes
+                                                                {...field}
+                                                                multiple
+                                                                values={values}
+                                                                errors={errors}
+                                                                touched={touched}
+                                                                label={field.fieldLabel}
+                                                                name={field.fieldName}
+                                                                type={field.type}
+                                                                options={field.option}
+                                                                fullWidth
+                                                                isTooltip={field?.isTooltip || false}
+                                                                tooltipMessage={field?.tooltipMessage}
+                                                                size="small"
+                                                                onChange={(e, value) => {
+                                                                    setFieldValue(
+                                                                        field.fieldName,
+                                                                        value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
+                                                                    );
+                                                                    handleChangeProduct(value.filter((v) => v.optionValue).map((val) => val.optionValue))
+                                                                }}
+                                                            />
+                                                        </Grid> :
+                                                        <Grid key={index2} item xs={12} sm={4} md={4}>
+                                                            <FormTypes
+                                                                // {...rest}
+                                                                values={values}
+                                                                errors={errors}
+                                                                touched={touched}
+                                                                label={field.fieldLabel}
+                                                                name={field.fieldName}
+                                                                type={field.type}
+                                                                options={field.option}
+                                                                setFieldValue={(name, value) => {
+                                                                    setFieldValue(name, value)
+                                                                }}
+                                                                required={field.required}
+                                                                fullWidth
+                                                                isTooltip={field?.isTooltip || false}
+                                                                tooltipMessage={field?.tooltipMessage}
+                                                                size="small"
+                                                                imageOrFileUploadCompletePercentage={null}
+                                                            />
+                                                        </Grid>
+                                                ))}
+                                                {index === formsData.length - 1 && <Fragment>
+                                                    <Grid item xs={12} sm={4} md={4} className="pt-1">
+                                                        <Autocomplete
+                                                            multiple
+                                                            disableCloseOnSelect={true}
+                                                            id="autocompleteunits"
+                                                            options={units.map((e) => { return e.optionValue })}
+                                                            value={values['units'] ? values['units'] : []}
+                                                            renderTags={(value: string[], getTagProps) =>
+                                                                value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
+                                                            }
+                                                            onChange={(e, value) => setFieldValue("units", value)}
+                                                            renderInput={(params) =>
+                                                                <TextField
+                                                                    {...params}
+                                                                    margin="dense"
+                                                                    name="units"
+                                                                    variant="outlined"
+                                                                    label="Units"
+                                                                    placeholder="Units"
+                                                                    error={touched['units'] && Boolean(errors['units'])}
+                                                                    helperText={touched['units'] && errors['units']}
+                                                                />}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={4} md={4} className="pt-1">
+                                                        <Autocomplete
+                                                            multiple
+                                                            id="tags-filled"
+                                                            disableCloseOnSelect={true}
+                                                            options={getUniqueCurrencies().map((_c) => { return _c.currencyCode + " - " + _c.currencyName + " - (" + _c.symbolNative + ")" })}
+                                                            renderTags={(value: string[], getTagProps) =>
+                                                                value.map((option: string, index: number) => (
+                                                                    <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+                                                                ))
+                                                            }
+                                                            getOptionLabel={(option) => option}
+                                                            value={convertValuetoLabel(values["currency"] ? values["currency"] : [])}
+                                                            onChange={(e, value) => setFieldValue("currency", convertLabeltoValue(value))}
+                                                            renderInput={(params) => (
+                                                                <TextField
+                                                                    {...params}
+                                                                    margin="dense"
+                                                                    variant="outlined"
+                                                                    name="currency"
+                                                                    label="Currency"
+                                                                    placeholder="Currency"
+                                                                    error={touched['currency'] && Boolean(errors['currency'])}
+                                                                    helperText={touched['currency'] && errors['currency']}
+                                                                />
+                                                            )}
+                                                        />
+                                                    </Grid>
+                                                </Fragment>}
+                                            </Grid>
+                                        </Box>
+                                    </div>
+                                })}
+                                <Box>
+
+
+                                    {values.conditionType === "Price" &&
+                                        <Grid spacing={3} container>
+                                            {values["currency"] && values["currency"].map((_currency, i) =>
+                                                values["units"] && values["units"].map((_unit, j) => (
+                                                    <Grid item xs={12} sm={3} md={3}>
+                                                        <TextField
+                                                            id="mrp"
+                                                            name="mrp"
+                                                            variant="outlined"
+                                                            margin="dense"
+                                                            fullWidth
+                                                            label={"Rate " + _unit + " " + _currency}
+                                                            type="number"
+                                                            value={values['mrp' + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]}
+                                                            onChange={(e) => setFieldValue('mrp' + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase(), parseFloat(e.target.value))}
+                                                            InputProps={{
+                                                                startAdornment: (
+                                                                    <InputAdornment position="start">
+                                                                        {result(
+                                                                            find(getUniqueCurrencies(), function (obj) {
+                                                                                return obj.currencyCode === _currency;
+                                                                            }),
+                                                                            'symbolNative'
+                                                                        )}
+                                                                    </InputAdornment>
+                                                                ),
+                                                                inputProps: { min: 0, max: 9999999999 },
+                                                            }}
+                                                        />
+                                                    </Grid>
+                                                )))
+                                            }
+                                        </Grid>
                                     }
 
-                                </DetailsPageHeader>
-                            )}
-
-
-                            <Box>
-                                {loading || !pricingConditionsFields.length ? (
-                                    <Grid container spacing={2} style={{ padding: "8px" }}>
-                                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                                    </Grid>
-                                ) : (
-                                    <>
-                                        <DetailsPage data={pricingConditionsData} fields={pricingConditionsFields} />
-                                    </>
-                                )}
-                            </Box>
-
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
-                        <Paper>
-                            <Box
-                                padding={1}
-                                bgcolor="grey.200"
-                                display="flex"
-                                justifyContent="space-between"
-                                alignItems="center"
-                            >
-                                <Typography variant="subtitle2">
-                                    Pricing Conditions
-                                </Typography>
-
-                                {permissions.pricingCondition.isUpdate && (
-                                    <IconButton
-                                        title="Assign users"
-                                        color="primary"
-                                        size="small"
-                                        onClick={() => { setOpenPricingConditionDialog(true) }}
-                                    >
-                                        <ControlPoint />
-                                    </IconButton>
-                                )}
-                            </Box>
-                            {(
-                                <Box>
-                                    {loading ? (
-                                        [1, 2].map((i) => (
-                                            <BoxWithBorder
-                                                key={i}
-                                                style={{
-                                                    margin: "8px",
-                                                }}
-                                            >
-                                                <Box padding={1}>
-                                                    <Skeleton
-                                                        variant="text"
-                                                        width="100px"
-                                                        height="20px"
-                                                    />
-                                                    <Box marginTop={1} />
-                                                    <Skeleton variant="text" width="100%" height="15px" />
-                                                </Box>
-                                            </BoxWithBorder>
-                                        ))
-
-                                    ) : (
-                                        pricingConditionsData?.discount && pricingConditionsData?.discount.length > 0 ?
-                                            <>
-                                                <div className={classes.demo}>
-                                                    <List disablePadding>
-                                                        {pricingConditionsData?.discount && pricingConditionsData?.discount.length
-                                                            ? pricingConditionsData?.discount.map((obj) => (
-                                                                <BoxWithBorder key={obj._id} style={{ margin: "8px" }}>
-                                                                    <ListItem disableGutters className={classes.list}>
-                                                                        <div>
-                                                                            <ListItemText
-                                                                                primary={
-                                                                                    <Typography>
-                                                                                        {`Quantity ${obj?.quantity || ""}`}
-                                                                                    </Typography>
-                                                                                }
-                                                                                secondary={discountType === "Flat Discount" ? `Discount % ${obj?.amount}` : `Amount ${currency} ${obj?.amount}`}
-                                                                            />
-                                                                        </div>
-                                                                    </ListItem>
-                                                                </BoxWithBorder>
+                                    {values.conditionType === "Rent" &&
+                                        <Fragment>
+                                            <Grid spacing={3} container>
+                                                <Grid item xs={12} sm={4} md={4}>
+                                                    <Autocomplete
+                                                        multiple
+                                                        id="tags-filled"
+                                                        disableCloseOnSelect={true}
+                                                        options={rentType}
+                                                        getOptionLabel={(option: any) => (startCase(option))}
+                                                        renderTags={(value: string[], getTagProps) =>
+                                                            value.map((option: string, index: number) => (
+                                                                <Chip variant="outlined" label={startCase(option)} {...getTagProps({ index })} />
                                                             ))
-
-                                                            : null}
-                                                    </List>
-                                                </div>
-
-                                            </>
-                                            : <Box textAlign="center" padding={2}>
-                                                <Typography>No price condition has been assigned </Typography>
+                                                        }
+                                                        value={values["rentType"]}
+                                                        onChange={(e, value) => {
+                                                            setFieldValue("rentType", value)
+                                                        }}
+                                                        renderInput={(params) => (
+                                                            <TextField
+                                                                {...params}
+                                                                margin="dense"
+                                                                variant="outlined"
+                                                                name="rentType"
+                                                                label="Rent Type"
+                                                                placeholder="Rent Type"
+                                                                error={touched['rentType'] && Boolean(errors['rentType'])}
+                                                                helperText={touched['rentType'] && errors['rentType']}
+                                                            />
+                                                        )}
+                                                    />
+                                                </Grid>
+                                            </Grid>
+                                            <Box marginTop={1} border={1} p={1} borderColor="grey.300" >
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th></th>
+                                                            {values["currency"] && values["currency"].map((_currency, i) =>
+                                                                values['units'] && values['units'].map((_unit, j) => (
+                                                                    <th key={j}  >
+                                                                        {_unit + " " + _currency}
+                                                                    </th>
+                                                                )))}
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {values['rentType'] && values['rentType'].map((_rentType, i) => (
+                                                            <tr key={i}>
+                                                                <th style={{ paddingRight: 10, minWidth: 50 }}>
+                                                                    {startCase(_rentType)}
+                                                                </th>
+                                                                {values["currency"] && values["currency"].map((_currency, j) =>
+                                                                    values['units'] && values['units'].map((_unit, k) => (
+                                                                        <td key={j}>
+                                                                            <TextField
+                                                                                name={"rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()}
+                                                                                variant="outlined"
+                                                                                margin="dense"
+                                                                                fullWidth
+                                                                                type="number"
+                                                                                style={{ margin: 0 }}
+                                                                                value={values["rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()]}
+                                                                                onChange={(e) => setFieldValue("rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(), parseFloat(e.target.value))}
+                                                                            />
+                                                                        </td>
+                                                                    )))}
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
                                             </Box>
-                                    )}
+                                        </Fragment>
+                                    }
+
+                                    {values.conditionType === "Discount" &&
+                                        <Fragment>
+                                            <Box mt={3}>
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    size="small"
+                                                    onClick={() => {
+                                                        setDiscount([...discount, {
+                                                            type: "Flat",
+                                                            amount: 0,
+                                                            minTransAmount: 0,
+                                                            maxDiscount: 0,
+                                                            group: []
+                                                        }])
+                                                    }}
+                                                >
+                                                    Add Discount
+                                                </Button>
+                                            </Box>
+                                            {discount.map((val, index) => (
+                                                <Box key={index} mt={1}>
+                                                    <Badge badgeContent={index + 1} color="primary">
+                                                    </Badge>
+                                                    <Box p={2} border={1} borderColor="grey.300">
+                                                        <Grid spacing={3} container>
+                                                            <Grid item xs={12} sm={2} md={2}>
+                                                                <FormControl fullWidth margin="dense" variant="outlined">
+                                                                    <InputLabel id="demo-simple-select-outlined-label">Discount Type</InputLabel>
+                                                                    <Select
+                                                                        labelId="demo-simple-select-outlined-label"
+                                                                        id="demo-simple-select-outlined"
+                                                                        value={val.type}
+                                                                        onChange={(e) => {
+                                                                            handleChangeValue(index, 'type', e.target.value)
+                                                                        }}
+                                                                        label="Type"
+                                                                        name={"type_" + index}
+                                                                    >
+                                                                        <MenuItem value="Flat">Flat</MenuItem>
+                                                                        <MenuItem value="Percentage">Percentage</MenuItem>
+                                                                        <MenuItem value="Group Flat">Group Flat</MenuItem>
+                                                                        <MenuItem value="Group Percentage">Group Percentage</MenuItem>
+                                                                    </Select>
+                                                                </FormControl>
+                                                            </Grid>
+                                                            {(val.type === "Flat" || val.type === "Percentage") &&
+                                                                <Fragment>
+                                                                    <Grid item xs={12} sm={2} md={2}>
+                                                                        <TextField
+                                                                            id="amount"
+                                                                            name="amount"
+                                                                            variant="outlined"
+                                                                            margin="dense"
+                                                                            fullWidth
+                                                                            label={"Discount " + (val.type === "Flat" ? " Amount" : " Percentage")}
+                                                                            type="number"
+                                                                            value={val.amount}
+                                                                            onChange={(e) => handleChangeValue(index, 'amount', parseFloat(e.target.value))}
+                                                                        />
+                                                                    </Grid>
+                                                                    <Grid item xs={12} sm={2} md={2}>
+                                                                        <TextField
+                                                                            id="minTransAmount"
+                                                                            name="minTransAmount"
+                                                                            variant="outlined"
+                                                                            margin="dense"
+                                                                            fullWidth
+                                                                            label="Minimum Trans. Amount"
+                                                                            type="number"
+                                                                            value={val.minTransAmount}
+                                                                            onChange={(e) => handleChangeValue(index, 'minTransAmount', parseFloat(e.target.value))}
+                                                                        />
+                                                                    </Grid>
+                                                                    <Grid item xs={12} sm={2} md={2}>
+                                                                        <TextField
+                                                                            id="maxDiscount"
+                                                                            name="maxDiscount"
+                                                                            variant="outlined"
+                                                                            margin="dense"
+                                                                            fullWidth
+                                                                            label="Maximum Discount"
+                                                                            type="number"
+                                                                            value={val.maxDiscount}
+                                                                            onChange={(e) => handleChangeValue(index, 'maxDiscount', parseFloat(e.target.value))}
+                                                                        />
+                                                                    </Grid>
+                                                                </Fragment>
+                                                            }
+                                                            <Grid container justify="flex-end"
+                                                                item xs={12}
+                                                                sm={val.type === "Flat" || val.type === "Percentage" ? 4 : 10}
+                                                                md={val.type === "Flat" || val.type === "Percentage" ? 4 : 10} >
+                                                                <IconButton size="small" aria-label="delete"
+                                                                    onClick={() => {
+                                                                        const _list = [...discount];
+                                                                        _list.splice(index, 1)
+                                                                        setDiscount(_list)
+                                                                    }} >
+                                                                    <Delete color="error" />
+                                                                </IconButton>
+                                                            </Grid>
+                                                        </Grid>
+                                                        {(val.type === "Group Flat" || val.type === "Group Percentage") &&
+                                                            <Grid container>
+                                                                <Grid item xs={12} sm={6} md={6}>
+                                                                    <MultipleEntry
+                                                                        discount={discount}
+                                                                        index={index}
+                                                                        setDiscount={setDiscount}
+                                                                        fieldNames={["qty", "amount"]}
+                                                                        fieldLabels={val.type === "Group Flat" ? ["Quantity", "Discount Amount"]
+                                                                            : ["Quantity", "Discount Percentage"]}
+                                                                        label="Group Discount"
+                                                                    />
+                                                                </Grid>
+                                                            </Grid>
+                                                        }
+                                                    </Box>
+                                                </Box>
+                                            ))}
+                                        </Fragment>
+                                    }
+
+                                    {(values.conditionType === "Charge") &&
+                                        <Fragment>
+                                            <Box mt={3}>
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    size="small"
+                                                    onClick={() => {
+                                                        setCharge([...charge, {
+                                                            type: "Flat",
+                                                            label: "",
+                                                            amount: 0,
+                                                        }])
+                                                    }}
+                                                >
+                                                    Add Charge
+                                                </Button>
+                                            </Box>
+                                            {charge.map((val, index) => (
+                                                <Box key={index} mt={1}>
+                                                    <Badge badgeContent={index + 1} color="primary">
+                                                    </Badge>
+                                                    <Box p={2} border={1} borderColor="grey.300">
+                                                        <Grid spacing={3} container>
+                                                            <Grid item xs={12} sm={2} md={2}>
+                                                                <TextField
+                                                                    id="label"
+                                                                    name="label"
+                                                                    variant="outlined"
+                                                                    margin="dense"
+                                                                    fullWidth
+                                                                    label={"Charge Name"}
+                                                                    type="text"
+                                                                    value={val.label}
+                                                                    onChange={(e) => handleChangeChargeValue(index, 'label', e.target.value)}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={12} sm={2} md={2}>
+                                                                <FormControl fullWidth margin="dense" variant="outlined">
+                                                                    <InputLabel id="demo-simple-select-outlined-label">Charge Type</InputLabel>
+                                                                    <Select
+                                                                        labelId="demo-simple-select-outlined-label"
+                                                                        id="demo-simple-select-outlined"
+                                                                        value={val.type}
+                                                                        onChange={(e) => {
+                                                                            handleChangeChargeValue(index, 'type', e.target.value)
+                                                                        }}
+                                                                        label="Type"
+                                                                        name={"type_" + index}
+                                                                    >
+                                                                        <MenuItem value="Flat">Flat</MenuItem>
+                                                                        <MenuItem value="Percentage">Percentage</MenuItem>
+                                                                    </Select>
+                                                                </FormControl>
+                                                            </Grid>
+                                                            <Grid item xs={12} sm={2} md={2}>
+                                                                <TextField
+                                                                    id="amount"
+                                                                    name="amount"
+                                                                    variant="outlined"
+                                                                    margin="dense"
+                                                                    fullWidth
+                                                                    label={"Charge " + (val.type === "Flat" ? " Amount" : " Percentage")}
+                                                                    type="number"
+                                                                    value={val.amount}
+                                                                    onChange={(e) => handleChangeChargeValue(index, 'amount', parseFloat(e.target.value))}
+                                                                />
+                                                            </Grid>
+                                                            <Grid container justify="flex-end" item xs={12} sm={6} md={6} >
+                                                                <IconButton size="small" aria-label="delete"
+                                                                    onClick={() => {
+                                                                        const _charge = [...charge];
+                                                                        _charge.splice(index, 1)
+                                                                        setCharge(_charge)
+                                                                    }} >
+                                                                    <Delete color="error" />
+                                                                </IconButton>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Box>
+                                                </Box>
+                                            ))}
+                                        </Fragment>
+                                    }
+
+                                    {(values.conditionType === "Tax") &&
+                                        <Fragment>
+                                            <Box mt={3}>
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    size="small"
+                                                    onClick={() => {
+                                                        setTax([...tax, {
+                                                            type: "Flat",
+                                                            taxCode: "",
+                                                            amount: 0,
+                                                        }])
+                                                    }}
+                                                >
+                                                    Add Tax
+                                                </Button>
+                                            </Box>
+                                            {tax.map((val, index) => (
+                                                <Box key={index} mt={1}>
+                                                    <Badge badgeContent={index + 1} color="primary">
+                                                    </Badge>
+                                                    <Box p={2} border={1} borderColor="grey.300">
+                                                        <Grid spacing={3} container>
+                                                            <Grid item xs={12} sm={2} md={2}>
+                                                                <TextField
+                                                                    id="taxCode"
+                                                                    name="taxCode"
+                                                                    variant="outlined"
+                                                                    margin="dense"
+                                                                    fullWidth
+                                                                    label={"Tax Code"}
+                                                                    type="text"
+                                                                    value={val.taxCode}
+                                                                    onChange={(e) => handleChangeTaxValue(index, 'taxCode', e.target.value)}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={12} sm={2} md={2}>
+                                                                <FormControl fullWidth margin="dense" variant="outlined">
+                                                                    <InputLabel id="demo-simple-select-outlined-label">Tax Type</InputLabel>
+                                                                    <Select
+                                                                        labelId="demo-simple-select-outlined-label"
+                                                                        id="demo-simple-select-outlined"
+                                                                        value={val.type}
+                                                                        onChange={(e) => {
+                                                                            handleChangeTaxValue(index, 'type', e.target.value)
+                                                                        }}
+                                                                        label="Type"
+                                                                        name={"type_" + index}
+                                                                    >
+                                                                        <MenuItem value="Flat">Flat</MenuItem>
+                                                                        <MenuItem value="Percentage">Percentage</MenuItem>
+                                                                    </Select>
+                                                                </FormControl>
+                                                            </Grid>
+                                                            <Grid item xs={12} sm={2} md={2}>
+                                                                <TextField
+                                                                    id="amount"
+                                                                    name="amount"
+                                                                    variant="outlined"
+                                                                    margin="dense"
+                                                                    fullWidth
+                                                                    label={"Tax " + (val.type === "Flat" ? " Amount" : " Percentage")}
+                                                                    type="number"
+                                                                    value={val.amount}
+                                                                    onChange={(e) => handleChangeTaxValue(index, 'amount', parseFloat(e.target.value))}
+                                                                />
+                                                            </Grid>
+                                                            <Grid container justify="flex-end" item xs={12} sm={6} md={6} >
+                                                                <IconButton size="small" aria-label="delete"
+                                                                    onClick={() => {
+                                                                        const _tax = [...tax];
+                                                                        _tax.splice(index, 1)
+                                                                        setTax(_tax)
+                                                                    }} >
+                                                                    <Delete color="error" />
+                                                                </IconButton>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Box>
+                                                </Box>
+                                            ))}
+                                        </Fragment>
+                                    }
+
                                 </Box>
-                            )}
-                        </Paper>
-                    </Grid>
-
-                </Grid>
-
-            </Fragment>
-            {showConfirmBox && (
-                <ConfirmationDialog
-                    open={showConfirmBox}
-                    message={`Are you sure you want to delete this pricing conditions ${headingLabel} ?`
-                    }
-                    onClose={() => {
-                        setShowConfirmBox(false);
-                    }}
-                    onOk={handleDelete}
-                />
+                            </Box>
+                            {
+                                showConfirmDialog &&
+                                <ConfirmCancelDialog
+                                    open={showConfirmDialog}
+                                    onSave={() => {
+                                        setShowConfirmDialog(false)
+                                        submitForm();
+                                    }}
+                                    onClose={() => {
+                                        setShowConfirmDialog(false)
+                                        history.push(routes.pricingCondition.path)
+                                    }}
+                                />
+                            }
+                        </Form>
+                    )}
+                </Formik>
+            ) : (
+                <Box p={2} height={500} bgcolor="white">
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>
             )}
 
-            {openUpdateDialog && (
-                <ManagePricingConditionsDialog
-                    open={openUpdateDialog}
-                    onSuccess={getPricingConditionsFieldsAndData}
-                    onClose={() => {
-                        setOpenUpdateDialog(false)
-                    }}
-                    pricingConditionId={id}
-                />
-            )}
-            {openPricingConditionDialog && (
-                <ManagePricingDiscountDialog
-                    open={openPricingConditionDialog}
-                    onClose={() => {
-                        setOpenPricingConditionDialog(false)
-                    }}
-                    currency={currency}
-                    pricingConditionsData={pricingConditionsData}
-                    discountType={discountType}
-                    onSuccess={() => {
-                        setOpenPricingConditionDialog(false)
-                        getPricingConditionsFieldsAndData()
-                    }}
-                />
-            )
-
-            }
-
-        </>
+        </div>
+    </Fragment >
     );
-};
+}
 
-export default PricingConditionsDetailsPage;
+export default PricingConditionsDetailsPage
+
+

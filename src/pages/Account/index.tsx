@@ -24,17 +24,11 @@ import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import { MdAccountCircle } from 'react-icons/md';
-import { gridLoadingTimeout, entity, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, entity, sidebarResource, prepareDataForGrid } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from './../../components/Helpers/Routes';
 import { isObjectEmpty } from '../../constants/helpers';
-import {
-  CommonRenderer,
-  CreatedByRenderer,
-  UpdatedByRenderer,
-  CommonRendererWithCopy
-} from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import ToggleButton from '@material-ui/lab/ToggleButton';
@@ -44,6 +38,7 @@ import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes"
 import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import { HiBadgeCheck } from "react-icons/hi"
+import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
 
 const AccTypes = [
   {
@@ -110,23 +105,13 @@ export default function Account(props) {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
+  const [columns, setColumns] = useState([])
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem(accountResource));
 
-  const columns = [
-    { field: 'accountName', headerName: 'Account Name', show: true, disabled: true, cellRenderer: 'accountNameRenderer' },
-    { field: 'lead', headerName: 'Related Lead', show: true, cellRenderer: 'leadRenderer' },
-    { field: 'typeOfAccount', headerName: 'Type', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'entity', headerName: 'Entity Name', show: true, cellRenderer: 'entityRenderer' },
-    { field: 'industry', headerName: 'Industry', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-    { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
-    { field: 'parentAccount', headerName: 'Parent Account', show: true, cellRenderer: 'parentAccountRenderer' },
-    { field: 'masterAccount', headerName: 'Master Account', show: true, cellRenderer: 'masterAccountRenderer', filter: false, sortable: false },
-    { field: 'phone', headerName: 'Phone', show: true, cellRenderer: 'commonRendererWithCopy' }
-  ];
 
   if (columnState) {
     columns.forEach((item) => {
@@ -138,6 +123,60 @@ export default function Account(props) {
     });
   }
 
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+
+  const fetchGridColumns = async () => {
+
+    const response = await axiosInstance()
+      .get(`/field?resource=${sidebarResource[accountResource]}`)
+
+    let data = response?.data?.data
+
+    let columns = []
+    let rendererNames = []
+    data.forEach(o => {
+      if (["accountName"].indexOf(o?.fieldData?.fieldName) === 0) {
+        columns = [...columns, {
+          pivotIndex: 0,
+          field: 'accountName', headerName: 'Account Name', show: true, disabled: true,
+          cellRenderer: 'accountNameRenderer'
+        }]
+      }
+      else {
+        let currentColumn = getColumnData(accountResource, o?.fieldData, `/${accountRoute}/detail`)
+        if (currentColumn !== null) {
+          columns = [...columns, currentColumn?.columnData]
+          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+            rendererNames.push(currentColumn?.rendererName)
+          }
+        }
+      }
+      return o?.fieldData
+    })
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      accountNameRenderer: AccountNameRenderer,
+      masterAccountRenderer: MasterAccountRenderer,
+      leadRenderer: LeadRenderer,
+      actionsRenderer: ActionsRenderer
+    }
+    setFrameWorkComponent({ ...tempFrameworkComponent })
+    columns = [...columns,
+    { field: 'masterAccount', headerName: 'Master Account', show: true, cellRenderer: 'masterAccountRenderer', filter: false, sortable: false }]
+    if (accountResource.includes("customer")) {
+      columns = [...columns,
+      { field: 'lead', headerName: 'Related Lead', show: true, cellRenderer: 'leadRenderer' }
+      ]
+    }
+    let staticFields = getStaticFields()
+    staticFields.forEach(field => {
+      columns.push(checkStaticField(routes.projectSales.title, field))
+    })
+    setColumns([...columns])
+  }
   //  Grid Variables - End
 
   useEffect(() => {
@@ -220,8 +259,8 @@ export default function Account(props) {
         :
         <NoDataCell />
       }
-      {params.data?.restEntity?.length > 0 && (
-        <span className="createdAtTime badge-date">{`+${params.data?.restEntity.length} more..`}</span>
+      {params.data?.restentity?.length > 0 && (
+        <span className="createdAtTime badge-date">{`+${params.data?.restentity.length} more..`}</span>
       )}
     </h5>
   )
@@ -331,8 +370,8 @@ export default function Account(props) {
                 if (params?.data?.entityId) {
                   entities.push(params?.data?.entityId)
                 }
-                if (params?.data?.restEntity) {
-                  let restEntities = params?.data?.restEntity.map(o => o.optionValue)
+                if (params?.data?.restentity) {
+                  let restEntities = params?.data?.restentity.map(o => o.optionValue)
                   entities = [...entities, ...restEntities]
                 }
                 setEntities([...entities])
@@ -345,18 +384,6 @@ export default function Account(props) {
     </>
   );
 
-  const frameworkComponents = {
-    accountNameRenderer: AccountNameRenderer,
-    leadRenderer: LeadRenderer,
-    commonRenderer: CommonRenderer,
-    commonRendererWithCopy: CommonRendererWithCopy,
-    parentAccountRenderer: ParentAccountRenderer,
-    masterAccountRenderer: MasterAccountRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-    entityRenderer: EntityRenderer
-  };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -461,14 +488,9 @@ export default function Account(props) {
       .get(`${accountApi}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          const { owner, collaborator, createdBy, updatedBy, staticData, parentAccount, parentHierarchy, entity, ...restProperties } = u;
-          const [firstEntity, ...restEntity] = entity;
+          let finalObject = prepareDataForGrid(u);
           let res = {
-            ...restProperties,
-            id: u._id,
-
-            owner: u.owner?.optionLabel,
-            ownerId: u.owner?.optionValue,
+            ...finalObject,
             canDelete: u.owner?.optionValue === user?.user._id,
 
             isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
@@ -477,23 +499,12 @@ export default function Account(props) {
             leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
             approved: u.staticData?.approved,
 
-            parentAccount: parentAccount?.optionLabel,
-            parentAccountId: parentAccount?.optionValue,
-
-            entity: firstEntity?.optionLabel ?? '',
-            entityId: firstEntity?.optionValue ?? '',
-            restEntity: restEntity,
             masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
             masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : '',
 
-            createdBy: u.createdBy?.user?.concatedName,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
           };
           return res;
         });
-
         dispatch({ type: 'initialize', data: rows, count: count });
 
         setTimeout(() => {
@@ -673,6 +684,8 @@ export default function Account(props) {
             afterImportCompleted={() => {
               fetchAccounts();
             }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
             recordsToExport={selectedRecords.length}
             ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
@@ -862,8 +875,8 @@ export default function Account(props) {
                                 if (current?.entityId) {
                                   entities = [...entities, current?.entityId]
                                 }
-                                if (current?.restEntity) {
-                                  let restEntities = current?.restEntity.map(o => o.optionValue)
+                                if (current?.restentity) {
+                                  let restEntities = current?.restentity.map(o => o.optionValue)
                                   entities = [...entities, ...restEntities]
                                 }
                               })
@@ -894,20 +907,22 @@ export default function Account(props) {
             </CustomHeader> */}
         </div>
 
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          loading={loading}
-          renderedFrom={accountResource}
-          refreshGrid={fetchAccounts}
-        />
+        {
+          Object.keys(frameWorkComponent).length > 0 ?
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              loading={loading}
+              renderedFrom={accountResource}
+              refreshGrid={fetchAccounts}
+            /> : null}
 
 
         {showDeleteWarningConfirmBox?.show ? (

@@ -17,6 +17,7 @@ import {
   quoteBuilder,
   formatAmountWithCurrency,
   gridLoadingTimeout,
+  prepareDataForGrid,
 } from "../../constants/helpers";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
@@ -40,6 +41,7 @@ import VersionStatus from "./VersionStatus";
 import TransferEntityDialog from "../../components/AssignRolesDialog/TransferEntityDialog";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
+import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
 
 let quoteTimeout;
 const QuoteType = [
@@ -88,6 +90,8 @@ const QuoteBuilders = () => {
     resource: history.location?.state?.resource,
   });
   const [showVersionsDialog, setShowVersionsDialog] = useState(false);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [columns, setColumns] = useState([])
   const [versionStatusData, setVersionStatusData] = useState({
     columns: [
       {
@@ -181,54 +185,112 @@ const QuoteBuilders = () => {
     selectedRecords,
   } = state;
 
-  const columns = [
-    {
-      field: "quoteName",
-      headerName: "Quote Name",
-      show: true,
-      disabled: true,
-      cellRenderer: "quoteNameRenderer",
-    },
-    {
-      field: "customerAccountName",
-      headerName: "Customer Account Name",
-      show: true,
-      cellRenderer: "customerAccountNameRenderer",
-    },
+  // const columns = [
+  //   {
+  //     field: "quoteName",
+  //     headerName: "Quote Name",
+  //     show: true,
+  //     disabled: true,
+  //     cellRenderer: "quoteNameRenderer",
+  //   },
+  //   {
+  //     field: "customerAccountName",
+  //     headerName: "Customer Account Name",
+  //     show: true,
+  //     cellRenderer: "customerAccountNameRenderer",
+  //   },
+  //   {
+  //     field: "relatedOpportunity",
+  //     headerName: "Related Opportunity",
+  //     show: true,
+  //     cellRenderer: "relatedOpportunityRenderer"
+  //   },
+
+  //   {
+  //     field: "createdBy",
+  //     headerName: "Created By",
+  //     show: true,
+  //     cellRenderer: "createdByRenderer",
+  //   },
+  //   {
+  //     field: "updatedBy",
+  //     headerName: "Updated By",
+  //     show: true,
+  //     cellRenderer: "updatedByRenderer",
+  //   },
+  //   {
+  //     field: "expiryDate",
+  //     headerName: "Expiry Date",
+  //     show: true,
+  //     filter: false,
+  //     cellRenderer: "commonRenderer",
+  //   },
+  //   {
+  //     field: "owner",
+  //     headerName: "Quote Owner",
+  //     show: true,
+  //     cellRenderer: "commonRenderer",
+  //   },
+  // ];
+  //  Grid Variables - End
+
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+
+  const fetchGridColumns = async () => {
+
+    const response = await axiosInstance()
+      .get(`/field?resource=Quotes&entity=${selectedEntity}`)
+
+    let data = response?.data?.data
+
+    let columns = []
+    let rendererNames = []
+    data.forEach(o => {
+      if (["quoteName"].find(d => d === o?.fieldData?.fieldName)) {
+        columns = [...columns, {
+          disabled: true,
+          field: "quoteName",
+          headerName: "Quote Name",
+          pivotIndex: 0,
+          show: true,
+          cellRenderer: "quoteNameRenderer"
+        }]
+      }
+      else {
+        let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
+        if (currentColumn !== null) {
+          columns = [...columns, currentColumn?.columnData]
+          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+            rendererNames.push(currentColumn?.rendererName)
+          }
+        }
+      }
+    })
+
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      quoteNameRenderer: QuoteNameRenderer,
+      relatedOpportunityRenderer: RelatedOpportunityRenderer,
+      actionsRenderer: ActionsRenderer
+    }
+    columns = [...columns,
     {
       field: "relatedOpportunity",
       headerName: "Related Opportunity",
       show: true,
       cellRenderer: "relatedOpportunityRenderer"
-    },
-
-    {
-      field: "createdBy",
-      headerName: "Created By",
-      show: true,
-      cellRenderer: "createdByRenderer",
-    },
-    {
-      field: "updatedBy",
-      headerName: "Updated By",
-      show: true,
-      cellRenderer: "updatedByRenderer",
-    },
-    {
-      field: "expiryDate",
-      headerName: "Expiry Date",
-      show: true,
-      filter: false,
-      cellRenderer: "commonRenderer",
-    },
-    {
-      field: "owner",
-      headerName: "Quote Owner",
-      show: true,
-      cellRenderer: "commonRenderer",
-    },
-  ];
-  //  Grid Variables - End
+    }
+    ]
+    setFrameWorkComponent({ ...tempFrameworkComponent })
+    let staticFields = getStaticFields()
+    staticFields.forEach(field => {
+      columns.push(checkStaticField(routes.projectSales.title, field))
+    })
+    setColumns([...columns])
+  }
 
   useEffect(() => {
     if (permissions && permissions.quoteBuilder) {
@@ -518,14 +580,6 @@ const QuoteBuilders = () => {
         .get(`${qbApi}${queryString}`)
         .then(({ data: { data, count } }) => {
           let rows = data.map((u) => {
-            const {
-              owner,
-              collaborator,
-              createdBy,
-              updatedBy,
-              customerAccountName,
-              ...restProperties
-            } = u;
 
             let versionCount = Object.keys(u.versions).length;
             let tempStatus = "Building Quote"
@@ -539,32 +593,25 @@ const QuoteBuilders = () => {
               tempStatus = updatedVersion.status
             }
 
-            let res = {
-              ...restProperties,
-              id: u._id,
+            //  Dynamic grid code - start
+            let finalObject = prepareDataForGrid(u);
 
-              owner: u.owner?.optionLabel,
-              ownerId: u.owner?.optionValue,
+            //  Custom props which are required
+            finalObject["relatedOpportunity"] = u.opportunity?.optionLabel;
+            finalObject["relatedOpportunityId"] = u.opportunity?.optionValue;
+            finalObject["id"] = u._id;
+            finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
+            finalObject["createdBy"] = u.createdBy?.user?.concatedName;
+            finalObject["createdByDate"] = u.createdBy?.date;
+            finalObject["updatedBy"] = u.updatedBy?.user?.concatedName;
+            finalObject["updatedByDate"] = u.updatedBy?.date;
+            finalObject["status"] = tempStatus;
+            finalObject["versionCount"] = versionCount;
+            finalObject["versionData"] = versionArray;
 
-              canDelete: u.owner?.optionValue === user?.user._id,
-              expiryDate: u.expiryDate ? displayDate(u.expiryDate) : "",
-
-              customerAccountName: u.customerAccountName?.optionLabel,
-              customerAccountId: u.customerAccountName?.optionValue,
-              status: tempStatus,
-              versionCount: versionCount,
-              versionData: versionArray,
-              currency: u.currency,
-              relatedOpportunity: u.opportunity?.optionLabel,
-              relatedOpportunityId: u.opportunity?.optionValue,
-
-              createdBy: u.createdBy?.user?.concatedName,
-              createdByDate: u.createdBy?.date,
-              updatedBy: u.updatedBy?.user?.concatedName,
-              updatedByDate: u.updatedBy?.date,
-            };
-            return res;
+            return finalObject;
           });
+          //  Dynamic grid code - end
 
           dispatch({ type: "initialize", data: rows, count: count });
           setTimeout(() => {
@@ -717,20 +764,24 @@ const QuoteBuilders = () => {
               )}
             </QuoteHeader>
           </div>
-
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={100}
-            loading={loading}
-          />
+          {
+            Object.keys(frameWorkComponent).length > 0 ?
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameWorkComponent}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                actionWidth={100}
+                loading={loading}
+                renderedFrom={routes.quoteBuilder.title}
+                refreshGrid={fetchQuoteBuilder}
+              /> : null
+          }
 
           {showDeleteWarningConfirmBox ? (
             <MessageDialog

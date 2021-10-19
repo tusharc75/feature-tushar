@@ -31,8 +31,12 @@ import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { useHistory } from "react-router-dom";
+import queryString from "query-string";
 
 const MarketSegment = () => {
+
+    const history = useHistory();
 
     const toastConfig = useContext(CustomToastContext)
     const {
@@ -69,6 +73,13 @@ const MarketSegment = () => {
             });
         });
     }
+
+    useEffect(() => {
+        const parsedParams = queryString.parse(history?.location?.search);
+        if (parsedParams?.id) {
+            setOpen({ open: true, isClone: false, idToClone: parsedParams?.id });
+        }
+    }, [])
     //  Grid Variables - End
 
     useEffect(() => {
@@ -307,7 +318,9 @@ const MarketSegment = () => {
 
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                 dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
-                loading={loading} renderedFrom="marketSegmentPage" />
+                loading={loading} renderedFrom="marketSegmentPage"
+                refreshGrid={fetchMarketSegment}
+            />
 
             {showDeleteConfirmBox &&
                 <ConfirmationDialog

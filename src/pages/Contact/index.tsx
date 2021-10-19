@@ -16,29 +16,24 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
-import { isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
-import NoDataCell from '../../components/Helpers/NoDataCell';
+import { isObjectEmpty, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { Chip } from '@material-ui/core';
 import routes from './../../components/Helpers/Routes';
-import {
-  CommonRenderer,
-  CreatedByRenderer,
-  UpdatedByRenderer,
-  CommonRendererWithCopy
-} from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import contactClass from './contact.module.scss'
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import { sidebarResource } from "../../constants/helpers"
 import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
+import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
+import NoDataCell from '../../components/Helpers/NoDataCell';
 
 const ContactTypes = [
   {
@@ -90,6 +85,8 @@ export default function Contact(props) {
 
   const [filter, setFilter] = useState('All Contacts');
   const [entities, setEntities] = useState([])
+  const [columns, setColumns] = useState([])
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -97,17 +94,47 @@ export default function Contact(props) {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const columnState = JSON.parse(localStorage.getItem(contactResource));
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
-  const columns = [
-    { field: 'concatedName', headerName: 'Name', show: true, disabled: true, cellRenderer: 'concatedNameRenderer' },
-    { field: 'relatedLead', headerName: 'Related Lead', show: true, cellRenderer: 'relatedLeadRenderer' },
-    { field: 'entity', headerName: 'Entity Name', show: true, cellRenderer: 'entityRenderer' },
-    { field: 'phone', headerName: 'Phone', show: true, cellRenderer: 'commonRendererWithCopy' },
-    { field: 'email', headerName: 'Email', show: true, cellRenderer: 'commonRendererWithCopy' },
-    { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-    { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
-    { field: 'accountName', headerName: 'Account Name', show: true, cellRenderer: 'accountNameRenderer' }
-  ];
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+
+  const fetchGridColumns = async () => {
+
+    const response = await axiosInstance()
+      .get(`/field?resource=${sidebarResource[contactResource]}`)
+
+    let data = response?.data?.data
+
+    let columns = []
+    let rendererNames = []
+    data.forEach(o => {
+      let currentColumn = getColumnData(contactResource, o?.fieldData, `/${contactRoute}/detail`)
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData]
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName)
+        }
+      }
+      return o?.fieldData
+    })
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      relatedLeadRenderer: RelatedLeadRenderer,
+      actionsRenderer: ActionsRenderer
+    }
+    if (contactResource.includes("customer")) {
+      columns = [...columns,
+      { field: 'relatedLead', headerName: 'Related Lead', show: true, cellRenderer: 'relatedLeadRenderer' },
+      ]
+    }
+    setFrameWorkComponent({ ...tempFrameworkComponent })
+    let staticFields = getStaticFields()
+    staticFields.forEach(field => {
+      columns.push(checkStaticField(routes.projectSales.title, field))
+    })
+    setColumns([...columns])
+  }
   //  Grid Variables - End
   if (columnState) {
     columns.map((item) => {
@@ -169,28 +196,6 @@ export default function Contact(props) {
     return entityList.includes(id);
   }
 
-  const ConcatedNameRenderer = (params) => (
-    <Link className="link" to={`/${contactRoute}/detail/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
-
-  const EntityRenderer = (params) => (
-    <h5 className="createBy d-flex">
-      {params.data?.firstEntity ?
-        <Link className="link" title={params.data.firstEntity} to={`${routes.entity.path}/detail/${params.data.firstEntityId}`}>
-          {params.data.firstEntity}
-        </Link>
-        :
-        <NoDataCell />
-      }
-      {params.data?.restEntity?.length > 0 && (
-        <span className="createdAtTime badge-date">{`+${params.data.restEntity.length} more..`}</span>
-      )}
-    </h5>
-  )
-
-
   const RelatedLeadRenderer = (params) =>
     params.value ? (
       params?.data?.relatedLeadEntity === selectedEntity ?
@@ -218,12 +223,6 @@ export default function Contact(props) {
     ) : (
       <NoDataCell />
     );
-
-  const AccountNameRenderer = (params) => (
-    <Link className="link" to={`/${account.accountRoute}/detail/${params.data.accountId}`}>
-      {params.value}
-    </Link>
-  );
 
   const ActionsRenderer = (params) => (
     <>
@@ -263,19 +262,19 @@ export default function Contact(props) {
             onClick={() => {
               setContactId(params.data._id)
               setShowEntityDialog(true)
-              if (params?.data?.firstEntityId) {
+              if (params?.data?.entityId) {
                 let entities = []
-                if (params?.data?.firstEntityId) {
-                  entities.push(params?.data?.firstEntityId)
+                if (params?.data?.entityId) {
+                  entities.push(params?.data?.entityId)
                 }
-                if (params?.data?.restEntity) {
-                  let restEntities = params?.data?.restEntity.map(o => o?.optionValue)
+                if (params?.data?.restentity) {
+                  let restEntities = params?.data?.restentity.map(o => o?.optionValue)
                   entities = [...entities, ...restEntities]
                 }
                 setEntities([...entities])
               }
-              else if (params?.data?.restEntity) {
-                let restEntities = params?.data?.restEntity.map(o => o?.optionValue)
+              else if (params?.data?.restentity) {
+                let restEntities = params?.data?.restentity.map(o => o?.optionValue)
                 setEntities([...restEntities])
               }
             }}>
@@ -285,18 +284,6 @@ export default function Contact(props) {
       }
     </>
   );
-
-  const frameworkComponents = {
-    concatedNameRenderer: ConcatedNameRenderer,
-    relatedLeadRenderer: RelatedLeadRenderer,
-    commonRenderer: CommonRenderer,
-    commonRendererWithCopy: CommonRendererWithCopy,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    accountNameRenderer: AccountNameRenderer,
-    actionsRenderer: ActionsRenderer,
-    entityRenderer: EntityRenderer,
-  };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -380,30 +367,16 @@ export default function Contact(props) {
       .get(`${contactApi}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          const { owner, collaborator, createdBy, updatedBy, accountName, staticData, entity, ...restProperties } = u;
-          const [firstEntity, ...restEntity] = entity;
+
+          let finalObject = prepareDataForGrid(u);
           return {
-            ...restProperties,
-            id: u._id,
+            ...finalObject,
 
             canDelete: u.owner?.optionValue === user?.user._id,
-
-            accountId: u.accountName?.optionValue,
-            accountName: u.accountName?.optionLabel,
-
-            firstEntity: firstEntity?.optionLabel ?? '',
-            firstEntityId: firstEntity?.optionValue ?? '',
-            restEntity: restEntity,
             relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
             relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
             relatedLeadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
-            owner: u.owner?.optionLabel,
-            ownerId: u.owner?.optionValue,
 
-            createdBy: u.createdBy?.user?.concatedName,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
           };
         });
 
@@ -620,11 +593,11 @@ export default function Contact(props) {
                               let entities = []
                               selectedRecords.map(current => {
 
-                                if (current?.firstEntityId) {
-                                  entities = [...entities, current?.firstEntityId]
+                                if (current?.entityId) {
+                                  entities = [...entities, current?.entityId]
                                 }
-                                if (current?.restEntity) {
-                                  let restEntities = current?.restEntity.map(o => o?.optionValue)
+                                if (current?.restentity) {
+                                  let restEntities = current?.restentity.map(o => o?.optionValue)
                                   entities = [...entities, ...restEntities]
                                 }
                               })
@@ -645,21 +618,24 @@ export default function Contact(props) {
           </Grid>
         </div>
         <Box component="div">
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            actionWidth={170}
-            page={page}
-            loading={loading}
-            renderedFrom={contactResource}
-            refreshGrid={getContacts}
-          />
+          {
+            Object.keys(frameWorkComponent).length > 0 ?
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameWorkComponent}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                actionWidth={170}
+                page={page}
+                loading={loading}
+                renderedFrom={contactResource}
+                refreshGrid={getContacts}
+              /> : null
+          }
 
           {showDeleteWarningConfirmBox?.show ? (
             <MessageDialog

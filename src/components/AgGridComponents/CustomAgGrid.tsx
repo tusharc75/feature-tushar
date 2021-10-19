@@ -5,7 +5,7 @@ import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AgGridHeaderHeight, AgGridFloatingFiltersHeight, AgGridRowHeight, gridPageSizes } from '../../constants/helpers';
 import CustomGridHeaderOptions from './CustomGridHeaderOptions';
-import { CustomLoadingOverlay } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import { CustomLoadingOverlay, CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter';
 import { orderBy } from 'lodash';
 import { checkStaticField, staticColumns } from "../../constants/columns"
@@ -129,7 +129,10 @@ export default function CustomAgGrid({
   selectedRecords = [],
   onSelection = null,
   renderedFrom = null,
-  customGridOptions = null
+  customGridOptions = null,
+  actionLabel = null,
+  actionEditable = false,
+  onCellValueChanged = () => { }
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -184,6 +187,7 @@ export default function CustomAgGrid({
         filter={column.filter ?? 'agTextColumnFilter'}
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
+        cellRendererParams={column.cellRendererParams ?? null}
         minWidth={column.width ?? 250}
         flex={1}
         rowDrag={column.rowDrag ?? false}
@@ -202,6 +206,7 @@ export default function CustomAgGrid({
         filter={column.filter ?? 'agTextColumnFilter'}
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
+        cellRendererParams={column.cellRendererParams ?? null}
         minWidth={column.width ?? 250}
         flex={1}
         filterParams={customFilterParams}
@@ -252,6 +257,7 @@ export default function CustomAgGrid({
               rowHeight={AgGridRowHeight}
               frameworkComponents={{
                 ...frameworkComponents,
+                commonRenderer: frameworkComponents["commonRenderer"] ?? CommonRenderer,
                 customLoadingOverlay: CustomLoadingOverlay,
                 customFloatingFilter: CustomFloatingFilter
                 // customLoadingCellRenderer: CustomLoadingCellRenderer,
@@ -334,7 +340,6 @@ export default function CustomAgGrid({
               suppressPaginationPanel={true}
               paginationPageSize={limit}
               rowDragManaged={enableRowDrag}
-
             >
               {allowSelection && (
                 <AgGridColumn
@@ -356,14 +361,15 @@ export default function CustomAgGrid({
                 <AgGridColumn
                   width={actionWidth}
                   field="actions"
-                  headerName="Actions"
+                  headerName={actionLabel ? actionLabel : "Actions"}
                   pinned={isMobile || isTablet ? false : 'right'}
                   lockPinned={isMobile || isTablet ? false : true}
                   resizable={false}
                   sortable={false}
+                  editable={actionEditable}
                   filter={false}
+                  onCellValueChanged={onCellValueChanged}
                   cellRenderer="actionsRenderer"
-
                 ></AgGridColumn>
               )}
             </AgGridReact>

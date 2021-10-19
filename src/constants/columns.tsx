@@ -1,13 +1,16 @@
 import { leadDetailPage } from "../routes/Lead"
 import routes from "../components/Helpers/Routes"
 import camelCase from "lodash/camelCase"
-import capitalize from "lodash/capitalize"
 import {
     CommonRenderer,
     CreatedByRenderer,
     UpdatedByRenderer,
     CommonRendererWithCopy,
-    DateRenderer
+    DateRenderer,
+    LinkRenderer,
+    ImageRenderer,
+    NameRenderer,
+    CheckboxRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
 
 
@@ -17,12 +20,12 @@ export const staticFrameworkRender = {
 }
 
 export const headerName = {
-    firstName: "Name",
-    owner: "Owner Alies"
+    firstName: "Name"
 }
 export const isRenderWithCopy = (name) => {
-    return ["mobile", "phone", "email"].indexOf(name) >= 0
+    return ["mobileNumber", "phone", "email"].indexOf(name) >= 0
 }
+const hideColumns = ["salutation", "middleName", "lastName", "suffix"]
 export const detailPagePath = {
     leads: leadDetailPage.path,
     owner: routes?.userDetail?.path,
@@ -30,7 +33,13 @@ export const detailPagePath = {
     collaborator: routes?.userDetail?.path,
     rental: routes.rentalManagementDetail.path,
     deliveryPerson: routes?.userDetail?.path,
-    pDFTemplate: routes?.quotePdfTemplateDetail?.path
+    pDFTemplate: routes?.quotePdfTemplateDetail?.path,
+    subMarketSegment: routes?.marketSegment?.path,
+}
+export const hasDetailPageAsPopup = {
+    subMarketSegment: routes?.marketSegment?.path,
+    marketSegment: routes?.marketSegment?.path,
+    productCategory: routes?.productCategory?.path
 }
 export const disabledColumns = {
     [routes.rentalManagementDetail.title]: [],
@@ -46,6 +55,12 @@ export const getFrameworkComponents = (rendererNameList, showStaticRenderers = f
                 "commonRenderer": CommonRenderer
             }
         }
+        else if (o === "linkRenderer") {
+            result = {
+                ...result,
+                "linkRenderer": LinkRenderer
+            }
+        }
         else if (o === "commonRendererWithCopy") {
             result = {
                 ...result,
@@ -58,6 +73,25 @@ export const getFrameworkComponents = (rendererNameList, showStaticRenderers = f
                 "dateRenderer": DateRenderer
             }
         }
+        else if (o === "checkboxRenderer") {
+            result = {
+                ...result,
+                "checkboxRenderer": CheckboxRenderer
+            }
+        }
+        else if (o === "imageRenderer") {
+            result = {
+                ...result,
+                "imageRenderer": ImageRenderer
+            }
+        }
+        else if (o === "nameRenderer") {
+            result = {
+                ...result,
+                "nameRenderer": NameRenderer
+            }
+        }
+
     })
     if (showStaticRenderers) {
         result = {
@@ -86,7 +120,7 @@ export const checkStaticField = (renderedFrom, fieldData) => {
 }
 
 export const staticColumns = ["createdBy", "updatedBy"]
-export const getColumnData = (title, field) => {
+export const getColumnData = (title, field, detailScreenRoute = null, hasPopup = false) => {
     let data = localStorage.getItem("gridMetaData")
 
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
@@ -98,15 +132,18 @@ export const getColumnData = (title, field) => {
     if (gridMetaData[updatedTitle]?.hidden && gridMetaData[updatedTitle]?.hidden.indexOf(field?.fieldName) >= 0) {
         return null
     }
+    else if (hideColumns.indexOf(field?.fieldName) >= 0) {
+        return null
+    }
     else {
-        let fieldHeaderName = headerName[field?.fieldName] ?? capitalize(field?.fieldLabel)
+        let fieldHeaderName = headerName[field?.fieldName] ?? field?.fieldLabel
         let commonFieldData = {
             field: field?.fieldName,
             headerName: fieldHeaderName,
             show: gridMetaData[updatedTitle]?.hide && gridMetaData[updatedTitle]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
             disabled: gridMetaData[updatedTitle]?.disabled && gridMetaData[updatedTitle]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false
         }
-        if (field?.fieldName === "firstName") {
+        if (field?.fieldName === "firstName" && field?.primaryField === false) {
             let combinedTitle = camelCase(updatedTitle)
             let pathName = detailPagePath[combinedTitle] ? detailPagePath[combinedTitle] :
                 routes.userDetail.path ? routes.userDetail.path : ""
@@ -114,23 +151,52 @@ export const getColumnData = (title, field) => {
                 columnData: {
                     ...commonFieldData,
                     field: "concatedName",
-                    cellRenderer: (params) => `<a id="link-a" href='${pathName}/${params?.data?._id}' title='${params?.value}'>${params?.value}</a >`,
-                }
+                    cellRenderer: "nameRenderer",
+                    cellRendererParams: { pathName: pathName }
+                },
+                rendererName: 'nameRenderer',
+            }
+        }
+        else if (field?.primaryField === true && detailScreenRoute) {
+            return {
+                columnData: {
+                    pivotIndex: 0,
+                    ...commonFieldData,
+                    disabled: true,
+                    field: field?.fieldName === "firstName" ? "concatedName" : field.fieldName,
+                    cellRenderer: "linkRenderer",
+                    cellRendererParams: { "pathName": detailScreenRoute, "property": "_id", isForPopup: hasPopup }
+                },
+                rendererName: 'linkRenderer',
             }
         }
         else if (field?.lookup) {
 
-            let joinedFieldName = field?.fieldName.indexOf("_") > 0 ? camelCase(field?.fieldName) : field?.fieldName
-            let pathName = detailPagePath[joinedFieldName] ? detailPagePath[joinedFieldName] :
-                routes[`${joinedFieldName}Detail`]?.path ? routes[`${joinedFieldName}Detail`]?.path : ""
+            let joinedFieldName = field?.fieldName.indexOf(" ") > 0 ? camelCase(field?.fieldName) : field?.fieldName
+            let pathName = ""
+            let isForPopup = false
+            if (hasDetailPageAsPopup[joinedFieldName]) {
+                isForPopup = true
+                pathName = `${hasDetailPageAsPopup[joinedFieldName]}`
+            }
+            else {
+                pathName = detailPagePath[joinedFieldName] ? detailPagePath[joinedFieldName] :
+                    field?.lookupResource && routes[`${camelCase(field?.lookupResource)}Detail`]?.path ?
+                        routes[`${camelCase(field?.lookupResource)}Detail`]?.path :
+                        routes[joinedFieldName]?.path ? routes[joinedFieldName]?.path :
+                            routes[`${joinedFieldName}Detail`]?.path ? routes[`${joinedFieldName}Detail`]?.path : ""
+            }
+
             return {
                 columnData: {
                     ...commonFieldData,
-                    cellRenderer: (params) => params.value ? `<a id="link-a" href='${pathName}/${params.data[joinedFieldName + 'Id']}' title='${params.value}'>${params.value ?? null}</Link >` : "-----",
-                }
+                    cellRenderer: "linkRenderer",
+                    cellRendererParams: { "pathName": pathName, "property": joinedFieldName + 'Id', isForPopup: isForPopup, "more": `rest${joinedFieldName}` }
+                },
+                rendererName: 'linkRenderer',
             }
         }
-        else if (isRenderWithCopy(field?.fieldName)) {
+        else if (isRenderWithCopy(field?.type)) {
             return {
                 columnData: {
                     ...commonFieldData,
@@ -144,8 +210,9 @@ export const getColumnData = (title, field) => {
                 columnData: {
                     ...commonFieldData,
                     filter: false, sortable: false,
-                    cellRenderer: (params) => `<img src='${params?.value}' id="img-avatar" alt='profile' />`
-                }
+                    cellRenderer: 'imageRenderer'
+                },
+                rendererName: 'imageRenderer'
             }
         }
         else if (field?.type === "date") {
@@ -155,6 +222,16 @@ export const getColumnData = (title, field) => {
                     cellRenderer: "dateRenderer"
                 },
                 rendererName: 'dateRenderer'
+            }
+        }
+        else if (field?.type === "checkBox") {
+            return {
+                columnData: {
+                    ...commonFieldData,
+                    // filter: false, sortable: false,
+                    cellRenderer: "checkboxRenderer"
+                },
+                rendererName: 'checkboxRenderer'
             }
         }
         else {

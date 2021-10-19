@@ -225,7 +225,7 @@ const ProductBuilder = () => {
         <div className="header-panel">
           <Grid container>
             <Grid item xs={6} className="d-flex align-items-center gap-1">
-              <RiPriceTag2Fill  size={22} style={{paddingBottom: "3px"}}/>{" "}
+              <RiPriceTag2Fill size={22} style={{ paddingBottom: "3px" }} />{" "}
               <span className="listingHeader">
                 {routes.productBuilder.title}
               </span>
@@ -295,6 +295,7 @@ const ProductBuilder = () => {
           actionWidth={100}
           isClientSideGrid={true}
           loading={loading}
+          refreshGrid={fetchProductBuilder}
         />
 
         {showDeleteWarningConfirmBox ? (
@@ -307,9 +308,8 @@ const ProductBuilder = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord ? deleteRecord.name : "selected product(s)"
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord ? deleteRecord.name : "selected product(s)"
+              }?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

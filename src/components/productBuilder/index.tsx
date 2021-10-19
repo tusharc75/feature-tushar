@@ -198,6 +198,7 @@ const ProductBuilder = (props) => {
           entity: firstEntity?.optionLabel,
           entityId: firstEntity?.optionValue,
           restEntity: restEntity,
+          serializedProduct: u.serializedProduct.toString()
         }
         for (let col in res) {
           if (res[col] && res[col].optionLabel) {
@@ -614,6 +615,14 @@ const ProductBuilder = (props) => {
                   if (isImportedSuccessfully) {
                     fetchProduct(productBuilderId);
                   }
+                }}
+                isExportAllOrSomeFeature={true}
+                total={rowCount}
+                recordsToExport={selectedRecords.length}
+                ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                onExportToExcelSuccess={() => {
+                  if (gridApi) gridApi.deselectAll()
+                  else fetchProduct(productBuilderId)
                 }}
               />
             )}

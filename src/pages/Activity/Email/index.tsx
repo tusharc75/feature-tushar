@@ -369,6 +369,7 @@ const Email = () => {
                 >
                   Add
                 </Button>
+
                 {/* </Box> */}
                 <Button
                   className={styles.action_submit_btn}
@@ -419,6 +420,7 @@ const Email = () => {
           actionWidth={150}
           loading={loading}
           renderedFrom="emailPage"
+          refreshGrid={fetchEmails}
         />
 
         {showDeleteWarningConfirmBox ? (

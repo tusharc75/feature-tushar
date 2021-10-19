@@ -72,7 +72,12 @@ const ProductTemplate = () => {
             e.preventDefault();
             window.history.pushState(null, null, window.location.pathname);
             if (!isEqual(ref.current.values, initialValues) || !isEqual(initialValues.section, section)) {
-                setShowConfirmDialog(true)
+                if (((id === "0" && productTemplatePermissions.isCreate) || (id !== "0" && productTemplatePermissions.isUpdate))) {
+                    setShowConfirmDialog(true)
+                }
+                else {
+                    history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.productTemplate.path })
+                }
             }
             else {
                 history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.productTemplate.path })
@@ -278,7 +283,10 @@ const ProductTemplate = () => {
                         setIsBreakCrumbPath(path)
                         if (hasPermissionToUpdate && (!isEqual(ref.current.values, initialValues) ||
                             !isEqual(initialValues.section, section))) {
-                            setShowConfirmDialog(true)
+                            if ((id === "0" && productTemplatePermissions.isCreate) || (id !== "0" && productTemplatePermissions.isUpdate)) {
+                                setShowConfirmDialog(true)
+                            }
+                            else history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.productTemplate.path })
                         }
                         else history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.productTemplate.path })
                     }}
@@ -381,7 +389,8 @@ const ProductTemplate = () => {
                                     <Grid item xs={12} sm={4} container justify="flex-end">
                                         <HistoryButton onClick={() => setShowHistory(true)} />
                                         <Box>
-                                            {(productTemplatePermissions.isCreate || productTemplatePermissions.isUpdate) &&
+                                            {
+                                                ((id === "0" && productTemplatePermissions.isCreate) || (id !== "0" && productTemplatePermissions.isUpdate)) &&
                                                 <Button disabled={isUpdating || !hasPermissionToUpdate} color="primary" size="small" onClick={submitForm} variant="contained" >
                                                     Save{isUpdating && <CircularProgress size={24} />}
                                                 </Button>
@@ -392,7 +401,12 @@ const ProductTemplate = () => {
                                                 onClick={() => {
                                                     if (hasPermissionToUpdate && (!isEqual(ref.current.values, initialValues) ||
                                                         !isEqual(initialValues.section, section))) {
-                                                        setShowConfirmDialog(true)
+                                                        if (((id === "0" && productTemplatePermissions.isCreate) || (id !== "0" && productTemplatePermissions.isUpdate))) {
+                                                            setShowConfirmDialog(true)
+                                                        }
+                                                        else {
+                                                            history.push(routes.productTemplate.path)
+                                                        }
                                                     }
                                                     else {
                                                         history.push(routes.productTemplate.path)

@@ -4,6 +4,8 @@ import { AiOutlineLoading } from "react-icons/ai";
 import CustomRenderCell from "../Helpers/CustomRenderCell";
 import NoDataCell from "../Helpers/NoDataCell";
 import { dateFormat } from "../../constants/helpers"
+import Avatar from "@material-ui/core/Avatar"
+import { Link } from 'react-router-dom'
 
 export const CommonRenderer = params => <CustomRenderCell value={params.value} />;
 
@@ -23,7 +25,7 @@ export const CreatedByRenderer = params => params.value ? (
 );
 
 export const DateRenderer = params => params.value ? (
-    <h5 className="createBy" title={`${params.value} • ${moment(
+    <h5 className="createBy" title={`${moment(
         params.value.slice(0, 10)
     ).format(dateFormat)}`}>
         {moment(params.value.slice(0, 10)).format(dateFormat)}
@@ -31,6 +33,11 @@ export const DateRenderer = params => params.value ? (
 ) : (
     <NoDataCell />
 );
+export const CheckboxRenderer = params => (
+    <span>
+        {Boolean(params?.value) ? "Yes" : "No"}
+    </span>
+)
 
 export const UpdatedByRenderer = params => params.value ? (
     <h5 className="updateBy" title={`${params.value} • ${moment(
@@ -43,6 +50,32 @@ export const UpdatedByRenderer = params => params.value ? (
     </h5>
 ) : (
     <NoDataCell />
+)
+
+export const LinkRenderer = params => params.value ? (
+    <>
+        <Link className="link" to={params?.isForPopup ? `${params?.pathName}?id=${params?.data[params?.property]}` :
+            `${params?.pathName}/${params?.data[params?.property]}`} title={params?.value}>{params?.value}</Link>
+
+        {
+            params["more"] && params.data[params["more"]]?.length > 0 && (
+                <span className="createdAtTime badge-date">{`+${params.data[params["more"]].length} more..`}</span>
+            )
+        }
+    </>
+) : (
+    <NoDataCell />
+)
+
+export const NameRenderer = params => params.value ? (
+    <Link className="link"
+        to={`${params?.pathName}/${params?.data?._id}`} title={params?.value}>{params?.value}</Link>
+) : (
+    <NoDataCell />
+)
+
+export const ImageRenderer = params => (
+    <Avatar className="grid-avatar" src={params?.value} />
 )
 
 export const CustomLoadingOverlay = (params) => <div

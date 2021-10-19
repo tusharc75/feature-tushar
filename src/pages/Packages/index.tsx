@@ -10,16 +10,12 @@ import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { FaRegistered, FaListAlt } from 'react-icons/fa';
 import { BiPackage } from "react-icons/bi";
-
-
 import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, packages, product } from '../../constants/helpers';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
 import { useHistory } from 'react-router-dom';
-import { CommonRenderer, CreatedByRenderer, DateRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import NoDataCell from '../../components/Helpers/NoDataCell';
 import PackageHeader from './PackageHeader';
 import ManagePackageDialog from './ManagePackageDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -30,18 +26,9 @@ import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticFiel
 import { camelCase } from 'lodash';
 import ProductListDialog from './ProductListDialog';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
+import { prepareDataForGrid } from "../../constants/helpers"
 
 let packagesTimeout;
-const PackagesType = [
-    {
-        key: 'All Packages',
-        value: 1
-    },
-    {
-        key: 'My Packages',
-        value: 2
-    }
-];
 
 const PackageList = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -107,7 +94,7 @@ const PackageList = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-            let currentColumn = getColumnData(pageTitle, o?.fieldData);
+            let currentColumn = getColumnData(pageTitle, o?.fieldData, `${routes.packages.path}/detail`);
             if (currentColumn !== null) {
                 if (isOffline) {
                     currentColumn.columnData['filter'] = false;
@@ -184,14 +171,6 @@ const PackageList = () => {
             });
     };
 
-    // const packageNameRenderer = (params) => (
-    //     <>
-    //         <Link className="text-truncate link" title={params.value} to={`${routes.packages.path}/detail/${params.data._id}`}>
-    //             {params.value}
-    //         </Link>
-    //     </>
-    // );
-
     const ActionsRenderer = (params) => (
         <>
             {permissions?.packages.isCreate ? (
@@ -245,15 +224,6 @@ const PackageList = () => {
             </HideWhenOffline>
         </>
     );
-
-    // const frameworkComponents = {
-    //     packageNameRenderer: packageNameRenderer,
-    //     createdByRenderer: CreatedByRenderer,
-    //     updatedByRenderer: UpdatedByRenderer,
-    //     actionsRenderer: ActionsRenderer,
-    //     commonRenderer: CommonRenderer,
-    //     dateRenderer: DateRenderer
-    // };
 
     const replaceFieldName = (field) => {
         switch (field) {
@@ -362,14 +332,7 @@ const PackageList = () => {
                 const { owner, createdBy, updatedBy, ...restProperties } = u;
 
                 let res = {
-                    ...restProperties,
-                    id: u._id,
-                    owner: u.createdBy.user.concatedName,
-                    ownerId: u.createdBy.user._id,
-                    createdBy: u.createdBy?.user?.concatedName,
-                    createdByDate: u.createdBy?.date,
-                    updatedBy: u.updatedBy?.user?.concatedName,
-                    updatedByDate: u.updatedBy?.date
+                    ...prepareDataForGrid(u)
                 };
                 return res;
             });
@@ -471,6 +434,14 @@ const PackageList = () => {
                                         afterImportCompleted={() => {
                                             fetchPackages();
                                         }}
+                                        isExportAllOrSomeFeature={true}
+                                        total={rowCount}
+                                        recordsToExport={selectedRecords.length}
+                                        ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                                        onExportToExcelSuccess={() => {
+                                            if (gridApi) gridApi.deselectAll()
+                                            else fetchPackages()
+                                        }}
                                     />
                                 </Grid>
                             </Grid>
@@ -484,7 +455,7 @@ const PackageList = () => {
                         <PackageHeader
                             selectedRecords={selectedRecords}
                             onTypeChange={handlePackageTypeSel}
-                            options={PackagesType}
+                            options={[]}
                             onSearch={handleSearch}
                             searchVal={search}
                             packagePermissions={permissions?.packages}

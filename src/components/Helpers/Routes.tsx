@@ -33,7 +33,7 @@ const routes = {
     path: "/entity",
     data: {},
   },
-  entityDetails: {
+  entityDetail: {
     title: storedRoutes ? storedRoutes.entity?.title : RESOURCE_LABEL.entity,
     path: "/entity/detail",
     data: {},
@@ -130,11 +130,11 @@ const routes = {
     path: "/profile",
   },
   projectSales: {
-    title: storedRoutes ? storedRoutes.projectSales?.title : RESOURCE_LABEL.projectStrategy,
+    title: storedRoutes ? storedRoutes.projectStrategy?.title : RESOURCE_LABEL.projectStrategy,
     path: "/project-sales",
   },
   projectSalesDetail: {
-    title: storedRoutes ? storedRoutes.projectSales?.title : RESOURCE_LABEL.projectStrategy,
+    title: storedRoutes ? storedRoutes.projectStrategy?.title : RESOURCE_LABEL.projectStrategy,
     path: "/project-sales/detail",
   },
   priceTemplate: {

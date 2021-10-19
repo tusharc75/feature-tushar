@@ -13,7 +13,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { gridLoadingTimeout, isObjectEmpty, processFieldName } from '../../constants/helpers';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import { HiUserGroup } from 'react-icons/hi';
-import { lead } from '../../constants/helpers';
+import { lead, prepareDataForGrid } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import { SiConvertio } from 'react-icons/si';
@@ -25,6 +25,7 @@ import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEnt
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
+
 
 const LeadTypes = [
   {
@@ -108,6 +109,7 @@ const Leads = () => {
       setLeadsPermissions(permissions[leadResource]);
     }
   }, [permissions]);
+
   useEffect(() => {
     fetchGridColumns()
   }, [])
@@ -137,7 +139,7 @@ const Leads = () => {
         let rendererNames = []
         data.forEach(o => {
 
-          let currentColumn = getColumnData(leadResource, o?.fieldData)
+          let currentColumn = getColumnData(leadResource, o?.fieldData, routes.warehouse.path)
 
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData]
@@ -149,19 +151,16 @@ const Leads = () => {
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
+          relatedOpportunityRenderer: RelatedOpportunityRenderer,
           actionsRenderer: ActionsRenderer
         }
         setFrameWorkComponent({ ...tempFrameworkComponent })
-        columns = [...columns, ...getStaticFields()]
-
+        columns = [...columns,
+        { field: 'relatedOpportunity', headerName: 'Related Opportunity', show: true, cellRenderer: 'relatedOpportunityRenderer' },
+        ...getStaticFields()]
         setColumns([...columns])
       })
   }
-  const NameRenderer = (params) => (
-    <Link className="link" to={`${leadDetailPage.path}/${params.data._id}`} title={params.value}>
-      {params.value}
-    </Link>
-  );
 
   const RelatedOpportunityRenderer = (params) => (
     <>
@@ -200,17 +199,6 @@ const Leads = () => {
       />
     </>
   );
-
-  // const frameworkComponents = {
-  //   // nameRenderer: NameRenderer,
-  //   // relatedOpportunityRenderer: RelatedOpportunityRenderer,
-  //   linkRenderer: LinkRenderer,
-  //   commonRenderer: CommonRenderer,
-  //   commonRendererWithCopy: CommonRendererWithCopy,
-  //   createdByRenderer: CreatedByRenderer,
-  //   updatedByRenderer: UpdatedByRenderer,
-  //   actionsRenderer: ActionsRenderer
-  // };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -302,24 +290,16 @@ const Leads = () => {
         }
 
         let rows = data.map((u) => {
-          const { owner, collaborator, createdBy, updatedBy, staticData, ...restProperties } = u;
+          const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
 
+          let finalObject = prepareDataForGrid(u);
           let res = {
-            ...restProperties,
-            id: u._id,
-
-            owner: u.owner?.optionLabel,
-            ownerId: u.owner?.optionValue,
+            ...finalObject,
             isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id),
-
             convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
             relatedOpportunity: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?.opportunityName,
             relatedOpportunityId: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?._id,
 
-            createdBy: u.createdBy?.user?.concatedName,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
           };
           return res;
         });

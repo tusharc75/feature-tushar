@@ -8,7 +8,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import { GiAbstract055 } from "react-icons/gi";
 import CustomContainer from "../../components/CustomContainer";
 import { gridLoadingTimeout, gridPageSizes } from "../../constants/helpers";
-import CustomAgGrid, { reducer, intialState }  from "../../components/AgGridComponents/CustomAgGrid";
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import routes from "../../components/Helpers/Routes";
 
 const DOARequest = () => {
@@ -177,6 +177,7 @@ const DOARequest = () => {
           isClientSideGrid={true}
           loading={loading}
           renderedFrom="doaRequestPage"
+          refreshGrid={fetchProductBuilder}
         />
       </CustomContainer>
     </Fragment>

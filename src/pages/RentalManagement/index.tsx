@@ -7,6 +7,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
+import { prepareDataForGrid } from "../../constants/helpers"
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FaRegistered } from "react-icons/fa";
 
@@ -56,7 +57,7 @@ const RentalManagement = () => {
   const toastConfig = useContext(CustomToastContext);
   const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
 
-  const pageTitle = camelCase(`${routes.rentalManagement.title}Page`)
+  const pageTitle = camelCase(`${routes.rentalManagement.title}`)
   const history = useHistory();
   const {
     state: { user, permissions, selectedEntity },
@@ -105,74 +106,6 @@ const RentalManagement = () => {
     selectedRecords,
   } = state;
 
-  // const columns = [
-  //   {
-  //     field: "rentalJobName",
-  //     headerName: "Rental Job Name",
-  //     show: false,
-  //     disabled: true,
-  //     cellRenderer: "rentalManagementNameRenderer",
-  //   },
-  //   {
-  //     field: "status",
-  //     headerName: "Status",
-  //     show: true,
-  //     disabled: false,
-  //     cellRenderer: "commonRenderer",
-  //   },
-  //   {
-  //     field: "rentalJobID",
-  //     headerName: "Rental Job ID",
-  //     show: true,
-  //     cellRenderer: "commonRenderer",
-  //   },
-  //   {
-  //     field: "rentalStartDate",
-  //     headerName: "Rental Start Date",
-  //     show: true,
-  //     filter: false,
-  //     cellRenderer: "dateRenderer",
-  //   },
-  //   {
-  //     field: "rentalEndDate",
-  //     headerName: "Rental End Date",
-  //     show: true,
-  //     filter: false,
-  //     cellRenderer: "dateRenderer",
-  //   },
-  //   {
-  //     field: "customerAccount",
-  //     headerName: "Customer Account Name",
-  //     show: true,
-  //     cellRenderer: "customerAccountRenderer",
-  //   },
-  //   {
-  //     field: "relatedOpportunity",
-  //     headerName: "Related Opportunity",
-  //     show: true,
-  //     cellRenderer: "relatedOpportunityRenderer"
-  //   },
-
-  //   {
-  //     field: "createdBy",
-  //     headerName: "Created By",
-  //     show: true,
-  //     cellRenderer: "createdByRenderer",
-  //   },
-  //   {
-  //     field: "updatedBy",
-  //     headerName: "Updated By",
-  //     show: false,
-  //     cellRenderer: "updatedByRenderer",
-  //   },
-  //   {
-  //     field: "owner",
-  //     headerName: "RentalManagement Owner",
-  //     show: true,
-  //     cellRenderer: "commonRenderer",
-  //   },
-  // ];
-
   useEffect(() => {
     fetchGridColumns()
   }, [])
@@ -197,7 +130,7 @@ const RentalManagement = () => {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      let currentColumn = getColumnData(pageTitle, o?.fieldData)
+      let currentColumn = getColumnData(pageTitle, o?.fieldData, routes.rentalManagementDetail.path)
       if (currentColumn !== null) {
         if (isOffline) {
           currentColumn.columnData["filter"] = false
@@ -361,17 +294,6 @@ const RentalManagement = () => {
     </>
   );
 
-  const frameworkComponents = {
-    rentalManagementNameRenderer: RentalManagementNameRenderer,
-    customerAccountRenderer: CustomerAccountRenderer,
-    relatedOpportunityRenderer: RelatedOpportunityRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-    commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer,
-  };
-
   const replaceFieldName = (field) => {
     switch (field) {
       case "createdBy":
@@ -452,6 +374,7 @@ const RentalManagement = () => {
     return deepFilter;
   };
 
+
   const fetchRentalManagement = async () => {
     dispatch({ type: "loading", loading: true });
     const queryString = getQueryString();
@@ -481,33 +404,8 @@ const RentalManagement = () => {
       }
 
       let rows = data.map((u) => {
-        const {
-          owner,
-          collaborator,
-          createdBy,
-          updatedBy,
-          customerAccount,
-          ...restProperties
-        } = u;
-
         let res = {
-          ...restProperties,
-          id: u._id,
-          status: u.status,
-          owner: u.owner?.optionLabel,
-          ownerId: u.owner?.optionValue,
-          customerAccount: u.customerAccount?.optionLabel,
-          customerAccountId: u.customerAccount?.optionValue,
-          customerContact: u.customerContact?.optionLabel,
-          customerContactId: u.customerContact?.optionValue,
-          relatedOpportunity: u.opportunity?.optionLabel,
-          relatedOpportunityId: u.opportunity?.optionValue,
-          pDFTemplateId: u?.pDFTemplate?.optionValue,
-          pDFTemplate: u?.pDFTemplate?.optionLabel,
-          createdBy: u.createdBy?.user?.concatedName,
-          createdByDate: u.createdBy?.date,
-          updatedBy: u.updatedBy?.user?.concatedName,
-          updatedByDate: u.updatedBy?.date,
+          ...prepareDataForGrid(u),
         };
         return res;
       });
@@ -608,6 +506,14 @@ const RentalManagement = () => {
                     api={rentalManagementApi}
                     afterImportCompleted={() => {
                       fetchRentalManagement();
+                    }}
+                    isExportAllOrSomeFeature={true}
+                    total={rowCount}
+                    recordsToExport={selectedRecords.length}
+                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    onExportToExcelSuccess={() => {
+                      if (gridApi) gridApi.deselectAll()
+                      else fetchRentalManagement()
                     }}
                   />
                 </Grid>

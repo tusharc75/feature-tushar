@@ -37,19 +37,19 @@ export default function AccountHierarchy({ data, currentAccountId, accountRoute 
         {
             title: 'Type', field: 'typeOfAccount',
             render: (rowData: any) => <div style={{ width: commonFieldWidth }}>
-                {rowData.typeOfAccount}
+                <CustomRenderCell value={rowData.typeOfAccount} />
             </div>
         },
         {
             title: 'Industry', field: 'industry',
             render: (rowData: any) => <div style={{ width: commonFieldWidth }}>
-                {rowData.industry}
+                <CustomRenderCell value={rowData.industry} />
             </div>
         },
         {
             title: 'Type Of Business', field: 'typeOfBusiness',
             render: (rowData: any) => <div style={{ width: commonFieldWidth }}>
-                {rowData.typeOfBusiness}
+                <CustomRenderCell value={rowData.typeOfBusiness} />
             </div>
         },
         {
@@ -58,7 +58,7 @@ export default function AccountHierarchy({ data, currentAccountId, accountRoute 
                 {
                     rowData.parentAccountId === currentAccountId ? <span>{rowData.parentAccountText}</span> :
                         <Link className="link" to={`/${accountRoute}/detail/${rowData.parentAccountId}`}>
-                            {rowData.parentAccountText}
+                            <CustomRenderCell value={rowData.parentAccountText} />
                         </Link>
                 }
             </div>
