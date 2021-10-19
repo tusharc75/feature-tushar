@@ -192,7 +192,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         }
         const items = [...lists, ...enitityList].filter(
           (item) => {
-            if (item?.name === "Product Builder" && process.env.REACT_APP_ENV === 'stagging') {
+            if (item?.name === "Product Builder" && process.env.REACT_APP_ENV === 'staging') {
               return false
             }
             return item.isRead === true

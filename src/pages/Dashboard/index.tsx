@@ -36,7 +36,7 @@ function Dashboard() {
 
       // const list = allData?.filter((u) => sec === u.sectionName && u.isRead);
       const list = allData?.filter((u) => {
-        if (u?.name === "Product Builder" && process.env.REACT_APP_ENV === 'stagging') {
+        if (u?.name === "Product Builder" && process.env.REACT_APP_ENV === 'staging') {
           return false
         }
         return sec === u.sectionName && u.isRead
