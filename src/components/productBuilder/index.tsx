@@ -708,6 +708,7 @@ const ProductBuilder = (props) => {
           isAddInBuilder={true}
           addProductInBuilder={addProductInBuilder}
           openFrom="builder"
+          fromQuote={fromQuote}
         />
       )}
       {isAddExistingProduct && (
