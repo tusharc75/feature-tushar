@@ -16,6 +16,7 @@ import { GetApp, InfoOutlined, InsertDriveFile } from "@material-ui/icons";
 import { kebabCase } from "lodash";
 import axios from "axios";
 import { FcApproval } from "react-icons/fc";
+import { FaDiceOne } from "react-icons/fa";
 import { camelCase, getObjKeysWithValues, sidebarResource } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -361,9 +362,12 @@ const Details = (props: DetailProps) => {
           form.name && (
             <React.Fragment key={form.name}>
               <div className="detail-box">
+                <div className={"detail-box-content"}>
+                <h3><FaDiceOne/></h3>
                 <h3 className="form-label-style" title={form.name}>
-                  {form.name}
+                   {form.name}
                 </h3>
+                </div>
                 <Grid container>
                   {form.sectionFields.map((field, i) => (
                     <Grid
