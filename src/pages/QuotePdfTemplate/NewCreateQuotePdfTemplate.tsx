@@ -82,6 +82,7 @@ export default function NewCreateQuotePdfTemplate() {
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [isLandscapChecked, setIsLandscapChecked] = useState(false)
     const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
+    const [isPreview, setIsPreview] = useState(false)
 
     const onBackButtonEvent = (e) => {
         if (hasPermissionToUpdate) {
@@ -193,7 +194,7 @@ export default function NewCreateQuotePdfTemplate() {
             });
     }
 
-    const handleSubmit = (values, isPreview) => {
+    const handleSubmit = (values) => {
         if (isPreview === true) {
             setIsUpdatingAndPreview(true);
         } else {
@@ -329,7 +330,7 @@ export default function NewCreateQuotePdfTemplate() {
                                         </Button>
 
                                         <Button disabled={isUpdatingAndPreview || !hasPermissionToUpdate} size="small" color="primary"
-                                            onClick={() => { handleSubmit(values, true) }} variant="contained">
+                                            onClick={() => { setIsPreview(true); submitForm() }} variant="contained">
                                             {isUpdatingAndPreview && <CircularProgress size={24} />} {" "} Save & Preview
                                         </Button>
 
