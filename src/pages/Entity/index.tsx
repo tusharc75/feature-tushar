@@ -15,16 +15,13 @@ import { useData } from "../../StateProvider/Provider";
 import ManageEntity from "./ManageEntity";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AssignUsersDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
-import {
-  CommonRenderer,
-  CreatedByRenderer,
-  UpdatedByRenderer
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import { FaUser } from "react-icons/fa";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { prepareDataForGrid } from "../../constants/helpers"
+import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
 
 let entityTimeout;
 
@@ -41,6 +38,8 @@ const Entity: FC = () => {
   const [usersDialogLoding, setUsersDialogLoding] = useState(false);
   const [users, setUsers] = useState([]);
   const [selectedEntity, setSelectedEntity] = useState(null);
+  const [columns, setColumns] = useState([])
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -49,12 +48,7 @@ const Entity: FC = () => {
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem("entityPage"));
-  const [columns,] = useState([
-    { field: "entityName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
-    { field: "address", headerName: "Address", show: true, cellRenderer: "commonRenderer" },
-    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
-  ]);
+
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
@@ -94,6 +88,37 @@ const Entity: FC = () => {
     }
   }, [selectedRecords]);
 
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get("/field?resource=Entity")
+      .then(({ data: { data } }) => {
+        let columns = []
+        let rendererNames = []
+        data.forEach(o => {
+          let currentColumn = getColumnData(routes.entity.title, o?.fieldData, routes.entityDetail.path)
+
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData]
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
+          }
+        })
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+          actionsRenderer: ActionsRenderer
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        columns = [...columns, ...getStaticFields()]
+        setColumns([...columns])
+      })
+  }
+
   const fetchEntityUser = async (entityId) => {
     setUsersDialogLoding(true)
     await axiosInstance()
@@ -108,10 +133,6 @@ const Entity: FC = () => {
 
       });
   };
-  const NameRenderer = params => <Link className="link"
-    to={`${routes.entityDetail.path}/${params.data._id}`} title={params.value}>
-    {params.value}
-  </Link>;
 
   const ActionsRenderer = params => <>
     <Tooltip
@@ -150,15 +171,6 @@ const Entity: FC = () => {
       </Tooltip>
     }
   </>
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    commonRenderer: CommonRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer
-  };
-
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -214,18 +226,7 @@ const Entity: FC = () => {
       .then(({ data: { data, count } }) => {
 
         let rows = data.map((u) => {
-
-          const { owner, collaborator, createdBy, updatedBy, staticData, ...restProperties } = u;
-
-          let res = {
-            ...restProperties,
-            id: u._id,
-            createdBy: u.createdBy?.user?.concatedName,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date,
-          };
-          return res;
+          return prepareDataForGrid(u);
         });
 
         dispatch({ type: "initialize", data: rows, count: count });
@@ -302,11 +303,14 @@ const Entity: FC = () => {
           />
         </div>
 
-        <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-          dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
-          loading={loading} renderedFrom="entityPage"
-          refreshGrid={fetchEntity}
-        />
+        {
+          Object.keys(frameWorkComponent).length > 0 ?
+            <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameWorkComponent} setGridApi={setGridApi}
+              dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
+              loading={loading} renderedFrom={routes.entity.title}
+              refreshGrid={fetchEntity}
+            /> : null
+        }
 
         {isOpen?.open && (
           <ManageEntity
