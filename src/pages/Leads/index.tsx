@@ -139,7 +139,7 @@ const Leads = () => {
         let rendererNames = []
         data.forEach(o => {
 
-          let currentColumn = getColumnData(leadResource, o?.fieldData, routes.warehouse.path)
+          let currentColumn = getColumnData(leadResource, o?.fieldData, leadDetailPage.path)
 
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData]

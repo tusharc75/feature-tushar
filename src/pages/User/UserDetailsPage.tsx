@@ -63,6 +63,7 @@ import UserSetupDialog from "./UserSetupDialog";
 import moment from "moment";
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
+import { Line } from 'react-chartjs-2';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -132,7 +133,11 @@ const UserDetailsPage = () => {
       to: new Date()
     }
   });
-  const [totalDuration, setTotalDuration] = useState('0');
+  const [userTrackingData, setUserTrackingData] = useState({
+    labels: [],
+    datasets: []
+  })
+  const [userTrackingDataLoading, setUserTrackingDataLoading] = useState(true);
 
   useEffect(() => {
     if (id) {
@@ -143,7 +148,6 @@ const UserDetailsPage = () => {
       fetchUsers()
       fetchUserRelatedDetail()
       setCurrentTabIndex(0);
-      userTimeTracker()
     }
     userSetup === "true" && setShowSetupUserDialog(true);
     // eslint-disable-next-line
@@ -193,7 +197,7 @@ const UserDetailsPage = () => {
 
   useEffect(() => {
     userTimeTracker()
-  },[trackingTime])
+  }, [trackingTime])
 
   const quickLinks: IQuickLinks[] = [
     {
@@ -209,17 +213,6 @@ const UserDetailsPage = () => {
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
-  }
-
-  const msToTime = (ms) => {
-    let seconds = (ms / 1000).toFixed(1);
-    let minutes = (ms / (1000 * 60)).toFixed(1);
-    let hours = (ms / (1000 * 60 * 60)).toFixed(1);
-    let days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
-    if (parseInt(seconds) < 60) return seconds + " Sec";
-    else if (parseInt(minutes) < 60) return minutes + " Min";
-    else if (parseInt(hours) < 24) return hours + " Hrs";
-    else return days + " Days"
   }
 
   const fetchUserData = async () => {
@@ -285,18 +278,39 @@ const UserDetailsPage = () => {
   }
 
   const userTimeTracker = async () => {
+    setUserTrackingDataLoading(true)
     const parsedFromTime = convertDate(trackingTime.between.from)
     const parsedToTime = convertDate(trackingTime.between.to)
     axiosInstance()
       .get(`/user-activity/${id}/${parsedFromTime}/${parsedToTime}`)
       .then(({ data: { data } }) => {
-        const totalTimeInMs = data?.map((time) => time.duration).reduce((total, current) => {
-          total += current
-          return total
-        }, 0);
-        setTotalDuration(msToTime(totalTimeInMs))
-      }).catch((error) => { 
-        toastConfig.setToastConfig(error) 
+        const labels = [];
+        const dataSets = [];
+
+        data = data.sort((a, b) => {
+          const aDate = new Date(a.date).getTime();
+          const bDate = new Date(b.date).getTime();
+
+          return aDate - bDate;
+        });
+
+        data.map((obj) => {
+          labels.push(moment(obj?.date).format('DD/MMM'));
+          dataSets.push((obj?.totalDuration) / 3600000)
+        })
+        setUserTrackingData({
+          labels: labels,
+          datasets: [
+            {
+              label: "Total Duration(In Hours)",
+              data: dataSets,
+              borderColor: "rgba(75,192,192,1)"
+            }
+          ]
+        })
+        setUserTrackingDataLoading(false)
+      }).catch((error) => {
+        toastConfig.setToastConfig(error)
       })
   }
 
@@ -951,69 +965,86 @@ const UserDetailsPage = () => {
                     </Grid>
                   </Grid>
                 </Box>
-                <Box padding ="10px">
-                <Grid item xs={12} sm={12} md={12}>
-                  <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={4}>
-                        <FormControl fullWidth size="small" variant="outlined">
-                          <InputLabel id="duration">Select Duration</InputLabel>
-                          <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
-                            <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                            <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                            <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                            <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                            <MenuItem value={'custom'}>Custom</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </Grid>
-                      <Grid item xs={6} sm={4}>
-                        <KeyboardDatePicker
-                          disabled={timeFrame !== 'custom'}
-                          inputVariant="outlined"
-                          variant="inline"
-                          fullWidth
-                          autoOk
-                          disableFuture
-                          size="small"
-                          openTo="year"
-                          format="dd/MM/yyyy"
-                          maxDate={trackingTime.between.to}
-                          label="From"
-                          views={['year', 'month', 'date']}
-                          value={trackingTime.between.from}
-                          onChange={(date) => {
-                            setTrackingTime({ between: { from: date, to: trackingTime.between.to } });
-                          }}
-                        />
+                <Box padding="10px">
+                  <Grid item xs={12} sm={12} md={12}>
+                    <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} sm={4}>
+                          <FormControl fullWidth size="small" variant="outlined">
+                            <InputLabel id="duration">Select Duration</InputLabel>
+                            <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
+                              <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                              <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                              <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                              <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                              <MenuItem value={'custom'}>Custom</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                          <KeyboardDatePicker
+                            disabled={timeFrame !== 'custom'}
+                            inputVariant="outlined"
+                            variant="inline"
+                            fullWidth
+                            autoOk
+                            disableFuture
+                            size="small"
+                            openTo="year"
+                            format="dd/MM/yyyy"
+                            maxDate={trackingTime.between.to}
+                            label="From"
+                            views={['year', 'month', 'date']}
+                            value={trackingTime.between.from}
+                            onChange={(date) => {
+                              setTrackingTime({ between: { from: date, to: trackingTime.between.to } });
+                            }}
+                          />
 
 
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                          <KeyboardDatePicker
+                            disabled={timeFrame !== 'custom'}
+                            inputVariant="outlined"
+                            variant="inline"
+                            fullWidth
+                            autoOk
+                            disableFuture
+                            size="small"
+                            minDate={trackingTime.between.from}
+                            openTo="year"
+                            format="dd/MM/yyyy"
+                            label="To"
+                            views={['year', 'month', 'date']}
+                            value={trackingTime.between.to}
+                            onChange={(date) => {
+                              setTrackingTime({ between: { to: date, from: trackingTime.between.from } });
+                            }}
+                          />
+                        </Grid>
                       </Grid>
-                      <Grid item xs={6} sm={4}>
-                        <KeyboardDatePicker
-                          disabled={timeFrame !== 'custom'}
-                          inputVariant="outlined"
-                          variant="inline"
-                          fullWidth
-                          autoOk
-                          disableFuture
-                          size="small"
-                          minDate={trackingTime.between.from}
-                          openTo="year"
-                          format="dd/MM/yyyy"
-                          label="To"
-                          views={['year', 'month', 'date']}
-                          value={trackingTime.between.to}
-                          onChange={(date) => {
-                            setTrackingTime({ between: { to: date, from: trackingTime.between.from } });
-                          }}
-                        />
-                      </Grid>
-                    </Grid>
-                  </MuiPickersUtilsProvider>
-                </Grid>
+                    </MuiPickersUtilsProvider>
+                  </Grid>
                 </Box>
-                <Typography className="subtitle1 m-2">{parseInt(totalDuration) > 0 ? `Total Time: ${totalDuration}`:"No record found"}</Typography>
+                <Typography className="subtitle1 m-2">
+                  {
+                    
+                      userTrackingDataLoading ?
+                        (
+                          <Grid container spacing={2} style={{ padding: "8px" }}>
+                            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                          </Grid>
+                        )
+                        : 
+                        userTrackingData.labels.length === 0 ?
+                        (
+                          <h3>No activiy found in the selected date range</h3>
+                        )
+                        :
+                        <Line type="line" data={userTrackingData} />
+                  }
+                </Typography>
               </Box>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
