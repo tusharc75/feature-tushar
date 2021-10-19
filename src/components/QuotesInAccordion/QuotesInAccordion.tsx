@@ -80,7 +80,7 @@ function DisplayData({ key, label, value, icon }) {
 }
 
 export default function QuotesInAccordion({
-    expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null, isAllowedToUpdate, marketSegmentId = null, subMarketSegmentId = null, currency = null, estimatedAmount = null }) {
+    expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, accountName = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null, isAllowedToUpdate, marketSegmentId = null, subMarketSegmentId = null, currency = null, estimatedAmount = null }) {
     const history = useHistory();
     const {
         state: { selectedEntity, user }, dispatch
@@ -313,7 +313,11 @@ export default function QuotesInAccordion({
             <Box margin={1} /> */}
 
             <Box margin={1} className="btn-view gap-1" onClick={() =>
-                history.push(routes.quoteBuilder.path)}
+                history.push(routes.quoteBuilder.path, {
+                    accountId: accountId,
+                    accountName: accountName,
+                    resource: `${accountResource}`,
+                })}
 
                 p={1} display="flex" justifyContent="center" alignItems="center">
                 <HiExternalLink size={25} />

@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState, useReducer, Fragment } from "react";
-import ManagePriceConditionDialog from "./ManagePricingConditionsDialog";
 import { Box, Button, Menu, MenuItem, Grid } from "@material-ui/core";
 import { useData } from "../../StateProvider/Provider";
 import { ExpandMore } from "@material-ui/icons";
@@ -28,7 +27,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 let timeout;
 const PricingConditions = () => {
@@ -37,13 +36,9 @@ const PricingConditions = () => {
   const { pricingConditionApi } = pricingCondition;
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
-  const [showManagePriceConditionDialog, setShowManagePriceConditionDialog] = useState({
-    show: false,
-    id: null,
-  });
 
+  const history = useHistory();
   const [gridApi, setGridApi] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -113,21 +108,16 @@ const PricingConditions = () => {
     {params.value}
   </Link>;
 
-
   const ActionsRenderer = params => (
-    <>
-      {
-        permissions.pricingCondition.isDelete &&
-        <Tooltip title="Delete">
-          <IconButton size="small" aria-label="Delete" onClick={() => {
-            setDeleteRecord(params.data)
-            setShowDeleteConfirmBox(true)
-          }} >
-            <DeleteIcon color="error" />
-          </IconButton>
-        </Tooltip >
-      }
-    </>
+    permissions.pricingCondition.isDelete &&
+    <Tooltip title="Delete">
+      <IconButton size="small" aria-label="Delete" onClick={() => {
+        setDeleteRecord(params.data)
+        setShowDeleteConfirmBox(true)
+      }} >
+        <DeleteIcon color="error" />
+      </IconButton>
+    </Tooltip >
   )
 
   const frameworkComponents = {
@@ -184,38 +174,28 @@ const PricingConditions = () => {
 
   const fetchPriceConditionList = () => {
     dispatch({ type: "loading", loading: true });
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
     const queryString = getQueryString();
-    axiosInstance()
-      .get(`/pricing-condition${queryString}`)
-      .then(({ data }) => {
-        let rows = data.data.map((item) => {
-          const { createdBy, updatedBy, ...restProperties } = item;
-          let res = {
-            ...restProperties,
-            id: item._id,
-          };
-          return res;
-        });
-        console.log(rows)
-        dispatch({ type: "initialize", data: rows, count: data.count });
-        setTimeout(() => {
-          dispatch({ type: "loading", loading: false });
-        }, gridLoadingTimeout);
-      })
+    axiosInstance().get(`/pricing-condition${queryString}`).then(({ data }) => {
+      let rows = data.data.map((item) => {
+        const { createdBy, updatedBy, ...restProperties } = item;
+        let res = {
+          ...restProperties,
+          id: item._id,
+        };
+        return res;
+      });
+      dispatch({ type: "initialize", data: rows, count: data.count });
+      setTimeout(() => {
+        dispatch({ type: "loading", loading: false });
+      }, gridLoadingTimeout);
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: "loading", loading: false });
       });
-  };
-
-  const onSuccess = () => {
-    fetchPriceConditionList();
-    setShowManagePriceConditionDialog({ show: false, id: null });
   };
 
   const handleDelete = () => {
@@ -248,143 +228,129 @@ const PricingConditions = () => {
     dispatch({ type: "search", search: e.target.value });
   };
 
+  const CreateNew = (id, isClone) => {
+    if (isClone) {
+      history.push(routes.pricingConditionDetail.path + "/0", { isClone: true })
+    }
+    else {
+      history.push(routes.pricingConditionDetail.path + "/" + id, { isClone: false })
+    }
+  }
+
   return (
-    <>
-      {showManagePriceConditionDialog.show && (
-        <ManagePriceConditionDialog
-          open={showManagePriceConditionDialog.show}
-          onSuccess={onSuccess}
-          onClose={() => {
-            setShowManagePriceConditionDialog({ show: false, id: null });
-          }}
-          pricingConditionId={showManagePriceConditionDialog.id}
-        />
-      )}
-      <Fragment>
-        <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
-            <CustomBreadCrumbs routes={[{ title: routes.pricingCondition.title }]} />
-          </Grid>
-          <Grid item md={8} sm={1} xs={2}>
-            <ImportExportLinks
-              permissions={permissions.pricingCondition}
-              module="pricingCondition(s)"
-              api={"pricingCondition"}
-              afterImportCompleted={() => {
-                fetchPriceConditionList();
-              }}
-              isExportAllOrSomeFeature={true}
-              total={rowCount}
-              recordsToExport={selectedRecords.length}
-              ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
-              onExportToExcelSuccess={() => {
-                if (gridApi) gridApi.deselectAll()
-                else fetchPriceConditionList()
-              }}
-            />
-          </Grid>
+    <Fragment>
+      <Grid container className="headerbox">
+        <Grid item md={4} sm={11} xs={10}>
+          <CustomBreadCrumbs routes={[{ title: routes.pricingCondition.title }]} />
         </Grid>
-
-        <CustomContainer>
-          <div className="header-panel">
-            <Grid
-              className={styles.filter_side_container}
-              container
-              justify="space-between"
-            >
-              <Grid item className="d-flex align-items-center gap-1">
-                <MdContacts className="headerLogo" />
-                <span className="listingHeader">
-                  {routes.pricingCondition.title}
-                </span>
-              </Grid>
-              <Grid className={styles.filter_side} item>
-                <Box className={styles.filter_side_header} component="div">
-                  <SearchBox
-                    onSearch={onSearch}
-                    searchbox={styles.search_box_input}
-                    value={search}
-                    size="small"
-                    placeholder="Search PriceCondition"
-                    width="242px"
-                  />
-
-                  <>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      startIcon={<AddIcon />}
-                      className={styles.add_submit_btn}
-                      onClick={() => {
-                        setShowManagePriceConditionDialog({ show: true, id: null });
-                      }}
-                    >
-                      Add
-                    </Button>
-                  </>
-
-                  <>
-                    <Button
-                      variant="outlined"
-                      color="default"
-                      size="small"
-                      className={styles.action_submit_btn}
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                    >
-                      Actions <ExpandMore />
-                    </Button>
-
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "left",
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                    </Menu>
-                  </>
-                </Box>
-              </Grid>
-            </Grid>
-          </div>
-          <Box component="div">
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={100}
-              loading={loading}
-              renderedFrom="pricingConditionPage"
-              refreshGrid={fetchPriceConditionList}
-            />
-          </Box>
-        </CustomContainer>
-
-        {showDeleteConfirmBox &&
-          <ConfirmationDialog
-            open={showDeleteConfirmBox}
-            message={deleteRecord?._id ? `Are you sure you want to delete the pricing condition ${deleteRecord?.name} ?` : "Are you sure you want to delete selected pricingCondition(s) ?"}
-            onClose={() => setShowDeleteConfirmBox(false)}
-            onOk={handleDelete}
+        <Grid item md={8} sm={1} xs={2}>
+          <ImportExportLinks
+            permissions={permissions.pricingCondition}
+            module="pricingCondition(s)"
+            api={"pricingCondition"}
+            afterImportCompleted={() => {
+              fetchPriceConditionList();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords.length}
+            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            onExportToExcelSuccess={() => {
+              if (gridApi) gridApi.deselectAll()
+              else fetchPriceConditionList()
+            }}
           />
-        }
-      </Fragment>
-    </>
+        </Grid>
+      </Grid>
+      <CustomContainer>
+        <div className="header-panel">
+          <Grid
+            className={styles.filter_side_container}
+            container
+            justify="space-between"
+          >
+            <Grid item className="d-flex align-items-center gap-1">
+              <MdContacts className="headerLogo" />
+              <span className="listingHeader">
+                {routes.pricingCondition.title}
+              </span>
+            </Grid>
+            <Grid className={styles.filter_side} item>
+              <Box className={styles.filter_side_header} component="div">
+                <SearchBox
+                  onSearch={onSearch}
+                  searchbox={styles.search_box_input}
+                  value={search}
+                  size="small"
+                  placeholder="Search PriceCondition"
+                  width="242px"
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  startIcon={<AddIcon />}
+                  className={styles.add_submit_btn}
+                  onClick={() => CreateNew("0", false)}
+                >
+                  Add
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="default"
+                  size="small"
+                  className={styles.action_submit_btn}
+                  onClick={openActions}
+                  disabled={selectedRecords.length ? false : true}
+                  aria-controls="action-menu"
+                >
+                  Actions <ExpandMore />
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                </Menu>
+              </Box>
+            </Grid>
+          </Grid>
+        </div>
+        <Box component="div">
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={100}
+            loading={loading}
+            renderedFrom="pricingConditionPage"
+            refreshGrid={fetchPriceConditionList}
+          />
+        </Box>
+      </CustomContainer>
+      {showDeleteConfirmBox &&
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={deleteRecord?._id ? `Are you sure you want to delete the pricing condition ${deleteRecord?.name} ?` : "Are you sure you want to delete selected pricingCondition(s) ?"}
+          onClose={() => setShowDeleteConfirmBox(false)}
+          onOk={handleDelete}
+        />
+      }
+    </Fragment>
   );
 }
 

@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.20.0](https://github.com/vebholic/oms_frontend/compare/v1.19.2...v1.20.0) (2021-10-19)
+
+
+### Features
+
+* - localstorage api check added for vercel ([5619f3c](https://github.com/vebholic/oms_frontend/commit/5619f3c17afa4a91bf14f319a512aeefb4637107))
+* - OAT-26 address broken issue fixed, OAT-27 address same issue fixed ([dd59cb2](https://github.com/vebholic/oms_frontend/commit/dd59cb291163fc6a691cf2343008fa02feb7dc01))
+* - OAT-26 address broken issue fixed, OAT-27 address same issue fixed ([4c80291](https://github.com/vebholic/oms_frontend/commit/4c8029131b71bb053f89a1b1020850ab95b75615))
+* - OAT-26 address broken issue fixed, OAT-27 address same issue fixed ([c8ce08e](https://github.com/vebholic/oms_frontend/commit/c8ce08e0d388d7573db0adea48aa1efe39584270))
+* - OAT-26 address broken issue fixed, OAT-27 address same issue fixed ([052af10](https://github.com/vebholic/oms_frontend/commit/052af1074f85da3f923edf508f8426ed36d025df))
+* - OAT-26 address broken issue fixed, OAT-27 address same issue fixed ([bdb101d](https://github.com/vebholic/oms_frontend/commit/bdb101d70705699cca95d86dd583d183f7279ebe))
+* - OAT-26 address broken issue fixed, OAT-27 address same issue fixed ([b0abc70](https://github.com/vebholic/oms_frontend/commit/b0abc70000cfafeee02f285a01d88b2364fea582))
+* - OAT-26 address broken issue fixed, OAT-27 address same issue fixed ([076b7b9](https://github.com/vebholic/oms_frontend/commit/076b7b9b1307ad1028c4adc795115f5a37d78767))
+* - OAT-62 - View all quotes related to any resource is not working ([5ef1089](https://github.com/vebholic/oms_frontend/commit/5ef1089c57b8e9f51bd9f3214399911de51aa555))
+* added dynamic grid changes ([628b45a](https://github.com/vebholic/oms_frontend/commit/628b45a99305230ae6446e1b805cae28d3300bd0))
+
+
+### Bug Fixes
+
+* **createemail.tsx:** fix error ([23ba044](https://github.com/vebholic/oms_frontend/commit/23ba044902ab3ddbec8e652aa8ceb6c0de92aef6))
+* dependent dropdown lookup ([da39796](https://github.com/vebholic/oms_frontend/commit/da39796da3706e5a90a3cd28c15c0f29733b4106))
+* dynamic grid changes added ([22a0bbe](https://github.com/vebholic/oms_frontend/commit/22a0bbe42c6b28de00bb1c64fcaa1fba84b30a24))
+* dynamic grid column added related lead in contacts and account ([371b3b7](https://github.com/vebholic/oms_frontend/commit/371b3b7765feae0c2d63176a9db07ba24e8bec81))
+* dynamic grid issue for few pages ([350c926](https://github.com/vebholic/oms_frontend/commit/350c926e5b13939dc38829f2a67b18b07eb57d88))
+* **notes.tsx:** fix loading ([a2059e8](https://github.com/vebholic/oms_frontend/commit/a2059e82334210e881e0da85b9b433493a966fb4))
+* **quotedetails.tsx:** fix null static value ([e63d3ca](https://github.com/vebholic/oms_frontend/commit/e63d3caffb64d17ea0308c04102310ce74259a64))
+* removed unnecessary code from below files ([06320c6](https://github.com/vebholic/oms_frontend/commit/06320c662554079175024d3814344e31cb6209ab))
+* removed unused code ([2b7e312](https://github.com/vebholic/oms_frontend/commit/2b7e3125ffc6c29fcc4c69d01070c4acad37d217))
+
+### [1.19.2](https://github.com/vebholic/oms_frontend/compare/v1.19.1...v1.19.2) (2021-10-18)
+
+
+### Bug Fixes
+
+* price builder and bug fix ([cffcb45](https://github.com/vebholic/oms_frontend/commit/cffcb45aada416365296e89566b6e34b7a8e9967))
+
+### [1.19.1](https://github.com/vebholic/oms_frontend/compare/v1.19.0...v1.19.1) (2021-10-17)
+
 ## [1.19.0](https://github.com/vebholic/oms_frontend/compare/v1.18.0...v1.19.0) (2021-10-16)
 
 

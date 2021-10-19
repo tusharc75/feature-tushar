@@ -273,8 +273,17 @@ const QuoteBuilders = () => {
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
       quoteNameRenderer: QuoteNameRenderer,
+      relatedOpportunityRenderer: RelatedOpportunityRenderer,
       actionsRenderer: ActionsRenderer
     }
+    columns = [...columns,
+    {
+      field: "relatedOpportunity",
+      headerName: "Related Opportunity",
+      show: true,
+      cellRenderer: "relatedOpportunityRenderer"
+    }
+    ]
     setFrameWorkComponent({ ...tempFrameworkComponent })
     let staticFields = getStaticFields()
     staticFields.forEach(field => {
@@ -588,6 +597,8 @@ const QuoteBuilders = () => {
             let finalObject = prepareDataForGrid(u);
 
             //  Custom props which are required
+            finalObject["relatedOpportunity"] = u.opportunity?.optionLabel;
+            finalObject["relatedOpportunityId"] = u.opportunity?.optionValue;
             finalObject["id"] = u._id;
             finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
             finalObject["createdBy"] = u.createdBy?.user?.concatedName;

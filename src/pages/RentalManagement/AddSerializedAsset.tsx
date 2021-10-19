@@ -22,6 +22,7 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, selectedProducts }) => {
     const toastConfig = useContext(CustomToastContext)
 
+    const [serializedProducts, setSerializedProducts] = useState([]);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
@@ -33,6 +34,48 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
     useEffect(() => {
         fetchProductInventory()
     }, [page, limit, filters, sorting, search]);
+
+
+    useEffect(() => {
+        let tempProducts = serializedProducts
+        if (tempProducts.length === 0) {
+            selectedProducts.map(d => {
+                if (d.productName) {
+                    tempProducts.push({ "id": d._id, "name": d.productName, "qty": d.qty })
+                }
+                if (d.packageName && d?.products?.length > 0) {
+                    d.products.map(u => {
+                        tempProducts.push({ "id": d?.productDetail?._id, "name": u?.productDetail?.productName || "", "qty": u.qty })
+                    })
+                }
+            })
+        }
+        else {
+            tempProducts = []
+            selectedProducts.map(d => {
+                if (d.productName) {
+                    tempProducts.push({ "id": d._id, "name": d.productName, "qty": d.qty - selectedRecords.filter(obj => obj.product.optionValue === d._id).length })
+                }
+                if (d.packageName && d?.products?.length > 0) {
+                    d.products.map(u => {
+                        tempProducts.push({ "id": u?.productDetail?._id, "name": u?.productDetail?.productName || "", "qty": u.qty - selectedRecords.filter(obj => obj.product.optionValue === u?.productDetail?._id).length })
+                    })
+                }
+                if (d.qty - selectedRecords.filter(obj => obj.product.optionValue === d._id).length <= -1) {
+                    let tempSelectedRecoeds = selectedRecords
+                    var idx = tempSelectedRecoeds.findIndex(obj => obj.product.optionValue === d._id);
+                    var removed = tempSelectedRecoeds.splice(idx, 1);
+                    // dispatch({ type: "loading", loading: true });
+                    // setTimeout(() => {
+                    //     dispatch({ type: "loading", loading: false });
+                    // }, gridLoadingTimeout);
+                    dispatch({ type: "selection", selectedRecords: tempSelectedRecoeds });
+
+                }
+            })
+        }
+        setSerializedProducts(tempProducts)
+    }, [selectedRecords]);
 
     const columns = [
         { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
@@ -148,14 +191,14 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
             aria-labelledby="customized-dialog-title"
             open={true}
         >
-            <CustomDialogHeader title={"Add Serialized Assets"} onClose={handleSerializedAssetClose} ></CustomDialogHeader>
+            <CustomDialogHeader title={`Add ${routes.productInventory.title}`} onClose={handleSerializedAssetClose} ></CustomDialogHeader>
             <CustomDialogContent>
                 <div className="listing-grid p-3">
                     <Box mb={2}>
                         <Grid container >
                             <Grid item xs={12} sm={6}>
-                                {selectedProducts.map(d => <span>{d.productName ? `  ${d.productName} (${d.qty})  |` : ""}
-                                </span>)}
+                                {serializedProducts.length > 0 ? serializedProducts.map(d => <span>{d.name ? `  ${d.name} (${d.qty})  |` : ""}
+                                </span>) : null}
                             </Grid>
                             <Grid item xs={12} sm={6} container justify="flex-end">
                                 <SearchBox
@@ -186,6 +229,7 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
                             allowAction={false}
                             loading={loading}
                             customGridOptions={{ getRowStyle: getRowStyleScheduled }}
+                            selectedRecords={selectedRecords}
                         />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </div>

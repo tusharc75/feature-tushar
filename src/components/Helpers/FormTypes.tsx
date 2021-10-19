@@ -381,7 +381,7 @@ const FormTypes = (props) => {
   };
 
   // For public upload
-  const getImageUrl = (file, multiple=null) => {
+  const getImageUrl = (file, multiple = null) => {
     setImageUploadProgress(0);
     let formData = new FormData();
     formData.append('file', file);
@@ -508,7 +508,7 @@ const FormTypes = (props) => {
     setImageFileName(file.name.toString().split('.')[0])
     let reader = new FileReader();
 
-    
+
     reader.onload = async (e) => {
       const result = await e.target?.result
       setImage(result);
@@ -518,12 +518,12 @@ const FormTypes = (props) => {
     if (file) {
       reader.readAsDataURL(file);
     }
-  } 
+  }
 
-    const removeImage = (img) => {
-      const updatedArr = values[name].filter((i) => i !== img);
-      setFieldValue(name, updatedArr);
-    };
+  const removeImage = (img) => {
+    const updatedArr = values[name].filter((i) => i !== img);
+    setFieldValue(name, updatedArr);
+  };
 
   const handleChange = (name, value) => {
     const result = handleAutoCalculation(fieldData, fields, values, name, '', '', value);
@@ -1690,7 +1690,7 @@ const FormTypes = (props) => {
           />
         )}
         renderOption={(option: any) => {
-          const matches = option.structured_formatting.main_text_matched_substrings;
+          const matches = option.structured_formatting.main_text_matched_substrings || [];
           const parts = parse(
             option.structured_formatting.main_text,
             matches?.map((match) => [match.offset, match.offset + match.length])
@@ -1882,7 +1882,7 @@ const FormTypes = (props) => {
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
-        onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value.trim())} 
+        onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value.trim())}
       />
     </InfoLabel>
   ) : type === 'date' ? (
@@ -1959,41 +1959,41 @@ const FormTypes = (props) => {
       </MuiPickersUtilsProvider>
     </InfoLabel>
   ) : type === 'colorPicker' ? (
-      <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
-        <Box display="flex" alignItems="center">
-          <Typography color="textSecondary">{label}</Typography>
-          <Box ml={2} display='flex' alignContent="center">
-            <input type="color" name={name} value={values[name]} onChange={(e) => setFieldValue(name, e.target.value)} />
-          </Box>
-        </Box>
-        { touched[name] && Boolean(errors[name]) && (
-          <Typography variant="caption" color='error'>
-            {errors[name]}
-          </Typography>)
-        }
-      </InfoLabel>
-  ) : type === 'multiImageUpload' ? (
-      <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
+      <Box display="flex" alignItems="center">
         <Typography color="textSecondary">{label}</Typography>
-        <input
-          accept="image/*"
-          style={{display: "none"}}
-          id="multiple-images-button"
-          multiple
-          type="file"
-          onChange={readImageFile}
-        />
-        <label htmlFor="multiple-images-button">
-          <Button disabled={readingImage} variant="contained" color="primary" component="span">
-            Upload
-          </Button>
-        </label>
-        <Box mt={1}>
-          <Typography color="textSecondary">{values[name]?.length > 0 ? "Images Preview" : "No Images"}</Typography>
-          <Box display="flex" flexWrap="wrap" justifyContent="space-arounf" overflow="hidden">
-          <ImageList style={{flexWrap: "nowrap", transform: 'translateZ(0)'}}>
-            {values[name]? values[name].map((item, i) => (
-              <ImageListItem style={{height: '100px', width: "33.3%"}} key={item}> 
+        <Box ml={2} display='flex' alignContent="center">
+          <input type="color" name={name} value={values[name]} onChange={(e) => setFieldValue(name, e.target.value)} />
+        </Box>
+      </Box>
+      {touched[name] && Boolean(errors[name]) && (
+        <Typography variant="caption" color='error'>
+          {errors[name]}
+        </Typography>)
+      }
+    </InfoLabel>
+  ) : type === 'multiImageUpload' ? (
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
+      <Typography color="textSecondary">{label}</Typography>
+      <input
+        accept="image/*"
+        style={{ display: "none" }}
+        id="multiple-images-button"
+        multiple
+        type="file"
+        onChange={readImageFile}
+      />
+      <label htmlFor="multiple-images-button">
+        <Button disabled={readingImage} variant="contained" color="primary" component="span">
+          Upload
+        </Button>
+      </label>
+      <Box mt={1}>
+        <Typography color="textSecondary">{values[name]?.length > 0 ? "Images Preview" : "No Images"}</Typography>
+        <Box display="flex" flexWrap="wrap" justifyContent="space-arounf" overflow="hidden">
+          <ImageList style={{ flexWrap: "nowrap", transform: 'translateZ(0)' }}>
+            {values[name] ? values[name].map((item, i) => (
+              <ImageListItem style={{ height: '100px', width: "33.3%" }} key={item}>
                 <img src={item} alt={`demo ${i + 1}`} />
                 <ImageListItemBar
                   title={''}
@@ -2006,30 +2006,30 @@ const FormTypes = (props) => {
               </ImageListItem>
             )) : null}
           </ImageList>
-          </Box>
         </Box>
-        <Dialog fullWidth maxWidth="md" open={Boolean(image) || isImgUploading} onClose={() => {
-           if(!isImgUploading) {
-             setImage("")
-           }
-          }}>
-         <CustomDialogHeader onClose={() => {
-           if(!isImgUploading) {
+      </Box>
+      <Dialog fullWidth maxWidth="md" open={Boolean(image) || isImgUploading} onClose={() => {
+        if (!isImgUploading) {
+          setImage("")
+        }
+      }}>
+        <CustomDialogHeader onClose={() => {
+          if (!isImgUploading) {
             setImage("")
           }
-         }} title="Edit Image"/>
-         <CustomDialogContent>
-           <ImageCropTool 
-              image={image} 
-              setImage={setImage} 
-              getImageUrl={getImageUrl} 
-              isImgUploading={isImgUploading} 
-              imageUploadProgress={imageUploadProgress}
-              imageFileName={imageFileName}
-            />
-         </CustomDialogContent>
-        </Dialog>
-      </InfoLabel>
+        }} title="Edit Image" />
+        <CustomDialogContent>
+          <ImageCropTool
+            image={image}
+            setImage={setImage}
+            getImageUrl={getImageUrl}
+            isImgUploading={isImgUploading}
+            imageUploadProgress={imageUploadProgress}
+            imageFileName={imageFileName}
+          />
+        </CustomDialogContent>
+      </Dialog>
+    </InfoLabel>
   ) : null;
 };
 

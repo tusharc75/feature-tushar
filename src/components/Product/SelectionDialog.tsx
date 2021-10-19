@@ -29,7 +29,7 @@ const SelectionDialog = (props) => {
     const toastConfig = useContext(CustomToastContext)
     const { handleClose, api, refrenceId, isUpload, uploadData } = props;
     const [loading, setLoading] = useState(false);
-    const [initialData, setInitialData] = useState({});
+    const [initialData, setInitialData] = useState({ productCategory: "", productTemplate: "", priceTemplate: "" });
     const [productCategory, setProductCategory] = useState([]);
     const [productTemplate, setProductTemplate] = useState([]);
     const [priceTemplate, setPriceTemplate] = useState([]);

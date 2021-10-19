@@ -376,7 +376,7 @@ export default function QuoteProcess(props) {
     }, [DOAsetup])
 
     const fetchDOAData = () => {
-        if (ProcessStatus === "DOA Process" && DOAneeded) {
+        if ((ProcessStatus === "DOA Process" && DOAneeded) || (versionStatus.includes("Rejected by DOA") && ProcessStatus === "End")) {
             axiosInstance()
                 .get(`doa-request/doaFlow/${quoteData._id}/${currentVersion}`)
                 .then(({ data: { data } }) => {
