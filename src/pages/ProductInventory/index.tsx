@@ -5,7 +5,6 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import AddIcon from "@material-ui/icons/Add";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import { GiStockpiles } from 'react-icons/gi';
@@ -17,21 +16,16 @@ import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { productInventory, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
-import {
-    DateRenderer,
-    CommonRenderer,
-    CreatedByRenderer,
-    UpdatedByRenderer
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import ManageProductInventory from "./ManageProductInventory";
 import ManageRepairJob from '../RepairJob/ManageRepairJob'
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useHistory } from "react-router-dom";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import { prepareDataForGrid } from "../../constants/helpers"
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -44,6 +38,8 @@ const ProductInventory = () => {
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
     const [gridApi, setGridApi] = useState(null);
+    const [columns, setColumns] = useState([])
+    const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
@@ -56,25 +52,42 @@ const ProductInventory = () => {
     const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
 
     useEffect(() => {
+        fetchGridColumns()
+    }, [])
+
+    useEffect(() => {
         fetchProductInventory()
     }, [page, limit, filters, sorting, search, warehouse]);
 
-    const columns = [
-        { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "product", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
-        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "productCategoryRenderer" },
-        { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
-        { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "dateRenderer" },
-        { field: "bornOnDate", headerName: "Born on Date", show: true, cellRenderer: "dateRenderer" },
-        { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
-        { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "inventoryNumber", headerName: "Inventory Number", show: true, cellRenderer: "commonRenderer" },
-        { field: "warehouse", headerName: "Plants", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-        { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
-    ];
+    const fetchGridColumns = () => {
+        axiosInstance()
+            .get("/field?resource=Product Inventory")
+            .then(({ data: { data } }) => {
+                let columns = []
+                let rendererNames = []
+                data.forEach(o => {
+                    if (o?.fieldData?.fieldName === "serialNumber") {
+                        o.fieldData.primaryField = true
+                    }
+                    let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
+
+                    if (currentColumn !== null) {
+                        columns = [...columns, currentColumn?.columnData]
+                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                            rendererNames.push(currentColumn?.rendererName)
+                        }
+                    }
+                })
+                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+                tempFrameworkComponent = {
+                    ...tempFrameworkComponent,
+                    actionsRenderer: ActionsRenderer
+                }
+                setFrameWorkComponent({ ...tempFrameworkComponent })
+                columns = [...columns, ...getStaticFields()]
+                setColumns([...columns])
+            })
+    }
 
     const fetchProductInventory = () => {
         dispatch({ type: "loading", loading: true });
@@ -86,19 +99,7 @@ const ProductInventory = () => {
         const queryString = getQueryString();
         axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
             data.data = data.data?.map((u, i) => ({
-                ...u,
-                id: u._id,
-                serialNumber: u.serialNumber,
-                inServiceDate: u.inServiceDate,
-                bornOnDate: u.bornOnDate,
-                status: u.status,
-                warehouse: u.warehouse?.optionLabel,
-                product: u.product?.optionLabel,
-                productId: u.product?.optionValue,
-                createdBy: u.createdBy?.user?.concatedName,
-                createdByDate: u.createdBy?.date,
-                updatedBy: u.updatedBy?.user?.concatedName,
-                updatedByDate: u.updatedBy?.date,
+                ...prepareDataForGrid(u),
             }));
 
             dispatch({ type: "initialize", data: data.data, count: data.count });
@@ -159,33 +160,6 @@ const ProductInventory = () => {
         });
     }
 
-    const NameRenderer = (params) => (
-        params.value ? <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
-            {params.value}
-        </Link> : <NoDataCell />
-    );
-
-    const ProductRenderer = (params) => (
-        params.value ? <Link className="link" title={params.value} to={`${routes.product.path}/detail/${params.data.productId}`}>
-            {params.value}
-        </Link> : <NoDataCell />
-    );
-
-    const ProductCategoryRenderer = (params) => (
-        <> {params.data.productCategory.optionLabel !== undefined && params.data.productCategory.optionLabel !== null ?
-            (
-                <Chip
-                    className="ml-3"
-                    style={{ backgroundColor: `${params.data.productCategory?.chipColour}` }}
-                    label={`${params.data.productCategory?.optionLabel}`}
-                />
-            )
-            : (
-                <NoDataCell />
-            )}
-        </>
-    );
-
     const ActionsRenderer = params => (
         <>
             {
@@ -215,8 +189,6 @@ const ProductInventory = () => {
         </>
     )
 
-
-
     const handleSearch = (e) => {
         dispatch({ type: "search", search: e.target.value });
     };
@@ -227,17 +199,6 @@ const ProductInventory = () => {
 
     const closeActions = () => {
         setAnchorEl(null);
-    };
-
-    const frameworkComponents = {
-        commonRenderer: CommonRenderer,
-        createdByRenderer: CreatedByRenderer,
-        dateRenderer: DateRenderer,
-        productRenderer: ProductRenderer,
-        updatedByRenderer: UpdatedByRenderer,
-        actionsRenderer: ActionsRenderer,
-        nameRenderer: NameRenderer,
-        productCategoryRenderer: ProductCategoryRenderer
     };
 
     const replaceFieldName = (field) => {
@@ -363,21 +324,22 @@ const ProductInventory = () => {
                 </Grid>
             </div>
             {columns ?
-                <CustomAgGrid
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameworkComponents}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    actionWidth={150}
-                    loading={loading}
-                    renderedFrom="productInventoryPage"
-                    refreshGrid={fetchProductInventory}
-                />
+                Object.keys(frameWorkComponent).length > 0 ?
+                    <CustomAgGrid
+                        columns={columns}
+                        dataRows={dataRows}
+                        frameworkComponents={frameWorkComponent}
+                        setGridApi={setGridApi}
+                        dispatch={dispatch}
+                        rowCount={rowCount}
+                        limit={limit}
+                        pageSizes={pageSizes}
+                        page={page}
+                        actionWidth={150}
+                        loading={loading}
+                        renderedFrom={routes.productInventory?.title}
+                        refreshGrid={fetchProductInventory}
+                    /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
         {

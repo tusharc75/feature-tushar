@@ -7,6 +7,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
+import { prepareDataForGrid } from "../../constants/helpers"
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FaRegistered } from "react-icons/fa";
 
@@ -403,33 +404,8 @@ const RentalManagement = () => {
       }
 
       let rows = data.map((u) => {
-        const {
-          owner,
-          collaborator,
-          createdBy,
-          updatedBy,
-          customerAccount,
-          ...restProperties
-        } = u;
-
         let res = {
-          ...restProperties,
-          id: u._id,
-          status: u.status,
-          owner: u.owner?.optionLabel,
-          ownerId: u.owner?.optionValue,
-          customerAccount: u.customerAccount?.optionLabel,
-          customerAccountId: u.customerAccount?.optionValue,
-          customerContact: u.customerContact?.optionLabel,
-          customerContactId: u.customerContact?.optionValue,
-          relatedOpportunity: u.opportunity?.optionLabel,
-          relatedOpportunityId: u.opportunity?.optionValue,
-          pDFTemplateId: u?.pDFTemplate?.optionValue,
-          pDFTemplate: u?.pDFTemplate?.optionLabel,
-          createdBy: u.createdBy?.user?.concatedName,
-          createdByDate: u.createdBy?.date,
-          updatedBy: u.updatedBy?.user?.concatedName,
-          updatedByDate: u.updatedBy?.date,
+          ...prepareDataForGrid(u),
         };
         return res;
       });

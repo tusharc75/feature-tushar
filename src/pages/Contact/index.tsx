@@ -16,8 +16,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
-import { isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
-import NoDataCell from '../../components/Helpers/NoDataCell';
+import { isObjectEmpty, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { Chip } from '@material-ui/core';
@@ -26,14 +25,15 @@ import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import contactClass from './contact.module.scss'
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import { sidebarResource } from "../../constants/helpers"
 import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
+import NoDataCell from '../../components/Helpers/NoDataCell';
 
 const ContactTypes = [
   {
@@ -108,9 +108,6 @@ export default function Contact(props) {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      if (o?.fieldData?.fieldName === "accountName") {
-        o.fieldData.primary = true
-      }
       let currentColumn = getColumnData(contactResource, o?.fieldData, `/${contactRoute}/detail`)
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData]
@@ -123,7 +120,13 @@ export default function Contact(props) {
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
+      relatedLeadRenderer: RelatedLeadRenderer,
       actionsRenderer: ActionsRenderer
+    }
+    if (contactResource.includes("customer")) {
+      columns = [...columns,
+      { field: 'relatedLead', headerName: 'Related Lead', show: true, cellRenderer: 'relatedLeadRenderer' },
+      ]
     }
     setFrameWorkComponent({ ...tempFrameworkComponent })
     let staticFields = getStaticFields()
@@ -193,6 +196,34 @@ export default function Contact(props) {
     return entityList.includes(id);
   }
 
+  const RelatedLeadRenderer = (params) =>
+    params.value ? (
+      params?.data?.relatedLeadEntity === selectedEntity ?
+        <Link className="link" to={`${routes.leadDetail.path}/${params.data.relatedLeadId}`} title={params.value}>
+          {params.value}
+        </Link>
+        :
+        hasAccessToEntity(params?.data?.relatedLeadEntity) ?
+          <span
+            className="link"
+            onClick={() => {
+              handleEntityChange(params.data?.relatedLeadEntity)
+              history.push(`${routes.leadDetail.path}/${params.data.relatedLeadId}`)
+            }}
+            title={params.value}
+          >
+            {params.value}
+          </span>
+          :
+          <span
+            title={params.value}
+          >
+            <CustomRenderCell value={params.value} />
+          </span>
+    ) : (
+      <NoDataCell />
+    );
+
   const ActionsRenderer = (params) => (
     <>
       <Tooltip
@@ -236,14 +267,14 @@ export default function Contact(props) {
                 if (params?.data?.entityId) {
                   entities.push(params?.data?.entityId)
                 }
-                if (params?.data?.restEntity) {
-                  let restEntities = params?.data?.restEntity.map(o => o?.optionValue)
+                if (params?.data?.restentity) {
+                  let restEntities = params?.data?.restentity.map(o => o?.optionValue)
                   entities = [...entities, ...restEntities]
                 }
                 setEntities([...entities])
               }
-              else if (params?.data?.restEntity) {
-                let restEntities = params?.data?.restEntity.map(o => o?.optionValue)
+              else if (params?.data?.restentity) {
+                let restEntities = params?.data?.restentity.map(o => o?.optionValue)
                 setEntities([...restEntities])
               }
             }}>
@@ -336,33 +367,16 @@ export default function Contact(props) {
       .get(`${contactApi}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          const { owner, collaborator, createdBy, updatedBy, accountName, staticData, entity, ...restProperties } = u;
-          const [firstEntity, ...restEntity] = entity;
+
+          let finalObject = prepareDataForGrid(u);
           return {
-            ...restProperties,
-            id: u._id,
+            ...finalObject,
 
             canDelete: u.owner?.optionValue === user?.user._id,
-
-            accountNameId: u.accountName?.optionValue,
-            accountName: u.accountName?.optionLabel,
-
-            entity: firstEntity?.optionLabel ?? '',
-            entityId: firstEntity?.optionValue ?? '',
-            restEntity: restEntity,
             relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
             relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
             relatedLeadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
-            owner: u.owner?.optionLabel,
-            ownerId: u.owner?.optionValue,
 
-            reportsTo: u.reportsTo?.optionLabel,
-            reportsToId: u.reportsTo?.optionValue,
-
-            createdBy: u.createdBy?.user?.concatedName,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
           };
         });
 
@@ -582,8 +596,8 @@ export default function Contact(props) {
                                 if (current?.entityId) {
                                   entities = [...entities, current?.entityId]
                                 }
-                                if (current?.restEntity) {
-                                  let restEntities = current?.restEntity.map(o => o?.optionValue)
+                                if (current?.restentity) {
+                                  let restEntities = current?.restentity.map(o => o?.optionValue)
                                   entities = [...entities, ...restEntities]
                                 }
                               })

@@ -26,6 +26,7 @@ import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticFiel
 import { camelCase } from 'lodash';
 import ProductListDialog from './ProductListDialog';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
+import { prepareDataForGrid } from "../../constants/helpers"
 
 let packagesTimeout;
 
@@ -331,14 +332,7 @@ const PackageList = () => {
                 const { owner, createdBy, updatedBy, ...restProperties } = u;
 
                 let res = {
-                    ...restProperties,
-                    id: u._id,
-                    owner: u.createdBy.user.concatedName,
-                    ownerId: u.createdBy.user._id,
-                    createdBy: u.createdBy?.user?.concatedName,
-                    createdByDate: u.createdBy?.date,
-                    updatedBy: u.updatedBy?.user?.concatedName,
-                    updatedByDate: u.updatedBy?.date
+                    ...prepareDataForGrid(u)
                 };
                 return res;
             });

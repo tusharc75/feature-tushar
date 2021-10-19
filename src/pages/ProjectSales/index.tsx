@@ -1,6 +1,5 @@
 import { useState, FC, useReducer, useEffect, useContext, Fragment } from "react";
 import { Grid } from "@material-ui/core";
-import { Link } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "../../components/Helpers/Routes";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -11,7 +10,6 @@ import { useData } from "../../StateProvider/Provider";
 import CreateProjectSales from "./CreateProjectSales";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { gridLoadingTimeout, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
-import NoDataCell from "../../components/Helpers/NoDataCell";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import "./style.scss";
@@ -21,9 +19,8 @@ import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { sidebarResource } from "../../constants/helpers"
+import { sidebarResource, prepareDataForGrid } from "../../constants/helpers"
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
-
 
 function reducer(state, action) {
   switch (action.type) {
@@ -165,10 +162,7 @@ const ProjectSales: FC = () => {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      if (o?.fieldData?.fieldName === "projectName") {
-        o.fieldData.primary = true
-      }
-      let currentColumn = getColumnData(routes.projectSales.title, o?.fieldData)
+      let currentColumn = getColumnData(routes.projectSales.title, o?.fieldData, 'project-sales/detail')
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData]
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -250,8 +244,15 @@ const ProjectSales: FC = () => {
               setProjectSalesId(params.data._id)
               setShowEntityDialog(true)
               if (params?.data?.entity) {
-                let restEntities = params?.data?.entity.map(o => o.optionValue)
-                setEntities([...restEntities])
+                let entities = []
+                if (params?.data?.entityId) {
+                  entities.push(params?.data?.entityId)
+                }
+                if (params?.data?.restentity) {
+                  let restEntities = params?.data?.restentity.map(o => o.optionValue)
+                  entities = [...entities, ...restEntities]
+                }
+                setEntities([...entities])
               }
             }}>
             <AiOutlineDeploymentUnit fontSize="15" color="primary" />
@@ -335,19 +336,7 @@ const ProjectSales: FC = () => {
         .get(`/project-sales${queryString}`)
         .then(({ data: { data, count } }) => {
           let rows = data.map((project) => ({
-            ...project,
-            projectManager: project.projectManager?.optionLabel,
-            projectManagerId: project.projectManager?.optionValue,
-            marketSegment: project?.marketSegment?.optionLabel,
-            marketSegmentId: project?.marketSegment?.optionValue,
-            subMarketSegment: project?.subMarketSegment?.optionLabel,
-            subMarketSegmentId: project?.subMarketSegment?.optionValue,
-            entity: project["entity"] && project["entity"][0] ? project["entity"][0]?.optionLabel : "",
-            entityId: project["entity"] && project["entity"][0] ? project["entity"][0]?.optionValue : "",
-            createdBy: project.createdBy?.user?.concatedName,
-            createdByDate: project.createdBy?.date,
-            updatedBy: project.updatedBy?.user?.concatedName,
-            updatedByDate: project.updatedBy?.date,
+            ...prepareDataForGrid(project)
           }));
 
           dispatch({ type: "initialize", data: rows, count: count });
@@ -360,7 +349,6 @@ const ProjectSales: FC = () => {
           dispatch({ type: "loading", loading: false });
         });
     }
-    // eslint-disable-next-line
   };
 
   const handleProjectFilter = (filterValues) => {
