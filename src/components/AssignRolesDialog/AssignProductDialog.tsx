@@ -60,6 +60,7 @@ const AssignProductDialog = ({
     const toastConfig = useContext(CustomToastContext);
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [isAssigning, setAssigning] = useState(false);
+    const [disableSaveButton, setDisableSaveButton] = useState(false);
     const [productsConst, setProductsConst] = useState([]);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
@@ -226,7 +227,11 @@ const AssignProductDialog = ({
     };
 
     const onCellValueChanged = (row) => {
+        setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
     }
+    useEffect(() => {
+        setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
+    }, [selectedRecords])
 
     return (
         <Dialog
@@ -301,7 +306,7 @@ const AssignProductDialog = ({
                     Cancel
                 </Button>
                 <Button
-                    disabled={isAssigning}
+                    disabled={isAssigning || disableSaveButton}
                     onClick={handleAssignProduct}
                     color="primary"
                     size="small"
