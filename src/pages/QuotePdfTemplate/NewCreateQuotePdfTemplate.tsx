@@ -25,7 +25,7 @@ import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 const defaultProductColumns = 7;
 
 const PdfTemplateSchema = object().shape({
-    name: string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
+    name: string().min(3, 'Too Short!').max(50, 'Too Long').required('Quote PDF template Name  is required'),
     owner: string().required('Owner is required'),
     showPageNumberInFooter: boolean()
 });
