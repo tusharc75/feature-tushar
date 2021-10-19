@@ -198,7 +198,7 @@ const ProductBuilder = (props) => {
           entity: firstEntity?.optionLabel,
           entityId: firstEntity?.optionValue,
           restEntity: restEntity,
-          serializedProduct: u.serializedProduct.toString()
+          serializedProduct: u.serializedProduct && u.serializedProduct.toString()
         }
         for (let col in res) {
           if (res[col] && res[col].optionLabel) {
