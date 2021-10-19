@@ -191,7 +191,12 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
           );
         }
         const items = [...lists, ...enitityList].filter(
-          (item) => item.isRead === true
+          (item) => {
+            if (item?.name === "Product Builder" && process.env.REACT_APP_ENV === 'staging') {
+              return false
+            }
+            return item.isRead === true
+          }
         );
         return { section, items };
       });

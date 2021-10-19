@@ -33,6 +33,8 @@ import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { useLocation } from "react-router-dom";
+import queryString from "query-string";
 
 function reducer(state, action) {
     switch (action.type) {
@@ -126,6 +128,7 @@ const intialState = {
 
 const ProductCategory = () => {
 
+    const location = useLocation()
     const toastConfig = useContext(CustomToastContext)
     const {
         state: { permissions, user, selectedEntity },
@@ -172,6 +175,14 @@ const ProductCategory = () => {
     //  Grid Variables - End
 
     useEffect(() => {
+        const parsedParams = queryString.parse(location?.search);
+        if (parsedParams?.id) {
+            setProductCategoryId(parsedParams?.id);
+            setOpen({ open: true, isClone: false });
+        }
+    }, [location])
+
+    useEffect(() => {
         if (permissions && permissions.productCategory) {
             setProductCategoryPermissions(permissions.productCategory);
         }
@@ -183,7 +194,7 @@ const ProductCategory = () => {
 
     const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
         <Chip
-            className="ml-3"
+            className="ml-3 link"
             style={{ backgroundColor: `${params.data.chipColour}` }}
             label={`${params.value}`}
             onClick={() => {

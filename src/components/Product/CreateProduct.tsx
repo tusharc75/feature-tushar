@@ -30,13 +30,13 @@ const ignoreField = ["priceTemplate"]
 
 const CreateProduct = (props) => {
 
-    const { state: { permissions, user } }: any = useData();
+    const { state: { permissions, user, selectedEntity } }: any = useData();
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
-    const { productId, handleClose, isClone, isAddInBuilder, addProductInBuilder, openFrom, isRedirectToDetailPage } = props;
+    const { productId, handleClose, isClone, isAddInBuilder, addProductInBuilder, openFrom, isRedirectToDetailPage, fromQuote } = props;
     const [masterFields, setMasterFields] = useState([]);
     const [productFields, setProductFields] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
 
     const [isAddField, setIsAddField] = useState(false);
@@ -120,6 +120,9 @@ const CreateProduct = (props) => {
                         return true
                     }
                 })
+                if (selectedEntity && fromQuote) {
+                    values["entity"] = [selectedEntity]
+                }
                 setInitialData({
                     fields: _fields,
                     values: values,
@@ -148,15 +151,15 @@ const CreateProduct = (props) => {
     }, []);
 
     const handleSubmit = (values) => {
-        setLoading(true);
+        setSubmitting(true);
         values.fields = fields;
         if (productId && !isClone) {
             values._id = productId;
             axiosInstance().put(`/product`, values).then(({ data: { data } }) => {
-                setLoading(false);
+                setSubmitting(false);
                 handleClose();
             }).catch((error) => {
-                setLoading(false);
+                setSubmitting(false);
                 toastConfig.setToastConfig(error);
             });
         }
@@ -165,7 +168,7 @@ const CreateProduct = (props) => {
             delete values.brand
             axiosInstance().post(`/product`, values).then(({ data: { data } }) => {
                 const productId = data._id;
-                setLoading(false);
+                setSubmitting(false);
                 handleClose();
                 if (isAddInBuilder) {
                     delete data.brand
@@ -181,7 +184,7 @@ const CreateProduct = (props) => {
                     history.push(`/product/detail/${productId}`)
                 }
             }).catch((error) => {
-                setLoading(false);
+                setSubmitting(false);
                 toastConfig.setToastConfig(error);
             });
         }
@@ -326,6 +329,14 @@ const CreateProduct = (props) => {
         }
         return values;
     };
+
+    const getEntityOptions = (options: any[]) => {
+        if (selectedEntity && fromQuote) {
+            return options?.filter(option => option.optionValue === selectedEntity)
+        } else {
+            return options
+        }
+    }
 
     return (<Dialog
         maxWidth="md"
@@ -548,7 +559,7 @@ const CreateProduct = (props) => {
                                                                         label={field.fieldLabel}
                                                                         name={field.fieldName}
                                                                         type={field.type}
-                                                                        options={field.option}
+                                                                        options={getEntityOptions(field.option)}
                                                                         fullWidth
                                                                         isTooltip={field?.isTooltip || false}
                                                                         tooltipMessage={field?.tooltipMessage}
@@ -696,7 +707,7 @@ const CreateProduct = (props) => {
                             </Box>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button size="small" color="primary" onClick={() => {
+                            <Button disabled={uploadingImageOrFileProgress > 0 || submitting} size="small" color="primary" onClick={() => {
                                 if (!isEqual(ref.current.values, initialData.values)) {
                                     setShowConfirmDialog(true)
                                 }
@@ -705,11 +716,11 @@ const CreateProduct = (props) => {
                                 }
                             }}>Cancel</Button>
                             <CustomButton
-                                loading={loading}
+                                loading={submitting}
                                 variant="contained"
                                 color="primary"
                                 type="submit"
-                                disabled={uploadingImageOrFileProgress > 0}
+                                disabled={uploadingImageOrFileProgress > 0 || submitting}
                                 // disabled={Object.values(simplifyValues(initialData.values, initialData.fields)).toString() ===
                                 //     Object.values(simplifyValues(values, initialData.fields)).toString()}
                                 onClick={submitForm}

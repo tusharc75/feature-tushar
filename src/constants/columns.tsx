@@ -9,7 +9,8 @@ import {
     DateRenderer,
     LinkRenderer,
     ImageRenderer,
-    NameRenderer
+    NameRenderer,
+    CheckboxRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
 
 
@@ -37,7 +38,8 @@ export const detailPagePath = {
 }
 export const hasDetailPageAsPopup = {
     subMarketSegment: routes?.marketSegment?.path,
-    marketSegment: routes?.marketSegment?.path
+    marketSegment: routes?.marketSegment?.path,
+    productCategory: routes?.productCategory?.path
 }
 export const disabledColumns = {
     [routes.rentalManagementDetail.title]: [],
@@ -69,6 +71,12 @@ export const getFrameworkComponents = (rendererNameList, showStaticRenderers = f
             result = {
                 ...result,
                 "dateRenderer": DateRenderer
+            }
+        }
+        else if (o === "checkboxRenderer") {
+            result = {
+                ...result,
+                "checkboxRenderer": CheckboxRenderer
             }
         }
         else if (o === "imageRenderer") {
@@ -112,7 +120,7 @@ export const checkStaticField = (renderedFrom, fieldData) => {
 }
 
 export const staticColumns = ["createdBy", "updatedBy"]
-export const getColumnData = (title, field, detailScreenRoute = null) => {
+export const getColumnData = (title, field, detailScreenRoute = null, hasPopup = false) => {
     let data = localStorage.getItem("gridMetaData")
 
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
@@ -154,9 +162,10 @@ export const getColumnData = (title, field, detailScreenRoute = null) => {
                 columnData: {
                     pivotIndex: 0,
                     ...commonFieldData,
+                    disabled: true,
                     field: field?.fieldName === "firstName" ? "concatedName" : field.fieldName,
                     cellRenderer: "linkRenderer",
-                    cellRendererParams: { "pathName": detailScreenRoute, "property": "_id" }
+                    cellRendererParams: { "pathName": detailScreenRoute, "property": "_id", isForPopup: hasPopup }
                 },
                 rendererName: 'linkRenderer',
             }

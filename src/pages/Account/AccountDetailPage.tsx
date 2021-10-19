@@ -943,6 +943,7 @@ export default function AccountDetailPage(props) {
                             fetchData={fetchRelatedData}
                             quoteBuilderPermission={permissions.quoteBuilder}
                             accountId={id}
+                            accountName={accountData.accountName}
                             accountResource={accountResource}
                             isRenderedFromCustomerAccount={true}
                             isAllowedToUpdate={

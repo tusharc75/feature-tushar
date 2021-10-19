@@ -198,6 +198,7 @@ const ProductBuilder = (props) => {
           entity: firstEntity?.optionLabel,
           entityId: firstEntity?.optionValue,
           restEntity: restEntity,
+          serializedProduct: u.serializedProduct && u.serializedProduct.toString()
         }
         for (let col in res) {
           if (res[col] && res[col].optionLabel) {
@@ -707,6 +708,7 @@ const ProductBuilder = (props) => {
           isAddInBuilder={true}
           addProductInBuilder={addProductInBuilder}
           openFrom="builder"
+          fromQuote={fromQuote}
         />
       )}
       {isAddExistingProduct && (

@@ -246,10 +246,20 @@ export default function QuoteDetail() {
               { title: `${data?.quoteName}` },
             ]);
             setQuoteData(data);
-            setTypeCreateProjectSalesDialog((prevState) => ([...prevState,
-            { id: data?.customerAccountName?.optionValue, type: customerAccount.accountResource },
-            { id: data?.opportunity?.optionValue, type: opportunity.opportunityResource }
-            ]));
+
+            const dataOfTyoes = [...typeCreateProjectSalesDialog]
+            if (data.customerAccountName.optionValue) {
+              dataOfTyoes.push({
+                id: data.customerAccountName.optionValue,
+                type: customerAccount.accountResource
+              })
+            } else if (data.opportunity.optionValue) {
+              dataOfTyoes.push({
+                id: data?.opportunity?.optionValue,
+                type: opportunity.opportunityResource
+              })
+            }
+            setTypeCreateProjectSalesDialog(dataOfTyoes);
 
             setAllowedToEdit(
               [...(data.collaborator ?? []), data.owner].some(

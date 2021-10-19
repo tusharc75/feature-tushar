@@ -25,6 +25,7 @@ import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEnt
 import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { prepareDataForGrid } from "../../constants/helpers"
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
 
 let opportunityTimeout;
@@ -78,16 +79,7 @@ const Opportunities = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const columnState = JSON.parse(localStorage.getItem(opportunityResource));
-  // const columns = [
-  //   { field: 'opportunityName', headerName: 'Opportunity Name', show: true, disabled: true, cellRenderer: 'opportunityNameRenderer' },
-  //   { field: 'supplierAccountName', headerName: 'Supplier Account Name', show: true, cellRenderer: 'supplierAccountNameRenderer' },
-  //   { field: 'customerAccountName', headerName: 'Customer Account Name', show: true, cellRenderer: 'customerAccountNameRenderer' },
-  //   { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-  //   { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
-  //   { field: 'stage', headerName: 'Stage', show: true, cellRenderer: 'commonRenderer' },
-  //   { field: 'closeDate', headerName: 'Close Date', show: true, filter: false, cellRenderer: 'commonRenderer' },
-  //   { field: 'owner', headerName: 'Opportunity Owner', show: true, cellRenderer: 'commonRenderer' }
-  // ];
+
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
@@ -246,16 +238,6 @@ const Opportunities = () => {
     </>
   );
 
-  const frameworkComponents = {
-    opportunityNameRenderer: OpportunityNameRenderer,
-    supplierAccountNameRenderer: SupplierAccountNameRenderer,
-    customerAccountNameRenderer: CustomerAccountNameRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-    commonRenderer: CommonRenderer
-  };
-
   const replaceFieldName = (field) => {
     switch (field) {
       case 'createdBy':
@@ -344,40 +326,13 @@ const Opportunities = () => {
         .get(`${opportunityApi}${queryString}`)
         .then(({ data: { data, count } }) => {
           let rows = data.map((u) => {
-            const { owner, collaborator, createdBy, updatedBy, customerAccountName, supplierAccountName, staticData, ...restProperties } = u;
 
-            const [firstSupplierAccount, ...restSupplierAccounts] = supplierAccountName;
-
+            let finalObject = prepareDataForGrid(u);
             let res = {
-              ...restProperties,
-              id: u._id,
-
-              owner: u.owner?.optionLabel,
-              ownerId: u.owner?.optionValue,
-
+              ...finalObject,
               canDelete: u.owner?.optionValue === user?.user._id,
               stage: u.stage,
               closeDate: u?.closeDate ? displayDate(u.closeDate) : '',
-
-              supplierAccountName: firstSupplierAccount?.optionLabel ?? '',
-              supplierAccountId: firstSupplierAccount?.optionValue ?? '',
-
-              restSupplierAccounts: restSupplierAccounts,
-
-              customerAccountName: u.customerAccountName?.optionLabel,
-              customerAccountNameId: u.customerAccountName?.optionValue,
-              marketSegment: u?.marketSegment?.optionLabel,
-              marketSegmentId: u?.marketSegment?.optionValue,
-              subMarketSegment: u?.subMarketSegment?.optionLabel,
-              subMarketSegmentId: u?.subMarketSegment?.optionValue,
-
-              collaborator: u?.collaborator && u?.collaborator[0] ? u?.collaborator[0]?.optionLabel : "",
-              collaboratorId: u?.collaborator && u?.collaborator[0] ? u?.collaborator[0]?.optionValue : "",
-
-              createdBy: u.createdBy?.user?.concatedName,
-              createdByDate: u.createdBy?.date,
-              updatedBy: u.updatedBy?.user?.concatedName,
-              updatedByDate: u.updatedBy?.date
             };
             return res;
           });

@@ -15,23 +15,16 @@ import {
   deliveryTicket,
 } from "../../constants/helpers";
 import CustomContainer from "../../components/CustomContainer";
-import {
-  CommonRenderer,
-  CreatedByRenderer,
-  UpdatedByRenderer,
-  DateRenderer
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CustomAgGrid, {
   reducer,
   intialState,
 } from "../../components/AgGridComponents/CustomAgGrid";
-import NoDataCell from "../../components/Helpers/NoDataCell";
 import styles from "../Leads/Header.module.scss";
 import { GiAbstract055 } from 'react-icons/gi';
 import SearchBox from '../../components/Helpers/SearchBox'
 import ManageDeliveryTicketDialog from "./ManageDeliveryTicket"
-import { sidebarResource } from "../../constants/helpers"
+import { sidebarResource, prepareDataForGrid } from "../../constants/helpers"
 import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
 
 let deliveryTicketTimeout;
@@ -242,51 +235,10 @@ const DeliveryTicket = () => {
         .get(`${deliveryTicketApi}${queryString}`)
         .then(({ data: { data, count } }) => {
           let rows = data.map((u) => {
-            const {
-              createdBy,
-              updatedBy,
-              customerAccount,
-              deliveryPerson,
-              warehouse,
-              productInventory,
-              rental,
-              ...restProperties
-            } = u;
-
-            // let productInventories = []
-            // Object.keys(u.productInventory).forEach(o => {
-            //   productInventories.push(o?.optionLabel)
-            // })
-
             let res = {
-              ...restProperties,
-              id: u._id,
-              ownerId: u?.createdBy?.user?._id,
+              ...prepareDataForGrid(u),
               canDelete: u?.createdBy?.user?._id === user?.user._id,
-              expiryDate: u.deliveryDate || "",
-
-              status: u?.status,
-              customerAccount: u?.customerAccount?.optionLabel,
-              customerAccountId: u?.customerAccount?.optionValue,
-
-              deliveryPerson: u?.deliveryPerson?.optionLabel,
-              deliveryPersonId: u?.deliveryPerson?.optionValue,
-
-              warehouse: u?.warehouse?.optionLabel,
-              warehouseId: u?.warehouse?.optionValue,
-
-              rental: u?.rental?.optionLabel,
-              rentalId: u?.rental?.optionValue,
-
-              createdBy: u?.createdBy?.user?.concatedName,
-              createdByDate: u?.createdBy?.date,
-              updatedBy: u?.updatedBy?.user?.concatedName,
-              updatedByDate: u?.updatedBy?.date,
             };
-            if (u?.productInventory[0]) {
-              res["productInventory"] = u?.productInventory[0] ? u?.productInventory[0]?.optionLabel : null
-              res["productInventoryId"] = u?.productInventory[0] ? u?.productInventory[0]?.optionValue : null
-            }
             return res;
           });
           dispatch({ type: "initialize", data: rows, count: count });

@@ -13,7 +13,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { gridLoadingTimeout, isObjectEmpty, processFieldName } from '../../constants/helpers';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import { HiUserGroup } from 'react-icons/hi';
-import { lead } from '../../constants/helpers';
+import { lead, prepareDataForGrid } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import { SiConvertio } from 'react-icons/si';
@@ -25,6 +25,7 @@ import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEnt
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
+
 
 const LeadTypes = [
   {
@@ -108,6 +109,7 @@ const Leads = () => {
       setLeadsPermissions(permissions[leadResource]);
     }
   }, [permissions]);
+
   useEffect(() => {
     fetchGridColumns()
   }, [])
@@ -149,13 +151,28 @@ const Leads = () => {
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
+          relatedOpportunityRenderer: RelatedOpportunityRenderer,
           actionsRenderer: ActionsRenderer
         }
         setFrameWorkComponent({ ...tempFrameworkComponent })
-        columns = [...columns, ...getStaticFields()]
+        columns = [...columns,
+        { field: 'relatedOpportunity', headerName: 'Related Opportunity', show: true, cellRenderer: 'relatedOpportunityRenderer' },
+        ...getStaticFields()]
         setColumns([...columns])
       })
   }
+
+  const RelatedOpportunityRenderer = (params) => (
+    <>
+      {params.value ? (
+        <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
+          {params.value}
+        </Link>
+      ) : (
+        <NoDataCell />
+      )}
+    </>
+  );
 
   const ActionsRenderer = (params) => (
     <>
@@ -275,27 +292,14 @@ const Leads = () => {
         let rows = data.map((u) => {
           const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
 
+          let finalObject = prepareDataForGrid(u);
           let res = {
-            ...restProperties,
-            id: u._id,
-
-            owner: u.owner?.optionLabel,
-            ownerId: u.owner?.optionValue,
-            subMarketSegment: u?.subMarketSegment?.optionLabel,
-            subMarketSegmentId: u?.subMarketSegment?.optionValue,
-
-            marketSegment: u.marketSegment?.optionLabel,
-            marketSegmentId: u.marketSegment?.optionValue,
+            ...finalObject,
             isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id),
-
             convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
             relatedOpportunity: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?.opportunityName,
             relatedOpportunityId: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?._id,
 
-            createdBy: u.createdBy?.user?.concatedName,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
           };
           return res;
         });
