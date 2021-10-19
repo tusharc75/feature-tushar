@@ -147,7 +147,7 @@ const AssignDataDialog = (props) => {
       case "customer-account":
         return `${data.accountName}`;
       case "customer-contact":
-        return `${data.salutation} ${data.firstName} ${data.middleName}  ${data.lastName}`;
+        return `${data?.salutation ?? ""} ${data?.concatedName ?? ""}`;
       default:
         break;
     }
