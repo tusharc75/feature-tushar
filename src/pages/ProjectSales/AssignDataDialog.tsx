@@ -137,9 +137,9 @@ const AssignDataDialog = (props) => {
   const getHeading = (type: string, data: any) => {
     switch (type) {
       case "user":
-        return `${data.firstName}  ${data.lastName}`;
+        return `${data?.firstName ?? ""}  ${data.lastName}`;
       case "lead":
-        return `${data.salutation} ${data.firstName} ${data.middleName}  ${data.lastName}`;
+        return `${data?.salutation ?? ""} ${data?.firstName ?? ""} ${data?.middleName ?? ""}  ${data.lastName}`;
       case "opportunity":
         return `${data.opportunityName}`;
       case "quote-builder":
