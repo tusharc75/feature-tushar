@@ -6,6 +6,7 @@ import {
   Button,
   Typography,
   IconButton,
+  useMediaQuery
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { ControlPoint } from "@material-ui/icons";
@@ -34,7 +35,7 @@ import {
   formatAmountWithCurrency,
   opportunity,
   projectSales,
-  quote, 
+  quote,
   defaultActivityShow
 } from "../../constants/helpers";
 import Activity from "../../components/Activity";
@@ -49,6 +50,7 @@ const ProjectSalesDetails = () => {
   const {
     state: { user, permissions },
   }: any = useData();
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [loading, setLoading] = useState(false);
   const [copyOfProjectSalesData, setCopyOfProjectSalesData] = useState(null);
   const [projectSalesData, setProjectSalesData] = useState(null);
@@ -152,6 +154,12 @@ const ProjectSalesDetails = () => {
       toastConfig.setToastConfig(error);
     }
   };
+
+  useEffect(() => {
+    if (isSmallScreen) {
+      setActivityShow(true)
+    }
+  }, [isSmallScreen])
 
   useEffect(() => {
     getSalesData();
@@ -533,7 +541,7 @@ const ProjectSalesDetails = () => {
             </Paper>
           </div>
           <div className="position-relative">
-            {showActivity ?
+            {/* {showActivity ?
               <Paper>
                 {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                   <IoIosArrowDropright className="icon" />
@@ -555,7 +563,29 @@ const ProjectSalesDetails = () => {
               :
               !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropleft className="icon" />
+              </span>} */}
+
+            <Paper>
+              {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
+                {showActivity ? <IoIosArrowDropleft className="icon" /> : <IoIosArrowDropleft className="icon" />}
               </span>}
+              <div style={{ display: showActivity ? "block" : "none" }}>
+
+                <Activity
+                  resourceId={id}
+                  resource={projectSales.projectSalesRoute}
+                  relatedTo={[
+                    {
+                      type: projectSales.projectSalesResource,
+                      referenceId: id,
+                      access: true,
+                    }
+                  ]}
+                  handleActivityRefresh={() => { }}
+                  emails={[]}
+                />
+              </div>
+            </Paper>
           </div>
 
         </div>
