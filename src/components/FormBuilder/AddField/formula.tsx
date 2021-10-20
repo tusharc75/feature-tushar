@@ -111,7 +111,6 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
               ? convertValuetoLabel(values["inputFields"])
               : []
           }
-          freeSolo
           renderTags={(value: string[], getTagProps) =>
             value.map((option: string, index: number) => (
               <Chip
