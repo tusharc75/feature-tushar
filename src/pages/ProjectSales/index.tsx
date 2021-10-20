@@ -336,7 +336,7 @@ const ProjectSales: FC = () => {
         .get(`/project-sales${queryString}`)
         .then(({ data: { data, count } }) => {
           let rows = data.map((project) => ({
-            ...prepareDataForGrid(project)
+            ...prepareDataForGrid(project, user)
           }));
 
           dispatch({ type: "initialize", data: rows, count: count });

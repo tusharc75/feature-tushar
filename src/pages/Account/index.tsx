@@ -488,7 +488,8 @@ export default function Account(props) {
       .get(`${accountApi}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u);
+
+          let finalObject = prepareDataForGrid(u, user);
           let res = {
             ...finalObject,
             canDelete: u.owner?.optionValue === user?.user._id,
