@@ -66,7 +66,7 @@ const ProductDetailsPage = () => {
     }, [id]);
 
     useEffect(() => {
-        if (process.env.REACT_APP_ENV === 'staging') {
+        if (process.env.REACT_APP_ENV !== 'staging') {
             getProductTree()
             if (productData) {
                 getWarehouses()
@@ -577,7 +577,7 @@ const ProductDetailsPage = () => {
                     assignedProducts={BOMData}
                     onSuccess={() => {
                         getFrequentlyBoughtProduct();
-                        if (process.env.REACT_APP_ENV === 'staging') {
+                        if (process.env.REACT_APP_ENV !== 'staging') {
                             getProductTree()
                         }
                         setOpenAssignProductDialog(false)
@@ -594,7 +594,7 @@ const ProductDetailsPage = () => {
                     onClose={() => setOpenProductInventoryDialog(false)}
                     onSuccess={() => {
                         setOpenProductInventoryDialog(false)
-                        if (process.env.REACT_APP_ENV === 'staging') {
+                        if (process.env.REACT_APP_ENV !== 'staging') {
                             getWarehouses()
                         }
                     }}
@@ -603,7 +603,7 @@ const ProductDetailsPage = () => {
                     onClose={() => setOpenProductInventoryDialog(false)}
                     onSuccess={() => {
                         setOpenProductInventoryDialog(false)
-                        if (process.env.REACT_APP_ENV === 'staging') {
+                        if (process.env.REACT_APP_ENV !== 'staging') {
                             getWarehouses()
                         }
                     }}
