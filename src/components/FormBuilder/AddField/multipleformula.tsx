@@ -123,7 +123,6 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
           }
           getOptionLabel={(option) => option}
           value={values['formulaFields'] ? convertValuetoLabel(values['formulaFields']) : []}
-          freeSolo
           renderTags={(value: string[], getTagProps) =>
             value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
           }
@@ -155,7 +154,6 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
           }
           getOptionLabel={(option) => option}
           value={values['formulainputFields'] ? convertValuetoLabel(values['formulainputFields']) : []}
-          freeSolo
           renderTags={(value: string[], getTagProps) =>
             value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
           }
