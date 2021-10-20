@@ -102,7 +102,6 @@ const Login = () => {
       .then(({ data: response }) => {
         setSubmitting(false);
         const { data } = response;
-        console.log('data', data)
         localStorage.setItem('token', data.token);
         if (data?.entity && data?.entity.length) {
           let mappedEntities = []
