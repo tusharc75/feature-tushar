@@ -145,7 +145,7 @@ const AddressResource = () => {
       .get(`/warehouse${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          return prepareDataForGrid(u);
+          return prepareDataForGrid(u, user);
         });
 
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -220,8 +220,15 @@ const AddressResource = () => {
               setShowEntityDialog(true)
               setWarehouseId(params.data._id)
               if (params?.data?.entity) {
-                let restEntities = params?.data?.entity.map(o => o?.optionValue)
-                setEntities([...restEntities])
+                let entities = []
+                if (params?.data?.entityId) {
+                  entities.push(params?.data?.entityId)
+                }
+                if (params?.data?.restentity) {
+                  let restEntities = params?.data?.restentity.map(o => o.optionValue)
+                  entities = [...entities, ...restEntities]
+                }
+                setEntities([...entities])
               }
             }}>
             <AiOutlineDeploymentUnit fontSize="15" color="primary" />
@@ -393,8 +400,13 @@ const AddressResource = () => {
                             let entities = []
                             selectedRecords.map(current => {
                               if (current?.entity) {
-                                let restEntities = current?.entity.map(o => o?.optionValue)
-                                entities = [...entities, ...restEntities]
+                                if (current?.entityId) {
+                                  entities.push(current?.entityId)
+                                }
+                                if (current?.restentity) {
+                                  let restEntities = current?.restentity.map(o => o.optionValue)
+                                  entities = [...entities, ...restEntities]
+                                }
                               }
                             })
                             setEntities([...entities])
