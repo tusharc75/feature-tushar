@@ -171,6 +171,7 @@ const Header = ({ toggleDrawer }) => {
     state: { user, selectedEntity, cartCount },
     dispatch
   }: any = useData();
+
   const classes = useStyles();
   const history = useHistory();
   const { pathname } = useLocation();

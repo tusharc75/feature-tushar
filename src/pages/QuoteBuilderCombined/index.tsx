@@ -594,7 +594,7 @@ const QuoteBuilders = () => {
             }
 
             //  Dynamic grid code - start
-            let finalObject = prepareDataForGrid(u);
+            let finalObject = prepareDataForGrid(u, user);
 
             //  Custom props which are required
             finalObject["relatedOpportunity"] = u.opportunity?.optionLabel;

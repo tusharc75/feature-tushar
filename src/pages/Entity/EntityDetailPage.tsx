@@ -134,6 +134,13 @@ const EntityDetailsPage = () => {
       .get("/user/me")
       .then(({ data: response }) => {
         const { data } = response;
+        if (data?.entity && data?.entity.length) {
+          let mappedEntities = []
+          data.entity.forEach(o => {
+            mappedEntities.push({ optionLabel: o?.entityName, optionValue: o?._id })
+          })
+          data.mappedEntities = mappedEntities
+        }
         dispatch({ type: SET_USER, payload: data });
         if (data?.role?.selectedEntity?._id) {
           dispatch({
