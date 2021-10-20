@@ -5,6 +5,7 @@ import CustomRenderCell from "../Helpers/CustomRenderCell";
 import NoDataCell from "../Helpers/NoDataCell";
 import { dateFormat } from "../../constants/helpers"
 import Avatar from "@material-ui/core/Avatar"
+import Tooltip from "@material-ui/core/Tooltip"
 import { Link } from 'react-router-dom'
 
 export const CommonRenderer = params => <CustomRenderCell value={params.value} />;
@@ -52,6 +53,13 @@ export const UpdatedByRenderer = params => params.value ? (
     <NoDataCell />
 )
 
+const getTitle = data => {
+    if (data.length) {
+        let restParams = data.map(o => o?.optionLabel ? o?.optionLabel : typeof o !== "object" ? o : "").join(" , ")
+        return restParams
+    }
+    return ""
+}
 export const LinkRenderer = params => params.value ? (
     <>
         <Link className="link" to={params?.isForPopup ? `${params?.pathName}?id=${params?.data[params?.property]}` :
@@ -59,7 +67,10 @@ export const LinkRenderer = params => params.value ? (
 
         {
             params["more"] && params.data[params["more"]]?.length > 0 && (
-                <span className="createdAtTime badge-date">{`+${params.data[params["more"]].length} more..`}</span>
+                <Tooltip title={getTitle(params.data[params["more"]])} >
+                    <span className="createdAtTime badge-date">{`+${params.data[params["more"]].length} more..`}</span>
+                </Tooltip>
+
             )
         }
     </>
