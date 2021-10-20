@@ -102,7 +102,15 @@ const Login = () => {
       .then(({ data: response }) => {
         setSubmitting(false);
         const { data } = response;
+        console.log('data', data)
         localStorage.setItem('token', data.token);
+        if (data?.entity && data?.entity.length) {
+          let mappedEntities = []
+          data.entity.forEach(o => {
+            mappedEntities.push({ optionLabel: o?.entityName, optionValue: o?._id })
+          })
+          data.mappedEntities = mappedEntities
+        }
         dispatch({ type: SET_USER, payload: data });
         if (data?.role?.selectedEntity?._id) {
           dispatch({

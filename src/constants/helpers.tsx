@@ -1109,11 +1109,13 @@ export const generateUniqueId = () => {
   return `id-${new Date().getTime()}`;
 };
 
-export const prepareDataForGrid = (data) => {
-
+export const prepareDataForGrid = (data, user = {}) => {
   let objectValues = {};
   let restProperties = {};
 
+  if (data.entity && data.entity.length === 0 && user["mappedEntities"].length) {
+    data.entity = [...user["mappedEntities"]]
+  }
   Object.keys(data).forEach((key) => {
     if (typeof data[key] === "object") {
 
@@ -1156,5 +1158,6 @@ export const prepareDataForGrid = (data) => {
     finalObject["updatedByDate"] = data?.updatedBy?.date
   }
   finalObject["id"] = data?._id
+
   return finalObject;
 }

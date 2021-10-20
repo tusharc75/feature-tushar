@@ -332,7 +332,7 @@ const PackageList = () => {
                 const { owner, createdBy, updatedBy, ...restProperties } = u;
 
                 let res = {
-                    ...prepareDataForGrid(u)
+                    ...prepareDataForGrid(u, user)
                 };
                 return res;
             });
