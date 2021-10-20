@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.21.0](https://github.com/vebholic/oms_frontend/compare/v1.20.0...v1.21.0) (2021-10-20)
+
+
+### Features
+
+* - OAT-26 address broken issue fixed, OAT-27 address same issue fixed ([b14794a](https://github.com/vebholic/oms_frontend/commit/b14794a7fd91567da012ce762483c37cc2f0414f))
+* add serialized asset selection in Rental management details ([ecf0040](https://github.com/vebholic/oms_frontend/commit/ecf00406267d861b4fb68ee7fdb40f13d35ff48e))
+* product grid in quote details issue ([3d525cc](https://github.com/vebholic/oms_frontend/commit/3d525cc87d56eff66aaf521ebe1e756569b6180c))
+* **rentalmanagement:** bulk edit ([ae31859](https://github.com/vebholic/oms_frontend/commit/ae3185960657f21b91a18171e6265bd5d0c4b14e))
+
+
+### Bug Fixes
+
+* bug fix in product list ([633e5ad](https://github.com/vebholic/oms_frontend/commit/633e5ad7181a5877be2f8dc4cfd4eb7fac5095d7))
+* changed stagging to staging ([9f46c27](https://github.com/vebholic/oms_frontend/commit/9f46c27d3300908e46a28ccf17f01198d175e2d0))
+* changes added ([ebdd17e](https://github.com/vebholic/oms_frontend/commit/ebdd17e6945255d1e2989b5673df420d335ea408))
+* changes added ([a8d5a28](https://github.com/vebholic/oms_frontend/commit/a8d5a28d5bb1ef8cf6e4fce227cc82d58f68f328))
+* config--- testing backend ([d0d7e61](https://github.com/vebholic/oms_frontend/commit/d0d7e616a0d03055eb578a94b3a1e69cf2fb361e))
+* **createproduct.tsx:** auto select entity ([8a86b0a](https://github.com/vebholic/oms_frontend/commit/8a86b0ae64643c3a5a3953c080f4a76e610a23c5))
+* lead name redirect to warehouse ([fcbe1d0](https://github.com/vebholic/oms_frontend/commit/fcbe1d08a6e2ad790196a0e011fb2cddbe71b7b5))
+* oAT-29 OAT-24 ([e5637db](https://github.com/vebholic/oms_frontend/commit/e5637db07d658132817fadc437b583e52238c1a9))
+* oAT-66 ([698b931](https://github.com/vebholic/oms_frontend/commit/698b9318e4c5d49718d522031502240246c3f047))
+* quote hot fixes ([5c8ee81](https://github.com/vebholic/oms_frontend/commit/5c8ee81e9bb022d6532e2dc856ec57cb85633d85))
+* quote pdf template name required error message ([e18a747](https://github.com/vebholic/oms_frontend/commit/e18a7473b69544ec61d34c20c84f3b5e6b90d9ed))
+* rental job ([3ddf217](https://github.com/vebholic/oms_frontend/commit/3ddf2179900377a4f2e850b3f166d2553bff88d0))
+* undefined name issue in customer contact for project sales ([963822d](https://github.com/vebholic/oms_frontend/commit/963822dab7b803c49f0e0baf36138e4d0502ed11))
+
 ## [1.20.0](https://github.com/vebholic/oms_frontend/compare/v1.19.2...v1.20.0) (2021-10-19)
 
 

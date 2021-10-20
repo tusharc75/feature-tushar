@@ -25,7 +25,7 @@ import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 const defaultProductColumns = 7;
 
 const PdfTemplateSchema = object().shape({
-    name: string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required'),
+    name: string().min(3, 'Too Short!').max(50, 'Too Long').required('Quote PDF template Name  is required'),
     owner: string().required('Owner is required'),
     showPageNumberInFooter: boolean()
 });
@@ -82,6 +82,7 @@ export default function NewCreateQuotePdfTemplate() {
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [isLandscapChecked, setIsLandscapChecked] = useState(false)
     const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
+    const [isPreview, setIsPreview] = useState(false)
 
     const onBackButtonEvent = (e) => {
         if (hasPermissionToUpdate) {
@@ -193,7 +194,7 @@ export default function NewCreateQuotePdfTemplate() {
             });
     }
 
-    const handleSubmit = (values, isPreview) => {
+    const handleSubmit = (values) => {
         if (isPreview === true) {
             setIsUpdatingAndPreview(true);
         } else {
@@ -329,7 +330,7 @@ export default function NewCreateQuotePdfTemplate() {
                                         </Button>
 
                                         <Button disabled={isUpdatingAndPreview || !hasPermissionToUpdate} size="small" color="primary"
-                                            onClick={() => { handleSubmit(values, true) }} variant="contained">
+                                            onClick={() => { setIsPreview(true); submitForm() }} variant="contained">
                                             {isUpdatingAndPreview && <CircularProgress size={24} />} {" "} Save & Preview
                                         </Button>
 
