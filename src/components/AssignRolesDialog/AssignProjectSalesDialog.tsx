@@ -22,6 +22,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { customerAccount, customerContact, opportunity, quoteBuilder } from "../../constants/helpers"
 import { startCase } from "lodash";
 import SearchBox from "../Helpers/SearchBox";
+import { useData } from "../../StateProvider/Provider";
 const AssignProjectSalesDialog = ({
     projectSalesDialogOpen,
     onSuccess,
@@ -30,6 +31,9 @@ const AssignProjectSalesDialog = ({
     type,
 }) => {
     const toastConfig = useContext(CustomToastContext);
+    const {
+        state: { user }
+    }: any = useData();
     const [projectSales, setProjectSales] = useState([]);
     const [loadingProjectSales, setLoadingProjectSales] = useState(false);
     const [selectedProjectSales, setSelectedProjectSales] = useState([]);
@@ -66,7 +70,9 @@ const AssignProjectSalesDialog = ({
 
         let api = type.some(item => item?.type === customerContact.contactResource) ?
             `/project-sales?filterById=[{"field": "staticData.customerAccount", "term": "${type.find(item => item.type === customerAccount.accountResource).id}"}]`
-            : `/project-sales`
+            : user?.user?._id ?
+                `/project-sales?filterById=[{"field": "projectManager", "term": "${user?.user?._id}"}]`
+                : `/project-sales`
         axiosInstance()
             .get(api)
             .then(({ data: { data } }) => {
