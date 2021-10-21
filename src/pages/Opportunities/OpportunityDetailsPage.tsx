@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Button, Grid, Paper } from '@material-ui/core';
+import { Box, Button, Grid, Paper, useMediaQuery } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useHistory, useParams } from 'react-router-dom';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -23,7 +23,7 @@ import {
   customerContact,
   getObjKeysWithValues,
   processFieldName,
-  formatAmountWithCurrency, 
+  formatAmountWithCurrency,
   defaultActivityShow
 } from '../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -46,6 +46,7 @@ function OpportunityDetailsPage() {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(true);
   const [opportunityData, setOpportunityData] = useState(null);
@@ -123,6 +124,12 @@ function OpportunityDetailsPage() {
       fetchRelatedData();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (isSmallScreen) {
+      setActivityShow(true)
+    }
+  }, [isSmallScreen])
 
   useEffect(() => {
     if (
@@ -683,7 +690,7 @@ function OpportunityDetailsPage() {
           </Paper>
         </div>
         <div className="position-relative">
-          {showActivity ?
+          {/* {showActivity ?
             <Paper>
               {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropright className="icon" />
@@ -717,7 +724,40 @@ function OpportunityDetailsPage() {
             :
             !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
               <IoIosArrowDropleft className="icon" />
+            </span>} */}
+
+          <Paper>
+            {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
+              {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
             </span>}
+            <div style={{ display: showActivity ? "block" : "none" }}>
+              {!opportunityData ? (
+                <Box>
+                  <Skeleton variant="text" width="100px" height="25px" />
+                  <Box marginY={1} />
+                  {[0, 1, 2, 3, 4].map((i, index) => (
+                    <Skeleton key={index} width="100%" height="50px" />
+                  ))}
+                </Box>
+              ) : (
+                <div >
+                  <Activity
+                    resourceId={opportunityData?._id}
+                    resource={opportunityResource}
+                    relatedTo={[
+                      {
+                        type: opportunityResource,
+                        referenceId: opportunityData?._id,
+                        access: true
+                      }
+                    ]}
+                    handleActivityRefresh={() => { }}
+                    emails={contactsEmailsData}
+                  />
+                </div>
+              )}
+            </div>
+          </Paper>
         </div>
       </div>
 
