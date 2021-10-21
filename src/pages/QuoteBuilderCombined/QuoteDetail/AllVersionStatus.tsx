@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import CustomRenderCell from '../../../components/Helpers/CustomRenderCell';
 
 export default function AllVersionStatus({ quoteId, quoteData, quotePermissions, fetchQuoteData, handleChangeVersionFromAllVersion, handleCloneQuoteWithVersionFromAllVersion }) {
 
@@ -24,16 +25,15 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
         { field: "totalcost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
         { field: "totalSalesPrice", headerName: "Total Sales Price", show: true, cellRenderer: "commonRenderer" },
     ]);
-    const NameRenderer = params => <Link
-        title={params.value}
-        className="text-truncate link"
-        onClick={() => {
-            fetchQuoteData(params.data.versionNumber);
-            handleChangeVersionFromAllVersion(params.data.versionNumber);
-        }}
-    >
-        {params.value}
-    </Link>;
+    const NameRenderer = params =>
+        <span className="link"
+            onClick={() => {
+                fetchQuoteData(params.data.versionNumber);
+                handleChangeVersionFromAllVersion(params.data.versionNumber);
+            }}>
+            <CustomRenderCell value={params?.value} />
+        </span>
+        ;
 
     const ActionsRenderer = params => <>
 

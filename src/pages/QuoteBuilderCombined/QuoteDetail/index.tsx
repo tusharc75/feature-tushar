@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useMemo, useState, useReducer, Fragment } from 'react'
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import ReactDOM from "react-dom";
-import { Paper, Box, Tabs, Tab, Grid, Button, DialogTitle, Dialog, DialogActions, DialogContent, makeStyles, TextField } from "@material-ui/core";
+import { useMediaQuery, Paper, Box, Tabs, Tab, Grid, Button, DialogTitle, Dialog, DialogActions, DialogContent, makeStyles, TextField } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
@@ -81,6 +81,7 @@ export default function QuoteDetail() {
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [state, dispatch] = useReducer(reducer, intialState);
   const [quoteData, setQuoteData] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
@@ -478,6 +479,12 @@ export default function QuoteDetail() {
     setReopenReason(event.target.value);
   };
 
+  useEffect(() => {
+    if (isSmallScreen) {
+      setActivityShow(true)
+    }
+  }, [isSmallScreen])
+
   return (
     <>
       <Fragment>
@@ -724,7 +731,7 @@ export default function QuoteDetail() {
             </Paper>
           </div>
           <div className="position-relative">
-            {showActivity ?
+            {/* {showActivity ?
               <Paper>
                 {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                   <IoIosArrowDropright className="icon" />
@@ -761,7 +768,43 @@ export default function QuoteDetail() {
               </Paper> :
               !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropleft className="icon" />
+              </span>} */}
+            <Paper>
+              {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
+                {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
               </span>}
+              <div style={{ display: showActivity ? "block" : "none" }}>
+                {!quoteData ? (
+                  <Box>
+                    <Skeleton variant="text" width="100px" height="25px" />
+                    <Box marginY={1} />
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <Skeleton key={i} width="100%" height="50px" />
+                    ))}
+                  </Box>
+                ) : (
+                  <div>
+                    <Activity
+                      resourceId={quoteData?._id}
+                      resource={quote.quoteResource}
+                      restrictedAddActivities={
+                        allowedToEdit ? [] : ["Attachment", "Case"]
+                      }
+                      relatedTo={[
+                        {
+                          type: quote.quoteResource,
+                          referenceId: quoteData?._id,
+                          access: true,
+                        },
+                      ]}
+                      handleActivityRefresh={() => { }}
+                      //   emails={contactsEmailsData}
+                      emails={null}
+                    />
+                  </div>
+                )}
+              </div>
+            </Paper>
           </div>
         </div>
         {showConfirmBox ? (

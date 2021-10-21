@@ -108,7 +108,7 @@ const ManageWarehouse = (props) => {
                 }) => (
                     <Fragment>
                         <CustomDialogHeader
-                            title={addressResource?.id ? "Update " + addressResource.warehouseName : "Create " + routes.warehouse.title}
+                            title={addressResource?.id ? "Update " + initialData?.values["warehouseName"] ?? "" : "Create " + routes.warehouse.title}
                             onClose={() => {
                                 if (isFieldNotTouched({
                                     initialValues: initialData.values,

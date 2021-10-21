@@ -4,7 +4,7 @@ import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { Button, Dialog, Grid, IconButton, Paper, Tooltip, Typography } from "@material-ui/core";
+import { Button, Dialog, Grid, IconButton, Paper, Tooltip, Typography, useMediaQuery, } from "@material-ui/core";
 import { GiAbstract055, GiVintageRobot } from "react-icons/gi";
 import { AiOutlineEye } from "react-icons/ai";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -15,7 +15,7 @@ import {
   CustomDialogTransition,
   formatAmountWithCurrency,
   gridLoadingTimeout,
-  gridPageSizes, 
+  gridPageSizes,
   defaultActivityShow
 } from "../../constants/helpers";
 import { camelCase } from "lodash";
@@ -136,6 +136,7 @@ const DOAApproval = () => {
     limit,
     pageSizes,
   } = state;
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [QData, setQData] = useState(null);
   const [needDOA, setneedDOA] = useState(false);
   const [PDFName, setPDFName] = useState("");
@@ -156,6 +157,12 @@ const DOAApproval = () => {
       fetchQuote();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (isSmallScreen) {
+      setActivityShow(true);
+    }
+  }, [isSmallScreen]);
 
   const fetchDOA = (user) => {
     axiosInstance()
@@ -470,7 +477,7 @@ const DOAApproval = () => {
           </Paper>
         </div>
         <div className="position-relative">
-          {showActivity ?
+          {/* {showActivity ?
             <Paper>
               {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropright className="icon" />
@@ -491,7 +498,27 @@ const DOAApproval = () => {
             :
             !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
               <IoIosArrowDropleft className="icon" />
+            </span>} */}
+
+          <Paper>
+            {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
+              {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
             </span>}
+            <div style={{ display: showActivity ? "block" : "none" }}>
+              <Activity
+                resourceId={QData?.quoteBuilderId}
+                resource="DOA"
+                relatedTo={[
+                  {
+                    type: "DOA",
+                    referenceId: QData?.quoteBuilderId,
+                    access: true,
+                  },
+                ]}
+                handleActivityRefresh={() => { }}
+              />
+            </div>
+          </Paper>
         </div>
       </div>
       {

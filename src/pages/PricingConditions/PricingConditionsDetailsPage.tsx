@@ -58,7 +58,7 @@ function PricingConditionsDetailsPage() {
     const { id } = useParams();
     const { pricingConditionApi } = pricingCondition;
     const toastConfig = useContext(CustomToastContext);
-    const [initialData, setInitialData] = useState({ fields: [], values: {}, });
+    const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const { state: { permissions } }: any = useData();
     const [formsData, setFormsData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -84,7 +84,7 @@ function PricingConditionsDetailsPage() {
 
     useEffect(() => {
         axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
-            const unitField = data.filter((e) => e.fieldData.fieldName === "unit");
+            const unitField = data.filter((e) => e.fieldData.fieldName.toLowerCase().includes("unit") && e.fieldData.type === "dropDown");
             if (unitField.length) {
                 setUnits(unitField[0].fieldData.option);
                 setIsProductMasterUnit(true);
@@ -177,7 +177,6 @@ function PricingConditionsDetailsPage() {
             });
         }
     };
-
 
     const convertLabeltoValue = (value) => {
         const result = []
@@ -373,6 +372,7 @@ function PricingConditionsDetailsPage() {
                                                     <Grid item xs={12} sm={4} md={4} className="pt-1">
                                                         <Autocomplete
                                                             multiple
+                                                            freeSolo
                                                             disableCloseOnSelect={true}
                                                             id="autocompleteunits"
                                                             options={units.map((e) => { return e.optionValue })}

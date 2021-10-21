@@ -22,21 +22,19 @@ import {
     isObjectEmpty,
     marketSegment
 } from "../../constants/helpers";
-import {
-    CreatedByRenderer,
-    UpdatedByRenderer
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { useHistory } from "react-router-dom";
 import queryString from "query-string";
+import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import { prepareDataForGrid } from "../../constants/helpers"
+import { useLocation } from "react-router-dom";
 
 const MarketSegment = () => {
 
-    const history = useHistory();
+    const location = useLocation()
 
     const toastConfig = useContext(CustomToastContext)
     const {
@@ -47,6 +45,8 @@ const MarketSegment = () => {
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [open, setOpen] = useState({ open: false, isClone: false, idToClone: null });
     const [anchorEl, setAnchorEl] = useState(null);
+    const [columns, setColumns] = useState([])
+    const [frameWorkComponent, setFrameWorkComponent] = useState({})
 
     // const [selectedCategory, setSelectedCategory] = useState([]);
 
@@ -58,12 +58,6 @@ const MarketSegment = () => {
     // const [showGridFilters, setShowGridFilters] = useState(true)
     const columnState = JSON.parse(localStorage.getItem("marketSegmentPage"));
 
-    const columns = [
-        { field: "name", headerName: "Market Segment", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "parentMarketSegmentName", headerName: "Parent MarketSegment", show: true, cellRenderer: "commonRenderer" },
-        { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-        { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
-    ];
     if (columnState) {
         columns.map((item) => {
             columnState.map((d) => {
@@ -75,16 +69,55 @@ const MarketSegment = () => {
     }
 
     useEffect(() => {
-        const parsedParams = queryString.parse(history?.location?.search);
+        const parsedParams = queryString.parse(location?.search);
         if (parsedParams?.id) {
             setOpen({ open: true, isClone: false, idToClone: parsedParams?.id });
         }
-    }, [])
+    }, [location])
     //  Grid Variables - End
 
     useEffect(() => {
         fetchMarketSegment()
     }, [page, limit, filters, sorting, search])
+
+    useEffect(() => {
+        fetchGridColumns()
+    }, [])
+
+    const fetchGridColumns = () => {
+        axiosInstance()
+            .get(`/field?resource=Market Segment`)
+            .then(({ data: { data } }) => {
+                let columns = []
+                let rendererNames = []
+                data.forEach(o => {
+                    if (o?.fieldData?.primaryField === true) {
+                        columns = [...columns,
+                        { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" },]
+                    }
+                    else {
+                        let currentColumn = getColumnData(routes.marketSegment.title, o?.fieldData, routes.marketSegment.path)
+
+                        if (currentColumn !== null) {
+                            columns = [...columns, currentColumn?.columnData]
+                            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                                rendererNames.push(currentColumn?.rendererName)
+                            }
+                        }
+                    }
+                })
+                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+                tempFrameworkComponent = {
+                    ...tempFrameworkComponent,
+                    nameRenderer: NameRenderer,
+                    actionsRenderer: ActionsRenderer
+                }
+                setFrameWorkComponent({ ...tempFrameworkComponent })
+                columns = [...columns, ...getStaticFields()]
+                setColumns([...columns])
+            })
+    }
+
 
     const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
         <span className="link" onClick={() => {
@@ -125,15 +158,6 @@ const MarketSegment = () => {
             </Tooltip>
         }
     </Fragment>
-
-    const frameworkComponents = {
-        nameRenderer: NameRenderer,
-        createdByRenderer: CreatedByRenderer,
-        updatedByRenderer: UpdatedByRenderer,
-        actionsRenderer: ActionsRenderer
-    };
-
-
 
     const replaceFieldName = (field) => {
         switch (field) {
@@ -189,19 +213,7 @@ const MarketSegment = () => {
         axiosInstance().get(`${marketSegment.marketSegmentApi}${queryString}`).then(({ data: { data, count } }) => {
 
             let rows = data.map((u) => {
-                const { createdBy, updatedBy, ...restProperties } = u;
-
-                let res = {
-                    ...restProperties,
-                    id: u._id,
-                    parentMarketSegmentName: u.parentMarketSegment?.optionLabel,
-                    createdBy: u.createdBy?.user?.concatedName,
-                    createdByDate: u.createdBy?.date,
-                    updatedBy: u.updatedBy?.user?.concatedName,
-                    updatedByDate: u.updatedBy?.date,
-                }
-
-                return res;
+                return prepareDataForGrid(u);
             });
 
             dispatch({ type: "initialize", data: rows, count: count });
@@ -316,11 +328,14 @@ const MarketSegment = () => {
                 </Grid>
             </div>
 
-            <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
-                loading={loading} renderedFrom="marketSegmentPage"
-                refreshGrid={fetchMarketSegment}
-            />
+            {
+                Object.keys(frameWorkComponent).length > 0 ?
+                    <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameWorkComponent} setGridApi={setGridApi}
+                        dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
+                        loading={loading} renderedFrom={routes.marketSegment.title}
+                        refreshGrid={fetchMarketSegment}
+                    /> : null
+            }
 
             {showDeleteConfirmBox &&
                 <ConfirmationDialog

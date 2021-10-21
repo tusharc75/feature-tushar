@@ -168,7 +168,7 @@ const User: FC = () => {
       </p>
     ) : (
       <>
-        <Tooltip
+        {/* <Tooltip
           className={permissions.user.isCreate ? "" : "cursor-stop"}
           title={permissions.user.isCreate ? "Clone" : "You do not have permission to clone/create"} >
           <IconButton
@@ -180,7 +180,7 @@ const User: FC = () => {
           >
             <FileCopyIcon fontSize="small" color="primary" />
           </IconButton>
-        </Tooltip>
+        </Tooltip> */}
         {permissions.user.isDelete ? (
 
           params.data.isBrandAdmin ? (

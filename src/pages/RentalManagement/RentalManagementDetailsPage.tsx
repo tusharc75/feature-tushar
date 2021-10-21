@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, Tooltip, CircularProgress } from "@material-ui/core";
+import { Grid, Box, Button, Paper, CircularProgress } from "@material-ui/core";
 import { Skeleton, Autocomplete, Alert } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import { isMobile, isTablet } from "react-device-detect";
@@ -15,7 +15,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow } from "../../constants/helpers";
 import Steps from "./Steps";
 import AddExistingProductInventory from "./AddExistingProductInventory";
-import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
+import { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { Link } from 'react-router-dom'
 import InputAdornment from "@material-ui/core/InputAdornment/InputAdornment";
 import TextField from "@material-ui/core/TextField/TextField";
@@ -31,8 +31,6 @@ import DeliveryTicket from "./DeliveryTicket";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementDialog";
 import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
-import ManageProductInventory from '../ProductInventory/ManageProductInventory'
-import AddRentalCost from "./AddRentalCost";
 import Activity from "../../components/Activity";
 import styles from "./Retal.module.scss";
 import ReceivingTicket from "./ReceivingTicket";
@@ -45,6 +43,7 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
 import { GiMineExplosion } from 'react-icons/gi'
 import HtmlTooltip from '../../components/CustomTooltipTitle'
+import BulkEditInventoryDialog from './BulkEditInventoryDialog'
 
 const rentalProcessSteps = ["New", "Additional Cost", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
@@ -59,6 +58,8 @@ const RentalManagementDetailsPage = () => {
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loadingDetails, setLoadingDetails] = useState(true);
+  const [isUpdating, setUpdating] = useState(false);
+  const [isBulkEdit, setBulkEdit] = useState(false);
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -387,7 +388,7 @@ const RentalManagementDetailsPage = () => {
     { field: "UOM", headerName: "UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Gram", "Liter"] }, editable: true },
     { field: "pricingMethod", headerName: "Pricing Method", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Per Day", "Per Week", "Per Month"] }, editable: true },
     { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    { field: "discount", headerName: "Discount", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+    { field: "discount", headerName: "Discount (%)", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
     { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
   ];
 
@@ -519,6 +520,35 @@ const RentalManagementDetailsPage = () => {
         toastConfig.setToastConfig(error)
       });
   }
+
+  const bulkEditData = (values: any) => {
+    let updatedArr = dataRows.map(d => ({
+      "id": d.id,
+      "type": d.type.toLowerCase(),
+      "detail": d.detail,
+      "pricingMethod": values.pricingMethod ? values.pricingMethod : d.pricingMethod,
+      "UOM": values.UOM ? values.UOM : d.UOM,
+      "finalPrice": values.finalPrice ? values.finalPrice : d.finalPrice,
+      "discount": values.discount ? values.discount : d.discount,
+      "startDate": values.startDate ? values.startDate : d.startDate,
+      "endDate": values.endDate ? values.endDate : d.endDate,
+      "qty": values.qty ? values.qty : d.qty,
+      "price": values.price ? values.price : d.price
+    })
+    )
+
+    setUpdating(true)
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": updatedArr })
+      .then(() => {
+        setUpdating(false)
+        setBulkEdit(false)
+        fetchProductInventory()
+      }).catch((error) => {
+        setUpdating(false)
+        toastConfig.setToastConfig(error)
+      });
+  }
+
 
   return (
     <>
@@ -663,7 +693,21 @@ const RentalManagementDetailsPage = () => {
                         {`Add ${routes.packages.title}`}
                       </Button>
                     </Box>
-                    <div>
+                    <Box display="flex">
+                      <HtmlTooltip title={Boolean(selectedRecords.length) ? "Buld edit selected records" : "Select records to edit"}>
+                        <span>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            disabled={!Boolean(selectedRecords.length)}
+                            onClick={() => setBulkEdit(true)}
+                          >
+                            Bulk Edit
+                          </Button>
+                        </span>
+                      </HtmlTooltip>
+                      <Box mx={1} />
                       <HtmlTooltip title={Boolean(selectedRecords.length) ? "Delete selected records" : "Select records to delete"}>
                         <span>
 
@@ -686,7 +730,7 @@ const RentalManagementDetailsPage = () => {
                           </Button>
                         </span>
                       </HtmlTooltip>
-                    </div>
+                    </Box>
                   </Box>
                   {columns ?
                     <CustomAgGridEditable
@@ -1089,6 +1133,12 @@ const RentalManagementDetailsPage = () => {
         onOk={() => handleRemoveProductInventory(deleteData)}
         okBtnLoading={isDeleting}
       />}
+      {isBulkEdit &&
+        <BulkEditInventoryDialog
+          isSaving={isUpdating}
+          onClose={() => setBulkEdit(false)}
+          submitBulkEdit={bulkEditData}
+        />}
     </>
   );
 };

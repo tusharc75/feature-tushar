@@ -1692,6 +1692,7 @@ export default function QuoteProcess(props) {
                         qouteBuilderAttachments={attachments}
                         subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
                             }`}
+                        fromQuote={true}
                     />
                 </Dialog>
             )}

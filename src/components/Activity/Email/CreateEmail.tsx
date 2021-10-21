@@ -59,7 +59,7 @@ import { values } from "lodash";
 const EmailSchema = object().shape({
   name: string().required("please enter subject"),
   to: array()
-    .min(1)
+    .min(1, "Please enter a valid email")
     .transform(function (value, originalValue) {
       if (this.isType(value) && value !== null) {
         return value;
@@ -98,6 +98,7 @@ export const CreateEmail = ({
   subject = "",
   showESign = false,
   generatingFile = false,
+  fromQuote = false
 }) => {
   const {
     state: { user },
@@ -126,11 +127,19 @@ export const CreateEmail = ({
   const [stateQuoteBuilderAttachments, setStateQuoteBuilderAttachments] = useState([])
 
   useEffect(() => {
-    if (qouteBuilderAttachments && qouteBuilderAttachments.length > 0) {
-      if (stateQuoteBuilderAttachments.length == 0) {
+    if (fromQuote) {
+      if (qouteBuilderAttachments.length > 0) {
         setStateQuoteBuilderAttachments(qouteBuilderAttachments)
       }
     }
+    else {
+      if (qouteBuilderAttachments && qouteBuilderAttachments.length > 0) {
+        if (stateQuoteBuilderAttachments.length == 0) {
+          setStateQuoteBuilderAttachments(qouteBuilderAttachments)
+        }
+      }
+    }
+
   }, [qouteBuilderAttachments])
 
   useEffect(() => {

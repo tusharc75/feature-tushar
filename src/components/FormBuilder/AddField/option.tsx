@@ -74,13 +74,20 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
           let rowInsert = {};
           rowInsert["optionLabel"] = row[0] ? row[0].toString() : "";
           rowInsert["optionValue"] = row[0] ? row[0].toString() : "";
-          if (
-            values["isDependentDropdown"] &&
-            values["dropdowDependentOn"] !== ""
-          ) {
-            rowInsert[values["dropdowDependentOn"]] = row[1]
-              ? row[1].toString()
-              : "";
+          if (values["isDependentDropdown"] && values["dropdowDependentOn"] && values["dropdowDependentOn"] !== "") {
+            const value = row[1] ? row[1].toString() : "";
+            if (lookupOption.length) {
+              const resultFilter = lookupOption.filter((e) => e.optionLabel.toLowerCase() === value.toLowerCase());
+              if (resultFilter.length) {
+                rowInsert[values["dropdowDependentOn"]] = resultFilter[0].optionValue;
+              }
+              else {
+                rowInsert[values["dropdowDependentOn"]] = "";
+              }
+            }
+            else {
+              rowInsert[values["dropdowDependentOn"]] = value;
+            }
           }
           option.push(rowInsert);
         });
@@ -97,11 +104,19 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
     export_json.forEach((_d) => {
       let ele: any = {};
       ele.option = _d.optionLabel;
-      if (
-        values["isDependentDropdown"] &&
-        values["dropdowDependentOn"] !== ""
-      ) {
-        ele[values["dropdowDependentOn"]] = _d[values["dropdowDependentOn"]];
+      if (values["isDependentDropdown"] && values["dropdowDependentOn"] && values["dropdowDependentOn"] !== "") {
+        if (lookupOption.length) {
+          const resultFilter = lookupOption.filter((e) => e.optionValue === _d[values["dropdowDependentOn"]]);
+          if (resultFilter.length) {
+            ele[values["dropdowDependentOn"]] = resultFilter[0].optionLabel;
+          }
+          else {
+            ele[values["dropdowDependentOn"]] = _d[values["dropdowDependentOn"]];
+          }
+        }
+        else {
+          ele[values["dropdowDependentOn"]] = _d[values["dropdowDependentOn"]];
+        }
       }
       json_data.push(ele);
     });
@@ -141,6 +156,9 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
         axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=` + _filter[0].lookupResource).then(({ data: { data } }) => {
           setlookupOption(data[_filter[0].lookupResource])
         })
+      }
+      else {
+        setlookupOption([])
       }
     }
   }

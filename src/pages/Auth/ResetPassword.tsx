@@ -121,6 +121,13 @@ const ResetPassword = () => {
         axiosInstance()
           .get(`/user/me`)
           .then(({ data }) => {
+            if (data?.entity && data?.entity.length) {
+              let mappedEntities = []
+              data.entity.forEach(o => {
+                mappedEntities.push({ optionLabel: o?.entityName, optionValue: o?._id })
+              })
+              data.mappedEntities = mappedEntities
+            }
             dispatch({ type: SET_USER, payload: data.data });
             dispatch({ type: USER_LOADING, payload: false });
             toastConfig.setToastConfig({

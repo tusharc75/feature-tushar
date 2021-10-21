@@ -405,7 +405,7 @@ const RentalManagement = () => {
 
       let rows = data.map((u) => {
         let res = {
-          ...prepareDataForGrid(u),
+          ...prepareDataForGrid(u, user),
         };
         return res;
       });

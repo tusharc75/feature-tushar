@@ -171,6 +171,7 @@ const Header = ({ toggleDrawer }) => {
     state: { user, selectedEntity, cartCount },
     dispatch
   }: any = useData();
+
   const classes = useStyles();
   const history = useHistory();
   const { pathname } = useLocation();
@@ -582,7 +583,7 @@ const Header = ({ toggleDrawer }) => {
                   if (d?.entity) {
                     handleRedirect(d?.entity, d?.resourceId, d?.resourcePath);
                   } else {
-                    history.push(d?.resourceId ? `${d?.resourcePath}/${d?.resourceId}` : d?.resourcePath);
+                    history.push(d?.resourceId ? `${d?.resourcePath}/${d?.resourceId}` : d?.resourcePath, { data: d?.of ? d?.of : null });
                   }
                 }}
               >

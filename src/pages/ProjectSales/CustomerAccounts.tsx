@@ -105,7 +105,7 @@ const CustomerAccounts = (props) => {
     isTeamMember,
     isManager,
     ownerId,
-    currency = null, 
+    currency = null,
     marketSegmentId = null,
     subMarketSegmentId = null,
     estimatedAmount = null,
@@ -456,20 +456,29 @@ const CustomerAccounts = (props) => {
                 {customerAccounts.length > 0 &&
                   opportunities.filter(
                     (o) => o.customerAccountName === currentAccount?._id
-                  ).length < 1 && (
-                    <IconButton
-                      title={`Remove Account: ${currentAccount?.accountName}`}
-                      aria-haspopup="true"
-                      color="primary"
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveAccount();
-                      }}
-                    >
-                      <Delete color="error" />
-                    </IconButton>
-                  )}
+                  ).length < 1 ? (
+                  <IconButton
+                    title={`Remove Account: ${currentAccount?.accountName}`}
+                    aria-haspopup="true"
+                    color="primary"
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveAccount();
+                    }}
+                  >
+                    <Delete color="error" />
+                  </IconButton>
+                ) :
+                  <IconButton
+                    aria-haspopup="true"
+                    color="primary"
+                    size="small"
+                    className="cursor-stop"
+                  >
+                    <Delete color="disabled" />
+                  </IconButton>
+                }
               </>
             ) : null}
           </AccordionSummary>

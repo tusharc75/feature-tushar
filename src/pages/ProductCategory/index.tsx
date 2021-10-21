@@ -20,13 +20,7 @@ import {
     gridPageSizes,
     isObjectEmpty
 } from "../../constants/helpers";
-import {
-    CommonRenderer,
-    CreatedByRenderer,
-    UpdatedByRenderer
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
-import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
@@ -35,6 +29,8 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useLocation } from "react-router-dom";
 import queryString from "query-string";
+import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import { prepareDataForGrid } from "../../constants/helpers"
 
 function reducer(state, action) {
     switch (action.type) {
@@ -146,6 +142,8 @@ const ProductCategory = () => {
     const [open, setOpen] = useState({ open: false, isClone: false });
 
     const [productCategoryId, setProductCategoryId] = useState(null);
+    const [columns, setColumns] = useState([])
+    const [frameWorkComponent, setFrameWorkComponent] = useState({})
 
     // const [selectedCategory, setSelectedCategory] = useState([]);
 
@@ -156,12 +154,7 @@ const ProductCategory = () => {
 
     // const [showGridFilters, setShowGridFilters] = useState(true)
     const columnState = JSON.parse(localStorage.getItem("productCategoryPage"));
-    const columns = [
-        { field: "name", headerName: "Product Category", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "parentCategory", headerName: "Parent Category", show: true, disabled: true, cellRenderer: "parentCategoryRenderer" },
-        { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-        { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
-    ];
+
     const [anchorEl, setAnchorEl] = useState(null);
     if (columnState) {
         columns.map((item) => {
@@ -191,6 +184,44 @@ const ProductCategory = () => {
     useEffect(() => {
         fetchProductCategory()
     }, [page, limit, filters, sorting, search, selectedEntity])
+
+    useEffect(() => {
+        fetchGridColumns()
+    }, [])
+
+    const fetchGridColumns = () => {
+        axiosInstance()
+            .get("/field?resource=Product Category")
+            .then(({ data: { data } }) => {
+                let columns = []
+                let rendererNames = []
+                data.forEach(o => {
+                    if (o?.fieldData?.primaryField === true) {
+                        columns = [...columns,
+                        { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" }]
+                    }
+                    else {
+                        let currentColumn = getColumnData(routes.productCategory.title, o?.fieldData, routes.productCategory.path)
+
+                        if (currentColumn !== null) {
+                            columns = [...columns, currentColumn?.columnData]
+                            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                                rendererNames.push(currentColumn?.rendererName)
+                            }
+                        }
+                    }
+                })
+                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+                tempFrameworkComponent = {
+                    ...tempFrameworkComponent,
+                    nameRenderer: NameRenderer,
+                    actionsRenderer: ActionsRenderer
+                }
+                setFrameWorkComponent({ ...tempFrameworkComponent })
+                columns = [...columns, ...getStaticFields()]
+                setColumns([...columns])
+            })
+    }
 
     const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
         <Chip
@@ -252,14 +283,6 @@ const ProductCategory = () => {
         </>
     );
 
-    const frameworkComponents = {
-        nameRenderer: NameRenderer,
-        parentCategoryRenderer: ProductCategoryRenderer,
-        createdByRenderer: CreatedByRenderer,
-        updatedByRenderer: UpdatedByRenderer,
-        actionsRenderer: ActionsRenderer
-    };
-
     const replaceFieldName = (field) => {
         switch (field) {
             case "createdBy":
@@ -314,20 +337,7 @@ const ProductCategory = () => {
         axiosInstance().get(`/product-category${queryString}`).then(({ data: { data, count } }) => {
 
             let rows = data.map((u) => {
-                const { createdBy, updatedBy, ...restProperties } = u;
-
-                let res = {
-                    ...restProperties,
-                    id: u._id,
-                    createdBy: u.createdBy?.user?.concatedName,
-                    createdById: u.createdBy?.user?._id,
-                    createdByDate: u.createdBy?.date,
-                    updatedBy: u.updatedBy?.user?.concatedName,
-                    updatedByDate: u.updatedBy?.date,
-
-                }
-
-                return res;
+                return prepareDataForGrid(u)
             });
 
             dispatch({ type: "initialize", data: rows, count: count });
@@ -451,15 +461,19 @@ const ProductCategory = () => {
                 </Grid>
             </div>
 
-            <CustomAgGrid columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameworkComponents}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={true}
-                loading={loading} renderedFrom="productCategoryPage"
-                refreshGrid={fetchProductCategory}
-            />
+            {
+                Object.keys(frameWorkComponent).length > 0 ?
+                    <CustomAgGrid columns={columns}
+                        dataRows={dataRows}
+                        frameworkComponents={frameWorkComponent}
+                        setGridApi={setGridApi}
+                        dispatch={dispatch}
+                        rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={true}
+                        loading={loading}
+                        renderedFrom={routes.productCategory.title}
+                        refreshGrid={fetchProductCategory}
+                    /> : null
+            }
 
             {showDeleteConfirmBox &&
                 <ConfirmationDialog

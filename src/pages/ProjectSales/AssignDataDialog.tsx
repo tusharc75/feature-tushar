@@ -22,6 +22,7 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import SearchBox from "../../components/Helpers/SearchBox";
+import { useData } from "../../StateProvider/Provider";
 
 const AssignDataDialog = (props) => {
   const {
@@ -35,6 +36,9 @@ const AssignDataDialog = (props) => {
     entityIds = []
   } = props;
   const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { user }
+  }: any = useData();
   const [data, setData] = useState([]);
   const [dataConst, setDataConst] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -47,16 +51,20 @@ const AssignDataDialog = (props) => {
     let url = `/${type}?limit=0`;
 
     switch (type) {
+      case "customer-account":
+        url = `/${type}?filterById=[{"field":"owner", "term": "${user?.user?._id}"},{"field":"collaborator", "term": "${user?.user?._id}"}]`
+        break;
+
       case "customer-contact":
-        url = `/${type}?filterById=[{"field":"accountName", "term": "${accountId}"}]`
+        url = `/${type}?filterById=[{"field":"accountName", "term": "${accountId}"},{"field":"owner", "term": "${user?.user?._id}"},{"field":"collaborator", "term": "${user?.user?._id}"}]`
         break;
 
       case "opportunity":
-        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`
+        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"},{"field":"owner", "term": "${user?.user?._id}"},{"field":"collaborator", "term": "${user?.user?._id}"}]`
         break;
 
       case "quote-builder":
-        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`
+        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"},{"field":"owner", "term": "${user?.user?._id}"},{"field":"collaborator", "term": "${user?.user?._id}"}]`
         break;
 
       case "user":

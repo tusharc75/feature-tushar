@@ -5,6 +5,7 @@ import {
   getObjKeys,
   sidebarResource,
   initializeDropdownById,
+  formFieldNames,
 } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -26,6 +27,8 @@ export default function ManageAccountDialog(props) {
     fromProject,
     isRedirectToDetailPage = true,
     userId = null,
+    marketSegmentId = null,
+    subMarketSegmentId = null
   } = props;
   const {
     state: { user },
@@ -93,6 +96,12 @@ export default function ManageAccountDialog(props) {
             if (userId && _f.fieldData.fieldName == "owner") {
               _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
             }
+            if (marketSegmentId && _f.fieldData.fieldName === formFieldNames.marketSegment) {
+              _f = initializeDropdownById(_f, _f.fieldData.fieldName, marketSegmentId)
+            }
+            if (subMarketSegmentId && _f.fieldData.fieldName === formFieldNames.subMarketSegment) {
+              _f = initializeDropdownById(_f, _f.fieldData.fieldName, subMarketSegmentId)
+            }
 
             newFields.push(_f.fieldData);
           });
@@ -151,6 +160,8 @@ export default function ManageAccountDialog(props) {
       fromProject={fromProject}
       formValues={formValues}
       handleValuesChange={handleValuesChange}
+      marketSegmentId={marketSegmentId}
+      subMarketSegmentId={subMarketSegmentId}
     />
   );
 }
