@@ -22,7 +22,11 @@ const Reminder = () => {
 
   useEffect(() => {
     if (!state) return;
-    setSelectedActivity(state.data)
+
+    if (state) {
+      const { data } = state
+      setSelectedActivity({ type: data?.type, id: data?._id })
+    }
   }, [state])
 
 
