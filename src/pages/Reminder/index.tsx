@@ -1,24 +1,32 @@
 import { useCallback, useEffect, useState, Fragment } from "react";
 import { Box, Chip, Grid, Paper, Typography } from "@material-ui/core";
+import { MdDateRange } from 'react-icons/md';
 import moment from "moment";
+import { useLocation } from 'react-router-dom'
+
 import axiosInstance from "../../axios/axiosInstance";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { ListRelatedTo } from "../../components/Activity/Helpers/ListRelatedTo";
 import ActivityModelHandler from "../../components/Activity/ActivityModelHandler";
-import { MdDateRange } from 'react-icons/md';
 import routes from "../../components/Helpers/Routes";
 
 const Reminder = () => {
+  const { state } = useLocation()
   const [events, setEvents] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [cases, setCases] = useState([]);
-  const [loadingTasks, setLoadingTasks] = useState(false);
-  const [loadingEvents, setLoadingEvents] = useState(false);
-  const [loadingCases, setLoadingCases] = useState(false);
+  const [loadingTasks, setLoadingTasks] = useState(true);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+  const [loadingCases, setLoadingCases] = useState(true);
   const [selectedActivity, setSelectedActivity] = useState(null);
 
+  useEffect(() => {
+    if (!state) return;
+    setSelectedActivity(state.data)
+  }, [state])
+
+
   const fetchTasks = useCallback(() => {
-    setLoadingTasks(true);
     axiosInstance()
       .get("/task/my")
       .then(({ data: { data } }) => {
@@ -31,7 +39,6 @@ const Reminder = () => {
   }, []);
 
   const fetchEvents = useCallback(() => {
-    setLoadingEvents(true);
     axiosInstance()
       .get("/event/my")
       .then(({ data: { data } }) => {
@@ -44,7 +51,6 @@ const Reminder = () => {
   }, []);
 
   const fetchCases = useCallback(() => {
-    setLoadingCases(true);
     axiosInstance()
       .get("/case/my")
       .then(({ data: { data } }) => {
@@ -57,11 +63,10 @@ const Reminder = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedActivity)
     fetchTasks();
     fetchEvents();
     fetchCases();
-  }, [selectedActivity]);
+  }, [fetchTasks, fetchEvents, fetchCases]);
 
   const dynamicChip = (data: string, type: string = null) => (
     <Chip
@@ -71,16 +76,16 @@ const Reminder = () => {
           style={{
             color:
               new Date(data).getFullYear() < new Date().getFullYear() ||
-              new Date(data).getMonth() < new Date().getMonth() ||
-              new Date(data).getDate() < new Date().getDate()
+                new Date(data).getMonth() < new Date().getMonth() ||
+                new Date(data).getDate() < new Date().getDate()
                 ? "#dc3545"
                 : new Date(data).getDate() === new Date().getDate() &&
                   new Date(data).getMonth() === new Date().getMonth() &&
                   new Date(data).getFullYear() === new Date().getFullYear()
-                ? "#28a745"
-                : "#838485",
+                  ? "#28a745"
+                  : "#838485",
           }}
-          
+
         />
       }
       label={
@@ -92,14 +97,14 @@ const Reminder = () => {
         background: "#dfdfdf",
         color:
           new Date(data).getFullYear() < new Date().getFullYear() ||
-          new Date(data).getMonth() < new Date().getMonth() ||
-          new Date(data).getDate() < new Date().getDate()
+            new Date(data).getMonth() < new Date().getMonth() ||
+            new Date(data).getDate() < new Date().getDate()
             ? "#dc3545"
             : new Date(data).getDate() === new Date().getDate() &&
               new Date(data).getMonth() === new Date().getMonth() &&
               new Date(data).getFullYear() === new Date().getFullYear()
-            ? "#28a745"
-            : "#838485",
+              ? "#28a745"
+              : "#838485",
       }}
     />
   );
@@ -111,7 +116,11 @@ const Reminder = () => {
           activityId={selectedActivity.id}
           setActivityData={setSelectedActivity}
           activityType={selectedActivity.type}
-          fetchBoard={() => {}}
+          fetchBoard={() => {
+            fetchTasks();
+            fetchEvents();
+            fetchCases();
+          }}
         />
       )}
       <Fragment>
@@ -166,8 +175,8 @@ const Reminder = () => {
                         {loadingEvents
                           ? "Loading..."
                           : !events.length
-                          ? "No Events"
-                          : null}
+                            ? "No Events"
+                            : null}
                       </Typography>
                     </Box>
                   </Box>
@@ -219,8 +228,8 @@ const Reminder = () => {
                         {loadingTasks
                           ? "Loading..."
                           : !tasks.length
-                          ? "No Tasks"
-                          : null}
+                            ? "No Tasks"
+                            : null}
                       </Typography>
                     </Box>
                   </Box>
@@ -274,8 +283,8 @@ const Reminder = () => {
                         {loadingCases
                           ? "Loading..."
                           : !cases.length
-                          ? "No Cases"
-                          : null}
+                            ? "No Cases"
+                            : null}
                       </Typography>
                     </Box>
                   </Box>
