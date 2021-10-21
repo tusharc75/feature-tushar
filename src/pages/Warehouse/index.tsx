@@ -19,7 +19,6 @@ import { ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../constants/helpers';
-import { CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
@@ -28,8 +27,13 @@ import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import Chip from "@material-ui/core/Chip"
+import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import { prepareDataForGrid } from "../../constants/helpers"
+import { useLocation } from "react-router-dom";
+import queryString from "query-string";
 
 const AddressResource = () => {
+  const location = useLocation()
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, user, selectedEntity }
@@ -51,6 +55,8 @@ const AddressResource = () => {
   const [warehouseId, setWarehouseId] = useState("")
   const [entities, setEntities] = useState([])
   const [showUpdateWarningConfirmBox, setShowUpdateWarningConfirmBox] = useState(false)
+  const [columns, setColumns] = useState([])
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
 
   // const [selectedCategory, setSelectedCategory] = useState([]);
 
@@ -61,14 +67,6 @@ const AddressResource = () => {
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('addressResourcePage'));
-  const columns = [
-    { field: 'warehouseName', headerName: 'Plants Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
-    { field: 'warehouseID', headerName: 'Plants ID', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'storageType', headerName: 'Storage Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'address', headerName: 'Address', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-    { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }
-  ];
   if (columnState) {
     columns.forEach((item) => {
       columnState.forEach((d) => {
@@ -88,6 +86,52 @@ const AddressResource = () => {
     }
   }, [permissions]);
 
+  useEffect(() => {
+    const parsedParams = queryString.parse(location?.search);
+    if (parsedParams?.id) {
+      setAddressResource({ id: parsedParams?.id });
+      setOpen({ open: true, isClone: false });
+    }
+  }, [location])
+
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get("/field?resource=Warehouse")
+      .then(({ data: { data } }) => {
+        let columns = []
+        let rendererNames = []
+        data.forEach(o => {
+          if (o?.fieldData?.primaryField === true) {
+            columns = [...columns,
+            { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }]
+          }
+          else {
+            let currentColumn = getColumnData(routes.warehouse.title, o?.fieldData, routes.warehouse.path)
+
+            if (currentColumn !== null) {
+              columns = [...columns, currentColumn?.columnData]
+              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                rendererNames.push(currentColumn?.rendererName)
+              }
+            }
+          }
+        })
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+          nameRenderer: NameRenderer,
+          actionsRenderer: ActionsRenderer
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        columns = [...columns, ...getStaticFields()]
+        setColumns([...columns])
+      })
+  }
+
 
   const fetchWarehouses = () => {
     dispatch({ type: 'loading', loading: true });
@@ -101,20 +145,7 @@ const AddressResource = () => {
       .get(`/warehouse${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          const { createdBy, updatedBy, ...restProperties } = u;
-
-          let res = {
-            ...restProperties,
-            id: u._id,
-
-            createdBy: u.createdBy?.user?.concatedName,
-            createdById: u.createdBy?.user?._id,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
-          };
-
-          return res;
+          return prepareDataForGrid(u, user);
         });
 
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -189,8 +220,15 @@ const AddressResource = () => {
               setShowEntityDialog(true)
               setWarehouseId(params.data._id)
               if (params?.data?.entity) {
-                let restEntities = params?.data?.entity.map(o => o?.optionValue)
-                setEntities([...restEntities])
+                let entities = []
+                if (params?.data?.entityId) {
+                  entities.push(params?.data?.entityId)
+                }
+                if (params?.data?.restentity) {
+                  let restEntities = params?.data?.restentity.map(o => o.optionValue)
+                  entities = [...entities, ...restEntities]
+                }
+                setEntities([...entities])
               }
             }}>
             <AiOutlineDeploymentUnit fontSize="15" color="primary" />
@@ -199,13 +237,6 @@ const AddressResource = () => {
       }
     </>
   );
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer
-  };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -369,8 +400,13 @@ const AddressResource = () => {
                             let entities = []
                             selectedRecords.map(current => {
                               if (current?.entity) {
-                                let restEntities = current?.entity.map(o => o?.optionValue)
-                                entities = [...entities, ...restEntities]
+                                if (current?.entityId) {
+                                  entities.push(current?.entityId)
+                                }
+                                if (current?.restentity) {
+                                  let restEntities = current?.restentity.map(o => o.optionValue)
+                                  entities = [...entities, ...restEntities]
+                                }
                               }
                             })
                             setEntities([...entities])
@@ -388,21 +424,23 @@ const AddressResource = () => {
           </Grid>
         </div>
 
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={150}
-          loading={loading}
-          renderedFrom="warehousePage"
-          refreshGrid={fetchWarehouses}
-        />
+        {
+          Object.keys(frameWorkComponent).length > 0 ?
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={150}
+              loading={loading}
+              renderedFrom={routes.warehouse.title}
+              refreshGrid={fetchWarehouses}
+            /> : null}
 
         {showDeleteConfirmBox && (
           <ConfirmationDialog

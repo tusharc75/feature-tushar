@@ -224,6 +224,13 @@ const RoleDetailsPage = () => {
       .get("/user/me")
       .then(({ data: response }) => {
         const { data } = response;
+        if (data?.entity && data?.entity.length) {
+          let mappedEntities = []
+          data.entity.forEach(o => {
+            mappedEntities.push({ optionLabel: o?.entityName, optionValue: o?._id })
+          })
+          data.mappedEntities = mappedEntities
+        }
         dispatch({ type: SET_USER, payload: data });
         if (data?.role?.selectedEntity?._id) {
           dispatch({
@@ -555,7 +562,7 @@ const RoleDetailsPage = () => {
                             text: roleData.type === roleTypes.find((d) => d.key === "Global")?.value ? "Company wide role" : "Region wide functional role"
                           })}>
                           <FaEye /> View All &#8599;
-                      </Box>
+                        </Box>
                       }
                     </>
                   ) : (

@@ -368,7 +368,7 @@ export default function Contact(props) {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
 
-          let finalObject = prepareDataForGrid(u);
+          let finalObject = prepareDataForGrid(u, user);
           return {
             ...finalObject,
 

@@ -236,7 +236,7 @@ const DeliveryTicket = () => {
         .then(({ data: { data, count } }) => {
           let rows = data.map((u) => {
             let res = {
-              ...prepareDataForGrid(u),
+              ...prepareDataForGrid(u, user),
               canDelete: u?.createdBy?.user?._id === user?.user._id,
             };
             return res;

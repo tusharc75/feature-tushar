@@ -126,8 +126,13 @@ const ProjectStrategyHeader = (props) => {
                         let entities = []
                         selectedRecords.map(current => {
                           if (current?.entity) {
-                            let restEntities = current?.entity.map(o => o.optionValue)
-                            entities = [...entities, ...restEntities]
+                            if (current?.entityId) {
+                              entities.push(current?.entityId)
+                            }
+                            if (current?.restentity) {
+                              let restEntities = current?.restentity.map(o => o.optionValue)
+                              entities = [...entities, ...restEntities]
+                            }
                           }
                         })
                         setEntities([...entities])
