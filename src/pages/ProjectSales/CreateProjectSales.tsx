@@ -18,7 +18,7 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { useHistory } from "react-router-dom";
-import { getObjKeys, yupSchema, setFieldsInAscendingOrder, getObjKeysWithValues, formFieldNames, getUniqueCurrencies } from "../../constants/helpers";
+import { getObjKeys, yupSchema, setFieldsInAscendingOrder, getObjKeysWithValues, formFieldNames, getUniqueCurrencies, initializeDropdownById } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "../../StateProvider/Provider";
 import FormTypes from "../../components/Helpers/FormTypes";
@@ -27,6 +27,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialog";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { simplifyValues } from "../../constants/helpers"
+import { values } from "lodash";
 
 interface InitialData {
   fields: any[];
@@ -154,11 +155,13 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
         }
         else {
           const createFields = filterData.map(m => m.fieldData)
+          let tempObjKeysWithValues = getObjKeys("", createFields);
+          tempObjKeysWithValues["projectManager"] = user._id;
           setInitialData({
             fields: createFields,
-            values: getObjKeys("", createFields),
+            values: tempObjKeysWithValues,
           });
-          setFormValues(getObjKeys("", createFields))
+          setFormValues(tempObjKeysWithValues)
         }
 
         setTimeout(() => setLoading(false), 500);
