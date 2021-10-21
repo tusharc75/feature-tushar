@@ -422,7 +422,7 @@ const hasAccessToEntity = (id) => {
           open={showConfirmBox}
           message={
             removeRec
-              ? `Are you sure you want to remove opportunity  ${removeRec.opportunityName}`
+              ? `Are you sure you want to remove opportunity  ${removeRec.opportunityName} ?`
               : ""
           }
           onClose={() => {
