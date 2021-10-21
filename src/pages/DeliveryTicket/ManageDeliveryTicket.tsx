@@ -50,9 +50,9 @@ const ManageDeliveryTicket = (props) => {
             else {
                 if (productInventoryForDeliveryTicket && rentalData) {
                     const tempInitialData = getObjKeys("", fieldsDataForCreate)
-                    tempInitialData["productInventory"] = productInventoryForDeliveryTicket.map(d => d.inventory._id)
+                    tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
                     tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
-                    tempInitialData["rental"] = rentalData._id
+                    tempInitialData["rental"] = rentalData?._id
                     tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
                     tempInitialData["shippingAddress"] = rentalData.shippingAddress
                     tempInitialData["deliveryJobName"] = rentalData?.rentalJobName

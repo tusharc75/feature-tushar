@@ -23,61 +23,38 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const [downlodingFile, setDownlodingFile] = useState(false)
-  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
 
   useEffect(() => {
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`)
       .then(({ data }) => {
-        setAddSerializedAssetDialog(false)
         setAssignedSerializedAsset(data.data)
         dispatch({ type: "loading", loading: true });
-        if (warehouse) {
-          dispatch({
-            type: "initialize", data: productInventory.map((u) => ({
-              ...u,
-              serializedAsset: data.data?.filter(d => d.inventory?.product?.optionValue === u._id || u.products?.some(obj => d.inventory?.product?.optionValue === obj?.productId)).map(d => d.inventory?.serialNumber),
-              deliveryTicket: u.deliveryTicket || "",
-              deliveryTicketId: u.deliveryTicketId || "",
-            })).filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue), count: productInventory.filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue).length
-          });
-          setTimeout(() => {
-            dispatch({ type: "loading", loading: false });
-          }, gridLoadingTimeout);
-        }
-        else {
-          dispatch({
-            type: "initialize", data: productInventory.map((u) => ({
-              ...u,
-              serializedAsset: data.data?.filter(d => d.inventory?.product?.optionValue === u._id || u.products?.some(obj => d.inventory?.product?.optionValue === obj?.productId)).map(d => d.inventory?.serialNumber),
-              deliveryTicket: u.deliveryTicket || "",
-              deliveryTicketId: u.deliveryTicketId || "",
-            })), count: productInventory.length
-          });
-          setTimeout(() => {
-            dispatch({ type: "loading", loading: false });
-          }, gridLoadingTimeout);
-        }
+        // if (warehouse) {
+        //   dispatch({
+        //     type: "initialize", data: data.data.map(d => d.inventory).map((u) => ({
+        //       ...u,
+        //       serializedAsset: data.data?.filter(d => d.inventory?.product?.optionValue === u._id || u.products?.some(obj => d.inventory?.product?.optionValue === obj?.productId)).map(d => d.inventory?.serialNumber),
+        //       deliveryTicket: u.deliveryTicket || "",
+        //       deliveryTicketId: u.deliveryTicketId || "",
+        //     })).filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue), count: productInventory.filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue).length
+        //   });
+        //   setTimeout(() => {
+        //     dispatch({ type: "loading", loading: false });
+        //   }, gridLoadingTimeout);
+        // }
+        // else {
+        dispatch({
+          type: "initialize", data: data.data.map(d => d.inventory), count: data.data.map(d => d.inventory).length
+        });
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
+        // }
       }).catch((error) => {
-        setAddSerializedAssetDialog(false)
         toastConfig.setToastConfig(error)
       });
     // eslint-disable-next-line
   }, [warehouse, productInventory]);
-
-  const NameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
-      {params.value}
-    </Link>
-  );
-
-  const SerializedAssetRenderer = (params) => (
-    <h5 className="createBy d-flex">
-      {params.data?.serializedAsset[0]}
-      {params.data?.serializedAsset?.length > 0 && (
-        <span className="createdAtTime badge-date">{`+${params.data?.serializedAsset.length} more..`}</span>
-      )}
-    </h5>
-  )
 
   const TicketRenderer = (params) => (
     params?.value ? (
@@ -89,33 +66,20 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
     )
   );
 
-  const ProductRenderer = (params) => (
-    <Link className="link" title={params.value} to={params.data.type === "Product" ? `${routes.productDetail.path}/${params.data.id}` : `${routes.packagesDetail.path}/${params.data.id}`}>
-      {params.value}
-    </Link>
-  );
+
 
   const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    productRenderer: ProductRenderer,
+    ticketRenderer: TicketRenderer,
     commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer,
-    serializedAssetRenderer: SerializedAssetRenderer
   };
 
   const columns = [
-    { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "productRenderer" },
+    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "serializedAsset", headerName: "Serialized Asset", show: true, disabled: true, cellRenderer: "serializedAssetRenderer" },
-    { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "TicketRenderer" },
-    { field: "startDate", headerName: "Start Date", show: true, disabled: true, cellRenderer: "dateRenderer" },
-    { field: "endDate", headerName: "End Date", show: true, disabled: true, cellRenderer: "dateRenderer" },
-    { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "UOM", headerName: "UOM", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "pricingMethod", headerName: "Pricing Method", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "discount", headerName: "Discount", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
+    { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "ticketRenderer" },
   ];
 
   const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageDeliveryTicket"));
@@ -129,21 +93,6 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
     });
   }
 
-  const handleAddSerializedAsset = (productInventoryArray) => {
-    let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id } })
-    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`, { "products": tempProductArray })
-      .then(({ data }) => {
-        setAddSerializedAssetDialog(false)
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
-        });
-      }).catch((error) => {
-        setAddSerializedAssetDialog(false)
-        toastConfig.setToastConfig(error)
-      });
-  };
 
   return (<>
 
@@ -190,19 +139,6 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
         color="primary"
         type="button"
         size="small"
-        disabled={(selectedRecords.length === 0)}
-        onClick={() => {
-          setAddSerializedAssetDialog(true)
-        }}
-      >
-        {`Assign ${routes.productInventory.title}`}
-      </Button>
-      <Box mx={1} />
-      <Button
-        variant="contained"
-        color="primary"
-        type="button"
-        size="small"
         disabled={(selectedRecords.length === 0) || currentStep === 4}
         onClick={() => {
           handleDeliveryTicketDialog(selectedRecords, warehouse)
@@ -233,14 +169,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
 
       }
     </Grid>
-    {addSerializedAssetDialog &&
-      <AddSerializedAsset
-        addSerializedAsset={handleAddSerializedAsset}
-        handleSerializedAssetClose={() => { setAddSerializedAssetDialog(false) }}
-        selectedProducts={selectedRecords}
-      // type={inventoryType}
-      />
-    }
+    
   </>
   );
 }
