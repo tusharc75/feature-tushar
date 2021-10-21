@@ -36,7 +36,7 @@ import { useParams, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from "../../components/Helpers/Routes";
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { result, find, startCase, isEqual } from 'lodash';
+import { result, find, startCase, isEqual, camelCase } from 'lodash';
 import { Delete } from "@material-ui/icons";
 import Badge from '@material-ui/core/Badge';
 import { makeStyles } from '@material-ui/core/styles';
@@ -95,6 +95,35 @@ function PricingConditionsDetailsPage() {
     useEffect(() => {
         setFormsData(setFieldsInAscendingOrder(initialData.fields));
     }, [initialData.fields]);
+
+
+    // useEffect(() => {
+    //     //materialType can be =["product","packages","productCategory"]
+    //     //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
+    //     const data: any = {}
+    //     data.conditionType = ["Rent"]
+    //     data.material = [{
+    //         materialId: "617044747098be0594ca47b8",
+    //         materialType: "product",
+    //         qty: 0,
+    //         rentType: "perDay",
+    //         unit: "well",
+    //         currency: "USD"
+    //     }, {
+    //         materialId: "617044897098be0594ca47ba",
+    //         materialType: "product",
+    //         qty: 0,
+    //         rentType: "perDay",
+    //         unit: "Two Well Pad",
+    //         currency: "USD"
+    //     }]
+    //     data.supplier = [];
+    //     data.customer = [];
+    //     data.warehouse = [];
+    //     axiosInstance().post(pricingConditionApi + `/calculatePrice`, data).then(({ data: { data } }) => {
+    //         console.log(data)
+    //     })
+    // }, []);
 
     const getPricingConditionsFields = () => {
         axiosInstance().get(`/field?resource=Pricing Condition`).then(({ data: { data } }) => {
@@ -443,8 +472,8 @@ function PricingConditionsDetailsPage() {
                                                             fullWidth
                                                             label={"Rate " + _unit + " " + _currency}
                                                             type="number"
-                                                            value={values['mrp' + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]}
-                                                            onChange={(e) => setFieldValue('mrp' + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase(), parseFloat(e.target.value))}
+                                                            value={values['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())]}
+                                                            onChange={(e) => setFieldValue('mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase()), parseFloat(e.target.value))}
                                                             InputProps={{
                                                                 startAdornment: (
                                                                     <InputAdornment position="start">
@@ -522,14 +551,14 @@ function PricingConditionsDetailsPage() {
                                                                     values['units'] && values['units'].map((_unit, k) => (
                                                                         <td key={j}>
                                                                             <TextField
-                                                                                name={"rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()}
+                                                                                name={"rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + camelCase(_unit.toLowerCase())}
                                                                                 variant="outlined"
                                                                                 margin="dense"
                                                                                 fullWidth
                                                                                 type="number"
                                                                                 style={{ margin: 0 }}
-                                                                                value={values["rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()]}
-                                                                                onChange={(e) => setFieldValue("rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(), parseFloat(e.target.value))}
+                                                                                value={values["rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + camelCase(_unit.toLowerCase())]}
+                                                                                onChange={(e) => setFieldValue("rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + camelCase(_unit.toLowerCase()), parseFloat(e.target.value))}
                                                                             />
                                                                         </td>
                                                                     )))}
