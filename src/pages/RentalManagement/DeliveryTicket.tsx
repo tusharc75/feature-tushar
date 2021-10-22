@@ -28,23 +28,25 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`)
       .then(({ data }) => {
         setAssignedSerializedAsset(data.data)
+        let tempProductInventory = data.data.map(d => d.inventory)
         dispatch({ type: "loading", loading: true });
-        // if (warehouse) {
-        //   dispatch({
-        //     type: "initialize", data: data.data.map(d => d.inventory).map((u) => ({
-        //       ...u,
-        //       serializedAsset: data.data?.filter(d => d.inventory?.product?.optionValue === u._id || u.products?.some(obj => d.inventory?.product?.optionValue === obj?.productId)).map(d => d.inventory?.serialNumber),
-        //       deliveryTicket: u.deliveryTicket || "",
-        //       deliveryTicketId: u.deliveryTicketId || "",
-        //     })).filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue), count: productInventory.filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue).length
-        //   });
-        //   setTimeout(() => {
-        //     dispatch({ type: "loading", loading: false });
-        //   }, gridLoadingTimeout);
-        // }
-        // else {
+        axiosInstance()
+          .get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/delivery-ticket `)
+          .then(({ data }) => {
+            data.data.map(obj => {
+              tempProductInventory.map((d, index) => {
+                if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
+                  tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
+                  tempProductInventory[index]["deliveryTicketId"] = obj?._id
+                }
+              })
+            })
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+          });
         dispatch({
-          type: "initialize", data: data.data.map(d => d.inventory), count: data.data.map(d => d.inventory).length
+          type: "initialize", data: tempProductInventory, count: tempProductInventory.length
         });
         setTimeout(() => {
           dispatch({ type: "loading", loading: false });
@@ -169,7 +171,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
 
       }
     </Grid>
-    
+
   </>
   );
 }

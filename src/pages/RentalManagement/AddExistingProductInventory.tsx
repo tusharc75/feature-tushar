@@ -31,6 +31,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const [disableSaveButton, setDisableSaveButton] = useState(false);
 
     const {
         state: { permissions },
@@ -161,9 +162,12 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         }, gridLoadingTimeout);
     }
 
-    const onCellValueChanged = (params) => {
-
-    };
+    const onCellValueChanged = (row) => {
+        setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
+    }
+    useEffect(() => {
+        setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
+    }, [selectedRecords])
 
     return (<Fragment>
         <>
@@ -193,7 +197,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                         color="primary"
                                         onClick={() => addProductInventory(selectedRecords)}
                                         variant="contained"
-                                        disabled={!Boolean(selectedRecords.length) || isAddingProducts}
+                                        disabled={!Boolean(selectedRecords.length) || isAddingProducts || disableSaveButton}
                                         endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
                                         {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
                                         Add</Button>

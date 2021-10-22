@@ -296,7 +296,7 @@ const RentalManagementDetailsPage = () => {
         description: u.packageDescription,
 
       })));
-      fetchDeliveryTicket(tempInventory);
+      setProductInventory(tempInventory)
 
       // let tempWareHouse = []
       // data.data.map(d => {
@@ -403,30 +403,7 @@ const RentalManagementDetailsPage = () => {
     });
   }
 
-  const fetchDeliveryTicket = (values) => {
-    setProductInventory([])
-    axiosInstance()
-      .get(`${rentalManagement.rentalManagementApi}/${id}/delivery-ticket `)
-      .then(({ data }) => {
-        let tempProductInventory = values
-        data.data.map(obj => {
-          tempProductInventory.map((d, index) => {
-            if (obj.productInventory.some(p => d.id === p.optionValue)) {
-              tempProductInventory[index]["deliveryTicket"] = obj.deliveryJobName
-              tempProductInventory[index]["deliveryTicketId"] = obj._id
-            }
-          })
-
-        })
-        setProductInventory(tempProductInventory)
-        // if (tempProductInventory.length > 0 && tempProductInventory.every(d => d.deliveryTicket !== undefined)) {
-        //   setCurrentStep(4)
-        // }
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
+ 
 
   const handleAddProductInventory = (productInventoryArray) => {
     // let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
@@ -805,7 +782,6 @@ const RentalManagementDetailsPage = () => {
                                                   variant="outlined"
                                                   name="nameField"
                                                   label="Cost Type"
-                                                  required
                                                 />}
                                               />
                                             </Grid>
@@ -825,7 +801,6 @@ const RentalManagementDetailsPage = () => {
                                                     ["description"]: e.target.value
                                                   })
                                                 }}
-                                                required
                                               />
                                             </Grid>
                                             <Grid item md={2}>
@@ -844,7 +819,6 @@ const RentalManagementDetailsPage = () => {
                                                     ["qty"]: e.target.value.replace(/[^0-9]/g, '')
                                                   })
                                                 }}
-                                                required
                                               />
                                             </Grid>
                                             <Grid item md={2}>
@@ -866,7 +840,6 @@ const RentalManagementDetailsPage = () => {
                                                   variant="outlined"
                                                   name="nameField"
                                                   label="UOM"
-                                                  required
                                                 />}
                                               />
                                             </Grid>
@@ -895,7 +868,6 @@ const RentalManagementDetailsPage = () => {
                                                       ["amount"]: e.target.value.replace(/[^0-9]/g, '')
                                                     })
                                                   }}
-                                                  required
                                                 />
                                               </Grid>
                                             }
