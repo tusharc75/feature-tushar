@@ -34,13 +34,29 @@ const AddExistingProduct = (props) => {
     const { handleClose, addProductInBuilder } = props;
     const [columns, setColumns] = useState(null);
     const [productList, setProductList] = useState([]);
+    const [productColoums, setProductColoums] = useState([]);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
     useEffect(() => {
-        fetchProduct()
-    }, [page, limit, filters, sorting, search]);
+        if (productColoums.length) {
+            fetchProduct()
+        }
+    }, [page, limit, filters, sorting, search, productColoums]);
+
+    useEffect(() => {
+        axiosInstance().get("/field?resource=Product").then(({ data: { data } }) => {
+            const productField = []
+            data.map((_f) => productField.push(_f.fieldData));
+            var coloum = [];
+            GenrateColoum(productField, coloum)
+            coloum.forEach((ele) => {
+                ele.leval = "product"
+            })
+            setProductColoums(coloum)
+        })
+    }, [])
 
 
     const EntityNameRenderer = (params) => params.value ? (
@@ -120,94 +136,104 @@ const AddExistingProduct = (props) => {
                 }
                 return res;
             });
-            let column = []
-            data.data.forEach((row) => {
-                row.fields.forEach((ele) => {
-                    if (ignoreField.includes(ele.fieldName)) {
-                    }
-                    else if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
-                        if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
-                            ele.displayUnits.forEach((_unit) => {
-                                let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
-                                let fieldLabel = ele.fieldLabel + " " + _unit
-                                if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                    let col: any = {}
-                                    col.field = fieldName
-                                    col.headerName = fieldLabel
-                                    col.width = 180
-                                    col.show = true
-                                    col.cellRenderer = "commonRenderer"
-                                    col.leval = ele.leval
-                                    column.push(col)
-                                }
-                            })
-                        }
-                        else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
-                            ele.displayUnits.forEach((_unit) => {
-                                ele.displayCurrency.forEach((_currency) => {
-                                    let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
-                                    let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
-                                    if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                        let col: any = {}
-                                        col.field = fieldName
-                                        col.headerName = fieldLabel
-                                        col.width = 180
-                                        col.show = true
-                                        col.cellRenderer = "commonRenderer"
-                                        col.leval = ele.leval
-                                        column.push(col)
-                                    }
-                                })
-                            })
-                        }
-                        else if (ele.type === "currencyAmount") {
-                            ele.displayCurrency.forEach((_currency) => {
-                                let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
-                                let fieldLabel = ele.fieldLabel + " " + _currency
-                                if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                    let col: any = {}
-                                    col.field = fieldName
-                                    col.headerName = fieldLabel
-                                    col.width = 180
-                                    col.show = true
-                                    col.cellRenderer = "commonRenderer"
-                                    col.leval = ele.leval
-                                    column.push(col)
-                                }
-                            })
-                        }
-                    }
-                    else {
-                        if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-                            let col: any = {};
-                            col.field = ele.fieldName;
-                            col.headerName = ele.fieldLabel;
-                            col.width = 180;
-                            col.show = true
-                            col.cellRenderer = "commonRenderer"
-                            if (ele.fieldName === "entity") {
-                                col.cellRenderer = "entityRenderer"
-                            }
-                            col.order = ele.order;
-                            col.leval = ele.leval;
-                            column.push(col);
-                        }
-                    }
-                })
-            });
-            column = sortBy(column, function (item: any) {
-                return levalOrderBy.indexOf(item.leval)
-            });
-            setColumns(column);
+            if (data.data.length) {
+                let column = [...productColoums]
+                data.data.forEach((row) => {
+                    GenrateColoum(row.fields, column);
+                });
+                column = sortBy(column, function (item: any) {
+                    return levalOrderBy.indexOf(item.leval)
+                });
+                setColumns(column);
+            }
             dispatch({ type: "initialize", data: data.data, count: data.count });
-            setTimeout(() => {
-                dispatch({ type: "loading", loading: false });
-            }, gridLoadingTimeout);
+            setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
         });
     };
+
+    const GenrateColoum = (fields, column) => {
+        fields.forEach((ele) => {
+            if (ignoreField.includes(ele.fieldName)) {
+            }
+            else if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
+                if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+                    ele.displayUnits.forEach((_unit) => {
+                        let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
+                        let fieldLabel = ele.fieldLabel + " " + _unit
+                        if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                            let col: any = {}
+                            col.field = fieldName
+                            col.headerName = fieldLabel
+                            col.width = 180
+                            col.show = true
+                            col.cellRenderer = "commonRenderer"
+                            col.leval = ele.leval
+                            column.push(col)
+                        }
+                    })
+                }
+                else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+                    ele.displayUnits.forEach((_unit) => {
+                        ele.displayCurrency.forEach((_currency) => {
+                            let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
+                            let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
+                            if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                                let col: any = {}
+                                col.field = fieldName
+                                col.headerName = fieldLabel
+                                col.width = 180
+                                col.show = true
+                                col.cellRenderer = "commonRenderer"
+                                col.leval = ele.leval
+                                column.push(col)
+                            }
+                        })
+                    })
+                }
+                else if (ele.type === "currencyAmount") {
+                    ele.displayCurrency.forEach((_currency) => {
+                        let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
+                        let fieldLabel = ele.fieldLabel + " " + _currency
+                        if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                            let col: any = {}
+                            col.field = fieldName
+                            col.headerName = fieldLabel
+                            col.width = 180
+                            col.show = true
+                            col.cellRenderer = "commonRenderer"
+                            col.leval = ele.leval
+                            column.push(col)
+                        }
+                    })
+                }
+            }
+            else {
+                if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
+                    let col: any = {};
+                    col.field = ele.fieldName;
+                    col.headerName = ele.fieldLabel;
+                    col.width = 180;
+                    col.show = true
+                    col.cellRenderer = "commonRenderer"
+                    if (ele.fieldName === "productName") {
+                        col.cellRenderer = "productNameRenderer"
+                    }
+                    if (ele.fieldName === "entity") {
+                        col.cellRenderer = "entityRenderer"
+                    }
+                    if (ele.fieldName === "productCategory") {
+                        col.cellRenderer = "productCategoryRenderer"
+                    }
+                    col.order = ele.order;
+                    col.leval = ele.leval;
+                    column.push(col);
+                }
+            }
+        })
+    }
 
     const handleAdd = () => {
         let rows = productList.filter(
@@ -244,7 +270,6 @@ const AddExistingProduct = (props) => {
         addProductInBuilder(rows)
         handleClose()
     }
-
 
     return (<Dialog
         fullScreen={true}
