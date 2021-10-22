@@ -263,7 +263,6 @@ const CreateProduct = (props) => {
       if (!label.includes("Secondary Unit") && label.includes("Unit")  && unit) {
         label = `${label.split(" Unit")[0]} ${unit}`;
       }
-
     }
     return label;
   };

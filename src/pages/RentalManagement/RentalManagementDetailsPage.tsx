@@ -440,8 +440,8 @@ const RentalManagementDetailsPage = () => {
       "finalPrice": parseInt(d.finalPrice) || 0,
       "price": parseInt(d.mrp) || parseInt(d.price) || 0,
       "discount": parseInt(d.discount) || 0,
-      "startDate": d.startDate || new Date(),
-      "endDate": d.endDate || new Date(),
+      "startDate": rentalManagementData ? rentalManagementData?.rentalStartDate : new Date(),
+      "endDate": rentalManagementData ? rentalManagementData?.rentalEndDate : new Date(),
     }))
     axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": tempProductArray })
       .then(() => {
