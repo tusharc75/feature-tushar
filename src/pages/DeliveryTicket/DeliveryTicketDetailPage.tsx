@@ -251,8 +251,6 @@ export default function DeliveryTicketDetail(props) {
       stateArr.push(signedData);
     }
 
-    console.log(stateArr)
-
     if (stateArr.length === 2) {
       setSignatures(stateArr)
       setSubmittingSign(true)
