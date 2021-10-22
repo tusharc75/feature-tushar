@@ -101,6 +101,7 @@ export default function Account(props) {
   const anchorRef = React.useRef<HTMLDivElement>(null);
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const [filter, setFilter] = useState('All Accounts');
+  const [accountNameForClone, setAccountNameForClone] = useState('');
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -293,7 +294,7 @@ export default function Account(props) {
             size="small"
             aria-label="Clone"
             onClick={() => {
-              cloneAccount(params.data._id);
+              cloneAccount(params.data);
             }}
           >
             <FileCopyIcon fontSize="small" color="primary" />
@@ -518,8 +519,9 @@ export default function Account(props) {
       });
   };
 
-  const cloneAccount = async (accountId) => {
-    setCloneId(accountId);
+  const cloneAccount = async (data) => {
+    setAccountNameForClone(data?.accountName);
+    setCloneId(data?._id);
     setIsAccDialogVisible(true);
   };
 
@@ -999,6 +1001,8 @@ export default function Account(props) {
             id={cloneId}
             accountResource={accountResource}
             accountApi={accountApi}
+            isClone={true}
+            accountNameForClone={accountNameForClone}
           />
         ) : null}
         {

@@ -28,7 +28,9 @@ export default function ManageAccountDialog(props) {
     isRedirectToDetailPage = true,
     userId = null,
     marketSegmentId = null,
-    subMarketSegmentId = null
+    subMarketSegmentId = null,
+    isClone = false,
+    accountNameForClone = ''
   } = props;
   const {
     state: { user },
@@ -162,6 +164,8 @@ export default function ManageAccountDialog(props) {
       handleValuesChange={handleValuesChange}
       marketSegmentId={marketSegmentId}
       subMarketSegmentId={subMarketSegmentId}
+      isClone={isClone}
+      accountNameForClone={accountNameForClone}
     />
   );
 }
