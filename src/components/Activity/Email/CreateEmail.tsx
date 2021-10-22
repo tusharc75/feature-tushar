@@ -59,7 +59,7 @@ import { values } from "lodash";
 const EmailSchema = object().shape({
   name: string().required("please enter subject"),
   to: array()
-    .min(1)
+    .min(1, "Please enter a valid email")
     .transform(function (value, originalValue) {
       if (this.isType(value) && value !== null) {
         return value;

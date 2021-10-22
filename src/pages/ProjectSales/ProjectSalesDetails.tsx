@@ -597,9 +597,9 @@ const ProjectSalesDetails = () => {
             open={showConfirmBox}
             message={
               deleteRec
-                ? `Are you sure you want to delete this ${projectSalesData.projectName}`
+                ? `Are you sure you want to delete this ${projectSalesData.projectName} ?`
                 : removeUserRec
-                  ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
+                  ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName} ?`
                   : ""
             }
             onClose={() => {
