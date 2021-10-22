@@ -28,6 +28,8 @@ import { customerAccount, customerContact } from "../../constants/helpers";
 import ManageAccountDialog from "../Account/ManageAccount";
 import ConfirmationDialogRaw from "../../components/Helpers/ConfirmationDialog";
 import QuotesAccordionInProjectSale from "./QuotesAccordionInProjectSale";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 
 const Accordion = withStyles({
   root: {
@@ -42,6 +44,7 @@ const Accordion = withStyles({
     "&$expanded": {
       margin: "auto",
     },
+    width: "100%"
   },
   expanded: {},
 })(MuiAccordion);
@@ -114,6 +117,7 @@ const CustomerAccounts = (props) => {
   const classes = useStyles();
   const { setToastConfig } = useContext(CustomToastContext);
   const [expandedParent, setExpandedParent] = useState(true);
+  const [expandCustomerContact, setExpandCustomerContact] = useState(false);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [collaborators, setCollaborators] = useState([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -420,7 +424,7 @@ const CustomerAccounts = (props) => {
           fromProject={true}
         />
       )}
-      <Paper className={classes.root}>
+      <Paper className={classes.root} >
         <Accordion
           square={false}
           expanded={expandedParent}
@@ -515,42 +519,72 @@ const CustomerAccounts = (props) => {
                     <Box hidden={currentTabIndex !== i} key={c._id}>
                       <Grid container spacing={1}>
                         <Grid item xs={12} sm={12} md={12} lg={12}>
-                          <Paper style={{ overflow: "hidden", marginTop: 15 }}>
-                            <Box style={{ padding: "0px", maxHeight: "450px" }}>
-                              <Box
-                                width="100%"
-                                padding={1}
-                                bgcolor="grey.100"
-                                display="flex"
-                                alignItems="center"
-                                justifyContent="space-between"
-                                boxShadow={2}
-                              >
-                                <Typography variant="subtitle2">
-                                  Customer Contacts (
-                                  {
-                                    customerContacts.filter(
-                                      (ca) => ca.accountName === c._id
-                                    ).length
-                                  }
-                                  )
-                                </Typography>
-                                {(permissions?.isUpdate && isTeamMember) ||
-                                  isManager ? (
-                                  <IconButton
-                                    aria-haspopup="true"
-                                    color="primary"
-                                    size="small"
-                                    onClick={(e) => {
-                                      handleClick(e, "customer-contact");
-                                      setAccId(c._id);
-                                    }}
+
+                          <Accordion
+                            expanded={expandCustomerContact}
+
+                            className="omsAccordian"
+                            onChange={() => setExpandCustomerContact(!expandCustomerContact)}
+                          >
+                            <AccordionSummary
+                              style={{ padding: 0 }}
+                              aria-controls="user-panel-content"
+                              id="user-panel-header"
+                            >
+                              <Grid container>
+                                <Grid item xs={8}>
+                                  <Box
+                                    component="div"
+                                    display="flex"
+                                    alignItems="center"
+                                    flexGrow={1}
                                   >
-                                    <MoreVert />
-                                  </IconButton>
-                                ) : null}
-                              </Box>
-                              <Box padding={1}>
+                                    <IconButton
+                                      size="small"
+                                      onClick={(e) => e.preventDefault()}
+                                    >
+                                      {expandCustomerContact === true ? (
+                                        <ExpandLessIcon />
+                                      ) : (
+                                        <ExpandMoreIcon />
+                                      )}
+                                    </IconButton>
+                                    <Box>
+                                      <Typography variant="subtitle2">
+                                        Customer Contacts (
+                                        {
+                                          customerContacts.filter(
+                                            (ca) => ca.accountName === c._id
+                                          ).length
+                                        }
+                                        )
+                                      </Typography>
+                                    </Box>
+                                  </Box>
+                                </Grid>
+                                <Grid item xs={4} container justify="flex-end" alignItems="center">
+                                  <Typography variant="subtitle2">
+                                    {(permissions?.isUpdate && isTeamMember) ||
+                                      isManager ? (
+                                      <IconButton
+                                        aria-haspopup="true"
+                                        color="primary"
+                                        size="small"
+                                        onClick={(e) => {
+                                          handleClick(e, "customer-contact");
+                                          setAccId(c._id);
+                                        }}
+                                      >
+                                        <MoreVert />
+                                      </IconButton>
+                                    ) : null}
+                                  </Typography>
+                                </Grid>
+                              </Grid>
+                            </AccordionSummary>
+                            <Box margin={0.5} />
+                            <AccordionDetails>
+                              <Box style={{ width: '100%' }}>
                                 {loading ? (
                                   [1, 2].map((i) => (
                                     <BoxWithBorder
@@ -593,8 +627,10 @@ const CustomerAccounts = (props) => {
                                   </Box>
                                 )}
                               </Box>
-                            </Box>
-                          </Paper>
+                            </AccordionDetails>
+                          </Accordion>
+
+
 
                           {/*TODO: Heirarchy Table */}
                           {permissions?.isRead && (
@@ -667,30 +703,32 @@ const CustomerAccounts = (props) => {
           </AccordionDetails>
         </Accordion>
       </Paper>
-      {showConfirmBox && (
-        <ConfirmationDialogRaw
-          open={showConfirmBox}
-          message={
-            accountDeleteRec
-              ? "Are you sure about removing this account from project?"
-              : contactDeleteRec
-                ? `Are you sure about removing this "${contactDeleteRec.firstName} ${contactDeleteRec.lastName}" contact from project?`
-                : null
-          }
-          onClose={() => {
-            setShowConfirmBox(false);
-            setAccountDeleteRec(null);
-          }}
-          onOk={
-            accountDeleteRec
-              ? removeAccount
-              : contactDeleteRec
-                ? removeContact
-                : null
-          }
-          okBtnLoading={isRemoving}
-        />
-      )}
+      {
+        showConfirmBox && (
+          <ConfirmationDialogRaw
+            open={showConfirmBox}
+            message={
+              accountDeleteRec
+                ? "Are you sure about removing this account from project?"
+                : contactDeleteRec
+                  ? `Are you sure about removing this "${contactDeleteRec.firstName} ${contactDeleteRec.lastName}" contact from project?`
+                  : null
+            }
+            onClose={() => {
+              setShowConfirmBox(false);
+              setAccountDeleteRec(null);
+            }}
+            onOk={
+              accountDeleteRec
+                ? removeAccount
+                : contactDeleteRec
+                  ? removeContact
+                  : null
+            }
+            okBtnLoading={isRemoving}
+          />
+        )
+      }
     </>
   );
 };

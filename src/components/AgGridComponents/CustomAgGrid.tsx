@@ -154,8 +154,10 @@ export default function CustomAgGrid({
   };
 
   const onColumnMoved = (params) => {
-    const columnState = JSON.stringify(params.columnApi.getColumnState());
-    localStorage.setItem(renderedFrom, columnState);
+    if (params?.source === "uiColumnDragged") {
+      const columnState = JSON.stringify(params.columnApi.getColumnState());
+      localStorage.setItem(renderedFrom, columnState);
+    }
   };
 
   useEffect(() => {

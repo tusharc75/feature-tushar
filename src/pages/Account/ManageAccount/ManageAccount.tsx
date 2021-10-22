@@ -77,6 +77,7 @@ export default function ManageAccount(props) {
       const processSteps = accountData.fields.find(
         (d) => d.type.toLowerCase() === "process"
       );
+
       if (processSteps) {
         accountData.fields.map((d) => {
           if (d.sectionName == processSteps?.additionalInfoSection) {
@@ -132,8 +133,13 @@ export default function ManageAccount(props) {
       setMarketSegmentDataSource(initializeMarketSegmentDataSource);
     }
 
+
     if (!isNew && marketSegmentDropdownData) {
       setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === accountData.initialValues.marketSegment));
+    }
+
+    if (accountData?.initialValues?.marketSegment && marketSegmentDropdownData) {
+      setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === accountData?.initialValues?.marketSegment));
     }
 
     if (marketSegmentId && marketSegmentDropdownData) {
