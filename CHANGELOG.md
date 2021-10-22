@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.23.0](https://github.com/vebholic/oms_frontend/compare/v1.22.0...v1.23.0) (2021-10-22)
+
+
+### Features
+
+* **reminder.tsx:** open activity from notification ([d05cb53](https://github.com/vebholic/oms_frontend/commit/d05cb5311dbe1226f4fea7dfaf6871b82a21eaec))
+
+
+### Bug Fixes
+
+*  while Cloning a account submarket segment value coming to be blank though in the account ([d8fe611](https://github.com/vebholic/oms_frontend/commit/d8fe611e059a8c67ec694d9a076eb4d4517bbc87))
+* **activity.tsx:** chatter bug fix ([0e1fc1d](https://github.com/vebholic/oms_frontend/commit/0e1fc1d788427d41448c86017cf523cc8fea359d))
+* **confirmationBox:** error message text changes ([2ffb39c](https://github.com/vebholic/oms_frontend/commit/2ffb39c3aa5a27792981d1fa0879e6214e9a15f7))
+* price condition ([cf1f3b6](https://github.com/vebholic/oms_frontend/commit/cf1f3b6a0397329ffe4ba8e0661ac0dd2b9fdca6))
+* **reminder.tsx:** desctructure state data ([7c098d2](https://github.com/vebholic/oms_frontend/commit/7c098d20938823364c372d73217544fd87fa1e37))
+
 ## [1.22.0](https://github.com/vebholic/oms_frontend/compare/v1.21.0...v1.22.0) (2021-10-21)
 
 
