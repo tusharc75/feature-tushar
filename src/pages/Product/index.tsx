@@ -44,6 +44,14 @@ var levalOrderBy = [
     "price-builder-custom",
 ];
 
+const columnSequence = [
+    "productCategory",
+    "productName",
+    "entity",
+    "grade",
+    "productTemplate"
+]
+
 const Product = () => {
 
     const history = useHistory();
@@ -67,7 +75,7 @@ const Product = () => {
         isRead: false,
         isDelete: false,
     });
-    
+
     useEffect(() => {
         if (permissions && permissions.product) {
             setProductPermissions(permissions.product);
