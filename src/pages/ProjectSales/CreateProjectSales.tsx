@@ -275,6 +275,20 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
       ...data
     }))
   }
+  const handleScroll = (errors) => {
+    const err = Object.keys(errors);
+    if (err.length) {
+      const input = document.querySelector(
+        `input[name=${err[0]}]`,
+      );
+
+      input.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'start',
+      });
+    }
+  }
   return (
     <Dialog
       open={open}
@@ -791,7 +805,10 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                   variant="contained"
                   color="primary"
                   size="small"
-                  onClick={submitForm}
+                  onClick={() => {
+                    submitForm()
+                    handleScroll(errors)
+                  }}
                   disabled={isSubmitting || loading || uploadingImageOrFileProgress > 0}
                 >
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
