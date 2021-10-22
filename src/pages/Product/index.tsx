@@ -44,6 +44,14 @@ var levalOrderBy = [
     "price-builder-custom",
 ];
 
+const columnSequence = [
+    "productCategory",
+    "productName",
+    "entity",
+    "grade",
+    "productTemplate"
+]
+
 const Product = () => {
 
     const history = useHistory();
@@ -211,6 +219,11 @@ const Product = () => {
                     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer", leval: "price-builder-custom" },
                 )
             }
+
+            column = sortBy(column, function (item: any) {
+                return columnSequence.indexOf(item.field) > -1 ? columnSequence.indexOf(item.field) : 99999999;
+            });
+
             const columnState = JSON.parse(localStorage.getItem("productPage"));
             if (columnState) {
                 column.forEach((item) => {
