@@ -24,6 +24,7 @@ import { productInventory, gridLoadingTimeout } from "../../constants/helpers"
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from "../../components/Activity";
 import { isMobile, isTablet } from "react-device-detect";
+import SignatureDialog from '../../components/Helpers/SignatureDialog';
 
 const mappedStatus = {
   "Start Delivery": "In-Transit",
@@ -39,6 +40,9 @@ export default function DeliveryTicketDetail(props) {
   }: any = useData();
   const [deliveryTicketData, setDeliveryTicketData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [submittingSign, setSubmittingSign] = useState(false);
+  const [openSignatureDialog, setOpenSignatureDialog] = useState(false);
+  const [signatures, setSignatures] = useState([]);
   const { deliveryTicketApi } = deliveryTicket;
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -226,8 +230,49 @@ export default function DeliveryTicketDetail(props) {
     }
   }
 
+
+
   let label = deliveryTicketData ? deliveryTicketData?.status === "New" ? "Start Delivery" :
     (deliveryTicketData?.status === "In-Transit") ? "Sign-Off" : "" : ""
+
+  const handleSignature = (signedData) => {
+    const { type, sign: newSign } = signedData;
+    let stateArr = signatures;
+    const existingData = signatures.find(d => d.type === type)
+
+    if (existingData) {
+      stateArr = stateArr.map(d => {
+        if (d.type === type) {
+          d.sign = newSign.split("base64,")[1]
+        }
+        return d
+      })
+    } else {
+      stateArr.push(signedData);
+    }
+
+    console.log(stateArr)
+
+    if (stateArr.length === 2) {
+      setSignatures(stateArr)
+      setSubmittingSign(true)
+      axiosInstance().put(`${deliveryTicketApi}/signature`, {
+        _id: id,
+        signatures: stateArr.map(d => ({ type: d.type, signature: d.sign, status: label }))
+      }).then(() => {
+        handleChangeStatus(label)
+        setOpenSignatureDialog(false)
+        setSubmittingSign(false)
+        setSignatures([])
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+        setOpenSignatureDialog(false)
+        setSubmittingSign(false)
+        setSignatures([])
+      });
+    }
+  }
+
 
   return (
     <>
@@ -289,7 +334,8 @@ export default function DeliveryTicketDetail(props) {
                           variant="contained"
                           color="primary"
                           size="small"
-                          onClick={() => handleChangeStatus(label)}>
+                          disabled={loading}
+                          onClick={() => setOpenSignatureDialog(true)}>
                           {label}
                         </Button> : null : null
                   }
@@ -319,7 +365,7 @@ export default function DeliveryTicketDetail(props) {
                     dataRows && dataRows.length ?
                       <>
                         <Grid container>
-                          <Grid item xs={12} alignItems='center'>
+                          <Grid item xs={12}>
                             <Box
                               component="div"
                               display="flex"
@@ -333,7 +379,7 @@ export default function DeliveryTicketDetail(props) {
                               </Box>
                             </Box>
                           </Grid>
-                          <Grid item xs={12} alignItems='center'>
+                          <Grid item xs={12}>
                             <CustomAgGrid
                               allowSelection={false}
                               allowAction={false}
@@ -421,7 +467,19 @@ export default function DeliveryTicketDetail(props) {
             }}
           />
         )}
-
+        {openSignatureDialog &&
+          <SignatureDialog
+            submitting={submittingSign}
+            label={label}
+            steps={label === "Start Delivery" ? ["Supervisor", "Delivery Person"] : ["Delivery Person", "Receiver"]}
+            forDelivery={true}
+            open={true}
+            onClose={() => {
+              setOpenSignatureDialog(false)
+              setSignatures([])
+            }}
+            onSigned={handleSignature}
+          />}
       </Fragment>
     </>
   );
