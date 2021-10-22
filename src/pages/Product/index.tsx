@@ -44,6 +44,14 @@ var levalOrderBy = [
     "price-builder-custom",
 ];
 
+const columnSequence = [
+    "productCategory",
+    "productName",
+    "entity",
+    "grade",
+    "productTemplate"
+]
+
 const Product = () => {
 
     const history = useHistory();
@@ -54,19 +62,13 @@ const Product = () => {
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
+    const [productColoums, setProductColoums] = useState([]);
     const [columns, setColumns] = useState(null);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-    const {
-        state: { permissions, selectedEntity },
-    }: any = useData();
-
-    useEffect(() => {
-        fetchProduct()
-    }, [page, limit, filters, sorting, search, selectedEntity]);
-
+    const { state: { permissions, selectedEntity } }: any = useData();
     const [productPermissions, setProductPermissions] = useState({
         isCreate: false,
         isUpdate: false,
@@ -80,157 +82,173 @@ const Product = () => {
         }
     }, [permissions]);
 
+    useEffect(() => {
+        if (productColoums.length) {
+            fetchProduct()
+        }
+    }, [page, limit, filters, sorting, search, selectedEntity, productColoums]);
+
+    useEffect(() => {
+        axiosInstance().get("/field?resource=Product").then(({ data: { data } }) => {
+            const productField = []
+            data.map((_f) => productField.push(_f.fieldData));
+            var coloum = [];
+            GenrateColoum(productField, coloum)
+            coloum.forEach((ele) => {
+                ele.leval = "product"
+            })
+            setProductColoums(coloum)
+        })
+    }, [])
+
     const fetchProduct = () => {
         dispatch({ type: "loading", loading: true });
-
         if (gridApi) {
             gridApi.setRowData([]);
         }
-
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
-            try {
-                data.data = data.data?.map((u) => {
-                    const { createdBy, entity, ...restProperties } = u;
-                    const [firstEntity, ...restEntity] = entity ? entity : [];
-                    let res = {
-                        ...restProperties,
-                        id: u._id,
-                        inventoryCount: u?.qty,
-                        warehouses: u.warehouse?.map(w => w.warehouseName).join(", "),
-                        createdBy: u.createdBy?.user?.concatedName,
-                        createdByDate: u.createdBy?.date,
-                        updatedBy: u.updatedBy?.user?.concatedName,
-                        updatedByDate: u.updatedBy?.date,
-                        entity: firstEntity?.optionLabel,
-                        entityId: firstEntity?.optionValue,
-                        productCategoryChipColor: u.productCategory?.chipColour,
-                        restEntity: restEntity,
-                        serializedProduct: u.serializedProduct && u.serializedProduct.toString()
+            data.data = data.data?.map((u) => {
+                const { createdBy, entity, ...restProperties } = u;
+                const [firstEntity, ...restEntity] = entity ? entity : [];
+                let res = {
+                    ...restProperties,
+                    id: u._id,
+                    inventoryCount: u?.qty,
+                    warehouses: u.warehouse?.map(w => w.warehouseName).join(", "),
+                    createdBy: u.createdBy?.user?.concatedName,
+                    createdByDate: u.createdBy?.date,
+                    updatedBy: u.updatedBy?.user?.concatedName,
+                    updatedByDate: u.updatedBy?.date,
+                    entity: firstEntity?.optionLabel,
+                    entityId: firstEntity?.optionValue,
+                    productCategoryChipColor: u.productCategory?.chipColour,
+                    restEntity: restEntity,
+                    serializedProduct: u.serializedProduct && u.serializedProduct.toString()
+                }
+                for (let col in res) {
+                    if (res[col] && res[col].optionLabel) {
+                        res[col] = res[col].optionLabel;
                     }
-                    for (let col in res) {
-                        if (res[col] && res[col].optionLabel) {
-                            res[col] = res[col].optionLabel;
-                        }
-                    }
-                    return res;
+                }
+                return res;
+            });
+            if (data.data.length) {
+                let column = [...productColoums]
+                data.data.forEach((row) => {
+                    GenrateColoum(row.fields, column);
                 });
-            }
-            catch (e) {
-                console.error(e)
-            }
-            let column = []
-            data.data.forEach((row) => {
-                row.fields.forEach((ele) => {
-                    if (ignoreField.includes(ele.fieldName)) {
-                    }
-                    else if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
-                        if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
-                            ele.displayUnits.forEach((_unit) => {
-                                let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
-                                let fieldLabel = ele.fieldLabel + " " + _unit
-                                if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                    let col: any = {}
-                                    col.field = fieldName
-                                    col.headerName = fieldLabel
-                                    col.width = 180
-                                    col.show = true
-                                    col.cellRenderer = "commonRenderer"
-                                    col.leval = ele.leval
-                                    column.push(col)
-                                }
-                            })
-                        }
-                        else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
-                            ele.displayUnits.forEach((_unit) => {
-                                ele.displayCurrency.forEach((_currency) => {
-                                    let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
-                                    let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
-                                    if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                        let col: any = {}
-                                        col.field = fieldName
-                                        col.headerName = fieldLabel
-                                        col.width = 180
-                                        col.show = true
-                                        col.cellRenderer = "commonRenderer"
-                                        col.leval = ele.leval
-                                        column.push(col)
-                                    }
-                                })
-                            })
-                        }
-                        else if (ele.type === "currencyAmount") {
-                            ele.displayCurrency.forEach((_currency) => {
-                                let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
-                                let fieldLabel = ele.fieldLabel + " " + _currency
-                                if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                    let col: any = {}
-                                    col.field = fieldName
-                                    col.headerName = fieldLabel
-                                    col.width = 180
-                                    col.show = true
-                                    col.cellRenderer = "commonRenderer"
-                                    col.leval = ele.leval
-                                    column.push(col)
-                                }
-                            })
-                        }
-                    }
-                    else {
-                        if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-                            let col: any = {};
-                            col.field = ele.fieldName;
-                            col.headerName = ele.fieldLabel;
-                            col.width = 180;
-                            col.show = true
-                            col.cellRenderer = "commonRenderer"
-                            if (ele.fieldName === "productName") {
-                                col.cellRenderer = "productNameRenderer"
+                column = sortBy(column, function (item: any) {
+                    return levalOrderBy.indexOf(item.leval)
+                });
+                if (column.length) {
+                    column.splice(4, 0, { field: "inventoryCount", headerName: "Inventory Count", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" },
+                        { field: "warehouses", headerName: "Plants", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" })
+                    column.push(
+                        { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer", leval: "price-builder-custom" },
+                        { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer", leval: "price-builder-custom" },
+                    )
+                }
+                const columnState = JSON.parse(localStorage.getItem("productPage"));
+                if (columnState) {
+                    column.forEach((item) => {
+                        columnState.forEach((d) => {
+                            if (d.colId == item.field) {
+                                item.show = !d.hide;
                             }
-                            if (ele.fieldName === "entity") {
-                                col.cellRenderer = "entityRenderer"
-                            }
-                            if (ele.fieldName === "productCategory") {
-                                col.cellRenderer = "productCategoryRenderer"
-                            }
-                            col.order = ele.order;
-                            col.leval = ele.leval;
-                            column.push(col);
-                        }
-                    }
-                })
-            });
-            column = sortBy(column, function (item: any) {
-                return levalOrderBy.indexOf(item.leval)
-            });
-            if (column.length) {
-                column.splice(4, 0, { field: "inventoryCount", headerName: "Inventory Count", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" },
-                    { field: "warehouses", headerName: "Plants", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" })
-                column.push(
-                    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer", leval: "price-builder-custom" },
-                    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer", leval: "price-builder-custom" },
-                )
-            }
-            const columnState = JSON.parse(localStorage.getItem("productPage"));
-            if (columnState) {
-                column.forEach((item) => {
-                    columnState.forEach((d) => {
-                        if (d.colId == item.field) {
-                            item.show = !d.hide;
-                        }
+                        });
                     });
-                });
+                }
+                setColumns(column);
             }
-            setColumns(column);
             dispatch({ type: "initialize", data: data.data, count: data.count });
-            setTimeout(() => {
-                dispatch({ type: "loading", loading: false });
-            }, gridLoadingTimeout);
+            setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
         });
     };
+
+    const GenrateColoum = (fields, column) => {
+        fields.forEach((ele) => {
+            if (ignoreField.includes(ele.fieldName)) {
+            }
+            else if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
+                if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+                    ele.displayUnits.forEach((_unit) => {
+                        let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
+                        let fieldLabel = ele.fieldLabel + " " + _unit
+                        if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                            let col: any = {}
+                            col.field = fieldName
+                            col.headerName = fieldLabel
+                            col.width = 180
+                            col.show = true
+                            col.cellRenderer = "commonRenderer"
+                            col.leval = ele.leval
+                            column.push(col)
+                        }
+                    })
+                }
+                else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+                    ele.displayUnits.forEach((_unit) => {
+                        ele.displayCurrency.forEach((_currency) => {
+                            let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
+                            let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
+                            if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                                let col: any = {}
+                                col.field = fieldName
+                                col.headerName = fieldLabel
+                                col.width = 180
+                                col.show = true
+                                col.cellRenderer = "commonRenderer"
+                                col.leval = ele.leval
+                                column.push(col)
+                            }
+                        })
+                    })
+                }
+                else if (ele.type === "currencyAmount") {
+                    ele.displayCurrency.forEach((_currency) => {
+                        let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
+                        let fieldLabel = ele.fieldLabel + " " + _currency
+                        if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                            let col: any = {}
+                            col.field = fieldName
+                            col.headerName = fieldLabel
+                            col.width = 180
+                            col.show = true
+                            col.cellRenderer = "commonRenderer"
+                            col.leval = ele.leval
+                            column.push(col)
+                        }
+                    })
+                }
+            }
+            else {
+                if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
+                    let col: any = {};
+                    col.field = ele.fieldName;
+                    col.headerName = ele.fieldLabel;
+                    col.width = 180;
+                    col.show = true
+                    col.cellRenderer = "commonRenderer"
+                    if (ele.fieldName === "productName") {
+                        col.cellRenderer = "productNameRenderer"
+                    }
+                    if (ele.fieldName === "entity") {
+                        col.cellRenderer = "entityRenderer"
+                    }
+                    if (ele.fieldName === "productCategory") {
+                        col.cellRenderer = "productCategoryRenderer"
+                    }
+                    col.order = ele.order;
+                    col.leval = ele.leval;
+                    column.push(col);
+                }
+            }
+        })
+    }
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
@@ -339,14 +357,14 @@ const Product = () => {
                     </IconButton>
                 </HtmlTooltip >
             }
-            {productPermissions.isRead &&
+            {productPermissions.isRead && (process.env.REACT_APP_ENV !== 'staging') ?
                 <HtmlTooltip title="BOM">
                     <IconButton size="small" aria-label="View BOM" onClick={() => {
                         history.push(`${routes.productDetail.path}/${params.data._id}/bom`, { productName: params.data.productName })
                     }} >
                         <RiBillLine color="primary" />
                     </IconButton>
-                </HtmlTooltip >
+                </HtmlTooltip > : null
             }
         </>
     )

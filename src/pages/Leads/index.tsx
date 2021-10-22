@@ -70,19 +70,7 @@ const Leads = () => {
 
   const columnState = JSON.parse(localStorage.getItem(leadResource));
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
-  const [columns, setColumns] = useState([
-    // { field: 'concatedName', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
-    // { field: 'relatedOpportunity', headerName: 'Related Opportunity', show: true, cellRenderer: 'relatedOpportunityRenderer' },
-    // { field: 'title', headerName: 'Title', show: true, cellRenderer: 'commonRenderer' },
-    // { field: 'company', headerName: 'Company', show: true, cellRenderer: 'commonRenderer' },
-    // { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-    // { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
-    // { field: 'phone', headerName: 'Phone', show: true, cellRenderer: 'commonRendererWithCopy' },
-    // { field: 'mobile', headerName: 'Mobile', show: true, cellRenderer: 'commonRendererWithCopy' },
-    // { field: 'email', headerName: 'Email', show: true, cellRenderer: 'commonRendererWithCopy' },
-    // { field: 'owner', headerName: 'Owner Alies', show: true, cellRenderer: 'commonRenderer' }
-  ]);
+  const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
 
   if (columnState) {
