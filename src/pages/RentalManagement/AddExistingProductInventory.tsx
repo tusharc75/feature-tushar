@@ -60,7 +60,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             axiosInstance()
                 .get(`${packages.packageApi}/get-products/${packageId}`)
                 .then(({ data: { data } }) => {
-                    const newArr = data.length > 0 ? data.map((product: any) => ({ product: product.productId, qty: product.qty })) : [];
+                    const newArr = data.length > 0 ? data.map((product: any) => ({ product: product.productName, qty: product.qty })) : [];
                     setPackageProductData(newArr);
                     setLoadingProducts(false);
                 })
@@ -226,12 +226,12 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             </Dialog>
             )}
             {packageDialog && <Dialog open fullWidth maxWidth="md" onClose={() => setPackageDialog(false)}>
-                <CustomDialogHeader title={"Assign To Package"} onClose={() => setPackageDialog(false)} />
+                <CustomDialogHeader title={"Package Details"} onClose={() => setPackageDialog(false)} />
                 <CustomDialogContent>
                     <Box p={2}>
                         <div className="detail-box">
                             <h3 className="form-label-style" title={"Package Details"}>
-                                {"Package Details"}
+                                {"Product List"}
                             </h3>
                         </div>
                         <Grid container spacing={2}>
@@ -241,7 +241,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                         <TextField
                                             size="small"
                                             fullWidth
-                                            value={obj?.product?.productName}
+                                            value={obj?.product}
                                             type="text"
                                             disabled
                                             variant="outlined"

@@ -41,17 +41,16 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
                 }
               })
             })
+            dispatch({
+              type: "initialize", data: tempProductInventory, count: tempProductInventory.length
+            });
+            setTimeout(() => {
+              dispatch({ type: "loading", loading: false });
+            }, gridLoadingTimeout);
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
           });
-        dispatch({
-          type: "initialize", data: tempProductInventory, count: tempProductInventory.length
-        });
-        setTimeout(() => {
-          dispatch({ type: "loading", loading: false });
-        }, gridLoadingTimeout);
-        // }
       }).catch((error) => {
         toastConfig.setToastConfig(error)
       });

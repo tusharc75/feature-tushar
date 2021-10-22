@@ -41,11 +41,21 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
         if (tempProducts.length === 0) {
             selectedProducts.map(d => {
                 if (d.productName) {
-                    tempProducts.push({ "id": d._id, "name": d.productName, "qty": d?.qty })
+                    if (tempProducts.find(obj => obj.id === d._id)) {
+                        tempProducts.find(obj => obj.id === d._id).qty = d?.qty + tempProducts.find(obj => obj.id === d._id).qty
+                    }
+                    else {
+                        tempProducts.push({ "id": d._id, "name": d.productName, "qty": d?.qty })
+                    }
                 }
                 if (d.packageName && d?.products?.length > 0) {
                     d.products.map(u => {
-                        tempProducts.push({ "id": d?.productDetail?._id, "name": u?.productDetail?.productName || "", "qty": u?.qty * d?.qty })
+                        if (tempProducts.find(obj => obj.id === u?.productDetail?._id)) {
+                            tempProducts.find(obj => obj.id === u?.productDetail?._id).qty = (u?.qty * d?.qty) + tempProducts.find(obj => obj.id === u?.productDetail?._id).qty
+                        }
+                        else {
+                            tempProducts.push({ "id": u?.productDetail?._id, "name": u?.productDetail?.productName || "", "qty": u?.qty * d?.qty })
+                        }
                     })
                 }
             })
@@ -58,7 +68,12 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
                 }
                 if (d.packageName && d?.products?.length > 0) {
                     d.products.map(u => {
-                        tempProducts.push({ "id": u?.productDetail?._id, "name": u?.productDetail?.productName || "", "qty": u?.qty * d?.qty - selectedRecords.filter(obj => obj.product.optionValue === u?.productDetail?._id).length })
+                        if (tempProducts.find(obj => obj.id === d?.productDetail?._id)) {
+                            tempProducts.find(obj => obj.id === d?.productDetail?._id).qty = u?.qty * d?.qty + tempProducts.find(obj => obj.id === d?.productDetail?._id).qty - selectedRecords.filter(obj => obj.product.optionValue === u?.productDetail?._id).length
+                        }
+                        else {
+                            tempProducts.push({ "id": u?.productDetail?._id, "name": u?.productDetail?.productName || "", "qty": u?.qty * d?.qty - selectedRecords.filter(obj => obj.product.optionValue === u?.productDetail?._id).length })
+                        }
                     })
                 }
                 if (d?.qty - selectedRecords.filter(obj => obj.product.optionValue === d._id).length <= -1) {

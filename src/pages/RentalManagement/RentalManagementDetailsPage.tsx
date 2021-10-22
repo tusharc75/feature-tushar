@@ -403,7 +403,7 @@ const RentalManagementDetailsPage = () => {
     });
   }
 
- 
+
 
   const handleAddProductInventory = (productInventoryArray) => {
     // let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
@@ -920,9 +920,9 @@ const RentalManagementDetailsPage = () => {
               )}
               {(currentStep === 2) && (
                 <SerializedAssetStep
-                rentalManagementId={id}
-                productInventory={productInventory}
-                currentStep={currentStep}
+                  rentalManagementId={id}
+                  productInventory={productInventory}
+                  currentStep={currentStep}
                 />
               )}
               {(currentStep === 3) && (
@@ -1063,6 +1063,7 @@ const RentalManagementDetailsPage = () => {
           isSaving={isUpdating}
           onClose={() => setBulkEdit(false)}
           submitBulkEdit={bulkEditData}
+          currencySymbol={currencySymbol}
         />}
     </>
   );
