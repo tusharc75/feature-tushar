@@ -357,14 +357,14 @@ const Product = () => {
                     </IconButton>
                 </HtmlTooltip >
             }
-            {productPermissions.isRead &&
+            {productPermissions.isRead && (process.env.REACT_APP_ENV !== 'staging') ?
                 <HtmlTooltip title="BOM">
                     <IconButton size="small" aria-label="View BOM" onClick={() => {
                         history.push(`${routes.productDetail.path}/${params.data._id}/bom`, { productName: params.data.productName })
                     }} >
                         <RiBillLine color="primary" />
                     </IconButton>
-                </HtmlTooltip >
+                </HtmlTooltip > : null
             }
         </>
     )

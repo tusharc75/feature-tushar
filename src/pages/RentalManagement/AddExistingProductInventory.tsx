@@ -31,6 +31,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const [disableSaveButton, setDisableSaveButton] = useState(false);
 
     const {
         state: { permissions },
@@ -59,7 +60,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             axiosInstance()
                 .get(`${packages.packageApi}/get-products/${packageId}`)
                 .then(({ data: { data } }) => {
-                    const newArr = data.length > 0 ? data.map((product: any) => ({ product: product.productId, qty: product.qty })) : [];
+                    const newArr = data.length > 0 ? data.map((product: any) => ({ product: product.productName, qty: product.qty })) : [];
                     setPackageProductData(newArr);
                     setLoadingProducts(false);
                 })
@@ -161,9 +162,12 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         }, gridLoadingTimeout);
     }
 
-    const onCellValueChanged = (params) => {
-
-    };
+    const onCellValueChanged = (row) => {
+        setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
+    }
+    useEffect(() => {
+        setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
+    }, [selectedRecords])
 
     return (<Fragment>
         <>
@@ -193,7 +197,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                         color="primary"
                                         onClick={() => addProductInventory(selectedRecords)}
                                         variant="contained"
-                                        disabled={!Boolean(selectedRecords.length) || isAddingProducts}
+                                        disabled={!Boolean(selectedRecords.length) || isAddingProducts || disableSaveButton}
                                         endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
                                         {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
                                         Add</Button>
@@ -222,12 +226,12 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             </Dialog>
             )}
             {packageDialog && <Dialog open fullWidth maxWidth="md" onClose={() => setPackageDialog(false)}>
-                <CustomDialogHeader title={"Assign To Package"} onClose={() => setPackageDialog(false)} />
+                <CustomDialogHeader title={"Package Details"} onClose={() => setPackageDialog(false)} />
                 <CustomDialogContent>
                     <Box p={2}>
                         <div className="detail-box">
                             <h3 className="form-label-style" title={"Package Details"}>
-                                {"Package Details"}
+                                {"Product List"}
                             </h3>
                         </div>
                         <Grid container spacing={2}>
@@ -237,7 +241,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                         <TextField
                                             size="small"
                                             fullWidth
-                                            value={obj?.product?.productName}
+                                            value={obj?.product}
                                             type="text"
                                             disabled
                                             variant="outlined"
