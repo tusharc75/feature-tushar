@@ -23,7 +23,7 @@ import { CustomDialogTransition } from "./../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import CreateProductCategory from "../../pages/ProductCategory/CreateProductCategory";
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import { autoCalculateSpecificFields } from "../../constants/formulaUtility";
+import { autoCalculateSpecificFields, handleAutoCalculation } from "../../constants/formulaUtility";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog";
 
 const ignoreField = ["priceTemplate"]
@@ -242,6 +242,15 @@ const CreateProduct = (props) => {
                             });
                         });
                     }
+                    else {
+                        setPriceTemplate([])
+                        let newField = [...masterFields, ...fields];
+                        setInitialData({
+                            fields: newField,
+                            values: { ...getObjKeys('', newField), ...ref?.current?.values, productTemplate: "", priceTemplate: "" },
+                        });
+                        EvaluteproductFields(newField)
+                    }
                 }
             });
         }
@@ -428,7 +437,13 @@ const CreateProduct = (props) => {
                                                                             disableClearable
                                                                             onChange={(e, val) => {
                                                                                 setNewProductCategoryId(null);
-                                                                                setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                                const result = handleAutoCalculation(field, initialData.fields, values,
+                                                                                    field.fieldName, '', '', val && val.optionValue ? val.optionValue : "");
+                                                                                if (Object.keys(result).length > 1) {
+                                                                                    for (var x in result) {
+                                                                                        setFieldValue(x, result[x]);
+                                                                                    }
+                                                                                }
                                                                                 if (isProductTemplate) {
                                                                                     handleChangeCategory(val && val.optionValue ? val.optionValue : "",
                                                                                         val && val.optionLabel ? val.optionLabel : "", true, null)
