@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.23.0](https://github.com/vebholic/oms_frontend/compare/v1.22.0...v1.23.0) (2021-10-22)
+
+
+### Features
+
+* **reminder.tsx:** open activity from notification ([d05cb53](https://github.com/vebholic/oms_frontend/commit/d05cb5311dbe1226f4fea7dfaf6871b82a21eaec))
+
+
+### Bug Fixes
+
+*  while Cloning a account submarket segment value coming to be blank though in the account ([d8fe611](https://github.com/vebholic/oms_frontend/commit/d8fe611e059a8c67ec694d9a076eb4d4517bbc87))
+* **activity.tsx:** chatter bug fix ([0e1fc1d](https://github.com/vebholic/oms_frontend/commit/0e1fc1d788427d41448c86017cf523cc8fea359d))
+* **confirmationBox:** error message text changes ([2ffb39c](https://github.com/vebholic/oms_frontend/commit/2ffb39c3aa5a27792981d1fa0879e6214e9a15f7))
+* price condition ([cf1f3b6](https://github.com/vebholic/oms_frontend/commit/cf1f3b6a0397329ffe4ba8e0661ac0dd2b9fdca6))
+* **reminder.tsx:** desctructure state data ([7c098d2](https://github.com/vebholic/oms_frontend/commit/7c098d20938823364c372d73217544fd87fa1e37))
+
+## [1.22.0](https://github.com/vebholic/oms_frontend/compare/v1.21.0...v1.22.0) (2021-10-21)
+
+
+### Features
+
+* added dynamic grid for market segment,warehouse entities ,product category ([3f8ff11](https://github.com/vebholic/oms_frontend/commit/3f8ff11f6d2e06fde9b88e28fa56133e16ed48de))
+
+
+### Bug Fixes
+
+* **activity.tsx:** chatter fix ([8c57fd3](https://github.com/vebholic/oms_frontend/commit/8c57fd3e5e55a578f13cb6bcdb087f8432a714fa))
+* do not fetch bom and plants data if env is staging ([55c47f2](https://github.com/vebholic/oms_frontend/commit/55c47f254675e0855959e4a8ff9716c552a7adc4))
+* if entty is not assigned then by default set all entities ([5460862](https://github.com/vebholic/oms_frontend/commit/546086256e52ffee2ecc7642a092692ed9233e88))
+* oAT-59 ([a30fdbf](https://github.com/vebholic/oms_frontend/commit/a30fdbf6a5bb87d78bb55e554780561a7d0e0f58))
+* oAT-95 ([16ad464](https://github.com/vebholic/oms_frontend/commit/16ad464bc94d4e23e7ade101389124dc7010916c))
+* option dropdown ([960da14](https://github.com/vebholic/oms_frontend/commit/960da14eb470d23bfddd7ba50ea157e8f0543c43))
+* quote detail history.js issue ([cd6ca08](https://github.com/vebholic/oms_frontend/commit/cd6ca081d1880a4caf31bf993e8b53fcca93c4c3))
+* remove freesole from formula ([cd39900](https://github.com/vebholic/oms_frontend/commit/cd399007289fbf7a6e9f98dfa70d01b1a80e7b36))
+* removed console from login.tsx ([77c7162](https://github.com/vebholic/oms_frontend/commit/77c71622eff4d3baf55c8e8f5b7f379fb4a7d3a4))
+* removed unused code ([6429785](https://github.com/vebholic/oms_frontend/commit/64297852184c7b3ccac8151b7599bd0c0ec9c638))
+
 ## [1.21.0](https://github.com/vebholic/oms_frontend/compare/v1.20.0...v1.21.0) (2021-10-20)
 
 

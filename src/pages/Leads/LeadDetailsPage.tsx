@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, Grid, Paper } from '@material-ui/core';
+import { Box, Button, Grid, Paper, useMediaQuery } from '@material-ui/core';
 import { useHistory, useParams } from 'react-router-dom';
 import { Skeleton } from '@material-ui/lab';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -28,6 +28,7 @@ const LeadDetailsPage = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(true);
   const [leadData, setLeadData] = useState(null);
@@ -96,6 +97,12 @@ const LeadDetailsPage = () => {
       }
     }
   }, [steps]);
+
+  useEffect(() => {
+    if (isSmallScreen) {
+      setActivityShow(true)
+    }
+  }, [isSmallScreen])
 
   useEffect(() => {
     fetchLeadData();
@@ -433,7 +440,7 @@ const LeadDetailsPage = () => {
             </Paper>
           </div>
           <div className="position-relative">
-            {showActivity ?
+            {/* {showActivity ?
               <Paper>
                 {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                   <IoIosArrowDropright className="icon" />
@@ -468,7 +475,42 @@ const LeadDetailsPage = () => {
               :
               !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropleft className="icon" />
+              </span>} */}
+
+            <Paper>
+              {!isMobile && !isTablet && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
+                {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
               </span>}
+              <div style={{ display: showActivity ? "block" : "none" }}>
+                {!leadData ? (
+                  <Box>
+                    <Skeleton variant="text" width="100px" height="25px" />
+                    <Box marginY={1} />
+                    {[0, 1, 2, 3, 4].map((i, index) => (
+                      <Skeleton key={index} width="100%" height="50px" />
+                    ))}
+                  </Box>
+                ) : (
+                  <div>
+                    <Activity
+                      restrictedAddActivities={leadsPermissions.isUpdate && allowedToEdit ? [] : ['Attachment', 'Case']}
+                      relatedTo={[
+                        {
+                          type: leadResource,
+                          referenceId: leadData._id,
+                          access: true
+                        }
+                      ]}
+                      resourceId={leadData._id}
+                      resource={leadResource}
+                      handleActivityRefresh={() => { }}
+                      emails={[leadData?.email ?? '']}
+                    />
+                  </div>
+                )}
+              </div>
+            </Paper>
+
           </div>
         </div>
 
