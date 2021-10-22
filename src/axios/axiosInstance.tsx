@@ -81,13 +81,13 @@ export default (history = null, passedHeaders = null) => {
                 return new Promise((resolve, reject) => reject({ open: true, type: "error", message: err.error, }));
             }
 
-            if (error.message == "Network Error") {
-                if (navigator.onLine) {
-                    return new Promise((resolve, reject) => {
-                        reject({ open: true, type: "error", message: "Api Not Working" });
-                    })
-                }
-            }
+            // if (error.message == "Network Error") {
+            //     if (navigator.onLine) {
+            //         return new Promise((resolve, reject) => {
+            //             reject({ open: true, type: "error", message: "Api Not Working" });
+            //         })
+            //     }
+            // }
 
             if (!error.response) {
                 return new Promise((resolve, reject) => {
