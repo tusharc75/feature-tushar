@@ -9,6 +9,7 @@ import {
   Card,
   CardContent,
   List,
+  useMediaQuery
 } from "@material-ui/core";
 import { isMobile, isTablet } from "react-device-detect";
 
@@ -98,7 +99,7 @@ export default function AccountDetailPage(props) {
   const {
     state: { user, permissions, selectedEntity, tour }, dispatch
   }: any = useData();
-
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [headingLbl, setHeadingLbl] = useState("");
   // const [isUpdating, setIsUpdating] = useState(false);
   const [accountData, setAccountData] = useState<any>({});
@@ -199,6 +200,12 @@ export default function AccountDetailPage(props) {
       setGraphData({ edges: [], nodes: [], colorPalette: null });
     };
   }, [tabValue]);
+
+  useEffect(() => {
+    if (isSmallScreen) {
+      setActivityShow(true)
+    }
+  }, [isSmallScreen])
 
   useEffect(() => {
 
@@ -969,7 +976,7 @@ export default function AccountDetailPage(props) {
           </Paper>
         </div>
         <div id="activitiesSidebar" className="position-relative">
-          {showActivity ?
+          {/* {showActivity ?
             <Paper >
               {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropright className="icon" />
@@ -1152,7 +1159,188 @@ export default function AccountDetailPage(props) {
             :
             !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
               <IoIosArrowDropleft className="icon" />
+            </span>} */}
+          <Paper >
+            {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
+              {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
             </span>}
+            <div style={{ display: showActivity ? "block" : "none" }}>
+              <Grid container>
+                <Grid item xs={12}>
+                  {accountData && (
+                    <div>
+                      <Activity
+                        resourceId={accountData._id}
+                        resource={accountRoute}
+                        restrictedAddActivities={
+                          permissions &&
+                            permissions[accountResource] &&
+                            permissions[accountResource].isUpdate &&
+                            canEdit
+                            ? []
+                            : ["Attachment", "Case"]
+                        }
+                        relatedTo={[
+                          {
+                            type: accountResource,
+                            referenceId: accountData._id,
+                            access: true,
+                          },
+                        ]}
+                        handleActivityRefresh={() => { }}
+                        emails={
+                          relatedContacts && relatedContacts.length > 0
+                            ? cloneDeep(relatedContacts).reduce(
+                              (emails, contact) => {
+                                if (contact?.email)
+                                  emails.push(contact.email);
+                                return emails;
+                              },
+                              []
+                            )
+                            : []
+                        }
+                      />
+                    </div>
+                  )}
+                </Grid>
+                <Grid item xs={12}>
+                  <QuickLinks quickLinks={quickLinks} />
+                </Grid>
+
+                {permissions &&
+                  permissions[contactResource] &&
+                  permissions[contactResource].isRead && (
+                    <Grid item xs={12}>
+                      <BoxWithBorder
+                        style={{ marginTop: "3%", padding: "0px" }}
+                      >
+                        <div className={`${accountClass.detail_page_div3}`}>
+                          <div className={`${accountClass.related_contacts}`}>
+                            <Typography
+                              color="primary"
+                              variant="h6"
+                              style={{ margin: "0 10px" }}
+                            >
+                              Related Contacts
+                            </Typography>
+                            {permissions[contactResource].isCreate && (
+                              <span>
+                                <IconButton
+                                  onClick={handleCreateContact}
+                                  color="primary"
+                                  size="small"
+                                >
+                                  <ControlPointIcon />
+                                </IconButton>
+                              </span>
+                            )}
+                          </div>
+                          {relatedContactsLoading ? (
+                            <CommonSkeleton lenArray={[...Array(4).keys()]} />
+                          ) : (
+                            <>
+                              <Box className={`${accountClass.custom_box1}`}>
+                                <RelatedContacts
+                                  contacts={_reverse(
+                                    relatedContacts.slice(0, 2)
+                                  )}
+                                  accountId={accountData._id}
+                                  accountName={accountData.accountName}
+                                  contactApi={contactApi}
+                                  contactRoute={contactRoute}
+                                />
+                              </Box>
+                            </>
+                          )}
+                        </div>
+                      </BoxWithBorder>
+                    </Grid>
+                  )}
+
+                {accountData?.staticData?.lead &&
+                  permissions &&
+                  permissions.lead &&
+                  permissions.lead.isRead && (
+                    <Grid item xs={12}>
+                      <BoxWithBorder
+                        style={{ marginTop: "3%", padding: "0px" }}
+                      >
+                        <div id="contactsAccordion" className={`${accountClass.detail_page_div3}`}>
+                          <div className={`${accountClass.leads_data}`}>
+                            <Typography
+                              color="primary"
+                              variant="h6"
+                              style={{ margin: "0 10px" }}
+                            >
+                              Related Lead
+                            </Typography>
+                          </div>
+                          {relatedContactsLoading ? (
+                            <CommonSkeleton lenArray={[...Array(4).keys()]} />
+                          ) : (
+                            <>
+                              <Box className={`${accountClass.custom_box1}`}>
+                                <Card>
+                                  <CardContent className="detailListing">
+                                    <Grid
+                                      container
+                                      className="detailCardHeader"
+                                    >
+                                      <Grid item xs={12} sm={12}>
+                                        {accountData?.staticData?.lead?.entity === selectedEntity ? <Link
+                                          className="link f_size"
+                                          to={`/lead/detail/${accountData?.staticData?.lead?._id}`}
+                                        >
+                                          {accountData?.staticData?.lead
+                                            ?.concatedName || ""}
+
+                                        </Link>
+                                          : hasAccessToEntity(accountData?.staticData?.lead?.entity) ?
+                                            <Link
+                                              className="link f_size"
+                                              onClick={() => {
+                                                handleEntityChange(accountData?.staticData?.lead?.entity)
+                                                history.push(`/lead/detail/${accountData?.staticData?.lead?._id}`)
+                                              }
+                                              }
+                                            >
+                                              {accountData?.staticData?.lead
+                                                ?.concatedName || ""}
+
+                                            </Link>
+                                            :
+                                            <span>
+                                              {accountData?.staticData?.lead
+                                                ?.concatedName || ""}
+                                            </span>
+                                        }
+                                      </Grid>
+                                    </Grid>
+                                    <Grid container>
+                                      <Grid item xs={12} sm={6}>
+                                        <DisplayData
+                                          label="Title"
+                                          value={
+                                            accountData?.staticData?.lead
+                                              ?.title || "-"
+                                          }
+                                          icon={<BsPerson size={20} />}
+                                        />
+                                      </Grid>
+                                    </Grid>
+                                  </CardContent>
+                                </Card>
+                              </Box>
+                            </>
+                          )}
+                        </div>
+                      </BoxWithBorder>
+                    </Grid>
+                  )}
+              </Grid>
+            </div>
+          </Paper>
         </div>
       </div>
       <div >

@@ -1113,7 +1113,7 @@ export const prepareDataForGrid = (data, user = {}) => {
   let objectValues = {};
   let restProperties = {};
 
-  if (data.entity && data.entity.length === 0 && user["mappedEntities"].length) {
+  if (data.entity && data.entity.length === 0 && user["mappedEntities"]?.length) {
     data.entity = [...user["mappedEntities"]]
   }
   Object.keys(data).forEach((key) => {

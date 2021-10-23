@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, Tooltip, CircularProgress } from "@material-ui/core";
+import { Grid, Box, Button, Paper, CircularProgress } from "@material-ui/core";
 import { Skeleton, Autocomplete, Alert } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import { isMobile, isTablet } from "react-device-detect";
@@ -15,7 +15,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow } from "../../constants/helpers";
 import Steps from "./Steps";
 import AddExistingProductInventory from "./AddExistingProductInventory";
-import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
+import { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { Link } from 'react-router-dom'
 import InputAdornment from "@material-ui/core/InputAdornment/InputAdornment";
 import TextField from "@material-ui/core/TextField/TextField";
@@ -30,8 +30,6 @@ import DeliveryTicket from "./DeliveryTicket";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementDialog";
 import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
-import ManageProductInventory from '../ProductInventory/ManageProductInventory'
-import AddRentalCost from "./AddRentalCost";
 import Activity from "../../components/Activity";
 import styles from "./Retal.module.scss";
 import ReceivingTicket from "./ReceivingTicket";
@@ -44,8 +42,10 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
 import { GiMineExplosion } from 'react-icons/gi'
 import HtmlTooltip from '../../components/CustomTooltipTitle'
+import BulkEditInventoryDialog from './BulkEditInventoryDialog'
+import SerializedAssetStep from "./SerializedAssetStep";
 
-const rentalProcessSteps = ["New", "Additional Cost", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
+const rentalProcessSteps = ["New", "Additional Cost", "Serialized Asset", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -58,6 +58,8 @@ const RentalManagementDetailsPage = () => {
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loadingDetails, setLoadingDetails] = useState(true);
+  const [isUpdating, setUpdating] = useState(false);
+  const [isBulkEdit, setBulkEdit] = useState(false);
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -254,13 +256,13 @@ const RentalManagementDetailsPage = () => {
 
   const handleDeliveryTicketDialog = (selectedProductInventory, warehouse) => {
     setProductInventoryForDeliveryTicket(selectedProductInventory)
-    setWarehouseForDeliveryTicket(warehouse)
+    // setWarehouseForDeliveryTicket(warehouse)
     setShowDeliveryTicketDialog(true)
   }
 
   const handleReceivingTicketDialog = (selectedProductInventory, warehouse) => {
     setProductInventoryForReceivingTicket(selectedProductInventory)
-    setWarehouseForReceivingTicket(warehouse)
+    // setWarehouseForReceivingTicket(warehouse)
     setShowReceivingTicketDialog(true)
   }
 
@@ -294,7 +296,7 @@ const RentalManagementDetailsPage = () => {
         description: u.packageDescription,
 
       })));
-      fetchDeliveryTicket(tempInventory);
+      setProductInventory(tempInventory)
 
       // let tempWareHouse = []
       // data.data.map(d => {
@@ -386,7 +388,7 @@ const RentalManagementDetailsPage = () => {
     { field: "UOM", headerName: "UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Gram", "Liter"] }, editable: true },
     { field: "pricingMethod", headerName: "Pricing Method", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Per Day", "Per Week", "Per Month"] }, editable: true },
     { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    { field: "discount", headerName: "Discount", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+    { field: "discount", headerName: "Discount (%)", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
     { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
   ];
 
@@ -401,30 +403,7 @@ const RentalManagementDetailsPage = () => {
     });
   }
 
-  const fetchDeliveryTicket = (values) => {
-    setProductInventory([])
-    axiosInstance()
-      .get(`${rentalManagement.rentalManagementApi}/${id}/delivery-ticket `)
-      .then(({ data }) => {
-        let tempProductInventory = values
-        data.data.map(obj => {
-          tempProductInventory.map((d, index) => {
-            if (obj.productInventory.some(p => d.id === p.optionValue)) {
-              tempProductInventory[index]["deliveryTicket"] = obj.deliveryJobName
-              tempProductInventory[index]["deliveryTicketId"] = obj._id
-            }
-          })
 
-        })
-        setProductInventory(tempProductInventory)
-        // if (tempProductInventory.length > 0 && tempProductInventory.every(d => d.deliveryTicket !== undefined)) {
-        //   setCurrentStep(4)
-        // }
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
 
   const handleAddProductInventory = (productInventoryArray) => {
     // let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
@@ -439,8 +418,8 @@ const RentalManagementDetailsPage = () => {
       "finalPrice": parseInt(d.finalPrice) || 0,
       "price": parseInt(d.mrp) || parseInt(d.price) || 0,
       "discount": parseInt(d.discount) || 0,
-      "startDate": d.startDate || new Date(),
-      "endDate": d.endDate || new Date(),
+      "startDate": rentalManagementData ? rentalManagementData?.rentalStartDate : new Date(),
+      "endDate": rentalManagementData ? rentalManagementData?.rentalEndDate : new Date(),
     }))
     axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": tempProductArray })
       .then(() => {
@@ -518,6 +497,35 @@ const RentalManagementDetailsPage = () => {
         toastConfig.setToastConfig(error)
       });
   }
+
+  const bulkEditData = (values: any) => {
+    let updatedArr = dataRows.map(d => ({
+      "id": d.id,
+      "type": d.type.toLowerCase(),
+      "detail": d.detail,
+      "pricingMethod": values.pricingMethod ? values.pricingMethod : d.pricingMethod,
+      "UOM": values.UOM ? values.UOM : d.UOM,
+      "finalPrice": values.finalPrice ? values.finalPrice : d.finalPrice,
+      "discount": values.discount ? values.discount : d.discount,
+      "startDate": values.startDate ? values.startDate : d.startDate,
+      "endDate": values.endDate ? values.endDate : d.endDate,
+      "qty": values.qty ? values.qty : d.qty,
+      "price": values.price ? values.price : d.price
+    })
+    )
+
+    setUpdating(true)
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": updatedArr })
+      .then(() => {
+        setUpdating(false)
+        setBulkEdit(false)
+        fetchProductInventory()
+      }).catch((error) => {
+        setUpdating(false)
+        toastConfig.setToastConfig(error)
+      });
+  }
+
 
   return (
     <>
@@ -603,7 +611,7 @@ const RentalManagementDetailsPage = () => {
               <Steps
                 className={styles.steps_box}
                 isNextStep={!Boolean(productInventory.length)}
-                steps={rentalProcessSteps.slice(0, 4)}
+                steps={rentalProcessSteps.slice(0, 5)}
                 currentStep={currentStep}
                 setCurrentStep={setCurrentStep}
               />
@@ -635,7 +643,21 @@ const RentalManagementDetailsPage = () => {
                         {`Add ${routes.packages.title}`}
                       </Button>
                     </Box>
-                    <div>
+                    <Box display="flex">
+                      <HtmlTooltip title={Boolean(selectedRecords.length) ? "Buld edit selected records" : "Select records to edit"}>
+                        <span>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            disabled={!Boolean(selectedRecords.length)}
+                            onClick={() => setBulkEdit(true)}
+                          >
+                            Bulk Edit
+                          </Button>
+                        </span>
+                      </HtmlTooltip>
+                      <Box mx={1} />
                       <HtmlTooltip title={Boolean(selectedRecords.length) ? "Delete selected records" : "Select records to delete"}>
                         <span>
 
@@ -658,7 +680,7 @@ const RentalManagementDetailsPage = () => {
                           </Button>
                         </span>
                       </HtmlTooltip>
-                    </div>
+                    </Box>
                   </Box>
                   {columns ?
                     <CustomAgGridEditable
@@ -687,16 +709,6 @@ const RentalManagementDetailsPage = () => {
                   }
                 </>
               )}
-              {/* {(currentStep === 1) && (
-                <AddRentalCost
-                  rentalEndDate={rentalManagementData?.rentalEndDate}
-                  rentalStartDate={rentalManagementData?.rentalStartDate}
-                  productInventory={productInventory}
-                  rentalId={id}
-                  currencySymbol={currencySymbol}
-                  fetchProductInventory={fetchProductInventory}
-                />
-              )} */}
               {(currentStep === 1) && (
                 <Formik
                   initialValues={{ additionalCost: additionalCost || [{ "id": "", "description": "", "uom": "", "qty": 0, "type": "", "amount": 0 }] }}
@@ -770,7 +782,6 @@ const RentalManagementDetailsPage = () => {
                                                   variant="outlined"
                                                   name="nameField"
                                                   label="Cost Type"
-                                                  required
                                                 />}
                                               />
                                             </Grid>
@@ -790,7 +801,6 @@ const RentalManagementDetailsPage = () => {
                                                     ["description"]: e.target.value
                                                   })
                                                 }}
-                                                required
                                               />
                                             </Grid>
                                             <Grid item md={2}>
@@ -809,7 +819,6 @@ const RentalManagementDetailsPage = () => {
                                                     ["qty"]: e.target.value.replace(/[^0-9]/g, '')
                                                   })
                                                 }}
-                                                required
                                               />
                                             </Grid>
                                             <Grid item md={2}>
@@ -831,7 +840,6 @@ const RentalManagementDetailsPage = () => {
                                                   variant="outlined"
                                                   name="nameField"
                                                   label="UOM"
-                                                  required
                                                 />}
                                               />
                                             </Grid>
@@ -860,7 +868,6 @@ const RentalManagementDetailsPage = () => {
                                                       ["amount"]: e.target.value.replace(/[^0-9]/g, '')
                                                     })
                                                   }}
-                                                  required
                                                 />
                                               </Grid>
                                             }
@@ -906,29 +913,19 @@ const RentalManagementDetailsPage = () => {
                           </Grid>
                         </Container>
                       </Form>
-
-                      {/* <Grid container >
-                      <Grid item xs={12} md={12} sm={12} className="d-flex justify-content-end">
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          type="submit"
-                          size="small"
-
-                          onClick={() => {
-                            handleSaveAdditionalCost(values.additionalCost)
-                          }}
-                        >
-                          {"Save"}
-                        </Button>
-                      </Grid>
-                    </Grid> */}
                     </>
                   )}
                 </Formik>
 
               )}
               {(currentStep === 2) && (
+                <SerializedAssetStep
+                  rentalManagementId={id}
+                  productInventory={productInventory}
+                  currentStep={currentStep}
+                />
+              )}
+              {(currentStep === 3) && (
                 <DeliveryTicket
                   rentalManagementId={id}
                   warehouselist={warehouseList}
@@ -937,7 +934,7 @@ const RentalManagementDetailsPage = () => {
                   handleDeliveryTicketDialog={handleDeliveryTicketDialog}
                 />
               )}
-              {(currentStep === 3 || currentStep === 4) && (
+              {(currentStep === 4 || currentStep === 5) && (
                 <ReceivingTicket
                   rentalManagementId={id}
                   warehouselist={warehouseList}
@@ -1061,6 +1058,13 @@ const RentalManagementDetailsPage = () => {
         onOk={() => handleRemoveProductInventory(deleteData)}
         okBtnLoading={isDeleting}
       />}
+      {isBulkEdit &&
+        <BulkEditInventoryDialog
+          isSaving={isUpdating}
+          onClose={() => setBulkEdit(false)}
+          submitBulkEdit={bulkEditData}
+          currencySymbol={currencySymbol}
+        />}
     </>
   );
 };
