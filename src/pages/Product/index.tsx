@@ -44,13 +44,6 @@ var levalOrderBy = [
     "price-builder-custom",
 ];
 
-const columnSequence = [
-    "productCategory",
-    "productName",
-    "entity",
-    "grade",
-    "productTemplate"
-]
 
 const Product = () => {
 
