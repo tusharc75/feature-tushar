@@ -17,6 +17,7 @@ import { AzureLogin } from '../../components/Azure/Azure';
 import { SiMicrosoftoffice } from 'react-icons/si';
 import { SVG } from '../../assets';
 import { SET_GRID_METADATA } from "../../StateProvider/actionTypes"
+import { entity } from "../../constants/helpers"
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -53,6 +54,7 @@ const Login = () => {
   const account = useAccount(accounts[0] || {});
   const [counter, setCounter] = useState(0);
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
+  const { entityApi } = entity
 
   useEffect(() => {
     if (!isEmpty(account)) {
@@ -64,6 +66,7 @@ const Login = () => {
           });
           const { data } = res.data;
           localStorage.setItem('token', data.token);
+
           dispatch({ type: SET_USER, payload: data });
           if (data?.role?.selectedEntity?._id) {
             dispatch({
@@ -103,13 +106,20 @@ const Login = () => {
         setSubmitting(false);
         const { data } = response;
         localStorage.setItem('token', data.token);
-        if (data?.entity && data?.entity.length) {
-          let mappedEntities = []
-          data.entity.forEach(o => {
-            mappedEntities.push({ optionLabel: o?.entityName, optionValue: o?._id })
+
+        axiosInstance()
+          .get(`${entityApi}`)
+          .then(({ data: { data } }) => {
+            let mappedEntities = []
+            if (data && data.length) {
+              data.forEach(o => {
+                mappedEntities = [...mappedEntities,
+                { optionLabel: o?.entityName, optionValue: o?._id }]
+              })
+            }
+            localStorage.setItem("mappedEntities", JSON.stringify(mappedEntities))
           })
-          data.mappedEntities = mappedEntities
-        }
+
         dispatch({ type: SET_USER, payload: data });
         if (data?.role?.selectedEntity?._id) {
           dispatch({

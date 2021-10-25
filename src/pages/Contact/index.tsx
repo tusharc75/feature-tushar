@@ -254,33 +254,39 @@ export default function Contact(props) {
       />
 
       {
-        contactPermissions.isUpdate &&
-        <Tooltip title="Entity">
-          <IconButton
-            size="small"
-            aria-label="Entity"
-            onClick={() => {
-              setContactId(params.data._id)
-              setShowEntityDialog(true)
-              if (params?.data?.entityId) {
-                let entities = []
+        contactPermissions.isUpdate && params.data?.isAllowedToUpdate ?
+          <Tooltip title="Entity">
+            <IconButton
+              size="small"
+              aria-label="Entity"
+              onClick={() => {
+                setContactId(params.data._id)
+                setShowEntityDialog(true)
                 if (params?.data?.entityId) {
-                  entities.push(params?.data?.entityId)
+                  let entities = []
+                  if (params?.data?.entityId) {
+                    entities.push(params?.data?.entityId)
+                  }
+                  if (params?.data?.restentity) {
+                    let restEntities = params?.data?.restentity.map(o => o?.optionValue)
+                    entities = [...entities, ...restEntities]
+                  }
+                  setEntities([...entities])
                 }
-                if (params?.data?.restentity) {
+                else if (params?.data?.restentity) {
                   let restEntities = params?.data?.restentity.map(o => o?.optionValue)
-                  entities = [...entities, ...restEntities]
+                  setEntities([...restEntities])
                 }
-                setEntities([...entities])
-              }
-              else if (params?.data?.restentity) {
-                let restEntities = params?.data?.restentity.map(o => o?.optionValue)
-                setEntities([...restEntities])
-              }
-            }}>
-            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
-          </IconButton>
-        </Tooltip>
+              }}>
+              <AiOutlineDeploymentUnit fontSize="15" color="primary" />
+            </IconButton>
+          </Tooltip> : (
+            <Tooltip className="cursor-stop" title="You do not have permission to update entity">
+              <IconButton aria-label="Clone" size="small">
+                <AiOutlineDeploymentUnit fontSize="15" />
+              </IconButton>
+            </Tooltip>
+          )
       }
     </>
   );
