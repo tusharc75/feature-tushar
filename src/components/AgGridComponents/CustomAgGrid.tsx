@@ -56,6 +56,7 @@ export function reducer(state, action) {
     case 'search':
       return {
         ...state,
+        page: 0,
         search: action.search,
         loading: true
       };
