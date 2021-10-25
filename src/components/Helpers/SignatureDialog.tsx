@@ -117,7 +117,7 @@ export default function SignatureDialog(props) {
                     </>
                     : <Button
                         size="small"
-                        disabled={loading}
+                        disabled={loading || (signCanvas.current.isEmpty() === true)}
                         onClick={() => {
                             setLoading(true);
                             onSigned(signCanvas.current.getTrimmedCanvas().toDataURL("image/png"))

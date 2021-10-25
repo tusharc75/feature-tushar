@@ -180,47 +180,74 @@ export default function CustomAgGrid({
     // debounceMs: 1000,
   };
 
+  const getActionColumn = (
+    <AgGridColumn
+      width={actionWidth}
+      field="actions"
+      headerName={actionLabel ? actionLabel : "Actions"}
+      pinned={isMobile || isTablet ? false : 'right'}
+      lockPinned={isMobile || isTablet ? false : true}
+      resizable={false}
+      sortable={false}
+      editable={actionEditable}
+      filter={false}
+      onCellValueChanged={onCellValueChanged}
+      cellRenderer="actionsRenderer"
+    ></AgGridColumn>
+  )
+
   const generateColumns = columns.map((column: any, index) => {
     return isClientSideGrid ? (
-      <AgGridColumn
-        key={index}
-        field={column.field}
-        headerName={column.headerName}
-        filter={column.filter ?? 'agTextColumnFilter'}
-        sortable={column.sortable ?? true}
-        cellRenderer={column.cellRenderer ?? null}
-        cellRendererParams={column.cellRendererParams ?? null}
-        minWidth={column.width ?? 250}
-        flex={1}
-        rowDrag={column.rowDrag ?? false}
-        hide={staticColumns.indexOf(column.field) >= 0 ? checkStaticField(renderedFrom, column.field) :
-          (column.hasOwnProperty("show") && !column?.show) ? true : false}
-      // floatingFilterComponent={column.floatingFilterComponent ?? null}
-      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-      //   suppressFilterButton: true,
-      // }}
-      ></AgGridColumn>
+      <>
+        <AgGridColumn
+          key={index}
+          field={column.field}
+          headerName={column.headerName}
+          filter={column.filter ?? 'agTextColumnFilter'}
+          sortable={column.sortable ?? true}
+          cellRenderer={column.cellRenderer ?? null}
+          cellRendererParams={column.cellRendererParams ?? null}
+          minWidth={column.width ?? 250}
+          flex={1}
+          rowDrag={column.rowDrag ?? false}
+          hide={staticColumns.indexOf(column.field) >= 0 ? checkStaticField(renderedFrom, column.field) :
+            (column.hasOwnProperty("show") && !column?.show) ? true : false}
+        // floatingFilterComponent={column.floatingFilterComponent ?? null}
+        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        //   suppressFilterButton: true,
+        // }}
+        ></AgGridColumn>
+        {
+          (index === columns.length - 1) && allowAction ? getActionColumn : null
+        }
+      </>
     ) : (
-      <AgGridColumn
-        key={index}
-        field={column.field}
-        headerName={column.headerName}
-        filter={column.filter ?? 'agTextColumnFilter'}
-        sortable={column.sortable ?? true}
-        cellRenderer={column.cellRenderer ?? null}
-        cellRendererParams={column.cellRendererParams ?? null}
-        minWidth={column.width ?? 250}
-        flex={1}
-        filterParams={customFilterParams}
-        hide={(column.hasOwnProperty("show") && !column?.show) ? true : false}
-        comparator={() => {
-          return 0;
-        }}
-      // floatingFilterComponent={column.floatingFilterComponent ?? null}
-      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-      //   suppressFilterButton: true,
-      // }}
-      ></AgGridColumn>
+      <>
+        <AgGridColumn
+          lockPosition={column?.lockPosition ? true : false}
+          key={index}
+          field={column.field}
+          headerName={column.headerName}
+          filter={column.filter ?? 'agTextColumnFilter'}
+          sortable={column.sortable ?? true}
+          cellRenderer={column.cellRenderer ?? null}
+          cellRendererParams={column.cellRendererParams ?? null}
+          minWidth={column.width ?? 250}
+          flex={1}
+          filterParams={customFilterParams}
+          hide={(column.hasOwnProperty("show") && !column?.show) ? true : false}
+          comparator={() => {
+            return 0;
+          }}
+        // floatingFilterComponent={column.floatingFilterComponent ?? null}
+        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        //   suppressFilterButton: true,
+        // }}
+        ></AgGridColumn>
+        {
+          (index === columns.length - 1) && allowAction ? getActionColumn : null
+        }
+      </>
     );
   });
 
@@ -359,21 +386,6 @@ export default function CustomAgGrid({
 
               {generateColumns}
 
-              {allowAction && (
-                <AgGridColumn
-                  width={actionWidth}
-                  field="actions"
-                  headerName={actionLabel ? actionLabel : "Actions"}
-                  pinned={isMobile || isTablet ? false : 'right'}
-                  lockPinned={isMobile || isTablet ? false : true}
-                  resizable={false}
-                  sortable={false}
-                  editable={actionEditable}
-                  filter={false}
-                  onCellValueChanged={onCellValueChanged}
-                  cellRenderer="actionsRenderer"
-                ></AgGridColumn>
-              )}
             </AgGridReact>
           </div>
 
