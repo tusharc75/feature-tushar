@@ -48,7 +48,7 @@ export default function ManageContact(props) {
     accountId = null,
     formValues = {},
     handleValuesChange = null,
-    isClone = false, 
+    isClone = false,
     isAccountFieldDisable = false
   } = props;
 
@@ -268,7 +268,7 @@ export default function ManageContact(props) {
             isClone ? "Clone" :
               isNew
                 ? "Add Contact"
-                : `Editing ${contactData.initialValues.firstName}`
+                : `Editing ${contactData.initialValues?.firstName ?? ""} ${contactData.initialValues?.lastName ?? ""}`
           }
         />
 
@@ -442,7 +442,7 @@ export default function ManageContact(props) {
                                                 )
                                                 : values
                                             }
-                                            disabled={fromProject || (!isNew && field.disableOnEdit)|| (accountId && isAccountFieldDisable)}
+                                            disabled={fromProject || (!isNew && field.disableOnEdit) || (accountId && isAccountFieldDisable)}
                                             errors={errors}
                                             touched={touched}
                                             label={field.fieldLabel}
@@ -482,7 +482,7 @@ export default function ManageContact(props) {
                                                 <IconButton
                                                   onClick={onCreateAccount}
                                                   size="small"
-                                                  disabled={fromProject || (!isNew && field.disableOnEdit)|| (accountId && isAccountFieldDisable)}
+                                                  disabled={fromProject || (!isNew && field.disableOnEdit) || (accountId && isAccountFieldDisable)}
                                                 >
                                                   <AddIcon color={(fromProject || (!isNew && field.disableOnEdit) || (accountId && isAccountFieldDisable)) ? "disabled" : "primary"} />
                                                 </IconButton>

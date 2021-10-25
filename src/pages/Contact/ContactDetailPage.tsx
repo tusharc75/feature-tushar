@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List } from '@material-ui/core';
+import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List, useMediaQuery } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { Skeleton } from '@material-ui/lab';
@@ -47,6 +47,7 @@ const ContactDetailsPage = (props) => {
   const {
     state: { user, permissions, selectedEntity, tour }, dispatch
   }: any = useData();
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [headingLbl, setHeadingLbl] = useState('');
   const [contactData, setContactData] = useState<any>({});
   const [loading, setLoading] = useState(false);
@@ -98,6 +99,13 @@ const ContactDetailsPage = (props) => {
       fetchRelatedData();
     }
   }, [id]);
+
+
+  useEffect(() => {
+    if (isSmallScreen) {
+      setActivityShow(true)
+    }
+  }, [isSmallScreen])
 
   useEffect(() => {
     if (steps.length > 0) {
@@ -683,7 +691,7 @@ const ContactDetailsPage = (props) => {
           </Paper>
         </div>
         <div id="activitiesSidebar" className="position-relative">
-          {showActivity ?
+          {/* {showActivity ?
             <Paper>
               {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropright className="icon" />
@@ -781,23 +789,7 @@ const ContactDetailsPage = (props) => {
                             </List>
                           </CardContent>
                         </Card>
-                        {/* <Card>
-                            <CardContent className="detailListing">
-                              <Grid container className="detailCardHeader">
-                                <Grid item xs={12} sm={12}>
-                                  <Link className="link f_size"
-                                    to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
-                                    {contactData?.staticData?.lead?.firstName || ''} {contactData?.staticData?.lead?.lastName || ''}
-                                  </Link>
-                                </Grid>
-                              </Grid>
-                              <Grid container>
-                                <Grid item xs={12} sm={6}>
-                                  <DisplayData label='Title' value={contactData?.staticData?.lead?.title || '-'} icon={< BiFace size={20} />} />
-                                </Grid>
-                              </Grid>
-                            </CardContent>
-                          </Card> */}
+                        
                       </Box>
                     </div>
                   </BoxWithBorder>
@@ -806,7 +798,114 @@ const ContactDetailsPage = (props) => {
             </Paper> :
             !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
               <IoIosArrowDropleft className="icon" />
+            </span>} */}
+
+          <Paper>
+            {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
+              {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
             </span>}
+            <div style={{ display: showActivity ? "block" : "none" }}>
+              {!isObjectEmpty(contactData) && (
+                <div>
+                  <Activity
+                    resourceId={contactData._id}
+                    resource={contactRoute}
+                    restrictedAddActivities={contactPermissions.isUpdate && canEdit ? [] : ['Attachment', 'Case']}
+                    relatedTo={[
+                      {
+                        type: contactResource,
+                        referenceId: contactData._id,
+                        access: true
+                      }
+                    ]}
+                    handleActivityRefresh={() => { }}
+                    emails={[contactData?.email ?? '']}
+                  />
+                </div>
+              )}
+              <QuickLinks quickLinks={quickLinks} />
+              {contactData?.staticData?.lead && permissions && permissions.lead && permissions.lead.isRead && (
+                <Grid item xs={12}>
+                  <BoxWithBorder style={{ marginTop: '3%', padding: '0px' }}>
+                    <div className={`${contactClass.detail_page_div3}`}>
+                      <div className={`${contactClass.leads_data}`}>
+                        <Typography color="primary" variant="h6" style={{ margin: '0 10px' }}>
+                          Related Lead
+                        </Typography>
+                      </div>
+                      <Box className={`${contactClass.custom_box1}`}>
+                        <Card className="contactCard">
+                          <CardContent className="detailListing">
+                            <List>
+                              <ListItem>
+                                <ListItemAvatar>
+                                  <div
+                                    data-initials={[
+                                      contactData?.staticData?.lead?.firstName?.charAt(0).toUpperCase(),
+                                      contactData?.staticData?.lead?.lastName?.charAt(0).toUpperCase()
+                                    ]
+                                      .filter((f) => f)
+                                      .join('')}
+                                  ></div>
+                                </ListItemAvatar>
+                                <ListItemText
+                                  className="ml-2"
+                                  primary={
+                                    contactData?.staticData?.lead?.entity === selectedEntity ?
+                                      <Link className="link f_size p-l2" to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
+                                        {contactData?.staticData?.lead?.concatedName}
+                                      </Link>
+                                      : hasAccessToEntity(contactData?.staticData?.lead?.entity) ?
+                                        <Link
+                                          className="link f_size p-l2"
+                                          onClick={() => {
+                                            handleEntityChange(contactData?.staticData?.lead?.entity)
+                                            history.push(`/lead/detail/${contactData?.staticData?.lead?._id}`)
+                                          }}>
+                                          {contactData?.staticData?.lead?.concatedName}
+                                        </Link>
+                                        :
+                                        <span>
+                                          {contactData?.staticData?.lead?.concatedName}
+                                        </span>
+                                  }
+                                  secondary={
+                                    <React.Fragment>
+                                      <Typography component="p" variant="body2" className="cardDetail">
+                                        {contactData?.staticData?.lead?.title && (
+                                          <span className="d-flex gap-2 align-items-center">
+                                            <FiStar size="15" />
+                                            {contactData?.staticData?.lead?.title}
+                                          </span>
+                                        )}
+                                        {contactData?.staticData?.lead?.email && (
+                                          <span className="d-flex gap-2 align-items-center">
+                                            <AiOutlineMail size="15" />
+                                            {contactData?.staticData?.lead?.email}
+                                          </span>
+                                        )}
+                                        {contactData?.staticData?.lead?.phone && (
+                                          <span className="d-flex gap-2 align-items-center">
+                                            <BiPhone size="15" />
+                                            {contactData?.staticData?.lead?.phone}
+                                          </span>
+                                        )}
+                                      </Typography>
+                                    </React.Fragment>
+                                  }
+                                />
+                              </ListItem>
+                            </List>
+                          </CardContent>
+                        </Card>
+
+                      </Box>
+                    </div>
+                  </BoxWithBorder>
+                </Grid>
+              )}
+            </div>
+          </Paper>
         </div>
       </div>
       {showConfirmBox ? (

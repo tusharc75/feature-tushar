@@ -2,6 +2,93 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.24.0](https://github.com/vebholic/oms_frontend/compare/v1.23.0...v1.24.0) (2021-10-23)
+
+
+### Features
+
+* - Column reorder done in product suggested by gagan ([2a2492d](https://github.com/vebholic/oms_frontend/commit/2a2492da28a8eb8edf161ae8fde9904c6d16351c))
+* **loadingticketdetails.tsx:** add signature method ([c5e4b94](https://github.com/vebholic/oms_frontend/commit/c5e4b94ebc9387961f1e90996ea7a64a509ad913))
+* pO-80 ([d479966](https://github.com/vebholic/oms_frontend/commit/d479966687757c52b258aa3fb2783b4dfabaca81))
+* pO-80 ([c67c44e](https://github.com/vebholic/oms_frontend/commit/c67c44e2141758985f8054b56314e7eb59d810c8))
+
+
+### Bug Fixes
+
+* added accordian for customer account in project sales ([772e6cb](https://github.com/vebholic/oms_frontend/commit/772e6cb447d79da3bdf0daf836bd40301c50d6c1))
+* bug fix ([c1ac8af](https://github.com/vebholic/oms_frontend/commit/c1ac8af449356b7ea01d5e695e1571cdf9e8ed03))
+* from action header of product listing screen hide the BOM action if the environment is staging ([a0b51e9](https://github.com/vebholic/oms_frontend/commit/a0b51e974b3a24284a4387567123653e001830d7))
+* **loadingticketdetails.tsx:** remove unused code ([61cd9ae](https://github.com/vebholic/oms_frontend/commit/61cd9ae1c37fe40b3a7c45a9f94c3f310c3bb2fa))
+* oAT-84 ([30f3792](https://github.com/vebholic/oms_frontend/commit/30f3792bca7141c9ed5a7d991d80b21f4d0820ba))
+* optimization ([faef150](https://github.com/vebholic/oms_frontend/commit/faef150715b08b3c39542d8efc1e6791a9e2f6b0))
+* optimization ([b03c9a7](https://github.com/vebholic/oms_frontend/commit/b03c9a792237aa4046ed373135983dd00761a1ca))
+* removed unused code from leads listing page ([3096b83](https://github.com/vebholic/oms_frontend/commit/3096b83503a9bc75a2baf44d8337a417cba048dc))
+* **rentaldetailspage.tsx:** dates from rental data ([8002675](https://github.com/vebholic/oms_frontend/commit/800267510ecd91a29ce185bfbf576f9a16c63310))
+
+## [1.23.0](https://github.com/vebholic/oms_frontend/compare/v1.22.0...v1.23.0) (2021-10-22)
+
+
+### Features
+
+* **reminder.tsx:** open activity from notification ([d05cb53](https://github.com/vebholic/oms_frontend/commit/d05cb5311dbe1226f4fea7dfaf6871b82a21eaec))
+
+
+### Bug Fixes
+
+*  while Cloning a account submarket segment value coming to be blank though in the account ([d8fe611](https://github.com/vebholic/oms_frontend/commit/d8fe611e059a8c67ec694d9a076eb4d4517bbc87))
+* **activity.tsx:** chatter bug fix ([0e1fc1d](https://github.com/vebholic/oms_frontend/commit/0e1fc1d788427d41448c86017cf523cc8fea359d))
+* **confirmationBox:** error message text changes ([2ffb39c](https://github.com/vebholic/oms_frontend/commit/2ffb39c3aa5a27792981d1fa0879e6214e9a15f7))
+* price condition ([cf1f3b6](https://github.com/vebholic/oms_frontend/commit/cf1f3b6a0397329ffe4ba8e0661ac0dd2b9fdca6))
+* **reminder.tsx:** desctructure state data ([7c098d2](https://github.com/vebholic/oms_frontend/commit/7c098d20938823364c372d73217544fd87fa1e37))
+
+## [1.22.0](https://github.com/vebholic/oms_frontend/compare/v1.21.0...v1.22.0) (2021-10-21)
+
+
+### Features
+
+* added dynamic grid for market segment,warehouse entities ,product category ([3f8ff11](https://github.com/vebholic/oms_frontend/commit/3f8ff11f6d2e06fde9b88e28fa56133e16ed48de))
+
+
+### Bug Fixes
+
+* **activity.tsx:** chatter fix ([8c57fd3](https://github.com/vebholic/oms_frontend/commit/8c57fd3e5e55a578f13cb6bcdb087f8432a714fa))
+* do not fetch bom and plants data if env is staging ([55c47f2](https://github.com/vebholic/oms_frontend/commit/55c47f254675e0855959e4a8ff9716c552a7adc4))
+* if entty is not assigned then by default set all entities ([5460862](https://github.com/vebholic/oms_frontend/commit/546086256e52ffee2ecc7642a092692ed9233e88))
+* oAT-59 ([a30fdbf](https://github.com/vebholic/oms_frontend/commit/a30fdbf6a5bb87d78bb55e554780561a7d0e0f58))
+* oAT-95 ([16ad464](https://github.com/vebholic/oms_frontend/commit/16ad464bc94d4e23e7ade101389124dc7010916c))
+* option dropdown ([960da14](https://github.com/vebholic/oms_frontend/commit/960da14eb470d23bfddd7ba50ea157e8f0543c43))
+* quote detail history.js issue ([cd6ca08](https://github.com/vebholic/oms_frontend/commit/cd6ca081d1880a4caf31bf993e8b53fcca93c4c3))
+* remove freesole from formula ([cd39900](https://github.com/vebholic/oms_frontend/commit/cd399007289fbf7a6e9f98dfa70d01b1a80e7b36))
+* removed console from login.tsx ([77c7162](https://github.com/vebholic/oms_frontend/commit/77c71622eff4d3baf55c8e8f5b7f379fb4a7d3a4))
+* removed unused code ([6429785](https://github.com/vebholic/oms_frontend/commit/64297852184c7b3ccac8151b7599bd0c0ec9c638))
+
+## [1.21.0](https://github.com/vebholic/oms_frontend/compare/v1.20.0...v1.21.0) (2021-10-20)
+
+
+### Features
+
+* - OAT-26 address broken issue fixed, OAT-27 address same issue fixed ([b14794a](https://github.com/vebholic/oms_frontend/commit/b14794a7fd91567da012ce762483c37cc2f0414f))
+* add serialized asset selection in Rental management details ([ecf0040](https://github.com/vebholic/oms_frontend/commit/ecf00406267d861b4fb68ee7fdb40f13d35ff48e))
+* product grid in quote details issue ([3d525cc](https://github.com/vebholic/oms_frontend/commit/3d525cc87d56eff66aaf521ebe1e756569b6180c))
+* **rentalmanagement:** bulk edit ([ae31859](https://github.com/vebholic/oms_frontend/commit/ae3185960657f21b91a18171e6265bd5d0c4b14e))
+
+
+### Bug Fixes
+
+* bug fix in product list ([633e5ad](https://github.com/vebholic/oms_frontend/commit/633e5ad7181a5877be2f8dc4cfd4eb7fac5095d7))
+* changed stagging to staging ([9f46c27](https://github.com/vebholic/oms_frontend/commit/9f46c27d3300908e46a28ccf17f01198d175e2d0))
+* changes added ([ebdd17e](https://github.com/vebholic/oms_frontend/commit/ebdd17e6945255d1e2989b5673df420d335ea408))
+* changes added ([a8d5a28](https://github.com/vebholic/oms_frontend/commit/a8d5a28d5bb1ef8cf6e4fce227cc82d58f68f328))
+* config--- testing backend ([d0d7e61](https://github.com/vebholic/oms_frontend/commit/d0d7e616a0d03055eb578a94b3a1e69cf2fb361e))
+* **createproduct.tsx:** auto select entity ([8a86b0a](https://github.com/vebholic/oms_frontend/commit/8a86b0ae64643c3a5a3953c080f4a76e610a23c5))
+* lead name redirect to warehouse ([fcbe1d0](https://github.com/vebholic/oms_frontend/commit/fcbe1d08a6e2ad790196a0e011fb2cddbe71b7b5))
+* oAT-29 OAT-24 ([e5637db](https://github.com/vebholic/oms_frontend/commit/e5637db07d658132817fadc437b583e52238c1a9))
+* oAT-66 ([698b931](https://github.com/vebholic/oms_frontend/commit/698b9318e4c5d49718d522031502240246c3f047))
+* quote hot fixes ([5c8ee81](https://github.com/vebholic/oms_frontend/commit/5c8ee81e9bb022d6532e2dc856ec57cb85633d85))
+* quote pdf template name required error message ([e18a747](https://github.com/vebholic/oms_frontend/commit/e18a7473b69544ec61d34c20c84f3b5e6b90d9ed))
+* rental job ([3ddf217](https://github.com/vebholic/oms_frontend/commit/3ddf2179900377a4f2e850b3f166d2553bff88d0))
+* undefined name issue in customer contact for project sales ([963822d](https://github.com/vebholic/oms_frontend/commit/963822dab7b803c49f0e0baf36138e4d0502ed11))
+
 ## [1.20.0](https://github.com/vebholic/oms_frontend/compare/v1.19.2...v1.20.0) (2021-10-19)
 
 

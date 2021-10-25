@@ -52,19 +52,19 @@ const AssignDataDialog = (props) => {
 
     switch (type) {
       case "customer-account":
-        url = `/${type}?filterById=[{"field":"owner", "term": "${user?.user?._id}"},{"field":"collaborator", "term": "${user?.user?._id}"}]`
+        url = `/${type}?filterById=[{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]`
         break;
 
       case "customer-contact":
-        url = `/${type}?filterById=[{"field":"accountName", "term": "${accountId}"},{"field":"owner", "term": "${user?.user?._id}"},{"field":"collaborator", "term": "${user?.user?._id}"}]`
+        url = `/${type}?filterById=[{"field":"accountName", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]`
         break;
 
       case "opportunity":
-        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"},{"field":"owner", "term": "${user?.user?._id}"},{"field":"collaborator", "term": "${user?.user?._id}"}]`
+        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]`
         break;
 
       case "quote-builder":
-        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"},{"field":"owner", "term": "${user?.user?._id}"},{"field":"collaborator", "term": "${user?.user?._id}"}]`
+        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]`
         break;
 
       case "user":
@@ -145,9 +145,9 @@ const AssignDataDialog = (props) => {
   const getHeading = (type: string, data: any) => {
     switch (type) {
       case "user":
-        return `${data.firstName}  ${data.lastName}`;
+        return `${data?.firstName ?? ""}  ${data.lastName}`;
       case "lead":
-        return `${data.salutation} ${data.firstName} ${data.middleName}  ${data.lastName}`;
+        return `${data?.salutation ?? ""} ${data?.firstName ?? ""} ${data?.middleName ?? ""}  ${data.lastName}`;
       case "opportunity":
         return `${data.opportunityName}`;
       case "quote-builder":
@@ -155,7 +155,7 @@ const AssignDataDialog = (props) => {
       case "customer-account":
         return `${data.accountName}`;
       case "customer-contact":
-        return `${data.salutation} ${data.firstName} ${data.middleName}  ${data.lastName}`;
+        return `${data?.salutation ?? ""} ${data?.concatedName ?? ""}`;
       default:
         break;
     }
