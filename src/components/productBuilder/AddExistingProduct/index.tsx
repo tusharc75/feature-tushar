@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext, useReducer } from "react";
-import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -16,6 +15,7 @@ import { CustomDialogTransition } from "../../../constants/helpers";
 import { CommonRenderer } from "../../AgGridComponents/CustomAgGridCellRenderers";
 import { Link } from "react-router-dom";
 import routes from "../../../components/Helpers/Routes";
+import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
 
 var levalOrderBy = [
     "product",
@@ -74,9 +74,33 @@ const AddExistingProduct = (props) => {
         <NoDataCell />
     );
 
+    const ProductCategoryRenderer = (params) => (
+        <> {params.data.productCategory !== undefined && params.data.productCategoryChipColor !== null ?
+            (
+                <Chip
+                    className="ml-3"
+                    style={{ backgroundColor: `${params.data.productCategoryChipColor}` }}
+                    label={`${params.data.productCategory}`}
+                />
+            )
+            : (
+                <NoDataCell />
+            )}
+        </>
+    );
+
+    const ProductNameRenderer = params => (
+        <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data._id}`}>
+            {params.value}
+        </Link>
+    )
+
+    
     const frameworkComponents = {
         commonRenderer: CommonRenderer,
         entityRenderer: EntityNameRenderer,
+        productNameRenderer: ProductNameRenderer,
+        productCategoryRenderer: ProductCategoryRenderer,
     };
 
     const getQueryString = () => {
@@ -127,6 +151,7 @@ const AddExistingProduct = (props) => {
                     id: u._id,
                     entity: firstEntity?.optionLabel,
                     entityId: firstEntity?.optionValue,
+                    productCategoryChipColor: u.productCategory?.chipColour,
                     restEntity: restEntity,
                 }
                 for (let col in res) {

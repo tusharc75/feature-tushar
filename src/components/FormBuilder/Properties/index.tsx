@@ -661,7 +661,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                             name="isConverter"
                             checked={values['isConverter']}
                             onChange={(e) => {
-
                               setFieldValue('isConverter', e.target.checked);
                               setFieldValue('units', []);
                               setFieldValue('displayUnits', []);
@@ -1202,9 +1201,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ) : null}
           </>
         )}
-
       </Formik>
-
     </Dialog >
   );
 };
