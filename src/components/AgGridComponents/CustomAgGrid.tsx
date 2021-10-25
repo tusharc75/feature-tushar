@@ -150,7 +150,9 @@ export default function CustomAgGrid({
     const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
     if (columnState) {
-      params.columnApi.setColumnState(columnState);
+      setTimeout(() => {
+        params.columnApi.setColumnState(columnState);
+      }, 50)
     }
   };
 
