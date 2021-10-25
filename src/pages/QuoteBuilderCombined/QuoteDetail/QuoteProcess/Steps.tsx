@@ -21,6 +21,8 @@ import {
   ListItemIcon,
   Checkbox,
   TextField,
+  Box,
+  CircularProgress
 } from "@material-ui/core";
 import {
   IoIosArrowDroprightCircle,
@@ -145,8 +147,10 @@ const Steps = (props) => {
   const [showManualCustomerActionDialog, setShowManualCustomerActionDialog] =
     useState(false);
   const [comment, setComment] = useState("");
+  const [commentError, setCommentError] = useState(null);
+  const [submitting, setSubmitting] = useState(null);
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setComment(event.target.value);
+    setComment(event.target.value.trimStart());
   };
   const ColorlibStepIcon = (props: StepIconProps) => {
     const classes = useColorlibStepIconStyles();
@@ -257,30 +261,44 @@ const Steps = (props) => {
 
   const manualSendToCustomer = () => {
     if (selectedOption) {
-      let tempComment = quoteData.versions[version]?.comment
+      let tempComment = quoteData.versions[version]?.comment ?? []
       if (typeof tempComment === 'string') {
         tempComment = [tempComment];
       }
       let dataObj = {
-        status: selectedOption + " by Customer",
+        status: selectedOption?.trim() + " by Customer",
         manual: true,
         comment: tempComment
       };
       if (selectedOption === "Invalid") {
         dataObj.comment.push(comment);
       }
-      axiosInstance()
-        .post(
-          `quote-builder/updateStatusfromCustomer/${id}?version=${version}`,
-          dataObj
-        )
-        .then(() => {
-          activeStep = activeStep + 1;
-          Refresh(version);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
+
+      let { comment: msg } = dataObj
+
+      msg = msg?.filter(x => x);
+
+      dataObj.comment = msg
+
+      if (selectedOption === "Invalid" && comment === "") {
+        setCommentError("Please write your comment!")
+      } else {
+        setSubmitting(true)
+        axiosInstance()
+          .post(
+            `quote-builder/updateStatusfromCustomer/${id}?version=${version}`,
+            dataObj
+          )
+          .then(() => {
+            setSubmitting(false)
+            activeStep = activeStep + 1;
+            Refresh(version);
+          })
+          .catch((error) => {
+            setSubmitting(false)
+            toastConfig.setToastConfig(error);
+          });
+      }
     }
   };
 
@@ -297,6 +315,14 @@ const Steps = (props) => {
         toastConfig.setToastConfig(error);
       });
   };
+
+
+  const closeManualDiaog = () => {
+    setShowManualCustomerActionDialog(false);
+    setSelectedOption(null)
+    setComment("")
+    setCommentError(null)
+  }
 
   return (
     <div>
@@ -659,7 +685,7 @@ const Steps = (props) => {
           fullWidth
           maxWidth="xs"
           open={showManualCustomerActionDialog}
-          onClose={() => setShowManualCustomerActionDialog(false)}
+          onClose={closeManualDiaog}
           aria-labelledby="assign-roles-dialog"
         >
           <CustomDialogHeader title={`Reason For Ending`} />
@@ -667,7 +693,7 @@ const Steps = (props) => {
             <>
               <List style={{ padding: 0 }}>
                 {options.map((option) => (
-                  <ListItem divider>
+                  <ListItem divider key={option}>
                     <ListItemIcon>
                       <Checkbox
                         edge="start"
@@ -687,31 +713,39 @@ const Steps = (props) => {
                 ))}
               </List>
               {selectedOption === "Invalid" && (
-                <TextField
-                  id="outlined-multiline-static"
-                  label="Comment"
-                  multiline
-                  value={comment}
-                  onChange={handleChange}
-                  rows={4}
-                  variant="outlined"
-                />
+                <Box my={2}>
+                  <TextField
+                    fullWidth
+                    id="outlined-multiline-static"
+                    label="Comment"
+                    multiline
+                    value={comment}
+                    onChange={handleChange}
+                    rows={4}
+                    variant="outlined"
+                    error={Boolean(commentError)}
+                    helperText={Boolean(commentError) && commentError}
+                  />
+                </Box>
               )}
             </>
           </CustomDialogContent>
           <CustomDialogFooter>
             <Button
-              onClick={() => setShowManualCustomerActionDialog(false)}
+              onClick={closeManualDiaog}
               color="primary"
               size="small"
+              disabled={submitting}
             >
               Cancel
             </Button>
             <Button
+              disabled={!Boolean(selectedOption) || submitting}
               onClick={manualSendToCustomer}
               color="primary"
               size="small"
               variant="contained"
+              endIcon={submitting && <CircularProgress size={20} />}
             >
               Save
             </Button>
