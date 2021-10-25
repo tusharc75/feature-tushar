@@ -1196,16 +1196,16 @@ export default function QuoteProcess(props) {
                             >
                                 <span>Total Profit </span>
                                 <span className="quoteAmount" title={totalProfit.fullFormatAmount} >
-                                    {totalProfit.shortFormatAmount
-                                        ? totalProfit.shortFormatAmount
+                                    {totalProfit.fullFormatAmount
+                                        ? totalProfit.fullFormatAmount
                                         : defaultTotalValue}
                                 </span>
                             </div>
                             <div className="quoteBox">
                                 <span>Total Cost Price </span>
                                 <span className="quoteAmount" title={totalcost.fullFormatAmount}  >
-                                    {totalcost.shortFormatAmount
-                                        ? totalcost.shortFormatAmount
+                                    {totalcost.fullFormatAmount
+                                        ? totalcost.fullFormatAmount
                                         : defaultTotalValue}
                                 </span>
                             </div>
@@ -1213,8 +1213,8 @@ export default function QuoteProcess(props) {
                                 <div className="redQuoteBox">
                                     <span>Total Selling Price </span>
                                     <span className="quoteAmount" title={totalsale.fullFormatAmount} >
-                                        {totalsale.shortFormatAmount
-                                            ? totalsale.shortFormatAmount
+                                        {totalsale.fullFormatAmount
+                                            ? totalsale.fullFormatAmount
                                             : defaultTotalValue}
                                     </span>
                                 </div>
@@ -1223,8 +1223,8 @@ export default function QuoteProcess(props) {
                                     <span>Total Selling Price </span>
                                     <span className="quoteAmount" title={totalsale.fullFormatAmount}
                                     >
-                                        {totalsale.shortFormatAmount
-                                            ? totalsale.shortFormatAmount
+                                        {totalsale.fullFormatAmount
+                                            ? totalsale.fullFormatAmount
                                             : defaultTotalValue}
                                     </span>
                                 </div>
