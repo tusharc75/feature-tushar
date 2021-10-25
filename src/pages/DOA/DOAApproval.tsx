@@ -392,7 +392,7 @@ const DOAApproval = () => {
                             formatAmountWithCurrency(
                               QData["TotalProfitcurr"],
                               QData["TotalProfitamount"]
-                            ).shortFormatAmount
+                            ).fullFormatAmount
                           }
                         </span>
                       </div>
@@ -410,7 +410,7 @@ const DOAApproval = () => {
                             formatAmountWithCurrency(
                               QData["TotalCostcurr"],
                               QData["TotalCostamount"]
-                            ).shortFormatAmount
+                            ).fullFormatAmount
                           }
                         </span>
                       </div>
@@ -428,7 +428,7 @@ const DOAApproval = () => {
                             formatAmountWithCurrency(
                               QData["TotalSellingPricecurr"],
                               QData["TotalSellingPriceamount"]
-                            ).shortFormatAmount
+                            ).fullFormatAmount
                           }
                         </span>
                       </div>

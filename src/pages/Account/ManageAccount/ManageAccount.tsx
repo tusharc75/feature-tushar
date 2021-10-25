@@ -40,7 +40,9 @@ export default function ManageAccount(props) {
     accountId = null,
     formValues = {},
     handleValuesChange = null,
-    marketSegmentId = null
+    marketSegmentId = null,
+    isClone,
+    accountNameForClone
   } = props;
 
   const {
@@ -303,12 +305,16 @@ export default function ManageAccount(props) {
             }
           }}
           title={
-            isNew
-              ? "Add Account"
-              : `Editing ${accountData.initialValues.accountName
-                ? accountData.initialValues.accountName
-                : ""
-              }`
+            isClone 
+            ? 
+            `Clone ${accountNameForClone}`
+              :
+              isNew
+                ? "Add Account"
+                : `Editing ${accountData.initialValues.accountName
+                  ? accountData.initialValues.accountName
+                  : ""
+                }`
           }
         />
         {accountData.fields.length > 0 ? (

@@ -18,6 +18,8 @@ import {
   formatAmountWithCurrency,
   gridLoadingTimeout,
   prepareDataForGrid,
+  customerContact,
+  supplierContact,
 } from "../../constants/helpers";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
@@ -89,6 +91,12 @@ const QuoteBuilders = () => {
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource,
   });
+
+  const [contactDetails, setContactDetails] = useState({
+    contactId: history.location?.state?.contactId,
+    contactName: history.location?.state?.contactName,
+    resource: history.location?.state?.resource,
+  })
   const [showVersionsDialog, setShowVersionsDialog] = useState(false);
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const [columns, setColumns] = useState([])
@@ -535,6 +543,24 @@ const QuoteBuilders = () => {
           {
             field: replaceFieldName("supplierAccountName"),
             term: { $in: [accountDetails.accountId] },
+          },
+        ])}`;
+      }
+    }
+
+    if (contactDetails.contactId) {
+      if (contactDetails.resource === customerContact.contactResource) {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
+          {
+            field: replaceFieldName("customerContactName"),
+            term: contactDetails.contactId,
+          },
+        ])}`;
+      } else if (contactDetails.resource === supplierContact.contactResource) {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
+          {
+            field: replaceFieldName("supplierContactName"),
+            term: { $in: [contactDetails.contactId] },
           },
         ])}`;
       }
