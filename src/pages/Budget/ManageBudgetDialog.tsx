@@ -72,7 +72,7 @@ export default function ManageBudgetDialog({
     const [usersDataSource, setUsersDataSource] = useState([]);
 
     const [showAddMarketSegmentDialog, setShowAddMarketSegmentDialog] = useState(false);
- 
+
     const [mainMarketSegmentDataSource, setMainMarketSegmentDataSource] = useState([]);
     const [marketSegmentDataSource, setMarketSegmentDataSource] = useState([]);
     const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
@@ -214,7 +214,6 @@ export default function ManageBudgetDialog({
     }
 
     const onSubmit = (values) => {
-        values.year = new Date(values.year).getFullYear();
         setLoading(true);
 
         if (budgetId && !isClone) {

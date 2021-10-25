@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.24.2](https://github.com/vebholic/oms_frontend/compare/v1.24.1...v1.24.2) (2021-10-25)
+
+### [1.24.1](https://github.com/vebholic/oms_frontend/compare/v1.24.0...v1.24.1) (2021-10-24)
+
+## [1.24.0](https://github.com/vebholic/oms_frontend/compare/v1.23.0...v1.24.0) (2021-10-23)
+
+
+### Features
+
+* - Column reorder done in product suggested by gagan ([2a2492d](https://github.com/vebholic/oms_frontend/commit/2a2492da28a8eb8edf161ae8fde9904c6d16351c))
+* **loadingticketdetails.tsx:** add signature method ([c5e4b94](https://github.com/vebholic/oms_frontend/commit/c5e4b94ebc9387961f1e90996ea7a64a509ad913))
+* pO-80 ([d479966](https://github.com/vebholic/oms_frontend/commit/d479966687757c52b258aa3fb2783b4dfabaca81))
+* pO-80 ([c67c44e](https://github.com/vebholic/oms_frontend/commit/c67c44e2141758985f8054b56314e7eb59d810c8))
+
+
+### Bug Fixes
+
+* added accordian for customer account in project sales ([772e6cb](https://github.com/vebholic/oms_frontend/commit/772e6cb447d79da3bdf0daf836bd40301c50d6c1))
+* bug fix ([c1ac8af](https://github.com/vebholic/oms_frontend/commit/c1ac8af449356b7ea01d5e695e1571cdf9e8ed03))
+* from action header of product listing screen hide the BOM action if the environment is staging ([a0b51e9](https://github.com/vebholic/oms_frontend/commit/a0b51e974b3a24284a4387567123653e001830d7))
+* **loadingticketdetails.tsx:** remove unused code ([61cd9ae](https://github.com/vebholic/oms_frontend/commit/61cd9ae1c37fe40b3a7c45a9f94c3f310c3bb2fa))
+* oAT-84 ([30f3792](https://github.com/vebholic/oms_frontend/commit/30f3792bca7141c9ed5a7d991d80b21f4d0820ba))
+* optimization ([faef150](https://github.com/vebholic/oms_frontend/commit/faef150715b08b3c39542d8efc1e6791a9e2f6b0))
+* optimization ([b03c9a7](https://github.com/vebholic/oms_frontend/commit/b03c9a792237aa4046ed373135983dd00761a1ca))
+* removed unused code from leads listing page ([3096b83](https://github.com/vebholic/oms_frontend/commit/3096b83503a9bc75a2baf44d8337a417cba048dc))
+* **rentaldetailspage.tsx:** dates from rental data ([8002675](https://github.com/vebholic/oms_frontend/commit/800267510ecd91a29ce185bfbf576f9a16c63310))
+
 ## [1.23.0](https://github.com/vebholic/oms_frontend/compare/v1.22.0...v1.23.0) (2021-10-22)
 
 
