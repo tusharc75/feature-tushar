@@ -5,7 +5,6 @@ import {
   IconButton,
   Tooltip,
 } from "@material-ui/core";
-import { Link } from "react-router-dom";
 import { entity, gridLoadingTimeout, isObjectEmpty } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "./../../components/Helpers/Routes";
@@ -213,7 +212,7 @@ const Entity: FC = () => {
     return deepFilter;
   };
 
-  const fetchEntity = () => {
+  const fetchEntity = (setEntities = false) => {
     const queryString = getQueryString();
     dispatch({ type: "loading", loading: true });
 
@@ -228,6 +227,16 @@ const Entity: FC = () => {
         let rows = data.map((u) => {
           return prepareDataForGrid(u);
         });
+        if (setEntities) {
+          let mappedEntities = []
+          if (data && data.length) {
+            data.forEach(o => {
+              mappedEntities = [...mappedEntities,
+              { optionLabel: o?.entityName, optionValue: o?._id }]
+            })
+          }
+          localStorage.setItem("mappedEntities", JSON.stringify(mappedEntities))
+        }
 
         dispatch({ type: "initialize", data: rows, count: count });
         setTimeout(() => {

@@ -357,29 +357,35 @@ export default function Account(props) {
         entity="account"
       />
       {
-        accountPermissions.isUpdate &&
-        <Tooltip title="Entity">
-          <IconButton
-            size="small"
-            aria-label="Entity"
-            onClick={() => {
-              setAccountId(params.data._id)
-              setShowEntityDialog(true)
-              if (params?.data?.entity) {
-                let entities = []
-                if (params?.data?.entityId) {
-                  entities.push(params?.data?.entityId)
+        accountPermissions.isUpdate && params.data?.isAllowedToUpdate ?
+          <Tooltip title="Entity">
+            <IconButton
+              size="small"
+              aria-label="Entity"
+              onClick={() => {
+                setAccountId(params.data._id)
+                setShowEntityDialog(true)
+                if (params?.data?.entity) {
+                  let entities = []
+                  if (params?.data?.entityId) {
+                    entities.push(params?.data?.entityId)
+                  }
+                  if (params?.data?.restentity) {
+                    let restEntities = params?.data?.restentity.map(o => o.optionValue)
+                    entities = [...entities, ...restEntities]
+                  }
+                  setEntities([...entities])
                 }
-                if (params?.data?.restentity) {
-                  let restEntities = params?.data?.restentity.map(o => o.optionValue)
-                  entities = [...entities, ...restEntities]
-                }
-                setEntities([...entities])
-              }
-            }}>
-            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
-          </IconButton>
-        </Tooltip>
+              }}>
+              <AiOutlineDeploymentUnit fontSize="15" color="primary" />
+            </IconButton>
+          </Tooltip> : (
+            <Tooltip className="cursor-stop" title="You do not have permission to update entity">
+              <IconButton aria-label="Clone" size="small">
+                <AiOutlineDeploymentUnit fontSize="15" />
+              </IconButton>
+            </Tooltip>
+          )
       }
     </>
   );

@@ -18,7 +18,8 @@ export const initialState = {
     start: false,
     stepIndex: 0,
   },
-  gridMetaData: {}
+  gridMetaData: {},
+  mappedEntities: []
 };
 
 const reducer = (state = initialState, action) => {
