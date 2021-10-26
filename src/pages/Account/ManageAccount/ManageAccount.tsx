@@ -74,79 +74,77 @@ export default function ManageAccount(props) {
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
 
   useEffect(() => {
-    if (accountData.fields.length > 0) {
-      if (isNew) {
-        const processSteps = accountData.fields.find(
-          (d) => d.type.toLowerCase() === "process"
-        );
-
-        if (processSteps) {
-          accountData.fields.map((d) => {
-            if (d.sectionName == processSteps?.additionalInfoSection) {
-              setAdditionalFieldName(d.sectionName)
-            }
-          });
-        }
-      }
-
-      if (fromProject) {
-        setOwnerCollaboratorCommonDataSource(owners);
-        setOwnerDataSource(owners);
-        setCollaboratorDataSource(collaborators);
-      } else {
-        let ownerCollaboratorDropdownData = accountData.fields.filter(
-          (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
-        );
-        if (ownerCollaboratorDropdownData.length > 0) {
-          setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
-          setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
-          setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
-        }
-      }
-
-      const parentAccountDropdownData = accountData.fields.find(
-        (d) => d.fieldName === "parentAccount"
+    if (isNew) {
+      const processSteps = accountData.fields.find(
+        (d) => d.type.toLowerCase() === "process"
       );
-      if (parentAccountDropdownData) {
-        setParentAccountDataSource(
-          isNew
-            ? parentAccountDropdownData.option
-            : parentAccountDropdownData.option.filter(
-              (d) => d?.optionValue !== accountId
-            )
-        );
-      }
 
-      setFormsData(setFieldsInAscendingOrder(accountData.fields));
-
-      //  Initialize market segment dropdown which have parentMarketSegment === "" or that record have child
-      const marketSegmentDropdownData = accountData.fields.find(
-        (d) => d.fieldName === formFieldNames.marketSegment
-      );
-      if (marketSegmentDropdownData) {
-        setMainMarketSegmentDataSource(marketSegmentDropdownData.option);
-
-        let initializeMarketSegmentDataSource = [];
-        marketSegmentDropdownData.option.forEach(option => {
-          if (option.parentMarketSegment === "" || marketSegmentDropdownData.option.some(s => s.parentMarketSegment === option.optionValue)) {
-            initializeMarketSegmentDataSource.push(option);
+      if (processSteps) {
+        accountData.fields.map((d) => {
+          if (d.sectionName == processSteps?.additionalInfoSection) {
+            setAdditionalFieldName(d.sectionName)
           }
-        })
-        setMarketSegmentDataSource(initializeMarketSegmentDataSource);
+        });
       }
+    }
+
+    if (fromProject) {
+      setOwnerCollaboratorCommonDataSource(owners);
+      setOwnerDataSource(owners);
+      setCollaboratorDataSource(collaborators);
+    } else {
+      let ownerCollaboratorDropdownData = accountData.fields.filter(
+        (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
+      );
+      if (ownerCollaboratorDropdownData.length > 0) {
+        setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
+        setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
+        setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
+      }
+    }
+
+    const parentAccountDropdownData = accountData.fields.find(
+      (d) => d.fieldName === "parentAccount"
+    );
+    if (parentAccountDropdownData) {
+      setParentAccountDataSource(
+        isNew
+          ? parentAccountDropdownData.option
+          : parentAccountDropdownData.option.filter(
+            (d) => d?.optionValue !== accountId
+          )
+      );
+    }
+
+    setFormsData(setFieldsInAscendingOrder(accountData.fields));
+
+    //  Initialize market segment dropdown which have parentMarketSegment === "" or that record have child
+    const marketSegmentDropdownData = accountData.fields.find(
+      (d) => d.fieldName === formFieldNames.marketSegment
+    );
+    if (marketSegmentDropdownData) {
+      setMainMarketSegmentDataSource(marketSegmentDropdownData.option);
+
+      let initializeMarketSegmentDataSource = [];
+      marketSegmentDropdownData.option.forEach(option => {
+        if (option.parentMarketSegment === "" || marketSegmentDropdownData.option.some(s => s.parentMarketSegment === option.optionValue)) {
+          initializeMarketSegmentDataSource.push(option);
+        }
+      })
+      setMarketSegmentDataSource(initializeMarketSegmentDataSource);
+    }
 
 
-      if (!isNew && marketSegmentDropdownData) {
-        setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === accountData.initialValues.marketSegment));
-      }
+    if (!isNew && marketSegmentDropdownData) {
+      setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === accountData.initialValues.marketSegment));
+    }
 
-      if (accountData?.initialValues?.marketSegment && marketSegmentDropdownData) {
-        setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === accountData?.initialValues?.marketSegment));
-      }
+    if (accountData?.initialValues?.marketSegment && marketSegmentDropdownData) {
+      setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === accountData?.initialValues?.marketSegment));
+    }
 
-      if (marketSegmentId && marketSegmentDropdownData) {
-        setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === marketSegmentId));
-      }
+    if (marketSegmentId && marketSegmentDropdownData) {
+      setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === marketSegmentId));
     }
 
     return () => {
@@ -154,7 +152,7 @@ export default function ManageAccount(props) {
       setOwnerDataSource([]);
       setCollaboratorDataSource([]);
     };
-  }, []);
+  }, [accountData.fields]);
 
   const onOwnerDropdownOpen = (selectedCollaborator, selectedEntity) => {
     if (selectedEntity?.length > 0) {
@@ -305,9 +303,9 @@ export default function ManageAccount(props) {
             }
           }}
           title={
-            isClone 
-            ? 
-            `Clone ${accountNameForClone}`
+            isClone
+              ?
+              `Clone ${accountNameForClone}`
               :
               isNew
                 ? "Add Account"
@@ -360,7 +358,7 @@ export default function ManageAccount(props) {
                                           ownerDataSource
                                         }
                                         onChange={(e, val) => {
-                                          handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : "");
+                                          // handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : "");
                                           setFieldValue(
                                             field.fieldName,
                                             val && val.optionValue
@@ -390,11 +388,11 @@ export default function ManageAccount(props) {
                                                   )
                                                   : collaboratorDataSource;
 
-                                              handleValuesChange("collaborator", newCollaboratorDataSource.find(
-                                                (d) =>
-                                                  d?.optionValue ===
-                                                  user?.user?._id
-                                              ).optionValue)
+                                              // handleValuesChange("collaborator", newCollaboratorDataSource.find(
+                                              //   (d) =>
+                                              //     d?.optionValue ===
+                                              //     user?.user?._id
+                                              // ).optionValue)
 
                                               setFieldValue("collaborator", [
                                                 ...values["collaborator"],
@@ -443,7 +441,7 @@ export default function ManageAccount(props) {
                                           collaboratorDataSource
                                         }
                                         setFieldValue={(name, value) => {
-                                          handleValuesChange(field.fieldName, value);
+                                          // handleValuesChange(field.fieldName, value);
                                           setFieldValue(field.fieldName, value)
                                         }}
                                         required={field.required}
@@ -477,13 +475,13 @@ export default function ManageAccount(props) {
                                         size="small"
                                         onChange={(e, value) => {
 
-                                          handleValuesChange(field.fieldName, value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [])
+                                          // handleValuesChange(field.fieldName, value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [])
                                           setFieldValue(
                                             field.fieldName,
                                             value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
                                           );
-                                          handleValuesChange("owner", "")
-                                          handleValuesChange("collaborator", [])
+                                          // handleValuesChange("owner", "")
+                                          // handleValuesChange("collaborator", [])
                                           setFieldValue("owner", "");
                                           setFieldValue("collaborator", []);
                                         }}
@@ -501,7 +499,7 @@ export default function ManageAccount(props) {
                                         name={field.fieldName}
                                         type={field.type}
                                         setFieldValue={(name, value) => {
-                                          handleValuesChange(name, value)
+                                          // handleValuesChange(name, value)
                                           setFieldValue(name, value)
                                         }}
                                         required={field.required}
@@ -510,7 +508,7 @@ export default function ManageAccount(props) {
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onChange={(e) => {
-                                          handleValuesChange(field.fieldName, e.target.checked)
+                                          // handleValuesChange(field.fieldName, e.target.checked)
                                           setFieldValue(
                                             field.fieldName,
                                             e.target.checked
@@ -519,7 +517,7 @@ export default function ManageAccount(props) {
                                             e.target.checked &&
                                             values.billingAddress
                                           ) {
-                                            handleValuesChange("shippingAddress", values.billingAddress)
+                                            // handleValuesChange("shippingAddress", values.billingAddress)
                                             setFieldValue(
                                               "shippingAddress",
                                               values.billingAddress
@@ -540,13 +538,13 @@ export default function ManageAccount(props) {
                                         type={field.type}
                                         options={field.option}
                                         setFieldValue={(name, value) => {
-                                          handleValuesChange(field.fieldName, value)
+                                          // handleValuesChange(field.fieldName, value)
                                           setFieldValue(name, value)
                                           if (
                                             values.isShippingAddressSameAsBillingAddress ===
                                             true
                                           ) {
-                                            handleValuesChange("shippingAddress", value ?? "")
+                                            // handleValuesChange("shippingAddress", value ?? "")
                                             setFieldValue(
                                               "shippingAddress",
                                               value ?? ""
@@ -559,7 +557,7 @@ export default function ManageAccount(props) {
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onChange={(event, newValue) => {
-                                          handleValuesChange(field.fieldName, newValue?.description ?? "")
+                                          // handleValuesChange(field.fieldName, newValue?.description ?? "")
                                           setFieldValue(
                                             field.fieldName,
                                             newValue?.description ?? ""
@@ -568,7 +566,7 @@ export default function ManageAccount(props) {
                                             values.isShippingAddressSameAsBillingAddress ===
                                             true
                                           ) {
-                                            handleValuesChange("shippingAddress", newValue?.description ?? "")
+                                            // handleValuesChange("shippingAddress", newValue?.description ?? "")
                                             setFieldValue(
                                               "shippingAddress",
                                               newValue?.description ?? ""
@@ -589,7 +587,7 @@ export default function ManageAccount(props) {
                                         type={field.type}
                                         options={field.option}
                                         setFieldValue={(name, value) => {
-                                          handleValuesChange(name, value);
+                                          // handleValuesChange(name, value);
                                           setFieldValue(name, value)
                                         }}
                                         required={field.required}
@@ -602,7 +600,7 @@ export default function ManageAccount(props) {
                                           true || (!isNew && field.disableOnEdit)
                                         }
                                         onChange={(event, newValue) => {
-                                          handleValuesChange(field.fieldName, newValue?.description ?? "");
+                                          // handleValuesChange(field.fieldName, newValue?.description ?? "");
                                           setFieldValue(
                                             field.fieldName,
                                             newValue?.description ?? ""
@@ -622,7 +620,7 @@ export default function ManageAccount(props) {
                                         type={field.type}
                                         options={parentAccountDataSource}
                                         setFieldValue={(name, value) => {
-                                          handleValuesChange(name, value);
+                                          // handleValuesChange(name, value);
                                           setFieldValue(name, value)
                                         }}
                                         required={field.required}
@@ -659,7 +657,7 @@ export default function ManageAccount(props) {
                                             name={field.fieldName}
                                             type={field.type}
                                             setFieldValue={(name, value) => {
-                                              handleValuesChange({ [name]: value })
+                                              // handleValuesChange({ [name]: value })
                                               setFieldValue(name, value)
                                             }}
                                             required={field.required}
@@ -745,7 +743,7 @@ export default function ManageAccount(props) {
                                               name={field.fieldName}
                                               type={field.type}
                                               setFieldValue={(name, value) => {
-                                                handleValuesChange({ [name]: value })
+                                                // handleValuesChange({ [name]: value })
                                                 setFieldValue(name, value)
                                               }}
                                               required={field.required}
@@ -815,7 +813,7 @@ export default function ManageAccount(props) {
                                           type={field.type}
                                           options={field.option}
                                           setFieldValue={(name, value) => {
-                                            handleValuesChange(name, value);
+                                            // handleValuesChange(name, value);
                                             setFieldValue(name, value)
                                           }}
                                           required={field.required}
