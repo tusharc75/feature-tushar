@@ -16,6 +16,10 @@
 .deleteIconNew{
     display: none;
 }
+.uio{
+    border: 1px solid grey;
+    flex-grow: 1;
+}
 
 @media only screen and (max-width: 600px) {
     .stepper-responsive {
@@ -186,6 +190,7 @@
         color: var(--danger-light);
         padding-bottom: 3px;
     }
+
 }
 
 /* Small devices (portrait tablets and large phones, 600px and up) */

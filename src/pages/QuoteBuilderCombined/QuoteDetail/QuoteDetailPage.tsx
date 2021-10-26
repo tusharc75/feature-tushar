@@ -10,11 +10,12 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 const useStyles = makeStyles(() => ({
     detailBox: {
         border: "1px solid #163340",
+        borderTop: "0px"
     },
     btnHeader: {
         position: "absolute",
-        top: "4px",
-        right: "20px",
+        top: "13px",
+        right: "36px",
     },
 }));
 
@@ -90,8 +91,8 @@ export default function QuoteDetailPage({ quoteData, quotePermissions, selectedE
                     <div className={classes.btnHeader}>
                         {quotePermissions?.isCreate ? (
                             <Button
-                                variant="contained"
-                                color="primary"
+                                variant="text"
+                                style={{color:"white"}}
                                 size="small"
                                 className="mr-1"
                                 startIcon={<BiLayerPlus />}
@@ -102,8 +103,8 @@ export default function QuoteDetailPage({ quoteData, quotePermissions, selectedE
                         ) : null}
                         {allowedToEdit ? (
                             <Button
-                                variant="contained"
-                                color="primary"
+                                variant="text"
+                                style={{color:"white"}}
                                 size="small"
                                 startIcon={<HiPencil />}
                                 onClick={handleOpenUpdateDialog}

@@ -108,7 +108,7 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
     };
 
     return (
-        <div style={{ maxHeight: 500, width: "100%" }} className="mt-2">
+        <div style={{ maxHeight: 500, width: "100%", border:"1px solid grey", borderTop:"0px" }} className="pt-2">
             <CustomAgGrid
                 columns={columns}
                 dataRows={dataRows}

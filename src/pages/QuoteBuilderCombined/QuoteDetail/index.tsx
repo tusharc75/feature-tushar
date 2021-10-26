@@ -585,8 +585,8 @@ export default function QuoteDetail() {
                   >
                     <Tab
                       style={{
-                        background: tabValue === 0 ? "#163340" : "",
-                        color: tabValue === 0 ? "white" : "#163340",
+                        background: tabValue === 0 ? "white" : "",
+                        color: tabValue === 0 ? "blue" : "#163340",
                       }}
                       label={
                         <div className="d-flex align-items-center tab-font">
@@ -598,8 +598,8 @@ export default function QuoteDetail() {
                     />
                     <Tab
                       style={{
-                        background: tabValue === 1 ? "#163340" : "",
-                        color: tabValue === 1 ? "white" : "#163340",
+                        background: tabValue === 1 ? "white" : "",
+                        color: tabValue === 1 ? "blue" : "#163340",
                       }}
                       label={
                         <div className="d-flex align-items-center tab-font">
@@ -611,8 +611,8 @@ export default function QuoteDetail() {
                     />
                     <Tab
                       style={{
-                        background: tabValue === 2 ? "#163340" : "",
-                        color: tabValue === 2 ? "white" : "#163340",
+                        background: tabValue === 2 ? "white" : "",
+                        color: tabValue === 2 ? "blue" : "#163340",
                       }}
                       label={
                         <div className="d-flex align-items-center tab-font">
@@ -622,7 +622,9 @@ export default function QuoteDetail() {
                       }
                       {...a11yProps(1)}
                     />
+                   <div className={"uio"}>  </div>
                   </Tabs>
+
 
 
                   <Grid className={"DetailCube"}>

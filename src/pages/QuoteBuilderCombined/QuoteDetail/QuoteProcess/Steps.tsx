@@ -49,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: "bold",
   },
   pStepper: {
-    padding: "10px 4px",
+    padding: "5px 4px",
     borderRadius: "4px",
     [theme.breakpoints.down("xs")]: {
       padding: "4px",
@@ -71,7 +71,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "center",
     margin: "1px",
-    borderRadius: "4px",
+    borderRadius: "20px 20px 2px 2px",
     border: "1px solid #d6d5d5",
     [theme.breakpoints.down("xs")]: {
       width: "50%",
@@ -80,12 +80,19 @@ const useStyles = makeStyles((theme) => ({
   },
   inActive: {
     background: "#ebebeb",
+    borderBottom:"2px solid var(--grey)",
   },
   currentStep: {
     background: "#ffffff",
+    borderBottom:"3px solid #378280",
+    color:"#378280 !important"
+
   },
   active: {
-    background: "#53ac65",
+    background: "var(--warning-light)",
+    borderBottom:"2px solid var(--warning)",
+    color:"#378280 !important"
+
   },
   sent: {
     color: "#00acc1",
@@ -111,7 +118,7 @@ const useColorlibStepIconStyles = makeStyles((theme) => ({
     alignItems: "center",
   },
   active: {
-    color: "#047d1c !important",
+    color: "#378280 !important",
   },
   completed: {
     color: "#3f3f02 !important",

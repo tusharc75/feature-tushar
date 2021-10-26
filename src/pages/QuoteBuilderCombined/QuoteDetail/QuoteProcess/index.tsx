@@ -6,7 +6,7 @@ import { useHistory } from "react-router-dom";
 import { AiFillEdit, AiFillPlusCircle, AiOutlineEye } from "react-icons/ai";
 import { BiLayerPlus, BiMailSend } from "react-icons/bi";
 import { FiDownloadCloud } from "react-icons/fi";
-import { GiVintageRobot } from "react-icons/gi";
+import { GiVintageRobot, GiProfit } from "react-icons/gi";
 import { HiPencil } from "react-icons/hi";
 import axiosInstance from "../../../../axios/axiosInstance";
 import Loader from "../../../../components/Loader";
@@ -34,6 +34,8 @@ import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 import DOAReasonDialog from "../../../DOA/DOAReasonDialog";
 import { camelCase, isEqual, startCase } from "lodash";
+import { VscVersions } from "react-icons/vsc";
+import { MdDelete } from "react-icons/md";
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -52,9 +54,10 @@ const useStyles = makeStyles((theme) => ({
     },
     bgProduct: {
         background: "#f5f5f5 !important",
-        padding: "10px",
+        padding: "5px 10px",
         paddingBottom: "0",
         border: "1px solid #163340",
+        borderTop:"0px",
         borderBottom: "none",
         boxShadow: "none",
         borderRadius: "0",
@@ -1194,13 +1197,18 @@ export default function QuoteProcess(props) {
                         >
                             <div
                                 className={redCard ? "redQuoteBox" : "quoteBox"}
-                            >
+                            >   <div>
+                                <span className={"quoteBoxicon"}>
+                                <GiProfit size={18}/>
+                                </span>
                                 <span>Total Profit </span>
+                            </div>
                                 <span className="quoteAmount" title={totalProfit.fullFormatAmount} >
                                     {totalProfit.fullFormatAmount
                                         ? totalProfit.fullFormatAmount
                                         : defaultTotalValue}
                                 </span>
+
                             </div>
                             <div className="quoteBox">
                                 <span>Total Cost Price </span>
@@ -1280,13 +1288,17 @@ export default function QuoteProcess(props) {
                         <div>
                             <Button
                                 className="customSelect mx-1"
-                                variant="outlined"
+                                variant="text"
                                 color="primary"
                                 size="small"
                                 aria-controls="simple-menu"
                                 aria-haspopup="true"
-                                onClick={handleClick}>
+                                style={{color:"var(--warning)"}}
+                                onClick={handleClick}
+                                startIcon={<VscVersions style={{paddingTop:"2px"}} size={18}/>}>
+
                                 {`Version : ${currentVersion}`}
+
                             </Button>
                             <Menu
                                 id="simple-menu"
@@ -1306,14 +1318,16 @@ export default function QuoteProcess(props) {
                             <>
                                 {currentVersion !== 1 && ifQuoteApproved.approved === false && (
                                     <Button
-                                        variant="outlined"
+                                        variant="text"
                                         size="small"
+                                        style={{color:"var(--error)"}}
                                         disabled={
                                             !allowedToEdit ||
                                             deletingDOA || loading || (DOAneeded
                                                 ? DOASteps.indexOf(ProcessStatus) > 1
                                                 : OtherSteps.indexOf(ProcessStatus) > 1)
                                         }
+                                        startIcon={<MdDelete size={16}/>}
                                         onClick={deleteVersion}
                                     >
                                         Delete
@@ -1321,7 +1335,7 @@ export default function QuoteProcess(props) {
                                 )}
                                 <Button
                                     disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
-                                    variant="contained"
+                                    variant="text"
                                     type="button"
                                     size="small"
                                     startIcon={
@@ -1335,7 +1349,7 @@ export default function QuoteProcess(props) {
                                         )
                                     }
                                     className="mx-1"
-                                    color="primary"
+                                    style={{color:"var(--success-light)"}}
                                     onClick={() => {
                                         cloneVersion();
                                     }}

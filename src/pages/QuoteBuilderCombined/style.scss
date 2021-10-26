@@ -19,13 +19,16 @@
 }
 .currentStepColor {
   & .MuiStepLabel-iconContainer {
-    color: #0e7723 !important;
+    color: #378280 !important;
     opacity: 1;
-    font-Size: 12px
+    font-Size: 12px;
+    active:{
+      color: #378280 !important;
+    }
 
   }
   & .MuiStepLabel-label {
-    color: #0e7723 !important;
+    color: #378280 !important;
     font-weight: 600 !important;
     font-Size: 12px
   }
@@ -34,11 +37,18 @@
 .MuiTab-textColorPrimary.Mui-selected {
       border-radius: 0;
       background: #163340;
-      color: white !important;
-      border-top-right-radius: 12px;
-      border-top-left-radius: 12px;
-}
+      color: var(--primary) !important;
+      border: 1px solid lightgray;
+  border-top: 4px solid #1B7D1C !important;
+  border-bottom: 0px !important;
 
+      //border-top-right-radius: 12px;
+      //border-top-left-radius: 12px;
+}
+.MuiTab-textColorPrimary{
+  border: 1px solid grey !important;
+  border-radius: 0px !important;
+}
 .tab-font{
   font-size: 14px;
 }

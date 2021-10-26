@@ -438,11 +438,9 @@ body::-webkit-scrollbar-thumb {
 .form-label-style {
   color: var(--secondary);
   font-size: 0.8rem;
-  margin-top: 1.5rem;
-  border-bottom: 3px solid var(--secondary);
-  margin-bottom: 10px;
-  padding: 0 0 0 2px;
+  padding: 0 0 0 6px;
   text-align: left;
+  padding-bottom: 6px;
 }
 
 .link {
@@ -598,7 +596,19 @@ body::-webkit-scrollbar-thumb {
 }
 
 .detail-box {
-  padding: 10px 20px;
+  padding: 10px 20px 0 20px;
+}
+.detail-box-content{
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 3px;
+  background-color: var(--colorLeads);
+  h3{
+    padding: 0px;
+    padding-top:1px;
+    color: var(--white)
+  }
 }
 
 .detailHeader {
@@ -1002,4 +1012,11 @@ body::-webkit-scrollbar-thumb {
 
 .errorColor {
   color: var(--error) !important;
+}
+
+@media only screen and (max-width: 560px) {
+  .grid-without-activity {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
 }
