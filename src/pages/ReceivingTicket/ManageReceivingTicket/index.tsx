@@ -25,7 +25,7 @@ import { useHistory } from 'react-router-dom';
 import { useData } from '../../../StateProvider/Provider';
 import routes from '../../../components/Helpers/Routes';
 
-const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryForReceivingTicket = null, rentalData = null, warehouseId = null, onClose, onSuccess, open }) => {
+const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryForReceivingTicket = null, rentalData = null, isRedirectToDetailPage = true, onClose, onSuccess, open }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
@@ -77,8 +77,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
         } else {
           if (productInventoryForReceivingTicket && rentalData) {
             const tempInitialData = getObjKeys("", fieldsDataForCreate)
-            tempInitialData["productInventory"] = productInventoryForReceivingTicket.map(d => d.inventory._id)
-            tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
+            tempInitialData["productInventory"] = productInventoryForReceivingTicket.map(d => d._id)
             tempInitialData["rentalJob"] = rentalData._id
             tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
             tempInitialData["pickupAddress"] = rentalData.shippingAddress
@@ -141,7 +140,9 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
       axiosInstance()
         .post(`${receivingTicket.receivingTicketApi}`, values)
         .then(({ data: { data, message } }) => {
-          history.push(`${routes.receivingTicketDetail.path}/${data._id}`);
+          if(isRedirectToDetailPage){
+            history.push(`${routes.receivingTicketDetail.path}/${data._id}`);
+          }
           setSubmitting(false);
           onSuccess(data);
           toastConfig.setToastConfig({

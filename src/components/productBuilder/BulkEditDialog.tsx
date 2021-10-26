@@ -82,8 +82,9 @@ const BulkEditDialog = (props) => {
         //     values: { ...getObjKeysWithValues(values, _fields) },
         // });
         _fields.forEach((_f) => {
-            _f.isFormula = false
-            _f.isMulitFormula = false
+            _f.isFormulaColor = _f.isFormula;
+            _f.isFormula = false;
+            _f.isMulitFormula = false;
         })
         setInitialData({
             fields: _fields,
@@ -245,6 +246,7 @@ const BulkEditDialog = (props) => {
         setFieldChanges(_fieldChanges)
     }
 
+
     return (<Dialog
         maxWidth="md"
         fullScreen={isMobile || isTablet}
@@ -299,12 +301,13 @@ const BulkEditDialog = (props) => {
                                                                 />
                                                             </Grid> : field.type === "converter" || field.type === "currencyAmount" ?
                                                                 <FormTypes
+                                                                    style={{ background: field?.isUneditable ? "#EBEBE4" : field?.isFormulaColor ? "#1e768221" : "" }}
                                                                     fields={initialData.fields}
                                                                     fieldData={field}
                                                                     values={values}
                                                                     errors={errors}
                                                                     touched={touched}
-                                                                    label={field.fieldLabel}
+                                                                    label={field.fieldLabel + (field.isUneditable ? " (Auto Calculated Field)" : "")}
                                                                     name={field.fieldName}
                                                                     type={field.type}
                                                                     options={field.option}
@@ -324,12 +327,13 @@ const BulkEditDialog = (props) => {
                                                                     <Box display="flex" >
                                                                         <Box flexGrow={1}  >
                                                                             <FormTypes
+                                                                                style={{ background: field?.isUneditable ? "#EBEBE4" : field?.isFormulaColor ? "#1e768221" : "" }}
                                                                                 fields={initialData.fields}
                                                                                 fieldData={field}
                                                                                 values={values}
                                                                                 errors={errors}
                                                                                 touched={touched}
-                                                                                label={field.fieldLabel}
+                                                                                label={field.fieldLabel + (field.isUneditable ? " (Auto Calculated Field)" : "")}
                                                                                 name={field.fieldName}
                                                                                 type={field.type}
                                                                                 options={field.option}

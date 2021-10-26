@@ -131,7 +131,7 @@ const ProjectSalesDetails = () => {
       modifiedData["amount"] = formatAmountWithCurrency(
         modifiedData.currency,
         modifiedData.amount
-      ).shortFormatAmount;
+      ).fullFormatAmount;
 
       setCopyOfProjectSalesData(modifiedData);
 
@@ -182,7 +182,7 @@ const ProjectSalesDetails = () => {
       ["Project Name"]: data.projectName || "",
       ["Amount"]:
         formatAmountWithCurrency(data.currency, data.amount)
-          .shortFormatAmount || "",
+          .fullFormatAmount || "",
       ["End Date"]: data.endDate ? displayCardDate(data.endDate) : "",
       ["Project Probability"]: data?.projectProbability
         ? `${data.projectProbability}%`

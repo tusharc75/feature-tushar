@@ -244,7 +244,7 @@ export default function OpportunityAccordionInUserDetail({
                                                                 </Grid>
                                                                 <Grid item xs={5} sm={4}>
                                                                     <Typography className="amount" title={formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).fullFormatAmount}>
-                                                                        {formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).shortFormatAmount}
+                                                                        {formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).fullFormatAmount}
                                                                     </Typography>
                                                                 </Grid>
                                                             </Grid>

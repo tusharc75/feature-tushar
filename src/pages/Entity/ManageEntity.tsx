@@ -25,7 +25,8 @@ interface InitialData {
   values: object;
 }
 
-const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = false, entityId = null }) => {
+const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = false,
+  entityId = null, fetchEntities = null }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
@@ -106,7 +107,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
         .then(({ data }) => {
           const newId = data.data._id;
           setSubmitting(false);
-          fetchData();
+          fetchData(true);
           toastConfig.setToastConfig({
             type: "success",
             open: true,

@@ -32,12 +32,12 @@ export default function QuoteDetailPage({ quoteData, quotePermissions, selectedE
             modifiedData["estimatedAmount"] = formatAmountWithCurrency(
                 modifiedData["currency"],
                 modifiedData["estimatedAmount"]
-            ).shortFormatAmount;
+            ).fullFormatAmount;
 
             modifiedData["invoiceAmount"] = formatAmountWithCurrency(
                 modifiedData["currency"],
                 modifiedData["invoiceAmount"]
-            ).shortFormatAmount;
+            ).fullFormatAmount;
         }
         return modifiedData;
     }, [quoteData?.accountName, quoteData?.closeDate, quoteData?.estimatedAmount, quoteData?.currency, quoteData?.owner,]);

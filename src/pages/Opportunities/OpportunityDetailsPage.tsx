@@ -157,7 +157,7 @@ function OpportunityDetailsPage() {
         .then(({ data: { data } }) => {
           let modifiedData = {};
           Object.assign(modifiedData, data);
-          modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).shortFormatAmount;
+          modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).fullFormatAmount;
           setCopyOfOpportunityData(modifiedData);
 
           handleMainPoints(data);
@@ -322,7 +322,7 @@ function OpportunityDetailsPage() {
     let mainPoint = {};
     mainPoint['Account Name'] = data?.accountName?.optionLabel || '';
     mainPoint['Close Date'] = yyyyMMDD(data.closeDate);
-    mainPoint['Estimated Amount'] = data?.estimatedAmount ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount).shortFormatAmount : '';
+    mainPoint['Estimated Amount'] = data?.estimatedAmount ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount).fullFormatAmount : '';
     mainPoint['Opportunity Owner'] = data?.owner?.optionLabel || '';
     setMainPoints(mainPoint);
   };

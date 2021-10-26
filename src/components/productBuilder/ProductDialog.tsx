@@ -259,11 +259,10 @@ const CreateProduct = (props) => {
       if (label.includes("Secondary Unit") && sUnit) {
         label = `${label.split(" Secondary Unit")[0]} ${sUnit}`;
       }
-      
-      if (!label.includes("Secondary Unit") && label.includes("Unit")  && unit) {
+
+      if (!label.includes("Secondary Unit") && label.includes("Unit") && unit) {
         label = `${label.split(" Unit")[0]} ${unit}`;
       }
-
     }
     return label;
   };
@@ -325,7 +324,7 @@ const CreateProduct = (props) => {
                                 section.sectionFields.map((field) =>
                                   field.type === "converter" || field.type === "currencyAmount" || field.isConverter ? (
                                     <FormTypes
-                                      style={{ background: field?.isUneditable ? "#FF573321" : field?.isFormula ? "#1e768221"   : "" }}
+                                      style={{ background: field?.isUneditable ? "#EBEBE4" : field?.isFormula ? "#1e768221" : "" }}
                                       fields={initialData.fields}
                                       fieldData={field}
                                       values={values}
@@ -364,8 +363,8 @@ const CreateProduct = (props) => {
                                           : ["productCategory", "productTemplate", "entity", "priceTemplate"].includes(field.fieldName) ? true : false
                                         :
                                         stage === "product" ?
-                                          ["product", "product-custom", "product-template"].includes(field.leval) ? true : false
-                                          : ["product", "product-custom", "product-template"].includes(field.leval) ? true : false}
+                                          ["product", "product-custom"].includes(field.leval) ? true : false
+                                          : ["product", "product-custom"].includes(field.leval) ? true : false}
                                     />
                                   ) : (
                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
@@ -373,7 +372,7 @@ const CreateProduct = (props) => {
                                         <Box flexGrow={1}>
                                           <FormTypes
                                             {...field}
-                                            style={{ background: field?.isUneditable ? "#FF573321" : field?.isFormula ? "#1e768221"   : "" }}
+                                            style={{ background: field?.isUneditable ? "#EBEBE4" : field?.isFormula ? "#1e768221" : "" }}
                                             productTemplateId={values?.productTemplate}
                                             priceTemplateId={values?.priceTemplate}
                                             fields={initialData.fields}
@@ -414,10 +413,8 @@ const CreateProduct = (props) => {
                                                 ["productCategory", "productTemplate", "entity"].includes(field.fieldName) ? true : false
                                                 : ["productCategory", "productTemplate", "entity", "priceTemplate"].includes(field.fieldName) ? true : false
                                               : stage === "product" ?
-                                                ["product", "product-custom", "product-template"].includes(field.leval)
-                                                  && !["priceTemplate"].includes(field.fieldName)
-                                                  ? true : false
-                                                : ["product", "product-custom", "product-template"].includes(field.leval) ? true : false}
+                                                ["product", "product-custom"].includes(field.leval) && !["priceTemplate"].includes(field.fieldName) ? true : false
+                                                : ["product", "product-custom"].includes(field.leval) ? true : false}
                                             imageOrFileUploadCompletePercentage={
                                               ["imageUpload", "fileUpload"].some((s) => s === field.type)
                                                 ? (completePercentage) => {

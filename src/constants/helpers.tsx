@@ -1112,9 +1112,10 @@ export const generateUniqueId = () => {
 export const prepareDataForGrid = (data, user = {}) => {
   let objectValues = {};
   let restProperties = {};
+  let mappedEntities = JSON.parse(localStorage.getItem("mappedEntities"))
 
-  if (data.entity && data.entity.length === 0 && user["mappedEntities"].length) {
-    data.entity = [...user["mappedEntities"]]
+  if (data.entity && data.entity.length === 0 && mappedEntities.length) {
+    data.entity = [...mappedEntities]
   }
   Object.keys(data).forEach((key) => {
     if (typeof data[key] === "object") {
@@ -1149,10 +1150,19 @@ export const prepareDataForGrid = (data, user = {}) => {
     }
   });
 
+  if (data?.collaborator) {
+    finalObject["isAllowedToUpdate"] = [...(data?.collaborator ?? []), data?.owner].some(
+      (obj) => obj.optionValue === user["user"]?._id
+    )
+  }
+
   if (data?.createdBy) {
     finalObject["createdBy"] = data.createdBy?.user?.concatedName
     finalObject["createdByDate"] = data.createdBy?.date
     finalObject["createdById"] = data.createdBy?.user?._id
+    if (!finalObject["isAllowedToUpdate"]) {
+      finalObject["isAllowedToUpdate"] = data.createdBy?.user?._id === user["user"]?._id
+    }
   }
   if (data?.updatedBy) {
     finalObject["updatedBy"] = data?.updatedBy?.user?.concatedName

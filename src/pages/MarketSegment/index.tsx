@@ -56,17 +56,7 @@ const MarketSegment = () => {
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
     // const [showGridFilters, setShowGridFilters] = useState(true)
-    const columnState = JSON.parse(localStorage.getItem("marketSegmentPage"));
-
-    if (columnState) {
-        columns.map((item) => {
-            columnState.map((d) => {
-                if (d.colId == item.field) {
-                    item.show = !d.hide;
-                }
-            });
-        });
-    }
+    const columnState = JSON.parse(localStorage.getItem(routes.marketSegment.title));
 
     useEffect(() => {
         const parsedParams = queryString.parse(location?.search);
@@ -114,6 +104,17 @@ const MarketSegment = () => {
                 }
                 setFrameWorkComponent({ ...tempFrameworkComponent })
                 columns = [...columns, ...getStaticFields()]
+
+                if (columnState) {
+                    columns.map((item) => {
+                        columnState.map((d) => {
+                            if (d.colId == item.field) {
+                                item.show = !d.hide;
+                            }
+                        });
+                    });
+                }
+
                 setColumns([...columns])
             })
     }

@@ -16,13 +16,6 @@ export const Provider = ({ children }) => {
         .get("/user/me")
         .then(({ data: response }) => {
           const { data } = response;
-          if (data?.entity && data?.entity.length) {
-            let mappedEntities = []
-            data.entity.forEach(o => {
-              mappedEntities.push({ optionLabel: o?.entityName, optionValue: o?._id })
-            })
-            data.mappedEntities = mappedEntities
-          }
           dispatch({ type: SET_USER, payload: data });
           let prevSelectedEntity = localStorage.getItem("selectedEntity")
           if (prevSelectedEntity && prevSelectedEntity !== 'null') {

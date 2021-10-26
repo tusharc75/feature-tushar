@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Dialog, TextField, Grid, Box, CircularProgress, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
+import { Button, Dialog, TextField, Grid, Box, CircularProgress, FormControl, InputLabel, Select, MenuItem, InputAdornment } from '@material-ui/core';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
 import DateUtils from '@date-io/date-fns';
 
@@ -8,8 +8,9 @@ import { dateFormatForInputControl } from '../../constants/helpers';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import { Field } from 'formik';
 
-const BulkEditInventoryDialog = ({ onClose, isSaving, submitBulkEdit }) => {
+const BulkEditInventoryDialog = ({ onClose, isSaving, submitBulkEdit, currencySymbol }) => {
   const [values, setValues] = useState(null)
 
   const handleChange = (name: string, value: any) => {
@@ -40,18 +41,6 @@ const BulkEditInventoryDialog = ({ onClose, isSaving, submitBulkEdit }) => {
                   type="number"
                   variant={"outlined"}
                   value={values?.qty || 0}
-                  onChange={(e) => handleChange(e.target.name, parseInt(e.target.value))}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Final Price"
-                  name="finalPrice"
-                  fullWidth
-                  size="small"
-                  type="number"
-                  variant={"outlined"}
-                  value={values?.finalPrice || 0}
                   onChange={(e) => handleChange(e.target.name, parseInt(e.target.value))}
                 />
               </Grid>
@@ -93,27 +82,22 @@ const BulkEditInventoryDialog = ({ onClose, isSaving, submitBulkEdit }) => {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Price"
-                  name="price"
+                <KeyboardDatePicker
+                  label="End Date"
+                  name="endDate"
                   fullWidth
                   size="small"
-                  type="number"
-                  variant={"outlined"}
-                  value={values?.price || 0}
-                  onChange={(e) => handleChange(e.target.name, parseInt(e.target.value))}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Discount (%)"
-                  name="discount"
-                  fullWidth
-                  size="small"
-                  type="number"
-                  variant={"outlined"}
-                  value={values?.discount || 0}
-                  onChange={(e) => handleChange(e.target.name, parseInt(e.target.value))}
+                  inputVariant="outlined"
+                  variant='inline'
+                  format={dateFormatForInputControl}
+                  clearable
+                  autoOk
+                  value={values?.endDate || new Date()}
+                  minDate={values?.startDate || new Date()}
+                  onChange={(date) => handleChange("endDate", date)}
+                  InputLabelProps={{
+                    shrink: true
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -134,22 +118,57 @@ const BulkEditInventoryDialog = ({ onClose, isSaving, submitBulkEdit }) => {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <KeyboardDatePicker
-                  label="End Date"
-                  name="endDate"
+                <TextField
+                  label="Price"
+                  name="price"
                   fullWidth
-                  size="small"
-                  inputVariant="outlined"
-                  variant='inline'
-                  format={dateFormatForInputControl}
-                  clearable
-                  autoOk
-                  value={values?.endDate || new Date()}
-                  minDate={values?.startDate || new Date()}
-                  onChange={(date) => handleChange("endDate", date)}
-                  InputLabelProps={{
-                    shrink: true
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        {currencySymbol ? currencySymbol : ""}
+                      </InputAdornment>
+                    ),
                   }}
+                  size="small"
+                  type="number"
+                  variant={"outlined"}
+                  value={values?.price || 0}
+                  onChange={(e) => handleChange(e.target.name, parseInt(e.target.value))}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Discount (%)"
+                  name="discount"
+                  fullWidth
+                  InputProps={{
+                    endAdornment: '%',
+                    inputProps: { min: 0 },
+                  }}
+                  size="small"
+                  type="number"
+                  variant={"outlined"}
+                  value={values?.discount || 0}
+                  onChange={(e) => handleChange(e.target.name, parseInt(e.target.value))}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Final Price"
+                  name="finalPrice"
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        {currencySymbol ? currencySymbol : ""}
+                      </InputAdornment>
+                    ),
+                  }}
+                  size="small"
+                  type="number"
+                  variant={"outlined"}
+                  value={values?.finalPrice || 0}
+                  onChange={(e) => handleChange(e.target.name, parseInt(e.target.value))}
                 />
               </Grid>
             </Grid>

@@ -52,19 +52,19 @@ const AssignDataDialog = (props) => {
 
     switch (type) {
       case "customer-account":
-        url = `/${type}?filterById=[{"field":"owner", "term": "${user?.user?._id}"},{"field":"collaborator", "term": "${user?.user?._id}"}]`
+        url = `/${type}?filterById=[{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]`
         break;
 
       case "customer-contact":
-        url = `/${type}?filterById=[{"field":"accountName", "term": "${accountId}"},{"field":"owner", "term": "${user?.user?._id}"},{"field":"collaborator", "term": "${user?.user?._id}"}]`
+        url = `/${type}?filterById=[{"field":"accountName", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]&filterType=and`
         break;
 
       case "opportunity":
-        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"},{"field":"owner", "term": "${user?.user?._id}"},{"field":"collaborator", "term": "${user?.user?._id}"}]`
+        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]&filterType=and`
         break;
 
       case "quote-builder":
-        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"},{"field":"owner", "term": "${user?.user?._id}"},{"field":"collaborator", "term": "${user?.user?._id}"}]`
+        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]&filterType=and`
         break;
 
       case "user":

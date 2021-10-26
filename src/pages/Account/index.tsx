@@ -101,6 +101,7 @@ export default function Account(props) {
   const anchorRef = React.useRef<HTMLDivElement>(null);
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const [filter, setFilter] = useState('All Accounts');
+  const [accountNameForClone, setAccountNameForClone] = useState('');
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -293,7 +294,7 @@ export default function Account(props) {
             size="small"
             aria-label="Clone"
             onClick={() => {
-              cloneAccount(params.data._id);
+              cloneAccount(params.data);
             }}
           >
             <FileCopyIcon fontSize="small" color="primary" />
@@ -357,29 +358,35 @@ export default function Account(props) {
         entity="account"
       />
       {
-        accountPermissions.isUpdate &&
-        <Tooltip title="Entity">
-          <IconButton
-            size="small"
-            aria-label="Entity"
-            onClick={() => {
-              setAccountId(params.data._id)
-              setShowEntityDialog(true)
-              if (params?.data?.entity) {
-                let entities = []
-                if (params?.data?.entityId) {
-                  entities.push(params?.data?.entityId)
+        accountPermissions.isUpdate && params.data?.isAllowedToUpdate ?
+          <Tooltip title="Entity">
+            <IconButton
+              size="small"
+              aria-label="Entity"
+              onClick={() => {
+                setAccountId(params.data._id)
+                setShowEntityDialog(true)
+                if (params?.data?.entity) {
+                  let entities = []
+                  if (params?.data?.entityId) {
+                    entities.push(params?.data?.entityId)
+                  }
+                  if (params?.data?.restentity) {
+                    let restEntities = params?.data?.restentity.map(o => o.optionValue)
+                    entities = [...entities, ...restEntities]
+                  }
+                  setEntities([...entities])
                 }
-                if (params?.data?.restentity) {
-                  let restEntities = params?.data?.restentity.map(o => o.optionValue)
-                  entities = [...entities, ...restEntities]
-                }
-                setEntities([...entities])
-              }
-            }}>
-            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
-          </IconButton>
-        </Tooltip>
+              }}>
+              <AiOutlineDeploymentUnit fontSize="15" color="primary" />
+            </IconButton>
+          </Tooltip> : (
+            <Tooltip className="cursor-stop" title="You do not have permission to update entity">
+              <IconButton aria-label="Clone" size="small">
+                <AiOutlineDeploymentUnit fontSize="15" />
+              </IconButton>
+            </Tooltip>
+          )
       }
     </>
   );
@@ -518,8 +525,9 @@ export default function Account(props) {
       });
   };
 
-  const cloneAccount = async (accountId) => {
-    setCloneId(accountId);
+  const cloneAccount = async (data) => {
+    setAccountNameForClone(data?.accountName);
+    setCloneId(data?._id);
     setIsAccDialogVisible(true);
   };
 
@@ -999,6 +1007,8 @@ export default function Account(props) {
             id={cloneId}
             accountResource={accountResource}
             accountApi={accountApi}
+            isClone={cloneId ? true : false}
+            accountNameForClone={accountNameForClone}
           />
         ) : null}
         {

@@ -159,7 +159,7 @@ export default function QuoteDetail() {
       mainPoint["Expiry Date"] = yyyyMMDD(quoteData?.closeDate);
       mainPoint["Estimated Amount"] = quoteData?.estimatedAmount
         ? formatAmountWithCurrency(quoteData?.currency, quoteData?.estimatedAmount)
-          .shortFormatAmount
+          .fullFormatAmount
         : "";
       mainPoint["Quote Owner"] = quoteData?.owner?.optionLabel || "";
     }
