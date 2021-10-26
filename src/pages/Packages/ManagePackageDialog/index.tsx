@@ -37,6 +37,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
         state: { user },
     }: any = useData();
     const [formValues, setFormValues] = useState({})
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
 
@@ -266,7 +267,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
             <Dialog
                 maxWidth="md"
                 fullWidth
-                fullScreen={isMobile || isTablet}
+                fullScreen={fullScreen || (isMobile || isTablet)}
                 TransitionComponent={CustomDialogTransition}
                 aria-labelledby="customized-dialog-title"
                 onClose={(e, reason) => {
@@ -286,6 +287,11 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                         if (isFieldNotTouched(packageData, formValues)) onClose()
                         else setShowConfirmDialog(true)
                     }}
+                    isMinimized={!fullScreen}
+                    onMinimizeMaximize={() => {
+                        setFullScreen(prevState => !prevState)
+                    }}
+                    showManimizeMaximize={true}
                 />
                 {loading || !packageData.fields.length ? (
                     <>

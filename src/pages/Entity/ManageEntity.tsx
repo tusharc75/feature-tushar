@@ -19,21 +19,22 @@ import { useHistory } from "react-router-dom";
 import { getObjKeys, yupSchema, isFieldNotTouched, setFieldsInAscendingOrder, getObjKeysWithValues } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import FormTypes from "../../components/Helpers/FormTypes";
-
+import { isMobile , isTablet } from 'react-device-detect';
 interface InitialData {
   fields: any[];
   values: object;
 }
 
-const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = false, entityId = null }) => {
+const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = false,
+  entityId = null, fetchEntities = null }) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState<InitialData>({
     fields: [],
     values: values,
   });
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   //  Owner, Collaborator Code - Start
   const [formsData, setFormsData] = useState([]);
@@ -106,7 +107,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
         .then(({ data }) => {
           const newId = data.data._id;
           setSubmitting(false);
-          fetchData();
+          fetchData(true);
           toastConfig.setToastConfig({
             type: "success",
             open: true,
@@ -158,7 +159,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
       }}
       maxWidth="md"
       fullWidth
-      fullScreen={isMobile}
+      fullScreen={fullScreen || (isMobile || isTablet)}
     >
       <CustomDialogHeader title={isClone ? "Clone" : isNew ? "Create New Entities" : "Update Entity"}
         onClose={() => {
@@ -167,7 +168,13 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
             initialValues: initialData.values,
           }, formValues)) close()
           else setShowConfirmDialog(true)
-        }} />
+        }}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen(prevState => !prevState)
+        }}
+        showManimizeMaximize={true}
+      />
 
       {loading || !initialData.fields.length ? (
         <>

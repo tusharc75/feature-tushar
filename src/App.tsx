@@ -7,7 +7,6 @@ import { theme } from "./constants/AppConfig";
 import { CustomToastContext } from "./StateProvider/CustomToastContext/CustomToastContext";
 import { CustomNotificationCountContext } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import axiosInstance from "./axios/axiosInstance";
-import { TRACKING_ID } from "./config";
 import { CustomChatNotificationCountContext } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
 import queryString from "query-string";
 import {
@@ -26,7 +25,6 @@ import CustomToaster from "./components/Helpers/CustomToast";
 import PrivateRoute from "./components/PrivateRoute";
 import { useData } from "./StateProvider/Provider";
 import ErrorBoundaryComponent from "./ErrorBoundary"
-import OfflineStatusDialog from "./components/Helpers/OfflineStatusDialog";
 import Login from "./pages/Auth/Login";
 import AzureLogin from "./pages/Auth/AzureLogin";
 import Leads from "./pages/Leads";
@@ -175,14 +173,6 @@ function App() {
               .get("/user/me")
               .then(({ data: response }) => {
                 const { data } = response;
-                if (data?.entity && data?.entity.length) {
-                  let mappedEntities = []
-                  data.entity.forEach(o => {
-                    mappedEntities["optionLabel"] = o?.entityName;
-                    mappedEntities["optionValue"] = o?._id;
-                  })
-                  data.mappedEntities = mappedEntities
-                }
                 dispatch({ type: SET_USER, payload: data });
                 let prevSelectedEntity = localStorage.getItem("selectedEntity");
                 if (prevSelectedEntity && prevSelectedEntity !== "null") {

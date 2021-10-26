@@ -5,8 +5,6 @@ import ListItem from "@material-ui/core/ListItem"
 import ListItemIcon from "@material-ui/core/ListItemIcon"
 import Checkbox from "@material-ui/core/Checkbox"
 import ListItemText from "@material-ui/core/ListItemText"
-import Tooltip from "@material-ui/core/Tooltip"
-import IconButton from "@material-ui/core/IconButton"
 import CustomButton from './Helpers/CustomButton'
 import Button from "@material-ui/core/Button"
 import CustomDialogContent from './CustomDialog/CustomDialogContent';
@@ -31,6 +29,7 @@ function EntitySelections(props) {
     const [dataLoading, setDataLoading] = useState(false)
     const [loading, setLoading] = useState(false)
     const { entityApi } = entity
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
         setSelectedEntities([...entities])
@@ -53,8 +52,12 @@ function EntitySelections(props) {
     }
     const onUpdateEntity = () => {
 
+        let filteredIds = []
+        resourceIds.forEach(currentId => {
+            if (filteredIds.indexOf(currentId) < 0) filteredIds.push(currentId)
+        })
         let request = {
-            ids: [...resourceIds],
+            ids: [...filteredIds],
             entity: [...selectedEntities]
         }
         setLoading(true)
@@ -78,7 +81,7 @@ function EntitySelections(props) {
     return <>
         <Dialog
             maxWidth="sm"
-            fullScreen={isMobile || isTablet}
+            fullScreen={fullScreen || (isMobile || isTablet)}
             TransitionComponent={CustomDialogTransition}
             aria-labelledby="customized-dialog-title"
             open={open}
@@ -88,7 +91,13 @@ function EntitySelections(props) {
             fullWidth>
             <CustomDialogHeader
                 title="Assign Entity"
-                onClose={onClose} />
+                onClose={onClose}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                    setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
+            />
 
             <CustomDialogContent>
                 {

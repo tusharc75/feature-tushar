@@ -27,7 +27,7 @@ import { useLocation, useHistory } from "react-router-dom";
 import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { useData } from "../../StateProvider/Provider";
-
+import { isMobile , isTablet } from 'react-device-detect';
 interface InitialData {
   fields: any[];
   values: object;
@@ -63,6 +63,7 @@ export default function ManageUserDialog({
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
   const [formValues, setFormValues] = useState(dataToUpdate ? dataToUpdate : {})
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const getInitialData = useCallback(() => {
     setLoading(true);
@@ -207,7 +208,7 @@ export default function ManageUserDialog({
       open={open}
       maxWidth="md"
       fullWidth
-      fullScreen={isMobile}
+      fullScreen={fullScreen || (isMobile || isTablet)}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
           setShowConfirmDialog(true)
@@ -230,6 +231,11 @@ export default function ManageUserDialog({
           }, formValues)) close()
           else setShowConfirmDialog(true)
         }}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen(prevState => !prevState)
+        }}
+        showManimizeMaximize={true}
       />
 
       {loading || !initialData.fields.length ? (

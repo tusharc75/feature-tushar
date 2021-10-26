@@ -13,6 +13,7 @@ import CustomButton from './Helpers/CustomButton';
 const arr = [...Array(9).keys()];
 
 const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) => {
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [entityData,] = useState({
     fields: fieldData.map((fields) => fields.fieldData),
     initialValues: getObjKeys(
@@ -36,14 +37,20 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
       <Dialog
         maxWidth="md"
         fullWidth
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={close}
         open={open}
         disableBackdropClick={true}
       >
-        <CustomDialogHeader title={title} onClose={close} />
+        <CustomDialogHeader title={title} onClose={close}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
+        />
         {entityData.fields.length === 0 && (
           <CustomDialogContent>
             <CommonSkeleton lenArray={arr} />

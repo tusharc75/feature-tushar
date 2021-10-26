@@ -162,7 +162,8 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
         else if (field?.primaryField === true && detailScreenRoute) {
             return {
                 columnData: {
-                    pivotIndex: 0,
+                    // pivotIndex: 0,
+                    lockPosition: true,
                     ...commonFieldData,
                     disabled: true,
                     field: field?.fieldName === "firstName" ? "concatedName" : field.fieldName,

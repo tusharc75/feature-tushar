@@ -11,68 +11,84 @@ import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import { gridLoadingTimeout, rentalManagement } from "../../constants/helpers";
 
-const ReceivingTicket = ({ warehouselist, productInventory, currentStep, handleReceivingTicketDialog, rentalManagementId }) => {
+const ReceivingTicket = ({productInventory, currentStep, handleReceivingTicketDialog, rentalManagementId }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [gridApi, setGridApi] = useState(null);
-  const [warehouse, setWarehouse] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const [downlodingFile, setDownlodingFile] = useState(false)
 
   useEffect(() => {
-
-    if (warehouse) {
-      dispatch({
-        type: "initialize", data: productInventory.map((u) => ({
-          ...u,
-          productName: u.productName || "",
-          inventoryId: u?.inventory._id,
-          productId: u?.product._id,
-          costPerDay: u.costing?.costPerDay,
-          totalCost: u.costing?.totalCost,
-          startDate: u.costing?.startDate,
-          dueDate: u.costing?.dueDate,
-          receivingTicket: u.receivingTicket || "",
-          receivingTicketId: u.receivingTicketId || "",
-          hideSelection: u.receivingTicket === null || u.receivingTicket === undefined ? false : true,
-        })).filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue), count: productInventory.filter(d => d.inventory.warehouse.optionValue === warehouse.optionValue).length
+    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`)
+      .then(({ data }) => {
+        let tempProductInventory = data.data.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
+        dispatch({ type: "loading", loading: true });
+        axiosInstance()
+          .get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/delivery-ticket `)
+          .then(({ data }) => {
+            data.data.map(obj => {
+              tempProductInventory.map((d, index) => {
+                if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
+                  tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
+                  tempProductInventory[index]["deliveryTicketId"] = obj?._id
+                }
+              })
+            })
+            axiosInstance()
+              .get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/receiving-ticket `)
+              .then(({ data }) => {
+                data.data.map(obj => {
+                  tempProductInventory.map((d, index) => {
+                    if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
+                      tempProductInventory[index]["receivingTicket"] = obj?.receivingJobName
+                      tempProductInventory[index]["receivingTicketId"] = obj?._id
+                    }
+                  })
+                })
+                dispatch({
+                  type: "initialize", data: tempProductInventory, count: tempProductInventory.length
+                });
+                setTimeout(() => {
+                  dispatch({ type: "loading", loading: false });
+                }, gridLoadingTimeout);
+              })
+              .catch((err) => {
+                toastConfig.setToastConfig(err);
+              });
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+          });
+      }).catch((error) => {
+        toastConfig.setToastConfig(error)
       });
-    }
-    else {
-      dispatch({
-        type: "initialize", data: productInventory.map((u) => ({
-          ...u,
-          productName: u?.productName || "",
-          inventoryId: u?.inventory?._id,
-          productId: u?.product?._id,
-          costPerDay: u.costing?.costPerDay,
-          totalCost: u.costing?.totalCost,
-          startDate: u.costing?.startDate,
-          dueDate: u.costing?.dueDate,
-          receivingTicket: u.receivingTicket || "",
-          receivingTicketId: u.receivingTicketId || "",
-          hideSelection: u.receivingTicket === null || u.receivingTicket === undefined ? false : true,
-        })), count: productInventory.length
-      });
-    }
     // eslint-disable-next-line
-  }, [warehouse, productInventory]);
+  }, [productInventory]);
 
-  const NameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
-      {params.value}
-    </Link>
-  );
 
   const InventoryRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data.inventoryId}`}>
+    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
       {params.value}
     </Link>
   );
-
-  const TicketRenderer = (params) => (
+  const ProductNameRenderer = (params) => (
+    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.product.optionValue}`}>
+      {params.value}
+    </Link>
+  );
+  const DeliveryTicketRenderer = (params) => (
+    params?.value ? (
+      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
+        {params.value}
+      </Link>
+    ) : (
+      <NoDataCell />
+    )
+  );
+  const ReceivingTicketRenderer = (params) => (
     params?.value ? (
       <Link className="link" title={params.value} to={`${routes.receivingTicketDetail.path}/${params.data.receivingTicketId}`}>
         {params.value}
@@ -83,21 +99,21 @@ const ReceivingTicket = ({ warehouselist, productInventory, currentStep, handleR
   );
 
   const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    TicketRenderer: TicketRenderer,
+    receivingTicketRenderer: ReceivingTicketRenderer,
+    deliveryTicketRenderer: DeliveryTicketRenderer,
     inventoryRenderer: InventoryRenderer,
+    productNameRenderer:ProductNameRenderer,
     commonRenderer: CommonRenderer,
     dateRenderer: DateRenderer,
   };
   const columns = [
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "inventoryRenderer" },
-    { field: "productName", headerName: "Product Description", show: true, cellRenderer: "nameRenderer" },
-    { field: "receivingTicket", headerName: "Loading Ticket", show: true, cellRenderer: "TicketRenderer" },
-    { field: "costPerDay", headerName: "Cost Per Day", show: true, cellRenderer: "commonRenderer" },
-    { field: "totalCost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
-    { field: "startDate", headerName: "Start Date", show: true, cellRenderer: "dateRenderer" },
-    { field: "dueDate", headerName: "End Date", show: true, cellRenderer: "dateRenderer" },
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "deliveryTicketRenderer" },
+    { field: "receivingTicket", headerName: "Receiving Ticket", show: true, cellRenderer: "receivingTicketRenderer" },
+    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productNameRenderer" },
+    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
   ];
 
   const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageReceivingTicket"));
@@ -114,25 +130,6 @@ const ReceivingTicket = ({ warehouselist, productInventory, currentStep, handleR
   return (<>
 
     <Box display="flex" justifyContent="flex-end">
-
-      {/* <Autocomplete
-          id="combo-box-demo"
-          size="small"
-          style={{ minWidth: 300 }}
-          value={warehouse}
-          options={warehouselist}
-          getOptionLabel={(option: any) => option ? option?.optionLabel : ""}
-          onChange={(event, newValue) => {
-            setWarehouse(newValue)
-          }}
-          placeholder="Select Warehouse"
-          renderInput={(params) => <TextField
-            {...params}
-            variant="outlined"
-            label="Select Warehouse"
-            name="warehouseField"
-          />}
-        /> */}
       <Button
         onClick={() => {
           setDownlodingFile(true);
@@ -177,7 +174,7 @@ const ReceivingTicket = ({ warehouselist, productInventory, currentStep, handleR
         size="small"
         disabled={(selectedRecords.length === 0) || currentStep === 5}
         onClick={() => {
-          handleReceivingTicketDialog(selectedRecords, warehouse)
+          handleReceivingTicketDialog(selectedRecords)
         }}
       >
         Create Reciving Ticket

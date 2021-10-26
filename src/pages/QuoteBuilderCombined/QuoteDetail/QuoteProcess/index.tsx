@@ -204,7 +204,8 @@ export default function QuoteProcess(props) {
         message: null,
     });
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+    
     useEffect(() => {
         if (currentVersion !== 0) {
             fetchDOAData();
@@ -1196,16 +1197,16 @@ export default function QuoteProcess(props) {
                             >
                                 <span>Total Profit </span>
                                 <span className="quoteAmount" title={totalProfit.fullFormatAmount} >
-                                    {totalProfit.shortFormatAmount
-                                        ? totalProfit.shortFormatAmount
+                                    {totalProfit.fullFormatAmount
+                                        ? totalProfit.fullFormatAmount
                                         : defaultTotalValue}
                                 </span>
                             </div>
                             <div className="quoteBox">
                                 <span>Total Cost Price </span>
                                 <span className="quoteAmount" title={totalcost.fullFormatAmount}  >
-                                    {totalcost.shortFormatAmount
-                                        ? totalcost.shortFormatAmount
+                                    {totalcost.fullFormatAmount
+                                        ? totalcost.fullFormatAmount
                                         : defaultTotalValue}
                                 </span>
                             </div>
@@ -1213,8 +1214,8 @@ export default function QuoteProcess(props) {
                                 <div className="redQuoteBox">
                                     <span>Total Selling Price </span>
                                     <span className="quoteAmount" title={totalsale.fullFormatAmount} >
-                                        {totalsale.shortFormatAmount
-                                            ? totalsale.shortFormatAmount
+                                        {totalsale.fullFormatAmount
+                                            ? totalsale.fullFormatAmount
                                             : defaultTotalValue}
                                     </span>
                                 </div>
@@ -1223,8 +1224,8 @@ export default function QuoteProcess(props) {
                                     <span>Total Selling Price </span>
                                     <span className="quoteAmount" title={totalsale.fullFormatAmount}
                                     >
-                                        {totalsale.shortFormatAmount
-                                            ? totalsale.shortFormatAmount
+                                        {totalsale.fullFormatAmount
+                                            ? totalsale.fullFormatAmount
                                             : defaultTotalValue}
                                     </span>
                                 </div>
@@ -1631,7 +1632,7 @@ export default function QuoteProcess(props) {
                         setShowAiDialog(false);
                     }}
                     fullWidth
-                    fullScreen={isMobile || isTablet}
+                    fullScreen={fullScreen || (isMobile || isTablet)}
                     TransitionComponent={CustomDialogTransition}
                 >
                     <CustomDialogHeader
@@ -1639,6 +1640,11 @@ export default function QuoteProcess(props) {
                         onClose={() => {
                             setShowAiDialog(false);
                         }}
+                        isMinimized={!fullScreen}
+                        onMinimizeMaximize={() => {
+                            setFullScreen(prevState => !prevState)
+                        }}
+                        showManimizeMaximize={true}
                     />
                     <CustomDialogContent>
                         <div className="text-align-center">

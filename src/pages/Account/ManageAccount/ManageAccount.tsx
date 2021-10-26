@@ -40,7 +40,9 @@ export default function ManageAccount(props) {
     accountId = null,
     formValues = {},
     handleValuesChange = null,
-    marketSegmentId = null
+    marketSegmentId = null,
+    isClone,
+    accountNameForClone
   } = props;
 
   const {
@@ -70,9 +72,9 @@ export default function ManageAccount(props) {
   const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
-
     if (isNew) {
       const processSteps = accountData.fields.find(
         (d) => d.type.toLowerCase() === "process"
@@ -283,7 +285,7 @@ export default function ManageAccount(props) {
       <Dialog
         fullWidth
         maxWidth="md"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={(e, reason) => {
@@ -294,6 +296,11 @@ export default function ManageAccount(props) {
         open={open}
       >
         <CustomDialogHeader
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
           onClose={() => {
             if (isFieldNotTouched(accountData, formValues)) {
               onClose({})
@@ -302,12 +309,16 @@ export default function ManageAccount(props) {
             }
           }}
           title={
-            isNew
-              ? "Add Account"
-              : `Editing ${accountData.initialValues.accountName
-                ? accountData.initialValues.accountName
-                : ""
-              }`
+            isClone
+              ?
+              `Clone ${accountNameForClone}`
+              :
+              isNew
+                ? "Add Account"
+                : `Editing ${accountData.initialValues.accountName
+                  ? accountData.initialValues.accountName
+                  : ""
+                }`
           }
         />
         {accountData.fields.length > 0 ? (
@@ -353,7 +364,7 @@ export default function ManageAccount(props) {
                                           ownerDataSource
                                         }
                                         onChange={(e, val) => {
-                                          handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : "");
+                                          // handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : "");
                                           setFieldValue(
                                             field.fieldName,
                                             val && val.optionValue
@@ -383,11 +394,11 @@ export default function ManageAccount(props) {
                                                   )
                                                   : collaboratorDataSource;
 
-                                              handleValuesChange("collaborator", newCollaboratorDataSource.find(
-                                                (d) =>
-                                                  d?.optionValue ===
-                                                  user?.user?._id
-                                              ).optionValue)
+                                              // handleValuesChange("collaborator", newCollaboratorDataSource.find(
+                                              //   (d) =>
+                                              //     d?.optionValue ===
+                                              //     user?.user?._id
+                                              // ).optionValue)
 
                                               setFieldValue("collaborator", [
                                                 ...values["collaborator"],
@@ -436,7 +447,7 @@ export default function ManageAccount(props) {
                                           collaboratorDataSource
                                         }
                                         setFieldValue={(name, value) => {
-                                          handleValuesChange(field.fieldName, value);
+                                          // handleValuesChange(field.fieldName, value);
                                           setFieldValue(field.fieldName, value)
                                         }}
                                         required={field.required}
@@ -470,13 +481,13 @@ export default function ManageAccount(props) {
                                         size="small"
                                         onChange={(e, value) => {
 
-                                          handleValuesChange(field.fieldName, value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [])
+                                          // handleValuesChange(field.fieldName, value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [])
                                           setFieldValue(
                                             field.fieldName,
                                             value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
                                           );
-                                          handleValuesChange("owner", "")
-                                          handleValuesChange("collaborator", [])
+                                          // handleValuesChange("owner", "")
+                                          // handleValuesChange("collaborator", [])
                                           setFieldValue("owner", "");
                                           setFieldValue("collaborator", []);
                                         }}
@@ -494,7 +505,7 @@ export default function ManageAccount(props) {
                                         name={field.fieldName}
                                         type={field.type}
                                         setFieldValue={(name, value) => {
-                                          handleValuesChange(name, value)
+                                          // handleValuesChange(name, value)
                                           setFieldValue(name, value)
                                         }}
                                         required={field.required}
@@ -503,7 +514,7 @@ export default function ManageAccount(props) {
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onChange={(e) => {
-                                          handleValuesChange(field.fieldName, e.target.checked)
+                                          // handleValuesChange(field.fieldName, e.target.checked)
                                           setFieldValue(
                                             field.fieldName,
                                             e.target.checked
@@ -512,7 +523,7 @@ export default function ManageAccount(props) {
                                             e.target.checked &&
                                             values.billingAddress
                                           ) {
-                                            handleValuesChange("shippingAddress", values.billingAddress)
+                                            // handleValuesChange("shippingAddress", values.billingAddress)
                                             setFieldValue(
                                               "shippingAddress",
                                               values.billingAddress
@@ -533,13 +544,13 @@ export default function ManageAccount(props) {
                                         type={field.type}
                                         options={field.option}
                                         setFieldValue={(name, value) => {
-                                          handleValuesChange(field.fieldName, value)
+                                          // handleValuesChange(field.fieldName, value)
                                           setFieldValue(name, value)
                                           if (
                                             values.isShippingAddressSameAsBillingAddress ===
                                             true
                                           ) {
-                                            handleValuesChange("shippingAddress", value ?? "")
+                                            // handleValuesChange("shippingAddress", value ?? "")
                                             setFieldValue(
                                               "shippingAddress",
                                               value ?? ""
@@ -552,7 +563,7 @@ export default function ManageAccount(props) {
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onChange={(event, newValue) => {
-                                          handleValuesChange(field.fieldName, newValue?.description ?? "")
+                                          // handleValuesChange(field.fieldName, newValue?.description ?? "")
                                           setFieldValue(
                                             field.fieldName,
                                             newValue?.description ?? ""
@@ -561,7 +572,7 @@ export default function ManageAccount(props) {
                                             values.isShippingAddressSameAsBillingAddress ===
                                             true
                                           ) {
-                                            handleValuesChange("shippingAddress", newValue?.description ?? "")
+                                            // handleValuesChange("shippingAddress", newValue?.description ?? "")
                                             setFieldValue(
                                               "shippingAddress",
                                               newValue?.description ?? ""
@@ -582,7 +593,7 @@ export default function ManageAccount(props) {
                                         type={field.type}
                                         options={field.option}
                                         setFieldValue={(name, value) => {
-                                          handleValuesChange(name, value);
+                                          // handleValuesChange(name, value);
                                           setFieldValue(name, value)
                                         }}
                                         required={field.required}
@@ -595,7 +606,7 @@ export default function ManageAccount(props) {
                                           true || (!isNew && field.disableOnEdit)
                                         }
                                         onChange={(event, newValue) => {
-                                          handleValuesChange(field.fieldName, newValue?.description ?? "");
+                                          // handleValuesChange(field.fieldName, newValue?.description ?? "");
                                           setFieldValue(
                                             field.fieldName,
                                             newValue?.description ?? ""
@@ -615,7 +626,7 @@ export default function ManageAccount(props) {
                                         type={field.type}
                                         options={parentAccountDataSource}
                                         setFieldValue={(name, value) => {
-                                          handleValuesChange(name, value);
+                                          // handleValuesChange(name, value);
                                           setFieldValue(name, value)
                                         }}
                                         required={field.required}
@@ -652,7 +663,7 @@ export default function ManageAccount(props) {
                                             name={field.fieldName}
                                             type={field.type}
                                             setFieldValue={(name, value) => {
-                                              handleValuesChange({ [name]: value })
+                                              // handleValuesChange({ [name]: value })
                                               setFieldValue(name, value)
                                             }}
                                             required={field.required}
@@ -738,7 +749,7 @@ export default function ManageAccount(props) {
                                               name={field.fieldName}
                                               type={field.type}
                                               setFieldValue={(name, value) => {
-                                                handleValuesChange({ [name]: value })
+                                                // handleValuesChange({ [name]: value })
                                                 setFieldValue(name, value)
                                               }}
                                               required={field.required}
@@ -808,7 +819,7 @@ export default function ManageAccount(props) {
                                           type={field.type}
                                           options={field.option}
                                           setFieldValue={(name, value) => {
-                                            handleValuesChange(name, value);
+                                            // handleValuesChange(name, value);
                                             setFieldValue(name, value)
                                           }}
                                           required={field.required}

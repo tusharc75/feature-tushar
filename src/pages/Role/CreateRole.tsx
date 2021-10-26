@@ -20,6 +20,7 @@ import Loader from "../../components/Loader";
 import RoleEngine from "../../components/Shared/RoleEngine";
 import { roleTypes } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
+import { isMobile , isTablet } from 'react-device-detect';
 
 const CreateRole = ({
   open,
@@ -33,14 +34,14 @@ const CreateRole = ({
 }) => {
   const theme = useTheme();
   const history = useHistory();
-  const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState({ name: "", description: "" });
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  
   useEffect(() => {
     if (isClone) {
       fetchRoleData()
@@ -124,7 +125,7 @@ const CreateRole = ({
       open={open}
       maxWidth="md"
       fullWidth
-      fullScreen={isMobile}
+      fullScreen={fullScreen || (isMobile || isTablet)}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
           setShowConfirmDialog(true)
@@ -132,7 +133,13 @@ const CreateRole = ({
       }}
     >
       <CustomDialogHeader title="Create New Role"
-        onClose={() => setShowConfirmDialog(true)} />
+        onClose={() => setShowConfirmDialog(true)}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen(prevState => !prevState)
+        }}
+        showManimizeMaximize={true}
+      />
 
       {loading ? (
         <>

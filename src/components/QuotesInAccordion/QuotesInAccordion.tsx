@@ -17,7 +17,7 @@ import { displayDate } from '../../services/util';
 import { HiExternalLink } from 'react-icons/hi';
 import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
 import { MoreVert } from "@material-ui/icons";
-import { formatAmountWithCurrency } from '../../constants/helpers';
+import { formatAmountWithCurrency, opportunity } from '../../constants/helpers';
 import AssignQuoteDialog from './AssignQuoteDialog';
 import routes from '../Helpers/Routes';
 import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
@@ -80,7 +80,7 @@ function DisplayData({ key, label, value, icon }) {
 }
 
 export default function QuotesInAccordion({
-    expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, accountName = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null, isAllowedToUpdate, marketSegmentId = null, subMarketSegmentId = null, currency = null, estimatedAmount = null }) {
+    expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, accountName = null, contactName = null, resource = null, contactId = null, opportunityId = null, accountResource = null, contactResource = null, isRenderedInCustomerContact = false, isRenderedFromCustomerAccount = false, isCreateOwnerDisable = true, contacts = null, isRenderedFromOpportunity = false, opportunityName = null, isAllowedToUpdate, marketSegmentId = null, subMarketSegmentId = null, currency = null, estimatedAmount = null }) {
     const history = useHistory();
     const {
         state: { selectedEntity, user }, dispatch
@@ -109,6 +109,7 @@ export default function QuotesInAccordion({
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const [showAddExistingDialog, setShowAddExistingDialog] = useState(false);
+    const [resourceName, setResourceName] = useState('');
 
     const onSuccess = () => {
         setShowCreateDialog(false);
@@ -120,7 +121,8 @@ export default function QuotesInAccordion({
         else if (quotes?.length > 0 && !isExpanded) isExpanded = true;
 
         setExpandQuote(isExpanded);
-    }, [quotes]);
+        setResourceName((accountId && !contactId && !opportunityId) ? accountResource : contactResource ? contactResource : "opportunity")
+    }, [quotes, resourceName]);
 
     const handleOpenMenu = (event) => {
         setAnchorEl(event.currentTarget);
@@ -161,6 +163,34 @@ export default function QuotesInAccordion({
                 </Tooltip>
             </span>)
     )
+
+    const handleViewAll = (detailPage) => {
+        switch (detailPage) {
+            case "customerAccount" || "supplierAccount":
+                history.push(routes.quoteBuilder.path, {
+                    accountId: accountId,
+                    accountName: accountName,
+                    resource: `${accountResource}`,
+                })
+                break;
+            case "customerContact" || "supplierContact":
+                history.push(routes.quoteBuilder.path, {
+                    contactId: contactId,
+                    contactName: contactName,
+                    resource: `${contactResource}`,
+                })
+                break;
+            case "opportunity":
+                history.push(routes.quoteBuilder.path, {
+                    opportunityId: opportunityId,
+                    opportunityName: opportunityName,
+                })
+                break;
+
+            default:
+                break;
+        }
+    }
     return <>
         <Accordion expanded={expandQuote} className="omsAccordian accordQuotes">
             <AccordionSummary
@@ -272,7 +302,7 @@ export default function QuotesInAccordion({
                                                             </Grid>
                                                             <Grid item xs={5} sm={4}>
                                                                 <Typography className="amount" title={formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).fullFormatAmount}>
-                                                                    {formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).shortFormatAmount}
+                                                                    {formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).fullFormatAmount}
                                                                 </Typography>
                                                             </Grid>
                                                         </Grid>
@@ -312,12 +342,12 @@ export default function QuotesInAccordion({
             </Box>
             <Box margin={1} /> */}
 
-            <Box margin={1} className="btn-view gap-1" onClick={() =>
-                history.push(routes.quoteBuilder.path, {
-                    accountId: accountId,
-                    accountName: accountName,
-                    resource: `${accountResource}`,
-                })}
+            <Box
+                margin={1}
+                className="btn-view gap-1"
+                onClick={() =>
+                    handleViewAll(resourceName)
+                }
 
                 p={1} display="flex" justifyContent="center" alignItems="center">
                 <HiExternalLink size={25} />

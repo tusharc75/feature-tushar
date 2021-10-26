@@ -136,6 +136,8 @@ export default function ManageQuoteDialog({
   const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
+  
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     if (entityData.fields.length === 0 && Object.keys(customError).length > 0) {
@@ -779,7 +781,7 @@ export default function ManageQuoteDialog({
         }}
         open={open}
         fullWidth
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
       >
         <CustomDialogHeader
           title={isNew ? "Create Quote" : isClone ? `Clone ${dataToUpdate.quoteName}` : `Editing ${dataToUpdate.quoteName}`}
@@ -787,6 +789,11 @@ export default function ManageQuoteDialog({
             if (isFieldNotTouched(entityData, formValues)) onClose()
             else setShowConfirmDialog(true)
           }}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
         />
 
         {entityData.fields.length === 0 && (
@@ -1450,32 +1457,32 @@ export default function ManageQuoteDialog({
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                       />
-                                    ): field.fieldName === "expiryDate"  ? (
-                                    <FormTypes
-                                      {...field}
-                                      // {...rest}
-                                      disablePast={true}
-                                      isNew={isNew}
-                                      disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
-                                      selectedCurrencyCode={values["currency"]}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        handleValuesChange({ [name]: value })
-                                        setFieldValue(name, value)
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                    />
-                                  ) : [
+                                    ) : field.fieldName === "expiryDate" ? (
+                                      <FormTypes
+                                        {...field}
+                                        // {...rest}
+                                        disablePast={true}
+                                        isNew={isNew}
+                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
+                                        selectedCurrencyCode={values["currency"]}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange({ [name]: value })
+                                          setFieldValue(name, value)
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                      />
+                                    ) : [
                                       "quoteAcceptDate",
                                       "salesOrderCreationDate",
                                       "invoiceCreationDate",

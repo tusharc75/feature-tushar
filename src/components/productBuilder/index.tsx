@@ -59,6 +59,8 @@ const ProductBuilder = (props) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [product, setProduct] = useState([]);
+  const [productFields, setProductFields] = useState([]);
+
   const [columns, setColumns] = useState(null);
   const [productData, setProductData] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -88,13 +90,7 @@ const ProductBuilder = (props) => {
   }, [productBuilderId]);
 
   const ActionsRenderer = (params) => {
-    const permission =
-      permissions?.isUpdate && fromQuote
-        ? hasPermission
-          ? true
-          : false
-        : true;
-
+    const permission = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
     return (
       <>
         <IconButton
@@ -111,7 +107,6 @@ const ProductBuilder = (props) => {
             color={permission ? "primary" : "disabled"}
           />
         </IconButton>
-
         <IconButton
           disabled={permission ? false : true}
           aria-label="Edit"
@@ -124,7 +119,6 @@ const ProductBuilder = (props) => {
             color={permission ? "primary" : "disabled"}
           />
         </IconButton>
-
         <IconButton
           disabled={permission ? false : true}
           aria-label="Delete"
@@ -187,8 +181,21 @@ const ProductBuilder = (props) => {
       gridApi.setRowData([]);
     }
     axiosInstance().get(`/productbuilder/getproduct/${id}`).then(({ data: { data } }) => {
-      setProduct(data.data);
-      data = data.data?.map((u, index) => {
+      setProduct(data.data.product);
+      setProductFields(data.data.productFields);
+      setColumns(null);
+      let column = [
+        {
+          field: "srno",
+          headerName: "Item #",
+          width: 70,
+          show: true,
+          disabled: true,
+          cellRenderer: "productNameRenderer",
+        },
+      ];
+      GenrateColoum(data.data.productFields, column);
+      data = data.data.product?.map((u, index) => {
         const { entity, ...restProperties } = u;
         const [firstEntity, ...restEntity] = entity ? entity : [];
         let res = {
@@ -207,107 +214,8 @@ const ProductBuilder = (props) => {
         }
         return res;
       });
-      setColumns(null);
-      let column = [
-        {
-          field: "srno",
-          headerName: "Item #",
-          width: 70,
-          show: true,
-          disabled: true,
-          cellRenderer: "productNameRenderer",
-        },
-      ];
       data.forEach((row) => {
-        let _fields = row.fields;
-        if (stage && stage === "product") { _fields = row.fields.filter((t) => t.leval === "product" || t.leval === "product-custom" || t.leval === "product-template"); }
-        _fields.forEach((ele) => {
-          if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
-            if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
-              ele.displayUnits && Array.isArray(ele.displayUnits) && ele.displayUnits.forEach((_unit) => {
-                let fieldName = ele.fieldName + "_" + _unit.toLowerCase();
-                let fieldLabel = ele.fieldLabel + " " + _unit;
-                if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                  let col: any = {};
-                  col.field = fieldName;
-                  col.headerName = fieldLabel;
-                  col.width = 180;
-                  if (!ele.isFormula && !ele.isUneditable && Editable) {
-                    col.cellRenderer = "commonRenderer";
-                    col.cellEditor = "numericCellEditor";
-                    col.editable = true;
-                  } else {
-                    col.cellRenderer = "commonRenderer";
-                  }
-                  column.push(col);
-                }
-              });
-            } else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
-              ele.displayUnits && Array.isArray(ele.displayUnits) && ele.displayUnits.forEach((_unit) => {
-                ele.displayCurrency && Array.isArray(ele.displayCurrency) && ele.displayCurrency.forEach((_currency) => {
-                  let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase();
-                  let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency;
-                  if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                    let col: any = {};
-                    col.field = fieldName;
-                    col.headerName = fieldLabel;
-                    col.width = 180;
-                    if (!ele.isFormula && !ele.isUneditable && Editable) {
-                      col.cellRenderer = "commonRenderer";
-                      col.cellEditor = "numericCellEditor";
-                      col.editable = true;
-                    } else {
-                      col.cellRenderer = "commonRenderer";
-                    }
-                    column.push(col);
-                  }
-                });
-              });
-            } else if (ele.type === "currencyAmount") {
-              ele.displayCurrency && Array.isArray(ele.displayCurrency) && ele.displayCurrency.forEach((_currency) => {
-                let fieldName = ele.fieldName + "_" + _currency.toLowerCase();
-                let fieldLabel = ele.fieldLabel + " " + _currency;
-                if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                  let col: any = {};
-                  col.field = fieldName;
-                  col.headerName = fieldLabel;
-                  col.width = 180;
-                  if (!ele.isFormula && !ele.isUneditable && Editable) {
-                    col.cellRenderer = "commonRenderer";
-                    col.cellEditor = "numericCellEditor";
-                    col.editable = true;
-                  } else {
-                    col.cellRenderer = "commonRenderer";
-                  }
-                  column.push(col);
-                }
-              });
-            }
-          } else {
-            if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-              let col: any = {};
-              col.field = ele.fieldName;
-              col.headerName = ele.fieldLabel;
-              col.width = 180;
-              col.cellRenderer = "commonRenderer";
-              if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
-                if (!ele.isFormula && !ele.isUneditable && Editable) {
-                  col.cellRenderer = "commonRenderer";
-                  if (ele.type === "decimal" || ele.type === "percent") {
-                    col.cellEditor = "numericCellEditor";
-                  }
-                  col.editable = true;
-                } else {
-                  col.cellRenderer = "commonRenderer";
-                }
-              }
-              if (ele.fieldName === "entity") {
-                col.cellRenderer = "entityRenderer"
-              }
-              column.push(col);
-            }
-          }
-        });
+        GenrateColoum(row.fields, column);
       });
       column = orderBy(column, "order", "asc");
       column = sortBy(column, (item: any) => {
@@ -339,10 +247,102 @@ const ProductBuilder = (props) => {
       });
   };
 
+  const GenrateColoum = (fields, column) => {
+    let _fields = fields;
+    if (stage && stage === "product") { _fields = fields.filter((t) => t.leval === "product" || t.leval === "product-custom" || t.leval === "product-template"); }
+    _fields.forEach((ele) => {
+      if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
+        if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+          ele.displayUnits && Array.isArray(ele.displayUnits) && ele.displayUnits.forEach((_unit) => {
+            let fieldName = ele.fieldName + "_" + _unit.toLowerCase();
+            let fieldLabel = ele.fieldLabel + " " + _unit;
+            if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+              let col: any = {};
+              col.field = fieldName;
+              col.headerName = fieldLabel;
+              col.width = 180;
+              if (!ele.isFormula && !ele.isUneditable && Editable) {
+                col.cellRenderer = "commonRenderer";
+                col.cellEditor = "numericCellEditor";
+                col.editable = true;
+              } else {
+                col.cellRenderer = "commonRenderer";
+              }
+              column.push(col);
+            }
+          });
+        } else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+          ele.displayUnits && Array.isArray(ele.displayUnits) && ele.displayUnits.forEach((_unit) => {
+            ele.displayCurrency && Array.isArray(ele.displayCurrency) && ele.displayCurrency.forEach((_currency) => {
+              let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase();
+              let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency;
+              if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                let col: any = {};
+                col.field = fieldName;
+                col.headerName = fieldLabel;
+                col.width = 180;
+                if (!ele.isFormula && !ele.isUneditable && Editable) {
+                  col.cellRenderer = "commonRenderer";
+                  col.cellEditor = "numericCellEditor";
+                  col.editable = true;
+                } else {
+                  col.cellRenderer = "commonRenderer";
+                }
+                column.push(col);
+              }
+            });
+          });
+        } else if (ele.type === "currencyAmount") {
+          ele.displayCurrency && Array.isArray(ele.displayCurrency) && ele.displayCurrency.forEach((_currency) => {
+            let fieldName = ele.fieldName + "_" + _currency.toLowerCase();
+            let fieldLabel = ele.fieldLabel + " " + _currency;
+            if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+              let col: any = {};
+              col.field = fieldName;
+              col.headerName = fieldLabel;
+              col.width = 180;
+              if (!ele.isFormula && !ele.isUneditable && Editable) {
+                col.cellRenderer = "commonRenderer";
+                col.cellEditor = "numericCellEditor";
+                col.editable = true;
+              } else {
+                col.cellRenderer = "commonRenderer";
+              }
+              column.push(col);
+            }
+          });
+        }
+      } else {
+        if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
+          let col: any = {};
+          col.field = ele.fieldName;
+          col.headerName = ele.fieldLabel;
+          col.width = 180;
+          col.cellRenderer = "commonRenderer";
+          if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
+            if (!ele.isFormula && !ele.isUneditable && Editable) {
+              col.cellRenderer = "commonRenderer";
+              if (ele.type === "decimal" || ele.type === "percent") {
+                col.cellEditor = "numericCellEditor";
+              }
+              col.editable = true;
+            } else {
+              col.cellRenderer = "commonRenderer";
+            }
+          }
+          if (ele.fieldName === "entity") {
+            col.cellRenderer = "entityRenderer"
+          }
+          column.push(col);
+        }
+      }
+    });
+  }
+
   const openProductModel = (id) => {
     const result = product.filter((_f) => _f._id === id);
     if (result.length) {
-      setProductData(result[0]);
+      setProductData({ ...result[0], fields: [...productFields, ...result[0].fields] });
     }
   }
 
@@ -479,25 +479,15 @@ const ProductBuilder = (props) => {
     data._ids = selectedRecords.map((d) => d.id);
     data.field = field;
     data.field.leval = "price-builder-custom";
-    if (
-      addFieldData.fields.filter(
-        (_f) => _f.sectionName === data.field.sectionName
-      ).length
-    ) {
-      if (
-        addFieldData.fields.filter(
-          (_f) => _f.sectionName === data.field.sectionName
-        )[0].leval !== "price-template"
-      ) {
+    if (addFieldData.fields.filter((_f) => _f.sectionName === data.field.sectionName).length) {
+      if (addFieldData.fields.filter((_f) => _f.sectionName === data.field.sectionName)[0].leval !== "price-template") {
         data.field.leval = "product-builder-custom";
       }
     }
-    axiosInstance()
-      .post(`/productbuilder/addField`, data)
-      .then(() => {
-        fetchProduct(productBuilderId);
-        setIsAddField(false);
-      })
+    axiosInstance().post(`/productbuilder/addField`, data).then(() => {
+      fetchProduct(productBuilderId);
+      setIsAddField(false);
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -514,11 +504,7 @@ const ProductBuilder = (props) => {
   const checkUniqTemplate = () => {
     if (selectedRecords.length === 0) {
       return true;
-    } else if (
-      uniq(map(selectedRecords, "priceTemplate")).length ===
-      1 &&
-      stage === "cost"
-    ) {
+    } else if (uniq(map(selectedRecords, "priceTemplate")).length === 1 && stage === "cost") {
       return false;
     } else {
       return true;
@@ -533,26 +519,16 @@ const ProductBuilder = (props) => {
       if (row.column.colId.split("_").length) {
         fieldName = row.column.colId.split("_")[0];
       }
-      const fieldData = productRow.fields.filter(
-        (_f) => _f.fieldName === fieldName
-      );
+      const fieldData = [...productFields, ...productRow.fields].filter((_f) => _f.fieldName === fieldName);
       if (fieldData.length) {
         let currency = "";
         let unit = "";
         if (row.column.colId.split("_").length) {
-          if (
-            fieldData[0].type !== "currencyAmount" &&
-            (fieldData[0].type === "converter" ||
-              fieldData[0].isConverter === true)
-          ) {
+          if (fieldData[0].type !== "currencyAmount" && (fieldData[0].type === "converter" || fieldData[0].isConverter === true)) {
             if (row.column.colId.split("_").length === 2) {
               unit = row.column.colId.split("_")[1];
             }
-          } else if (
-            fieldData[0].type === "currencyAmount" &&
-            (fieldData[0].type === "converter" ||
-              fieldData[0].isConverter === true)
-          ) {
+          } else if (fieldData[0].type === "currencyAmount" && (fieldData[0].type === "converter" || fieldData[0].isConverter === true)) {
             if (row.column.colId.split("_").length === 3) {
               currency = row.column.colId.split("_")[1];
               unit = row.column.colId.split("_")[2];
@@ -563,17 +539,12 @@ const ProductBuilder = (props) => {
             }
           }
         }
-
         let value: any;
-        if (
-          fieldData[0].type === "singleLine" ||
-          fieldData[0].type === "multiLine"
-        ) {
+        if (fieldData[0].type === "singleLine" || fieldData[0].type === "multiLine") {
           value = row.newValue;
         } else {
           value = parseFloat(row.newValue);
         }
-
         const result = handleAutoCalculation(
           fieldData[0],
           productRow.fields,
@@ -587,11 +558,9 @@ const ProductBuilder = (props) => {
         data.values = result;
         data.id = row.data.id;
         data._id = productBuilderId;
-        axiosInstance()
-          .put(`/productbuilder/updateproduct-inline`, data)
-          .then(() => {
-            fetchProduct(productBuilderId);
-          })
+        axiosInstance().put(`/productbuilder/updateproduct-inline`, data).then(() => {
+          fetchProduct(productBuilderId);
+        })
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });

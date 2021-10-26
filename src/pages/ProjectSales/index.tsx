@@ -236,28 +236,36 @@ const ProjectSales: FC = () => {
         entity="Project"
       />
       {
-        permissions?.projectStrategy?.isUpdate && <Tooltip title="Entity">
-          <IconButton
-            size="small"
-            aria-label="Entity"
-            onClick={() => {
-              setProjectSalesId(params.data._id)
-              setShowEntityDialog(true)
-              if (params?.data?.entity) {
-                let entities = []
-                if (params?.data?.entityId) {
-                  entities.push(params?.data?.entityId)
+        (permissions?.projectStrategy?.isUpdate && params?.data?.isTeamMember) ||
+          params?.data?.isManager ?
+          <Tooltip title="Entity">
+            <IconButton
+              size="small"
+              aria-label="Entity"
+              onClick={() => {
+                setProjectSalesId(params.data._id)
+                setShowEntityDialog(true)
+                if (params?.data?.entity) {
+                  let entities = []
+                  if (params?.data?.entityId) {
+                    entities.push(params?.data?.entityId)
+                  }
+                  if (params?.data?.restentity) {
+                    let restEntities = params?.data?.restentity.map(o => o.optionValue)
+                    entities = [...entities, ...restEntities]
+                  }
+                  setEntities([...entities])
                 }
-                if (params?.data?.restentity) {
-                  let restEntities = params?.data?.restentity.map(o => o.optionValue)
-                  entities = [...entities, ...restEntities]
-                }
-                setEntities([...entities])
-              }
-            }}>
-            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
-          </IconButton>
-        </Tooltip>
+              }}>
+              <AiOutlineDeploymentUnit fontSize="15" color="primary" />
+            </IconButton>
+          </Tooltip> : (
+            <Tooltip className="cursor-stop" title="You do not have permission to update entity">
+              <IconButton aria-label="Clone" size="small">
+                <AiOutlineDeploymentUnit fontSize="15" />
+              </IconButton>
+            </Tooltip>
+          )
       }
     </>
   );
@@ -336,7 +344,9 @@ const ProjectSales: FC = () => {
         .get(`/project-sales${queryString}`)
         .then(({ data: { data, count } }) => {
           let rows = data.map((project) => ({
-            ...prepareDataForGrid(project, user)
+            ...prepareDataForGrid(project, user),
+            isManager: user.user._id === project?.projectManager?.optionValue,
+            isTeamMember: Boolean(data.staticData?.user.find((u) => u._id === user.user._id))
           }));
 
           dispatch({ type: "initialize", data: rows, count: count });

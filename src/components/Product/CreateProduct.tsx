@@ -439,7 +439,7 @@ const CreateProduct = (props) => {
                                                                                 setNewProductCategoryId(null);
                                                                                 const result = handleAutoCalculation(field, initialData.fields, values,
                                                                                     field.fieldName, '', '', val && val.optionValue ? val.optionValue : "");
-                                                                                if (Object.keys(result).length > 1) {
+                                                                                if (Object.keys(result).length >= 1) {
                                                                                     for (var x in result) {
                                                                                         setFieldValue(x, result[x]);
                                                                                     }

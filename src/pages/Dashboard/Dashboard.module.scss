@@ -72,10 +72,10 @@
   border-radius: 50px 10px !important;
 }
 
-.all_content_box {
-  display: grid;
+// .all_content_box {
+//   display: grid;
 
-}
+// }
 
 .set_crm_image {
   width: 85%;
@@ -202,3 +202,8 @@ h5 {
   }
 }
 
+.list_header {
+  background: #41aeaa !important;
+  color: white !important;
+  border-radius: 5px !important;
+}

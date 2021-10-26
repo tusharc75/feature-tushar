@@ -28,7 +28,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`)
       .then(({ data }) => {
         setAssignedSerializedAsset(data.data)
-        let tempProductInventory = data.data.map(d => d.inventory)
+        let tempProductInventory = data.data.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
         dispatch({ type: "loading", loading: true });
         axiosInstance()
           .get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/delivery-ticket `)
@@ -55,7 +55,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
         toastConfig.setToastConfig(error)
       });
     // eslint-disable-next-line
-  }, [warehouse, productInventory]);
+  }, [productInventory]);
 
   const TicketRenderer = (params) => (
     params?.value ? (
@@ -66,21 +66,31 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
       <NoDataCell />
     )
   );
-
-
+  const InventoryRenderer = (params) => (
+    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+      {params.value}
+    </Link>
+  );
+  const ProductNameRenderer = (params) => (
+    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.product.optionValue}`}>
+      {params.value}
+    </Link>
+  );
 
   const frameworkComponents = {
     ticketRenderer: TicketRenderer,
+    productNameRenderer: ProductNameRenderer,
+    inventoryRenderer: InventoryRenderer,
     commonRenderer: CommonRenderer,
   };
 
   const columns = [
-    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "inventoryRenderer" },
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
     { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "ticketRenderer" },
+    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productNameRenderer" },
+    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
   ];
 
   const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageDeliveryTicket"));

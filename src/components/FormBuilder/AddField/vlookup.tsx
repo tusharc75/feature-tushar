@@ -321,66 +321,6 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
           >
             {Row}
           </FixedSizeList>
-          {/*
-                    {values["option"] && values["option"].map((data, index) => (
-                        <Box key={index} bgcolor="white" border={1} mb={1} p={1} borderColor="grey.300" width={"100%"} >
-                            <Box display="flex" flexDirection="row" >
-                                <Box minWidth={100}>
-                                    <IconButton aria-label="setting" onClick={() => AddRemoveValue("add", index)} >
-                                        <AddCircleOutlineIcon fontSize="small" />
-                                    </IconButton>
-                                    <IconButton aria-label="setting" onClick={() => AddRemoveValue("remove", index)} >
-                                        <RemoveCircleOutlineIcon fontSize="small" />
-                                    </IconButton>
-                                </Box>
-                                <Box minWidth={200} maxWidth={200} pl={1}>
-                                    <TextField
-                                        id="standard-basic"
-                                        variant="outlined"
-                                        margin="dense"
-                                        fullWidth
-                                        style={{ margin: 0 }}
-                                        value={data.optionLabel}
-                                        onChange={(event) => onChangeValue(index, "optionLabel", event.target.value)}
-                                    />
-                                </Box>
-                                {values["vlookupInputFields"] && values["vlookupInputFields"].map((_row) => (
-                                    <Box minWidth={200} maxWidth={200} pl={1}>
-                                        {(fields.filter((_f) => _f.fieldName === _row).length) &&
-                                            fields.filter((_f) => _f.fieldName === _row)[0].type === "dropDown" ||
-                                            fields.filter((_f) => _f.fieldName === _row)[0].type === "vlookupDropdown" ?
-                                            <Select
-                                                id="demo-simple-select-outlined"
-                                                fullWidth
-                                                variant="outlined"
-                                                margin="dense"
-                                                value={data[_row]}
-                                                onChange={(event) => onChangeValue(index, _row, event.target.value)}
-                                            >
-                                                {fields.filter((_f) => _f.fieldName === _row)[0].option &&
-                                                    fields.filter((_f) => _f.fieldName === _row)[0].option.map((_option) => {
-                                                        return (<MenuItem key={_option.optionLabel} value={_option.optionLabel}>
-                                                            {_option.optionLabel}
-                                                        </MenuItem>
-                                                        );
-                                                    })
-                                                }
-                                            </Select>
-                                            :
-                                            <TextField
-                                                id="standard-basic"
-                                                variant="outlined"
-                                                margin="dense"
-                                                fullWidth
-                                                style={{ margin: 0 }}
-                                                value={data[_row]}
-                                                onChange={(event) => onChangeValue(index, _row, event.target.value)}
-                                            />
-                                        }
-                                    </Box>))}
-                            </Box>
-                        </Box>
-                    ))} */}
         </Box>
       </Box>
       {values['isConverter'] || values['type'] === "converter" && (

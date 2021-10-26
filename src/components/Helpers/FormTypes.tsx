@@ -1763,7 +1763,7 @@ const FormTypes = (props) => {
           <IconButton
             disabled={Boolean(!values[name])}
             title="Remove picture"
-            color="secondary"
+            className={Boolean(!values[name]) ? "" : "errorColor"}
             size="small"
             aria-label="delete picture"
             component="span"

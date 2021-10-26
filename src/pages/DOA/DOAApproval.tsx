@@ -147,6 +147,8 @@ const DOAApproval = () => {
   const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
   const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
   var DOALimit = 0;
   var DOAsetup = false;
   const handleActivityHideShow = () => {
@@ -392,7 +394,7 @@ const DOAApproval = () => {
                             formatAmountWithCurrency(
                               QData["TotalProfitcurr"],
                               QData["TotalProfitamount"]
-                            ).shortFormatAmount
+                            ).fullFormatAmount
                           }
                         </span>
                       </div>
@@ -410,7 +412,7 @@ const DOAApproval = () => {
                             formatAmountWithCurrency(
                               QData["TotalCostcurr"],
                               QData["TotalCostamount"]
-                            ).shortFormatAmount
+                            ).fullFormatAmount
                           }
                         </span>
                       </div>
@@ -428,7 +430,7 @@ const DOAApproval = () => {
                             formatAmountWithCurrency(
                               QData["TotalSellingPricecurr"],
                               QData["TotalSellingPriceamount"]
-                            ).shortFormatAmount
+                            ).fullFormatAmount
                           }
                         </span>
                       </div>
@@ -531,7 +533,7 @@ const DOAApproval = () => {
               setShowAIDialog(false);
             }}
             fullWidth
-            fullScreen={isMobile || isTablet}
+            fullScreen={fullScreen || (isMobile || isTablet)}
             TransitionComponent={CustomDialogTransition}
           >
             <CustomDialogHeader
@@ -539,6 +541,11 @@ const DOAApproval = () => {
               onClose={() => {
                 setShowAIDialog(false);
               }}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+              }}
+              showManimizeMaximize={true}
             />
             <CustomDialogContent>
               <div className="text-align-center">
