@@ -1007,7 +1007,7 @@ export default function Account(props) {
             id={cloneId}
             accountResource={accountResource}
             accountApi={accountApi}
-            isClone={true}
+            isClone={cloneId ? true : false}
             accountNameForClone={accountNameForClone}
           />
         ) : null}
