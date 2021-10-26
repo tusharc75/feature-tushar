@@ -453,6 +453,7 @@ const ProductCategory = () => {
                             >
                                 <MenuItem onClick={() => {
                                     closeActions()
+                                    {selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0])}
                                     setShowDeleteConfirmBox(true)
                                 }}>Delete</MenuItem>
                             </Menu>

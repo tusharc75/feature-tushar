@@ -56,6 +56,7 @@ export function reducer(state, action) {
     case 'search':
       return {
         ...state,
+        page: 0,
         search: action.search,
         loading: true
       };
@@ -149,7 +150,9 @@ export default function CustomAgGrid({
     const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
     if (columnState) {
-      params.columnApi.setColumnState(columnState);
+      setTimeout(() => {
+        params.columnApi.setColumnState(columnState);
+      }, 50)
     }
   };
 

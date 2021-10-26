@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.25.0](https://github.com/vebholic/oms_frontend/compare/v1.24.2...v1.25.0) (2021-10-26)
+
+
+### Features
+
+* - OAT-105 - Rearrangement of columns issue fixed ([5d3b3ec](https://github.com/vebholic/oms_frontend/commit/5d3b3ecefa148f523e38c9a2443d3bc87f165990))
+* - OAT-105 on filter page changed to first page done ([3073cc4](https://github.com/vebholic/oms_frontend/commit/3073cc4cfca071b66ee3beba5bc661c89df82b3d))
+* - OAT-151 - Owner coming in collaborator issue fixed for customer account screen ([60ea8bf](https://github.com/vebholic/oms_frontend/commit/60ea8bf4134682ed3add56b85e98c00e909e125d))
+* - Search added in dashboard" ([cf0f800](https://github.com/vebholic/oms_frontend/commit/cf0f800b89f68fa0a3fa93621ed8d81f0d717de7))
+* rental job --- receiving ticket ([099c9cc](https://github.com/vebholic/oms_frontend/commit/099c9cc2a4c2574c9ba43006e16416ec045328b5))
+
+
+### Bug Fixes
+
+* **budgets:** year issue ([1c8bb0d](https://github.com/vebholic/oms_frontend/commit/1c8bb0d42fcedb7f4d75662a81b1222613a2820c))
+* bug fix ([62e70d3](https://github.com/vebholic/oms_frontend/commit/62e70d31d15d9ae833bd94a76ccd6d080213cfdb))
+* **opportunity:** undefined optionLabel ([25c3fc3](https://github.com/vebholic/oms_frontend/commit/25c3fc3f973557a98d5e2ae06af497385783e176))
+* **steps:** manual step error fix ([7dace77](https://github.com/vebholic/oms_frontend/commit/7dace77e77cb8a08f2ee8059f28a162652c2a7b8))
+
+### [1.24.2](https://github.com/vebholic/oms_frontend/compare/v1.24.1...v1.24.2) (2021-10-25)
+
+### [1.24.1](https://github.com/vebholic/oms_frontend/compare/v1.24.0...v1.24.1) (2021-10-24)
+
 ## [1.24.0](https://github.com/vebholic/oms_frontend/compare/v1.23.0...v1.24.0) (2021-10-23)
 
 

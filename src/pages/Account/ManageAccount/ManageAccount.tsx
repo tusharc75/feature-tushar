@@ -40,7 +40,9 @@ export default function ManageAccount(props) {
     accountId = null,
     formValues = {},
     handleValuesChange = null,
-    marketSegmentId = null
+    marketSegmentId = null,
+    isClone,
+    accountNameForClone
   } = props;
 
   const {
@@ -72,78 +74,79 @@ export default function ManageAccount(props) {
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
 
   useEffect(() => {
+    if (accountData.fields.length > 0) {
+      if (isNew) {
+        const processSteps = accountData.fields.find(
+          (d) => d.type.toLowerCase() === "process"
+        );
 
-    if (isNew) {
-      const processSteps = accountData.fields.find(
-        (d) => d.type.toLowerCase() === "process"
-      );
-
-      if (processSteps) {
-        accountData.fields.map((d) => {
-          if (d.sectionName == processSteps?.additionalInfoSection) {
-            setAdditionalFieldName(d.sectionName)
-          }
-        });
-      }
-    }
-
-    if (fromProject) {
-      setOwnerCollaboratorCommonDataSource(owners);
-      setOwnerDataSource(owners);
-      setCollaboratorDataSource(collaborators);
-    } else {
-      let ownerCollaboratorDropdownData = accountData.fields.filter(
-        (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
-      );
-      if (ownerCollaboratorDropdownData.length > 0) {
-        setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
-        setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
-        setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
-      }
-    }
-
-    const parentAccountDropdownData = accountData.fields.find(
-      (d) => d.fieldName === "parentAccount"
-    );
-    if (parentAccountDropdownData) {
-      setParentAccountDataSource(
-        isNew
-          ? parentAccountDropdownData.option
-          : parentAccountDropdownData.option.filter(
-            (d) => d?.optionValue !== accountId
-          )
-      );
-    }
-
-    setFormsData(setFieldsInAscendingOrder(accountData.fields));
-
-    //  Initialize market segment dropdown which have parentMarketSegment === "" or that record have child
-    const marketSegmentDropdownData = accountData.fields.find(
-      (d) => d.fieldName === formFieldNames.marketSegment
-    );
-    if (marketSegmentDropdownData) {
-      setMainMarketSegmentDataSource(marketSegmentDropdownData.option);
-
-      let initializeMarketSegmentDataSource = [];
-      marketSegmentDropdownData.option.forEach(option => {
-        if (option.parentMarketSegment === "" || marketSegmentDropdownData.option.some(s => s.parentMarketSegment === option.optionValue)) {
-          initializeMarketSegmentDataSource.push(option);
+        if (processSteps) {
+          accountData.fields.map((d) => {
+            if (d.sectionName == processSteps?.additionalInfoSection) {
+              setAdditionalFieldName(d.sectionName)
+            }
+          });
         }
-      })
-      setMarketSegmentDataSource(initializeMarketSegmentDataSource);
-    }
+      }
+
+      if (fromProject) {
+        setOwnerCollaboratorCommonDataSource(owners);
+        setOwnerDataSource(owners);
+        setCollaboratorDataSource(collaborators);
+      } else {
+        let ownerCollaboratorDropdownData = accountData.fields.filter(
+          (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
+        );
+        if (ownerCollaboratorDropdownData.length > 0) {
+          setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
+          setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
+          setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
+        }
+      }
+
+      const parentAccountDropdownData = accountData.fields.find(
+        (d) => d.fieldName === "parentAccount"
+      );
+      if (parentAccountDropdownData) {
+        setParentAccountDataSource(
+          isNew
+            ? parentAccountDropdownData.option
+            : parentAccountDropdownData.option.filter(
+              (d) => d?.optionValue !== accountId
+            )
+        );
+      }
+
+      setFormsData(setFieldsInAscendingOrder(accountData.fields));
+
+      //  Initialize market segment dropdown which have parentMarketSegment === "" or that record have child
+      const marketSegmentDropdownData = accountData.fields.find(
+        (d) => d.fieldName === formFieldNames.marketSegment
+      );
+      if (marketSegmentDropdownData) {
+        setMainMarketSegmentDataSource(marketSegmentDropdownData.option);
+
+        let initializeMarketSegmentDataSource = [];
+        marketSegmentDropdownData.option.forEach(option => {
+          if (option.parentMarketSegment === "" || marketSegmentDropdownData.option.some(s => s.parentMarketSegment === option.optionValue)) {
+            initializeMarketSegmentDataSource.push(option);
+          }
+        })
+        setMarketSegmentDataSource(initializeMarketSegmentDataSource);
+      }
 
 
-    if (!isNew && marketSegmentDropdownData) {
-      setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === accountData.initialValues.marketSegment));
-    }
+      if (!isNew && marketSegmentDropdownData) {
+        setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === accountData.initialValues.marketSegment));
+      }
 
-    if (accountData?.initialValues?.marketSegment && marketSegmentDropdownData) {
-      setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === accountData?.initialValues?.marketSegment));
-    }
+      if (accountData?.initialValues?.marketSegment && marketSegmentDropdownData) {
+        setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === accountData?.initialValues?.marketSegment));
+      }
 
-    if (marketSegmentId && marketSegmentDropdownData) {
-      setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === marketSegmentId));
+      if (marketSegmentId && marketSegmentDropdownData) {
+        setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === marketSegmentId));
+      }
     }
 
     return () => {
@@ -151,7 +154,7 @@ export default function ManageAccount(props) {
       setOwnerDataSource([]);
       setCollaboratorDataSource([]);
     };
-  }, [accountData.fields]);
+  }, []);
 
   const onOwnerDropdownOpen = (selectedCollaborator, selectedEntity) => {
     if (selectedEntity?.length > 0) {
@@ -302,12 +305,16 @@ export default function ManageAccount(props) {
             }
           }}
           title={
-            isNew
-              ? "Add Account"
-              : `Editing ${accountData.initialValues.accountName
-                ? accountData.initialValues.accountName
-                : ""
-              }`
+            isClone 
+            ? 
+            `Clone ${accountNameForClone}`
+              :
+              isNew
+                ? "Add Account"
+                : `Editing ${accountData.initialValues.accountName
+                  ? accountData.initialValues.accountName
+                  : ""
+                }`
           }
         />
         {accountData.fields.length > 0 ? (
