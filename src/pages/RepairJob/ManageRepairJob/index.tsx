@@ -35,7 +35,8 @@ const ManageRepairJob = (props) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
   const [formValues, setFormValues] = useState({});
-
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(repairJobData.fields));
   }, [repairJobData.fields]);
@@ -178,7 +179,7 @@ const ManageRepairJob = (props) => {
       <Dialog
         maxWidth="md"
         fullWidth
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={(e, reason) => {
@@ -194,6 +195,11 @@ const ManageRepairJob = (props) => {
             if (isFieldNotTouched(repairJobData, formValues)) onClose();
             else setShowConfirmDialog(true);
           }}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
         />
         {loading || !repairJobData.fields.length ? (
           <>

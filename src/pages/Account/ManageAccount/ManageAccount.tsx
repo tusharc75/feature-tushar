@@ -72,6 +72,7 @@ export default function ManageAccount(props) {
   const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     if (isNew) {
@@ -284,7 +285,7 @@ export default function ManageAccount(props) {
       <Dialog
         fullWidth
         maxWidth="md"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={(e, reason) => {
@@ -295,6 +296,11 @@ export default function ManageAccount(props) {
         open={open}
       >
         <CustomDialogHeader
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
           onClose={() => {
             if (isFieldNotTouched(accountData, formValues)) {
               onClose({})

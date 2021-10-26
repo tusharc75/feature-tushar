@@ -36,7 +36,8 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
         state: { user },
     }: any = useData();
     const [formValues, setFormValues] = useState({})
-
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+    
     useEffect(() => {
 
         const ownerCollabOptions = rentalData.fields.filter(
@@ -266,7 +267,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             <Dialog
                 maxWidth="md"
                 fullWidth
-                fullScreen={isMobile || isTablet}
+                fullScreen={fullScreen || (isMobile || isTablet)}
                 TransitionComponent={CustomDialogTransition}
                 aria-labelledby="customized-dialog-title"
                 onClose={(e, reason) => {
@@ -286,6 +287,11 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                         if (isFieldNotTouched(rentalData, formValues)) onClose()
                         else setShowConfirmDialog(true)
                     }}
+                    isMinimized={!fullScreen}
+                    onMinimizeMaximize={() => {
+                        setFullScreen(prevState => !prevState)
+                    }}
+                    showManimizeMaximize={true}
                 />
                 {!rentalData.fields.length ? (
                     <>

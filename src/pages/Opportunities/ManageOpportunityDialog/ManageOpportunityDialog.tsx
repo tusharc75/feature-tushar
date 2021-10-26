@@ -98,6 +98,7 @@ export default function ManageOpportunityDialog({
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
   const [formValues, setFormValues] = useState({})
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     if (isNew) {
@@ -413,7 +414,7 @@ export default function ManageOpportunityDialog({
       <Dialog
         maxWidth="md"
         fullWidth
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={(e, reason) => {
@@ -434,6 +435,11 @@ export default function ManageOpportunityDialog({
             if (isFieldNotTouched(entityData, formValues)) onClose()
             else setShowConfirmDialog(true)
           }}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
         />
 
         {entityData.fields.length === 0 && (

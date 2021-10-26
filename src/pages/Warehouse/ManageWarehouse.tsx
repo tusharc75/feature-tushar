@@ -22,7 +22,8 @@ const ManageWarehouse = (props) => {
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+    
     useEffect(() => {
         axiosInstance().get("/field?resource=Warehouse").then(({ data: { data } }) => {
             const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
@@ -82,7 +83,7 @@ const ManageWarehouse = (props) => {
 
     return (<Dialog
         maxWidth="md"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
@@ -115,7 +116,13 @@ const ManageWarehouse = (props) => {
                                     fields: initialData.fields
                                 }, values)) onClose()
                                 else setShowConfirmDialog(true)
-                            }}></CustomDialogHeader>
+                            }}
+                            isMinimized={!fullScreen}
+                            onMinimizeMaximize={() => {
+                                setFullScreen(prevState => !prevState)
+                            }}
+                            showManimizeMaximize={true}
+                        ></CustomDialogHeader>
                         <CustomDialogContent>
                             <Form autoComplete="off" autoCorrect="off" noValidate >
                                 <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>

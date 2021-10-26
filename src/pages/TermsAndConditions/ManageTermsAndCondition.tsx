@@ -96,7 +96,8 @@ const TermsAndCondition = ({
     setAdditionalDataPosition((event.target as HTMLInputElement).value);
   };
   const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(true)
-
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  
   useEffect(() => {
     if (editRecord && editRecord?._id) {
       let tacName = editRecord.TACName
@@ -188,7 +189,7 @@ const TermsAndCondition = ({
     <Dialog
       disableBackdropClick={true}
       open={open}
-      fullScreen={isMobile || isTablet}
+      fullScreen={fullScreen || (isMobile || isTablet)}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       maxWidth="md"
@@ -216,6 +217,11 @@ const TermsAndCondition = ({
             handleClose()
           }
         }}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen(prevState => !prevState)
+        }}
+        showManimizeMaximize={true}
       ></CustomDialogHeader>
       {initialValues && (
         <Formik
