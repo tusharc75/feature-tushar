@@ -28,6 +28,7 @@ import { Autocomplete } from "@material-ui/lab";
 import TextField from "@material-ui/core/TextField";
 import { useData } from "../../StateProvider/Provider";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
+import { CircularProgress } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
   textEditor: {
@@ -69,6 +70,7 @@ const TermsAndCondition = ({
   }: any = useData();
 
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const [initialValues, setInitialValues] = useState({
@@ -143,7 +145,7 @@ const TermsAndCondition = ({
       request["topPosition"] = additionalDataPosition === "true" ? true : false
     }
 
-    setLoading(true);
+    setSubmitting(true);
     if (editRecord?._id && !isClone) {
       axiosInstance()
         .put(termsAndCondition.api, { ...request, _id: editRecord?._id })
@@ -154,13 +156,13 @@ const TermsAndCondition = ({
             type: "success",
             message: data.message,
           });
-          setLoading(false);
+          setSubmitting(false);
 
           handleClose();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
-          setLoading(false);
+          setSubmitting(false);
         });
     } else {
       axiosInstance()
@@ -172,12 +174,12 @@ const TermsAndCondition = ({
             type: "success",
             message: data.message,
           });
-          setLoading(false);
+          setSubmitting(false);
           handleClose();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
-          setLoading(false);
+          setSubmitting(false);
         });
     }
   };
@@ -391,7 +393,7 @@ const TermsAndCondition = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" color="primary"
+                <Button size="small" color="primary" disabled={submitting}
                   onClick={() => {
                     if (hasPermissionToUpdate) {
                       setShowConfirmDialog(true)
@@ -406,8 +408,9 @@ const TermsAndCondition = ({
                   color="primary"
                   loading={loading}
                   type="submit"
-                  disabled={uploadingImageOrFileProgress > 0 || !hasPermissionToUpdate}
+                  disabled={uploadingImageOrFileProgress > 0 || !hasPermissionToUpdate || submitting}
                   onClick={submitForm}
+                  endIcon={submitting && <CircularProgress size={20} color='inherit' />}
                 >
                   Save
                 </CustomButton>
