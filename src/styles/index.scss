@@ -45,8 +45,7 @@
 @import "~ag-grid-community/dist/styles/ag-theme-material/sass/_ag-theme-material-mixin.scss";
 .ag-theme-material {
   border: 1px solid #eeeaea;
-  @include ag-theme-material(
-    (
+  @include ag-theme-material((
       font-family: (
         Nunito,
         BlinkMacSystemFont,
@@ -785,7 +784,7 @@ body::-webkit-scrollbar-thumb {
   -webkit-gap: 0.25rem;
   font-weight: bold;
 }
-@supports (not (gap: 0.25rem)) and (not (-webkit-gap: 0.25rem)) {
+@supports (not(gap: 0.25rem)) and (not (-webkit-gap: 0.25rem)) {
   .quoteHeader > *:not(:nth-child(1)) {
     margin-left: 0.25rem !important;
   }
@@ -999,4 +998,8 @@ body::-webkit-scrollbar-thumb {
     color: #636663;
     box-shadow: 1px 3px 3px #ab9b9b;
   }
+}
+
+.errorColor {
+  color: var(--error) !important;
 }

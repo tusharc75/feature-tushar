@@ -260,14 +260,14 @@ const RentalManagementDetailsPage = () => {
     setShowDeliveryTicketDialog(true)
   }
 
-  const handleReceivingTicketDialog = (selectedProductInventory, warehouse) => {
+  const handleReceivingTicketDialog = (selectedProductInventory) => {
     setProductInventoryForReceivingTicket(selectedProductInventory)
     // setWarehouseForReceivingTicket(warehouse)
     setShowReceivingTicketDialog(true)
   }
 
   const costTypeList = ["Repair", "Delivery", "Assembly"]
-  const uomTypeList = ["litre", "gram"]
+  const uomTypeList = ["Litre", "Gram"]
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
@@ -826,6 +826,8 @@ const RentalManagementDetailsPage = () => {
                                                 size="small"
                                                 style={{ minWidth: 200 }}
                                                 value={userVal.uom}
+                                                freeSolo
+                                                autoSelect
                                                 options={uomTypeList}
                                                 getOptionLabel={(option: any) => option ? option : ""}
                                                 onChange={(_, newValue) => {
@@ -937,7 +939,6 @@ const RentalManagementDetailsPage = () => {
               {(currentStep === 4 || currentStep === 5) && (
                 <ReceivingTicket
                   rentalManagementId={id}
-                  warehouselist={warehouseList}
                   productInventory={productInventory}
                   currentStep={currentStep}
                   handleReceivingTicketDialog={handleReceivingTicketDialog}
@@ -1042,13 +1043,13 @@ const RentalManagementDetailsPage = () => {
           isClone={false}
           receivingTicketId={null}
           productInventoryForReceivingTicket={productInventoryForReceivingTicket}
-          warehouseId={warehouseForReceivingTicket}
           rentalData={rentalManagementData}
           onClose={() => setShowReceivingTicketDialog(false)}
           onSuccess={() => {
             setShowReceivingTicketDialog(false)
             fetchProductInventory()
           }}
+          isRedirectToDetailPage={false}
         />
       }
       {deleteData && <ConfirmationDialog

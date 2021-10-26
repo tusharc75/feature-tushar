@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
     },
     pbStepper: {
         overflow: "none",
-        justifyContent:"space-evenly",
+        justifyContent: "space-evenly",
         [theme.breakpoints.down("xs")]: {
             overflow: "auto"
         },
@@ -191,7 +191,7 @@ const Steps = (props) => {
                                     {(
                                         <div>
                                             <Button
-                                                disabled={currentStep === 4 || currentStep === 0}
+                                                disabled={currentStep === 5 || currentStep === 0}
                                                 onClick={() => {
                                                     setCurrentStep(currentStep - 1)
                                                 }}
@@ -211,7 +211,7 @@ const Steps = (props) => {
                                 <Grid
                                     item
                                     xs={6}
-                                    // className="d-flex align-items-center justify-content-start "
+                                // className="d-flex align-items-center justify-content-start "
                                 >
                                     {isMobile && (
                                         <>
@@ -220,7 +220,7 @@ const Steps = (props) => {
                                                     <div>
                                                         <IconButton
                                                             color="primary"
-                                                            disabled={currentStep === 4}
+                                                            disabled={currentStep === 5 || currentStep === 0}
                                                             onClick={() => {
                                                                 setCurrentStep(currentStep + 1)
                                                             }}
@@ -251,7 +251,8 @@ const Steps = (props) => {
                                                                     setCurrentStep(currentStep + 1)
                                                                 }}
                                                                 size="small"
-                                                                disabled={currentStep === 4}
+                                                                disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
+
                                                             >
                                                                 Next
                                                             </IconButton>
@@ -295,26 +296,26 @@ const Steps = (props) => {
                         className="d-flex align-items-center justify-content-center mt-2 "
                     >
                         {!isMobile && (
-                          <>
-                            <div>
-                              {(
+                            <>
                                 <div>
-                                  {(
-                                    <Button
+                                    {(
+                                        <div>
+                                            {(
+                                                <Button
 
-                                        onClick={() => {
-                                            setCurrentStep(currentStep + 1)
-                                        }}
-                                        size="large"
-                                        disabled={currentStep >=3 || (currentStep === 0 && isNextStep)}
-                                        endIcon={<IoIosArrowDroprightCircle />}
-                                    >
-                                    </Button>
-                                  )}
+                                                    onClick={() => {
+                                                        setCurrentStep(currentStep + 1)
+                                                    }}
+                                                    size="large"
+                                                    disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
+                                                    endIcon={<IoIosArrowDroprightCircle />}
+                                                >
+                                                </Button>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
-                              )}
-                            </div>
-                          </>
+                            </>
                         )}
                     </Grid>
                 </Grid>

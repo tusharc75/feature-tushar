@@ -168,8 +168,10 @@ const AddressResource = () => {
       <span
         className="link"
         onClick={() => {
-          setAddressResource(params.data);
-          setOpen({ open: true, isClone: false });
+          if (params.data?.isAllowedToUpdate) {
+            setAddressResource(params.data);
+            setOpen({ open: true, isClone: false });
+          }
         }}
       >
         <CustomRenderCell value={params.value} />
@@ -212,28 +214,35 @@ const AddressResource = () => {
         </Tooltip>
       )}
       {
-        warehousePermissions.isUpdate && <Tooltip title="Entity">
-          <IconButton
-            size="small"
-            aria-label="Entity"
-            onClick={() => {
-              setShowEntityDialog(true)
-              setWarehouseId(params.data._id)
-              if (params?.data?.entity) {
-                let entities = []
-                if (params?.data?.entityId) {
-                  entities.push(params?.data?.entityId)
+        warehousePermissions.isUpdate && params.data?.isAllowedToUpdate ?
+          <Tooltip title="Entity">
+            <IconButton
+              size="small"
+              aria-label="Entity"
+              onClick={() => {
+                setShowEntityDialog(true)
+                setWarehouseId(params.data._id)
+                if (params?.data?.entity) {
+                  let entities = []
+                  if (params?.data?.entityId) {
+                    entities.push(params?.data?.entityId)
+                  }
+                  if (params?.data?.restentity) {
+                    let restEntities = params?.data?.restentity.map(o => o.optionValue)
+                    entities = [...entities, ...restEntities]
+                  }
+                  setEntities([...entities])
                 }
-                if (params?.data?.restentity) {
-                  let restEntities = params?.data?.restentity.map(o => o.optionValue)
-                  entities = [...entities, ...restEntities]
-                }
-                setEntities([...entities])
-              }
-            }}>
-            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
-          </IconButton>
-        </Tooltip>
+              }}>
+              <AiOutlineDeploymentUnit fontSize="15" color="primary" />
+            </IconButton>
+          </Tooltip> : (
+            <Tooltip className="cursor-stop" title="You do not have permission to update entity">
+              <IconButton aria-label="Clone" size="small">
+                <AiOutlineDeploymentUnit fontSize="15" />
+              </IconButton>
+            </Tooltip>
+          )
       }
     </>
   );
