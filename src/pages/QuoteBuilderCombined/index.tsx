@@ -97,6 +97,10 @@ const QuoteBuilders = () => {
     contactName: history.location?.state?.contactName,
     resource: history.location?.state?.resource,
   })
+  const [opportunityDetails, setOpportunityDetails] = useState({
+    opportunityId: history.location?.state?.opportunityId,
+    opportunityName: history.location?.state?.opportunityName,
+  })
   const [showVersionsDialog, setShowVersionsDialog] = useState(false);
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const [columns, setColumns] = useState([])
@@ -334,6 +338,8 @@ const QuoteBuilders = () => {
     sorting,
     selectedEntity,
     accountDetails,
+    contactDetails,
+    opportunityDetails
   ]);
 
   const getVersionStatus = (id, currency) => {
@@ -518,6 +524,8 @@ const QuoteBuilders = () => {
       case "supplierAccountName":
         return "supplierAccountName.optionLabel";
 
+
+
       default:
         return field;
     }
@@ -565,6 +573,17 @@ const QuoteBuilders = () => {
         ])}`;
       }
     }
+
+    if (opportunityDetails.opportunityId) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify([
+        {
+          field: "opportunity",
+          term: opportunityDetails.opportunityId
+        }
+      ])}`
+    }
+
+
 
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
@@ -784,6 +803,34 @@ const QuoteBuilders = () => {
                       accountId: null,
                       accountName: null,
                       resource: null,
+                    });
+                  }}
+                />
+              )}
+              {contactDetails.contactId && (
+                <Chip
+                  className="ml-3"
+                  color="primary"
+                  label={`Contact: ${contactDetails.contactName}`}
+                  onDelete={() => {
+                    setContactDetails({
+                      contactId: null,
+                      contactName: null,
+                      resource: null,
+                    });
+                  }}
+                />
+              )}
+
+              {opportunityDetails.opportunityId && (
+                <Chip
+                  className="ml-3"
+                  color="primary"
+                  label={`Opportunity: ${opportunityDetails.opportunityName}`}
+                  onDelete={() => {
+                    setOpportunityDetails({
+                      opportunityId: null,
+                      opportunityName: null
                     });
                   }}
                 />
