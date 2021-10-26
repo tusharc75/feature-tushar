@@ -5,8 +5,6 @@ import ListItem from "@material-ui/core/ListItem"
 import ListItemIcon from "@material-ui/core/ListItemIcon"
 import Checkbox from "@material-ui/core/Checkbox"
 import ListItemText from "@material-ui/core/ListItemText"
-import Tooltip from "@material-ui/core/Tooltip"
-import IconButton from "@material-ui/core/IconButton"
 import CustomButton from './Helpers/CustomButton'
 import Button from "@material-ui/core/Button"
 import CustomDialogContent from './CustomDialog/CustomDialogContent';
@@ -53,8 +51,12 @@ function EntitySelections(props) {
     }
     const onUpdateEntity = () => {
 
+        let filteredIds = []
+        resourceIds.forEach(currentId => {
+            if (filteredIds.indexOf(currentId) < 0) filteredIds.push(currentId)
+        })
         let request = {
-            ids: [...resourceIds],
+            ids: [...filteredIds],
             entity: [...selectedEntities]
         }
         setLoading(true)
