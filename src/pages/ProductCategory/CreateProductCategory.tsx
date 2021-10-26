@@ -25,6 +25,7 @@ const CreateProductCategory = (props) => {
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [formValues, setFormValues] = useState({})
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Product Category").then(({ data: { data } }) => {
@@ -100,7 +101,7 @@ const CreateProductCategory = (props) => {
 
     return (<Dialog
         maxWidth="md"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
@@ -133,7 +134,13 @@ const CreateProductCategory = (props) => {
                                     fields: initialData.fields
                                 }, values)) onClose()
                                 else setShowConfirmDialog(true)
-                            }}></CustomDialogHeader>
+                            }}
+                            isMinimized={!fullScreen}
+                            onMinimizeMaximize={() => {
+                                setFullScreen(prevState => !prevState)
+                            }}
+                            showManimizeMaximize={true}
+                        ></CustomDialogHeader>
                         <CustomDialogContent>
                             <Form autoComplete="off" autoCorrect="off" noValidate >
                                 <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
