@@ -1048,7 +1048,7 @@ const UserDetailsPage = () => {
                       :
                       userTrackingData.labels.length === 0 ?
                         (
-                          <h3>No activiy found in the selected date range</h3>
+                          <h3>No activity found in the selected date range</h3>
                         )
                         :
                         <Line type="line" data={userTrackingData} />
