@@ -44,6 +44,7 @@ const Note = () => {
   const [, setShowDeleteWarningConfirmBox] = useState(false);
   const [noteData, setNoteData] = useState(null);
   const [noteId, setNoteId] = useState(undefined);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -334,19 +335,32 @@ const Note = () => {
       {showCreateDialog && (
         <Dialog
           open={showCreateDialog}
-          fullScreen={isMobile || isTablet}
+          fullScreen={fullScreen || (isMobile || isTablet)}
           TransitionComponent={CustomDialogTransition}
           aria-labelledby="customized-dialog-title"
           maxWidth={'md'}
-          onClose={handleDialogClose}
+          onClose={() => {
+            handleDialogClose()
+            setFullScreen(false);
+          }}
           fullWidth
         >
           <CreateNote
             noteId={isNew ? null : noteData?.id}
             relatedTo={[{ type: 'my', name: user?.user?._id }]}
-            handleClose={handleClose}
-            handleDialogClose={handleDialogClose}
-
+            handleClose={() => {
+              handleClose()
+              setFullScreen(false);
+            }}
+            handleDialogClose={() => {
+              handleDialogClose()
+              setFullScreen(false);
+            }}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+              setFullScreen(prevState => !prevState)
+            }}
+            showManimizeMaximize={true}
           // noteData={noteData}
           />
         </Dialog>

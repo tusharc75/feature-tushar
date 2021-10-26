@@ -112,6 +112,9 @@ const Event = () => {
               <CreateEvent
                 eventId={activityData ? activityData.id : null}
                 handleClose={handleClose}
+                isMinimized={false}
+                onMinimizeMaximize={() => { }}
+                showManimizeMaximize={false}
               />
             </Dialog>
           </Box>

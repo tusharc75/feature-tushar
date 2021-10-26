@@ -81,6 +81,7 @@ const Activity = (props) => {
   const {
     state: { permissions, selectedEntity },
   }: any = useData();
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const tabs = ["Task", "Event", "Case", "Note", "Email", "Attachment"];
 
@@ -302,7 +303,7 @@ const Activity = (props) => {
           </>
         </Box>
         <Dialog
-          fullScreen={isMobile || isTablet}
+          fullScreen={fullScreen || (isMobile || isTablet)}
           TransitionComponent={CustomDialogTransition}
           open={open}
           aria-labelledby="customized-dialog-title"
@@ -311,52 +312,104 @@ const Activity = (props) => {
             if (reason !== 'backdropClick') {
               handleClose()
             }
+            setFullScreen(false);
           }}
           fullWidth
         >
           {type === "Task" ? (
             <CreateTask
               taskId={null}
-              handleClose={handleClose}
+              handleClose={() => {
+                handleClose()
+                setFullScreen(false);
+              }}
               relatedTo={relatedTo}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+              }}
+              showManimizeMaximize={true}
             />
           ) : null}
           {type === "Event" ? (
             <CreateEvent
               eventId={null}
-              handleClose={handleClose}
+              handleClose={() => {
+                handleClose()
+                setFullScreen(false);
+              }}
               relatedTo={relatedTo}
               email={emails}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+              }}
+              showManimizeMaximize={true}
             />
           ) : null}
           {type === "Case" ? (
             <CreateCase
               caseId={null}
-              handleClose={handleClose}
+              handleClose={() => {
+                handleClose()
+                setFullScreen(false);
+              }}
               relatedTo={relatedTo}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+              }}
+              showManimizeMaximize={true}
             />
           ) : null}
           {type === "Note" ? (
             <CreateNote
               noteId={null}
-              handleClose={handleClose}
+              handleClose={() => {
+                handleClose()
+                setFullScreen(false);
+              }}
               relatedTo={relatedTo}
-              handleDialogClose={handleClose}
+              handleDialogClose={() => {
+                handleClose()
+                setFullScreen(false);
+              }}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+              }}
+              showManimizeMaximize={true}
             />
           ) : null}
           {type === "Email" ? (
             <CreateEmail
               emailId={null}
-              handleClose={handleClose}
+              handleClose={() => {
+                handleClose()
+                setFullScreen(false);
+              }}
               relatedTo={relatedTo}
               options={emailUsersOptions}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+              }}
+              showManimizeMaximize={true}
             />
           ) : null}
           {type === "Attachment" ? (
             <ManageAttachment
               attachmentId={null}
-              handleClose={handleClose}
+              handleClose={() => {
+                handleClose()
+                setFullScreen(false);
+              }}
               relatedTo={relatedTo}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+              }}
+              showManimizeMaximize={true}
             />
           ) : null}
         </Dialog>

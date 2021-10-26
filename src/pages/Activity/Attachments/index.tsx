@@ -133,7 +133,7 @@ export default function Attachment() {
   const {
     state: { user, permissions }
   }: any = useData();
-
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
@@ -467,19 +467,30 @@ export default function Attachment() {
         {open ? (
           <Dialog
             open={open}
-            fullScreen={isMobile || isTablet}
+            fullScreen={fullScreen || (isMobile || isTablet)}
             TransitionComponent={CustomDialogTransition}
             aria-labelledby="customized-dialog-title"
             maxWidth={'md'}
-            onClose={handleClose}
+            onClose={() => {
+              handleClose()
+              setFullScreen(false);
+            }}
             fullWidth
           >
             <ManageAttachment
               attachmentId={attachmentData?.id}
               relatedTo={[{ type: 'my', name: user?.user?._id }]}
-              handleClose={handleClose}
+              handleClose={() => {
+                handleClose()
+                setFullScreen(false);
+              }}
               attachmentData={attachmentData}
               fetchData={fetchAttachments}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+              }}
+              showManimizeMaximize={true}
             />
           </Dialog>
         ) : null}
