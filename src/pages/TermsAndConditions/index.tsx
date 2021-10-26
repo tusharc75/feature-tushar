@@ -56,7 +56,7 @@ export default function TermsAndCondition(props) {
     const TermsConditionNameRenderer = params => (
         <span className="link cursor-pointer"
             onClick={() => {
-                setShowCreateDialog({ open: false, isClone: false });
+                setShowCreateDialog({ open: true, isClone: false });
                 setEditRecord(cloneDeep(params.data))
             }}>
             <CustomRenderCell value={params?.value} />
