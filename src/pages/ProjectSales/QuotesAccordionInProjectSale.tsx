@@ -327,7 +327,7 @@ export default function QuotesAccordionInProjectSale({
                                 <Box display="flex" alignItems="center" justifyContent="flex-end">
                                   {obj?.estimatedAmount ? (
                                     <Typography className="amount" title={formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).fullFormatAmount}>
-                                      {formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).shortFormatAmount}
+                                      {formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).fullFormatAmount}
                                     </Typography>
                                   ) : (
                                     ""

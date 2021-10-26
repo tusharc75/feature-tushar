@@ -31,12 +31,12 @@ export default function DeliveryTicketDetailPage(props) {
             modifiedData["estimatedAmount"] = formatAmountWithCurrency(
                 modifiedData["currency"],
                 modifiedData["estimatedAmount"]
-            ).shortFormatAmount;
+            ).fullFormatAmount;
 
             modifiedData["invoiceAmount"] = formatAmountWithCurrency(
                 modifiedData["currency"],
                 modifiedData["invoiceAmount"]
-            ).shortFormatAmount;
+            ).fullFormatAmount;
         }
         return modifiedData;
     }, [deliveryTicketData?.accountName, deliveryTicketData?.closeDate, deliveryTicketData?.estimatedAmount, deliveryTicketData?.currency, deliveryTicketData?.owner,]);

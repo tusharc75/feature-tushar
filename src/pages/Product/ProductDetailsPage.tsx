@@ -77,8 +77,8 @@ const ProductDetailsPage = () => {
     const handleMainPoints = (data) => {
         let mainPoint = {};
         mainPoint['Quantity'] = data?.qty || '';
-        mainPoint['MRP'] = data?.mrp || '';
-        mainPoint['Serialized Product'] = data?.serializedProduct ? "Yes" : 'No';
+        // mainPoint['MRP'] = data?.mrp || '';
+        // mainPoint['Serialized Product'] = data?.serializedProduct ? "Yes" : 'No';
         setMainPoints(mainPoint);
     };
 
