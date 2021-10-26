@@ -35,7 +35,8 @@ const ManageSalesOrder = (props) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
   const [formValues, setFormValues] = useState({});
-
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(salesOrderData.fields));
   }, [salesOrderData.fields]);
@@ -169,7 +170,7 @@ const ManageSalesOrder = (props) => {
       <Dialog
         maxWidth="md"
         fullWidth
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={(e, reason) => {
@@ -185,6 +186,11 @@ const ManageSalesOrder = (props) => {
             if (isFieldNotTouched(salesOrderData, formValues)) onClose();
             else setShowConfirmDialog(true);
           }}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
         />
         {loading || !salesOrderData.fields.length ? (
           <>
@@ -212,7 +218,7 @@ const ManageSalesOrder = (props) => {
             initialValues={salesOrderData.initialValues}
             validationSchema={yupSchema(salesOrderData.fields)}
             validateOnMount
-            onSubmit={() => {}}
+            onSubmit={() => { }}
           >
             {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
               <>
@@ -255,8 +261,8 @@ const ManageSalesOrder = (props) => {
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
                                               : null
                                           }
                                         />

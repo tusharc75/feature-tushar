@@ -7,6 +7,8 @@ import {
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import CloseIcon from "@material-ui/icons/Close";
 import PropTypes from 'prop-types';
+import { FiMinimize2, FiMaximize2 } from 'react-icons/fi'
+import { isMobile, isTablet } from "react-device-detect";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -25,23 +27,36 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-function CustomDialogHeader({ title, onClose }) {
+function CustomDialogHeader({ title, onClose, showManimizeMaximize = false, isMinimized = true, onMinimizeMaximize = () => { } }) {
+
     const classes = useStyles();
 
     return (
         <React.Fragment>
             <MuiDialogTitle disableTypography className={classes.root}>
                 <Typography variant="h6" className={classes.dialogTitle}>{title}</Typography>
-                {
-                    onClose && <IconButton
-                        aria-label="close"
-                        className={classes.closeButton}
-                        onClick={onClose}
-                        size="small"
-                    >
-                        <CloseIcon />
-                    </IconButton>
-                }
+
+                <div className={classes.closeButton}>
+                    {
+                        showManimizeMaximize && <IconButton
+                            aria-label="close"
+                            onClick={onMinimizeMaximize}
+                            size="small"
+                            className="mr-2"
+                        >
+                            {isMinimized ? <FiMaximize2 /> : <FiMinimize2 />}
+                        </IconButton>
+                    }
+                    {
+                        onClose && <IconButton
+                            aria-label="close"
+                            onClick={onClose}
+                            size="small"
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    }
+                </div>
             </MuiDialogTitle>
         </React.Fragment>
     )
@@ -49,7 +64,10 @@ function CustomDialogHeader({ title, onClose }) {
 
 CustomDialogHeader.propTypes = {
     title: PropTypes.string.isRequired,
-    onClose: PropTypes.func
+    onClose: PropTypes.func,
+    isMinimized: PropTypes.bool,
+    onMinimizeMaximize: PropTypes.func,
+    showManimizeMaximize: PropTypes.bool
 }
 
 export default CustomDialogHeader

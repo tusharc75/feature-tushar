@@ -72,9 +72,9 @@ export default function ManageContact(props) {
   const [reportsToMainDataSource, setReportsToMainDataSource] = useState([]);
   const [reportsToDataSource, setReportsToDataSource] = useState([]);
   const [additionalFieldName, setAdditionalFieldName] = useState("")
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
-    useState(0);
-
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  
   useEffect(() => {
 
     if (contactData.fields.length > 0) {
@@ -253,7 +253,7 @@ export default function ManageContact(props) {
         }}
         open={open}
         fullWidth
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
       >
         <CustomDialogHeader
@@ -270,6 +270,11 @@ export default function ManageContact(props) {
                 ? "Add Contact"
                 : `Editing ${contactData.initialValues?.firstName ?? ""} ${contactData.initialValues?.lastName ?? ""}`
           }
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
         />
 
         {contactData.fields.length > 0 ? (

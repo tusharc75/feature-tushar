@@ -30,6 +30,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
     //     product: "",
     //     serialNumber: ""
     // }
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Product Inventory").then(({ data: { data } }) => {
@@ -129,7 +130,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
 
     return (<Dialog
         maxWidth="md"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
@@ -158,6 +159,11 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                 if (isFieldNotTouched(initialData, values)) onClose()
                                 else setShowConfirmDialog(true)
                             }}
+                            isMinimized={!fullScreen}
+                            onMinimizeMaximize={() => {
+                                setFullScreen(prevState => !prevState)
+                            }}
+                            showManimizeMaximize={true}
                         ></CustomDialogHeader>
                         <CustomDialogContent>
                             <Form autoComplete="off" autoCorrect="off" noValidate >

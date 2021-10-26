@@ -1,5 +1,4 @@
 import React, {
-  useRef,
   useState,
   useEffect,
   Fragment,
@@ -7,7 +6,7 @@ import React, {
 } from "react";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import CustomDialogHeader from "../../../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../../components/CustomDialog/CustomDialogFooter";
@@ -17,11 +16,7 @@ import { CustomToastContext } from "../../../../StateProvider/CustomToastContext
 import CustomButton from "../../../../components/Helpers/CustomButton";
 import TextField from "@material-ui/core/TextField";
 import { object, string } from "yup";
-import { useHistory } from "react-router-dom";
-import AxiosInstance from "../../../../axios/axiosInstance";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import routes from "../../../../components/Helpers/Routes";
-import { stubTrue } from "lodash";
 import { isMobile, isTablet } from "react-device-detect";
 import {
   CustomDialogTransition,
@@ -79,8 +74,8 @@ const EmailDialog = (props) => {
     useState(0);
   const [open, setOpen] = useState(false);
   const [imageSource, setImageSource] = useState(null);
-  const history = useHistory();
   const classes = useStyles();
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     fetchContacts(account.optionValue);
@@ -255,8 +250,8 @@ const EmailDialog = (props) => {
                       <Typography variant="subtitle2">
                         {attachment
                           ? attachment.substring(
-                              attachment.lastIndexOf("/") + 1
-                            )
+                            attachment.lastIndexOf("/") + 1
+                          )
                           : "attachment"}
                       </Typography>
                       <IconButton className={emailStyles.text}>
@@ -286,7 +281,7 @@ const EmailDialog = (props) => {
     <>
       <Dialog
         maxWidth="sm"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
@@ -304,6 +299,11 @@ const EmailDialog = (props) => {
               <CustomDialogHeader
                 title={"Choose contact to email"}
                 onClose={handleClose}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>

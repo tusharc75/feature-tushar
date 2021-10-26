@@ -204,7 +204,8 @@ export default function QuoteProcess(props) {
         message: null,
     });
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+    
     useEffect(() => {
         if (currentVersion !== 0) {
             fetchDOAData();
@@ -1631,7 +1632,7 @@ export default function QuoteProcess(props) {
                         setShowAiDialog(false);
                     }}
                     fullWidth
-                    fullScreen={isMobile || isTablet}
+                    fullScreen={fullScreen || (isMobile || isTablet)}
                     TransitionComponent={CustomDialogTransition}
                 >
                     <CustomDialogHeader
@@ -1639,6 +1640,11 @@ export default function QuoteProcess(props) {
                         onClose={() => {
                             setShowAiDialog(false);
                         }}
+                        isMinimized={!fullScreen}
+                        onMinimizeMaximize={() => {
+                            setFullScreen(prevState => !prevState)
+                        }}
+                        showManimizeMaximize={true}
                     />
                     <CustomDialogContent>
                         <div className="text-align-center">
