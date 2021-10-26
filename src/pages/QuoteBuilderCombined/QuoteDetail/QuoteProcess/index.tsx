@@ -205,7 +205,7 @@ export default function QuoteProcess(props) {
     });
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-    
+
     useEffect(() => {
         if (currentVersion !== 0) {
             fetchDOAData();
@@ -1677,16 +1677,22 @@ export default function QuoteProcess(props) {
             {sendEmail && (
                 <Dialog
                     open={sendEmail}
-                    fullScreen={isMobile || isTablet}
+                    fullScreen={fullScreen || (isMobile || isTablet)}
                     TransitionComponent={CustomDialogTransition}
                     aria-labelledby="customized-dialog-title"
                     maxWidth="md"
-                    onClose={() => setSendEmail(false)}
+                    onClose={() => {
+                        setSendEmail(false)
+                        setFullScreen(false);
+                    }}
                     fullWidth
                 >
                     <CreateEmail
                         generatingFile={generatingPdfFile}
-                        handleClose={() => setSendEmail(false)}
+                        handleClose={() => {
+                            setSendEmail(false)
+                            setFullScreen(false);
+                        }}
                         fetchData={onSendEmailSuccess}
                         id={quoteData._id}
                         showESign={true}
@@ -1699,6 +1705,11 @@ export default function QuoteProcess(props) {
                         subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
                             }`}
                         fromQuote={true}
+                        isMinimized={!fullScreen}
+                        onMinimizeMaximize={() => {
+                            setFullScreen(prevState => !prevState)
+                        }}
+                        showManimizeMaximize={true}
                     />
                 </Dialog>
             )}

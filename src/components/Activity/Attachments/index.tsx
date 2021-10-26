@@ -28,6 +28,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   const {
     state: { permissions },
   }: any = useData();
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     fetchAttachment();
@@ -180,16 +181,27 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               open={open}
               aria-labelledby="customized-dialog-title"
               maxWidth="md"
-              onClose={handleClose}
+              onClose={() => {
+                handleClose()
+                setFullScreen(false);
+              }}
               fullWidth
-              fullScreen={isMobile || isTablet}
+              fullScreen={fullScreen || (isMobile || isTablet)}
               TransitionComponent={CustomDialogTransition}
             >
               <ManageAttachment
                 attachmentId={attachmentId}
                 attachmentData={attachmentData}
-                handleClose={handleClose}
+                handleClose={() => {
+                  handleClose()
+                  setFullScreen(false);
+                }}
                 relatedTo={relatedTo}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
               />
             </Dialog>
           </>

@@ -64,6 +64,8 @@ const Email = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const columnState = JSON.parse(localStorage.getItem('emailPage'));
 
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
   const [columns,] = useState([
     { field: 'to', headerName: 'Recipient', show: true, disabled: true, cellRenderer: 'recipentRenderer' },
     {
@@ -445,19 +447,30 @@ const Email = () => {
         {open ? (
           <Dialog
             open={open}
-            fullScreen={isMobile || isTablet}
+            fullScreen={fullScreen || (isMobile || isTablet)}
             TransitionComponent={CustomDialogTransition}
             aria-labelledby="customized-dialog-title"
             maxWidth="md"
-            onClose={handleClose}
+            onClose={() => {
+              handleClose()
+              setFullScreen(false);
+            }}
             fullWidth
           >
             <CreateEmail
               emailId={emailId}
-              handleClose={handleClose}
+              handleClose={() => {
+                handleClose()
+                setFullScreen(false);
+              }}
               fetchData={fetchEmails}
               relatedTo={[{ type: 'my', name: user?.user?._id }]}
               options={emailUsersOptions}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+              }}
+              showManimizeMaximize={true}
             />
           </Dialog>
         ) : null}
