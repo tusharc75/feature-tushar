@@ -171,9 +171,9 @@ const Details = (props: DetailProps) => {
         : "";
       text = value ? value : "-";
     } else if (input.type === "freeStyleMultiSelect") {
-      const value = values[input.fieldName].length
-        ? values[input.fieldName].map((d) => d).join(", ")
-        : "";
+      const value = values[input.fieldName].length && Array.isArray(values[input.fieldName])
+        ? values[input.fieldName].map((d) => d).join(", ") : typeof values[input.fieldName] === "string" ? values[input.fieldName] : "";
+
       text = value ? value : "-";
     } else if (input.type === "dropDown") {
       const opt = input.option?.find(
@@ -235,7 +235,7 @@ const Details = (props: DetailProps) => {
    * Render Link  or Typography component
    */
   const renderData = (val: any, fieldData: any) => {
-    
+
     const value = normalizeValues(val, fieldData);
     if (fieldData.hasOwnProperty("lookup") && fieldData.lookup && permissions[camelCase(fieldData.lookupResource)]?.isRead && !unlinkFields.includes(fieldData.lookupResource)) {
       if (fieldData.type === "multiSelect" || fieldData.type === "dropDown") {
@@ -297,60 +297,60 @@ const Details = (props: DetailProps) => {
         );
       }
     } else {
-      return fieldData.type === "multiImageUpload" ? 
-       
-      val[fieldData.fieldName] && <div className={classes.imageListContainer}>
-        <ImageList className={classes.imageList} cols={2.5}>
-          {val[fieldData.fieldName].map((item, i) => (
-            <ImageListItem className={classes.imageListItem} key={item}>
-              <img 
-                className="cursor-pointer"
-                onClick={() => {
-                  setDialogData({index: i, open: true, images: val[fieldData.fieldName]})
-                }} 
-                src={item} alt={item}
-              />
-            </ImageListItem>
-          ))}
-        </ImageList>
-      </div>
-      
-      : fieldData.type === "colorPicker" ?
-        <Box display="flex" alignItems="center">
-          <Box width={16} height={16} borderRadius={"50%"} bgcolor={value} />
-          <Typography variant="body2" className={classes.fieldText}>{value}</Typography>
-        </Box>
-      
-      : (
-        <Typography
-          title={value === "-" ? "" : value}
-          className={classes.fieldText}
-          variant="body2"
-        >
-          {fieldData.type === "url" || fieldData.type === "email" ? (
-            <>
-              <MuiLink
-                href={
-                  fieldData.type === "email"
-                    ? `mailto:${value}`
-                    : `https://${value}`
-                }
-                target="_blank"
-              >
+      return fieldData.type === "multiImageUpload" ?
+
+        val[fieldData.fieldName] && <div className={classes.imageListContainer}>
+          <ImageList className={classes.imageList} cols={2.5}>
+            {val[fieldData.fieldName].map((item, i) => (
+              <ImageListItem className={classes.imageListItem} key={item}>
+                <img
+                  className="cursor-pointer"
+                  onClick={() => {
+                    setDialogData({ index: i, open: true, images: val[fieldData.fieldName] })
+                  }}
+                  src={item} alt={item}
+                />
+              </ImageListItem>
+            ))}
+          </ImageList>
+        </div>
+
+        : fieldData.type === "colorPicker" ?
+          <Box display="flex" alignItems="center">
+            <Box width={16} height={16} borderRadius={"50%"} bgcolor={value} />
+            <Typography variant="body2" className={classes.fieldText}>{value}</Typography>
+          </Box>
+
+          : (
+            <Typography
+              title={value === "-" ? "" : value}
+              className={classes.fieldText}
+              variant="body2"
+            >
+              {fieldData.type === "url" || fieldData.type === "email" ? (
+                <>
+                  <MuiLink
+                    href={
+                      fieldData.type === "email"
+                        ? `mailto:${value}`
+                        : `https://${value}`
+                    }
+                    target="_blank"
+                  >
+                    <span className={`text-truncate ${classes.dataValue}`}> {value} </span>
+                  </MuiLink>
+                  {fieldData.type === "email" && value !== "-" ? (
+                    <CopyToClipboard textToCopy={value} />
+                  ) : null}
+                </>
+              ) : (
                 <span className={`text-truncate ${classes.dataValue}`}> {value} </span>
-              </MuiLink>
-              {fieldData.type === "email" && value !== "-" ? (
+              )}
+              {fieldData.type === "mobileNumber" && value !== "-" ? (
                 <CopyToClipboard textToCopy={value} />
               ) : null}
-            </>
-          ) : (
-            <span className={`text-truncate ${classes.dataValue}`}> {value} </span>
-          )}
-          {fieldData.type === "mobileNumber" && value !== "-" ? (
-            <CopyToClipboard textToCopy={value} />
-          ) : null}
-        </Typography>
-      );
+            </Typography>
+          );
     }
   };
 
