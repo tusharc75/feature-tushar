@@ -674,6 +674,8 @@ const ContactDetailsPage = (props) => {
                     quoteBuilderPermission={permissions.quoteBuilder}
                     accountId={contactData?.accountName?.optionValue}
                     contactId={id}
+                    contactName={[`${contactData?.firstName}`, `${contactData?.middleName}`, `${contactData?.lastName}`].filter((d) => d).join(' ')}
+                    contactResource={contactResource}
                     accountResource={accountResource}
                     isRenderedInCustomerContact={true}
                     isRenderedFromCustomerAccount={true}
