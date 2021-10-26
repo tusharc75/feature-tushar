@@ -77,6 +77,7 @@ export default function ManageLeadDialog({
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
   const [formValues, setFormValues] = useState({})
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     if (isNew) {
@@ -357,7 +358,7 @@ export default function ManageLeadDialog({
       <Dialog
         maxWidth="md"
         fullWidth
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={(e, reason) => {
@@ -380,6 +381,11 @@ export default function ManageLeadDialog({
             if (isFieldNotTouched(leadData, formValues)) onClose()
             else setShowConfirmDialog(true)
           }}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
         />
 
         {loadingData && (

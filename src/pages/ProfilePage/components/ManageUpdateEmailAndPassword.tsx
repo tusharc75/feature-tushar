@@ -50,7 +50,8 @@ export default function ManageUpdateEmailAndPassword({
         newPassword: false,
         confirmPassword: false
     });
-
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+    
     const toggleVisibility = (key) => {
         setVisibity({ ...visibity, [key]: !visibity[key] })
     }
@@ -142,7 +143,7 @@ export default function ManageUpdateEmailAndPassword({
     return (
         <Dialog
             maxWidth="sm"
-            fullScreen={isMobile || isTablet}
+            fullScreen={fullScreen || (isMobile || isTablet)}
             TransitionComponent={CustomDialogTransition}
             aria-labelledby="customized-dialog-title"
             onClose={onClose}
@@ -152,6 +153,11 @@ export default function ManageUpdateEmailAndPassword({
             <CustomDialogHeader
                 title={isUpdateEmail ? "Update Email" : "Update Password"}
                 onClose={onClose}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                    setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
             />
             <Formik
                 onSubmit={handleSubmit}

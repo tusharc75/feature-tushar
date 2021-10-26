@@ -50,7 +50,7 @@ const EventSchema = object().shape({
   endDate: string().required("Please enter end date").nullable(),
 });
 
-export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
+export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimized, onMinimizeMaximize, showManimizeMaximize }) => {
   const {
     state: {
       user: { user },
@@ -263,6 +263,9 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
       <CustomDialogHeader
         title={`${eventId ? "Edit" : "New"} Event`}
         onClose={handleClose}
+        isMinimized={isMinimized}
+        onMinimizeMaximize={onMinimizeMaximize}
+        showManimizeMaximize={showManimizeMaximize}
       ></CustomDialogHeader>
       {initialValues ? (
         <Formik
@@ -629,4 +632,7 @@ CreateEvent.propTypes = {
   taskId: PropTypes.any,
   handleClose: PropTypes.any,
   email: PropTypes.array,
+  // isMinimized: PropTypes.bool, 
+  // onMinimizeMaximize: PropTypes.func, 
+  // showManimizeMaximize: PropTypes.bool
 };
