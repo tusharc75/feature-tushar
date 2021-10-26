@@ -441,46 +441,49 @@ const Product = () => {
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
                         <RiShoppingBag3Fill size={22} style={{ paddingBottom: "3px" }} className="headerLogo" /> <span className="listingHeader">{routes.product.title} </span>
                     </Grid>
-                    <Grid xs={6} container className={styles.filter_side} >
-                        <Box className={styles.filter_side_header} component="div" >
+                    <Grid item xs={6}>
 
-                            <SearchBox
-                                onSearch={handleSearch}
-                                searchbox={styles.search_box_input}
-                                width="242px"
-                                size="small"
-                                value={search}
-                            />
-                            {productPermissions.isCreate &&
-                                <Button className={styles.add_submit_btn} onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                            }
-                            {productPermissions.isDelete &&
-                                <Button
-                                    className={styles.action_submit_btn}
-                                    variant="outlined"
-                                    color="default"
+                        <Grid container className={styles.filter_side} >
+                            <Box className={styles.filter_side_header} component="div" >
+
+                                <SearchBox
+                                    onSearch={handleSearch}
+                                    searchbox={styles.search_box_input}
+                                    width="242px"
                                     size="small"
-                                    onClick={openActions}
-                                    disabled={selectedRecords.length ? false : true}
-                                    aria-controls="action-menu"
-                                >Actions <ExpandMore />
-                                </Button>
-                            }
-                            <Menu
-                                anchorEl={anchorEl}
-                                keepMounted
-                                getContentAnchorEl={null}
-                                anchorOrigin={{
-                                    vertical: "bottom",
-                                    horizontal: "left",
-                                }}
-                                id="action-menu"
-                                open={Boolean(anchorEl)}
-                                onClose={closeActions}
-                            >
-                                <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                            </Menu>
-                        </Box>
+                                    value={search}
+                                />
+                                {productPermissions.isCreate &&
+                                    <Button className={styles.add_submit_btn} onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                }
+                                {productPermissions.isDelete &&
+                                    <Button
+                                        className={styles.action_submit_btn}
+                                        variant="outlined"
+                                        color="default"
+                                        size="small"
+                                        onClick={openActions}
+                                        disabled={selectedRecords.length ? false : true}
+                                        aria-controls="action-menu"
+                                    >Actions <ExpandMore />
+                                    </Button>
+                                }
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    keepMounted
+                                    getContentAnchorEl={null}
+                                    anchorOrigin={{
+                                        vertical: "bottom",
+                                        horizontal: "left",
+                                    }}
+                                    id="action-menu"
+                                    open={Boolean(anchorEl)}
+                                    onClose={closeActions}
+                                >
+                                    <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                                </Menu>
+                            </Box>
+                        </Grid>
                     </Grid>
                 </Grid>
             </div>
