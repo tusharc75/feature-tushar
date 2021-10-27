@@ -197,7 +197,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                         color="primary"
                                         onClick={() => addProductInventory(selectedRecords)}
                                         variant="contained"
-                                        disabled={!Boolean(selectedRecords.length) || isAddingProducts || disableSaveButton}
+                                        disabled={!Boolean(selectedRecords.length) || isAddingProducts}
                                         endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
                                         {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
                                         Add</Button>
