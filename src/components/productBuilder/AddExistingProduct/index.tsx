@@ -16,6 +16,8 @@ import { CommonRenderer } from "../../AgGridComponents/CustomAgGridCellRenderers
 import { Link } from "react-router-dom";
 import routes from "../../../components/Helpers/Routes";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
+import { Autocomplete } from "@material-ui/lab";
+import TextField from "@material-ui/core/TextField";
 
 var levalOrderBy = [
     "product",
@@ -39,16 +41,48 @@ const AddExistingProduct = (props) => {
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
+    const [productCategoryList, setProductCategoryList] = useState([]);
+    const [productTemplateList, setProductTemplateList] = useState([]);
+    const [productCategory, setProductCategory] = useState(null);
+    const [productTemplate, setProductTemplate] = useState(null);
+    const [isProductTemplate, setIsProductTemplate] = useState(true);
+
+
+    useEffect(() => {
+        axiosInstance().get("/product-category").then(({ data: { data } }) => {
+            setProductCategoryList(data)
+        })
+    }, [])
+
+    useEffect(() => {
+        if (isProductTemplate) {
+            if (productCategory && productCategory !== "") {
+                axiosInstance().post(`/product-template/template/` + productCategory, { entity: [] }).then(({ data: { data } }) => {
+                    setProductTemplateList(data.data)
+                    setProductTemplate(null);
+                })
+            }
+            else {
+                setProductTemplateList([])
+                setProductTemplate(null);
+            }
+        }
+    }, [productCategory])
+
+
     useEffect(() => {
         if (productColoums.length) {
             fetchProduct()
         }
-    }, [page, limit, filters, sorting, search, productColoums]);
+    }, [page, limit, filters, sorting, search, productColoums, productCategory, productTemplate]);
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Product").then(({ data: { data } }) => {
             const productField = []
             data.map((_f) => productField.push(_f.fieldData));
+            if (productField.filter((e) => e.fieldName === "productTemplate").length === 0) {
+                setIsProductTemplate(false)
+            }
             var coloum = [];
             GenrateColoum(productField, coloum)
             coloum.forEach((ele) => {
@@ -105,7 +139,6 @@ const AddExistingProduct = (props) => {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
-
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
@@ -117,15 +150,22 @@ const AddExistingProduct = (props) => {
             });
             deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
         }
-
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
-
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
         }
-
+        const filterById = []
+        if (productCategory && productCategory !== "") {
+            filterById.push({ field: 'productCategory', term: productCategory });
+        }
+        if (productTemplate && productTemplate !== "") {
+            filterById.push({ field: 'productTemplate', term: productTemplate });
+        }
+        if (filterById.length) {
+            deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + "&filterType=and"
+        }
         return deepFilter;
     };
 
@@ -304,8 +344,58 @@ const AddExistingProduct = (props) => {
         <div className="listing-grid p-3">
             <Box mb={2}>
                 <Grid container >
-                    <Grid item xs={12} sm={6}>
-
+                    <Grid className="d-flex align-items-center gap-1" item xs={12} sm={6}>
+                        <Autocomplete
+                            style={{ width: "250px" }}
+                            options={productCategoryList}
+                            getOptionLabel={(option: any) => option ? option.name : ""}
+                            getOptionSelected={(option: any, val) =>
+                                option._id === val
+                            }
+                            value={productCategoryList.filter((data) => data._id === productCategory).length
+                                ? productCategoryList.filter((data) => data._id === productCategory)[0]
+                                : ""
+                            }
+                            onChange={(e, val) => {
+                                setProductCategory(val && val._id ? val._id : "")
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    margin="dense"
+                                    name="productCategory"
+                                    label="Product Category"
+                                    variant="outlined"
+                                    fullWidth
+                                />
+                            )}
+                        />
+                        {isProductTemplate &&
+                            <Autocomplete
+                                style={{ width: "250px" }}
+                                options={productTemplateList}
+                                getOptionLabel={(option: any) => option ? option.optionLabel : ""}
+                                getOptionSelected={(option: any, val) =>
+                                    option.optionValue === val
+                                }
+                                value={productTemplateList.filter((data) => data.optionValue === productTemplate).length
+                                    ? productTemplateList.filter((data) => data.optionValue === productTemplate)[0]
+                                    : ""
+                                }
+                                onChange={(e, val) => {
+                                    setProductTemplate(val && val.optionValue ? val.optionValue : "")
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        margin="dense"
+                                        name="productTemplate"
+                                        label="Product Template"
+                                        variant="outlined"
+                                        fullWidth
+                                    />
+                                )}
+                            />}
                     </Grid>
                     <Grid item xs={12} sm={6} container justify="flex-end">
                         <SearchBox

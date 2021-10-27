@@ -70,6 +70,7 @@ export default forwardRef((props: any, ref) => {
                 ref={inputRef}
                 onChange={onInputBoxChanged}
                 size="small"
+                fullWidth
                 InputProps={{
                     startAdornment: <FilterListIcon fontSize="small" className="mr-2" />,
                 }}
