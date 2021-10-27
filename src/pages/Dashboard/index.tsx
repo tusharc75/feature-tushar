@@ -49,11 +49,13 @@ function Dashboard() {
     }
 
     allData?.forEach((u) => {
+      u["resourceLabel"] = u.resourceLabel ?? u.name;
       u["sectionNameLowerCase"] = u.sectionName?.toLowerCase();
-      u["resourceLabelLowerCase"] = u.name?.toLowerCase() ?? u.resourceLabel?.toLowerCase();
+      u["resourceLabelLowerCase"] = u.resourceLabel?.toLowerCase() ?? u.name?.toLowerCase();
 
       !arr.includes(u.sectionName) && arr.push(u.sectionName);
     });
+    
     const data = arr.map((sec) => {
 
       // const list = allData?.filter((u) => sec === u.sectionName && u.isRead);
@@ -150,12 +152,13 @@ function Dashboard() {
                 className="mb-3"
                 onChange={(e) => {
                   const searchedValue = e.target.value;
+                  const searchedValueInLowerCase = searchedValue?.toLowerCase()
                   setSearch(searchedValue)
 
                   const filteredItems = [];
 
                   sections.forEach(section => {
-                    const items = section.items.filter(ff => ff.sectionNameLowerCase.indexOf(searchedValue) > -1 || ff.resourceLabelLowerCase.indexOf(searchedValue) > -1);
+                    const items = section.items.filter(ff => ff.sectionNameLowerCase.indexOf(searchedValueInLowerCase) > -1 || ff.resourceLabelLowerCase.indexOf(searchedValueInLowerCase) > -1);
                     if (items.length > 0) {
                       filteredItems.push({ ...section, items: items });
                     }
