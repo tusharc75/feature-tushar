@@ -27,8 +27,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialog";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { simplifyValues } from "../../constants/helpers"
-import { values } from "lodash";
-
+import { isMobile , isTablet } from 'react-device-detect';
 interface InitialData {
   fields: any[];
   values: object;
@@ -42,7 +41,6 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
   } = useData();
   const theme = useTheme();
   const toastConfig = useContext(CustomToastContext);
-  const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState<InitialData>({
@@ -65,7 +63,8 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [formValues, setFormValues] = useState({})
-
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  
   useEffect(() => {
     if (initialData.fields.length > 0) {
       setFormsData(setFieldsInAscendingOrder(initialData.fields));
@@ -299,14 +298,20 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
       }}
       maxWidth="md"
       fullWidth
-      fullScreen={isMobile}
+      fullScreen={fullScreen || (isMobile || isTablet)}
     >
       <CustomDialogHeader
         onClose={() => {
           if (isFieldNotTouched(initialData, formValues)) close()
           else setShowConfirmDialog(true)
         }}
-        title={`${isClone ? "Clone" : projectSalesId ? `Update ${productSalesName}` : "Create New Project Sales"}`} />
+        title={`${isClone ? "Clone" : projectSalesId ? `Update ${productSalesName}` : "Create New Project Sales"}`}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen(prevState => !prevState)
+        }}
+        showManimizeMaximize={true}
+      />
 
       {loading || !initialData.fields.length ? (
         <>

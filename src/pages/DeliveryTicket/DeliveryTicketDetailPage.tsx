@@ -25,6 +25,7 @@ import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from "../../components/Activity";
 import { isMobile, isTablet } from "react-device-detect";
 import SignatureDialog from '../../components/Helpers/SignatureDialog';
+import ViewSignsDialog from './ViewSignsDialog'
 
 const mappedStatus = {
   "Start Delivery": "In-Transit",
@@ -40,6 +41,7 @@ export default function DeliveryTicketDetail(props) {
   }: any = useData();
   const [deliveryTicketData, setDeliveryTicketData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [openSigns, setOpenSigns] = useState(false);
   const [submittingSign, setSubmittingSign] = useState(false);
   const [openSignatureDialog, setOpenSignatureDialog] = useState(false);
   const [signatures, setSignatures] = useState([]);
@@ -115,6 +117,7 @@ export default function DeliveryTicketDetail(props) {
         .get(`${deliveryTicketApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
           setDeliveryTicketData(data)
+          setSignatures(data?.signatures || []);
           if (data?.productInventory && data?.productInventory.length) {
             let ids = data?.productInventory.map(o => o?.optionValue)
             fetchProductInventory(ids)
@@ -236,27 +239,17 @@ export default function DeliveryTicketDetail(props) {
     (deliveryTicketData?.status === "In-Transit") ? "Sign-Off" : "" : ""
 
   const handleSignature = (signedData) => {
+    console.log(signedData)
     const { type, sign: newSign } = signedData;
     let stateArr = signatures;
-    const existingData = signatures.find(d => d.type === type)
+    stateArr.push({ type, signature: newSign, status: label });
+    setSignatures(stateArr)
 
-    if (existingData) {
-      stateArr = stateArr.map(d => {
-        if (d.type === type) {
-          d.sign = newSign.split("base64,")[1]
-        }
-        return d
-      })
-    } else {
-      stateArr.push(signedData);
-    }
-
-    if (stateArr.length === 2) {
-      setSignatures(stateArr)
+    if (stateArr.length === 2 || stateArr.length === 4) {
       setSubmittingSign(true)
       axiosInstance().put(`${deliveryTicketApi}/signature`, {
         _id: id,
-        signatures: stateArr.map(d => ({ type: d.type, signature: d.sign, status: label }))
+        signatures: stateArr
       }).then(() => {
         handleChangeStatus(label)
         setOpenSignatureDialog(false)
@@ -270,7 +263,6 @@ export default function DeliveryTicketDetail(props) {
       });
     }
   }
-
 
   return (
     <>
@@ -325,17 +317,25 @@ export default function DeliveryTicketDetail(props) {
                         Delete
                       </Button>
                     )} */}
-                  {
-                    deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id ?
-                      label !== "" ?
+                  {deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id ?
+                    label !== "" ?
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        disabled={loading}
+                        onClick={() => setOpenSignatureDialog(true)}>
+                        {label}
+                      </Button>
+                      : deliveryTicketData?.status === "Delivered" ?
                         <Button
                           variant="contained"
                           color="primary"
                           size="small"
-                          disabled={loading}
-                          onClick={() => setOpenSignatureDialog(true)}>
-                          {label}
-                        </Button> : null : null
+                          onClick={() => setOpenSigns(true)}>
+                          View Signatures
+                        </Button> : null
+                    : null
                   }
                 </DetailsPageHeader>
               )}
@@ -477,6 +477,11 @@ export default function DeliveryTicketDetail(props) {
               setSignatures([])
             }}
             onSigned={handleSignature}
+          />}
+        {openSigns &&
+          <ViewSignsDialog
+            signatures={deliveryTicketData?.signatures}
+            close={() => setOpenSigns(false)}
           />}
       </Fragment>
     </>

@@ -47,7 +47,7 @@ const TaskSchema = object().shape({
   dueDate: string().required("Please enter due date"),
 });
 
-export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
+export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized, onMinimizeMaximize, showManimizeMaximize }) => {
   const {
     state: {
       user: { user },
@@ -139,6 +139,9 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
           if (isFieldNotTouched(initialValues, formValues)) handleClose()
           else setShowConfirmDialog(true)
         }}
+        isMinimized={isMinimized}
+        onMinimizeMaximize={onMinimizeMaximize}
+        showManimizeMaximize={showManimizeMaximize}
       ></CustomDialogHeader>
       {initialValues ? (
         <Formik

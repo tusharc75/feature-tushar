@@ -49,6 +49,7 @@ const BigCalendar = () => {
   const [filter, setFilter] = useState([]);
   const [activityData, setActivityData] = useState(null);
   const [activities, setActivities] = useState([]);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -242,12 +243,15 @@ const BigCalendar = () => {
 
         {createType && (
           <Dialog
-            fullScreen={isMobile || isTablet}
+            fullScreen={fullScreen || (isMobile || isTablet)}
             TransitionComponent={CustomDialogTransition}
             open={true}
             fullWidth
             maxWidth="md"
-            onClose={closeDialog}
+            onClose={() => {
+              closeDialog()
+              setFullScreen(false);
+            }}
           >
             {createType === "task" && (
               <CreateTask
@@ -259,7 +263,15 @@ const BigCalendar = () => {
                     access: true,
                   },
                 ]}
-                handleClose={closeDialog}
+                handleClose={() => {
+                  closeDialog()
+                  setFullScreen(false);
+                }}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
               />
             )}
             {createType === "case" && (
@@ -268,7 +280,15 @@ const BigCalendar = () => {
                 relatedTo={[
                   { type: "user", referenceId: user._id, access: true },
                 ]}
-                handleClose={closeDialog}
+                handleClose={() => {
+                  closeDialog()
+                  setFullScreen(false);
+                }}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
               />
             )}
             {createType === "event" && (
@@ -281,7 +301,15 @@ const BigCalendar = () => {
                     access: true,
                   },
                 ]}
-                handleClose={closeDialog}
+                handleClose={() => {
+                  closeDialog()
+                  setFullScreen(false);
+                }}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
               />
             )}
           </Dialog>

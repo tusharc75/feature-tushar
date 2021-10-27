@@ -24,6 +24,7 @@ const ManageDeliveryTicket = (props) => {
     const [formsData, setFormsData] = useState([]);
     const [isSubmitting, setSubmitting] = useState(false);
     const [formValues, setFormValues] = useState({})
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
         if (initialData.fields.length > 0) {
@@ -126,7 +127,7 @@ const ManageDeliveryTicket = (props) => {
 
     return (<Dialog
         maxWidth="md"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
@@ -145,7 +146,13 @@ const ManageDeliveryTicket = (props) => {
                 }, formValues)) onClose()
                 else setShowConfirmDialog(true)
             }}
-            title={`${deliveryTicketId ? `Update  ` : "Create Loading Ticket"}`} />
+            title={`${deliveryTicketId ? `Update  ` : "Create Loading Ticket"}`}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+            }}
+            showManimizeMaximize={true}
+        />
 
         {loading || !initialData.fields.length ? (
             <>

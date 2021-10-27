@@ -75,7 +75,8 @@ export default function NewOpportunityProjectSales({
   ] = useState([]);
   const [ownerDataSource, setOwnerDataSource] = useState([]);
   const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
-
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  
   useEffect(() => {
     const processSteps = opportunityData.fields.find(
       (d) => d.type.toLowerCase() === "process"
@@ -245,14 +246,20 @@ export default function NewOpportunityProjectSales({
       <Dialog
         maxWidth="md"
         fullWidth
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={onClose}
         open={open}
         disableBackdropClick={true}
       >
-        <CustomDialogHeader title="Create Opportunity" onClose={onClose} />
+        <CustomDialogHeader title="Create Opportunity" onClose={onClose}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
+        />
 
         {opportunityData.fields.length === 0 && (
           <CustomDialogContent>

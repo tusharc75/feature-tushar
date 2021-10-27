@@ -21,7 +21,8 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [eventId, setEventId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  
   useEffect(() => {
     fetchEvent();
   }, []);
@@ -149,15 +150,26 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         open={open}
         aria-labelledby="customized-dialog-title"
         maxWidth="md"
-        onClose={handleClose}
+        onClose={() => {
+          handleClose()
+          setFullScreen(false);
+        }}
         fullWidth
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
       >
         <CreateEvent
           eventId={eventId}
-          handleClose={handleClose}
+          handleClose={() => {
+            handleClose()
+            setFullScreen(false);
+          }}
           relatedTo={relatedTo}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
         />
       </Dialog>
     </Box>

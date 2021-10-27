@@ -80,6 +80,7 @@ export default function ManageBudgetDialog({
     const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [formValues, setFormValues] = useState({})
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
         getBudgetFields();
@@ -313,7 +314,7 @@ export default function ManageBudgetDialog({
             <Dialog
                 maxWidth="md"
                 fullWidth
-                fullScreen={isMobile || isTablet}
+                fullScreen={fullScreen || (isMobile || isTablet)}
                 TransitionComponent={CustomDialogTransition}
                 aria-labelledby="customized-dialog-title"
                 open={open}
@@ -334,6 +335,11 @@ export default function ManageBudgetDialog({
                         if (isFieldNotTouched(entityData, formValues)) onClose()
                         else setShowConfirmDialog(true)
                     }}
+                    isMinimized={!fullScreen}
+                    onMinimizeMaximize={() => {
+                        setFullScreen(prevState => !prevState)
+                    }}
+                    showManimizeMaximize={true}
                 />
 
                 {entityData.fields.length === 0 && (

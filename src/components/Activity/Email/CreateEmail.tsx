@@ -98,7 +98,10 @@ export const CreateEmail = ({
   subject = "",
   showESign = false,
   generatingFile = false,
-  fromQuote = false
+  fromQuote = false,
+  isMinimized,
+  onMinimizeMaximize,
+  showManimizeMaximize
 }) => {
   const {
     state: { user },
@@ -544,6 +547,9 @@ export const CreateEmail = ({
           if (isFieldNotTouched(initialValues, formValues)) handleClose()
           else setShowConfirmDialog(true)
         }}
+        isMinimized={isMinimized}
+        onMinimizeMaximize={onMinimizeMaximize}
+        showManimizeMaximize={showManimizeMaximize}
       ></CustomDialogHeader>
       {loading ? (
         <div className={classes.root}>

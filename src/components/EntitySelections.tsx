@@ -29,6 +29,7 @@ function EntitySelections(props) {
     const [dataLoading, setDataLoading] = useState(false)
     const [loading, setLoading] = useState(false)
     const { entityApi } = entity
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
         setSelectedEntities([...entities])
@@ -80,7 +81,7 @@ function EntitySelections(props) {
     return <>
         <Dialog
             maxWidth="sm"
-            fullScreen={isMobile || isTablet}
+            fullScreen={fullScreen || (isMobile || isTablet)}
             TransitionComponent={CustomDialogTransition}
             aria-labelledby="customized-dialog-title"
             open={open}
@@ -90,7 +91,13 @@ function EntitySelections(props) {
             fullWidth>
             <CustomDialogHeader
                 title="Assign Entity"
-                onClose={onClose} />
+                onClose={onClose}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                    setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
+            />
 
             <CustomDialogContent>
                 {
