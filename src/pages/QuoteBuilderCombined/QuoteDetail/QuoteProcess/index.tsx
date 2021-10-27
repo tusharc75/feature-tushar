@@ -545,10 +545,12 @@ export default function QuoteProcess(props) {
                     return isEmpty.length > 0 ? true : false
                 })
 
-                if (ungivenValues && ungivenValues.length > 0) {
-                    setNextStep(false)
-                } else {
-                    setNextStep(true)
+                if (DOASteps.findIndex(d => d?.key === ProcessStatus) === 1 || ProcessStatus === "Price Builder") {
+                    if (ungivenValues && ungivenValues.length > 0) {
+                        setNextStep(false)
+                    } else {
+                        setNextStep(true)
+                    }
                 }
 
 
