@@ -31,7 +31,7 @@ function Dashboard() {
     }
 
     {/*Only show product list if environment is local || development*/ }
-    if (['local', 'development'].includes(process.env.REACT_APP_ENV)) {
+    if (['local', 'development'].includes(process.env.REACT_APP_ENV) && allData) {
       const indexOfProduct = allData.findIndex(d => d.name === "Product");
       const product = allData[indexOfProduct];
 
