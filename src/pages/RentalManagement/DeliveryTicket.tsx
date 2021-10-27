@@ -43,7 +43,6 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
 
               })
             })
-            console.log('tempProductInventory', tempProductInventory)
             dispatch({
               type: "initialize", data: tempProductInventory, count: tempProductInventory.length
             });

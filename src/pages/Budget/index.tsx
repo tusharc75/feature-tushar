@@ -245,12 +245,10 @@ function Budget() {
     axiosInstance()
       .get(`/budget${queryString}`)
       .then(({ data: { data, count } }) => {
-        console.log('data', data)
         let rows = data.map((item) => {
           let res = {
             ...prepareDataForGrid(item, user),
           };
-          console.log('res', res)
           return res;
         });
 
