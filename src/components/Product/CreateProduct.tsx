@@ -53,6 +53,7 @@ const CreateProduct = (props) => {
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [currencySymbol, setCurrencySymbol] = useState(null);
     const [isProductTemplate, setIsProductTemplate] = useState(false);
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
         var _isProductTemplate = false;
@@ -209,7 +210,7 @@ const CreateProduct = (props) => {
                 setProductTemplate(data.data)
                 if (isChange) {
                     let defaultproductTemplate = ""
-                    if (data.data.length) {
+                    if (data.data.length === 1) {
                         defaultproductTemplate = data.data[0].optionValue
                         data.data.forEach((_f) => {
                             let re = new RegExp(_f.optionLabel);
@@ -349,7 +350,7 @@ const CreateProduct = (props) => {
 
     return (<Dialog
         maxWidth="md"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
@@ -375,7 +376,13 @@ const CreateProduct = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={`${(productId && !isClone) ? "Edit" : "New"} Product`}
+                        <CustomDialogHeader
+                            title={`${(productId && !isClone) ? "Edit" : "New"} Product`}
+                            isMinimized={!fullScreen}
+                            onMinimizeMaximize={() => {
+                                setFullScreen(prevState => !prevState)
+                            }}
+                            showManimizeMaximize={true}
                             onClose={() => {
                                 if (!isEqual(ref.current.values, initialData.values)) {
                                     setShowConfirmDialog(true)
@@ -383,7 +390,7 @@ const CreateProduct = (props) => {
                                 else {
                                     handleClose()
                                 }
-                            }}></CustomDialogHeader>
+                            }} />
                         <CustomDialogContent>
                             <Box>
                                 <Form autoComplete="off" autoCorrect="off" noValidate >

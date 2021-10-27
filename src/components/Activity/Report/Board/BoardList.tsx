@@ -25,7 +25,7 @@ export const BoardList = ({
 }) => {
   const {
     state: {
-      user: { user },permissions
+      user: { user }, permissions
     },
   } = useData();
   const ref = useRef(null);
@@ -33,6 +33,7 @@ export const BoardList = ({
   const [isCreateButton, setCreateButton] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     setSubActivity(activity);
@@ -96,7 +97,7 @@ export const BoardList = ({
             ))}
 
             {
-             permissions &&  permissions[type?.toLowerCase()]?.isCreate ? 
+              permissions && permissions[type?.toLowerCase()]?.isCreate ?
                 <Box
                   p={1}
                   style={{
@@ -106,13 +107,16 @@ export const BoardList = ({
                     fullWidth
                     style={{ justifyContent: "flex-start" }}
                     startIcon={<Add />}
-                    onClick={() => setOpenDialog(true)}
+                    onClick={() => {
+                      setOpenDialog(true)
+                      setFullScreen(false);
+                    }}
                   >
                     Create {type}
                   </Button>
                 </Box>
-                :null
-             } 
+                : null
+            }
           </>
         ) : (
           <Box p={1}></Box>
@@ -130,10 +134,13 @@ export const BoardList = ({
 
       <Dialog
         open={openDialog}
-        onClose={handleCloseDialog}
+        onClose={() => {
+          handleCloseDialog();
+          setFullScreen(false);
+        }}
         fullWidth
         maxWidth="md"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
       >
         {type === "task" ? (
@@ -149,7 +156,15 @@ export const BoardList = ({
                 access: true,
               },
             ]}
-            handleClose={handleCloseDialog}
+            handleClose={() => {
+              handleCloseDialog()
+              setFullScreen(false);
+            }}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+              setFullScreen(prevState => !prevState)
+            }}
+            showManimizeMaximize={true}
           />
         ) : type === "case" ? (
           <CreateCase
@@ -164,7 +179,16 @@ export const BoardList = ({
                 access: true,
               },
             ]}
-            handleClose={handleCloseDialog}
+            handleClose={() => {
+              handleCloseDialog()
+              setFullScreen(false);
+            }}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+              setFullScreen(prevState => !prevState)
+            }}
+            showManimizeMaximize={true}
+
           />
         ) : null}
       </Dialog>

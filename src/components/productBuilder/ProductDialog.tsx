@@ -48,7 +48,7 @@ const CreateProduct = (props) => {
   const [fields, setFields] = useState([]);
   const [sectionName, setSectionName] = useState("");
   const ref = useRef(null);
-
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [fieldChanges, setFieldChanges] = useState([]);
 
   useEffect(() => {
@@ -270,7 +270,7 @@ const CreateProduct = (props) => {
   return (
     <Dialog
       maxWidth="md"
-      fullScreen={isMobile || isTablet}
+      fullScreen={fullScreen || (isMobile || isTablet)}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       open={true}
@@ -297,6 +297,11 @@ const CreateProduct = (props) => {
               <CustomDialogHeader
                 title={`Edit Product`}
                 onClose={handleClose}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Box>

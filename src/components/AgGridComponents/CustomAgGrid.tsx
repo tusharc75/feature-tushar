@@ -215,6 +215,7 @@ export default function CustomAgGrid({
           rowDrag={column.rowDrag ?? false}
           hide={staticColumns.indexOf(column.field) >= 0 ? checkStaticField(renderedFrom, column.field) :
             (column.hasOwnProperty("show") && !column?.show) ? true : false}
+          floatingFilterComponent="customFloatingFilter"
         // floatingFilterComponent={column.floatingFilterComponent ?? null}
         // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
         //   suppressFilterButton: true,
@@ -242,6 +243,7 @@ export default function CustomAgGrid({
           comparator={() => {
             return 0;
           }}
+          floatingFilterComponent="customFloatingFilter"
         // floatingFilterComponent={column.floatingFilterComponent ?? null}
         // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
         //   suppressFilterButton: true,
