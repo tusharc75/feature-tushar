@@ -209,7 +209,7 @@ const CreateProduct = (props) => {
                 setProductTemplate(data.data)
                 if (isChange) {
                     let defaultproductTemplate = ""
-                    if (data.data.length) {
+                    if (data.data.length === 1) {
                         defaultproductTemplate = data.data[0].optionValue
                         data.data.forEach((_f) => {
                             let re = new RegExp(_f.optionLabel);
