@@ -25,7 +25,8 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const {
     state: { permissions },
   }: any = useData();
-
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  
   useEffect(() => {
     fetchTask();
   }, []);
@@ -156,18 +157,29 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
           permissions["task"]?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
       </Menu>
       <Dialog
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         open={open}
         aria-labelledby="customized-dialog-title"
         maxWidth="md"
-        onClose={handleClose}
+        onClose={() => {
+          handleClose() 
+          setFullScreen(false);
+        }}
         fullWidth
       >
         <CreateTask
           taskId={taskId}
-          handleClose={handleClose}
+          handleClose={() => {
+            handleClose()
+            setFullScreen(false);
+          }}
           relatedTo={relatedTo}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
         />
       </Dialog>
     </Box>

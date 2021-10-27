@@ -12,7 +12,6 @@ import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, marketSegment, setFieldsInAscendingOrder } from "../../constants/helpers";
-import InputField from "../../components/Helpers/InputField";
 import { getObjKeysWithValues, getObjKeys, yupSchema, isFieldNotTouched } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { Box, Grid } from '@material-ui/core';
@@ -27,7 +26,7 @@ const ManageMarketSegmentDialog = (props) => {
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [formsData, setFormsData] = useState([]);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
         if (initialData.fields.length > 0) {
@@ -93,7 +92,7 @@ const ManageMarketSegmentDialog = (props) => {
 
     return (<Dialog
         maxWidth="md"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
@@ -126,7 +125,11 @@ const ManageMarketSegmentDialog = (props) => {
                                 }, values)) onClose()
                                 else setShowConfirmDialog(true)
                             }}
-
+                            isMinimized={!fullScreen}
+                            onMinimizeMaximize={() => {
+                                setFullScreen(prevState => !prevState)
+                            }}
+                            showManimizeMaximize={true}
                         ></CustomDialogHeader>
                         <CustomDialogContent>
 

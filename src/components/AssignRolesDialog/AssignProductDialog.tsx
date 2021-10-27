@@ -33,6 +33,7 @@ import styles from "../../pages/Leads/Header.module.scss";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { AddOutlined, RemoveOutlined } from "@material-ui/icons";
 import CustomAgGridEditable from "../AgGridComponents/CustomAgGridEditable";
+import { isMobile, isTablet } from 'react-device-detect';
 
 const options = [
     {
@@ -52,7 +53,7 @@ const AssignProductDialog = ({
     handleCloseDialog,
     assignedProducts
 }) => {
-
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const {
         state: { permissions, selectedEntity },
     }: any = useData();
@@ -237,11 +238,18 @@ const AssignProductDialog = ({
         <Dialog
             fullWidth
             maxWidth="md"
+            fullScreen={fullScreen || (isMobile || isTablet)}
             open={productsDialogOpen}
             onClose={handleCloseDialog}
             aria-labelledby="assign-roles-dialog"
         >
-            <CustomDialogHeader title={`Assign ${routes.product.title}`} />
+            <CustomDialogHeader title={`Assign ${routes.product.title}`}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                    setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
+            />
             <CustomDialogContent>
                 <>
                     <div className="header-panel">

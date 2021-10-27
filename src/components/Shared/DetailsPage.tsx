@@ -166,9 +166,10 @@ const Details = (props: DetailProps) => {
       const filterOptions = input.option?.filter((opt) =>
         values[input.fieldName].includes(opt.optionValue)
       );
-      const value = filterOptions.length
-        ? filterOptions.map((d) => d.optionLabel).join(", ")
-        : "";
+      const value = typeof values[input.fieldName] === "string"
+        ? values[input.fieldName] : filterOptions.length
+          ? filterOptions.map((d) => d.optionLabel).join(", ")
+          : "";
       text = value ? value : "-";
     } else if (input.type === "freeStyleMultiSelect") {
       const value = values[input.fieldName].length && Array.isArray(values[input.fieldName])

@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.26.0](https://github.com/vebholic/oms_frontend/compare/v1.25.0...v1.26.0) (2021-10-27)
+
+
+### Features
+
+* - Account create dialog no fields visible on create issue fixed ([26c601d](https://github.com/vebholic/oms_frontend/commit/26c601db67b2340e637f64dc3a37c665557170a7))
+* - Fullscreen icon added in dialogs ([404eafa](https://github.com/vebholic/oms_frontend/commit/404eafa8e461efb9fadd845d195f01ee4c8c8362))
+* - Maximize, Minimize added in activity dialogs ([2280754](https://github.com/vebholic/oms_frontend/commit/22807543d80ffdfe03ac134e05b5bc2600cc8a6e))
+* **deliveryticket:** view singature button ([7a691fe](https://github.com/vebholic/oms_frontend/commit/7a691fe7ccbf356131f4181b245c02da44ab0267))
+* entity selection changes added ([09aa103](https://github.com/vebholic/oms_frontend/commit/09aa10302c83128587daf3cac21446f87f80ac0b))
+
+
+### Bug Fixes
+
+* changes added ([8025153](https://github.com/vebholic/oms_frontend/commit/8025153800e3e8af9f63b00e359dd422870356cf))
+* changes added ([fa141ac](https://github.com/vebholic/oms_frontend/commit/fa141ac19b6788229509f39a56a886553028b9b9))
+* **createproduct:** product category binding issue ([e0bfd2c](https://github.com/vebholic/oms_frontend/commit/e0bfd2cac271632b19f36ed1162b226a2f8e0d55))
+* **detailspage:** type change fix ([fc7b3d1](https://github.com/vebholic/oms_frontend/commit/fc7b3d14fd8ce39c40ee96cd65158dbb5965ae5d))
+* **t&cs:** name click issue ([08c04e3](https://github.com/vebholic/oms_frontend/commit/08c04e351de6bc04df50353ef559ff9d4249a23d))
+
 ## [1.25.0](https://github.com/vebholic/oms_frontend/compare/v1.24.2...v1.25.0) (2021-10-26)
 
 

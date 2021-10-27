@@ -25,6 +25,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const {
     state: { permissions },
   }: any = useData();
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     fetchNote();
@@ -165,16 +166,30 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         open={open}
         aria-labelledby="customized-dialog-title"
         maxWidth="md"
-        onClose={handleDialogClose}
+        onClose={() => {
+          handleDialogClose()
+          setFullScreen(false);
+        }}
         fullWidth
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
       >
         <CreateNote
           noteId={noteId}
-          handleClose={handleClose}
+          handleClose={() => {
+            handleClose()
+            setFullScreen(false);
+          }}
           relatedTo={relatedTo}
-          handleDialogClose={handleDialogClose}
+          handleDialogClose={() => {
+            handleDialogClose();
+            setFullScreen(false);
+          }}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
         />
       </Dialog>
     </Box>

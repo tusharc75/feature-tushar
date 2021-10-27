@@ -411,7 +411,11 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     if (key.type === 'switch' || key.type === 'checkBox') {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : false;
     } else if (key.type === 'multiSelect') {
-      const values = dataObj[key.fieldName] && dataObj[key.fieldName].length ? dataObj[key.fieldName].map((val: any) => filterValues(val)) : [];
+      const values = dataObj[key.fieldName] && dataObj[key.fieldName].length
+        ? typeof dataObj[key.fieldName] === 'string'
+          ? dataObj[key.fieldName]
+          : dataObj[key.fieldName].map((val: any) => filterValues(val))
+        : [];
       obj[key.fieldName] = values;
     } else if (key.type === 'dropDown') {
       const value = filterValues(dataObj[key.fieldName]);
