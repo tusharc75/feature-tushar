@@ -29,10 +29,17 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
   const [isUpdate, setUpdate] = useState(false);
 
   useEffect(() => {
-    setFieldValue("option", options);
     if (values["isDependentDropdown"] && values["dropdowDependentOn"]) {
       GetLookupOption(values["dropdowDependentOn"])
     }
+  }, []);
+
+  useEffect(() => {
+    setFieldValue("option", options);
+  }, [options]);
+
+  useEffect(() => {
+    setlookupOption([...lookupOption])
   }, [options]);
 
   useEffect(() => {
