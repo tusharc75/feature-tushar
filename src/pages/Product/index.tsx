@@ -67,6 +67,7 @@ const Product = () => {
     const [productTemplateList, setProductTemplateList] = useState([]);
     const [productCategory, setProductCategory] = useState(null);
     const [productTemplate, setProductTemplate] = useState(null);
+    const [isProductTemplate, setIsProductTemplate] = useState(true);
 
     const { state: { permissions, selectedEntity } }: any = useData();
     const [productPermissions, setProductPermissions] = useState({
@@ -83,15 +84,17 @@ const Product = () => {
     }, [])
 
     useEffect(() => {
-        if (productCategory && productCategory !== "") {
-            axiosInstance().post(`/product-template/template/` + productCategory, { entity: [] }).then(({ data: { data } }) => {
-                setProductTemplateList(data.data)
+        if (isProductTemplate) {
+            if (productCategory && productCategory !== "") {
+                axiosInstance().post(`/product-template/template/` + productCategory, { entity: [] }).then(({ data: { data } }) => {
+                    setProductTemplateList(data.data)
+                    setProductTemplate(null);
+                })
+            }
+            else {
+                setProductTemplateList([])
                 setProductTemplate(null);
-            })
-        }
-        else {
-            setProductTemplateList([])
-            setProductTemplate(null);
+            }
         }
     }, [productCategory])
 
@@ -111,6 +114,9 @@ const Product = () => {
         axiosInstance().get("/field?resource=Product").then(({ data: { data } }) => {
             const productField = []
             data.map((_f) => productField.push(_f.fieldData));
+            if (productField.filter((e) => e.fieldName === "productTemplate").length === 0) {
+                setIsProductTemplate(false)
+            }
             var coloum = [];
             GenrateColoum(productField, coloum)
             coloum.forEach((ele) => {
@@ -498,31 +504,32 @@ const Product = () => {
                                 />
                             )}
                         />
-                        <Autocomplete
-                            style={{ width: "250px" }}
-                            options={productTemplateList}
-                            getOptionLabel={(option: any) => option ? option.optionLabel : ""}
-                            getOptionSelected={(option: any, val) =>
-                                option.optionValue === val
-                            }
-                            value={productTemplateList.filter((data) => data.optionValue === productTemplate).length
-                                ? productTemplateList.filter((data) => data.optionValue === productTemplate)[0]
-                                : ""
-                            }
-                            onChange={(e, val) => {
-                                setProductTemplate(val && val.optionValue ? val.optionValue : "")
-                            }}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    margin="dense"
-                                    name="productTemplate"
-                                    label="Product Template"
-                                    variant="outlined"
-                                    fullWidth
-                                />
-                            )}
-                        />
+                        {isProductTemplate &&
+                            <Autocomplete
+                                style={{ width: "250px" }}
+                                options={productTemplateList}
+                                getOptionLabel={(option: any) => option ? option.optionLabel : ""}
+                                getOptionSelected={(option: any, val) =>
+                                    option.optionValue === val
+                                }
+                                value={productTemplateList.filter((data) => data.optionValue === productTemplate).length
+                                    ? productTemplateList.filter((data) => data.optionValue === productTemplate)[0]
+                                    : ""
+                                }
+                                onChange={(e, val) => {
+                                    setProductTemplate(val && val.optionValue ? val.optionValue : "")
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        margin="dense"
+                                        name="productTemplate"
+                                        label="Product Template"
+                                        variant="outlined"
+                                        fullWidth
+                                    />
+                                )}
+                            />}
                     </Grid>
                     <Grid item xs={6}>
                         <Grid container className={styles.filter_side} >
