@@ -294,8 +294,21 @@ const RentalManagementDetailsPage = () => {
         id: u._id,
         detail: u.packageName,
         description: u.packageDescription,
-
       })));
+      tempInventory = tempInventory.map(u => {
+        let qty = parseInt(u?.quantity || u?.qty) || 0
+        let price = qty > 0 ? (parseInt(u?.price) * qty) || (parseInt(u?.mrp) * qty) || 0 : (parseInt(u.price) || 0)
+        let discount = parseInt(u?.discount) || 0
+        let finalPrice = parseInt(u?.finalPrice) || 0
+
+        finalPrice = (discount > 0 && price > 0) ? price - ((price * discount) / 100) : price
+        return {
+          ...u,
+          qty: qty,
+          finalPrice: finalPrice
+        }
+      })
+
       setProductInventory(tempInventory)
 
       // let tempWareHouse = []
@@ -481,9 +494,8 @@ const RentalManagementDetailsPage = () => {
       let price = qty > 0 ? (parseInt(d.price) * qty || 0) : (parseInt(d.price) || 0)
       let discount = parseInt(d.discount) || 0
       let finalPrice = parseInt(d.finalPrice) || 0
-      if (discount > 0 && price > 0) {
-        finalPrice = price - ((price * discount) / 100)
-      }
+
+      finalPrice = (discount > 0 && price > 0) ? price - ((price * discount) / 100) : price
       return {
         "id": d.id,
         "qty": qty,
@@ -492,7 +504,7 @@ const RentalManagementDetailsPage = () => {
         "pricingMethod": d.pricingMethod,
         "UOM": d.UOM,
         "finalPrice": finalPrice,
-        "price": price,
+        "price": parseInt(d.price) || 0,
         "discount": discount,
         "startDate": d.startDate,
         "endDate": d.endDate,
