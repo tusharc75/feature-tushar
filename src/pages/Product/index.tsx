@@ -126,8 +126,8 @@ const Product = () => {
                 }
                 return res;
             });
-            if (data.data.length) {
-                let column = [...productColoums]
+            let column = [...productColoums]
+            if (data.data.length) { 
                 data.data.forEach((row) => {
                     GenrateColoum(row.fields, column);
                 });
@@ -152,8 +152,8 @@ const Product = () => {
                         });
                     });
                 }
-                setColumns(column);
             }
+            setColumns(column);
             dispatch({ type: "initialize", data: data.data, count: data.count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
         }).catch((error) => {

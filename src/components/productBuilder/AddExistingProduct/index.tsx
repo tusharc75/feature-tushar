@@ -95,7 +95,7 @@ const AddExistingProduct = (props) => {
         </Link>
     )
 
-    
+
     const frameworkComponents = {
         commonRenderer: CommonRenderer,
         entityRenderer: EntityNameRenderer,
@@ -135,11 +135,9 @@ const AddExistingProduct = (props) => {
 
     const fetchProduct = () => {
         dispatch({ type: "loading", loading: true });
-
         if (gridApi) {
             gridApi.setRowData([]);
         }
-
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
             setProductList(data.data);
@@ -161,16 +159,16 @@ const AddExistingProduct = (props) => {
                 }
                 return res;
             });
+            let column = [...productColoums]
             if (data.data.length) {
-                let column = [...productColoums]
                 data.data.forEach((row) => {
                     GenrateColoum(row.fields, column);
                 });
                 column = sortBy(column, function (item: any) {
                     return levalOrderBy.indexOf(item.leval)
                 });
-                setColumns(column);
             }
+            setColumns(column);
             dispatch({ type: "initialize", data: data.data, count: data.count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
         }).catch((error) => {
