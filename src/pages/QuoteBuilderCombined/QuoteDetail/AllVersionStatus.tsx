@@ -10,6 +10,33 @@ import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGri
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomRenderCell from '../../../components/Helpers/CustomRenderCell';
 
+const DOASteps = [
+    {
+        key: "New",
+        label: "Product Builder",
+    },
+    {
+        key: "Price Builder",
+        label: "Price Builder",
+    },
+    {
+        key: "Quote Builder",
+        label: "Quote Builder",
+    },
+    {
+        key: "DOA Process",
+        label: "DOA Process",
+    },
+    {
+        key: "Send To Customer",
+        label: "Send To Customer",
+    },
+    {
+        key: "End",
+        label: "End",
+    },
+];
+
 export default function AllVersionStatus({ quoteId, quoteData, quotePermissions, fetchQuoteData, handleChangeVersionFromAllVersion, handleCloneQuoteWithVersionFromAllVersion }) {
 
     const toastConfig = useContext(CustomToastContext);
@@ -92,6 +119,7 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
                             quoteData?.currency,
                             d.productData.totalSalesPrice
                         ).fullFormatAmount,
+                        processStatus: DOASteps.find(obj => obj.key === d.processStatus)?.label
                     };
                 });
 

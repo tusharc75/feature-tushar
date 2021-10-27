@@ -103,60 +103,60 @@ function QuoteHeader(props) {
               Add
             </Button>
           )}
-            <>
-              <Button
-                disabled={canDelete}
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                className={styles.action_submit_btn}
-                aria-controls="action-menu"
-              >
-                Actions <ExpandMore />
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
+          <>
+            <Button
+              disabled={canDelete}
+              variant="outlined"
+              color="default"
+              size="small"
+              onClick={openActions}
+              className={styles.action_submit_btn}
+              aria-controls="action-menu"
+            >
+              Actions <ExpandMore />
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  showConfirmBox(null);
                 }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
+                disabled={!permissions?.quoteBuilder?.isDelete}
               >
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    showConfirmBox(null);
-                  }}
-                  disabled={!permissions?.quoteBuilder?.isDelete}
-                >
-                  Delete
-                </MenuItem>
-                {
-                  QuotePermissions.isUpdate && <MenuItem
+                Delete
+              </MenuItem>
+              {
+                QuotePermissions.isUpdate && <MenuItem
                   disabled={selectedRecords.find((d) => d.canDelete === false)}
-                    onClick={() => {
-                      closeActions();
-                      showTransferEntityDialog();
-                    }}
-                  >Transfer Entity</MenuItem>
-                }
-                <MenuItem
-                  disabled={selectedRecords.length !== 1}
                   onClick={() => {
                     closeActions();
-                    showCloneQuoteDialog()
+                    showTransferEntityDialog();
                   }}
-                >
-                  Clone
-                </MenuItem>
-              </Menu>
-            </>
-          
+                >Transfer Entity</MenuItem>
+              }
+              <MenuItem
+                disabled={selectedRecords.length !== 1}
+                onClick={() => {
+                  closeActions();
+                  showCloneQuoteDialog()
+                }}
+              >
+                Clone
+              </MenuItem>
+            </Menu>
+          </>
+
         </Box>
       </Grid>
     </Grid>
