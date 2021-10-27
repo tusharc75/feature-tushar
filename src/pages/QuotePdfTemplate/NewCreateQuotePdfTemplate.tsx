@@ -73,6 +73,8 @@ export default function NewCreateQuotePdfTemplate() {
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
     const [isClone] = useState(history.location.state?.isClone ? true : false);
+    const [quoteData] = useState(history.location.state?.quoteData);
+    const [version] = useState(history.location.state?.version);
     const {
         state: { user },
     }: any = useData();
@@ -101,40 +103,69 @@ export default function NewCreateQuotePdfTemplate() {
     }, []);
 
     useEffect(() => {
+
         if (id && id !== '0') {
-            (async () => {
-                try {
-                    const res = await axiosInstance().get(`/quote-pdf-template/${id}`);
-                    const {
-                        data: { data }
-                    } = res;
-                    setIsLandscapChecked(data?.landscape)
-                    setInitialValues({
-                        landscape: data?.landscape,
-                        productColumns: data?.productColumns,
-                        name: data?.name,
-                        showPageNumberInFooter: data?.pageNumberInFooter,
-                        header: data?.header,
-                        footer: data?.footer,
-                        aboveTable: data?.aboveTable,
-                        belowTable: data?.belowTable,
-                        entity: data?.entity ? data?.entity : [],
-                        owner: data?.owner && data.owner !== undefined ? data?.owner : user.user._id,
-                        collaborator: data?.collaborator ? data?.collaborator : [],
-                    });
-                    setDetails({
-                        header: data?.header,
-                        footer: data?.footer,
-                        aboveTable: data?.aboveTable,
-                        belowTable: data?.belowTable
-                    })
-                    if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator?.some(d => d === user.user._id)) {
-                        setHasPermissionToUpdate(false)
-                    }
-                } catch (e) {
-                    toastConfig.setToastConfig(e);
+            let tempPdfTemplate = quoteData?.versions[version]?.pdfTemplate
+            if (tempPdfTemplate) {
+                setIsLandscapChecked(tempPdfTemplate.landscape)
+                setInitialValues({
+                    landscape: tempPdfTemplate.landscape,
+                    productColumns: tempPdfTemplate.productColumns,
+                    name: tempPdfTemplate.name,
+                    showPageNumberInFooter: tempPdfTemplate.pageNumberInFooter,
+                    header: tempPdfTemplate.header,
+                    footer: tempPdfTemplate.footer,
+                    aboveTable: tempPdfTemplate.aboveTable,
+                    belowTable: tempPdfTemplate.belowTable,
+                    entity: tempPdfTemplate.entity ? tempPdfTemplate.entity : [],
+                    owner: tempPdfTemplate.owner && tempPdfTemplate.owner !== undefined ? tempPdfTemplate.owner : user.user._id,
+                    collaborator: tempPdfTemplate.collaborator ? tempPdfTemplate.collaborator : [],
+                });
+                setDetails({
+                    header: tempPdfTemplate.header,
+                    footer: tempPdfTemplate.footer,
+                    aboveTable: tempPdfTemplate.aboveTable,
+                    belowTable: tempPdfTemplate.belowTable
+                })
+                if (tempPdfTemplate.owner && tempPdfTemplate.owner !== undefined && user.user._id !== tempPdfTemplate.owner && !tempPdfTemplate.collaborator?.some(d => d === user.user._id)) {
+                    setHasPermissionToUpdate(false)
                 }
-            })();
+            }
+            else {
+                (async () => {
+                    try {
+                        const res = await axiosInstance().get(`/quote-pdf-template/${id}`);
+                        const {
+                            data: { data }
+                        } = res;
+                        setIsLandscapChecked(data?.landscape)
+                        setInitialValues({
+                            landscape: data?.landscape,
+                            productColumns: data?.productColumns,
+                            name: data?.name,
+                            showPageNumberInFooter: data?.pageNumberInFooter,
+                            header: data?.header,
+                            footer: data?.footer,
+                            aboveTable: data?.aboveTable,
+                            belowTable: data?.belowTable,
+                            entity: data?.entity ? data?.entity : [],
+                            owner: data?.owner && data.owner !== undefined ? data?.owner : user.user._id,
+                            collaborator: data?.collaborator ? data?.collaborator : [],
+                        });
+                        setDetails({
+                            header: data?.header,
+                            footer: data?.footer,
+                            aboveTable: data?.aboveTable,
+                            belowTable: data?.belowTable
+                        })
+                        if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator?.some(d => d === user.user._id)) {
+                            setHasPermissionToUpdate(false)
+                        }
+                    } catch (e) {
+                        toastConfig.setToastConfig(e);
+                    }
+                })();
+            }
         }
         else {
             setInitialValues({
@@ -229,8 +260,9 @@ export default function NewCreateQuotePdfTemplate() {
                 });
         }
         else {
+            let api = quoteData ? `/quote-builder/pdf-template/${quoteData._id}/${version}` : '/quote-pdf-template'
             axiosInstance()
-                .put('/quote-pdf-template', {
+                .put(api, {
                     _id: id,
                     ...details, name: values.name,
                     pageNumberInFooter: values.showPageNumberInFooter,
@@ -244,9 +276,9 @@ export default function NewCreateQuotePdfTemplate() {
                     if (isPreview === true) {
                         previewPdfTemplate(data._id);
                         setIsUpdatingAndPreview(false);
-                        if (history.location?.state?.quoteId) {
-                            history.push(`/quotes/detail/${history.location?.state?.quoteId}`, {
-                                versionNumber: `${history.location?.state?.version}`, tabValue: 2
+                        if (quoteData?._id) {
+                            history.push(`/quotes/detail/${quoteData?._id}`, {
+                                versionNumber: `${version}`, tabValue: 2
                             })
                         }
                         else {
@@ -254,9 +286,9 @@ export default function NewCreateQuotePdfTemplate() {
                         }
 
                     } else {
-                        if (history.location?.state?.quoteId) {
-                            history.push(`/quotes/detail/${history.location?.state?.quoteId}`, {
-                                versionNumber: `${history.location?.state?.version}`, tabValue: 2
+                        if (quoteData?._id) {
+                            history.push(`/quotes/detail/${quoteData?._id}`, {
+                                versionNumber: `${version}`, tabValue: 2
                             })
                         }
                         else {
