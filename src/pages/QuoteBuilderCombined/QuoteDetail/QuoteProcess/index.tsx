@@ -412,6 +412,7 @@ export default function QuoteProcess(props) {
         // }
         let colName = [];
         let dynamicTable = [];
+        let requiredValuesData = []
 
         const filterKeys = ["priceTemplate", "productTemplate", "productCategory", "productImage"]
         BuilderData.forEach((quoteRows: { [x: string]: any }, i) => {
@@ -423,17 +424,23 @@ export default function QuoteProcess(props) {
             quoteRowKeys.forEach((key) => {
                 if (key === "fields") {
                     const labelsWithVal = {}
+                    const requiredValues = {}
                     quoteRows[key].forEach((data, i) => {
                         // console.log(data)
                         if (!filterKeys.includes(data.fieldName)) {
                             const fieldLabel = data.fieldLabel;
                             const fieldName = data.fieldName;
+                            const required = data.required
                             const labels = []
+
                             if (data.displayCurrency && data.units) {
                                 data.displayCurrency.forEach((cur) => {
                                     if (data.units) {
                                         data.units.forEach(unit => {
-                                            const casedLabel = `${fieldName}_${cur.toLowerCase()}_${unit.toLowerCase()}`
+                                            const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`
+                                            if (required) {
+                                                requiredValues[casedLabel] = quoteRows[casedLabel]
+                                            }
                                             if (quoteRows[casedLabel]) {
                                                 labels.push(`${fieldLabel} ${unit.toUpperCase()} ${cur}`)
                                                 labelsWithVal[`${fieldLabel} ${unit.toUpperCase()} ${cur}`] = quoteRows[casedLabel]
@@ -441,6 +448,9 @@ export default function QuoteProcess(props) {
                                         })
                                     } else {
                                         const casedLabel = `${fieldName}_${cur.toLowerCase()}`
+                                        if (required) {
+                                            requiredValues[casedLabel] = quoteRows[casedLabel]
+                                        }
                                         if (quoteRows[casedLabel]) {
                                             labels.push(`${fieldLabel} ${cur}`)
                                             labelsWithVal[`${fieldLabel} ${cur}`] = quoteRows[casedLabel]
@@ -449,14 +459,32 @@ export default function QuoteProcess(props) {
                                 })
                             } else if (data.units && !data.displayCurrency) {
                                 data.units.forEach((unit) => {
-                                    const casedLabel = `${camelCase(fieldName)}_${unit.toLowerCase()}`
+                                    const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`
+                                    if (required) {
+                                        requiredValues[casedLabel] = quoteRows[casedLabel]
+                                    }
                                     if (quoteRows[casedLabel]) {
                                         labels.push(`${fieldLabel} ${unit.toUpperCase()}`)
                                         labelsWithVal[`${fieldLabel} ${unit.toUpperCase()}`] = quoteRows[casedLabel]
                                     }
                                 })
 
+                            } else if (data.displayCurrency) {
+                                data.displayCurrency.forEach((cur) => {
+                                    const casedLabel = `${fieldName}_${cur.toLowerCase()}`
+                                    if (required) {
+                                        requiredValues[casedLabel] = quoteRows[casedLabel]
+                                    }
+                                    if (quoteRows[casedLabel]) {
+                                        labels.push(`${fieldLabel} ${cur}`)
+                                        labelsWithVal[`${fieldLabel} ${cur}`] = quoteRows[casedLabel]
+                                    }
+
+                                })
                             } else {
+                                if (required) {
+                                    requiredValues[fieldName] = quoteRows[fieldName]
+                                }
                                 if (quoteRows[fieldName]) {
                                     labels.push(fieldLabel)
                                     labelsWithVal[fieldLabel] = quoteRows[fieldName]
@@ -473,8 +501,21 @@ export default function QuoteProcess(props) {
                         }
                     })
                     dynamicTable.push(labelsWithVal)
-
+                    requiredValuesData.push(requiredValues)
                 }
+
+                const ungivenValues = requiredValuesData.length > 0 && requiredValuesData.filter((d) => {
+                    const isEmpty = Object.entries(d).filter(([k, v]) => v === undefined || v === null || v === "")
+
+                    return isEmpty.length > 0 ? true : false
+                })
+
+                if (ungivenValues && ungivenValues.length > 0) {
+                    setNextStep(false)
+                } else {
+                    setNextStep(true)
+                }
+
 
                 if (ignoredKeys.indexOf(key) === -1) {
                     let indexkey = key;
