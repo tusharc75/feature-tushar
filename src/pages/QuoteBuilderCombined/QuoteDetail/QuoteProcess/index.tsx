@@ -237,6 +237,7 @@ export default function QuoteProcess(props) {
         message: null,
     });
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
         if (currentVersion !== 0) {
@@ -304,7 +305,7 @@ export default function QuoteProcess(props) {
             axiosInstance()
                 .get(`/productbuilder/getproduct/` + productBuilderId)
                 .then(({ data: { data } }) => {
-                    data = data.data?.map((u, index) => ({
+                    data = data.data?.product?.map((u, index) => ({
                         ...u,
                         id: u._id,
                         srno: index + 1,
@@ -353,7 +354,6 @@ export default function QuoteProcess(props) {
                 })
         }
     }, [DOAsetup])
-
 
     const fetchDOAData = () => {
         if ((ProcessStatus === "DOA Process" && DOAneeded) || (versionStatus.includes("Rejected by DOA") && ProcessStatus === "End")) {
@@ -1610,7 +1610,7 @@ export default function QuoteProcess(props) {
                         setShowAiDialog(false);
                     }}
                     fullWidth
-                    fullScreen={isMobile || isTablet}
+                    fullScreen={fullScreen || (isMobile || isTablet)}
                     TransitionComponent={CustomDialogTransition}
                 >
                     <CustomDialogHeader
@@ -1618,6 +1618,11 @@ export default function QuoteProcess(props) {
                         onClose={() => {
                             setShowAiDialog(false);
                         }}
+                        isMinimized={!fullScreen}
+                        onMinimizeMaximize={() => {
+                            setFullScreen(prevState => !prevState)
+                        }}
+                        showManimizeMaximize={true}
                     />
                     <CustomDialogContent>
                         <div className="text-align-center">
@@ -1650,16 +1655,22 @@ export default function QuoteProcess(props) {
             {sendEmail && (
                 <Dialog
                     open={sendEmail}
-                    fullScreen={isMobile || isTablet}
+                    fullScreen={fullScreen || (isMobile || isTablet)}
                     TransitionComponent={CustomDialogTransition}
                     aria-labelledby="customized-dialog-title"
                     maxWidth="md"
-                    onClose={() => setSendEmail(false)}
+                    onClose={() => {
+                        setSendEmail(false)
+                        setFullScreen(false);
+                    }}
                     fullWidth
                 >
                     <CreateEmail
                         generatingFile={generatingPdfFile}
-                        handleClose={() => setSendEmail(false)}
+                        handleClose={() => {
+                            setSendEmail(false)
+                            setFullScreen(false);
+                        }}
                         fetchData={onSendEmailSuccess}
                         id={quoteData._id}
                         showESign={true}
@@ -1672,6 +1683,11 @@ export default function QuoteProcess(props) {
                         subject={`${user?.user?.brandName ?? "Brand"} Offer - ${quoteData?.quoteName ?? ""
                             }`}
                         fromQuote={true}
+                        isMinimized={!fullScreen}
+                        onMinimizeMaximize={() => {
+                            setFullScreen(prevState => !prevState)
+                        }}
+                        showManimizeMaximize={true}
                     />
                 </Dialog>
             )}

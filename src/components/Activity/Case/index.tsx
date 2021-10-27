@@ -26,6 +26,7 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const {
     state: { permissions },
   }: any = useData();
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     fetchCash();
@@ -159,15 +160,26 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         open={open}
         aria-labelledby="customized-dialog-title"
         maxWidth="md"
-        onClose={handleClose}
+        onClose={() => {
+          handleClose()
+          setFullScreen(false);
+        }}
         fullWidth
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
       >
         <CreateCase
           caseId={caseId}
-          handleClose={handleClose}
+          handleClose={() => {
+            handleClose()
+            setFullScreen(false);
+          }}
           relatedTo={relatedTo}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
         />
       </Dialog>
     </Box>

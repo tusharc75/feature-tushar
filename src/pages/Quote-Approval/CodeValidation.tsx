@@ -18,7 +18,8 @@ const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, han
         email: email,
         code: ""
     })
-
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+    
     const copyOfEmail =
         email.substring(0, email.indexOf("@"))
             .split("").map((char) => char = "x")
@@ -46,7 +47,6 @@ const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, han
         setTimeout(() => {
             setDisableResendCode(false)
         }, 60000);
-
     }
 
     return (
@@ -54,7 +54,7 @@ const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, han
             <Dialog
                 maxWidth="md"
                 fullWidth
-                fullScreen={isMobile || isTablet}
+                fullScreen={fullScreen || (isMobile || isTablet)}
                 TransitionComponent={CustomDialogTransition}
                 aria-labelledby="customized-dialog-title"
                 onClose={close}
@@ -64,6 +64,11 @@ const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, han
                 <CustomDialogHeader
                     title={title}
                     onClose={close}
+                    isMinimized={!fullScreen}
+                    onMinimizeMaximize={() => {
+                        setFullScreen(prevState => !prevState)
+                    }}
+                    showManimizeMaximize={true}
                 />
 
                 <CustomDialogContent>
@@ -107,7 +112,7 @@ const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, han
                                         variant="outlined"
                                         InputLabelProps={{
                                             shrink: true,
-                                          }}                                
+                                        }}
                                         label="Code"
                                         name="code"
                                         type="password"

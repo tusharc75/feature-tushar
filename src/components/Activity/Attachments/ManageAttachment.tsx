@@ -58,7 +58,7 @@ const fileIcons = [
     }
 ]
 
-export default function ManageAttachment({ relatedTo, attachmentId, handleClose, fetchData = null, attachmentData = null }) {
+export default function ManageAttachment({ relatedTo, attachmentId, handleClose, fetchData = null, attachmentData = null, isMinimized, onMinimizeMaximize, showManimizeMaximize }) {
 
     const [initialValues, setInitialValues] = useState(null);
     const [loading, setLoading] = useState(false)
@@ -327,7 +327,11 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                         if (isFieldNotTouched(initialValues, formValues)) handleClose()
                         else setShowConfirmDialog(true)
                     }}
-                    title={`${attachmentId ? "Edit" : "New"} Attachment`}></CustomDialogHeader>
+                    title={`${attachmentId ? "Edit" : "New"} Attachment`}
+                    isMinimized={isMinimized}
+                    onMinimizeMaximize={onMinimizeMaximize}
+                    showManimizeMaximize={showManimizeMaximize}
+                ></CustomDialogHeader>
                 <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
                         <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
