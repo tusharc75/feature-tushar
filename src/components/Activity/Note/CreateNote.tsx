@@ -59,7 +59,7 @@ const fileIcons = [
     }
 ]
 
-export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }) => {
+export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, isMinimized, onMinimizeMaximize, showManimizeMaximize }) => {
 
     const [initialValues, setInitialValues] = useState(null);
     const [fileImageAttachments, setFileImageAttachments] = useState([])
@@ -288,7 +288,11 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                             if (isFieldNotTouched(initialValues, formValues)) handleClose()
                             else setShowConfirmDialog(true)
                         }}
-                        title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
+                        title={`${noteId ? "Edit" : "New"} Note`}
+                        isMinimized={isMinimized}
+                        onMinimizeMaximize={onMinimizeMaximize}
+                        showManimizeMaximize={showManimizeMaximize}
+                    ></CustomDialogHeader>
                     <CustomDialogContent>
                         <Form autoComplete="off" autoCorrect="off" noValidate >
                             <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>

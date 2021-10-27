@@ -41,7 +41,7 @@ function Budget() {
 
   const location = useLocation()
   const {
-    state: { permissions },
+    state: { permissions, user },
   }: any = useData();
   const { budgetApi } = budget;
 
@@ -247,15 +247,15 @@ function Budget() {
     const queryString = getQueryString();
     axiosInstance()
       .get(`/budget${queryString}`)
-      .then(({ data }) => {
-        let rows = data.data.map((item) => {
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((item) => {
           let res = {
-            ...prepareDataForGrid(item),
+            ...prepareDataForGrid(item, user),
           };
           return res;
         });
 
-        dispatch({ type: "initialize", data: rows, count: data.count });
+        dispatch({ type: "initialize", data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: "loading", loading: false });
         }, gridLoadingTimeout);
