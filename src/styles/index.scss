@@ -801,11 +801,14 @@ body::-webkit-scrollbar-thumb {
 }
 
 .quoteBox {
-  padding: 4px 15px;
+  padding: 10px 15px;
   display: flex;
-  flex-direction: column;
+  //flex-direction: column;
+  justify-content: space-between;
   align-items: center;
   border-right: 1px solid #c3bdbd;
+  background-color: #418887;
+  border-radius: 8px;
 }
 .redQuoteBox {
   padding: 4px 15px;
@@ -816,6 +819,21 @@ body::-webkit-scrollbar-thumb {
   flex-direction: column;
   align-items: center;
   border-right: 1px solid #c3bdbd;
+}
+.quoteBoxContent{
+  display: flex;
+  align-items: center;
+  padding-right: 15px;
+}
+.quoteBoxicon{
+  padding: 5px 4px 0 4px;
+  border-radius: 6px;
+  background-color: white;
+  color: #378280 ;
+  margin-right: 5px;
+}
+.quoteDetailHeading{
+  color: white;
 }
 
 .noBorder {
@@ -828,6 +846,7 @@ body::-webkit-scrollbar-thumb {
   border-top-right-radius: 0 !important;
 }
 .quoteAmount {
+  color: white;
   // font-size: 30px;
 }
 .customSelect {

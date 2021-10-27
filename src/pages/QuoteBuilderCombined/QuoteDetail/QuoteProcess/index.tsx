@@ -1197,11 +1197,11 @@ export default function QuoteProcess(props) {
                         >
                             <div
                                 className={redCard ? "redQuoteBox" : "quoteBox"}
-                            >   <div>
+                            >   <div className={"quoteBoxContent"}>
                                 <span className={"quoteBoxicon"}>
-                                <GiProfit size={18}/>
+                                <GiProfit size={16}/>
                                 </span>
-                                <span>Total Profit </span>
+                                <span className={"quoteDetailHeading"}>Total Profit </span>
                             </div>
                                 <span className="quoteAmount" title={totalProfit.fullFormatAmount} >
                                     {totalProfit.fullFormatAmount
@@ -1211,12 +1211,18 @@ export default function QuoteProcess(props) {
 
                             </div>
                             <div className="quoteBox">
-                                <span>Total Cost Price </span>
+                                <div className={"quoteBoxContent"}>
+                                <span className={"quoteBoxicon"}>
+                                <GiProfit size={16}/>
+                                </span>
+                                <span className={"quoteDetailHeading"}>Total Cost Price </span>
+                                </div>
                                 <span className="quoteAmount" title={totalcost.fullFormatAmount}  >
                                     {totalcost.fullFormatAmount
                                         ? totalcost.fullFormatAmount
                                         : defaultTotalValue}
                                 </span>
+
                             </div>
                             {redCard ? (
                                 <div className="redQuoteBox">
@@ -1229,7 +1235,12 @@ export default function QuoteProcess(props) {
                                 </div>
                             ) : (
                                 <div className="quoteBox">
-                                    <span>Total Selling Price </span>
+                                    <div className={"quoteBoxContent"}>
+                                <span className={"quoteBoxicon"}>
+                                <GiProfit size={16}/>
+                                </span>
+                                    <span className={"quoteDetailHeading"}>Total Selling Price </span>
+                                    </div>
                                     <span className="quoteAmount" title={totalsale.fullFormatAmount}
                                     >
                                         {totalsale.fullFormatAmount
