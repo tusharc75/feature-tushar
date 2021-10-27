@@ -105,28 +105,29 @@ export default function NewCreateQuotePdfTemplate() {
     useEffect(() => {
 
         if (id && id !== '0') {
-            if (quoteData?.versions[version]?.pdfTemplate) {
-                setIsLandscapChecked(quoteData?.versions[version]?.pdfTemplate?.landscape)
+            let tempPdfTemplate = quoteData?.versions[version]?.pdfTemplate
+            if (tempPdfTemplate) {
+                setIsLandscapChecked(tempPdfTemplate.landscape)
                 setInitialValues({
-                    landscape: quoteData?.versions[version]?.pdfTemplate?.landscape,
-                    productColumns: quoteData?.versions[version]?.pdfTemplate?.productColumns,
-                    name: quoteData?.versions[version]?.pdfTemplate?.name,
-                    showPageNumberInFooter: quoteData?.versions[version]?.pdfTemplate?.pageNumberInFooter,
-                    header: quoteData?.versions[version]?.pdfTemplate?.header,
-                    footer: quoteData?.versions[version]?.pdfTemplate?.footer,
-                    aboveTable: quoteData?.versions[version]?.pdfTemplate?.aboveTable,
-                    belowTable: quoteData?.versions[version]?.pdfTemplate?.belowTable,
-                    entity: quoteData?.versions[version]?.pdfTemplate?.entity ? quoteData?.versions[version]?.pdfTemplate?.entity : [],
-                    owner: quoteData?.versions[version]?.pdfTemplate?.owner && quoteData?.versions[version]?.pdfTemplate.owner !== undefined ? quoteData?.versions[version]?.pdfTemplate?.owner : user.user._id,
-                    collaborator: quoteData?.versions[version]?.pdfTemplate?.collaborator ? quoteData?.versions[version]?.pdfTemplate?.collaborator : [],
+                    landscape: tempPdfTemplate.landscape,
+                    productColumns: tempPdfTemplate.productColumns,
+                    name: tempPdfTemplate.name,
+                    showPageNumberInFooter: tempPdfTemplate.pageNumberInFooter,
+                    header: tempPdfTemplate.header,
+                    footer: tempPdfTemplate.footer,
+                    aboveTable: tempPdfTemplate.aboveTable,
+                    belowTable: tempPdfTemplate.belowTable,
+                    entity: tempPdfTemplate.entity ? tempPdfTemplate.entity : [],
+                    owner: tempPdfTemplate.owner && tempPdfTemplate.owner !== undefined ? tempPdfTemplate.owner : user.user._id,
+                    collaborator: tempPdfTemplate.collaborator ? tempPdfTemplate.collaborator : [],
                 });
                 setDetails({
-                    header: quoteData?.versions[version]?.pdfTemplate?.header,
-                    footer: quoteData?.versions[version]?.pdfTemplate?.footer,
-                    aboveTable: quoteData?.versions[version]?.pdfTemplate?.aboveTable,
-                    belowTable: quoteData?.versions[version]?.pdfTemplate?.belowTable
+                    header: tempPdfTemplate.header,
+                    footer: tempPdfTemplate.footer,
+                    aboveTable: tempPdfTemplate.aboveTable,
+                    belowTable: tempPdfTemplate.belowTable
                 })
-                if (quoteData?.versions[version]?.pdfTemplate?.owner && quoteData?.versions[version]?.pdfTemplate?.owner !== undefined && user.user._id !== quoteData?.versions[version]?.pdfTemplate?.owner && !quoteData?.versions[version]?.pdfTemplate?.collaborator?.some(d => d === user.user._id)) {
+                if (tempPdfTemplate.owner && tempPdfTemplate.owner !== undefined && user.user._id !== tempPdfTemplate.owner && !tempPdfTemplate.collaborator?.some(d => d === user.user._id)) {
                     setHasPermissionToUpdate(false)
                 }
             }
