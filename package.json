@@ -111,6 +111,7 @@
     "react-router-dom": "^5.2.0",
     "react-rte": "^0.16.3",
     "react-signature-canvas": "^1.0.3",
+    "react-swipeable-list": "^1.4.0",
     "react-window": "^1.8.6",
     "resolve": "1.18.1",
     "resolve-url-loader": "^3.1.2",
