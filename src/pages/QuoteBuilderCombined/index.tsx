@@ -267,25 +267,11 @@ const QuoteBuilders = () => {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      if (["quoteName"].find(d => d === o?.fieldData?.fieldName)) {
-        columns = [...columns, {
-          disabled: true,
-          field: "quoteName",
-          headerName: "Quote Name",
-          pivotIndex: 0,
-          show: true,
-          cellRenderer: "quoteNameRenderer",
-          primaryField: true,
-          onClick: (d) => { history.push(`${routes.quoteBuilderDetail.path}/${d._id}`) }
-        }]
-      }
-      else {
-        let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData]
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName)
-          }
+      let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData]
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName)
         }
       }
     })
@@ -878,6 +864,9 @@ const QuoteBuilders = () => {
               <CustomSwipableList
                 // columns={columns}
                 primaryField={columns?.find(d => d.primaryField)}
+                onClick={(data) => {
+                  history.push(`${routes.quoteBuilderDetail.path}/${data._id}`)
+                }}
                 dataRows={dataRows}
                 dispatch={dispatch}
                 onEdit={(data) => {

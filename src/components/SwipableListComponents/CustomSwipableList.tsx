@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Grid, Checkbox, FormControlLabel, TablePagination, Chip } from '@material-ui/core'
 import {
     SwipeableList,
@@ -7,7 +7,6 @@ import {
     TrailingActions,
     Type as ListType,
 } from 'react-swipeable-list';
-import { Link, useHistory } from 'react-router-dom';
 import { HiPencil } from "react-icons/hi";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -16,6 +15,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 export default function CustomSwipableList({
     // columns,
     primaryField,
+    onClick,
     dataRows,
     dispatch,
     onEdit,
@@ -26,8 +26,14 @@ export default function CustomSwipableList({
     pageSizes,
     chips
 }) {
-    const history = useHistory();
     const [isAllChecked, setIsAllChecked] = useState(false);
+
+    const [dataToShow, setDataToShow] = useState([])
+
+    useEffect(() => {
+        setDataToShow(prevState => [...prevState, ...dataRows]);
+    }, [dataRows])
+
     // const primaryField = columns.find(d => d.primaryField);
 
 
@@ -52,7 +58,7 @@ export default function CustomSwipableList({
                             checked={isAllChecked}
                             onChange={(e) => {
                                 setIsAllChecked(e.target.checked);
-                                const updatedMetadata = dataRows.map(d => {
+                                const updatedMetadata = dataToShow.map(d => {
                                     return { ...d, isChecked: e.target.checked };
                                 })
                                 dispatch({
@@ -71,15 +77,14 @@ export default function CustomSwipableList({
         </Grid>
 
         {/* <InfiniteScroll
-            dataLength={dataRows.length}
-            // height="500px"
-            scrollableTarget="scrollableDiv"
+            dataLength={dataToShow.length}
+            height="50%"
             next={() => {
                 setTimeout(() => {
                     dispatch({ type: 'pageChange', page: page + 1 })
-                }, 1500)
+                }, 500)
             }}
-            hasMore={true}
+            hasMore={dataToShow.length !== rowCount}
             loader={
                 <h3 className="text-center border mt-3 p-3 loading-dots">
                     Loading more items
@@ -93,7 +98,7 @@ export default function CustomSwipableList({
             type={ListType.IOS}
         >
             {
-                dataRows.map((d, index) => (
+                dataToShow.map((d, index) => (
                     <SwipeableListItem
                         // leadingActions={leadingActions()}
                         trailingActions={
@@ -122,15 +127,15 @@ export default function CustomSwipableList({
                                     color="primary"
                                     checked={d.isChecked}
                                     onChange={(e) => {
-                                        dataRows[index].isChecked = e.target.checked;
-                                        setIsAllChecked(!dataRows.some(d => d.isChecked === false));
+                                        dataToShow[index].isChecked = e.target.checked;
+                                        setIsAllChecked(!dataToShow.some(d => d.isChecked === false));
 
                                         dispatch({
                                             type: 'selection',
-                                            selectedRecords: dataRows.filter(d => d.isChecked)
+                                            selectedRecords: dataToShow.filter(d => d.isChecked)
                                         });
 
-                                        dispatch({ type: "update", data: dataRows });
+                                        dispatch({ type: "update", data: dataToShow });
                                     }}
                                     inputProps={{ 'aria-label': 'primary checkbox' }}
                                 />
@@ -140,7 +145,7 @@ export default function CustomSwipableList({
 
                                 {
                                     primaryField && <h4 className="ml-2 mb-2">
-                                        <span onClick={() => primaryField.onClick(d)} className="link">{d[primaryField.field]}</span>
+                                        <span onClick={() => onClick(d)} className="link">{d[primaryField.field]}</span>
                                     </h4>
                                 }
 
