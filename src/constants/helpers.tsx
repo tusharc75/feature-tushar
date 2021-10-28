@@ -1152,7 +1152,7 @@ export const prepareDataForGrid = (data, user = {}) => {
   let finalObject = { ...restProperties };
 
   Object.keys(objectValues).forEach(d => {
-    if (objectValues[d].hasOwnProperty("optionLabel")) {
+    if (objectValues[d] && objectValues[d].hasOwnProperty("optionLabel")) {
       finalObject[d] = objectValues[d]["optionLabel"];
       finalObject[`${d}Id`] = objectValues[d]["optionValue"];
     }
