@@ -371,6 +371,10 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       const defaultOptions = key.option?.filter((item: any) => item.default === true);
       const options = defaultOptions?.map((data: any) => data.optionValue);
       obj[key.fieldName] = value ? value : options;
+    } else if (key.type === 'freeStyleMultiSelect') {
+      const defaultOptions = key.option?.filter((item: any) => item.default === true);
+      const options = defaultOptions?.map((data: any) => data.optionValue);
+      obj[key.fieldName] = value ? value : options;
     } else if (key.type === 'date') {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === 'year') {
@@ -1148,7 +1152,7 @@ export const prepareDataForGrid = (data, user = {}) => {
   let finalObject = { ...restProperties };
 
   Object.keys(objectValues).forEach(d => {
-    if (objectValues[d].hasOwnProperty("optionLabel")) {
+    if (objectValues[d] && objectValues[d].hasOwnProperty("optionLabel")) {
       finalObject[d] = objectValues[d]["optionLabel"];
       finalObject[`${d}Id`] = objectValues[d]["optionValue"];
     }
