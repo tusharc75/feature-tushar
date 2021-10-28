@@ -371,6 +371,10 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       const defaultOptions = key.option?.filter((item: any) => item.default === true);
       const options = defaultOptions?.map((data: any) => data.optionValue);
       obj[key.fieldName] = value ? value : options;
+    } else if (key.type === 'freeStyleMultiSelect') {
+      const defaultOptions = key.option?.filter((item: any) => item.default === true);
+      const options = defaultOptions?.map((data: any) => data.optionValue);
+      obj[key.fieldName] = value ? value : options;
     } else if (key.type === 'date') {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === 'year') {
