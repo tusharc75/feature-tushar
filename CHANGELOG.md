@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.27.0](https://github.com/vebholic/oms_frontend/compare/v1.26.0...v1.27.0) (2021-10-28)
+
+
+### Features
+
+* - Dashboard filter issue fixed ([3ee80fd](https://github.com/vebholic/oms_frontend/commit/3ee80fdd5d8056afacec5100f96c9f3eea827a7a))
+* - Dashboard search issue fixed for arcelor-mittal ([4d39ed1](https://github.com/vebholic/oms_frontend/commit/4d39ed1bc5889656435b06645e88f219ca66d4ff))
+* - Filter icon added in ag grid ([bad6cba](https://github.com/vebholic/oms_frontend/commit/bad6cbacabb08d53128776dfdcc1e511a8124c88))
+* - Found the root cause of extra row on top in grid ([96093a3](https://github.com/vebholic/oms_frontend/commit/96093a3466a2f439a7391fe5c31f2d5761bd5c1f))
+* - Logout issue fixed ([29c87d7](https://github.com/vebholic/oms_frontend/commit/29c87d7e723e02c2ebde4caac4afad47e8f3d0e5))
+* filter by in product category and template ([dac98a5](https://github.com/vebholic/oms_frontend/commit/dac98a59dae332a9d7398136a3919485fba74ccc))
+* **productmasterdetails:** parent and package table ([5854c49](https://github.com/vebholic/oms_frontend/commit/5854c49e7041182ccdbdbb9926fb13adb51214b8))
+* quote next button disable in pricebuilder steps ([524e24a](https://github.com/vebholic/oms_frontend/commit/524e24a8b236ef15d3bd390ab0f402b1ef3e8ebf))
+* **quotebuilder:** disable next button ([b7cf5b5](https://github.com/vebholic/oms_frontend/commit/b7cf5b5d0d66adbc1eb3c10986db4f8a200e5c38))
+
+
+### Bug Fixes
+
+* product bug fix ([bf58adb](https://github.com/vebholic/oms_frontend/commit/bf58adb6423760f1f33e1c3c0693cc8b27df403e))
+* product dialog ([8add6e4](https://github.com/vebholic/oms_frontend/commit/8add6e4cced0ff4d6615aee0380152b979ef5c22))
+* product filter ([40e156e](https://github.com/vebholic/oms_frontend/commit/40e156e607484f5ba3e0efff129a3a9bdf58d99f))
+* quote ([15cc33f](https://github.com/vebholic/oms_frontend/commit/15cc33f400352d8d2fd1c1b65854782701e8ed35))
+* quote pdf template ([bea0810](https://github.com/vebholic/oms_frontend/commit/bea0810445cd13a14904fb46b8e494ae936ce6a1))
+* **quote:** conflict resolve ([88edd5f](https://github.com/vebholic/oms_frontend/commit/88edd5f39400ee1f801cb8a3ae05736f919bc247))
+* **quoteprocess:** fix data structure ([6594745](https://github.com/vebholic/oms_frontend/commit/659474571f36b843caa5bcb9e5b829dfdd009619))
+* rental job ([7b67b68](https://github.com/vebholic/oms_frontend/commit/7b67b6802344bb9dc98937284b24017a26b9d180))
+
 ## [1.26.0](https://github.com/vebholic/oms_frontend/compare/v1.25.0...v1.26.0) (2021-10-27)
 
 
