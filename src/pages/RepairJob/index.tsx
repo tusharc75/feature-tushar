@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
 
@@ -21,6 +21,9 @@ import RepairJobHeader from './RepairJobHeader';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import AddIcon from "@material-ui/icons/Add"
 
 let repairJobTimeout;
 const RepairJobType = [
@@ -61,14 +64,15 @@ const RepairJob = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
+  const [isAllChecked, setIsAllChecked] = useState(false);
   const columns = [
     {
       field: 'repairJobName',
       headerName: 'Repair Job Name',
       show: true,
       disabled: true,
-      cellRenderer: 'repairJobNameRenderer'
+      cellRenderer: 'repairJobNameRenderer',
+      primaryField:'true'
     },
     {
       field: 'status',
@@ -500,23 +504,52 @@ const RepairJob = () => {
             )}
           </RepairJobHeader>
         </div>
-
-        <CustomAgGrid
-          columns={columns}
+        {isMobile ? 
+        <CustomSwipableList
+          primaryField={columns?.find(d => d.primaryField)}
           dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
           dispatch={dispatch}
+          onEdit={(data) => {
+            history.push(`${routes.quoteBuilderDetail.path}/${data._id}?openEdit=true`)
+          }}
+          onDelete={(data) => {
+           
+          }}
+          onClick={(data) => {
+            history.push(`${routes.quoteBuilderDetail.path}/${data._id}`)
+          }}
           rowCount={rowCount}
+          page={page}
           limit={limit}
           pageSizes={pageSizes}
-          page={page}
-          actionWidth={100}
-          loading={loading}
-          renderedFrom={'repairJobPage'}
-          refreshGrid={fetchRepairJobs}
-        />
-
+          chips={[
+            {
+              label: "Status: ",
+              field: "status",
+            }
+          ]}
+        /> :
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={100}
+            loading={loading}
+            renderedFrom={'repairJobPage'}
+            refreshGrid={fetchRepairJobs}
+          />
+        }
+        {
+            permissions.repairJob?.isCreate && isMobile && <Fab size="small" onClick={clickCreateNew} className="fab-position-b-r" color="primary" aria-label="add">
+              <AddIcon />
+              </Fab>
+}
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}

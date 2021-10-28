@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
 
@@ -21,6 +21,9 @@ import ReceivingTicketHeader from './ReceivingTicketHeader';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import AddIcon from "@material-ui/icons/Add"
 
 let receivingTicketTimeout;
 const ReceivingTicketType = [
@@ -61,6 +64,7 @@ const ReceivingTicket = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const [isAllChecked, setIsAllChecked] = useState(false);
 
   const columns = [
     {
@@ -68,7 +72,8 @@ const ReceivingTicket = () => {
       headerName: 'Receiving Ticket Name',
       show: true,
       disabled: true,
-      cellRenderer: 'receivingJobNameRenderer'
+      cellRenderer: 'receivingJobNameRenderer',
+      primaryField: 'true'
     },
     {
       field: 'deliveryPerson',
@@ -548,23 +553,52 @@ const ReceivingTicket = () => {
             )}
           </ReceivingTicketHeader>
         </div>
+        {isMobile ?
+          <CustomSwipableList
+            primaryField={columns?.find(d => d.primaryField)}
+            dataRows={dataRows}
+            dispatch={dispatch}
+            onEdit={(data) => {
+              history.push(`${routes.quoteBuilderDetail.path}/${data._id}?openEdit=true`)
+            }}
+            onDelete={(data) => {
 
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={100}
-          loading={loading}
-          renderedFrom={'receivingTicketPage'}
-          refreshGrid={fetchReceivingTickets}
-        />
-
+            }}
+            onClick={(data) => {
+              history.push(`${routes.quoteBuilderDetail.path}/${data._id}`)
+            }}
+            rowCount={rowCount}
+            page={page}
+            limit={limit}
+            pageSizes={pageSizes}
+            chips={[
+              {
+                label: "Status: ",
+                field: "status",
+              }
+            ]}
+          /> :
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={100}
+            loading={loading}
+            renderedFrom={'receivingTicketPage'}
+            refreshGrid={fetchReceivingTickets}
+          />
+        }
+        {
+          permissions.repairJob?.isCreate && isMobile && <Fab size="small" onClick={clickCreateNew} className="fab-position-b-r" color="primary" aria-label="add">
+            <AddIcon />
+          </Fab>
+        }
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
