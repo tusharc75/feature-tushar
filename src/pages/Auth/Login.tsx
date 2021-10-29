@@ -189,8 +189,8 @@ const Login = () => {
               <Box my={4} />
               <Formik
                 initialValues={{
-                  email: ['local', 'development'].includes(process.env.REACT_APP_ENV) ? 'gagan@test.com' : '',
-                  password: ['local', 'development'].includes(process.env.REACT_APP_ENV) ? 'soR$Tw83n92ghs2' : ''
+                  email: ['local'].includes(process.env.REACT_APP_ENV) ? 'gagan@test.com' : '',
+                  password: ['local'].includes(process.env.REACT_APP_ENV) ? 'soR$Tw83n92ghs2' : ''
                 }}
                 validate={validateForm}
                 onSubmit={handleSubmit}
