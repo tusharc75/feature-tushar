@@ -16,7 +16,6 @@ import { useData } from '../../StateProvider/Provider';
 import { userType } from '../../constants/helpers';
 import AssignRolesDialog from '../../components/AssignRolesDialog/AssignRolesDialog';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
-import DoaDialog from '../DoaSetup/ManageDoa/ManageDoaDialog';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -33,14 +32,14 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-const stepsLabel = ["Set Approval Process", "Assign DOA", "Assign Regional Roles", "Assign Company Wide Role"]
+const stepsLabel = ["Set Approval Process", "Assign Regional Roles", "Assign Company Wide Role"]
 
 const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, userPermissions = null, fetchUsers, userList, selectedRecords }) => {
     const { state: { user, permissions }, } = useData();
     const [activeStep, setActiveStep] = useState(0)
     const classes = useStyles();
 
-    
+
 
     const getStepContent = (step: Number) => {
         switch (step) {
@@ -49,9 +48,9 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                     <ApprovalProcessDialog
                         openApprovalProcessDialog={open}
                         hasPermissionToUpdateApprovalProcess={permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin}
-                        onSuccess={() =>{
-                                setActiveStep((prevStep) => prevStep + 1)                           
-                            }
+                        onSuccess={() => {
+                            setActiveStep((prevStep) => prevStep + 1)
+                        }
                         }
                         handleCloseDialog={close}
                         userIds={userIds}
@@ -60,23 +59,6 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                 )
 
             case 1:
-                return (
-                    <DoaDialog
-                        userList={userList.filter(user => !selectedRecords.some(item => item?._id === user?.id))}
-                        doa={[]}
-                        doaCurrency={null}
-                        userSelected={userIds}
-                        open={open}
-                        from={"UserListPage"}
-                        onSuccess={() => {
-                            setActiveStep((prevStep) => prevStep + 1)
-                        }}
-                        onClose={close}
-                        isRenderedFromUserSetUp={true}
-                    />
-                    
-                )
-            case 2:
                 return (
                     <AssignEntityDialog
                         entitiesDialogOpen={open}
@@ -87,12 +69,12 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                         regionalRole={false}
                         onSuccess={() => {
                             setActiveStep((prevStep) => prevStep + 1)
-                            
+
                         }}
                         isRenderedFromUserSetUp={true}
                     />
                 )
-            case 3:
+            case 2:
                 return (
                     <AssignRolesDialog
                         rolesDialogOpen={open}
