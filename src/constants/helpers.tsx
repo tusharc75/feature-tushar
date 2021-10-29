@@ -54,6 +54,19 @@ export const leadImportErrorFileName = 'Leads-Errors.xlsx';
 export const opportunityTemplateFileName = 'Opportunities-Template.xlsx';
 export const opportunityImportErrorFileName = 'Opportunities-Errors.xlsx';
 
+export const quoteStepColors = {
+  "accepted by customer": { backgroundColor: "#008000", color: "#fff" },
+  "not booked by customer": { backgroundColor: "#ba181b", color: "#fff" },
+
+  "re-open": { backgroundColor: "#ff7d00", color: "#fff" },
+  "invalid by customer": { backgroundColor: "#eb5e28", color: "#fff" },
+
+  "not booked": { backgroundColor: "#2b2d42", color: "#fff" },
+  "building quote": { backgroundColor: "#023e7d", color: "#fff" },
+
+  "__default__": { backgroundColor: "#023e7d", color: "#fff" }
+}
+
 export const roleTypes = [
   {
     key: 'Global',
