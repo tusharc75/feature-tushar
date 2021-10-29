@@ -30,8 +30,7 @@ import ColumnsDialog from "./ColumnsDialog";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useData } from "../../../../StateProvider/Provider";
-import ThumbUpIcon from "@material-ui/icons/ThumbUp";
-import ThumbDownIcon from "@material-ui/icons/ThumbDown";
+
 import DOAReasonDialog from "../../../DOA/DOAReasonDialog";
 import { camelCase, isEqual, startCase } from "lodash";
 import { VscVersions } from "react-icons/vsc";
@@ -57,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
         padding: "5px 10px",
         paddingBottom: "0",
         border: "1px solid #163340",
-        borderTop:"0px",
+        borderTop: "0px",
         borderBottom: "none",
         boxShadow: "none",
         borderRadius: "0",
@@ -93,55 +92,6 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-
-const DOASteps = [
-    {
-        key: "New",
-        label: "Product Builder",
-    },
-    {
-        key: "Price Builder",
-        label: "Price Builder",
-    },
-    {
-        key: "Quote Builder",
-        label: "Quote Builder",
-    },
-    {
-        key: "DOA Process",
-        label: "DOA Process",
-    },
-    {
-        key: "Send To Customer",
-        label: "Send To Customer",
-    },
-    {
-        key: "End",
-        label: "End",
-    },
-];
-const OtherSteps = [
-    {
-        key: "New",
-        label: "Product Builder",
-    },
-    {
-        key: "Price Builder",
-        label: "Price Builder",
-    },
-    {
-        key: "Quote Builder",
-        label: "Quote Builder",
-    },
-    {
-        key: "Send To Customer",
-        label: "Send To Customer",
-    },
-    {
-        key: "End",
-        label: "End",
-    },
-];
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
@@ -163,7 +113,15 @@ export default function QuoteProcess(props) {
         fetchTNC,
         handleVersionUpdate,
         updatingVersion,
-        globalLoading
+        globalLoading,
+        DOASteps,
+        OtherSteps,
+        DOAneeded,
+        setDOAneeded,
+        setDOAApprovedFromQuoteDetails,
+        setDOARequestIdFromQuoteDetails,
+        showTotalSalesDialog,
+        setShowTotalSalesDialog
     } = props
     const defaultSelectColumns = [
         "Product Description",
@@ -207,7 +165,6 @@ export default function QuoteProcess(props) {
 
     const [buttonMessage, setButtonMessage] = useState("Send to Customer");
     const [DOAreq, setDOAreq] = useState(false);
-    const [DOAneeded, setDOAneeded] = useState(false);
     const [Customerreq, setCustomerreq] = useState(true);
     const [DOAData, setDOAData] = useState(null);
     const [DOAlimit, setDOALimit] = useState(0);
@@ -218,15 +175,12 @@ export default function QuoteProcess(props) {
     const [visibleColumns, setVisibleColumns] = useState(defaultSelectColumns);
     const [ColumnName, setColName] = useState([]);
     const [dynamicTableData, setDynamicTableData] = useState([]);
-    const [deletingDOA, setDeletingDOA] = useState(false);
     const [reminderLoading, setReminderLoading] = useState(false);
-    const [isCloning, setCloning] = useState(false);
     const [isRearrangeColumns, setRearrangeColumns] = useState(false);
     const [isAddNewProduct, setIsAddNewProduct] = useState(false);
     const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
     const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
     const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
-    const [approvedButtonText] = useState("Accept");
     const [loading, setLoading] = useState(false);
     const [pdfFileBase64, setPdfFileBase64] = useState(null);
     const [excelFileBase64, setExcelFileBase64] = useState(null);
@@ -235,6 +189,9 @@ export default function QuoteProcess(props) {
     const [sendEmail, setSendEmail] = useState(false);
     const [showAiDialog, setShowAiDialog] = useState(false);
     const [viewDownloadLoading, setViewDownloadLoading] = useState(false);
+    const [showPDFArrangeColumns, setShowPDFArrangeColumns] = useState(false);
+    const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState(false);
+
     const [messageDialog, setMessageDialog] = useState({
         open: false,
         message: null,
@@ -268,7 +225,9 @@ export default function QuoteProcess(props) {
                         .get(`/doa-request/can-i-approve/${quoteData._id}/${currentVersion}`)
                         .then(({ data: { data } }) => {
                             setDOAApproved(data.canApprove)
+                            setDOAApprovedFromQuoteDetails(data.canApprove)
                             setDOARequestId(data.requestId)
+                            setDOARequestIdFromQuoteDetails(data.requestId)
                         })
                         .catch((err) => {
                             // toastConfig.setToastConfig(err);
@@ -729,43 +688,6 @@ export default function QuoteProcess(props) {
         }
     };
 
-    const cloneVersion = () => {
-        const previousVersionTNC = quoteData.versions[currentVersion]?.acceptedColumns
-        setCloning(true);
-        axiosInstance()
-            .post(
-                `/quote-builder/createVersion/${quoteData._id}?version=${currentVersion}`,
-                { TNC: previousVersionTNC }
-            )
-            .then(() => {
-                fetchQuoteData(0);
-                setCloning(false);
-            })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
-                setCloning(false);
-            });
-    };
-
-
-    const deleteVersion = () => {
-        let versions = quoteData?.versions;
-
-        delete versions[currentVersion];
-
-        setDeletingDOA(true);
-        axiosInstance()
-            .delete(`${qbApi}/${quoteData._id}/${currentVersion}`)
-            .then(() => {
-                setDeletingDOA(false);
-                fetchQuoteData(0);
-            })
-            .catch((err) => {
-                toastConfig.setToastConfig(err);
-                setDeletingDOA(false);
-            });
-    };
-
     const handleSendReminder = () => {
         if (quoteData && currentVersion) {
             setReminderLoading(true);
@@ -1208,71 +1130,7 @@ export default function QuoteProcess(props) {
                     container
                     className="detailHeader d-flex align-items-center form-label-style mt-0 mb-0"
                 >
-                    {ProcessStatus === "New" ? null : (
-                        <Grid
-                            item
-                            xs={12}
-                            sm={7}
-                            md={7}
-                            className="quoteHeader"
-                        >
-                            <div
-                                className={redCard ? "redQuoteBox" : "quoteBox"}
-                            >   <div className={"quoteBoxContent"}>
-                                <span className={"quoteBoxicon"}>
-                                <GiProfit size={16}/>
-                                </span>
-                                <span className={"quoteDetailHeading"}>Total Profit </span>
-                            </div>
-                                <span className="quoteAmount" title={totalProfit.fullFormatAmount} >
-                                    {totalProfit.fullFormatAmount
-                                        ? totalProfit.fullFormatAmount
-                                        : defaultTotalValue}
-                                </span>
-
-                            </div>
-                            <div className="quoteBox">
-                                <div className={"quoteBoxContent"}>
-                                <span className={"quoteBoxicon"}>
-                                <GiProfit size={16}/>
-                                </span>
-                                <span className={"quoteDetailHeading"}>Total Cost Price </span>
-                                </div>
-                                <span className="quoteAmount" title={totalcost.fullFormatAmount}  >
-                                    {totalcost.fullFormatAmount
-                                        ? totalcost.fullFormatAmount
-                                        : defaultTotalValue}
-                                </span>
-
-                            </div>
-                            {redCard ? (
-                                <div className="redQuoteBox">
-                                    <span>Total Selling Price </span>
-                                    <span className="quoteAmount" title={totalsale.fullFormatAmount} >
-                                        {totalsale.fullFormatAmount
-                                            ? totalsale.fullFormatAmount
-                                            : defaultTotalValue}
-                                    </span>
-                                </div>
-                            ) : (
-                                <div className="quoteBox">
-                                    <div className={"quoteBoxContent"}>
-                                <span className={"quoteBoxicon"}>
-                                <GiProfit size={16}/>
-                                </span>
-                                    <span className={"quoteDetailHeading"}>Total Selling Price </span>
-                                    </div>
-                                    <span className="quoteAmount" title={totalsale.fullFormatAmount}
-                                    >
-                                        {totalsale.fullFormatAmount
-                                            ? totalsale.fullFormatAmount
-                                            : defaultTotalValue}
-                                    </span>
-                                </div>
-                            )}
-                        </Grid>
-                    )}
-                    <Grid
+                    {/* <Grid
                         item
                         xs={ProcessStatus === "New" ? 12 : 12}
                         sm={ProcessStatus === "New" ? 12 : 5}
@@ -1396,7 +1254,7 @@ export default function QuoteProcess(props) {
                                 </Button>{" "}
                             </>
                         )}
-                    </Grid>
+                    </Grid> */}
                 </Grid>
                 <div>
                     <Steps
@@ -1464,70 +1322,6 @@ export default function QuoteProcess(props) {
                                     </Button>
                                 </span>
                             ) : null}
-
-                            {ProcessStatus === "Quote Builder" ? (
-                                <Grid
-                                    container
-                                    justify="space-between"
-                                    alignItems="center"
-                                >
-                                    <Grid item xs={11} md={11} sm={11}>
-                                        <FormControl
-                                            fullWidth
-                                            className={classes.formControl}
-                                        >
-                                            <Autocomplete
-                                                id="demo-mutiple-chip"
-                                                disabled={!allowedToEdit}
-                                                fullWidth
-                                                size="small"
-                                                multiple
-                                                value={visibleColumns}
-                                                onChange={(e, val) => {
-                                                    setVisibleColumns(val);
-                                                    handleVersionUpdate(
-                                                        val,
-                                                        versionStatus,
-                                                        state?.selectedRecords
-                                                    );
-                                                }}
-                                                options={ColumnName}
-                                                disableCloseOnSelect
-                                                getOptionLabel={(option) => option}
-                                                renderOption={(option, { selected }) => (
-                                                    <React.Fragment>
-                                                        <Checkbox
-                                                            icon={icon}
-                                                            checkedIcon={checkedIcon}
-                                                            style={{ marginRight: 8 }}
-                                                            checked={selected}
-                                                        />
-                                                        {option}
-                                                    </React.Fragment>
-                                                )}
-                                                renderInput={(params) => (
-                                                    <TextField
-                                                        {...params}
-                                                        variant="outlined"
-                                                        label="Visible Columns in Quote"
-                                                        placeholder="Select "
-                                                    />
-                                                )}
-                                            />
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item xs={1} md={1} sm={1}>
-                                        <IconButton
-                                            disabled={!allowedToEdit}
-                                            title="Re-arrange columns"
-                                            color="inherit"
-                                            onClick={() => setRearrangeColumns(true)}
-                                        >
-                                            <ImportExportIcon />
-                                        </IconButton>
-                                    </Grid>
-                                </Grid>
-                            ) : null}
                             {(ProcessStatus === "DOA Process" &&
                                 versionStatus === "Building Quote" && DOAneeded) ||
                                 (ProcessStatus === "Send To Customer" &&
@@ -1568,7 +1362,7 @@ export default function QuoteProcess(props) {
                                     color="primary"
                                 >
                                     {isMobile ? <AiOutlineEye size={20} /> : ""}
-                                  {isMobile ? "" : "View"}
+                                    {isMobile ? "" : "View"}
                                 </Button>
                                 <Button
                                     disabled={viewDownloadLoading || updatingVersion}
@@ -1614,6 +1408,32 @@ export default function QuoteProcess(props) {
                                         <GiVintageRobot />
                                     </IconButton>
                                 </Tooltip>
+                                {ProcessStatus === "Quote Builder" && (
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        startIcon={<BiLayerPlus />}
+                                        color="primary"
+                                        onClick={() => {
+                                            setShowPDFArrangeColumns(true);
+                                        }}
+                                    >
+                                        PDF Columns
+                                    </Button>
+                                )}
+                                {ProcessStatus === "Quote Builder" && (
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        startIcon={<BiLayerPlus />}
+                                        color="primary"
+                                        onClick={() => {
+                                            setShowPDFArrangeColumns(true);
+                                        }}
+                                    >
+                                        Excel Columns
+                                    </Button>
+                                )}
                             </span>
                         ) : null}
                         <Grid item xs={12} sm={12} md={12} className="mt-2">
@@ -1782,6 +1602,183 @@ export default function QuoteProcess(props) {
                     QuoteStatusChange={QuoteStatusChange}
                     accepted={quoteStatusChangeData}
                 />
+            )}
+            {showTotalSalesDialog && (ProcessStatus !== "New") && (
+                <Dialog
+                    open={showTotalSalesDialog}
+                    aria-labelledby="customized-dialog-title"
+                    maxWidth="sm"
+                    onClose={() => {
+                        setShowTotalSalesDialog(false);
+                    }}
+                    fullWidth
+                    fullScreen={fullScreen || (isMobile || isTablet)}
+                    TransitionComponent={CustomDialogTransition}
+                >
+                    <CustomDialogHeader
+                        title="Total Sales"
+                        onClose={() => {
+                            setShowTotalSalesDialog(false);
+                        }}
+                        isMinimized={!fullScreen}
+                        onMinimizeMaximize={() => {
+                            setFullScreen(prevState => !prevState)
+                        }}
+                        showManimizeMaximize={true}
+                    />
+                    <CustomDialogContent>
+                        <Grid
+                            item
+                            xs={12}
+                            sm={7}
+                            md={7}
+                            className="quoteHeader"
+                        >
+                            <div
+                                className={redCard ? "redQuoteBox" : "quoteBox"}
+                            >   <div className={"quoteBoxContent"}>
+                                    <span className={"quoteBoxicon"}>
+                                        <GiProfit size={16} />
+                                    </span>
+                                    <span className={"quoteDetailHeading"}>Total Profit </span>
+                                </div>
+                                <span className="quoteAmount" title={totalProfit.fullFormatAmount} >
+                                    {totalProfit.fullFormatAmount
+                                        ? totalProfit.fullFormatAmount
+                                        : defaultTotalValue}
+                                </span>
+
+                            </div>
+                            <div className="quoteBox">
+                                <div className={"quoteBoxContent"}>
+                                    <span className={"quoteBoxicon"}>
+                                        <GiProfit size={16} />
+                                    </span>
+                                    <span className={"quoteDetailHeading"}>Total Cost Price </span>
+                                </div>
+                                <span className="quoteAmount" title={totalcost.fullFormatAmount}  >
+                                    {totalcost.fullFormatAmount
+                                        ? totalcost.fullFormatAmount
+                                        : defaultTotalValue}
+                                </span>
+
+                            </div>
+                            {redCard ? (
+                                <div className="redQuoteBox">
+                                    <span>Total Selling Price </span>
+                                    <span className="quoteAmount" title={totalsale.fullFormatAmount} >
+                                        {totalsale.fullFormatAmount
+                                            ? totalsale.fullFormatAmount
+                                            : defaultTotalValue}
+                                    </span>
+                                </div>
+                            ) : (
+                                <div className="quoteBox">
+                                    <div className={"quoteBoxContent"}>
+                                        <span className={"quoteBoxicon"}>
+                                            <GiProfit size={16} />
+                                        </span>
+                                        <span className={"quoteDetailHeading"}>Total Selling Price </span>
+                                    </div>
+                                    <span className="quoteAmount" title={totalsale.fullFormatAmount}
+                                    >
+                                        {totalsale.fullFormatAmount
+                                            ? totalsale.fullFormatAmount
+                                            : defaultTotalValue}
+                                    </span>
+                                </div>
+                            )}
+                        </Grid>
+                    </CustomDialogContent>
+                </Dialog>
+            )}
+            {showPDFArrangeColumns && (ProcessStatus !== "New") && (
+                <Dialog
+                    open={showPDFArrangeColumns}
+                    aria-labelledby="customized-dialog-title"
+                    maxWidth="sm"
+                    onClose={() => {
+                        setShowPDFArrangeColumns(false);
+                    }}
+                    fullWidth
+                    fullScreen={fullScreen || (isMobile || isTablet)}
+                    TransitionComponent={CustomDialogTransition}
+                >
+                    <CustomDialogHeader
+                        title="View Columns"
+                        onClose={() => {
+                            setShowPDFArrangeColumns(false);
+                        }}
+                        isMinimized={!fullScreen}
+                        onMinimizeMaximize={() => {
+                            setFullScreen(prevState => !prevState)
+                        }}
+                        showManimizeMaximize={true}
+                    />
+                    <CustomDialogContent>
+                        <Grid
+                            container
+                            justify="space-between"
+                            alignItems="center"
+                        >
+                            <Grid item xs={11} md={11} sm={11}>
+                                <FormControl
+                                    fullWidth
+                                    className={classes.formControl}
+                                >
+                                    <Autocomplete
+                                        id="demo-mutiple-chip"
+                                        disabled={!allowedToEdit}
+                                        fullWidth
+                                        size="small"
+                                        multiple
+                                        value={visibleColumns}
+                                        onChange={(e, val) => {
+                                            setVisibleColumns(val);
+                                            handleVersionUpdate(
+                                                val,
+                                                versionStatus,
+                                                state?.selectedRecords
+                                            );
+                                        }}
+                                        options={ColumnName}
+                                        disableCloseOnSelect
+                                        getOptionLabel={(option) => option}
+                                        renderOption={(option, { selected }) => (
+                                            <React.Fragment>
+                                                <Checkbox
+                                                    icon={icon}
+                                                    checkedIcon={checkedIcon}
+                                                    style={{ marginRight: 8 }}
+                                                    checked={selected}
+                                                />
+                                                {option}
+                                            </React.Fragment>
+                                        )}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                variant="outlined"
+                                                label="Visible Columns in Quote"
+                                                placeholder="Select "
+                                            />
+                                        )}
+                                    />
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={1} md={1} sm={1}>
+                                <IconButton
+                                    disabled={!allowedToEdit}
+                                    title="Re-arrange columns"
+                                    color="inherit"
+                                    onClick={() => setRearrangeColumns(true)}
+                                >
+                                    <ImportExportIcon />
+                                </IconButton>
+                            </Grid>
+                        </Grid>
+                    </CustomDialogContent>
+                </Dialog>
             )}
         </>
     )
