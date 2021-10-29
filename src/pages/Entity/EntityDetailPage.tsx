@@ -22,6 +22,9 @@ import {
 import AssignUserDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 import AssignedUsers from "./AssignedUsers";
 import ManageEntity from "./ManageEntity";
+import NewStepper from "../../components/Helpers/NewStepper";
+import { isObjectEmpty } from "../../constants/helpers";
+import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -29,7 +32,7 @@ const EntityDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions },
+    state: { user, permissions },
     dispatch,
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
@@ -49,12 +52,18 @@ const EntityDetailsPage = () => {
   ]);
   const showRecordsBeforeViewAll = 2;
   const [showUsers, setShowUsers] = useState(showRecordsBeforeViewAll);
-
+  const [doa, setDoa] = useState<any[]>([]);
+  const [doaCurrency, setDoaCurrency] = useState("");
+  const [doaType, setDoaType] = useState(null);
+  const [doaDialogOpen, setDoaDialogOpen] = useState(false);
+  const [userList, setUserList] = useState<any[]>([]);
   useEffect(() => {
     if (id) {
       getEntityFields();
       fetchEntityData();
       fetchEntityUser();
+      fetchUsers();
+      fetchDoa();
     }
   }, [id]);
 
@@ -222,6 +231,59 @@ const EntityDetailsPage = () => {
 
   const fieldsToShowInDetailPage = entityFields.filter((field) => field.isRead);
 
+  const fetchDoa = async () => {
+    axiosInstance()
+      .get(`/doa/${id}`)
+      .then(({ data: { data } }) => {
+        let doaData = [];
+
+        data.doa.forEach((item) => {
+          //  When the user set in doa was deleted, we are getting {} in array like this [{}]
+          //  So added this check
+          if (!isObjectEmpty(item)) {
+            doaData.push({
+              id: item.user?._id,
+              name: [item.user?.firstName, item.user?.lastName].filter(f => f).join(" "),
+              firstName: item.user?.firstName,
+              lastName: item.user?.lastName,
+              amount: item.amount,
+            });
+          }
+        });
+
+        setDoa(doaData);
+        setDoaCurrency(data.doaCurrency)
+        setDoaType(data.doaType)
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setLoading(false);
+        setDoa([]);
+      });
+  };
+
+  const fetchUsers = () => {
+    axiosInstance()
+      .get("/user")
+      .then(({ data: { data, count } }) => {
+        getRows(data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  }
+
+  const getRows = (data: []) => {
+    const rows = data.length
+      ? data.map((user: any) => ({
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+      }))
+      : [];
+
+    setUserList(rows);
+  };
+
   return (
     <>
       {showAssignUserDialog && (
@@ -341,84 +403,144 @@ const EntityDetailsPage = () => {
                   </>
                 )}
               </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
-                  <Box
-                    width="100%"
-                    padding={1}
-                    bgcolor="grey.200"
-                    display="flex"
-                    justifyContent="space-between"
-                  >
-                    <Typography variant="subtitle2">
-                      Assigned Users ({users.length || 0})
-                    </Typography>
-                    {permissions.entity.isUpdate && (
-                      <IconButton
-                        title="Assign users"
-                        color="primary"
-                        size="small"
-                        onClick={userDialogOpen}
-                      >
-                        <ControlPoint />
-                      </IconButton>
-                    )}
-                  </Box>
-                  <Box padding={1}>
-                    {usersLoading ? (
-                      <Box display="flex">
-                        {[1, 2].map((i) => (
-                          <BoxWithBorder
-                            key={i}
-                            style={{
-                              padding: "8px",
-                              margin: "8px",
-                              width: "100%",
-                            }}
-                          >
-                            <Box padding={1}>
-                              <Skeleton
-                                variant="text"
-                                width="100px"
-                                height="20px"
-                              />
-                              <Box marginTop={1} />
-                              <Skeleton variant="text" width="100%" height="15px" />
+              {
+                <>
+                  <Box>
+                    <Box
+                      width="100%"
+                      padding={1}
+                      bgcolor="grey.200"
+                      display="flex"
+                      justifyContent="space-between"
+                    >
+                      <Grid container>
+                        <Grid item xs={8}>
+                          <Box display="flex">
+                            <Box padding="5px">
+                              <Typography variant="subtitle2">
+                                {"DOA Details "}
+                              </Typography>
                             </Box>
-                          </BoxWithBorder>
-                        ))}
-                      </Box>
-                    ) : users.length ? (
-                      <>
-                        <AssignedUsers
-                          permissions={permissions}
-                          user={users.slice(0, showUsers)}
-                          unassignEntity={handleUnassignUser}
-                          type="entity"
-                        />
-
-                        <Box marginY={1} />
-                        {
-                          users.length > showRecordsBeforeViewAll &&
-                          <Box className="btn-view gap-1" p={1} display="flex" justifyContent="center" alignItems="center"
-                            onClick={() => history.push(`/user`, {
-                              id: entityData._id,
-                              name: entityData.entityName,
-                              type: "entity",
-                              text: "Entity"
-                            })}>
-                            <FaEye /> View All &#8599;
                           </Box>
-                        }
-                      </>
-                    ) : (
-                      <Box textAlign="center" padding={2}>
-                        <Typography>No Users </Typography>
-                      </Box>
-                    )}
+                        </Grid>
+                        <Grid item container xs={4} justify="flex-end">
+                          {permissions.user.isUpdate && user?.user?.permissions?.doaSetup && (
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              size="small"
+                              onClick={() => setDoaDialogOpen(true)}
+                            >
+                              {doa.length > 0 ? "Edit DOA" : "Add DOA"}
+                            </Button>
+                          )}
+                        </Grid>
+                      </Grid>
+                    </Box>
                   </Box>
-                </Grid>
-              </Grid>
+                  <Grid container style={{ padding: "8px" }} spacing={1}>
+                    <Grid item xs={12} sm={12}>
+                      <BoxWithBorder
+                        style={{
+                          padding: "0px",
+                        }}
+                      >
+                        {doa.length > 0 ? (
+                          <NewStepper
+                            heading={" "}
+                            steps={doa}
+                            doaCurrency={doaCurrency}
+                          />
+                        ) : (
+                          <Box textAlign="center" marginTop={2}>
+                            <Typography variant="body2">
+                              Entity doesn't have any DOA
+                            </Typography>
+                          </Box>
+                        )}
+                      </BoxWithBorder>
+                    </Grid>
+                  </Grid>
+                </>
+              }
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+            <Paper style={{ overflow: 'hidden' }}>
+              <Box
+                width="100%"
+                padding={1}
+                bgcolor="grey.200"
+                display="flex"
+                justifyContent="space-between"
+              >
+                <Typography variant="subtitle2">
+                  Assigned Users ({users.length || 0})
+                </Typography>
+                {permissions.entity.isUpdate && (
+                  <IconButton
+                    title="Assign users"
+                    color="primary"
+                    size="small"
+                    onClick={userDialogOpen}
+                  >
+                    <ControlPoint />
+                  </IconButton>
+                )}
+              </Box>
+              <Box padding={1}>
+                {usersLoading ? (
+                  <Box display="flex">
+                    {[1, 2].map((i) => (
+                      <BoxWithBorder
+                        key={i}
+                        style={{
+                          padding: "8px",
+                          margin: "8px",
+                          width: "100%",
+                        }}
+                      >
+                        <Box padding={1}>
+                          <Skeleton
+                            variant="text"
+                            width="100px"
+                            height="20px"
+                          />
+                          <Box marginTop={1} />
+                          <Skeleton variant="text" width="100%" height="15px" />
+                        </Box>
+                      </BoxWithBorder>
+                    ))}
+                  </Box>
+                ) : users.length ? (
+                  <>
+                    <AssignedUsers
+                      permissions={permissions}
+                      user={users.slice(0, showUsers)}
+                      unassignEntity={handleUnassignUser}
+                      type="entity"
+                    />
+
+                    <Box marginY={1} />
+                    {
+                      users.length > showRecordsBeforeViewAll &&
+                      <Box className="btn-view gap-1" p={1} display="flex" justifyContent="center" alignItems="center"
+                        onClick={() => history.push(`/user`, {
+                          id: entityData._id,
+                          name: entityData.entityName,
+                          type: "entity",
+                          text: "Entity"
+                        })}>
+                        <FaEye /> View All &#8599;
+                      </Box>
+                    }
+                  </>
+                ) : (
+                  <Box textAlign="center" padding={2}>
+                    <Typography>No Users </Typography>
+                  </Box>
+                )}
+              </Box>
             </Paper>
           </Grid>
         </Grid>
@@ -442,6 +564,33 @@ const EntityDetailsPage = () => {
           }
         />
       ) : null}
+      {doaDialogOpen && (
+        <Dialog
+          open={doaDialogOpen}
+          onClose={() => {
+            setDoaDialogOpen(false);
+          }}
+          scroll="body"
+          maxWidth="md"
+          fullWidth
+        >
+          <DoaDialog
+            userList={userList}
+            doa={doa}
+            doaCurrency={doaCurrency}
+            selectedEntity={[id]}
+            open={doaDialogOpen}
+            onSuccess={() => {
+              setDoaDialogOpen(false);
+              fetchDoa();
+            }}
+            onClose={() => {
+              setDoaDialogOpen(false);
+            }}
+            doaType={doaType}
+          />
+        </Dialog>
+      )}
     </>
   );
 };
