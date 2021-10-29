@@ -44,6 +44,7 @@ import { GiMineExplosion } from 'react-icons/gi'
 import HtmlTooltip from '../../components/CustomTooltipTitle'
 import BulkEditInventoryDialog from './BulkEditInventoryDialog'
 import SerializedAssetStep from "./SerializedAssetStep";
+import queryString from "query-string";
 
 const rentalProcessSteps = ["New", "Additional Cost", "Serialized Asset", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
@@ -53,6 +54,9 @@ const RentalManagementDetailsPage = () => {
 
   const { id } = useParams();
   const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit } = parsed;
+
   const {
     state: { user, permissions }
   }: any = useData();
@@ -213,7 +217,18 @@ const RentalManagementDetailsPage = () => {
           (d) => d.currencyCode === data["currency"]
         )?.symbolNative
       );
-      setAllowedToEdit([...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id));
+
+      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+
+      setAllowedToEdit(isAllowedToEdit);
+
+      if (isAllowedToEdit && openEdit === "true") {
+        setOpenUpdateDialog(true)
+        const params = new URLSearchParams()
+        params.delete("openEdit")
+        history.push({ search: params.toString() })
+      }
+
     } catch (error) {
       setLoadingDetails(false)
       toastConfig.setToastConfig(error);

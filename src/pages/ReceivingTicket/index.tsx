@@ -555,8 +555,10 @@ const ReceivingTicket = () => {
         </div>
         {isMobile ?
           <CustomSwipableList
+            permissions={permissions.receivingTicket}
             primaryField={columns?.find(d => d.primaryField)}
             dataRows={dataRows}
+            selectedRecords={selectedRecords}
             dispatch={dispatch}
             onEdit={(data) => {
               history.push(`${routes.quoteBuilderDetail.path}/${data._id}?openEdit=true`)
@@ -569,8 +571,7 @@ const ReceivingTicket = () => {
             }}
             rowCount={rowCount}
             page={page}
-            limit={limit}
-            pageSizes={pageSizes}
+            loading={loading}
             chips={[
               {
                 label: "Status: ",

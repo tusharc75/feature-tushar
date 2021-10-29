@@ -96,7 +96,6 @@ const RentalManagement = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const [isAllChecked, setIsAllChecked] = useState(false);
   const {
     dataRows,
     rowCount,
@@ -134,34 +133,20 @@ const RentalManagement = () => {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      if (["rentalJobName"].find(d => d === o?.fieldData?.fieldName)) {
-        columns = [...columns, {
-          disabled: true,
-          field: "rentalJobName",
-          headerName: "Rental Job Name",
-          pivotIndex: 0,
-          show: true,
-          cellRenderer: "rentalManagementNameRenderer",
-          primaryField: true,
-          onClick: (d) => { history.push(`${routes.rentalManagementDetail.path}/${d._id}`) }
-        }]
-      }
-      else {
-        let currentColumn = getColumnData(pageTitle, o?.fieldData, routes.rentalManagementDetail.path)
-        if (currentColumn !== null) {
-          if (isOffline) {
-            currentColumn.columnData["filter"] = false
-            currentColumn.columnData["sortable"] = false
-          }
-          columns = [...columns, currentColumn?.columnData]
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName)
-          }
+      let currentColumn = getColumnData(pageTitle, o?.fieldData, routes.rentalManagementDetail.path)
+      if (currentColumn !== null) {
+        if (isOffline) {
+          currentColumn.columnData["filter"] = false
+          currentColumn.columnData["sortable"] = false
+        }
+        columns = [...columns, currentColumn?.columnData]
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName)
         }
       }
-
       return o?.fieldData
     })
+
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
@@ -426,6 +411,7 @@ const RentalManagement = () => {
         let res = {
           ...prepareDataForGrid(u, user),
         };
+
         res["canDelete"] = u.owner?.optionValue === user?.user._id;
         res["isChecked"] = false;
         res["allowedToEdit"] = true;
@@ -433,6 +419,7 @@ const RentalManagement = () => {
       });
 
       dispatch({ type: "initialize", data: rows, count: count });
+
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
       }, gridLoadingTimeout);
@@ -587,37 +574,33 @@ const RentalManagement = () => {
             Object.keys(frameWorkComponent).length > 0 ?
               isMobile ?
                 <CustomSwipableList
+                  permissions={permissions.rentalManagement}
                   // columns={columns}
                   primaryField={columns?.find(d => d.primaryField)}
+                  onClick={(data) => {
+                    history.push(`${routes.rentalManagementDetail.path}/${data._id}`)
+                  }}
                   dataRows={dataRows}
+                  selectedRecords={selectedRecords}
                   dispatch={dispatch}
                   onEdit={(data) => {
-                    history.push(`${routes.quoteBuilderDetail.path}/${data._id}?openEdit=true`)
-                  }}
-                  onClick={(data) => {
-                    history.push(`${routes.quoteBuilderDetail.path}/${data._id}`)
+                    history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
                   }}
                   onDelete={(data) => {
-                    console.log("Pending")
+                    setSingleRentalManagementDelete({
+                      show: true,
+                      id: data._id,
+                      rentalJobName: `${data.rentalJobName}`,
+                    })
                   }}
                   rowCount={rowCount}
                   page={page}
-                  limit={limit}
-                  pageSizes={pageSizes}
+                  loading={loading}
                   chips={[
-                    // {
-                    //   label: "Version(s): ",
-                    //   field: "versionCount",
-                    //   onClick: (data) => {
-                    //     // setShowVersionsDialog(true)
-                    //     // getVersionStatus(data._id, data.currency)
-                    //   }
-                    // },
-                    // {
-                    //   label: "Status: ",
-                    //   field: "status",
-                    //  // chipColorVariable: quoteStepColors
-                    // }
+                    {
+                      label: "Status: ",
+                      field: "status",
+                    }
                   ]}
                 /> :
                 <CustomAgGrid
@@ -641,8 +624,8 @@ const RentalManagement = () => {
           {
             permissions.repairJob?.isCreate && isMobile && <Fab size="small" onClick={clickCreateNew} className="fab-position-b-r" color="primary" aria-label="add">
               <AddIcon />
-              </Fab>
-}
+            </Fab>
+          }
 
           {showDeleteWarningConfirmBox ? (
             <MessageDialog

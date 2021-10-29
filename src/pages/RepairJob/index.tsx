@@ -72,7 +72,7 @@ const RepairJob = () => {
       show: true,
       disabled: true,
       cellRenderer: 'repairJobNameRenderer',
-      primaryField:'true'
+      primaryField: 'true'
     },
     {
       field: 'status',
@@ -504,31 +504,32 @@ const RepairJob = () => {
             )}
           </RepairJobHeader>
         </div>
-        {isMobile ? 
-        <CustomSwipableList
-          primaryField={columns?.find(d => d.primaryField)}
-          dataRows={dataRows}
-          dispatch={dispatch}
-          onEdit={(data) => {
-            history.push(`${routes.quoteBuilderDetail.path}/${data._id}?openEdit=true`)
-          }}
-          onDelete={(data) => {
-           
-          }}
-          onClick={(data) => {
-            history.push(`${routes.quoteBuilderDetail.path}/${data._id}`)
-          }}
-          rowCount={rowCount}
-          page={page}
-          limit={limit}
-          pageSizes={pageSizes}
-          chips={[
-            {
-              label: "Status: ",
-              field: "status",
-            }
-          ]}
-        /> :
+        {isMobile ?
+          <CustomSwipableList
+            permissions={permissions.repairJob}
+            primaryField={columns?.find(d => d.primaryField)}
+            dataRows={dataRows}
+            selectedRecords={selectedRecords}
+            dispatch={dispatch}
+            onEdit={(data) => {
+              history.push(`${routes.quoteBuilderDetail.path}/${data._id}?openEdit=true`)
+            }}
+            onDelete={(data) => {
+
+            }}
+            onClick={(data) => {
+              history.push(`${routes.quoteBuilderDetail.path}/${data._id}`)
+            }}
+            rowCount={rowCount}
+            page={page}
+            loading={loading}
+            chips={[
+              {
+                label: "Status: ",
+                field: "status",
+              }
+            ]}
+          /> :
           <CustomAgGrid
             columns={columns}
             dataRows={dataRows}
@@ -546,10 +547,10 @@ const RepairJob = () => {
           />
         }
         {
-            permissions.repairJob?.isCreate && isMobile && <Fab size="small" onClick={clickCreateNew} className="fab-position-b-r" color="primary" aria-label="add">
-              <AddIcon />
-              </Fab>
-}
+          permissions.repairJob?.isCreate && isMobile && <Fab size="small" onClick={clickCreateNew} className="fab-position-b-r" color="primary" aria-label="add">
+            <AddIcon />
+          </Fab>
+        }
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
