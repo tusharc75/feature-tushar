@@ -202,6 +202,7 @@ const QuoteBuilders = () => {
     filters,
     sorting,
     selectedRecords,
+    appendRows
   } = state;
 
   // const columns = [
@@ -662,7 +663,12 @@ const QuoteBuilders = () => {
 
           setIsAllChecked(false);
 
-          dispatch({ type: "initialize", data: rows, count: count });
+          if (appendRows) {
+            dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
+          } else {
+            dispatch({ type: "initialize", data: rows, count: count });
+          }
+
           setTimeout(() => {
             dispatch({ type: "loading", loading: false });
           }, gridLoadingTimeout);
@@ -843,31 +849,15 @@ const QuoteBuilders = () => {
           </div>
           {
             isMobile ?
-
-              // <InfiniteScroll
-              //   dataLength={dataRows.length}
-              //   // height="500px"
-              //   scrollableTarget="scrollableDiv"
-              //   next={() => {
-              //     debugger;
-              //     setTimeout(() => {
-              //       dispatch({ type: 'pageChange', page: page + 1 })
-              //     }, 1500)
-              //   }}
-              //   hasMore={true}
-              //   loader={
-              //     <h3 className="text-center border mt-3 p-3 loading-dots">
-              //       Loading more items
-              //     </h3>
-              //   }
-              // >
               <CustomSwipableList
-                // columns={columns}
+                allowSelection={true}
+                permissions={permissions.quoteBuilder}
                 primaryField={columns?.find(d => d.primaryField)}
                 onClick={(data) => {
                   history.push(`${routes.quoteBuilderDetail.path}/${data._id}`)
                 }}
                 dataRows={dataRows}
+                selectedRecords={selectedRecords}
                 dispatch={dispatch}
                 onEdit={(data) => {
                   history.push(`${routes.quoteBuilderDetail.path}/${data._id}?openEdit=true`)
@@ -881,8 +871,7 @@ const QuoteBuilders = () => {
                 }}
                 rowCount={rowCount}
                 page={page}
-                limit={limit}
-                pageSizes={pageSizes}
+                loading={loading}
                 chips={[
                   {
                     label: "Version(s): ",
@@ -898,11 +887,9 @@ const QuoteBuilders = () => {
                     chipColorVariable: quoteStepColors
                   }
                 ]}
-              // onClick={(data) => {
-              //   history.push(`${routes.quoteBuilderDetail.path}/${data._id}`)
-              // }}
+                onCreate={clickCreateNew}
               />
-              // </InfiniteScroll>
+
               : (
                 Object.keys(frameWorkComponent).length > 0 ?
                   <CustomAgGrid
@@ -921,12 +908,6 @@ const QuoteBuilders = () => {
                     refreshGrid={fetchQuoteBuilder}
                   /> : null
               )
-          }
-
-          {
-            quotePermissions.isCreate && isMobile && <Fab size="small" onClick={clickCreateNew} className="fab-position-b-r" color="primary" aria-label="add">
-              <AddIcon />
-            </Fab>
           }
 
           {showDeleteWarningConfirmBox ? (

@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
 
@@ -21,6 +21,9 @@ import ReceivingTicketHeader from './ReceivingTicketHeader';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import AddIcon from "@material-ui/icons/Add"
 
 let receivingTicketTimeout;
 const ReceivingTicketType = [
@@ -60,7 +63,7 @@ const ReceivingTicket = () => {
   });
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
 
   const columns = [
     {
@@ -68,7 +71,8 @@ const ReceivingTicket = () => {
       headerName: 'Receiving Ticket Name',
       show: true,
       disabled: true,
-      cellRenderer: 'receivingJobNameRenderer'
+      cellRenderer: 'receivingJobNameRenderer',
+      primaryField: true
     },
     {
       field: 'deliveryPerson',
@@ -403,12 +407,21 @@ const ReceivingTicket = () => {
             createdBy: u.createdBy?.user?.concatedName,
             createdByDate: u.createdBy?.date,
             updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
+            updatedByDate: u.updatedBy?.date,
+
+            canDelete: u.createdBy?.user?._id === user?.user._id,
+            isChecked: false,
+            allowedToEdit: permissions?.receivingTicket?.isUpdate
           };
           return res;
         });
 
-        dispatch({ type: 'initialize', data: rows, count: count });
+        if (appendRows) {
+          dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
+        } else {
+          dispatch({ type: "initialize", data: rows, count: count });
+        }
+        
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -548,22 +561,54 @@ const ReceivingTicket = () => {
             )}
           </ReceivingTicketHeader>
         </div>
-
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={100}
-          loading={loading}
-          renderedFrom={'receivingTicketPage'}
-          refreshGrid={fetchReceivingTickets}
-        />
+        {isMobile ?
+          <CustomSwipableList
+            allowSelection={true}
+            permissions={permissions.receivingTicket}
+            primaryField={columns?.find(d => d.primaryField)}
+            onClick={(data) => {
+              history.push(`${routes.receivingTicketDetail.path}/${data._id}`)
+            }}
+            dataRows={dataRows}
+            selectedRecords={selectedRecords}
+            dispatch={dispatch}
+            onEdit={(data) => {
+              history.push(`${routes.receivingTicketDetail.path}/${data._id}?openEdit=true`)
+            }}
+            onDelete={(data) => {
+              setSingleTicketDelete({
+                show: true,
+                id: data._id,
+                receivingJobName: data.receivingJobName
+              })
+            }}
+            rowCount={rowCount}
+            page={page}
+            loading={loading}
+            chips={[
+              {
+                label: "Status: ",
+                field: "status",
+              }
+            ]}
+            onCreate={clickCreateNew}
+          /> :
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={100}
+            loading={loading}
+            renderedFrom={'receivingTicketPage'}
+            refreshGrid={fetchReceivingTickets}
+          />
+        }
 
         {showDeleteWarningConfirmBox ? (
           <MessageDialog

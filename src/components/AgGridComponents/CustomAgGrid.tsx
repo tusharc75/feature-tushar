@@ -15,14 +15,16 @@ export function reducer(state, action) {
     case 'loading':
       return {
         ...state,
-        loading: action.loading
+        loading: action.loading,
+        appendRows: action.loading === false ? false : state.appendRows
       };
 
     case 'initialize':
       return {
         ...state,
         dataRows: action.data,
-        rowCount: action.count
+        rowCount: action.count,
+        selectedRecords: []
       };
 
     case 'selection':
@@ -64,7 +66,8 @@ export function reducer(state, action) {
     case 'pageChange':
       return {
         ...state,
-        page: action.page
+        page: action.page,
+        appendRows: isMobile,
       };
 
     case 'pageSizeChange':
@@ -72,6 +75,7 @@ export function reducer(state, action) {
         ...state,
         limit: action.limit,
         page: 0,
+        appendRows: isMobile,
         loading: false
       };
 
@@ -100,12 +104,13 @@ export const intialState = {
   rowCount: 0,
   loading: false,
   page: 0,
-  limit: gridPageSizes[0],
-  pageSizes: gridPageSizes,
+  limit: 8,
+  pageSizes: [8, 16, 25],
   search: '',
   filters: {},
   sorting: [],
-  selectedRecords: []
+  selectedRecords: [],
+  appendRows: false
 };
 
 export default function CustomAgGrid({

@@ -1,3 +1,17 @@
+.custom-swipeable-list {
+    overflow-y: auto;
+    height: calc(100vh - 230px);
+}
+
+// .swipeable-list {
+//     flex: 1 1 !important;
+//     width: 100% !important;
+//     // height: 100% !important;
+//     // height: auto !important;
+//     overflow-y: auto !important;
+//     -webkit-overflow-scrolling: touch;
+// }
+
 .swipe-card {
     border: 1px solid #e6e7e7;
     margin: 4px;
