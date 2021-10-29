@@ -58,6 +58,7 @@ const CreateProduct = (props) => {
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     const [expanded, setExpanded] = useState({});
+    const [fieldChanges, setFieldChanges] = useState([]);
 
 
     useEffect(() => {
@@ -88,6 +89,9 @@ const CreateProduct = (props) => {
                 axiosInstance().get(`/product/` + productId).then(({ data: { data } }) => {
                     data.fields?.map((_f) => newField.push(_f));
                     data.productData.fields?.map((_f) => newField.push(_f));
+                    if (data.productData.fieldChanges) {
+                        setFieldChanges(data.productData.fieldChanges);
+                    }
                     setFields(data.productData.fields)
                     if (isClone) {
                         data.productData.productName = ""
@@ -159,6 +163,7 @@ const CreateProduct = (props) => {
     const handleSubmit = (values) => {
         setSubmitting(true);
         values.fields = fields;
+        values.fieldChanges = fieldChanges;
         if (productId && !isClone) {
             values._id = productId;
             axiosInstance().put(`/product`, values).then(({ data: { data } }) => {
@@ -364,6 +369,85 @@ const CreateProduct = (props) => {
         temp[index] = !temp[index]
         setExpanded(temp)
     }
+
+    const addDisplayType = (displayType, field, displayValue) => {
+        let _fieldChanges = fieldChanges;
+        if (_fieldChanges.filter((_f) => _f.fieldName === field.fieldName).length === 0) {
+            if (displayType === "currency") {
+                _fieldChanges.push({
+                    fieldName: field.fieldName,
+                    displayCurrency: [displayValue],
+                });
+            } else if (displayType === "converter") {
+                _fieldChanges.push({
+                    fieldName: field.fieldName,
+                    displayUnits: [displayValue],
+                });
+            }
+        } else {
+            _fieldChanges.forEach((_f) => {
+                if (_f.fieldName === field.fieldName) {
+                    if (displayType === "currency") {
+                        if (_f.displayCurrency) {
+                            _f.displayCurrency.push(displayValue);
+                        } else {
+                            _f.displayCurrency = [displayValue];
+                        }
+                    } else if (displayType === "converter") {
+                        if (_f.displayUnits) {
+                            _f.displayUnits.push(displayValue);
+                        } else {
+                            _f.displayUnits = [displayValue];
+                        }
+                    }
+                }
+            });
+        }
+        let newField = initialData.fields;
+        newField.forEach((_e) => {
+            if (_e.fieldName === field.fieldName) {
+                _e.fieldChanges = _fieldChanges.filter(
+                    (_f) => _f.fieldName === field.fieldName
+                )[0];
+            }
+        });
+        setInitialData({
+            fields: newField,
+            values: { ...getObjKeys("", newField), ...ref.current.values },
+        });
+        EvaluteproductFields(newField);
+        setFieldChanges(_fieldChanges);
+    };
+
+    const removeDisplayType = (displayType, field, displayValue) => {
+        let _fieldChanges = fieldChanges;
+        _fieldChanges.forEach((_f) => {
+            if (_f.fieldName === field.fieldName) {
+                if (displayType === "currency") {
+                    _f.displayCurrency = _f.displayCurrency.filter(
+                        (e) => e !== displayValue
+                    );
+                } else if (displayType === "converter") {
+                    _f.displayUnits = _f.displayUnits.filter((e) => e !== displayValue);
+                }
+            }
+        });
+        let newField = initialData.fields;
+        newField.forEach((_e) => {
+            if (_e.fieldName === field.fieldName) {
+                _e.fieldChanges = _fieldChanges.filter(
+                    (_f) => _f.fieldName === field.fieldName
+                )[0];
+            }
+        });
+        setInitialData({
+            fields: newField,
+            values: { ...getObjKeys("", newField), ...ref.current.values },
+        });
+        EvaluteproductFields(newField);
+        setFieldChanges(_fieldChanges);
+    };
+
 
     return (<Dialog
         maxWidth="md"
@@ -677,6 +761,8 @@ const CreateProduct = (props) => {
                                                                                     errors={errors}
                                                                                     touched={touched}
                                                                                     label={field.fieldLabel}
+                                                                                    addDisplayType={addDisplayType}
+                                                                                    removeDisplayType={removeDisplayType}
                                                                                     name={field.fieldName}
                                                                                     type={field.type}
                                                                                     options={field.option}
