@@ -176,7 +176,7 @@ export default function QuoteProcess(props) {
     const toastConfig = useContext(CustomToastContext);
     const { qbResource, qbApi } = quoteBuilder;
     const {
-        state: { user, permissions },
+        state: { user, permissions, selectedEntity },
     }: any = useData();
     const history = useHistory();
 
@@ -665,7 +665,7 @@ export default function QuoteProcess(props) {
     const fetchDoaLimit = () => {
         if (quoteData) {
             axiosInstance()
-                .post("doa-request/limit", { user: quoteData?.createdBy?.user?._id })
+                .post("doa-request/limit", { entity: selectedEntity })
                 .then(({ data: { data } }) => {
                     setDOAsetup(data.doasetup);
                     setDOALimit(data.limit ? data.limit : 0);
