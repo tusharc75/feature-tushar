@@ -54,6 +54,19 @@ export const leadImportErrorFileName = 'Leads-Errors.xlsx';
 export const opportunityTemplateFileName = 'Opportunities-Template.xlsx';
 export const opportunityImportErrorFileName = 'Opportunities-Errors.xlsx';
 
+export const quoteStepColors = {
+  "accepted by customer": { backgroundColor: "#008000", color: "#fff" },
+  "not booked by customer": { backgroundColor: "#ba181b", color: "#fff" },
+
+  "re-open": { backgroundColor: "#ff7d00", color: "#fff" },
+  "invalid by customer": { backgroundColor: "#eb5e28", color: "#fff" },
+
+  "not booked": { backgroundColor: "#2b2d42", color: "#fff" },
+  "building quote": { backgroundColor: "#023e7d", color: "#fff" },
+
+  "__default__": { backgroundColor: "#023e7d", color: "#fff" }
+}
+
 export const roleTypes = [
   {
     key: 'Global',
@@ -368,6 +381,10 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       const option = key.option?.find((data: any) => data.default === true);
       obj[key.fieldName] = value ? value : option ? option.optionValue : '';
     } else if (key.type === 'multiSelect') {
+      const defaultOptions = key.option?.filter((item: any) => item.default === true);
+      const options = defaultOptions?.map((data: any) => data.optionValue);
+      obj[key.fieldName] = value ? value : options;
+    } else if (key.type === 'freeStyleMultiSelect') {
       const defaultOptions = key.option?.filter((item: any) => item.default === true);
       const options = defaultOptions?.map((data: any) => data.optionValue);
       obj[key.fieldName] = value ? value : options;
@@ -1148,7 +1165,7 @@ export const prepareDataForGrid = (data, user = {}) => {
   let finalObject = { ...restProperties };
 
   Object.keys(objectValues).forEach(d => {
-    if (objectValues[d].hasOwnProperty("optionLabel")) {
+    if (objectValues[d] && objectValues[d].hasOwnProperty("optionLabel")) {
       finalObject[d] = objectValues[d]["optionLabel"];
       finalObject[`${d}Id`] = objectValues[d]["optionValue"];
     }

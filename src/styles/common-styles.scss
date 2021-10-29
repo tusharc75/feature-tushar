@@ -106,6 +106,14 @@
     border: 0 !important;
 }
 
+.grey {
+    color: grey !important;
+}
+
+.lightgrey {
+    color: lightgrey !important;
+}
+
 $directions: top, bottom, left, right;
 @each $direction in $directions {
     #{".border-" + $direction + "-0"} {
@@ -141,6 +149,8 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
 
 // Font size
 @include fixed-list-loop(".font-size-", "font-size", "rem");
+
+@include fixed-list-loop(".border-radius-", "border-radius", "rem");
 
 // Gap
 
@@ -314,6 +324,7 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
         opacity: 0.5;
     }
 }
+
 .blink {
     animation: blink 1s linear 10;
     -webkit-animation: blink 1s linear 10;

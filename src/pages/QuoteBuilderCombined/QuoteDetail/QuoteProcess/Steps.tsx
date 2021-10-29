@@ -255,7 +255,7 @@ const Steps = (props) => {
     }
     axiosInstance()
       .post(`quote-builder/updateprocess/${id}?version=${version}`, {
-        processStatus: steps[activeStep + 1],
+        processStatus: steps[activeStep + 1]?.key,
       })
       .then(() => {
         activeStep = activeStep + 1;
@@ -312,7 +312,7 @@ const Steps = (props) => {
   const handleBack = () => {
     axiosInstance()
       .post(`quote-builder/updateprocess/${id}?version=${version}`, {
-        processStatus: steps[activeStep - 1],
+        processStatus: steps[activeStep - 1]?.key,
       })
       .then(() => {
         activeStep = activeStep - 1;
@@ -568,7 +568,7 @@ const Steps = (props) => {
                                 onClick={() => {
                                   if (
                                     versionStatus.includes("Sent to Customer") ||
-                                    steps[currentStep] === "Send To Customer" ||
+                                    steps[currentStep]?.key === "Send To Customer" ||
                                     versionStatus === "Sent to Customer"
                                   ) {
                                     setShowManualCustomerActionDialog(true);
@@ -583,7 +583,7 @@ const Steps = (props) => {
                                   !nextStep ||
                                   versionStatus.includes("Sent for DOA") ||
                                   versionStatus.includes("Accepted  by DOA") ||
-                                  steps[currentStep] === "DOA Process" ||
+                                  steps[currentStep]?.key === "DOA Process" ||
                                   approvedQuote.approved
                                   // || versionStatus.includes("Sent to Customer") ||
                                   // steps[currentStep] === "Send To Customer" ||
@@ -607,11 +607,11 @@ const Steps = (props) => {
               <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={activeStep}>
                 {steps.map((label, i) => (
                   <Step
-                    key={label}
+                    key={label.label}
                     className={clsx(classes.step, {
                       [classes.active]:
                         currentStep > i ||
-                        steps[currentStep] === "End" || approvedQuote.approved,
+                        steps[currentStep]?.key === "End" || approvedQuote.approved,
                       [classes.currentStep]: currentStep === i,
                       [classes.inActive]: currentStep !== i,
                     })}
@@ -625,7 +625,7 @@ const Steps = (props) => {
                           : null
                       }
                     >
-                      {label}
+                      {label.label}
                     </StepLabel>
                   </Step>
                 ))}
@@ -651,7 +651,7 @@ const Steps = (props) => {
                           onClick={() => {
                             if (
                               versionStatus.includes("Sent to Customer") ||
-                              steps[currentStep] === "Send To Customer" ||
+                              steps[currentStep]?.key === "Send To Customer" ||
                               versionStatus === "Sent to Customer"
                             ) {
                               setShowManualCustomerActionDialog(true);
@@ -666,7 +666,7 @@ const Steps = (props) => {
                             !nextStep ||
                             versionStatus.includes("Sent for DOA") ||
                             versionStatus.includes("Accepted  by DOA") ||
-                            steps[currentStep] === "DOA Process" ||
+                            steps[currentStep]?.key === "DOA Process" ||
                             approvedQuote.approved
                           }
                           endIcon={<IoIosArrowDroprightCircle />}

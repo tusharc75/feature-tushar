@@ -92,12 +92,15 @@ const SelectionDialog = (props) => {
                     }
                 });
             } else {
-                axiosInstance().get(newFunction()).then(({ data: { data } }) => {
+                axiosInstance().get('/product-template/template/standard').then(({ data: { data } }) => {
                     setProductTemplate(data.data)
                     if (data.data.length) {
                         setInitialData({ ...ref.current.values, productTemplate: data.data[0].optionValue })
                         handleChangeProductTemplate(data.data[0].optionValue);
                     }
+                }).catch((error) => {
+                    setProductTemplate([])
+                    setPriceTemplate([])
                 });
             }
         }
@@ -359,7 +362,5 @@ const SelectionDialog = (props) => {
 }
 
 export default SelectionDialog;
-function newFunction(): string {
-    return `/product-template/template/standard`;
-}
+
 

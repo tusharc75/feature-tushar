@@ -16,6 +16,10 @@ import { CommonRenderer } from "../../AgGridComponents/CustomAgGridCellRenderers
 import { Link } from "react-router-dom";
 import routes from "../../../components/Helpers/Routes";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
+import { Autocomplete } from "@material-ui/lab";
+import TextField from "@material-ui/core/TextField";
+import { getColumnData, getStaticFields, getFrameworkComponents } from "../../../constants/columns"
+import { prepareDataForGrid } from "../../../constants/helpers";
 
 var levalOrderBy = [
     "product",
@@ -32,62 +36,88 @@ const AddExistingProduct = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
     const { handleClose, addProductInBuilder } = props;
-    const [columns, setColumns] = useState(null);
     const [productList, setProductList] = useState([]);
-    const [productColoums, setProductColoums] = useState([]);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-    useEffect(() => {
-        if (productColoums.length) {
-            fetchProduct()
-        }
-    }, [page, limit, filters, sorting, search, productColoums]);
+    const [productColoums, setProductColoums] = useState([]);
+    const [productRendererNames, setProductRendererNames] = useState([]);
+    const [columns, setColumns] = useState(null);
+    const [frameWorkComponent, setFrameWorkComponent] = useState(null)
+
+    const [productCategoryList, setProductCategoryList] = useState([]);
+    const [productTemplateList, setProductTemplateList] = useState([]);
+    const [productCategory, setProductCategory] = useState(null);
+    const [productTemplate, setProductTemplate] = useState(null);
+    const [isProductTemplate, setIsProductTemplate] = useState(true);
+
 
     useEffect(() => {
-        axiosInstance().get("/field?resource=Product").then(({ data: { data } }) => {
-            const productField = []
-            data.map((_f) => productField.push(_f.fieldData));
-            var coloum = [];
-            GenrateColoum(productField, coloum)
-            coloum.forEach((ele) => {
-                ele.leval = "product"
-            })
-            setProductColoums(coloum)
+        axiosInstance().get("/product-category").then(({ data: { data } }) => {
+            setProductCategoryList(data)
         })
     }, [])
 
+    useEffect(() => {
+        if (isProductTemplate) {
+            if (productCategory && productCategory !== "") {
+                axiosInstance().post(`/product-template/template/` + productCategory, { entity: [] }).then(({ data: { data } }) => {
+                    setProductTemplateList(data.data)
+                    setProductTemplate(null);
+                })
+            }
+            else {
+                setProductTemplateList([])
+                setProductTemplate(null);
+            }
+        }
+    }, [productCategory])
 
-    const EntityNameRenderer = (params) => params.value ? (
-        <>
-            <h5 className="createBy d-flex">
-                <Link className="link" title={params.value} to={`${routes.entity.path}/detail/${params.data.entityId}`}>
-                    {params.value}
-                </Link>
-                {params.data.restEntity.length > 0 && (
-                    <span className="createdAtTime badge-date">{`+${params.data.restEntity.length} more..`}</span>
-                )}
-            </h5>
-        </>
-    ) : (
-        <NoDataCell />
-    );
 
-    const ProductCategoryRenderer = (params) => (
-        <> {params.data.productCategory !== undefined && params.data.productCategoryChipColor !== null ?
-            (
-                <Chip
-                    className="ml-3"
-                    style={{ backgroundColor: `${params.data.productCategoryChipColor}` }}
-                    label={`${params.data.productCategory}`}
-                />
-            )
-            : (
-                <NoDataCell />
-            )}
-        </>
-    );
+    useEffect(() => {
+        if (productColoums && productColoums.length) {
+            fetchProduct()
+        }
+    }, [page, limit, filters, sorting, search, productColoums, productCategory, productTemplate]);
+
+    useEffect(() => {
+        axiosInstance().get("/field?resource=Product").then(({ data: { data } }) => {
+            if (data.filter((e) => e.fieldData.fieldName === "productTemplate").length === 0) {
+                setIsProductTemplate(false)
+            }
+            let columns = []
+            let rendererNames = []
+            data.forEach(o => {
+                if (!ignoreField.includes(o?.fieldData.fieldName)) {
+                    if (o?.fieldData?.fieldName === "productName") {
+                        columns = [...columns, {
+                            pivotIndex: 0,
+                            field: o?.fieldData?.fieldName,
+                            headerName: o?.fieldData?.fieldLabel,
+                            show: true,
+                            disabled: true,
+                            cellRenderer: 'productNameRenderer'
+                        }]
+                    }
+                    else {
+                        let currentColumn = getColumnData(routes.product.title, o?.fieldData, routes.product.path, true)
+                        if (currentColumn !== null) {
+                            columns = [...columns, currentColumn?.columnData]
+                            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                                rendererNames.push(currentColumn?.rendererName)
+                            }
+                        }
+                    }
+                }
+            })
+            columns.forEach((ele) => {
+                ele.leval = "product"
+            })
+            setProductRendererNames(rendererNames);
+            setProductColoums(columns);
+        })
+    }, [])
 
     const ProductNameRenderer = params => (
         <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data._id}`}>
@@ -95,17 +125,8 @@ const AddExistingProduct = (props) => {
         </Link>
     )
 
-    
-    const frameworkComponents = {
-        commonRenderer: CommonRenderer,
-        entityRenderer: EntityNameRenderer,
-        productNameRenderer: ProductNameRenderer,
-        productCategoryRenderer: ProductCategoryRenderer,
-    };
-
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
-
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
@@ -117,15 +138,22 @@ const AddExistingProduct = (props) => {
             });
             deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
         }
-
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
-
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
         }
-
+        const filterById = []
+        if (productCategory && productCategory !== "") {
+            filterById.push({ field: 'productCategory', term: productCategory });
+        }
+        if (productTemplate && productTemplate !== "") {
+            filterById.push({ field: 'productTemplate', term: productTemplate });
+        }
+        if (filterById.length) {
+            deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + "&filterType=and"
+        }
         return deepFilter;
     };
 
@@ -135,43 +163,38 @@ const AddExistingProduct = (props) => {
 
     const fetchProduct = () => {
         dispatch({ type: "loading", loading: true });
-
         if (gridApi) {
             gridApi.setRowData([]);
         }
-
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
-            setProductList(data.data);
-            data.data = data.data?.map((u, index) => {
-                const { entity, ...restProperties } = u;
-                const [firstEntity, ...restEntity] = entity ? entity : [];
+            setProductList(JSON.parse(JSON.stringify(data.data)));
+            let rows = data.data.map((item) => {
                 let res = {
-                    ...restProperties,
-                    id: u._id,
-                    entity: firstEntity?.optionLabel,
-                    entityId: firstEntity?.optionValue,
-                    productCategoryChipColor: u.productCategory?.chipColour,
-                    restEntity: restEntity,
-                }
-                for (let col in res) {
-                    if (res[col] && res[col].optionLabel) {
-                        res[col] = res[col].optionLabel;
-                    }
-                }
+                    ...prepareDataForGrid(item),
+                };
                 return res;
             });
-            if (data.data.length) {
-                let column = [...productColoums]
-                data.data.forEach((row) => {
-                    GenrateColoum(row.fields, column);
-                });
-                column = sortBy(column, function (item: any) {
-                    return levalOrderBy.indexOf(item.leval)
-                });
-                setColumns(column);
+            let columns = [...productColoums]
+            let rendererNames = [...productRendererNames]
+            data.productTemplate?.forEach((ele) => {
+                GenrateColoum(ele.fields, columns, rendererNames)
+            })
+            columns.push({ field: "inventoryCount", headerName: "Inventory Count", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" })
+            columns.push({ field: "warehouses", headerName: "Plants", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" })
+            columns = sortBy(columns, function (item: any) {
+                return levalOrderBy.indexOf(item.leval)
+            });
+            let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+            tempFrameworkComponent = {
+                ...tempFrameworkComponent,
+                commonRenderer: CommonRenderer,
+                productNameRenderer: ProductNameRenderer,
             }
-            dispatch({ type: "initialize", data: data.data, count: data.count });
+            setFrameWorkComponent({ ...tempFrameworkComponent })
+            columns = [...columns, ...getStaticFields()]
+            setColumns([...columns])
+            dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
@@ -179,7 +202,7 @@ const AddExistingProduct = (props) => {
         });
     };
 
-    const GenrateColoum = (fields, column) => {
+    const GenrateColoum = (fields, column, rendererNames) => {
         fields.forEach((ele) => {
             if (ignoreField.includes(ele.fieldName)) {
             }
@@ -195,7 +218,7 @@ const AddExistingProduct = (props) => {
                             col.width = 180
                             col.show = true
                             col.cellRenderer = "commonRenderer"
-                            col.leval = ele.leval
+                            col.leval = "product-template"
                             column.push(col)
                         }
                     })
@@ -212,7 +235,7 @@ const AddExistingProduct = (props) => {
                                 col.width = 180
                                 col.show = true
                                 col.cellRenderer = "commonRenderer"
-                                col.leval = ele.leval
+                                col.leval = "product-template"
                                 column.push(col)
                             }
                         })
@@ -229,7 +252,7 @@ const AddExistingProduct = (props) => {
                             col.width = 180
                             col.show = true
                             col.cellRenderer = "commonRenderer"
-                            col.leval = ele.leval
+                            col.leval = "product-template"
                             column.push(col)
                         }
                     })
@@ -237,30 +260,18 @@ const AddExistingProduct = (props) => {
             }
             else {
                 if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-                    let col: any = {};
-                    col.field = ele.fieldName;
-                    col.headerName = ele.fieldLabel;
-                    col.width = 180;
-                    col.show = true
-                    col.cellRenderer = "commonRenderer"
-                    if (ele.fieldName === "productName") {
-                        col.cellRenderer = "productNameRenderer"
+                    let currentColumn: any = getColumnData(routes.product.title, ele, routes.product.path, true)
+                    column.push({ ...currentColumn.columnData, leval: "product-template" });
+                    if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                        rendererNames.push(currentColumn?.rendererName)
                     }
-                    if (ele.fieldName === "entity") {
-                        col.cellRenderer = "entityRenderer"
-                    }
-                    if (ele.fieldName === "productCategory") {
-                        col.cellRenderer = "productCategoryRenderer"
-                    }
-                    col.order = ele.order;
-                    col.leval = ele.leval;
-                    column.push(col);
                 }
             }
         })
     }
 
     const handleAdd = () => {
+        console.log(productList)
         let rows = productList.filter(
             (val) => selectedRecords.filter((u) => val._id === u._id).length > 0
         );
@@ -306,8 +317,58 @@ const AddExistingProduct = (props) => {
         <div className="listing-grid p-3">
             <Box mb={2}>
                 <Grid container >
-                    <Grid item xs={12} sm={6}>
-
+                    <Grid className="d-flex align-items-center gap-1" item xs={12} sm={6}>
+                        <Autocomplete
+                            style={{ width: "250px" }}
+                            options={productCategoryList}
+                            getOptionLabel={(option: any) => option ? option.name : ""}
+                            getOptionSelected={(option: any, val) =>
+                                option._id === val
+                            }
+                            value={productCategoryList.filter((data) => data._id === productCategory).length
+                                ? productCategoryList.filter((data) => data._id === productCategory)[0]
+                                : ""
+                            }
+                            onChange={(e, val) => {
+                                setProductCategory(val && val._id ? val._id : "")
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    margin="dense"
+                                    name="productCategory"
+                                    label="Product Category"
+                                    variant="outlined"
+                                    fullWidth
+                                />
+                            )}
+                        />
+                        {isProductTemplate &&
+                            <Autocomplete
+                                style={{ width: "250px" }}
+                                options={productTemplateList}
+                                getOptionLabel={(option: any) => option ? option.optionLabel : ""}
+                                getOptionSelected={(option: any, val) =>
+                                    option.optionValue === val
+                                }
+                                value={productTemplateList.filter((data) => data.optionValue === productTemplate).length
+                                    ? productTemplateList.filter((data) => data.optionValue === productTemplate)[0]
+                                    : ""
+                                }
+                                onChange={(e, val) => {
+                                    setProductTemplate(val && val.optionValue ? val.optionValue : "")
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        margin="dense"
+                                        name="productTemplate"
+                                        label="Product Template"
+                                        variant="outlined"
+                                        fullWidth
+                                    />
+                                )}
+                            />}
                     </Grid>
                     <Grid item xs={12} sm={6} container justify="flex-end">
                         <SearchBox
@@ -324,11 +385,11 @@ const AddExistingProduct = (props) => {
                     </Grid>
                 </Grid>
             </Box>
-            {columns ?
+            {columns && frameWorkComponent ?
                 <CustomAgGrid
                     columns={columns}
                     dataRows={dataRows}
-                    frameworkComponents={frameworkComponents}
+                    frameworkComponents={frameWorkComponent}
                     setGridApi={setGridApi}
                     dispatch={dispatch}
                     rowCount={rowCount}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useReducer, Fragment } from "react";
-import { Grid, Chip, Typography, Tooltip } from "@material-ui/core";
+import { Grid, Chip, Typography, Tooltip, Fab } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import axiosInstance from "../../axios/axiosInstance";
@@ -44,6 +44,11 @@ import TransferEntityDialog from "../../components/AssignRolesDialog/TransferEnt
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import AddIcon from "@material-ui/icons/Add"
+import { isMobile, isTablet } from 'react-device-detect';
+import { quoteStepColors } from '../../constants/helpers';
+import InfiniteScroll from "react-infinite-scroll-component";
 
 let quoteTimeout;
 const QuoteType = [
@@ -104,6 +109,8 @@ const QuoteBuilders = () => {
   const [showVersionsDialog, setShowVersionsDialog] = useState(false);
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const [columns, setColumns] = useState([])
+  const [isAllChecked, setIsAllChecked] = useState(false);
+
   const [versionStatusData, setVersionStatusData] = useState({
     columns: [
       {
@@ -260,23 +267,11 @@ const QuoteBuilders = () => {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      if (["quoteName"].find(d => d === o?.fieldData?.fieldName)) {
-        columns = [...columns, {
-          disabled: true,
-          field: "quoteName",
-          headerName: "Quote Name",
-          pivotIndex: 0,
-          show: true,
-          cellRenderer: "quoteNameRenderer"
-        }]
-      }
-      else {
-        let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData]
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName)
-          }
+      let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData]
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName)
         }
       }
     })
@@ -654,9 +649,18 @@ const QuoteBuilders = () => {
             finalObject["versionCount"] = versionCount;
             finalObject["versionData"] = versionArray;
 
+            finalObject["isChecked"] = false;
+            finalObject["allowedToEdit"] = (
+              [...(u.collaborator ?? []), u.owner].some(
+                (d) => d?.optionValue === user?.user?._id
+              )
+            );
+
             return finalObject;
           });
           //  Dynamic grid code - end
+
+          setIsAllChecked(false);
 
           dispatch({ type: "initialize", data: rows, count: count });
           setTimeout(() => {
@@ -740,7 +744,7 @@ const QuoteBuilders = () => {
   };
 
   return (
-    <>
+    <div className="quote_index_page">
       <Fragment>
         <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>
@@ -838,22 +842,91 @@ const QuoteBuilders = () => {
             </QuoteHeader>
           </div>
           {
-            Object.keys(frameWorkComponent).length > 0 ?
-              <CustomAgGrid
-                columns={columns}
+            isMobile ?
+
+              // <InfiniteScroll
+              //   dataLength={dataRows.length}
+              //   // height="500px"
+              //   scrollableTarget="scrollableDiv"
+              //   next={() => {
+              //     debugger;
+              //     setTimeout(() => {
+              //       dispatch({ type: 'pageChange', page: page + 1 })
+              //     }, 1500)
+              //   }}
+              //   hasMore={true}
+              //   loader={
+              //     <h3 className="text-center border mt-3 p-3 loading-dots">
+              //       Loading more items
+              //     </h3>
+              //   }
+              // >
+              <CustomSwipableList
+                // columns={columns}
+                primaryField={columns?.find(d => d.primaryField)}
+                onClick={(data) => {
+                  history.push(`${routes.quoteBuilderDetail.path}/${data._id}`)
+                }}
                 dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
                 dispatch={dispatch}
+                onEdit={(data) => {
+                  history.push(`${routes.quoteBuilderDetail.path}/${data._id}?openEdit=true`)
+                }}
+                onDelete={(data) => {
+                  setSingleQuoteDelete({
+                    show: true,
+                    id: data._id,
+                    quoteName: `${data.quoteName}`,
+                  })
+                }}
                 rowCount={rowCount}
+                page={page}
                 limit={limit}
                 pageSizes={pageSizes}
-                page={page}
-                actionWidth={100}
-                loading={loading}
-                renderedFrom={routes.quoteBuilder.title}
-                refreshGrid={fetchQuoteBuilder}
-              /> : null
+                chips={[
+                  {
+                    label: "Version(s): ",
+                    field: "versionCount",
+                    onClick: (data) => {
+                      setShowVersionsDialog(true)
+                      getVersionStatus(data._id, data.currency)
+                    }
+                  },
+                  {
+                    label: "Status: ",
+                    field: "status",
+                    chipColorVariable: quoteStepColors
+                  }
+                ]}
+              // onClick={(data) => {
+              //   history.push(`${routes.quoteBuilderDetail.path}/${data._id}`)
+              // }}
+              />
+              // </InfiniteScroll>
+              : (
+                Object.keys(frameWorkComponent).length > 0 ?
+                  <CustomAgGrid
+                    columns={columns}
+                    dataRows={dataRows}
+                    frameworkComponents={frameWorkComponent}
+                    setGridApi={setGridApi}
+                    dispatch={dispatch}
+                    rowCount={rowCount}
+                    limit={limit}
+                    pageSizes={pageSizes}
+                    page={page}
+                    actionWidth={100}
+                    loading={loading}
+                    renderedFrom={routes.quoteBuilder.title}
+                    refreshGrid={fetchQuoteBuilder}
+                  /> : null
+              )
+          }
+
+          {
+            quotePermissions.isCreate && isMobile && <Fab size="small" onClick={clickCreateNew} className="fab-position-b-r" color="primary" aria-label="add">
+              <AddIcon />
+            </Fab>
           }
 
           {showDeleteWarningConfirmBox ? (
@@ -896,6 +969,7 @@ const QuoteBuilders = () => {
 
       {showCreateQuoteDialog && (
         <ManageQuoteDialog
+
           open={showCreateQuoteDialog}
           onSuccess={onSuccess}
           onClose={() => {
@@ -926,14 +1000,12 @@ const QuoteBuilders = () => {
             setVersionStatusData((prevState) => ({ ...prevState, data: [] }))
           }}
         >
-          <CustomDialogContent>
-            {versionStatusData.data.length === 0 && (
+          {
+            versionStatusData.data.length === 0 ?
               <CommonSkeleton lenArray={arr} />
-            )}
-            {versionStatusData.data.length > 0 &&
-              <VersionStatus loadingVersions={loadingVersions} versionStatusData={versionStatusData}
-              />}
-          </CustomDialogContent>
+              :
+              <VersionStatus loadingVersions={loadingVersions} versionStatusData={versionStatusData} />
+          }
         </CustomDialogComponent>
       )}
       {showTransferEntityDialog && (
@@ -952,7 +1024,7 @@ const QuoteBuilders = () => {
           api="quote-builder"
         />
       )}
-    </>
+    </div>
   );
 };
 

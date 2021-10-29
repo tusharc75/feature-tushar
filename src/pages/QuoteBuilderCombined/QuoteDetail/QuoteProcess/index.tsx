@@ -95,19 +95,52 @@ const useStyles = makeStyles((theme) => ({
 
 
 const DOASteps = [
-    "New",
-    "Price Builder",
-    "Quote Builder",
-    "DOA Process",
-    "Send To Customer",
-    "End",
+    {
+        key: "New",
+        label: "Product Builder",
+    },
+    {
+        key: "Price Builder",
+        label: "Price Builder",
+    },
+    {
+        key: "Quote Builder",
+        label: "Quote Builder",
+    },
+    {
+        key: "DOA Process",
+        label: "DOA Process",
+    },
+    {
+        key: "Send To Customer",
+        label: "Send To Customer",
+    },
+    {
+        key: "End",
+        label: "End",
+    },
 ];
 const OtherSteps = [
-    "New",
-    "Price Builder",
-    "Quote Builder",
-    "Send To Customer",
-    "End",
+    {
+        key: "New",
+        label: "Product Builder",
+    },
+    {
+        key: "Price Builder",
+        label: "Price Builder",
+    },
+    {
+        key: "Quote Builder",
+        label: "Quote Builder",
+    },
+    {
+        key: "Send To Customer",
+        label: "Send To Customer",
+    },
+    {
+        key: "End",
+        label: "End",
+    },
 ];
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -267,6 +300,7 @@ export default function QuoteProcess(props) {
         if (tempProcessStatus === "Customer Process") {
             setNextStep(false);
         }
+
     }, [quoteData]);
 
     useEffect(() => {
@@ -415,28 +449,34 @@ export default function QuoteProcess(props) {
         // }
         let colName = [];
         let dynamicTable = [];
+        let requiredValuesData = []
 
         const filterKeys = ["priceTemplate", "productTemplate", "productCategory", "productImage"]
         BuilderData.forEach((quoteRows: { [x: string]: any }, i) => {
-            const quoteRowKeys = Object.keys(quoteRows);
+            const quoteRowKeys = Object?.keys(quoteRows);
             let inventorydata: { fieldName: string; fieldValue: any }[] = [];
             // if (i === 0) console.log(quoteRows)
-
             // Making table columns and data for table
             quoteRowKeys.forEach((key) => {
                 if (key === "fields") {
                     const labelsWithVal = {}
+                    const requiredValues = {}
                     quoteRows[key].forEach((data, i) => {
                         // console.log(data)
                         if (!filterKeys.includes(data.fieldName)) {
                             const fieldLabel = data.fieldLabel;
                             const fieldName = data.fieldName;
+                            const required = data.required
                             const labels = []
+
                             if (data.displayCurrency && data.units) {
                                 data.displayCurrency.forEach((cur) => {
                                     if (data.units) {
                                         data.units.forEach(unit => {
-                                            const casedLabel = `${fieldName}_${cur.toLowerCase()}_${unit.toLowerCase()}`
+                                            const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`
+                                            if (required) {
+                                                requiredValues[casedLabel] = quoteRows[casedLabel]
+                                            }
                                             if (quoteRows[casedLabel]) {
                                                 labels.push(`${fieldLabel} ${unit.toUpperCase()} ${cur}`)
                                                 labelsWithVal[`${fieldLabel} ${unit.toUpperCase()} ${cur}`] = quoteRows[casedLabel]
@@ -444,6 +484,9 @@ export default function QuoteProcess(props) {
                                         })
                                     } else {
                                         const casedLabel = `${fieldName}_${cur.toLowerCase()}`
+                                        if (required) {
+                                            requiredValues[casedLabel] = quoteRows[casedLabel]
+                                        }
                                         if (quoteRows[casedLabel]) {
                                             labels.push(`${fieldLabel} ${cur}`)
                                             labelsWithVal[`${fieldLabel} ${cur}`] = quoteRows[casedLabel]
@@ -452,19 +495,36 @@ export default function QuoteProcess(props) {
                                 })
                             } else if (data.units && !data.displayCurrency) {
                                 data.units.forEach((unit) => {
-                                    const casedLabel = `${camelCase(fieldName)}_${unit.toLowerCase()}`
+                                    const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`
+                                    if (required) {
+                                        requiredValues[casedLabel] = quoteRows[casedLabel]
+                                    }
                                     if (quoteRows[casedLabel]) {
                                         labels.push(`${fieldLabel} ${unit.toUpperCase()}`)
                                         labelsWithVal[`${fieldLabel} ${unit.toUpperCase()}`] = quoteRows[casedLabel]
                                     }
                                 })
 
+                            } else if (data.displayCurrency) {
+                                data.displayCurrency.forEach((cur) => {
+                                    const casedLabel = `${fieldName}_${cur.toLowerCase()}`
+                                    if (required) {
+                                        requiredValues[casedLabel] = quoteRows[casedLabel]
+                                    }
+                                    if (quoteRows[casedLabel]) {
+                                        labels.push(`${fieldLabel} ${cur}`)
+                                        labelsWithVal[`${fieldLabel} ${cur}`] = quoteRows[casedLabel]
+                                    }
+
+                                })
                             } else {
+                                if (required) {
+                                    requiredValues[fieldName] = quoteRows[fieldName]
+                                }
                                 if (quoteRows[fieldName]) {
                                     labels.push(fieldLabel)
                                     labelsWithVal[fieldLabel] = quoteRows[fieldName]
                                 }
-
                             }
 
                             labels.forEach(d => {
@@ -472,12 +532,30 @@ export default function QuoteProcess(props) {
                                     colName.push(d)
                                 }
                             })
-
+                            // if (data.required) {
+                            //     (quoteRows[fieldName] && quoteRows[fieldName] !== "") || ((quoteRows[`${fieldName}_${data.displayCurrency.toLowerCase()}`] && quoteRows[`${fieldName}_${data.displayCurrency.toLowerCase()}`] !== "")) ? requiredFieldArray.push({ "key": quoteRows[fieldName], "value": true }) : requiredFieldArray.push({ "key": quoteRows[fieldName], "value": false }) //next button disable logic
+                            // }
                         }
                     })
-                    dynamicTable.push(labelsWithVal)
 
+                    dynamicTable.push(labelsWithVal)
+                    requiredValuesData.push(requiredValues)
                 }
+
+                const ungivenValues = requiredValuesData.length > 0 && requiredValuesData.filter((d) => {
+                    const isEmpty = Object.entries(d).filter(([k, v]) => v === undefined || v === null || v === "")
+
+                    return isEmpty.length > 0 ? true : false
+                })
+
+                if (DOASteps.findIndex(d => d?.key === ProcessStatus) === 1 || ProcessStatus === "Price Builder") {
+                    if (ungivenValues && ungivenValues.length > 0) {
+                        setNextStep(false)
+                    } else {
+                        setNextStep(true)
+                    }
+                }
+
 
                 if (ignoredKeys.indexOf(key) === -1) {
                     let indexkey = key;
@@ -528,11 +606,9 @@ export default function QuoteProcess(props) {
                 }
             });
 
-
             inventory.push(inventorydata);
         });
-
-
+        // requiredFieldArray.every(v => v.value === true) ? setNextStep(true) : setNextStep(false)
         setColName(colName)
         setDynamicTableData(dynamicTable);
         // console.log("*** TABLE ***: ", dynamicTable)
@@ -727,7 +803,7 @@ export default function QuoteProcess(props) {
             });
 
             const res = newTable.reduce((result, item) => {
-                const keys = Object.keys(item);
+                const keys = Object?.keys(item);
                 keys.forEach(key => {
                     if (!key.includes(quoteCurrency)) { return; }
                     result[key] = result[key]
@@ -737,7 +813,7 @@ export default function QuoteProcess(props) {
                 return result;
             }, { ["Product Description"]: "Total" });
 
-            Object.keys(res).forEach(k => {
+            Object?.keys(res).forEach(k => {
                 if (k.includes(quoteCurrency)) {
                     res[k] = res[k] && res[k].toString().split(".")[1] !== undefined
                         && res[k].toString().split(".")[1].length > 4
@@ -1263,7 +1339,7 @@ export default function QuoteProcess(props) {
                                 open={Boolean(anchorEl)}
                                 onClose={handleClose}
                             >
-                                {Object.keys(quoteData.versions).map((versionNumber) => (
+                                {Object?.keys(quoteData.versions).map((versionNumber) => (
                                     <MenuItem onClick={handleChangeVersionInQuote} key={versionNumber} value={versionNumber}>
                                         {"Version : " + versionNumber}
                                     </MenuItem>
@@ -1280,8 +1356,8 @@ export default function QuoteProcess(props) {
                                         disabled={
                                             !allowedToEdit ||
                                             deletingDOA || loading || (DOAneeded
-                                                ? DOASteps.indexOf(ProcessStatus) > 1
-                                                : OtherSteps.indexOf(ProcessStatus) > 1)
+                                                ? DOASteps.findIndex(d => d?.key === ProcessStatus) > 1
+                                                : OtherSteps.findIndex(d => d?.key === ProcessStatus) > 1)
                                         }
                                         startIcon={<MdDelete size={16}/>}
                                         onClick={deleteVersion}
@@ -1323,7 +1399,7 @@ export default function QuoteProcess(props) {
                 <div>
                     <Steps
                         steps={DOAneeded ? DOASteps : OtherSteps}
-                        currentStep={DOAneeded ? DOASteps.indexOf(ProcessStatus) : ProcessStatus === "DOA Process" ? OtherSteps.indexOf("Quote Builder") : OtherSteps.indexOf(ProcessStatus)}
+                        currentStep={DOAneeded ? DOASteps.findIndex(d => d?.key === ProcessStatus) : ProcessStatus === "DOA Process" ? OtherSteps.findIndex(d => d?.key === "Quote Builder") : OtherSteps.findIndex(d => d?.key === ProcessStatus)}
                         id={quoteData._id}
                         version={currentVersion}
                         Refresh={fetchQuoteData}
@@ -1510,7 +1586,7 @@ export default function QuoteProcess(props) {
                                     <Button
                                         onClick={() => {
                                             quoteData?.pDFTemplate.optionValue && history.push(`/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}`, {
-                                                quoteId: quoteData._id,
+                                                quoteData: quoteData,
                                                 version: currentVersion,
                                                 redirectTo: `/quotes/detail/${quoteData._id}`
                                             })
