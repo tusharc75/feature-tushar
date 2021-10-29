@@ -1133,7 +1133,7 @@ export const prepareDataForGrid = (data, user = {}) => {
           restProperties[`rest${key}`] = rest
         }
         else if (typeof data[key][0] !== "object") {
-          restProperties[key] = data[key].join(",")
+          restProperties[key] = data[key].join(" , ")
         }
       }
       else {
@@ -1142,7 +1142,6 @@ export const prepareDataForGrid = (data, user = {}) => {
     } else {
       restProperties[key] = data[key];
     }
-
   })
 
   let finalObject = { ...restProperties };
