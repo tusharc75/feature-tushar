@@ -10,6 +10,7 @@ import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGrid
 import { orderBy } from 'lodash';
 import { checkStaticField, staticColumns } from "../../constants/columns"
 
+
 export function reducer(state, action) {
   switch (action.type) {
     case 'loading':
@@ -246,7 +247,6 @@ export default function CustomAgGrid({
       ></AgGridColumn >
   })
 
-
   return (
     <>
       <div className="ag-grid-main">
@@ -380,7 +380,11 @@ export default function CustomAgGrid({
                 ></AgGridColumn>
               )}
 
-              {generateColumns}
+              {
+                columns.length > 0 ?
+                  generateColumns : null
+              }
+
             </AgGridReact>
           </div>
 
