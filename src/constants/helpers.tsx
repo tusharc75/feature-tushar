@@ -408,18 +408,23 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
 
   const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data.optionValue : '');
   for (const key of arr) {
+
+    let defaultValue
+    if (key?.isDefaultValue && key?.defaultValue) {
+      defaultValue = key.defaultValue
+    }
     if (key.type === 'switch' || key.type === 'checkBox') {
-      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : false;
+      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue ? defaultValue : false;
     } else if (key.type === 'multiSelect') {
       const values = dataObj[key.fieldName] && dataObj[key.fieldName].length
         ? typeof dataObj[key.fieldName] === 'string'
           ? dataObj[key.fieldName]
           : dataObj[key.fieldName].map((val: any) => filterValues(val))
-        : [];
+        : defaultValue || [];
       obj[key.fieldName] = values;
     } else if (key.type === 'dropDown') {
       const value = filterValues(dataObj[key.fieldName]);
-      obj[key.fieldName] = value ? value : '';
+      obj[key.fieldName] = value ? value : defaultValue || '';
     } else if (key.type === 'converter' || key.type === 'currencyAmount' || key.isConverter === true) {
       if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
         key.displayUnits &&
@@ -428,7 +433,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
             if (key.fieldName.includes('_')) {
               fieldName = key.fieldName;
             }
-            obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
+            obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : defaultValue || 0;
           });
       } else if (key.type === 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
         key.displayCurrency &&
@@ -453,9 +458,9 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
           });
       }
     } else if (key.type === 'decimal' || key.type === 'percent' || key.type === 'formula') {
-      obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
+      obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : defaultValue || 0;
     } else {
-      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
+      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue || '';
     }
   }
   return obj;
