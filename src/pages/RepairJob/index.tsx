@@ -63,7 +63,7 @@ const RepairJob = () => {
   });
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
   const [isAllChecked, setIsAllChecked] = useState(false);
   const columns = [
     {
@@ -359,12 +359,21 @@ const RepairJob = () => {
             createdBy: u.createdBy?.user?.concatedName,
             createdByDate: u.createdBy?.date,
             updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
+            updatedByDate: u.updatedBy?.date,
+
+            canDelete: u.createdBy?.user?._id === user?.user._id,
+            isChecked: false,
+            allowedToEdit: permissions?.repairJob?.isUpdate
           };
           return res;
         });
 
-        dispatch({ type: 'initialize', data: rows, count: count });
+        if (appendRows) {
+          dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
+        } else {
+          dispatch({ type: "initialize", data: rows, count: count });
+        }
+
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -506,19 +515,21 @@ const RepairJob = () => {
         </div>
         {isMobile ?
           <CustomSwipableList
+            allowSelection={true}
             permissions={permissions.repairJob}
             primaryField={columns?.find(d => d.primaryField)}
+            onClick={(data) => {
+              history.push(`${routes.repairJobDetail.path}/${data._id}`)
+            }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
             onEdit={(data) => {
-              history.push(`${routes.quoteBuilderDetail.path}/${data._id}?openEdit=true`)
+              history.push(`${routes.repairJobDetail.path}/${data._id}?openEdit=true`)
             }}
             onDelete={(data) => {
-
-            }}
-            onClick={(data) => {
-              history.push(`${routes.quoteBuilderDetail.path}/${data._id}`)
+              setDeleteRecord(data._id);
+              setIsConformDialogVisible(true);
             }}
             rowCount={rowCount}
             page={page}
@@ -527,8 +538,13 @@ const RepairJob = () => {
               {
                 label: "Status: ",
                 field: "status",
+              },
+              {
+                label: "Status: ",
+                field: "typeOfRepair",
               }
             ]}
+            onCreate={clickCreateNew}
           /> :
           <CustomAgGrid
             columns={columns}
@@ -546,11 +562,7 @@ const RepairJob = () => {
             refreshGrid={fetchRepairJobs}
           />
         }
-        {
-          permissions.repairJob?.isCreate && isMobile && <Fab size="small" onClick={clickCreateNew} className="fab-position-b-r" color="primary" aria-label="add">
-            <AddIcon />
-          </Fab>
-        }
+
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}

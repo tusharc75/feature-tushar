@@ -850,7 +850,7 @@ const QuoteBuilders = () => {
           {
             isMobile ?
               <CustomSwipableList
-                // columns={columns}
+                allowSelection={true}
                 permissions={permissions.quoteBuilder}
                 primaryField={columns?.find(d => d.primaryField)}
                 onClick={(data) => {
@@ -887,6 +887,7 @@ const QuoteBuilders = () => {
                     chipColorVariable: quoteStepColors
                   }
                 ]}
+                onCreate={clickCreateNew}
               />
 
               : (
@@ -907,12 +908,6 @@ const QuoteBuilders = () => {
                     refreshGrid={fetchQuoteBuilder}
                   /> : null
               )
-          }
-
-          {
-            quotePermissions.isCreate && isMobile && <Fab size="small" onClick={clickCreateNew} className="fab-position-b-r" color="primary" aria-label="add">
-              <AddIcon />
-            </Fab>
           }
 
           {showDeleteWarningConfirmBox ? (

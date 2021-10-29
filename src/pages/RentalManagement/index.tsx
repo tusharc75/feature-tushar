@@ -107,6 +107,7 @@ const RentalManagement = () => {
     filters,
     sorting,
     selectedRecords,
+    appendRows
   } = state;
 
   useEffect(() => {
@@ -418,7 +419,11 @@ const RentalManagement = () => {
         return res;
       });
 
-      dispatch({ type: "initialize", data: rows, count: count });
+      if (appendRows) {
+        dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
+      } else {
+        dispatch({ type: "initialize", data: rows, count: count });
+      }
 
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
@@ -570,12 +575,11 @@ const RentalManagement = () => {
           </div>
 
           {
-
             Object.keys(frameWorkComponent).length > 0 ?
               isMobile ?
                 <CustomSwipableList
+                  allowSelection={true}
                   permissions={permissions.rentalManagement}
-                  // columns={columns}
                   primaryField={columns?.find(d => d.primaryField)}
                   onClick={(data) => {
                     history.push(`${routes.rentalManagementDetail.path}/${data._id}`)
@@ -602,6 +606,7 @@ const RentalManagement = () => {
                       field: "status",
                     }
                   ]}
+                  onCreate={clickCreateNew}
                 /> :
                 <CustomAgGrid
                   columns={columns}
@@ -620,11 +625,6 @@ const RentalManagement = () => {
                   isClientSideGrid={isOffline}
                   refreshGrid={fetchRentalManagement}
                 /> : null
-          }
-          {
-            permissions.repairJob?.isCreate && isMobile && <Fab size="small" onClick={clickCreateNew} className="fab-position-b-r" color="primary" aria-label="add">
-              <AddIcon />
-            </Fab>
           }
 
           {showDeleteWarningConfirmBox ? (

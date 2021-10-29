@@ -63,8 +63,7 @@ const ReceivingTicket = () => {
   });
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-  const [isAllChecked, setIsAllChecked] = useState(false);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
 
   const columns = [
     {
@@ -73,7 +72,7 @@ const ReceivingTicket = () => {
       show: true,
       disabled: true,
       cellRenderer: 'receivingJobNameRenderer',
-      primaryField: 'true'
+      primaryField: true
     },
     {
       field: 'deliveryPerson',
@@ -408,12 +407,21 @@ const ReceivingTicket = () => {
             createdBy: u.createdBy?.user?.concatedName,
             createdByDate: u.createdBy?.date,
             updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
+            updatedByDate: u.updatedBy?.date,
+
+            canDelete: u.createdBy?.user?._id === user?.user._id,
+            isChecked: false,
+            allowedToEdit: permissions?.receivingTicket?.isUpdate
           };
           return res;
         });
 
-        dispatch({ type: 'initialize', data: rows, count: count });
+        if (appendRows) {
+          dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
+        } else {
+          dispatch({ type: "initialize", data: rows, count: count });
+        }
+        
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -555,19 +563,24 @@ const ReceivingTicket = () => {
         </div>
         {isMobile ?
           <CustomSwipableList
+            allowSelection={true}
             permissions={permissions.receivingTicket}
             primaryField={columns?.find(d => d.primaryField)}
+            onClick={(data) => {
+              history.push(`${routes.receivingTicketDetail.path}/${data._id}`)
+            }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
             onEdit={(data) => {
-              history.push(`${routes.quoteBuilderDetail.path}/${data._id}?openEdit=true`)
+              history.push(`${routes.receivingTicketDetail.path}/${data._id}?openEdit=true`)
             }}
             onDelete={(data) => {
-
-            }}
-            onClick={(data) => {
-              history.push(`${routes.quoteBuilderDetail.path}/${data._id}`)
+              setSingleTicketDelete({
+                show: true,
+                id: data._id,
+                receivingJobName: data.receivingJobName
+              })
             }}
             rowCount={rowCount}
             page={page}
@@ -578,6 +591,7 @@ const ReceivingTicket = () => {
                 field: "status",
               }
             ]}
+            onCreate={clickCreateNew}
           /> :
           <CustomAgGrid
             columns={columns}
@@ -595,11 +609,7 @@ const ReceivingTicket = () => {
             refreshGrid={fetchReceivingTickets}
           />
         }
-        {
-          permissions.repairJob?.isCreate && isMobile && <Fab size="small" onClick={clickCreateNew} className="fab-position-b-r" color="primary" aria-label="add">
-            <AddIcon />
-          </Fab>
-        }
+
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}

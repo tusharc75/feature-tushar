@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { Grid, Checkbox, FormControlLabel, TablePagination, Chip } from '@material-ui/core'
+import React, { useState, useEffect, Fragment } from 'react'
+import { Grid, Checkbox, FormControlLabel, Fab, Chip, Tooltip } from '@material-ui/core'
 import {
     SwipeableList,
     SwipeableListItem,
@@ -11,9 +11,12 @@ import { HiPencil } from "react-icons/hi";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { isMobile, isTablet } from 'react-device-detect';
+import AddIcon from "@material-ui/icons/Add"
 
 export default function CustomSwipableList({
     // columns,
+    allowSelection,
     primaryField,
     onClick,
     dataRows,
@@ -25,7 +28,8 @@ export default function CustomSwipableList({
     page,
     loading,
     chips,
-    permissions
+    permissions,
+    onCreate
 }) {
     const [isAllChecked, setIsAllChecked] = useState(false);
 
@@ -58,32 +62,34 @@ export default function CustomSwipableList({
     }
 
     return <>
-        <Grid container>
-            <Grid item xs={12} sm={12} className="pl-1 ml-3">
-                <FormControlLabel
-                    control={
-                        <Checkbox
-                            className="pl-2"
-                            checked={isAllChecked}
-                            onChange={(e) => {
-                                setIsAllChecked(e.target.checked);
-                                const updatedMetadata = dataRows.map(d => {
-                                    return { ...d, isChecked: e.target.checked };
-                                })
-                                dispatch({
-                                    type: 'selection',
-                                    selectedRecords: updatedMetadata.filter(d => d.isChecked)
-                                });
-                                dispatch({ type: "update", data: updatedMetadata });
-                            }}
-                            name="checkedB"
-                            color="primary"
-                        />
-                    }
-                    label="Check All"
-                />
+        {
+            allowSelection && <Grid container>
+                <Grid item xs={12} sm={12} className="pl-1 ml-3">
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                className="pl-2"
+                                checked={isAllChecked}
+                                onChange={(e) => {
+                                    setIsAllChecked(e.target.checked);
+                                    const updatedMetadata = dataRows.map(d => {
+                                        return { ...d, isChecked: e.target.checked };
+                                    })
+                                    dispatch({
+                                        type: 'selection',
+                                        selectedRecords: updatedMetadata.filter(d => d.isChecked)
+                                    });
+                                    dispatch({ type: "update", data: updatedMetadata });
+                                }}
+                                name="checkedB"
+                                color="primary"
+                            />
+                        }
+                        label="Check All"
+                    />
+                </Grid>
             </Grid>
-        </Grid>
+        }
 
         <div className="custom-swipeable-list" id="scrollableDiv">
             <div>
@@ -122,42 +128,44 @@ export default function CustomSwipableList({
                                     trailingActions={
                                         <TrailingActions>
                                             {
-                                                permissions.isUpdate && d.allowedToEdit && <div style={{ width: 60, background: "#163340" }} className="h-100 d-flex align-items-center">
+                                                permissions.isUpdate && d.allowedToEdit ? <div style={{ width: 60, background: "#163340" }} className="h-100 d-flex align-items-center">
                                                     <SwipeAction onClick={() => onEdit(d)}>
                                                         <HiPencil size={20} style={{ color: "white" }} />
                                                     </SwipeAction>
-                                                </div>
+                                                </div> : <></>
                                             }
 
                                             {
-                                                permissions.isDelete && d.canDelete && <div style={{ width: 60, background: "#dc3545" }} className="h-100 d-flex align-items-center">
+                                                permissions.isDelete && d.canDelete ? <div style={{ width: 60, background: "#dc3545" }} className="h-100 d-flex align-items-center">
                                                     <SwipeAction onClick={() => onDelete(d)}>
                                                         <DeleteIcon fontSize="small" style={{ color: "white" }} />
                                                     </SwipeAction>
-                                                </div>
+                                                </div> : <></>
                                             }
                                         </TrailingActions>
                                     }
                                 >
                                     <Grid container className="pb-2">
-                                        <Grid item xs={1} sm={1}>
-                                            <Checkbox
-                                                color="primary"
-                                                checked={d.isChecked}
-                                                onChange={(e) => {
-                                                    dataRows[index].isChecked = e.target.checked;
-                                                    setIsAllChecked(!dataRows.some(d => d.isChecked === false));
+                                        {
+                                            allowSelection && <Grid item xs={1} sm={1}>
+                                                <Checkbox
+                                                    color="primary"
+                                                    checked={d.isChecked}
+                                                    onChange={(e) => {
+                                                        dataRows[index].isChecked = e.target.checked;
+                                                        setIsAllChecked(!dataRows.some(d => d.isChecked === false));
 
-                                                    dispatch({
-                                                        type: 'selection',
-                                                        selectedRecords: dataRows.filter(d => d.isChecked)
-                                                    });
+                                                        dispatch({
+                                                            type: 'selection',
+                                                            selectedRecords: dataRows.filter(d => d.isChecked)
+                                                        });
 
-                                                    dispatch({ type: "update", data: dataRows });
-                                                }}
-                                                inputProps={{ 'aria-label': 'primary checkbox' }}
-                                            />
-                                        </Grid>
+                                                        dispatch({ type: "update", data: dataRows });
+                                                    }}
+                                                    inputProps={{ 'aria-label': 'primary checkbox' }}
+                                                />
+                                            </Grid>
+                                        }
 
                                         <Grid item xs={10} sm={10} className="pl-2">
 
@@ -170,13 +178,10 @@ export default function CustomSwipableList({
                                             <div className="d-flex gap-2 mt-2 mb-1 flex-wrap">
                                                 {
                                                     [
-                                                        // ...columns.filter(d => !d.primaryField).map(c => (
-                                                        //     <Chip variant="outlined" onClick={c.onClick ?? null} size="small" label={d[c.field]} />
-                                                        // )),
                                                         ...chips.map(c => (
-                                                            <Chip variant="outlined" onClick={c.onClick ? () => c.onClick(d) : null}
+                                                            d[c.field] ? <Chip key={c.field} variant="outlined" onClick={c.onClick ? () => c.onClick(d) : null}
                                                                 size="small" label={`${c.label} ${d[c.field]}`} style={c.chipColorVariable ? generateChipStyle(c.chipColorVariable, d[c.field]?.toLowerCase()) : {}}
-                                                            />
+                                                            /> : <Fragment key={c.field}></Fragment>
                                                         ))
                                                     ]
                                                 }
@@ -184,9 +189,11 @@ export default function CustomSwipableList({
 
                                         </Grid>
 
-                                        <Grid item xs={1} sm={1} className="d-flex align-items-center">
-                                            <ChevronRightIcon color="disabled" />
-                                        </Grid>
+                                        {
+                                            permissions.isUpdate && d.allowedToEdit && permissions.isDelete && d.canDelete && <Grid item xs={1} sm={1} className="d-flex align-items-center">
+                                                <ChevronRightIcon color="disabled" />
+                                            </Grid>
+                                        }
 
                                     </Grid>
                                 </SwipeableListItem>
@@ -216,5 +223,13 @@ export default function CustomSwipableList({
         {/* {
             dataRows.length !== rowCount && <div style={{ height: 70 }}></div>
         } */}
+
+        {
+            permissions?.isCreate && isMobile && onCreate && <Tooltip title="Create">
+                <Fab size="small" onClick={onCreate} className="fab-position-b-r" color="primary" aria-label="add">
+                    <AddIcon />
+                </Fab>
+            </Tooltip>
+        }
     </>
 }

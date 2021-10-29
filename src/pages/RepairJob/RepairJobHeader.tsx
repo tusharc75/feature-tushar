@@ -9,25 +9,6 @@ import styles from '../Leads/Header.module.scss';
 import { isMobile } from 'react-device-detect';
 
 function RepairJobHeader(props) {
-  const [anchorEl, setAnchorEl] = useState(null);
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const [filter, setFilter] = useState('All Repair Jobs');
-
-  const handleFilter = (event, newFilter) => {
-    if (newFilter != null) {
-      setFilter(newFilter);
-      onTypeChange(options.find((d) => d.key === newFilter).value);
-    }
-  };
-
   const {
     selectedRecords,
     onTypeChange,
@@ -44,6 +25,26 @@ function RepairJobHeader(props) {
     showTransferEntityDialog
     // showCloneRentalManagementDialog
   } = props;
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const [filter, setFilter] = useState(options[0].key);
+
+  const handleFilter = (event, newFilter) => {
+    if (newFilter != null) {
+      setFilter(newFilter);
+      onTypeChange(options.find((d) => d.key === newFilter).value);
+    }
+  };
+
   return (
     <Grid className={styles.filter_side_container} container>
       <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
