@@ -1,3 +1,9 @@
+.MuiStepLabel-iconContainer{
+  display: none !important;
+}
+.MuiStepLabel-label{
+  font-size: 12px !important;
+}
 .nameLink {
   color: #0645ad;
   cursor: pointer;
@@ -52,4 +58,27 @@
 .tab-font{
   font-size: 14px;
 }
-
+.stepperButton{
+  padding: 0px !important;
+  margin-left: 20px !important;
+  color: #418887 !important;
+}
+.stepperButtonNext{
+  padding: 0px !important;
+  margin-right: 20px !important;
+  color: #418887 !important;
+}
+.MuiButtonBase-root.Mui-disabled{
+  color: grey !important;
+}
+.buttonIconMobile{
+  min-width: 40px !important;
+}
+.setIconForMobile{
+  min-width: 40px !important;
+}
+@media (max-width: 760px){
+  .MuiStepLabel-label{
+    font-size: 10px !important;
+  }
+}

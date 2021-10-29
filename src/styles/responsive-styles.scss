@@ -20,6 +20,9 @@
     border: 1px solid grey;
     flex-grow: 1;
 }
+.detailHeaderDashboard{
+    display: none;
+}
 
 @media only screen and (max-width: 600px) {
     .stepper-responsive {
@@ -37,7 +40,7 @@
         padding: 8px;
     }
     .detailHeader {
-        padding: 8px 16px;
+        padding: 8px 0px;
         background-color: white;
         border-radius: 8px;
     }
@@ -85,13 +88,13 @@
         margin-top: 0 !important;
     }
 
-    .detailHeaderDashboard {
-        display: flex;
-        align-items: normal;
-        justify-content: center;
-        flex-direction: column;
-        padding: 0px;
-    }
+    //.detailHeaderDashboard {
+    //    display: flex;
+    //    align-items: normal;
+    //    justify-content: center;
+    //    flex-direction: column;
+    //    padding: 0px;
+    //}
 
     .listing-grid {
         height: calc(100vh - 233px);
@@ -176,19 +179,21 @@
         padding: 8px;
 
     }
-    .quote-tab {
-        display: none !important;
-    }
     .detailHeading{
         padding: 0px 16px;
     }
-    .deleteButton{
-        display: none !important;
+    .deleteButtonIcon{
+       color: var(--danger-light) !important;
+        margin: 0px !important;
     }
     .deleteIconNew{
         display: flex;
         color: var(--danger-light);
         padding-bottom: 3px;
+    }
+    .uio{
+        border: 1px solid grey;
+        flex-grow: 0;
     }
 
 }
@@ -213,6 +218,13 @@
     .main-container{
         top: 0;
         margin: 0;
+    }
+    .tabLayout{
+        padding: 3px 0 !important;
+        flex: 1;
+    }
+    .tab-font {
+        font-size: 12px;
     }
     
 }

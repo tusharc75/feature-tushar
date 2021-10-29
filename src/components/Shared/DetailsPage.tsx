@@ -78,6 +78,15 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "2px",
     top: "4px",
   },
+  "@media only screen and (max-width: 600px)":{
+    detailLabel: {
+      padding:"2px 10px 2px 4px",
+      fontSize: "0.8rem",
+    },
+    fieldText: {
+      fontSize:"0.8rem"
+    }
+  }
 }));
 
 interface DetailProps {

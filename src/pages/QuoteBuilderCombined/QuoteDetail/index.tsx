@@ -552,23 +552,25 @@ export default function QuoteDetail() {
                     user?.user?._id &&
                     quoteData.owner.optionValue === user.user._id ? (
                     <DeleteButton
-                      text="Delete"
+                        variant={isMobile ? "text" : "outlined"}
+                      text={isMobile ? "" : "Delete"}
                       onClick={() => setShowConfirmBox(true)}
-                      className={"deleteButton"}
+                      className={"deleteButtonIcon"}
+                      endIcon={ isMobile ? <MdDelete size={isMobile ? 20 : 16} style={{color:"var(--error)"}}/> : ""}
                     />
+
                   ) : null}
 
-                  {permissions[qbResource].isDelete &&
-                  quoteData?.owner.optionValue &&
-                  user?.user?._id &&
-                  quoteData.owner.optionValue === user.user._id ? (
-                      <MdDelete
-                          size={24}
-                          onClick={() => setShowConfirmBox(true)}
-                          className={"deleteIconNew"}
+                  {/*{permissions[qbResource].isDelete &&*/}
+                  {/*quoteData?.owner.optionValue &&*/}
+                  {/*user?.user?._id &&*/}
+                  {/*quoteData.owner.optionValue === user.user._id ? (*/}
+                  {/*    <MdDelete*/}
+                  {/*        size={24}*/}
+                  {/*        onClick={() => setShowConfirmBox(true)}*/}
 
-                      />
-                  ) : null}
+                  {/*    />*/}
+                  {/*) : null}*/}
 
 
                 </DetailsPageHeader>
@@ -600,12 +602,13 @@ export default function QuoteDetail() {
                     }}
                   >
                     <Tab
+                        className={"tabLayout"}
                       style={{
                         background: tabValue === 0 ? "white" : "",
                         color: tabValue === 0 ? "blue" : "#163340",
                       }}
                       label={
-                        <div className="d-flex align-items-center tab-font">
+                        <div className="d-flex align-items-center tab-font ">
                           <InfoIcon className="mr-1" fontSize="inherit" /> All
                           Version Status
                         </div>
@@ -613,6 +616,7 @@ export default function QuoteDetail() {
                       {...a11yProps(0)}
                     />
                     <Tab
+                        className={"tabLayout"}
                       style={{
                         background: tabValue === 1 ? "white" : "",
                         color: tabValue === 1 ? "blue" : "#163340",
@@ -626,6 +630,7 @@ export default function QuoteDetail() {
                       {...a11yProps(0)}
                     />
                     <Tab
+                        className={"tabLayout"}
                       style={{
                         background: tabValue === 2 ? "white" : "",
                         color: tabValue === 2 ? "blue" : "#163340",
@@ -643,48 +648,6 @@ export default function QuoteDetail() {
 
 
 
-                  <Grid className={"DetailCube"}>
-                    <Tabs
-                        className="zzzz"
-                        value={tabValue}
-                        onChange={handleMainTabChange}
-                        textColor="primary"
-                        TabIndicatorProps={{
-                          style: {
-                            display: "none",
-                          },
-                        }}
-                    >
-                      <Tab
-                          style={{
-                            background: tabValue === 0 ? "#163340" : "",
-                            color: tabValue === 0 ? "white" : "#163340",
-                            display: "none"
-                          }}
-                          label={
-                            <div className="d-flex align-items-center tab-font ">
-                              <InfoIcon className="mr-1" fontSize="inherit" /> All
-                              Version Status
-                            </div>
-                          }
-                          {...a11yProps(0)}
-                      />
-                      <Tab
-                          style={{
-                            background: tabValue === 1 ? "#163340" : "",
-                            color: tabValue === 1 ? "white" : "#163340",
-                          }}
-                          label={
-                            <div className="d-flex align-items-center tab-font">
-                              <FaWpforms className="mr-1" fontSize="inherit" />{" "}
-                              Details
-                            </div>
-                          }
-                          {...a11yProps(0)}
-                      />
-                    </Tabs>
-
-                  </Grid>
 
                   <TabPanel value={tabValue} index={0}>
                     {(quoteData && <AllVersionStatus

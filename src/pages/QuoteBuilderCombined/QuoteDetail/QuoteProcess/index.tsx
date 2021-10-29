@@ -1319,17 +1319,17 @@ export default function QuoteProcess(props) {
                         ) : null}
                         <div>
                             <Button
-                                className="customSelect mx-1"
+                                // className="customSelect mx-1"
                                 variant="text"
                                 color="primary"
                                 size="small"
                                 aria-controls="simple-menu"
                                 aria-haspopup="true"
+                                className={`${isMobile ? "buttonIconMobile" : "buttonIconDesktop"}`}
                                 style={{color:"var(--warning)"}}
                                 onClick={handleClick}
-                                startIcon={<VscVersions style={{paddingTop:"2px"}} size={18}/>}>
-
-                                {`Version : ${currentVersion}`}
+                                startIcon={<VscVersions style={{paddingTop:"2px"}} size={ isMobile ? `20` : `16`}/>}>
+                                { isMobile ? "" : `Version : ${currentVersion}`}
 
                             </Button>
                             <Menu
@@ -1353,21 +1353,23 @@ export default function QuoteProcess(props) {
                                         variant="text"
                                         size="small"
                                         style={{color:"var(--error)"}}
+                                        className={`${isMobile ? "buttonIconMobile" : "buttonIconDesktop"}`}
                                         disabled={
                                             !allowedToEdit ||
                                             deletingDOA || loading || (DOAneeded
                                                 ? DOASteps.findIndex(d => d?.key === ProcessStatus) > 1
                                                 : OtherSteps.findIndex(d => d?.key === ProcessStatus) > 1)
                                         }
-                                        startIcon={<MdDelete size={16}/>}
+                                        startIcon={<MdDelete size={ isMobile ? `20` : `16`}/>}
                                         onClick={deleteVersion}
                                     >
-                                        Delete
+                                        { isMobile ? "" : "Delete"}
                                     </Button>
                                 )}
                                 <Button
                                     disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
                                     variant="text"
+
                                     type="button"
                                     size="small"
                                     startIcon={
@@ -1377,10 +1379,10 @@ export default function QuoteProcess(props) {
                                                 size={16}
                                             />
                                         ) : (
-                                            <BiLayerPlus />
+                                            <BiLayerPlus size={ isMobile ? `20` : `16`}/>
                                         )
                                     }
-                                    className="mx-1"
+                                    className={`${isMobile ? "buttonIconMobile" : "buttonIconDesktop"}`}
                                     style={{color:"var(--success-light)"}}
                                     onClick={() => {
                                         cloneVersion();
@@ -1388,7 +1390,7 @@ export default function QuoteProcess(props) {
                                 >
                                     {isCloning ? (
                                         <>Cloning v{currentVersion}</>
-                                    ) : (
+                                    ) : ( isMobile ? "" :
                                         `Clone ${currentVersion}`
                                     )}
                                 </Button>{" "}
@@ -1553,7 +1555,7 @@ export default function QuoteProcess(props) {
                         </Grid>
                         {ProcessStatus !== "New" &&
                             ProcessStatus !== "Price Builder" ? (
-                            <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
+                            <span className="d-flex align-items-center justify-content-end ml-3">
                                 <Button
                                     onClick={() => {
                                         handleViewPdf(true, false);
@@ -1561,11 +1563,12 @@ export default function QuoteProcess(props) {
                                     variant="outlined"
                                     disabled={viewDownloadLoading || updatingVersion}
                                     size="small"
-                                    className="mr-1"
-                                    startIcon={<AiOutlineEye />}
+                                    className="mr-1 setIconForMobile"
+                                    startIcon={isMobile ? "" : <AiOutlineEye />}
                                     color="primary"
                                 >
-                                    View
+                                    {isMobile ? <AiOutlineEye size={20} /> : ""}
+                                  {isMobile ? "" : "View"}
                                 </Button>
                                 <Button
                                     disabled={viewDownloadLoading || updatingVersion}
@@ -1575,10 +1578,12 @@ export default function QuoteProcess(props) {
                                     }}
                                     variant="outlined"
                                     size="small"
-                                    startIcon={<FiDownloadCloud />}
+                                    className="mr-1 setIconForMobile"
+                                    startIcon={isMobile ? "" : <FiDownloadCloud />}
                                     color="primary"
                                 >
-                                    Download
+                                    {isMobile ? <FiDownloadCloud size={20} /> : ""}
+                                    {isMobile ? "" : "Download"}
                                 </Button>
                                 {(permissions[qbResource]?.isUpdate && permissions?.quotePdfTemplate.isUpdate &&
                                     (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some(d => d === user?.user?._id)) &&
@@ -1593,11 +1598,12 @@ export default function QuoteProcess(props) {
                                         }}
                                         variant="outlined"
                                         size="small"
-                                        className="mx-1"
-                                        startIcon={<AiFillEdit />}
+                                        className="setIconForMobile"
+                                        startIcon={isMobile ? "" : <AiFillEdit />}
                                         color="primary"
                                     >
-                                        Edit Template
+                                        {isMobile ? <AiFillEdit size={20} /> : ""}
+                                        {isMobile ? "" : "Edit Template"}
                                     </Button>}
                                 <Tooltip title="AI Suggestion">
                                     <IconButton
