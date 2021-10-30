@@ -6,27 +6,9 @@ import { ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import styles from '../Leads/Header.module.scss';
+import { isMobile } from 'react-device-detect';
 
 function RepairJobHeader(props) {
-  const [anchorEl, setAnchorEl] = useState(null);
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const [filter, setFilter] = useState('All Repair Jobs');
-
-  const handleFilter = (event, newFilter) => {
-    if (newFilter != null) {
-      setFilter(newFilter);
-      onTypeChange(options.find((d) => d.key === newFilter).value);
-    }
-  };
-
   const {
     selectedRecords,
     onTypeChange,
@@ -43,6 +25,26 @@ function RepairJobHeader(props) {
     showTransferEntityDialog
     // showCloneRentalManagementDialog
   } = props;
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const [filter, setFilter] = useState(options[0].key);
+
+  const handleFilter = (event, newFilter) => {
+    if (newFilter != null) {
+      setFilter(newFilter);
+      onTypeChange(options.find((d) => d.key === newFilter).value);
+    }
+  };
+
   return (
     <Grid className={styles.filter_side_container} container>
       <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
@@ -62,54 +64,55 @@ function RepairJobHeader(props) {
       </Grid>
       <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
         <Box className={styles.filter_side_header} component="div">
-          <SearchBox
-            onSearch={onSearch}
-            searchbox={styles.search_box_input}
-            value={searchVal}
-            size="small"
-            placeholder="Search Repair Jobs"
-            width="300px"
-          />
-
-          {RepairJobPermissions?.isCreate && RepairJobPermissions?.isUpdate && (
-            <Button variant="contained" color="primary" size="small" className={styles.add_submit_btn} onClick={onCreate} startIcon={<AddOutlined />}>
-              Add
-            </Button>
-          )}
-          {RepairJobPermissions?.isDelete && (
-            <>
-              <Button
-                disabled={canDelete}
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                className={styles.action_submit_btn}
-                aria-controls="action-menu"
-              >
-                Actions <ExpandMore />
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    showConfirmBox(null);
-                  }}
-                >
-                  Delete
-                </MenuItem>
-                {/* {RepairJobPermissions.isUpdate && (
+          <div className="d-flex gap-2">
+            <SearchBox
+              onSearch={onSearch}
+              searchbox={styles.search_box_input}
+              value={searchVal}
+              size="small"
+              placeholder="Search Repair Jobs"
+              width="300px"
+            />
+            <div className="d-flex gap-2">
+              {RepairJobPermissions?.isCreate && RepairJobPermissions?.isUpdate && !isMobile && (
+                <Button variant="contained" color="primary" size="small" className={styles.add_submit_btn} onClick={onCreate} startIcon={<AddOutlined />}>
+                  Add
+                </Button>
+              )}
+              {RepairJobPermissions?.isDelete && (
+                <>
+                  <Button
+                    disabled={canDelete}
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    //  className={styles.action_submit_btn}
+                    aria-controls="action-menu"
+                  >
+                    Actions <ExpandMore />
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      onClick={() => {
+                        closeActions();
+                        showConfirmBox(null);
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
+                    {/* {RepairJobPermissions.isUpdate && (
                   <MenuItem
                     disabled={selectedRecords.find((d) => d.canDelete === false)}
                     onClick={() => {
@@ -120,7 +123,7 @@ function RepairJobHeader(props) {
                     Transfer Entity
                   </MenuItem>
                 )} */}
-                {/* <MenuItem
+                    {/* <MenuItem
                   disabled={selectedRecords.length !== 1}
                   onClick={() => {
                     closeActions();
@@ -129,9 +132,11 @@ function RepairJobHeader(props) {
                 >
                   Clone
                 </MenuItem> */}
-              </Menu>
-            </>
-          )}
+                  </Menu>
+                </>
+              )}
+            </div>
+          </div>
         </Box>
       </Grid>
     </Grid>

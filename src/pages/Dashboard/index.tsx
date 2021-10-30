@@ -30,12 +30,32 @@ function Dashboard() {
       allData = [...allData, ...user?.role?.selectedEntity?.resource];
     }
 
+    {/*Only show product list if environment is local || development*/ }
+    if (['local', 'development'].includes(process.env.REACT_APP_ENV) && allData) {
+      const indexOfProduct = allData.findIndex(d => d.name === "Product");
+      const product = allData[indexOfProduct];
+
+      allData = [...allData.splice(0, indexOfProduct + 1), {
+        isCreate: true,
+        isDelete: true,
+        isRead: true,
+        isUpdate: true,
+        name: "Product List",
+        resourceId: "",
+        resourceLabel: "Product List",
+        roleType: 1,
+        sectionName: product.sectionName
+      }, ...allData]
+    }
+
     allData?.forEach((u) => {
+      u["resourceLabel"] = u.resourceLabel ?? u.name;
       u["sectionNameLowerCase"] = u.sectionName?.toLowerCase();
-      u["resourceLabelLowerCase"] = u.resourceLabel?.toLowerCase();
+      u["resourceLabelLowerCase"] = u.resourceLabel?.toLowerCase() ?? u.name?.toLowerCase();
 
       !arr.includes(u.sectionName) && arr.push(u.sectionName);
     });
+    
     const data = arr.map((sec) => {
 
       // const list = allData?.filter((u) => sec === u.sectionName && u.isRead);
@@ -96,6 +116,10 @@ function Dashboard() {
   }, [user]);
 
   const handleRoutes = (item) => {
+    if (item.name === "Product List") {
+      return "/product-list"
+    }
+
     return `/${kebabCase(item.name)}`;
 
     //  Use below code to handle special route cases
@@ -128,12 +152,13 @@ function Dashboard() {
                 className="mb-3"
                 onChange={(e) => {
                   const searchedValue = e.target.value;
+                  const searchedValueInLowerCase = searchedValue?.toLowerCase()
                   setSearch(searchedValue)
 
                   const filteredItems = [];
 
                   sections.forEach(section => {
-                    const items = section.items.filter(ff => ff.sectionNameLowerCase.indexOf(searchedValue) > -1 || ff.resourceLabelLowerCase.indexOf(searchedValue) > -1);
+                    const items = section.items.filter(ff => ff.sectionNameLowerCase.indexOf(searchedValueInLowerCase) > -1 || ff.resourceLabelLowerCase.indexOf(searchedValueInLowerCase) > -1);
                     if (items.length > 0) {
                       filteredItems.push({ ...section, items: items });
                     }
@@ -197,14 +222,6 @@ function Dashboard() {
                                               <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
                                             </Typography>
                                           </Box>
-                                          {/*Only show product list if environment is local || development*/}
-                                          {['local', 'development'].includes(process.env.REACT_APP_ENV) && item.name === 'Product' && (
-                                            <Box marginY={1} key={item.name} component="div">
-                                              <Typography paragraph className={styles.hover_list_box}>
-                                                <Link to={`/product-list`}>Product List</Link>
-                                              </Typography>
-                                            </Box>
-                                          )}
                                         </div>
                                       ))}
                                     </Box>
@@ -231,18 +248,6 @@ function Dashboard() {
                           >
                             <ListItemText primary={item.resourceLabel} />
                           </ListItem>
-
-                          {['local', 'development'].includes(process.env.REACT_APP_ENV) && item.name === 'Product' && (
-                            <ListItem
-                              key="Product List"
-                              button
-                              onClick={() => {
-                                history.push("/product-list");
-                              }}
-                            >
-                              <ListItemText primary="Product List" />
-                            </ListItem>
-                          )}
                         </>
                       })
                     }

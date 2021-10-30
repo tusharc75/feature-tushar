@@ -165,10 +165,10 @@ const PriceTemplate: FC = () => {
 
     const CreateNew = (id, isClone) => {
         if (isClone) {
-            history.push(routes.priceTemplate.path + "/0", { isClone: true })
+            history.push(routes.priceTemplate.path + "/" + id, { isClone: true })
         }
         else {
-            history.push(routes.priceTemplate.path + "/" + id, { isClone: false })
+            history.push(routes.priceTemplate.path + "/0" , { isClone: false })
         }
     }
 

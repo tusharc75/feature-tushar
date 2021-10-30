@@ -464,7 +464,7 @@ export default function Doa() {
               userList={dataRows}
               doa={doa}
               doaCurrency={"USD"}
-              userSelected={userSingleSelect.id}
+              selectedEntity={userSingleSelect.id}
               open={open}
               onClose={() => setOpen(false)}
               onSuccess={() => {

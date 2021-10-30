@@ -31,7 +31,10 @@ import { useData } from "../../StateProvider/Provider";
 import { sortBy } from 'lodash';
 import HtmlTooltip from '../../components/CustomTooltipTitle'
 import { RiBillLine } from "react-icons/ri";
-
+import { Autocomplete } from "@material-ui/lab";
+import TextField from "@material-ui/core/TextField";
+import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import { prepareDataForGrid } from "../../constants/helpers";
 
 const ignoreField = ["qty", "priceTemplate"]
 
@@ -55,11 +58,22 @@ const Product = () => {
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
+
     const [productColoums, setProductColoums] = useState([]);
+    const [productRendererNames, setProductRendererNames] = useState([]);
     const [columns, setColumns] = useState(null);
+    const [frameWorkComponent, setFrameWorkComponent] = useState(null)
+
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+    const [productCategoryList, setProductCategoryList] = useState([]);
+    const [productTemplateList, setProductTemplateList] = useState([]);
+    const [productCategory, setProductCategory] = useState(null);
+    const [productTemplate, setProductTemplate] = useState(null);
+    const [isProductTemplate, setIsProductTemplate] = useState(true);
+
 
     const { state: { permissions, selectedEntity } }: any = useData();
     const [productPermissions, setProductPermissions] = useState({
@@ -70,27 +84,73 @@ const Product = () => {
     });
 
     useEffect(() => {
+        axiosInstance().get("/product-category").then(({ data: { data } }) => {
+            setProductCategoryList(data)
+        })
+    }, [])
+
+    useEffect(() => {
+        if (isProductTemplate) {
+            if (productCategory && productCategory !== "") {
+                axiosInstance().post(`/product-template/template/` + productCategory, { entity: [] }).then(({ data: { data } }) => {
+                    setProductTemplateList(data.data)
+                    setProductTemplate(null);
+                })
+            }
+            else {
+                setProductTemplateList([])
+                setProductTemplate(null);
+            }
+        }
+    }, [productCategory])
+
+    useEffect(() => {
         if (permissions && permissions.product) {
             setProductPermissions(permissions.product);
         }
     }, [permissions]);
 
     useEffect(() => {
-        if (productColoums.length) {
+        if (productColoums && productColoums.length) {
             fetchProduct()
         }
-    }, [page, limit, filters, sorting, search, selectedEntity, productColoums]);
+    }, [page, limit, filters, sorting, search, selectedEntity, productColoums, productCategory, productTemplate]);
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Product").then(({ data: { data } }) => {
-            const productField = []
-            data.map((_f) => productField.push(_f.fieldData));
-            var coloum = [];
-            GenrateColoum(productField, coloum)
-            coloum.forEach((ele) => {
+            if (data.filter((e) => e.fieldData.fieldName === "productTemplate").length === 0) {
+                setIsProductTemplate(false)
+            }
+            let columns = []
+            let rendererNames = []
+            data.forEach(o => {
+                if (!ignoreField.includes(o?.fieldData.fieldName)) {
+                    if (o?.fieldData?.fieldName === "productName") {
+                        columns = [...columns, {
+                            pivotIndex: 0,
+                            field: o?.fieldData?.fieldName,
+                            headerName: o?.fieldData?.fieldLabel,
+                            show: true,
+                            disabled: true,
+                            cellRenderer: 'productNameRenderer'
+                        }]
+                    }
+                    else {
+                        let currentColumn = getColumnData(routes.product.title, o?.fieldData, routes.product.path, true)
+                        if (currentColumn !== null) {
+                            columns = [...columns, currentColumn?.columnData]
+                            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                                rendererNames.push(currentColumn?.rendererName)
+                            }
+                        }
+                    }
+                }
+            })
+            columns.forEach((ele) => {
                 ele.leval = "product"
             })
-            setProductColoums(coloum)
+            setProductRendererNames(rendererNames);
+            setProductColoums(columns);
         })
     }, [])
 
@@ -101,60 +161,33 @@ const Product = () => {
         }
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
-            data.data = data.data?.map((u) => {
-                const { createdBy, entity, ...restProperties } = u;
-                const [firstEntity, ...restEntity] = entity ? entity : [];
+            let rows = data.data.map((item) => {
                 let res = {
-                    ...restProperties,
-                    id: u._id,
-                    inventoryCount: u?.qty,
-                    warehouses: u.warehouse?.map(w => w.warehouseName).join(", "),
-                    createdBy: u.createdBy?.user?.concatedName,
-                    createdByDate: u.createdBy?.date,
-                    updatedBy: u.updatedBy?.user?.concatedName,
-                    updatedByDate: u.updatedBy?.date,
-                    entity: firstEntity?.optionLabel,
-                    entityId: firstEntity?.optionValue,
-                    productCategoryChipColor: u.productCategory?.chipColour,
-                    restEntity: restEntity,
-                    serializedProduct: u.serializedProduct && u.serializedProduct.toString()
-                }
-                for (let col in res) {
-                    if (res[col] && res[col].optionLabel) {
-                        res[col] = res[col].optionLabel;
-                    }
-                }
+                    ...prepareDataForGrid(item),
+                };
                 return res;
             });
-            if (data.data.length) {
-                let column = [...productColoums]
-                data.data.forEach((row) => {
-                    GenrateColoum(row.fields, column);
-                });
-                column = sortBy(column, function (item: any) {
-                    return levalOrderBy.indexOf(item.leval)
-                });
-                if (column.length) {
-                    column.splice(4, 0, { field: "inventoryCount", headerName: "Inventory Count", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" },
-                        { field: "warehouses", headerName: "Plants", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" })
-                    column.push(
-                        { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer", leval: "price-builder-custom" },
-                        { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer", leval: "price-builder-custom" },
-                    )
-                }
-                const columnState = JSON.parse(localStorage.getItem("productPage"));
-                if (columnState) {
-                    column.forEach((item) => {
-                        columnState.forEach((d) => {
-                            if (d.colId == item.field) {
-                                item.show = !d.hide;
-                            }
-                        });
-                    });
-                }
-                setColumns(column);
+            let columns = [...productColoums]
+            let rendererNames = [...productRendererNames]
+            data.productTemplate?.forEach((ele) => {
+                GenrateColoum(ele.fields, columns, rendererNames)
+            })
+            columns.push({ field: "inventoryCount", headerName: "Inventory Count", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" })
+            columns.push({ field: "warehouses", headerName: "Plants", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" })
+            columns = sortBy(columns, function (item: any) {
+                return levalOrderBy.indexOf(item.leval)
+            });
+            let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+            tempFrameworkComponent = {
+                ...tempFrameworkComponent,
+                commonRenderer: CommonRenderer,
+                productNameRenderer: ProductNameRenderer,
+                actionsRenderer: ActionsRenderer
             }
-            dispatch({ type: "initialize", data: data.data, count: data.count });
+            setFrameWorkComponent({ ...tempFrameworkComponent })
+            columns = [...columns, ...getStaticFields()]
+            setColumns([...columns])
+            dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
@@ -162,7 +195,7 @@ const Product = () => {
         });
     };
 
-    const GenrateColoum = (fields, column) => {
+    const GenrateColoum = (fields, column, rendererNames) => {
         fields.forEach((ele) => {
             if (ignoreField.includes(ele.fieldName)) {
             }
@@ -178,7 +211,7 @@ const Product = () => {
                             col.width = 180
                             col.show = true
                             col.cellRenderer = "commonRenderer"
-                            col.leval = ele.leval
+                            col.leval = "product-template"
                             column.push(col)
                         }
                     })
@@ -195,7 +228,7 @@ const Product = () => {
                                 col.width = 180
                                 col.show = true
                                 col.cellRenderer = "commonRenderer"
-                                col.leval = ele.leval
+                                col.leval = "product-template"
                                 column.push(col)
                             }
                         })
@@ -212,7 +245,7 @@ const Product = () => {
                             col.width = 180
                             col.show = true
                             col.cellRenderer = "commonRenderer"
-                            col.leval = ele.leval
+                            col.leval = "product-template"
                             column.push(col)
                         }
                     })
@@ -220,24 +253,11 @@ const Product = () => {
             }
             else {
                 if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-                    let col: any = {};
-                    col.field = ele.fieldName;
-                    col.headerName = ele.fieldLabel;
-                    col.width = 180;
-                    col.show = true
-                    col.cellRenderer = "commonRenderer"
-                    if (ele.fieldName === "productName") {
-                        col.cellRenderer = "productNameRenderer"
+                    let currentColumn: any = getColumnData(routes.product.title, ele, routes.product.path, true)
+                    column.push({ ...currentColumn.columnData, leval: "product-template" });
+                    if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                        rendererNames.push(currentColumn?.rendererName)
                     }
-                    if (ele.fieldName === "entity") {
-                        col.cellRenderer = "entityRenderer"
-                    }
-                    if (ele.fieldName === "productCategory") {
-                        col.cellRenderer = "productCategoryRenderer"
-                    }
-                    col.order = ele.order;
-                    col.leval = ele.leval;
-                    column.push(col);
                 }
             }
         })
@@ -245,13 +265,11 @@ const Product = () => {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
-
         if (selectedEntity) {
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;
         }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
-
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
@@ -260,15 +278,22 @@ const Product = () => {
             });
             deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
         }
-
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
-
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
         }
-
+        const filterById = []
+        if (productCategory && productCategory !== "") {
+            filterById.push({ field: 'productCategory', term: productCategory });
+        }
+        if (productTemplate && productTemplate !== "") {
+            filterById.push({ field: 'productTemplate', term: productTemplate });
+        }
+        if (filterById.length) {
+            deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + "&filterType=and"
+        }
         return deepFilter;
     };
 
@@ -295,37 +320,6 @@ const Product = () => {
             {params.value}
         </Link>
     )
-
-    const EntityNameRenderer = (params) =>
-        params.value ? (
-            <>
-                <h5 className="createBy d-flex">
-                    <Link className="link" title={params.value} to={`${routes.entity.path}/detail/${params.data.entityId}`}>
-                        {params.value}
-                    </Link>
-                    {params.data.restEntity.length > 0 && (
-                        <span className="createdAtTime badge-date">{`+${params.data.restEntity.length} more..`}</span>
-                    )}
-                </h5>
-            </>
-        ) : (
-            <NoDataCell />
-        );
-
-    const ProductCategoryRenderer = (params) => (
-        <> {params.data.productCategory !== undefined && params.data.productCategoryChipColor !== null ?
-            (
-                <Chip
-                    className="ml-3"
-                    style={{ backgroundColor: `${params.data.productCategoryChipColor}` }}
-                    label={`${params.data.productCategory}`}
-                />
-            )
-            : (
-                <NoDataCell />
-            )}
-        </>
-    );
 
     const ActionsRenderer = params => (
         <>
@@ -385,16 +379,6 @@ const Product = () => {
         setAnchorEl(null);
     };
 
-    const frameworkComponents = {
-        productNameRenderer: ProductNameRenderer,
-        createdByRenderer: CreatedByRenderer,
-        updatedByRenderer: UpdatedByRenderer,
-        actionsRenderer: ActionsRenderer,
-        entityRenderer: EntityNameRenderer,
-        productCategoryRenderer: ProductCategoryRenderer,
-        commonRenderer: CommonRenderer,
-    };
-
     const replaceFieldName = (field) => {
         switch (field) {
             case "createdBy":
@@ -440,12 +424,61 @@ const Product = () => {
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
                         <RiShoppingBag3Fill size={22} style={{ paddingBottom: "3px" }} className="headerLogo" /> <span className="listingHeader">{routes.product.title} </span>
+                        <Autocomplete
+                            style={{ width: "250px" }}
+                            options={productCategoryList}
+                            getOptionLabel={(option: any) => option ? option.name : ""}
+                            getOptionSelected={(option: any, val) =>
+                                option._id === val
+                            }
+                            value={productCategoryList.filter((data) => data._id === productCategory).length
+                                ? productCategoryList.filter((data) => data._id === productCategory)[0]
+                                : ""
+                            }
+                            onChange={(e, val) => {
+                                setProductCategory(val && val._id ? val._id : "")
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    margin="dense"
+                                    name="productCategory"
+                                    label="Product Category"
+                                    variant="outlined"
+                                    fullWidth
+                                />
+                            )}
+                        />
+                        {isProductTemplate &&
+                            <Autocomplete
+                                style={{ width: "250px" }}
+                                options={productTemplateList}
+                                getOptionLabel={(option: any) => option ? option.optionLabel : ""}
+                                getOptionSelected={(option: any, val) =>
+                                    option.optionValue === val
+                                }
+                                value={productTemplateList.filter((data) => data.optionValue === productTemplate).length
+                                    ? productTemplateList.filter((data) => data.optionValue === productTemplate)[0]
+                                    : ""
+                                }
+                                onChange={(e, val) => {
+                                    setProductTemplate(val && val.optionValue ? val.optionValue : "")
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        margin="dense"
+                                        name="productTemplate"
+                                        label="Product Template"
+                                        variant="outlined"
+                                        fullWidth
+                                    />
+                                )}
+                            />}
                     </Grid>
                     <Grid item xs={6}>
-
                         <Grid container className={styles.filter_side} >
                             <Box className={styles.filter_side_header} component="div" >
-
                                 <SearchBox
                                     onSearch={handleSearch}
                                     searchbox={styles.search_box_input}
@@ -487,11 +520,11 @@ const Product = () => {
                     </Grid>
                 </Grid>
             </div>
-            {columns ?
+            {columns && frameWorkComponent ?
                 <CustomAgGrid
                     columns={columns}
                     dataRows={dataRows}
-                    frameworkComponents={frameworkComponents}
+                    frameworkComponents={frameWorkComponent}
                     setGridApi={setGridApi}
                     dispatch={dispatch}
                     rowCount={rowCount}
