@@ -38,7 +38,7 @@ function CustomDialogHeader({ title, onClose, showManimizeMaximize = false, isMi
 
                 <div className={classes.closeButton}>
                     {
-                        showManimizeMaximize && <IconButton
+                        showManimizeMaximize && (!(isMobile || isTablet)) && <IconButton
                             aria-label="close"
                             onClick={onMinimizeMaximize}
                             size="small"

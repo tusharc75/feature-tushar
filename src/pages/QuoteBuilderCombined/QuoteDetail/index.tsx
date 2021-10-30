@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useMemo, useState, useReducer, Fragment } from 'react'
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import ReactDOM from "react-dom";
-import { useMediaQuery, Paper, Box, Tabs, Tab, Grid, Button, DialogTitle, Dialog, DialogActions, DialogContent, makeStyles, TextField } from "@material-ui/core";
+import { useMediaQuery, Paper, Box, Tabs, Tab, Grid, Button, DialogTitle, Dialog, DialogActions, DialogContent, makeStyles, TextField, Tooltip } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaWpforms } from "react-icons/fa";
@@ -28,6 +28,7 @@ import ProjectInAccordion from "../../../components/ProjectInAccordion/ProjectIn
 import QuoteProcess from './QuoteProcess';
 import QuoteDetailPage from './QuoteDetailPage';
 import AllVersionStatus from './AllVersionStatus';
+import queryString from "query-string";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -73,6 +74,8 @@ const useStyles = makeStyles((theme) => ({
 export default function QuoteDetail() {
   const classes = useStyles();
   const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit } = parsed;
   const location = useLocation();
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
@@ -241,7 +244,7 @@ export default function QuoteDetail() {
         .then(({ data: { data } }) => {
           ReactDOM.unstable_batchedUpdates(() => {
             setCustomizedRoutes([
-              { title: "Quote", path: routes.quoteBuilder.path },
+              { title: routes.quoteBuilder.title, path: routes.quoteBuilder.path },
               { title: `${data?.quoteName}` },
             ]);
             setQuoteData(data);
@@ -260,6 +263,11 @@ export default function QuoteDetail() {
             }
             setTypeCreateProjectSalesDialog(dataOfTyoes);
 
+            const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some(
+              (d) => d?.optionValue === user?.user?._id
+            )
+            setAllowedToEdit(isAllowedToEdit);
+
             setAllowedToEdit(
               [...(data.collaborator ?? []), data.owner].some(
                 (d) => d?.optionValue === user?.user?._id
@@ -273,7 +281,6 @@ export default function QuoteDetail() {
               setVersionStatus(data.versions[keys[keys.length - 1]].status);
               setColumnView(data.versions[keys[keys.length - 1]].acceptedColumns || [])
               dispatch({ type: "selection", selectedRecords: data.versions[keys[keys.length - 1]].TNC });
-
             }
             else {
               setCurrentVersion(version);
@@ -283,6 +290,14 @@ export default function QuoteDetail() {
               setColumnView(data.versions[version].acceptedColumns || [])
               dispatch({ type: "selection", selectedRecords: data.versions[version].TNC });
             }
+
+            if (isAllowedToEdit && openEdit === "true") {
+              setOpenUpdateDialog(true)
+              const params = new URLSearchParams()
+              params.delete("openEdit")
+              history.push({ search: params.toString() })
+            }
+
             setLoading(false);
           });
         })

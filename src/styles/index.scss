@@ -520,7 +520,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .main-container {
-  min-height: calc(100vh - 110px);
+  min-height: calc(100vh - 99px);
   position: relative;
   overflow: auto;
   z-index: 1;
@@ -783,7 +783,9 @@ body::-webkit-scrollbar-thumb {
   gap: 0.25rem;
   -webkit-gap: 0.25rem;
   font-weight: bold;
+  justify-content: center;
 }
+
 @supports (not(gap: 0.25rem)) and (not (-webkit-gap: 0.25rem)) {
   .quoteHeader > *:not(:nth-child(1)) {
     margin-left: 0.25rem !important;
