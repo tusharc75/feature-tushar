@@ -309,8 +309,21 @@ const RentalManagementDetailsPage = () => {
         id: u._id,
         detail: u.packageName,
         description: u.packageDescription,
-
       })));
+      tempInventory = tempInventory.map(u => {
+        let qty = parseInt(u?.quantity || u?.qty) || 0
+        let price = qty > 0 ? (parseInt(u?.price) * qty) || (parseInt(u?.mrp) * qty) || 0 : (parseInt(u.price) || 0)
+        let discount = parseInt(u?.discount) || 0
+        let finalPrice = parseInt(u?.finalPrice) || 0
+
+        finalPrice = (discount > 0 && price > 0) ? price - ((price * discount) / 100) : price
+        return {
+          ...u,
+          qty: qty,
+          finalPrice: finalPrice
+        }
+      })
+
       setProductInventory(tempInventory)
 
       // let tempWareHouse = []
@@ -394,9 +407,9 @@ const RentalManagementDetailsPage = () => {
     dateRenderer: DateRenderer,
   };
   const columns = [
-    { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "productRenderer" },
+    { field: "detail", headerName: "Product Description / Package", show: true, disabled: true, cellRenderer: "productRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "package", headerName: "Package", show: true, disabled: true, cellRenderer: "packageNameRenderer" },
+    { field: "package", headerName: "Parent Package", show: true, disabled: true, cellRenderer: "packageNameRenderer" },
     { field: "startDate", headerName: "Start Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
     { field: "endDate", headerName: "End Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
     { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
@@ -404,7 +417,7 @@ const RentalManagementDetailsPage = () => {
     { field: "pricingMethod", headerName: "Pricing Method", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Per Day", "Per Week", "Per Month"] }, editable: true },
     { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
     { field: "discount", headerName: "Discount (%)", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+    { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: false },
   ];
 
   const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageInventory"));
@@ -490,20 +503,28 @@ const RentalManagementDetailsPage = () => {
       } else {
         return d
       }
-    }).map(d => ({
-      "id": d.id,
-      "qty": parseInt(d.quantity || d.qty) || 0,
-      "type": d.type.toLowerCase(),
-      "detail": d.detail,
-      "pricingMethod": d.pricingMethod,
-      "UOM": d.UOM,
-      "finalPrice": parseInt(d.finalPrice) || 0,
-      "price": parseInt(d.price) || 0,
-      "discount": parseInt(d.discount) || 0,
-      "startDate": d.startDate,
-      "endDate": d.endDate,
-    }))
+    }).map(d => {
 
+      let qty = parseInt(d.quantity || d.qty) || 0
+      let price = qty > 0 ? (parseInt(d.price) * qty || 0) : (parseInt(d.price) || 0)
+      let discount = parseInt(d.discount) || 0
+      let finalPrice = parseInt(d.finalPrice) || 0
+
+      finalPrice = (discount > 0 && price > 0) ? price - ((price * discount) / 100) : price
+      return {
+        "id": d.id,
+        "qty": qty,
+        "type": d.type.toLowerCase(),
+        "detail": d.detail,
+        "pricingMethod": d.pricingMethod,
+        "UOM": d.UOM,
+        "finalPrice": finalPrice,
+        "price": parseInt(d.price) || 0,
+        "discount": discount,
+        "startDate": d.startDate,
+        "endDate": d.endDate,
+      }
+    })
 
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": updatedArr })
       .then(() => {
