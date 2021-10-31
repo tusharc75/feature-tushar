@@ -268,11 +268,24 @@ const QuoteBuilders = () => {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData]
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName)
+      if (["quoteName"].find(d => d === o?.fieldData?.fieldName)) {
+        columns = [...columns, {
+          disabled: true,
+          field: "quoteName",
+          headerName: "Quote Name",
+          pivotIndex: 0,
+          show: true,
+          cellRenderer: "quoteNameRenderer",
+          primaryField: true
+        }]
+      }
+      else {
+        let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
+        if (currentColumn !== null) {
+          columns = [...columns, currentColumn?.columnData]
+          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+            rendererNames.push(currentColumn?.rendererName)
+          }
         }
       }
     })
