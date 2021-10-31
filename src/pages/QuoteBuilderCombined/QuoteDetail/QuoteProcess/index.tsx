@@ -412,7 +412,7 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -471,7 +471,8 @@ export default function QuoteProcess(props) {
                 data.displayCurrency.forEach((cur) => {
                   if (data.units) {
                     data.units.forEach((unit) => {
-                      const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`;
+                      // const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`;
+                      const casedLabel = `${fieldName}_${cur.toLowerCase()}_${unit.toLowerCase()}`
                       if (required) {
                         requiredValues[casedLabel] = quoteRows[casedLabel];
                       }
@@ -481,7 +482,8 @@ export default function QuoteProcess(props) {
                       }
                     });
                   } else {
-                    const casedLabel = `${fieldName}_${cur.toLowerCase()}`;
+                    // const casedLabel = `${fieldName}_${cur.toLowerCase()}`;
+                    const casedLabel = `${fieldName}_${cur.toLowerCase()}`
                     if (required) {
                       requiredValues[casedLabel] = quoteRows[casedLabel];
                     }
@@ -493,7 +495,8 @@ export default function QuoteProcess(props) {
                 });
               } else if (data.units && !data.displayCurrency) {
                 data.units.forEach((unit) => {
-                  const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`;
+                  // const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`;
+                  const casedLabel = `${camelCase(fieldName)}_${unit.toLowerCase()}`
                   if (required) {
                     requiredValues[casedLabel] = quoteRows[casedLabel];
                   }
@@ -1262,8 +1265,8 @@ export default function QuoteProcess(props) {
               DOAneeded
                 ? DOASteps.findIndex((d) => d?.key === ProcessStatus)
                 : ProcessStatus === 'DOA Process'
-                ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
-                : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
+                  ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
+                  : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
             }
             id={quoteData._id}
             version={currentVersion}
@@ -1356,7 +1359,7 @@ export default function QuoteProcess(props) {
                 </Grid>
               ) : null}
               {(ProcessStatus === 'DOA Process' && versionStatus === 'Building Quote' && DOAneeded) ||
-              (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
+                (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
                 <div className="w-100 d-flex align-items-center justify-content-end doaAction">
                   {!ifQuoteApproved.approved && (
                     <Button
