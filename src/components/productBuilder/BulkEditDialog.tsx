@@ -96,7 +96,7 @@ const BulkEditDialog = (props) => {
 
     const handleSubmit = (values) => {
         for (const x in values) {
-            if (values[x] === 0 || values[x] === "0" || values[x] === "") {
+            if (values[x] === 0 || values[x] === "0" || values[x] === "" || (Array.isArray(values[x]) && values[x].length === 0)) {
                 delete values[x]
             }
         }
