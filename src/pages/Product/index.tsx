@@ -84,7 +84,7 @@ const Product = () => {
     });
 
     useEffect(() => {
-        axiosInstance().get("/product-category").then(({ data: { data } }) => {
+        axiosInstance().get("/product-category?sortBy=name&orderBy=asc").then(({ data: { data } }) => {
             setProductCategoryList(data)
         })
     }, [])
