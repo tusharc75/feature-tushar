@@ -193,6 +193,11 @@ const AddExistingProduct = (props) => {
             }
             setFrameWorkComponent({ ...tempFrameworkComponent })
             columns = [...columns, ...getStaticFields()]
+            columns.forEach((e) => {
+                if (e.cellRenderer === "linkRenderer") {
+                    e.cellRenderer = "commonRenderer";
+                }
+            })
             setColumns([...columns])
             dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
@@ -316,6 +321,7 @@ const AddExistingProduct = (props) => {
         <CustomDialogHeader title={"Add Existing Product"} onClose={handleClose} ></CustomDialogHeader>
         <div className="listing-grid p-3">
             <Box mb={2}>
+                <h6 className="form-label-style mt-0 mb-0" style={{ borderBottom: "none" }}>* Select product using checkbox and click Add button for add product</h6>
                 <Grid container >
                     <Grid className="d-flex align-items-center gap-1" item xs={12} sm={6}>
                         <Autocomplete
