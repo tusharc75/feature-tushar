@@ -123,9 +123,14 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
         }
         resultValues = handleFormula(fieldData, fields, values, name, value, resultValues, true);
         resultValues = handleCheckVlookupReverse(fieldData, fields, values, name, value, resultValues);
-        if (fieldData.type === 'dropDown') {
-            fields && fields.filter((_f: any) => _f.type === "dropDown" && _f.isDependentDropdown && _f.dropdowDependentOn === fieldData.fieldName).forEach((_r: any) => {
-                resultValues[_r.fieldName] = ""
+        if (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') {
+            fields && fields.filter((_f: any) => (_f.type === "dropDown" || _f.type === 'multiSelect') && _f.isDependentDropdown && _f.dropdowDependentOn === fieldData.fieldName).forEach((_r: any) => {
+                if (fieldData.type === 'dropDown') {
+                    resultValues[_r.fieldName] = ""
+                }
+                else {
+                    resultValues[_r.fieldName] = []
+                }
             });
         }
         for (var x in resultValues) {
@@ -551,7 +556,7 @@ export const autoCalculate = (values: any, fieldList: any) => {
                 }
             }
             for (const x in calValues) {
-                if (calValues[x] === 0 || calValues[x] === '') {
+                if (calValues[x] === 0 || calValues[x] === '' || (values[x] && values[x] !== '')) {
                     delete calValues[x];
                 }
             }

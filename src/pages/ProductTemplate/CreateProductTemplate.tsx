@@ -519,7 +519,7 @@ const ProductTemplate = () => {
                                     deleteField={deleteField}
                                     setDeleteField={setDeleteField}
                                     isCustomField={true}
-                                    extraFields={[]}
+                                    extraFields={productField}
                                     module="product-template"
                                 />
                             </Box>

@@ -449,12 +449,13 @@ const CreateProduct = (props) => {
     };
 
     const handleScroll = (errors) => {
+        console.log(errors)
         const err = Object.keys(errors);
         if (err.length) {
             const input = document.querySelector(
                 `input[name=${err[0]}]`,
             );
-            input.scrollIntoView({
+            input?.scrollIntoView({
                 behavior: 'smooth',
                 block: 'center',
                 inline: 'start',
