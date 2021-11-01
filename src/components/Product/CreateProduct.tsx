@@ -448,6 +448,19 @@ const CreateProduct = (props) => {
         setFieldChanges(_fieldChanges);
     };
 
+    const handleScroll = (errors) => {
+        const err = Object.keys(errors);
+        if (err.length) {
+            const input = document.querySelector(
+                `input[name=${err[0]}]`,
+            );
+            input.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'start',
+            });
+        }
+    }
 
     return (<Dialog
         maxWidth="md"
@@ -844,7 +857,11 @@ const CreateProduct = (props) => {
                                 disabled={uploadingImageOrFileProgress > 0 || submitting}
                                 // disabled={Object.values(simplifyValues(initialData.values, initialData.fields)).toString() ===
                                 //     Object.values(simplifyValues(values, initialData.fields)).toString()}
-                                onClick={submitForm}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleScroll(errors)
+                                    submitForm();
+                                }}
                             > Save</CustomButton>
                         </CustomDialogFooter>
                         {
