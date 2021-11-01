@@ -1,7 +1,7 @@
 import { IconButton, Tooltip } from '@material-ui/core';
 import { useContext, useReducer, useState } from 'react'
 import axiosInstance from '../../../axios/axiosInstance';
-import { formatAmountWithCurrency, gridLoadingTimeout } from '../../../constants/helpers';
+import { formatAmountWithCurrency, gridLoadingTimeout, isObjectEmpty } from '../../../constants/helpers';
 import { Link } from "react-router-dom";
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useEffect } from 'react';
@@ -10,20 +10,47 @@ import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGri
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomRenderCell from '../../../components/Helpers/CustomRenderCell';
 
+const DOASteps = [
+    {
+        key: "New",
+        label: "Product Builder",
+    },
+    {
+        key: "Price Builder",
+        label: "Price Builder",
+    },
+    {
+        key: "Quote Builder",
+        label: "Quote Builder",
+    },
+    {
+        key: "DOA Process",
+        label: "DOA Process",
+    },
+    {
+        key: "Send To Customer",
+        label: "Send To Customer",
+    },
+    {
+        key: "End",
+        label: "End",
+    },
+];
+
 export default function AllVersionStatus({ quoteId, quoteData, quotePermissions, fetchQuoteData, handleChangeVersionFromAllVersion, handleCloneQuoteWithVersionFromAllVersion }) {
 
     const toastConfig = useContext(CustomToastContext);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+    const { dataRows, rowCount, loading, page, limit, filters, pageSizes } = state;
 
     const [columns,] = useState([
-        { field: "versionNumber", headerName: "Version #", show: true, width: 140, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "versionNumber", headerName: "Version #", show: true, width: 140, disabled: true,filter: false, cellRenderer: "nameRenderer" },
         { field: "status", headerName: "Status", show: true, cellRenderer: "nameRenderer" },
-        { field: "processStatus", headerName: "Current Step", show: true, cellRenderer: "nameRenderer" },
-        { field: "comment", headerName: "Comment", show: true, cellRenderer: "commonRenderer" },
-        { field: "totalcost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
-        { field: "totalSalesPrice", headerName: "Total Sales Price", show: true, cellRenderer: "commonRenderer" },
+        { field: "processStatus", headerName: "Current Step", show: true, filter:false, cellRenderer: "nameRenderer" },
+        { field: "comment", headerName: "Comment", show: true,filter: false, cellRenderer: "commonRenderer" },
+        { field: "totalcost", headerName: "Total Cost", show: true, filter: false, cellRenderer: "commonRenderer" },
+        { field: "totalSalesPrice", headerName: "Total Sales Price", show: true, filter: false, cellRenderer: "commonRenderer" },
     ]);
     const NameRenderer = params =>
         <span className="link"
@@ -68,18 +95,22 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
         if (quoteId) {
             getVersionStatus()
         }
-    }, [quoteId]);
+    }, [quoteId, filters]);
 
     const getVersionStatus = () => {
         dispatch({ type: "loading", loading: true });
-
         if (gridApi) {
             gridApi.setRowData([]);
         }
         axiosInstance()
             .get(`/quote-builder/quote-hierarchy/${quoteId}`)
             .then(({ data: { data } }) => {
-                const newData = data.versions.map((d, index) => {
+                if (!isObjectEmpty(filters)) {
+                    data = data.versions.filter((item) => {
+                        return item.status.toLowerCase().search(`${filters.status.filter}`.toLowerCase()) !== -1
+                    });
+                }
+                const newData = isObjectEmpty(filters) ? data.versions.map((d, index) => {
                     return {
                         ...d,
                         id: index + 1,
@@ -92,8 +123,27 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
                             quoteData?.currency,
                             d.productData.totalSalesPrice
                         ).fullFormatAmount,
+                        processStatus: DOASteps.find(obj => obj.key === d.processStatus)?.label
                     };
-                });
+                }) :
+                    data.map((d, index) => {
+                        return {
+                            ...d,
+                            id: index + 1,
+                            comment: d.comment ? d.comment : "",
+                            totalcost: formatAmountWithCurrency(
+                                quoteData?.currency,
+                                d.productData.totalCost
+                            ).fullFormatAmount,
+                            totalSalesPrice: formatAmountWithCurrency(
+                                quoteData?.currency,
+                                d.productData.totalSalesPrice
+                            ).fullFormatAmount,
+                            processStatus: DOASteps.find(obj => obj.key === d.processStatus)?.label
+                        };
+
+                    })
+                    ;
 
                 dispatch({ type: "initialize", data: newData, count: newData.length });
                 setTimeout(() => {
@@ -109,21 +159,21 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
 
     return (
         <div style={{ maxHeight: 500, width: "100%" }} className="mt-2">
-            <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameworkComponents}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={150}
-                allowSelection={false}
-                loading={loading}
-                refreshGrid={getVersionStatus}
-            />
+                <CustomAgGrid
+                    columns={columns}
+                    dataRows={dataRows}
+                    frameworkComponents={frameworkComponents}
+                    setGridApi={setGridApi}
+                    dispatch={dispatch}
+                    rowCount={rowCount}
+                    limit={limit}
+                    pageSizes={pageSizes}
+                    page={page}
+                    actionWidth={150}
+                    allowSelection={false}
+                    loading={loading}
+                    refreshGrid={getVersionStatus}
+                />
         </div>
     )
 }

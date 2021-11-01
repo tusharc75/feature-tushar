@@ -54,6 +54,19 @@ export const leadImportErrorFileName = 'Leads-Errors.xlsx';
 export const opportunityTemplateFileName = 'Opportunities-Template.xlsx';
 export const opportunityImportErrorFileName = 'Opportunities-Errors.xlsx';
 
+export const quoteStepColors = {
+  "accepted by customer": { backgroundColor: "#008000", color: "#fff" },
+  "not booked by customer": { backgroundColor: "#ba181b", color: "#fff" },
+
+  "re-open": { backgroundColor: "#ff7d00", color: "#fff" },
+  "invalid by customer": { backgroundColor: "#eb5e28", color: "#fff" },
+
+  "not booked": { backgroundColor: "#2b2d42", color: "#fff" },
+  "building quote": { backgroundColor: "#023e7d", color: "#fff" },
+
+  "__default__": { backgroundColor: "#023e7d", color: "#fff" }
+}
+
 export const roleTypes = [
   {
     key: 'Global',
@@ -371,6 +384,10 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       const defaultOptions = key.option?.filter((item: any) => item.default === true);
       const options = defaultOptions?.map((data: any) => data.optionValue);
       obj[key.fieldName] = value ? value : options;
+    } else if (key.type === 'freeStyleMultiSelect') {
+      const defaultOptions = key.option?.filter((item: any) => item.default === true);
+      const options = defaultOptions?.map((data: any) => data.optionValue);
+      obj[key.fieldName] = value ? value : options;
     } else if (key.type === 'date') {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === 'year') {
@@ -501,7 +518,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
         : string().min(10, 'Mobile number is too short');
     } else if (input.type === 'multiSelect') {
-      schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`) : array();
+      schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else if (input.type === 'email') {
       schema[input.fieldName] =
         input.required && validEmail

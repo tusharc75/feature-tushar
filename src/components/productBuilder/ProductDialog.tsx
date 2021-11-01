@@ -26,6 +26,9 @@ import { CustomDialogTransition } from "./../../constants/helpers";
 import Tooltip from "@material-ui/core/Tooltip";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import { autoCalculateSpecificFields } from "../../constants/formulaUtility";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import { Collapse } from '@material-ui/core';
 
 var levalOrderBy = [
   "product",
@@ -48,8 +51,10 @@ const CreateProduct = (props) => {
   const [fields, setFields] = useState([]);
   const [sectionName, setSectionName] = useState("");
   const ref = useRef(null);
-
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [fieldChanges, setFieldChanges] = useState([]);
+
+  const [expanded, setExpanded] = useState({});
 
   useEffect(() => {
     let _fields = [];
@@ -125,6 +130,11 @@ const CreateProduct = (props) => {
       return { name, sectionFields };
     });
     setProductFields(customData);
+    const _expanded = {}
+    customData.forEach((ele: any, index) => {
+      _expanded[index] = true;
+    })
+    setExpanded(_expanded)
   };
 
   const handleOpenAddField = (name) => {
@@ -267,10 +277,30 @@ const CreateProduct = (props) => {
     return label;
   };
 
+  const handleExpand = (index) => {
+    const temp = { ...expanded };
+    temp[index] = !temp[index]
+    setExpanded(temp)
+  }
+
+  const handleScroll = (errors) => {
+    const err = Object.keys(errors);
+    if (err.length) {
+      const input = document.querySelector(
+        `input[name=${err[0]}]`,
+      );
+      input.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'start',
+      });
+    }
+  }
+
   return (
     <Dialog
       maxWidth="md"
-      fullScreen={isMobile || isTablet}
+      fullScreen={fullScreen || (isMobile || isTablet)}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       open={true}
@@ -297,6 +327,11 @@ const CreateProduct = (props) => {
               <CustomDialogHeader
                 title={`Edit Product`}
                 onClose={handleClose}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Box>
@@ -304,7 +339,10 @@ const CreateProduct = (props) => {
                     {productFields &&
                       productFields.map((section, i) => (
                         <div key={i}>
-                          <h2 className="form-label-style">
+                          <h2 className="form-label-style" onClick={() => handleExpand(i)}>
+                            <IconButton className="p-0" color="primary" style={{ marginTop: "-5px" }} size="small"  >
+                              {expanded[i] ? <ExpandLess fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                            </IconButton>
                             {section.name}
                             <span
                               style={{ float: "right", marginTop: "-10px" }}
@@ -319,135 +357,137 @@ const CreateProduct = (props) => {
                             </span>
                           </h2>
                           <Box marginY={2}>
-                            <Grid spacing={3} container>
-                              {section.sectionFields &&
-                                section.sectionFields.map((field) =>
-                                  field.type === "converter" || field.type === "currencyAmount" || field.isConverter ? (
-                                    <FormTypes
-                                      style={{ background: field?.isUneditable ? "#EBEBE4" : field?.isFormula ? "#1e768221" : "" }}
-                                      fields={initialData.fields}
-                                      fieldData={field}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={
-                                        field.isUneditable
-                                          ? `${replaceUnit(
-                                            field.fieldLabel,
-                                            values?.unit,
-                                            values?.secondaryUnit
-                                          )} (Auto Calculated Field)`
-                                          : replaceUnit(
-                                            field.fieldLabel,
-                                            values?.unit,
-                                            values?.secondaryUnit
-                                          )
-                                      }
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={setFieldValue}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field.isTooltip}
-                                      tooltipMessage={field.tooltipMessage}
-                                      doNotShowInfoTooltip={true}
-                                      size="small"
-                                      addDisplayType={addDisplayType}
-                                      removeDisplayType={removeDisplayType}
-                                      setValues={setValues}
-                                      handleRemoveField={handleRemoveField}
-                                      disabled={values.isEditable ?
-                                        stage === "product" ?
-                                          ["productCategory", "productTemplate", "entity"].includes(field.fieldName) ? true : false
-                                          : ["productCategory", "productTemplate", "entity", "priceTemplate"].includes(field.fieldName) ? true : false
-                                        :
-                                        stage === "product" ?
-                                          ["product", "product-custom"].includes(field.leval) ? true : false
-                                          : ["product", "product-custom"].includes(field.leval) ? true : false}
-                                    />
-                                  ) : (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
-                                      <Box display="flex">
-                                        <Box flexGrow={1}>
-                                          <FormTypes
-                                            {...field}
-                                            style={{ background: field?.isUneditable ? "#EBEBE4" : field?.isFormula ? "#1e768221" : "" }}
-                                            productTemplateId={values?.productTemplate}
-                                            priceTemplateId={values?.priceTemplate}
-                                            fields={initialData.fields}
-                                            fieldData={field}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={
-                                              field.isUneditable
-                                                ? `${replaceUnit(
-                                                  field.fieldLabel,
-                                                  values?.unit,
-                                                  values?.secondaryUnit
-                                                )} (Auto Calculated Field)`
-                                                : replaceUnit(
-                                                  field.fieldLabel,
-                                                  values?.unit,
-                                                  values?.secondaryUnit
-                                                )
-                                            }
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={field.option}
-                                            setFieldValue={setFieldValue}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field.isTooltip}
-                                            tooltipMessage={
-                                              field.tooltipMessage
-                                            }
-                                            decimalPlaces={field.decimalPlaces}
-                                            isvlookupReverse={
-                                              field.isvlookupReverse
-                                            }
-                                            size="small"
-                                            disabled={values.isEditable ?
-                                              stage === "product" ?
-                                                ["productCategory", "productTemplate", "entity"].includes(field.fieldName) ? true : false
-                                                : ["productCategory", "productTemplate", "entity", "priceTemplate"].includes(field.fieldName) ? true : false
-                                              : stage === "product" ?
-                                                ["product", "product-custom"].includes(field.leval) && !["priceTemplate"].includes(field.fieldName) ? true : false
-                                                : ["product", "product-custom"].includes(field.leval) ? true : false}
-                                            imageOrFileUploadCompletePercentage={
-                                              ["imageUpload", "fileUpload"].some((s) => s === field.type)
-                                                ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(
-                                                    completePercentage
-                                                  );
-                                                }
-                                                : null
-                                            }
-                                            setValues={setValues}
-                                          />
-                                        </Box>
-                                        {(field.leval === "product-builder-custom" || field.leval === "price-builder-custom") && (
-                                          <Box>
-                                            <Tooltip
-                                              title="Remove"
-                                              className="mt-1"
-                                            >
-                                              <IconButton
-                                                onClick={() => handleRemoveField(field)}
-                                                color="primary"
-                                                size="small"
-                                              >
-                                                <HighlightOffIcon color="error" />
-                                              </IconButton>
-                                            </Tooltip>
+                            <Collapse in={expanded[i]} timeout="auto" unmountOnExit>
+                              <Grid spacing={3} container>
+                                {section.sectionFields &&
+                                  section.sectionFields.map((field) =>
+                                    field.type === "converter" || field.type === "currencyAmount" || field.isConverter ? (
+                                      <FormTypes
+                                        style={{ background: field?.isUneditable ? "#EBEBE4" : field?.isFormula ? "#1e768221" : "" }}
+                                        fields={initialData.fields}
+                                        fieldData={field}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={
+                                          field.isUneditable
+                                            ? `${replaceUnit(
+                                              field.fieldLabel,
+                                              values?.unit,
+                                              values?.secondaryUnit
+                                            )} (Auto Calculated Field)`
+                                            : replaceUnit(
+                                              field.fieldLabel,
+                                              values?.unit,
+                                              values?.secondaryUnit
+                                            )
+                                        }
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field.isTooltip}
+                                        tooltipMessage={field.tooltipMessage}
+                                        doNotShowInfoTooltip={true}
+                                        size="small"
+                                        addDisplayType={addDisplayType}
+                                        removeDisplayType={removeDisplayType}
+                                        setValues={setValues}
+                                        handleRemoveField={handleRemoveField}
+                                        disabled={values.isEditable ?
+                                          stage === "product" ?
+                                            ["productCategory", "productTemplate", "entity"].includes(field.fieldName) ? true : false
+                                            : ["productCategory", "productTemplate", "entity", "priceTemplate"].includes(field.fieldName) ? true : false
+                                          :
+                                          stage === "product" ?
+                                            ["product", "product-custom"].includes(field.leval) ? true : false
+                                            : ["product", "product-custom"].includes(field.leval) ? true : false}
+                                      />
+                                    ) : (
+                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
+                                        <Box display="flex">
+                                          <Box flexGrow={1}>
+                                            <FormTypes
+                                              {...field}
+                                              style={{ background: field?.isUneditable ? "#EBEBE4" : field?.isFormula ? "#1e768221" : "" }}
+                                              productTemplateId={values?.productTemplate}
+                                              priceTemplateId={values?.priceTemplate}
+                                              fields={initialData.fields}
+                                              fieldData={field}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={
+                                                field.isUneditable
+                                                  ? `${replaceUnit(
+                                                    field.fieldLabel,
+                                                    values?.unit,
+                                                    values?.secondaryUnit
+                                                  )} (Auto Calculated Field)`
+                                                  : replaceUnit(
+                                                    field.fieldLabel,
+                                                    values?.unit,
+                                                    values?.secondaryUnit
+                                                  )
+                                              }
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={field.option}
+                                              setFieldValue={setFieldValue}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field.isTooltip}
+                                              tooltipMessage={
+                                                field.tooltipMessage
+                                              }
+                                              decimalPlaces={field.decimalPlaces}
+                                              isvlookupReverse={
+                                                field.isvlookupReverse
+                                              }
+                                              size="small"
+                                              disabled={values.isEditable ?
+                                                stage === "product" ?
+                                                  ["productCategory", "productTemplate", "entity"].includes(field.fieldName) ? true : false
+                                                  : ["productCategory", "productTemplate", "entity", "priceTemplate"].includes(field.fieldName) ? true : false
+                                                : stage === "product" ?
+                                                  ["product", "product-custom"].includes(field.leval) && !["priceTemplate"].includes(field.fieldName) ? true : false
+                                                  : ["product", "product-custom"].includes(field.leval) ? true : false}
+                                              imageOrFileUploadCompletePercentage={
+                                                ["imageUpload", "fileUpload"].some((s) => s === field.type)
+                                                  ? (completePercentage) => {
+                                                    setUploadingImageOrFileProgress(
+                                                      completePercentage
+                                                    );
+                                                  }
+                                                  : null
+                                              }
+                                              setValues={setValues}
+                                            />
                                           </Box>
-                                        )}
-                                      </Box>
-                                    </Grid>
-                                  )
-                                )}
-                            </Grid>
+                                          {(field.leval === "product-builder-custom" || field.leval === "price-builder-custom") && (
+                                            <Box>
+                                              <Tooltip
+                                                title="Remove"
+                                                className="mt-1"
+                                              >
+                                                <IconButton
+                                                  onClick={() => handleRemoveField(field)}
+                                                  color="primary"
+                                                  size="small"
+                                                >
+                                                  <HighlightOffIcon color="error" />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </Box>
+                                          )}
+                                        </Box>
+                                      </Grid>
+                                    )
+                                  )}
+                              </Grid>
+                            </Collapse>
                           </Box>
                         </div>
                       ))}
@@ -463,7 +503,11 @@ const CreateProduct = (props) => {
                   variant="contained"
                   color="primary"
                   type="submit"
-                  onClick={submitForm}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleScroll(errors)
+                    submitForm();
+                  }}
                   disabled={uploadingImageOrFileProgress > 0}
                 >
                   {" "}

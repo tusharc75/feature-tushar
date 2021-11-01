@@ -18,6 +18,7 @@ import SignatureDialog from '../../components/Helpers/SignatureDialog';
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { Link } from "react-router-dom";
 import { CommonRenderer, CreatedByRenderer, DateRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import queryString from "query-string";
 
 const mappedStatus = {
   "Start Delivery": "In-Transit",
@@ -29,6 +30,8 @@ const ReceivingTicketDetails = () => {
 
   const { id } = useParams();
   const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit } = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -56,7 +59,7 @@ const ReceivingTicketDetails = () => {
   const handleMainPoints = (data) => {
     let mainPoint = {};
     mainPoint['Receiving Job Name'] = data?.receivingJobName || '';
-    mainPoint['Delivery Person'] = data?.deliveryPerson.optionLabel || '';
+    mainPoint['Delivery Person'] = data?.deliveryPerson?.optionLabel || '';
     mainPoint['Status'] = data?.status || '';
     setMainPoints(mainPoint);
   };
@@ -88,6 +91,13 @@ const ReceivingTicketDetails = () => {
         if (data?.productInventory && data?.productInventory.length) {
           let ids = data?.productInventory.map(o => o?.optionValue)
           fetchProductInventory(ids)
+        }
+        
+        if (permissions?.receivingTicket?.isUpdate && openEdit === "true") {
+          setOpenUpdateDialog(true)
+          const params = new URLSearchParams()
+          params.delete("openEdit")
+          history.push({ search: params.toString() })
         }
       })
       .catch((err) => {

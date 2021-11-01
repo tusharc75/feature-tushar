@@ -143,7 +143,8 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
             field: field?.fieldName,
             headerName: fieldHeaderName,
             show: gridMetaData[updatedTitle]?.hide && gridMetaData[updatedTitle]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
-            disabled: gridMetaData[updatedTitle]?.disabled && gridMetaData[updatedTitle]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false
+            disabled: gridMetaData[updatedTitle]?.disabled && gridMetaData[updatedTitle]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
+            primaryField: field?.primaryField ?? false
         }
         if (field?.fieldName === "firstName" && field?.primaryField === false) {
             let combinedTitle = camelCase(updatedTitle)

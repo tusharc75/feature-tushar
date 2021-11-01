@@ -1,13 +1,13 @@
-import { useState, useEffect, useContext, Fragment } from "react";
+import { useState, useEffect, useContext, Fragment, useReducer } from "react";
 import {
     Grid, Box, Button, Typography, IconButton, Paper, Chip, List,
     ListItem,
     ListItemText,
-    ListItemSecondaryAction
+    ListItemSecondaryAction,
 } from "@material-ui/core";
 import { ControlPoint, ExpandLess, ExpandMore, InfoOutlined } from "@material-ui/icons";
-import { Skeleton } from "@material-ui/lab";
-import { useParams, useHistory } from "react-router-dom";
+import { Skeleton, ToggleButtonGroup, ToggleButton } from "@material-ui/lab";
+import { useParams, useHistory, Link } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "../../components/Helpers/Routes";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -24,11 +24,17 @@ import DeleteButton from "../../components/Helpers/DeleteButton";
 import AssignedFrequentlyBoughtProduct from "./AssignedFrequentlyBoughtProduct";
 import AssignProductDialog from "../../components/AssignRolesDialog/AssignProductDialog";
 import ManageProductInventory from "../ProductInventory/ManageProductInventory"
-import { extractFields } from "../../constants/formulaUtility";
+import { extractFieldsForDisplay } from "../../constants/formulaUtility";
 import ProductHierarchy from "./ProductHierarchy"
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
-
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
+import {
+    CommonRenderer,
+    CreatedByRenderer,
+    UpdatedByRenderer
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 const ProductDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -52,9 +58,17 @@ const ProductDetailsPage = () => {
     const [frequentlyBoughtProduct, setFrequentlyBoughtProduct] = useState([]);
     const [inventoriesData, setInventoriesData] = useState([]);
     const [BOMData, setBOMData] = useState([])
+    const [activeTable, setActiveTable] = useState("packages")
     const [productWarehouseData, setProductWarehouseData] = useState([]);
     const [selectedWarehouse, setSelectedWarehouse] = useState(null)
     const [openProductInventoryDialog, setOpenProductInventoryDialog] = useState(false);
+    const [productColoums, setProductColoums] = useState([]);
+    const [columns, setColumns] = useState([]);
+    const [gridApi, setGridApi] = useState(null);
+    const [state, dispatch] = useReducer(reducer, intialState);
+    const [currentTab, setCurrentTab] = useState(null)
+    const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
 
     const ignoreField = ["priceTemplate"]
 
@@ -73,6 +87,12 @@ const ProductDetailsPage = () => {
             }
         }
     }, [productData])
+
+    useEffect(() => {
+        if (productData) {
+            getColumns()
+        }
+    }, [activeTable, productData])
 
     const handleMainPoints = (data) => {
         let mainPoint = {};
@@ -104,7 +124,7 @@ const ProductDetailsPage = () => {
                     newField.forEach((_f) => {
                         fields.push(_f.fieldData)
                     })
-                    fields = extractFields(fields)
+                    fields = extractFieldsForDisplay(fields)
                     newField = []
                     fields.forEach((_f) => {
                         newField.push({ "fieldData": _f })
@@ -239,6 +259,92 @@ const ProductDetailsPage = () => {
             })
     }
 
+
+    const getColumns = () => {
+        if (productData === null) return
+        const { parent, packages } = productData
+        if (gridApi) {
+            gridApi.setRowData([]);
+        }
+        dispatch({ type: "loading", loading: true });
+        let newColumns = []
+        let rowsData = []
+        if (activeTable === "parent") {
+            rowsData = parent ? parent.map(product => ({
+                ...product,
+                serializedProduct: product.serializedProduct ? "Yes" : "No",
+                productType: product.productType,
+                createdBy: product.createdBy.user.concatedName,
+                createdByDate: product.createdBy.date,
+                updatedBy: product.updatedBy.user.concatedName,
+                updatedByDate: product.updatedBy.date,
+            })) : []
+            newColumns = [
+                { field: "productName", headerName: "Product Description", show: true, disabled: false, cellRenderer: "productNameRenderer" },
+                { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
+                { field: "longDescription", headerName: "Long Description", show: true, cellRenderer: "commonRenderer" },
+                { field: "productCategory", headerName: "Product Category", show: true, disabled: false, cellRenderer: "productCategoryRenderer" },
+                { field: "mrp", headerName: "MRP", show: true, disabled: false, cellRenderer: "commonRenderer" },
+                { field: "productType", headerName: "Product Type", show: true, disabled: false, cellRenderer: "commonRenderer" },
+                { field: "serializedProduct", headerName: "Serialized Product", show: true, disabled: false, cellRenderer: "commonRenderer" },
+                { field: "ratingsCount", headerName: "Ratings Count", show: true, disabled: false, cellRenderer: "commonRenderer" },
+                { field: "createdBy", headerName: "Created By", show: true, disabled: false, cellRenderer: "createdByRenderer" },
+                { field: "updatedBy", headerName: "Updated By", show: true, disabled: false, cellRenderer: "updatedByRenderer" },
+
+            ]
+        } else {
+            rowsData = packages ? packages.map((p) => ({
+                ...p,
+                createdBy: p.createdBy.user.concatedName,
+                createdByDate: p.createdBy.date,
+                updatedBy: p.updatedBy.user.concatedName,
+                updatedByDate: p.updatedBy.date,
+            })) : []
+            newColumns = [
+                { field: "packageName", headerName: "Package Name", show: true, cellRenderer: "packageNameRenderer" },
+                { field: "packageDescription", headerName: "Package Description", show: true, disabled: false, cellRenderer: "commonRenderer" },
+                { field: "createdBy", headerName: "Created By", show: true, disabled: false, cellRenderer: "createdByRenderer" },
+                { field: "updatedBy", headerName: "Updated By", show: true, disabled: false, cellRenderer: "updatedByRenderer" },
+            ];
+        }
+        setColumns(newColumns)
+        dispatch({ type: "initialize", data: rowsData, count: rowsData.length });
+        dispatch({ type: "loading", loading: false });
+    }
+
+
+    const ProductNameRenderer = params => (
+        <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data._id}`}>
+            {params.value}
+        </Link>
+    )
+
+    const PackageNameRenderer = params => (
+        <Link className="link" title={params.value} to={`${routes.packagesDetail.path}/${params.data._id}`}>
+            {params.value}
+        </Link>
+    )
+
+    const ProductCategoryRenderer = (params) => params.data.productCategory ?
+        <Chip
+            className="ml-3"
+            style={{ backgroundColor: `${params.data.productCategory.chipColor}` }}
+            label={`${params.data.productCategory.optionLabel}`}
+        />
+        : <NoDataCell />
+
+
+
+    const frameworkComponents = {
+        productNameRenderer: ProductNameRenderer,
+        packageNameRenderer: PackageNameRenderer,
+        createdByRenderer: CreatedByRenderer,
+        updatedByRenderer: UpdatedByRenderer,
+        productCategoryRenderer: ProductCategoryRenderer,
+        commonRenderer: CommonRenderer,
+    };
+
+
     return (
         <>
             <Fragment>
@@ -249,7 +355,7 @@ const ProductDetailsPage = () => {
                 <Grid container spacing={1} className="detail-container">
                     <Grid item xs={12} sm={12}
                         md={process.env.REACT_APP_ENV === 'staging' ? 12 : 8}
-                        lg={process.env.REACT_APP_ENV === 'staging' ? 12 : 8} spacing={2}>
+                        lg={process.env.REACT_APP_ENV === 'staging' ? 12 : 8}>
                         <Paper>
                             {!productData ? (
                                 <div>
@@ -305,12 +411,49 @@ const ProductDetailsPage = () => {
                                 )}
                             </Box>
 
+                            <Box ml={1} mb={1} mt={2}>
+                                <ToggleButtonGroup
+                                    size="small"
+                                    value={activeTable}
+                                    exclusive
+                                    onChange={(event, val) => {
+                                        setActiveTable(val);
+                                    }}
+                                    aria-label="parent data"
+                                >
+                                    <ToggleButton value="packages">
+                                        Packages
+                                    </ToggleButton>
+                                    <ToggleButton value="parent">
+                                        Parent
+                                    </ToggleButton>
+                                </ToggleButtonGroup>
+                            </Box>
+
+                            <CustomAgGrid
+                                allowSelection={false}
+                                allowAction={false}
+                                columns={columns}
+                                dataRows={dataRows}
+                                frameworkComponents={frameworkComponents}
+                                setGridApi={setGridApi}
+                                dispatch={dispatch}
+                                rowCount={rowCount}
+                                limit={limit}
+                                pageSizes={pageSizes}
+                                page={page}
+                                actionWidth={150}
+                                loading={gridLoading}
+                                renderedFrom="productMasterDetailsPage"
+                                refreshGrid={getColumns}
+                            />
+
                         </Paper>
                     </Grid>
                     {
                         process.env.REACT_APP_ENV === 'staging' ? null :
                             <Grid item xs={12} sm={12}
-                                md={4} lg={4} spacing={2}>
+                                md={4} lg={4}>
                                 <Paper style={{ overflow: 'hidden' }}>
                                     <Box
                                         padding={1}

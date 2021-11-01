@@ -46,6 +46,7 @@ const BulkEditDialog = (props) => {
 
     const [isShowProductTemplate, setIsShowProductTemplate] = useState(false);
     const [fieldChanges, setFieldChanges] = useState([]);
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
 
@@ -95,7 +96,7 @@ const BulkEditDialog = (props) => {
 
     const handleSubmit = (values) => {
         for (const x in values) {
-            if (values[x] === 0 || values[x] === "0" || values[x] === "") {
+            if (values[x] === 0 || values[x] === "0" || values[x] === "" || (Array.isArray(values[x]) && values[x].length === 0)) {
                 delete values[x]
             }
         }
@@ -249,7 +250,7 @@ const BulkEditDialog = (props) => {
 
     return (<Dialog
         maxWidth="md"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
@@ -270,7 +271,14 @@ const BulkEditDialog = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={`Bulk Edit`} onClose={handleClose}></CustomDialogHeader>
+                        <CustomDialogHeader
+                            title={`Bulk Edit`}
+                            isMinimized={!fullScreen}
+                            onMinimizeMaximize={() => {
+                                setFullScreen(prevState => !prevState)
+                            }}
+                            showManimizeMaximize={true}
+                            onClose={handleClose} />
                         <CustomDialogContent>
                             <Box>
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
