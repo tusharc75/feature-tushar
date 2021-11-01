@@ -89,7 +89,7 @@ export default function QuoteDetailPage({ quoteData, quotePermissions, selectedE
             {quoteData  && (
                 <>
                     <div className={classes.btnHeader}>
-                        {quotePermissions?.isCreate ? (
+                        {/* {quotePermissions?.isCreate ? (
                             <Button
                                 variant="text"
                                 style={{color:"white"}}
@@ -111,7 +111,7 @@ export default function QuoteDetailPage({ quoteData, quotePermissions, selectedE
                             >
                                 Edit
                             </Button>
-                        ) : null}
+                        ) : null} */}
                     </div>
                     {!loadingFields && quoteFields ? (
                         <DetailsPage
