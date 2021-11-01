@@ -183,9 +183,9 @@ const Details = (props: DetailProps) => {
           : "";
       text = value ? value : "-";
     } else if (input.type === "freeStyleMultiSelect") {
-      const value = values[input.fieldName].length
-        ? values[input.fieldName].map((d) => d).join(", ")
-        : "";
+      const value = values[input.fieldName].length && Array.isArray(values[input.fieldName])
+        ? values[input.fieldName].map((d) => d).join(", ") : typeof values[input.fieldName] === "string" ? values[input.fieldName] : "";
+
       text = value ? value : "-";
     } else if (input.type === "dropDown") {
       const opt = input.option?.find(

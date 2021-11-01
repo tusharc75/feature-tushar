@@ -30,7 +30,6 @@ import QuoteProcess from './QuoteProcess';
 import QuoteDetailPage from './QuoteDetailPage';
 import AllVersionStatus from './AllVersionStatus';
 import queryString from "query-string";
-import { GoIssueReopened } from 'react-icons/go';
 
 
 interface TabPanelProps {

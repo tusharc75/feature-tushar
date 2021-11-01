@@ -41,7 +41,7 @@ const SelectionDialog = (props) => {
     const ref = useRef(null);
 
     useEffect(() => {
-        axiosInstance().get(`/product-category`).then(({ data }) => {
+        axiosInstance().get(`/product-category?sortBy=name&orderBy=asc`).then(({ data }) => {
             data.data = data.data?.map((u) => ({
                 optionValue: u._id,
                 optionLabel: u.name,

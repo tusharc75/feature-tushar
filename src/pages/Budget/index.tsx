@@ -19,9 +19,6 @@ import {
   prepareDataForGrid
 } from "../../constants/helpers";
 import routes from "./../../components/Helpers/Routes";
-import {
-  CommonRenderer,
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid, {
   reducer,
   intialState,
