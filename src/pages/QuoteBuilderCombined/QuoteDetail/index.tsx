@@ -684,37 +684,29 @@ export default function QuoteDetail() {
                   mainPoints={quoteData ? getMainPoints : ""}
                   showHeading={true}
                 >
-                  <div className="d-flex align-items-center justify-content-start">
-                    <Button
-                      // className="customSelect mx-1"
-                      variant="text"
-                      color="primary"
-                      size="small"
-                      aria-controls="simple-menu"
-                      aria-haspopup="true"
-                      style={{ color: "var(--warning)" }}
-                      onClick={() => { setShowAllVersionStatus(true) }}
-                      startIcon={<VscVersions style={{ paddingTop: "2px" }} size={isMobile ? `20` : `16`} />}>
-                         {/* Version : ${currentVersion} */}
-                    </Button>
-
-                  </div>
-                  <Grid
-                    item
-                    xs={processStatus === "New" ? 12 : 12}
-                    sm={processStatus === "New" ? 12 : 5}
-                    md={processStatus === "New" ? 12 : 5}
+                  <Grid item md={12} sm={12} xs={12} 
                     className="d-flex align-items-center justify-content-end"
                   >
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      size="small"
+                      className="mx-1"
+                      onClick={() => { setShowAllVersionStatus(true) }}
+                      startIcon={<VscVersions />}>
+                      {isMobile ? "" : `Version : ${currentVersion}`}
+                    </Button>
                     {processStatus !== "New" && <Button
                       onClick={() => {
                         setShowTotalSalesDialog(true)
                       }}
                       variant="outlined"
                       size="small"
+                      className="mx-1"
                       startIcon={<GiReceiveMoney />}
                       color="primary"
                     >
+                      {isMobile ? "" : "Statastics"}
                     </Button>
                     }
                     {DOAApproved && versionStatus === "Sent for DOA" && (
@@ -725,22 +717,24 @@ export default function QuoteDetail() {
                           }}
                           variant="outlined"
                           size="small"
+                          className="mx-1"
                           startIcon={<ThumbUpIcon />}
                           color="primary"
                         >
-                          {approvedButtonText}
+                          { isMobile ? "" : `${approvedButtonText}`}
                         </Button>
                         <Button
                           onClick={() => {
                             setQuoteStatusChangeData("Rejected")
                             setShowQuoteStatusChangeDialog(true)
                           }}
+                          className="mx-1"
                           startIcon={<ThumbDownIcon />}
                           variant="contained"
                           size="small"
                           color="primary"
                         >
-                          Reject
+                          {isMobile ? "" : "Reject" }
                         </Button>
                       </>
                     )}
@@ -750,12 +744,12 @@ export default function QuoteDetail() {
                         color="default"
                         size="small"
                         className="mx-1"
+                        endIcon={<ExpandMore />}
                         onClick={openActions}
-                        fullWidth={true}
                         // className={styles.action_submit_btn}
                         aria-controls="action-menu"
                       >
-                        Actions <ExpandMore />
+                       {isMobile ? "" : "Actions "}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}

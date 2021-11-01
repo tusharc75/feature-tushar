@@ -20,7 +20,7 @@
 
 .doaAction {
   position: absolute;
-  top: 14px;
+  top: 2px;
   right: 14px;
 }
 .currentStepColor {
@@ -28,10 +28,9 @@
     color: #378280 !important;
     opacity: 1;
     font-Size: 12px;
-    active:{
-      color: #378280 !important;
-    }
-
+      active{
+        color: #378280 !important;
+      }
   }
   & .MuiStepLabel-label {
     color: #378280 !important;
