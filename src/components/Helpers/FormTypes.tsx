@@ -486,10 +486,10 @@ const FormTypes = (props) => {
 
   const addFieldOption = (optionData) => {
     if (fieldData && fieldData.isDependentDropdown) {
-      if(Array.isArray(optionData)){
+      if (Array.isArray(optionData)) {
         optionData[0][fieldData.dropdowDependentOn] = values[fieldData.dropdowDependentOn];
       }
-      else{
+      else {
         optionData[fieldData.dropdowDependentOn] = values[fieldData.dropdowDependentOn];
       }
     }
@@ -767,7 +767,7 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(name, parseFloat(e.target.value));
+              handleChange(name, e.target.value ? parseFloat(e.target.value) : 0);
             }
         }
       />
