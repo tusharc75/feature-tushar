@@ -21,12 +21,10 @@ const Header = (props) => {
     openRegionalRolesDialog,
     rolesActionDisabled,
     approvalProcessActionDisabled,
-    openDOADialog,
     entityRoleRedirectDetails,
     onEntityRoleRedirectDetailRemove,
     unAssignUsersFromEntity,
     openUserSetupDialog,
-    assignDoaDisabled,
     userSetupDisabled,
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
@@ -147,18 +145,6 @@ const Header = (props) => {
                     }}
                   >
                     Assign Region Wide Functional Roles
-                  </MenuItem>
-                }
-
-                {
-                  userPermissions.isUpdate && <MenuItem
-                    disabled={assignDoaDisabled}
-                    onClick={() => {
-                      openDOADialog();
-                      closeActions();
-                    }}
-                  >
-                    Assign DOA's
                   </MenuItem>
                 }
 

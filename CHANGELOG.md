@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.28.0](https://github.com/vebholic/oms_frontend/compare/v1.27.0...v1.28.0) (2021-10-29)
+
+
+### Features
+
+* - Maximize, Minimize was visible in mobile fixed ([7cc3d54](https://github.com/vebholic/oms_frontend/commit/7cc3d54e390ff502121a41e2c5f52ddf31a7b8db))
+* - Primary field separate addition fixed ([a1e90db](https://github.com/vebholic/oms_frontend/commit/a1e90db3af12dc09c68fa39e2729e8d56d61ddaa))
+* - Swipable code added ([c97b32c](https://github.com/vebholic/oms_frontend/commit/c97b32c67ec7b5cbb08d98bc5b71aa7e77f2193d))
+
+
+### Bug Fixes
+
+* **freestylemultiselect:** have default value of empty array ([91c23d3](https://github.com/vebholic/oms_frontend/commit/91c23d3346b3efe3d2030c9c0b62791b65c5ee40))
+* product min max ([f740ac8](https://github.com/vebholic/oms_frontend/commit/f740ac8d472c03cf5cf24087e655d5f2449c234d))
+* product optimization ([a90be0e](https://github.com/vebholic/oms_frontend/commit/a90be0e20fe7810053c072c1452b027f36384fd3))
+
 ## [1.27.0](https://github.com/vebholic/oms_frontend/compare/v1.26.0...v1.27.0) (2021-10-28)
 
 

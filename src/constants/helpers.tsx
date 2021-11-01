@@ -54,6 +54,19 @@ export const leadImportErrorFileName = 'Leads-Errors.xlsx';
 export const opportunityTemplateFileName = 'Opportunities-Template.xlsx';
 export const opportunityImportErrorFileName = 'Opportunities-Errors.xlsx';
 
+export const quoteStepColors = {
+  "accepted by customer": { backgroundColor: "#008000", color: "#fff" },
+  "not booked by customer": { backgroundColor: "#ba181b", color: "#fff" },
+
+  "re-open": { backgroundColor: "#ff7d00", color: "#fff" },
+  "invalid by customer": { backgroundColor: "#eb5e28", color: "#fff" },
+
+  "not booked": { backgroundColor: "#2b2d42", color: "#fff" },
+  "building quote": { backgroundColor: "#023e7d", color: "#fff" },
+
+  "__default__": { backgroundColor: "#023e7d", color: "#fff" }
+}
+
 export const roleTypes = [
   {
     key: 'Global',
@@ -500,7 +513,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
         : string().min(10, 'Mobile number is too short');
     } else if (input.type === 'multiSelect') {
-      schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`) : array();
+      schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else if (input.type === 'email') {
       schema[input.fieldName] =
         input.required && validEmail
@@ -1129,7 +1142,7 @@ export const prepareDataForGrid = (data, user = {}) => {
     if (typeof data[key] === "object") {
 
       if (Array.isArray(data[key])) {
-        if (data[key].length > 0 && data[key][0].hasOwnProperty("optionLabel")) {
+        if (data[key].length > 0 && data[key][0] && data[key][0].hasOwnProperty("optionLabel")) {
           const [first, ...rest] = data[key];
 
           restProperties[key] = first["optionLabel"];
@@ -1139,8 +1152,8 @@ export const prepareDataForGrid = (data, user = {}) => {
         else if (typeof data[key][0] !== "object") {
           restProperties[key] = data[key].join(",")
         }
-
-      } else {
+      }
+      else {
         objectValues[key] = data[key];
       }
     } else {
@@ -1152,7 +1165,7 @@ export const prepareDataForGrid = (data, user = {}) => {
   let finalObject = { ...restProperties };
 
   Object.keys(objectValues).forEach(d => {
-    if (objectValues[d].hasOwnProperty("optionLabel")) {
+    if (objectValues[d] && objectValues[d].hasOwnProperty("optionLabel")) {
       finalObject[d] = objectValues[d]["optionLabel"];
       finalObject[`${d}Id`] = objectValues[d]["optionValue"];
     }

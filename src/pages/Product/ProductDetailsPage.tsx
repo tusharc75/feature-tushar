@@ -24,7 +24,7 @@ import DeleteButton from "../../components/Helpers/DeleteButton";
 import AssignedFrequentlyBoughtProduct from "./AssignedFrequentlyBoughtProduct";
 import AssignProductDialog from "../../components/AssignRolesDialog/AssignProductDialog";
 import ManageProductInventory from "../ProductInventory/ManageProductInventory"
-import { extractFields } from "../../constants/formulaUtility";
+import { extractFieldsForDisplay } from "../../constants/formulaUtility";
 import ProductHierarchy from "./ProductHierarchy"
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
@@ -124,7 +124,7 @@ const ProductDetailsPage = () => {
                     newField.forEach((_f) => {
                         fields.push(_f.fieldData)
                     })
-                    fields = extractFields(fields)
+                    fields = extractFieldsForDisplay(fields)
                     newField = []
                     fields.forEach((_f) => {
                         newField.push({ "fieldData": _f })

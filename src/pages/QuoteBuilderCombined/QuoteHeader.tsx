@@ -15,6 +15,7 @@ import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import styles from "../Leads/Header.module.scss";
 import { useData } from "../../StateProvider/Provider";
+import { isMobile } from 'react-device-detect';
 
 function QuoteHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -82,81 +83,87 @@ function QuoteHeader(props) {
       </Grid>
       <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
         <Box className={styles.filter_side_header} component="div">
-          <SearchBox
-            onSearch={onSearch}
-            searchbox={styles.search_box_input}
-            value={searchVal}
-            size="small"
-            placeholder="Search Quotes"
-            width="242px"
-          />
 
-          {QuotePermissions.isCreate && QuotePermissions.isUpdate && (
-            <Button
-              variant="contained"
-              color="primary"
+          <div className="d-flex gap-2">
+
+            <SearchBox
+              onSearch={onSearch}
+              searchbox={styles.search_box_input}
+              value={searchVal}
               size="small"
-              className={styles.add_submit_btn}
-              onClick={onCreate}
-              startIcon={<AddOutlined />}
-            >
-              Add
-            </Button>
-          )}
-          <>
-            <Button
-              disabled={canDelete}
-              variant="outlined"
-              color="default"
-              size="small"
-              onClick={openActions}
-              className={styles.action_submit_btn}
-              aria-controls="action-menu"
-            >
-              Actions <ExpandMore />
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  showConfirmBox(null);
-                }}
-                disabled={!permissions?.quoteBuilder?.isDelete}
-              >
-                Delete
-              </MenuItem>
-              {
-                QuotePermissions.isUpdate && <MenuItem
-                  disabled={selectedRecords.find((d) => d.canDelete === false)}
-                  onClick={() => {
-                    closeActions();
-                    showTransferEntityDialog();
+              placeholder="Search Quotes"
+              width="242px"
+            />
+
+            <div className="d-flex gap-2">
+              {QuotePermissions.isCreate && QuotePermissions.isUpdate && !isMobile && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  className={styles.add_submit_btn}
+                  onClick={onCreate}
+                  startIcon={<AddOutlined />}
+                >
+                  Add
+                </Button>
+              )}
+              <>
+                <Button
+                  disabled={canDelete}
+                  variant="outlined"
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  fullWidth={true}
+                  // className={styles.action_submit_btn}
+                  aria-controls="action-menu"
+                >
+                  Actions <ExpandMore />
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
                   }}
-                >Transfer Entity</MenuItem>
-              }
-              <MenuItem
-                disabled={selectedRecords.length !== 1}
-                onClick={() => {
-                  closeActions();
-                  showCloneQuoteDialog()
-                }}
-              >
-                Clone
-              </MenuItem>
-            </Menu>
-          </>
-
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      showConfirmBox(null);
+                    }}
+                    disabled={!permissions?.quoteBuilder?.isDelete}
+                  >
+                    Delete
+                  </MenuItem>
+                  {
+                    QuotePermissions.isUpdate && <MenuItem
+                      disabled={selectedRecords.find((d) => d.canDelete === false)}
+                      onClick={() => {
+                        closeActions();
+                        showTransferEntityDialog();
+                      }}
+                    >Transfer Entity</MenuItem>
+                  }
+                  <MenuItem
+                    disabled={selectedRecords.length !== 1}
+                    onClick={() => {
+                      closeActions();
+                      showCloneQuoteDialog()
+                    }}
+                  >
+                    Clone
+                  </MenuItem>
+                </Menu>
+              </>
+            </div>
+          </div>
         </Box>
       </Grid>
     </Grid>

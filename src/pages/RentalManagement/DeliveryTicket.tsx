@@ -38,7 +38,9 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
                 if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
                   tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
                   tempProductInventory[index]["deliveryTicketId"] = obj?._id
+                  tempProductInventory[index]["hideSelection"] = true
                 }
+
               })
             })
             dispatch({
@@ -174,6 +176,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
           page={page}
           allowAction={false}
           loading={loading}
+          allowSelection={true}
           renderedFrom="rentalManagementDetailsPageDeliveryTicket"
         />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>

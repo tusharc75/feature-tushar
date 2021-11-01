@@ -63,7 +63,7 @@ const useStyles = makeStyles((theme) => ({
         padding: "4px !important"
     }
 }));
-const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaType = null, open, onClose, from = "UserDetailPage", isRenderedFromUserSetUp = false }) => {
+const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, doaType = null, open, onClose, from = "EntityDetailPage", isRenderedFromUserSetUp = false }) => {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const [loading, setLoading] = useState(false);
@@ -78,7 +78,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
             ).symbolNative
             : null);
 
-    const tempUserList = from === "UserDetailPage" ? userList.filter(v => v.id !== userSelected[0]) : userList.filter(v => v.id !== "self")
+    const tempUserList = from === "EntityDetailPage" ? userList.filter(v => v.id !== selectedEntity[0]) : userList.filter(v => v.id !== "self")
     const fetchDoa = useCallback(() => {
         doa.length > 0 ?
             setUsers(doa) :
@@ -98,7 +98,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                     amount: item.amount ? Number(item.amount) : 0
                 };
             })
-            let self_index = doaArray.findIndex(x => x.user === userSelected[0] || x.user === "self");
+            let self_index = doaArray.findIndex(x => x.user === selectedEntity[0] || x.user === "self");
             if (self_index > 0) {
                 var element = doaArray[self_index];
                 doaArray.splice(self_index, 1);
@@ -114,7 +114,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
         }
 
 
-        const userDoa = { _ids: userSelected, doaCurrency: selectedType === 2 ? currency : "", doa: doaArray, doaType: selectedType };
+        const userDoa = { _ids: selectedEntity, doaCurrency: selectedType === 2 ? currency : "", doa: doaArray, doaType: selectedType };
         setLoading(true)
         axiosInstance().put('/doa/setups', removeEmptyKeys(userDoa))
             .then(({ data }) => {
@@ -137,7 +137,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
             setSelectedType(DOAType.find((d) => d.key === newFilter).value);
             if (newFilter === "Sequence") {
                 doa.length > 0 ?
-                    setUsers(doa.filter(v => v.id !== userSelected[0] && v.id !== "self")) :
+                    setUsers(doa.filter(v => v.id !== selectedEntity[0] && v.id !== "self")) :
                     setUsers(([{ id: tempUserList ? tempUserList[0]?.id : "", name: tempUserList ? tempUserList[0]?.name : "", amount: 0 }]))
             }
             else {
@@ -168,7 +168,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
         });
 
         if (values.users.length > 0) {
-            let tempUser = values.users.find(item => item.id === userSelected[0] || item.id === "self")
+            let tempUser = values.users.find(item => item.id === selectedEntity[0] || item.id === "self")
             if (tempUser && tempUser.amount !== minTemp.amount) {
                 errors = "Too many characters!";
             }
@@ -353,7 +353,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                                                                 // helperText={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined ? " User is Required" : ""}
                                                                                                 required
                                                                                             />
-                                                                                            {validate(values) && check && (userVal.id === userSelected[0] || userVal.id === "self") && (
+                                                                                            {validate(values) && check && (userVal.id === selectedEntity[0] || userVal.id === "self") && (
                                                                                                 <span style={{ color: 'red' }}>{`${userVal.name} should have minimum amount`}</span>
                                                                                             )}
                                                                                         </Grid>
