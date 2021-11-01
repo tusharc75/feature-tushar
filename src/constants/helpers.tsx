@@ -155,6 +155,8 @@ export const sidebarResource = {
   priceBuilder: 'Price Builder',
   flags: 'Flags',
   projectSales: 'Project Sales',
+  purchaseOrder: 'Purchase Order'
+
 };
 
 export const RESOURCE_LABEL = {
@@ -205,6 +207,7 @@ export const RESOURCE_LABEL = {
   salesOrder: 'Sales Order',
   eCommerce: 'e-Commerce',
   packages: 'Packages',
+  purchaseOrder: 'Purchase Order'
 };
 
 export const lead = {
@@ -363,6 +366,12 @@ export const quotePdfTemplate = {
 export const marketSegment = {
   marketSegmentApi: '/market-segment',
   marketSegmentResource: 'marketSegment'
+};
+
+export const purchaseOrder = {
+  api: '/purchase-order',
+  route: '/purchase-order',
+  permission: 'purchaseOrder'
 };
 
 export const profileMenuItems = {
