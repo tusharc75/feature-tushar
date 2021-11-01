@@ -16,7 +16,7 @@ import {
   Search,
   ViewColumn
 } from '@material-ui/icons';
-import { object, string, array, boolean } from 'yup';
+import { object, string, array, boolean, number } from 'yup';
 import moment from 'moment';
 import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
@@ -155,6 +155,8 @@ export const sidebarResource = {
   priceBuilder: 'Price Builder',
   flags: 'Flags',
   projectSales: 'Project Sales',
+  purchaseOrder: 'Purchase Order'
+
 };
 
 export const RESOURCE_LABEL = {
@@ -205,6 +207,7 @@ export const RESOURCE_LABEL = {
   salesOrder: 'Sales Order',
   eCommerce: 'e-Commerce',
   packages: 'Packages',
+  purchaseOrder: 'Purchase Order'
 };
 
 export const lead = {
@@ -365,6 +368,12 @@ export const marketSegment = {
   marketSegmentResource: 'marketSegment'
 };
 
+export const purchaseOrder = {
+  api: '/purchase-order',
+  route: '/purchase-order',
+  permission: 'purchaseOrder'
+};
+
 export const profileMenuItems = {
   profile: 1,
   notification: 2,
@@ -514,6 +523,10 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         : string().min(10, 'Mobile number is too short');
     } else if (input.type === 'multiSelect') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
+    } else if (input.type === 'percent') {
+      schema[input.fieldName] = input.required 
+        ? number().required(`${input.fieldLabel} is required`).nullable()
+        : number().nullable();
     } else if (input.type === 'email') {
       schema[input.fieldName] =
         input.required && validEmail
