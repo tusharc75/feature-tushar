@@ -36,6 +36,7 @@ import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 import DOAReasonDialog from '../../DOA/DOAReasonDialog';
 import { ExpandMore } from "@material-ui/icons";
+import { AiFillPlusCircle } from 'react-icons/ai';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -76,6 +77,16 @@ const useStyles = makeStyles((theme) => ({
     width: '80%',
     maxHeight: 435,
   },
+  productPos: {
+    position: "absolute",
+    top: "1px",
+    left: "6px",
+    [theme.breakpoints.down("xs")]: {
+      position: "static",
+      display: "flex",
+      alignItems: "center"
+    },
+  }
 }));
 
 const DOASteps = [
@@ -177,6 +188,8 @@ export default function QuoteDetail() {
   const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [showTotalSalesDialog, setShowTotalSalesDialog] = useState(false);
+  const [isAddNewProduct, setIsAddNewProduct] = useState(false);
+  const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -806,12 +819,43 @@ export default function QuoteDetail() {
                             </Button>
                           </MenuItem>
                         )}
-
+                        {!ifQuoteApproved.approved &&
+                          processStatus === "New" && allowedToEdit && (
+                            <>
+                              <MenuItem>
+                                <Button
+                                  variant="outlined"
+                                  size="small"
+                                  className="mr-1"
+                                  startIcon={<AiFillPlusCircle />}
+                                  color="primary"
+                                  disabled={!permissions.product?.isCreate}
+                                  onClick={() => {
+                                    setIsAddNewProduct(true);
+                                  }}
+                                >
+                                  New
+                                </Button>
+                              </MenuItem>
+                              <MenuItem>
+                                <Button
+                                  variant="outlined"
+                                  size="small"
+                                  startIcon={<BiLayerPlus />}
+                                  color="primary"
+                                  onClick={() => {
+                                    setIsAddExistingProduct(true);
+                                  }}
+                                >
+                                  Add Existing
+                                </Button>
+                              </MenuItem>
+                            </>
+                          )}
                         <MenuItem>
                           <Button
                             disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
                             variant="text"
-
                             type="button"
                             size="small"
                             startIcon={
@@ -1010,6 +1054,10 @@ export default function QuoteDetail() {
                       setDOARequestIdFromQuoteDetails={setDOARequestId}
                       showTotalSalesDialog={showTotalSalesDialog}
                       setShowTotalSalesDialog={setShowTotalSalesDialog}
+                      setIsAddNewProduct={setIsAddNewProduct}
+                      isAddNewProduct={isAddNewProduct}
+                      setIsAddExistingProduct={setIsAddExistingProduct}
+                      isAddExistingProduct={isAddExistingProduct}
                     />)}
                   </TabPanel>
                 </>

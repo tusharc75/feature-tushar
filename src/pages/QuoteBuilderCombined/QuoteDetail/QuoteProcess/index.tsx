@@ -3,7 +3,7 @@ import { Autocomplete } from "@material-ui/lab";
 import React, { useEffect, useMemo, useState } from "react";
 import { useContext } from "react";
 import { useHistory } from "react-router-dom";
-import { AiFillEdit, AiFillPlusCircle, AiOutlineEye } from "react-icons/ai";
+import { AiFillEdit, AiOutlineEye } from "react-icons/ai";
 import { BiLayerPlus, BiMailSend } from "react-icons/bi";
 import { FiDownloadCloud } from "react-icons/fi";
 import { GiVintageRobot, GiProfit } from "react-icons/gi";
@@ -80,16 +80,6 @@ const useStyles = makeStyles((theme) => ({
         top: "4px",
         right: "20px",
     },
-    productPos: {
-        position: "absolute",
-        top: "1px",
-        left: "6px",
-        [theme.breakpoints.down("xs")]: {
-            position: "static",
-            display: "flex",
-            alignItems: "center"
-        },
-    }
 }));
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
@@ -121,7 +111,11 @@ export default function QuoteProcess(props) {
         setDOAApprovedFromQuoteDetails,
         setDOARequestIdFromQuoteDetails,
         showTotalSalesDialog,
-        setShowTotalSalesDialog
+        setShowTotalSalesDialog,
+        setIsAddNewProduct,
+        isAddNewProduct,
+        setIsAddExistingProduct,
+        isAddExistingProduct
     } = props
     const defaultSelectColumns = [
         "Product Description",
@@ -177,8 +171,6 @@ export default function QuoteProcess(props) {
     const [dynamicTableData, setDynamicTableData] = useState([]);
     const [reminderLoading, setReminderLoading] = useState(false);
     const [isRearrangeColumns, setRearrangeColumns] = useState(false);
-    const [isAddNewProduct, setIsAddNewProduct] = useState(false);
-    const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
     const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
     const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
     const [loading, setLoading] = useState(false);
@@ -1293,35 +1285,6 @@ export default function QuoteProcess(props) {
                             md={12}
                             className="d-flex align-items-center gap-1"
                         >
-                            {!ifQuoteApproved.approved &&
-                                ProcessStatus === "New" && allowedToEdit ? (
-                                <span className={`${classes.productPos} m-2`}>
-                                    <Button
-                                        variant="outlined"
-                                        size="small"
-                                        className="mr-1"
-                                        startIcon={<AiFillPlusCircle />}
-                                        color="primary"
-                                        disabled={!permissions.product?.isCreate}
-                                        onClick={() => {
-                                            setIsAddNewProduct(true);
-                                        }}
-                                    >
-                                        New
-                                    </Button>
-                                    <Button
-                                        variant="outlined"
-                                        size="small"
-                                        startIcon={<BiLayerPlus />}
-                                        color="primary"
-                                        onClick={() => {
-                                            setIsAddExistingProduct(true);
-                                        }}
-                                    >
-                                        Add Existing
-                                    </Button>
-                                </span>
-                            ) : null}
                             {(ProcessStatus === "DOA Process" &&
                                 versionStatus === "Building Quote" && DOAneeded) ||
                                 (ProcessStatus === "Send To Customer" &&
