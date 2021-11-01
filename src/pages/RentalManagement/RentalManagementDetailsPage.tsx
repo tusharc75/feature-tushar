@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, CircularProgress } from "@material-ui/core";
+import { Grid, Box, Button, Paper, CircularProgress, useMediaQuery } from "@material-ui/core";
 import { Skeleton, Autocomplete, Alert } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import { isMobile, isTablet } from "react-device-detect";
@@ -44,6 +44,7 @@ import { GiMineExplosion } from 'react-icons/gi'
 import HtmlTooltip from '../../components/CustomTooltipTitle'
 import BulkEditInventoryDialog from './BulkEditInventoryDialog'
 import SerializedAssetStep from "./SerializedAssetStep";
+import MaterialTableComponent from "../../components/Shared/MaterialTableComponent";
 
 const rentalProcessSteps = ["New", "Additional Cost", "Serialized Asset", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
@@ -56,6 +57,8 @@ const RentalManagementDetailsPage = () => {
   const {
     state: { user, permissions }
   }: any = useData();
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
+  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [headingLbl, setHeadingLbl] = useState("");
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [isUpdating, setUpdating] = useState(false);
@@ -85,6 +88,7 @@ const RentalManagementDetailsPage = () => {
   const [warehouseForReceivingTicket, setWarehouseForReceivingTicket] = useState<any[]>([]);
   const [showReceivingTicketDialog, setShowReceivingTicketDialog] = useState(false);
   const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false)
+  const [selectedProducts, setSelectedProducts] = useState(null)
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
@@ -116,6 +120,12 @@ const RentalManagementDetailsPage = () => {
   useEffect(() => {
     updateStatus()
   }, [currentStep, productInventory])
+
+  useEffect(() => {
+    if (isSmallScreen) {
+      setActivityShow(true)
+    }
+  }, [isSmallScreen])
 
   const updateStatus = () => {
     if (productInventory.length > 0 && rentalManagementData) {
@@ -286,8 +296,8 @@ const RentalManagementDetailsPage = () => {
         id: u._id,
         detail: u.productName,
         productCategory: u.productCategory?.optionLabel,
-        package: u.hasOwnProperty("package") ? u.package.packageName : "",
-        packageId: u.hasOwnProperty("package") ? u.package._id : ""
+        // package: u.hasOwnProperty("package") ? u.package.packageName : "",
+        // packageId: u.hasOwnProperty("package") ? u.package._id : ""
       })));
       data.data?.packages.map((u) => (tempInventory.push({
         ...u,
@@ -335,11 +345,11 @@ const RentalManagementDetailsPage = () => {
     </Link>
   );
 
-  const PackageNameRenderer = (params) => (
-    params.value ? <Link className="link" title={params.value} to={`${routes.packagesDetail.path}/${params.data.packageId}`}>
-      {params.value}
-    </Link> : <NoDataCell />
-  );
+  // const PackageNameRenderer = (params) => (
+  //   params.value ? <Link className="link" title={params.value} to={`${routes.packagesDetail.path}/${params.data.packageId}`}>
+  //     {params.value}
+  //   </Link> : <NoDataCell />
+  // );
 
   const ActionsRenderer = (params) => (
     <>
@@ -373,7 +383,7 @@ const RentalManagementDetailsPage = () => {
   const frameworkComponents = {
     nameRenderer: NameRenderer,
     productRenderer: ProductRenderer,
-    packageNameRenderer: PackageNameRenderer,
+    // packageNameRenderer: PackageNameRenderer,
     commonRenderer: CommonRenderer,
     actionsRenderer: ActionsRenderer,
     dateRenderer: DateRenderer,
@@ -381,7 +391,7 @@ const RentalManagementDetailsPage = () => {
   const columns = [
     { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "productRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "package", headerName: "Package", show: true, disabled: true, cellRenderer: "packageNameRenderer" },
+    // { field: "package", headerName: "Package", show: true, disabled: true, cellRenderer: "packageNameRenderer" },
     { field: "startDate", headerName: "Start Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
     { field: "endDate", headerName: "End Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
     { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
@@ -478,15 +488,15 @@ const RentalManagementDetailsPage = () => {
     }).map(d => ({
       "id": d.id,
       "qty": parseInt(d.quantity || d.qty) || 0,
-      "type": d.type.toLowerCase(),
+      "type": d?.type || "",
       "detail": d.detail,
-      "pricingMethod": d.pricingMethod,
-      "UOM": d.UOM,
+      "pricingMethod": d?.pricingMethod || "",
+      "UOM": d?.UOM || "",
       "finalPrice": parseInt(d.finalPrice) || 0,
       "price": parseInt(d.price) || 0,
       "discount": parseInt(d.discount) || 0,
-      "startDate": d.startDate,
-      "endDate": d.endDate,
+      "startDate": d?.startDate || "",
+      "endDate": d?.endDate || "",
     }))
 
 
@@ -683,23 +693,45 @@ const RentalManagementDetailsPage = () => {
                     </Box>
                   </Box>
                   {columns ?
-                    <CustomAgGridEditable
-                      columns={columns}
-                      dataRows={dataRows}
-                      frameworkComponents={frameworkComponents}
-                      setGridApi={setGridApi}
-                      dispatch={dispatch}
-                      rowCount={rowCount}
-                      limit={limit}
-                      pageSizes={pageSizes}
-                      page={page}
-                      actionWidth={150}
-                      allowAction={true}
-                      loading={loading}
-                      onCellValueChanged={(row) => { updateProductData(row.data) }}
-                      renderedFrom="rentalManagementDetailsPageInventory"
-                      refreshGrid={fetchProductInventory}
-                    />
+                    <>
+                      <CustomAgGridEditable
+                        columns={columns}
+                        dataRows={dataRows}
+                        frameworkComponents={frameworkComponents}
+                        setGridApi={setGridApi}
+                        dispatch={dispatch}
+                        rowCount={rowCount}
+                        limit={limit}
+                        pageSizes={pageSizes}
+                        page={page}
+                        actionWidth={150}
+                        allowAction={true}
+                        loading={loading}
+                        onCellValueChanged={(row) => { updateProductData(row.data) }}
+                        renderedFrom="rentalManagementDetailsPageInventory"
+                        refreshGrid={fetchProductInventory}
+                      />
+                      <Box
+                        p="6px"
+                        zIndex={5}
+                        width={
+                          isTabletScreen
+                            ? "calc(100vw - 20px)"
+                            : isSmallScreen
+                              ? "calc(100vw - 78px)"
+                              : showActivity ? "100%" : "calc(100vw - 100px)"}
+                        height={"600px"}>
+                        <MaterialTableComponent
+                          columns={columns}
+                          rowData={dataRows}
+                          title={""}
+                          loading={loading}
+                          updateProductData={updateProductData}
+                          onSelection={(d) => setSelectedProducts(d)}
+                        />
+                      </Box>
+
+                    </>
                     : <Box
                       p={2}
                       height={500}
@@ -948,7 +980,7 @@ const RentalManagementDetailsPage = () => {
           </div>
           <div className="position-relative">
             <HideWhenOffline>
-              {showActivity ?
+              {/* {showActivity ?
                 <Paper>
                   {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                     <IoIosArrowDropright className="icon" />
@@ -984,7 +1016,44 @@ const RentalManagementDetailsPage = () => {
                 </Paper> :
                 !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
                   <IoIosArrowDropleft className="icon" />
+                </span>} */}
+
+              <Paper>
+                {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
+                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
                 </span>}
+                <div style={{ display: showActivity ? "block" : "none" }}>
+
+                  <Grid container>
+                    <Grid item xs={12}>
+                      {rentalManagementData && (
+                        <div>
+                          <Activity
+                            resourceId={rentalManagementData._id}
+                            resource={rentalManagement.resource}
+                            restrictedAddActivities={
+                              permissions &&
+                                permissions["rentalManagement"] &&
+                                permissions["rentalManagement"].isUpdate
+                                ? []
+                                : ["Attachment", "Case"]
+                            }
+                            relatedTo={[
+                              {
+                                type: rentalManagement,
+                                referenceId: rentalManagementData._id,
+                                access: true,
+                              },
+                            ]}
+                            handleActivityRefresh={() => { }}
+                            emails={[]}
+                          />
+                        </div>
+                      )}
+                    </Grid>
+                  </Grid>
+                </div>
+              </Paper>
             </HideWhenOffline>
           </div>
         </div>
