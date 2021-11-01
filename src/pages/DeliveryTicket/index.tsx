@@ -400,6 +400,7 @@ const DeliveryTicket = () => {
             isMobile ?
               <CustomSwipableList
                 allowSelection={false}
+                allowSwipe={true}
                 permissions={permissions.deliveryTicket}
                 primaryField={columns?.find(d => d.primaryField)}
                 onClick={(data) => {
@@ -409,6 +410,7 @@ const DeliveryTicket = () => {
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
                 onEdit={() => { }}
+                extraParamsToCheckDelete={true}
                 onDelete={() => { }}
                 rowCount={rowCount}
                 page={page}
@@ -424,6 +426,8 @@ const DeliveryTicket = () => {
                   }
                 ]}
                 onCreate={null}
+                showClone={false}
+                onClone={() => { }}
               />
               : Object.keys(frameWorkComponent).length > 0 ?
                 <CustomAgGrid
