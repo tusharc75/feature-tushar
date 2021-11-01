@@ -195,7 +195,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
   }, [isUpdate]);
 
   return (<Box pt={2} pb={2}>
-    {values["type"] === "dropDown" && (
+    {(values["type"] === "dropDown" || values["type"] === "multiSelect") && (
       <Grid spacing={3} container>
         <Grid item xs={12} sm={6} md={6}>
           <FormControlLabel

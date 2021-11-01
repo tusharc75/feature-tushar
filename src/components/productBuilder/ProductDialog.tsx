@@ -289,7 +289,7 @@ const CreateProduct = (props) => {
       const input = document.querySelector(
         `input[name=${err[0]}]`,
       );
-      input.scrollIntoView({
+      input?.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
         inline: 'start',
