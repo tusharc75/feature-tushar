@@ -538,7 +538,6 @@ export default function QuoteProcess(props) {
                                 d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
                         );
                     }
-                    console.log(ungivenValues, ungivenValues.length, withZeroAmt.length, hasPrice, withZeroQty.length)
                     if (((ungivenValues && ungivenValues.length > 0) || (withZeroAmt.length === 0 && !hasPrice && withZeroQty.length === 0))) {
                         setNextStep(false)
                     } else {
