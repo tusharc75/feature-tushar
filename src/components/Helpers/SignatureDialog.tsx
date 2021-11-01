@@ -13,7 +13,7 @@ export default function SignatureDialog(props) {
     const signCanvas: any = useRef(null);
     const [loading, setLoading] = useState(false);
 
-    const clear = () => signCanvas.current.clear();
+    const clear = () => signCanvas.current?.clear();
 
 
     const handleClickNext = () => {
@@ -22,12 +22,12 @@ export default function SignatureDialog(props) {
         if (label === "Start Delivery") {
             signedData = {
                 type: activeStep === 0 ? "supervisor" : "deliveryPerson",
-                sign: signCanvas.current.getTrimmedCanvas().toDataURL("image/png")
+                sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png")
             }
         } else if (label === "Sign-Off") {
             signedData = {
                 type: activeStep === 0 ? "deliveryPerson" : "receiver",
-                sign: signCanvas.current.getTrimmedCanvas().toDataURL("image/png")
+                sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png")
             }
         }
 
@@ -117,10 +117,10 @@ export default function SignatureDialog(props) {
                     </>
                     : <Button
                         size="small"
-                        disabled={loading || signCanvas.current.isEmpty()}
+                        disabled={loading || signCanvas.current?.isEmpty()}
                         onClick={() => {
                             setLoading(true);
-                            onSigned(signCanvas.current.getTrimmedCanvas().toDataURL("image/png"))
+                            onSigned(signCanvas.current?.getTrimmedCanvas().toDataURL("image/png"))
                         }} color="primary" variant="contained">
                         {loading ? "Sending..." : "Send"}
                     </Button>}
