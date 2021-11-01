@@ -258,6 +258,11 @@ export default function ManageOpportunityDialog({
           const selectedEntityDetails = user?.entity?.find(d => d?._id === selectedEntity)
           if (selectedEntityDetails) {
             initialData["currency"] = selectedEntityDetails.currency || "";
+            setCurrencySymbol(
+              getUniqueCurrencies().find(
+                (d) => d.currencyCode === initialData["currency"]
+              )?.symbolNative
+            );
           }
         }
 
