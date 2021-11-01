@@ -34,25 +34,25 @@
         }
     }
     .tab-font {
-        font-size: 12px;
-    }
-    .mainHeader{
-        padding: 8px;
+        font-size: 10px;
     }
     .detailHeader {
-        padding: 8px 0px;
-        background-color: white;
-        border-radius: 8px;
+        padding: 2px !important;
+    }
+    .MuiButton-outlinedSizeSmall {
+        padding: 2px 9px !important;
+        font-size: 0.6rem;
     }
     .MuiMenuItem-root {
         font-size: 0.8rem;
         min-height: 34px;
+        min-height: auto !important;
     }
     .headerLogo {
         font-size: 1rem;
     }
     .listingHeader {
-        font-size: 1rem;
+        font-size: 0.8rem;
     }
 
     .listingHeaderActivity {
@@ -86,6 +86,34 @@
         top: 0;
         padding: 0;
         margin-top: 0 !important;
+    }
+
+    .detailHeaderDashboard {
+        padding: 2px;
+    }
+
+    .quoteBox {
+        padding: 4px !important;
+    }
+
+    .MuiButton-containedSizeSmall {
+        padding: 3px 5px !important;
+        font-size: 0.7rem !important;
+    }
+
+    .detail-box {
+        padding: 5px 6px;
+    }
+
+    .MuiButton-startIcon {
+        margin-right: 0 !important;
+    }
+    .MuiButton-root {
+        min-width: auto !important;
+    }
+
+    .headerbox{
+        padding: 2px 6px;;
     }
 
     //.detailHeaderDashboard {
@@ -165,12 +193,10 @@
     }
     .mobileHeading{
          padding: 5px 8px;
-        background-color: #43AEAA;
         color: white !important;
         border-radius: 8px;
     }
     .listingHeader{
-        color: white !important;
         padding-right: 0px !important;
         font-size: 0.9rem;
     }
@@ -196,6 +222,25 @@
         flex-grow: 0;
     }
 
+    .MuiButton-root{
+        min-width: auto !important;
+    }
+
+    .MuiButton-startIcon{
+        margin-right: 0px !important;
+    }
+
+    .MuiButton-outlinedSizeSmall{
+        padding: 2px;
+    }
+
+    .quoteHeader{
+        flex-direction: column;
+    }
+
+    .quoteBoxicon{
+        color: #ffffff
+    }
 }
 
 /* Small devices (portrait tablets and large phones, 600px and up) */

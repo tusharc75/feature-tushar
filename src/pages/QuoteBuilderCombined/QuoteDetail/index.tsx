@@ -36,6 +36,8 @@ import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 import DOAReasonDialog from '../../DOA/DOAReasonDialog';
 import { ExpandMore } from "@material-ui/icons";
+import { MdDeleteSweep } from 'react-icons/md';
+import { GiReceiveMoney } from 'react-icons/gi';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -690,12 +692,10 @@ export default function QuoteDetail() {
                       size="small"
                       aria-controls="simple-menu"
                       aria-haspopup="true"
-                      className={`${isMobile ? "buttonIconMobile" : "buttonIconDesktop"}`}
                       style={{ color: "var(--warning)" }}
                       onClick={() => { setShowAllVersionStatus(true) }}
                       startIcon={<VscVersions style={{ paddingTop: "2px" }} size={isMobile ? `20` : `16`} />}>
-                      {isMobile ? "" : `Version : ${currentVersion}`}
-
+                         {/* Version : ${currentVersion} */}
                     </Button>
 
                   </div>
@@ -712,10 +712,9 @@ export default function QuoteDetail() {
                       }}
                       variant="outlined"
                       size="small"
-                      startIcon={<ThumbUpIcon />}
+                      startIcon={<GiReceiveMoney />}
                       color="primary"
                     >
-                      dollar sales profit
                     </Button>
                     }
                     {DOAApproved && versionStatus === "Sent for DOA" && (
@@ -750,6 +749,7 @@ export default function QuoteDetail() {
                         variant="outlined"
                         color="default"
                         size="small"
+                        className="mx-1"
                         onClick={openActions}
                         fullWidth={true}
                         // className={styles.action_submit_btn}
@@ -782,7 +782,7 @@ export default function QuoteDetail() {
                               startIcon={<MdDelete size={isMobile ? `20` : `16`} />}
                               onClick={() => setShowConfirmBox(true)}
                             >
-                              {isMobile ? "" : `Delete Quote`}
+                              Delete Quote
                             </Button>
                           </MenuItem>}
 
@@ -799,10 +799,10 @@ export default function QuoteDetail() {
                                   ? DOASteps.findIndex(d => d?.key === processStatus) > 1
                                   : OtherSteps.findIndex(d => d?.key === processStatus) > 1)
                               }
-                              startIcon={<MdDelete size={isMobile ? `20` : `16`} />}
+                              startIcon={<MdDeleteSweep size={isMobile ? `20` : `16`} />}
                               onClick={deleteVersion}
                             >
-                              {isMobile ? "" : `Delete ${currentVersion}`}
+                              Delete Version-{currentVersion}
                             </Button>
                           </MenuItem>
                         )}
@@ -831,10 +831,9 @@ export default function QuoteDetail() {
                             }}
                           >
                             {isCloning ? (
-                              <>Cloning v{currentVersion}</>
-                            ) : (isMobile ? "" :
-                              `Clone ${currentVersion}`
-                            )}
+                              <>Cloning Version-{currentVersion}</>
+                            ) : (`Clone Version-${currentVersion}`)
+                            }
                           </Button>
                         </MenuItem>
 
@@ -845,7 +844,7 @@ export default function QuoteDetail() {
                               variant="outlined"
                               color="primary"
                               size="small"
-                              startIcon={<HiPencil />}
+                              startIcon={<HiPencil size={isMobile ? `20` : `16`} />}
                               disabled={quoteReOpening}
                               onClick={() => setReopenReasonDialog(true)}
                             >

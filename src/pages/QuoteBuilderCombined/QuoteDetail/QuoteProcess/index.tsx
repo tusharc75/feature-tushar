@@ -89,6 +89,11 @@ const useStyles = makeStyles((theme) => ({
             display: "flex",
             alignItems: "center"
         },
+    },
+    actionPosQuote:{
+        position: "absolute",
+        top: "4px",
+        right: "20px",
     }
 }));
 
@@ -1126,10 +1131,10 @@ export default function QuoteProcess(props) {
     return (
         <>
             <Paper className={classes.bgProduct}>
-                <Grid
+                {/* <Grid
                     container
                     className="detailHeader d-flex align-items-center form-label-style mt-0 mb-0"
-                >
+                > */}
                     {/* <Grid
                         item
                         xs={ProcessStatus === "New" ? 12 : 12}
@@ -1255,7 +1260,7 @@ export default function QuoteProcess(props) {
                             </>
                         )}
                     </Grid> */}
-                </Grid>
+                {/* </Grid> */}
                 <div>
                     <Steps
                         steps={DOAneeded ? DOASteps : OtherSteps}
@@ -1291,24 +1296,26 @@ export default function QuoteProcess(props) {
                             xs={12}
                             sm={12}
                             md={12}
-                            className="d-flex align-items-center gap-1"
-                        >
+                            className="d-flex align-items-center gap-1">
                             {!ifQuoteApproved.approved &&
                                 ProcessStatus === "New" && allowedToEdit ? (
-                                <span className={`${classes.productPos} m-2`}>
-                                    <Button
-                                        variant="outlined"
-                                        size="small"
-                                        className="mr-1"
-                                        startIcon={<AiFillPlusCircle />}
-                                        color="primary"
-                                        disabled={!permissions.product?.isCreate}
-                                        onClick={() => {
-                                            setIsAddNewProduct(true);
-                                        }}
-                                    >
-                                        New
-                                    </Button>
+                                <span className={`${classes.productPos} mx-2`}>
+                                    <Tooltip title="New">
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            className="mr-1"
+                                            startIcon={<AiFillPlusCircle />}
+                                            color="primary"
+                                            disabled={!permissions.product?.isCreate}
+                                            onClick={() => {
+                                                setIsAddNewProduct(true);
+                                            }}
+                                        >
+                                            {isMobile ? "" : "New"}
+                                        </Button>
+                                    </Tooltip>
+                                    <Tooltip title="Add Existing">
                                     <Button
                                         variant="outlined"
                                         size="small"
@@ -1318,15 +1325,16 @@ export default function QuoteProcess(props) {
                                             setIsAddExistingProduct(true);
                                         }}
                                     >
-                                        Add Existing
+                                        {isMobile ? "" : "Add Existing"}
                                     </Button>
+                                    </Tooltip>
                                 </span>
                             ) : null}
                             {(ProcessStatus === "DOA Process" &&
                                 versionStatus === "Building Quote" && DOAneeded) ||
                                 (ProcessStatus === "Send To Customer" &&
                                     versionStatus !== "Sent to Customer") ? (
-                                <div className="w-100 d-flex align-items-center justify-content-end doaAction">
+                                <div className={`w-100 d-flex align-items-center justify-content-end doaAction ${isMobile ? "actio-pos-quote"  : "" }`}>
                                     {!ifQuoteApproved.approved && (
                                         <Button
                                             onClick={() => {
