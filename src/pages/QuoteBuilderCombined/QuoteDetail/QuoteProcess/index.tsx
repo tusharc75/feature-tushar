@@ -3,7 +3,7 @@ import { Autocomplete } from "@material-ui/lab";
 import React, { useEffect, useMemo, useState } from "react";
 import { useContext } from "react";
 import { useHistory } from "react-router-dom";
-import { AiFillEdit, AiFillPlusCircle, AiOutlineEye } from "react-icons/ai";
+import { AiFillEdit, AiOutlineEye } from "react-icons/ai";
 import { BiLayerPlus, BiMailSend } from "react-icons/bi";
 import { FiDownloadCloud } from "react-icons/fi";
 import { GiVintageRobot, GiProfit } from "react-icons/gi";
@@ -35,7 +35,7 @@ import DOAReasonDialog from "../../../DOA/DOAReasonDialog";
 import { camelCase, isEqual, startCase } from "lodash";
 import { VscVersions } from "react-icons/vsc";
 import { MdDelete } from "react-icons/md";
-import { AiOutlineFileExcel ,AiOutlineFilePdf } from 'react-icons/ai';
+import { AiOutlineFileExcel, AiOutlineFilePdf } from 'react-icons/ai';
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -81,21 +81,6 @@ const useStyles = makeStyles((theme) => ({
         top: "4px",
         right: "20px",
     },
-    productPos: {
-        position: "absolute",
-        top: "1px",
-        left: "6px",
-        [theme.breakpoints.down("xs")]: {
-            position: "static",
-            display: "flex",
-            alignItems: "center"
-        },
-    },
-    actionPosQuote: {
-        position: "absolute",
-        top: "4px",
-        right: "20px",
-    }
 }));
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
@@ -127,7 +112,11 @@ export default function QuoteProcess(props) {
         setDOAApprovedFromQuoteDetails,
         setDOARequestIdFromQuoteDetails,
         showTotalSalesDialog,
-        setShowTotalSalesDialog
+        setShowTotalSalesDialog,
+        setIsAddNewProduct,
+        isAddNewProduct,
+        setIsAddExistingProduct,
+        isAddExistingProduct
     } = props
     const defaultSelectColumns = [
         "Product Description",
@@ -183,8 +172,6 @@ export default function QuoteProcess(props) {
     const [dynamicTableData, setDynamicTableData] = useState([]);
     const [reminderLoading, setReminderLoading] = useState(false);
     const [isRearrangeColumns, setRearrangeColumns] = useState(false);
-    const [isAddNewProduct, setIsAddNewProduct] = useState(false);
-    const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
     const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
     const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
     const [loading, setLoading] = useState(false);
@@ -1288,8 +1275,7 @@ export default function QuoteProcess(props) {
                     />
                 </div>
             </Paper>
-            <div className={`mt-0 subDetailModule ${classes.detailBox}`} >
-
+            <div className={`pt-1 subDetailModule ${classes.detailBox}`} >
                 {!loading && quoteData ? (
                     <Grid container className="position-relative">
                         <Grid
@@ -1297,40 +1283,8 @@ export default function QuoteProcess(props) {
                             xs={12}
                             sm={12}
                             md={12}
-                            className="d-flex align-items-center gap-1">
-                            {!ifQuoteApproved.approved &&
-                                ProcessStatus === "New" && allowedToEdit ? (
-                                <span className={`${classes.productPos} mx-2`}>
-                                    <Tooltip title="New">
-                                        <Button
-                                            variant="outlined"
-                                            size="small"
-                                            className="mr-1"
-                                            startIcon={<AiFillPlusCircle />}
-                                            color="primary"
-                                            disabled={!permissions.product?.isCreate}
-                                            onClick={() => {
-                                                setIsAddNewProduct(true);
-                                            }}
-                                        >
-                                            {isMobile ? "" : "New"}
-                                        </Button>
-                                    </Tooltip>
-                                    <Tooltip title="Add Existing">
-                                        <Button
-                                            variant="outlined"
-                                            size="small"
-                                            startIcon={<BiLayerPlus />}
-                                            color="primary"
-                                            onClick={() => {
-                                                setIsAddExistingProduct(true);
-                                            }}
-                                        >
-                                            {isMobile ? "" : "Add Existing"}
-                                        </Button>
-                                    </Tooltip>
-                                </span>
-                            ) : null}
+                            className="d-flex align-items-center gap-1"
+                        >
                             {(ProcessStatus === "DOA Process" &&
                                 versionStatus === "Building Quote" && DOAneeded) ||
                                 (ProcessStatus === "Send To Customer" &&
@@ -1350,7 +1304,7 @@ export default function QuoteProcess(props) {
                                             size="small"
                                             color="primary"
                                         >
-                                           {isMobile ? "" : `${buttonMessage}`}
+                                            {isMobile ? "" : `${buttonMessage}`}
                                         </Button>
                                     )}
                                 </div>
@@ -1656,43 +1610,31 @@ export default function QuoteProcess(props) {
                     <CustomDialogContent>
                         <Grid
                             item
-                            xs={12}
-                            sm={7}
-                            md={7}
                             className="quoteHeader"
                         >
-                            <div
-                                className={redCard ? "redQuoteBox" : "quoteBox"}
-                            >   <div className={"quoteBoxContent"}>
-                                    <span className={"quoteBoxicon"}>
-                                        <GiProfit size={16} />
-                                    </span>
-                                    <span className={"quoteDetailHeading"}>Total Profit </span>
-                                </div>
-                                <span className="quoteAmount" title={totalProfit.fullFormatAmount} >
+                            <div className={redCard ? "quoteBox quoteRed" : "quoteBox quoteProfit"}>
+                                <span className="quoteAmount" title={totalProfit.fullFormatAmount}>
                                     {totalProfit.fullFormatAmount
                                         ? totalProfit.fullFormatAmount
                                         : defaultTotalValue}
                                 </span>
-
-                            </div>
-                            <div className="quoteBox">
                                 <div className={"quoteBoxContent"}>
-                                    <span className={"quoteBoxicon"}>
-                                        <GiProfit size={16} />
-                                    </span>
-                                    <span className={"quoteDetailHeading"}>Total Cost Price </span>
+                                    <span className={"quoteDetailHeading"}>Total Profit </span>
                                 </div>
-                                <span className="quoteAmount" title={totalcost.fullFormatAmount}  >
+                            </div>
+                            <div className="quoteBox quoteCost">
+                                <span className="quoteAmount" title={totalcost.fullFormatAmount}>
                                     {totalcost.fullFormatAmount
                                         ? totalcost.fullFormatAmount
                                         : defaultTotalValue}
                                 </span>
-
+                                <div className={"quoteBoxContent"}>
+                                    <span className={"quoteDetailHeading"}>Total Cost Price </span>
+                                </div>
                             </div>
                             {redCard ? (
-                                <div className="redQuoteBox">
-                                    <span>Total Selling Price </span>
+                                <div className="quoteBox quoteRed">
+                                    <div className={"quoteBoxContent"}> <span>Total Selling Price </span></div>
                                     <span className="quoteAmount" title={totalsale.fullFormatAmount} >
                                         {totalsale.fullFormatAmount
                                             ? totalsale.fullFormatAmount
@@ -1700,19 +1642,16 @@ export default function QuoteProcess(props) {
                                     </span>
                                 </div>
                             ) : (
-                                <div className="quoteBox">
-                                    <div className={"quoteBoxContent"}>
-                                        <span className={"quoteBoxicon"}>
-                                            <GiProfit size={16} />
-                                        </span>
-                                        <span className={"quoteDetailHeading"}>Total Selling Price </span>
-                                    </div>
+                                <div className="quoteBox quoteSale">
                                     <span className="quoteAmount" title={totalsale.fullFormatAmount}
                                     >
                                         {totalsale.fullFormatAmount
                                             ? totalsale.fullFormatAmount
                                             : defaultTotalValue}
                                     </span>
+                                    <div className={"quoteBoxContent"}>
+                                        <span className={"quoteDetailHeading"}>Total Selling Price </span>
+                                    </div>
                                 </div>
                             )}
                         </Grid>

@@ -38,7 +38,8 @@ import DOAReasonDialog from '../../DOA/DOAReasonDialog';
 import { ExpandMore } from "@material-ui/icons";
 import { MdDeleteSweep } from 'react-icons/md';
 import { GiReceiveMoney } from 'react-icons/gi';
-
+import { AiFillPlusCircle } from 'react-icons/ai';
+import { MdLibraryAdd } from 'react-icons/md';
 interface TabPanelProps {
   children?: React.ReactNode;
   index: any;
@@ -78,6 +79,16 @@ const useStyles = makeStyles((theme) => ({
     width: '80%',
     maxHeight: 435,
   },
+  productPos: {
+    position: "absolute",
+    top: "1px",
+    left: "6px",
+    [theme.breakpoints.down("xs")]: {
+      position: "static",
+      display: "flex",
+      alignItems: "center"
+    },
+  }
 }));
 
 const DOASteps = [
@@ -179,6 +190,8 @@ export default function QuoteDetail() {
   const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [showTotalSalesDialog, setShowTotalSalesDialog] = useState(false);
+  const [isAddNewProduct, setIsAddNewProduct] = useState(false);
+  const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -684,58 +697,67 @@ export default function QuoteDetail() {
                   mainPoints={quoteData ? getMainPoints : ""}
                   showHeading={true}
                 >
-                  <Grid item md={12} sm={12} xs={12} 
+                  <Grid item md={12} sm={12} xs={12}
                     className="d-flex align-items-center justify-content-end"
                   >
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      size="small"
-                      className="mx-1"
-                      onClick={() => { setShowAllVersionStatus(true) }}
-                      startIcon={<VscVersions />}>
-                      {isMobile ? "" : `Version : ${currentVersion}`}
-                    </Button>
-                    {processStatus !== "New" && <Button
-                      onClick={() => {
-                        setShowTotalSalesDialog(true)
-                      }}
-                      variant="outlined"
-                      size="small"
-                      className="mx-1"
-                      startIcon={<GiReceiveMoney />}
-                      color="primary"
-                    >
-                      {isMobile ? "" : "Statastics"}
-                    </Button>
-                    }
-                    {DOAApproved && versionStatus === "Sent for DOA" && (
-                      <>
+                    {processStatus !== "New" &&
+                      <Tooltip title="Statastics">
                         <Button
                           onClick={() => {
-                            QuoteStatusChange("Accepted", "", "")
+                            setShowTotalSalesDialog(true)
                           }}
                           variant="outlined"
                           size="small"
                           className="mx-1"
-                          startIcon={<ThumbUpIcon />}
+                          startIcon={<GiReceiveMoney />}
                           color="primary"
                         >
-                          { isMobile ? "" : `${approvedButtonText}`}
+                          {isMobile ? "" : "Statastics"}
                         </Button>
-                        <Button
-                          onClick={() => {
-                            setQuoteStatusChangeData("Rejected")
-                            setShowQuoteStatusChangeDialog(true)
-                          }}
-                          className="mx-1"
-                          startIcon={<ThumbDownIcon />}
-                          variant="contained"
-                          size="small"
-                          color="primary"
-                        >
-                          {isMobile ? "" : "Reject" }
-                        </Button>
+                      </Tooltip>
+                    }
+                    <Tooltip title={`Version : ${currentVersion}`}>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        className="mx-1"
+                        onClick={() => { setShowAllVersionStatus(true) }}
+                        startIcon={<VscVersions />}>
+                        {isMobile ? "" : `Version : ${currentVersion}`}
+                      </Button>
+                    </Tooltip>
+                    {DOAApproved && versionStatus === "Sent for DOA" && (
+                      <>
+                        <Tooltip title={`${approvedButtonText}`}>
+                          <Button
+                            onClick={() => {
+                              QuoteStatusChange("Accepted", "", "")
+                            }}
+                            variant="outlined"
+                            size="small"
+                            className="mx-1"
+                            startIcon={<ThumbUpIcon />}
+                            color="primary"
+                          >
+                            {isMobile ? "" : `${approvedButtonText}`}
+                          </Button>
+                        </Tooltip>
+                        <Tooltip title="Reject">
+                          <Button
+                            onClick={() => {
+                              setQuoteStatusChangeData("Rejected")
+                              setShowQuoteStatusChangeDialog(true)
+                            }}
+                            className="mx-1"
+                            startIcon={<ThumbDownIcon />}
+                            variant="contained"
+                            size="small"
+                            color="primary"
+                          >
+                            {isMobile ? "" : "Reject"}
+                          </Button>
+                        </Tooltip>
                       </>
                     )}
                     <>
@@ -749,7 +771,7 @@ export default function QuoteDetail() {
                         // className={styles.action_submit_btn}
                         aria-controls="action-menu"
                       >
-                       {isMobile ? "" : "Actions "}
+                        {isMobile ? "" : "Actions "}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -771,9 +793,7 @@ export default function QuoteDetail() {
                             <Button
                               variant="text"
                               size="small"
-                              style={{ color: "var(--error)" }}
-                              className={`${isMobile ? "buttonIconMobile" : "buttonIconDesktop"}`}
-                              startIcon={<MdDelete size={isMobile ? `20` : `16`} />}
+                              startIcon={<MdDelete />}
                               onClick={() => setShowConfirmBox(true)}
                             >
                               Delete Quote
@@ -785,27 +805,56 @@ export default function QuoteDetail() {
                             <Button
                               variant="text"
                               size="small"
-                              style={{ color: "var(--error)" }}
-                              className={`${isMobile ? "buttonIconMobile" : "buttonIconDesktop"}`}
                               disabled={
                                 !allowedToEdit ||
                                 deletingDOA || loading || (DOAneeded
                                   ? DOASteps.findIndex(d => d?.key === processStatus) > 1
                                   : OtherSteps.findIndex(d => d?.key === processStatus) > 1)
                               }
-                              startIcon={<MdDeleteSweep size={isMobile ? `20` : `16`} />}
+                              startIcon={<MdDeleteSweep />}
                               onClick={deleteVersion}
                             >
                               Delete Version-{currentVersion}
                             </Button>
                           </MenuItem>
                         )}
+                        {!ifQuoteApproved.approved &&
+                          processStatus === "New" && allowedToEdit && (
+                            <>
+                              <MenuItem disabled={!permissions.product?.isCreate}>
+                                <Button
+                                  variant="text"
+                                  size="small"
+                                  className="mr-1"
+                                  startIcon={<AiFillPlusCircle />}
+                                  color="primary"
 
+                                  onClick={() => {
+                                    setIsAddNewProduct(true);
+                                  }}
+                                >
+                                  Add New Product
+                                </Button>
+                              </MenuItem>
+                              <MenuItem>
+                                <Button
+                                  variant="text"
+                                  size="small"
+                                  startIcon={<MdLibraryAdd />}
+                                  color="primary"
+                                  onClick={() => {
+                                    setIsAddExistingProduct(true);
+                                  }}
+                                >
+                                  Add Existing Product
+                                </Button>
+                              </MenuItem>
+                            </>
+                          )}
                         <MenuItem>
                           <Button
                             disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
                             variant="text"
-
                             type="button"
                             size="small"
                             startIcon={
@@ -818,8 +867,6 @@ export default function QuoteDetail() {
                                 <BiLayerPlus size={isMobile ? `20` : `16`} />
                               )
                             }
-                            className={`${isMobile ? "buttonIconMobile" : "buttonIconDesktop"}`}
-                            style={{ color: "var(--success-light)" }}
                             onClick={() => {
                               cloneVersion();
                             }}
@@ -1003,6 +1050,10 @@ export default function QuoteDetail() {
                       setDOARequestIdFromQuoteDetails={setDOARequestId}
                       showTotalSalesDialog={showTotalSalesDialog}
                       setShowTotalSalesDialog={setShowTotalSalesDialog}
+                      setIsAddNewProduct={setIsAddNewProduct}
+                      isAddNewProduct={isAddNewProduct}
+                      setIsAddExistingProduct={setIsAddExistingProduct}
+                      isAddExistingProduct={isAddExistingProduct}
                     />)}
                   </TabPanel>
                 </>

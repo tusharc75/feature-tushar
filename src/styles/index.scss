@@ -45,7 +45,8 @@
 @import "~ag-grid-community/dist/styles/ag-theme-material/sass/_ag-theme-material-mixin.scss";
 .ag-theme-material {
   border: 1px solid #eeeaea;
-  @include ag-theme-material((
+  @include ag-theme-material(
+    (
       font-family: (
         Nunito,
         BlinkMacSystemFont,
@@ -422,13 +423,11 @@ body::-webkit-scrollbar-thumb {
 }
 
 .ag-grid-listing-grid-header-options {
-  margin: 0px 6px;
   background: #f0f2f3 !important;
 }
 
 .product-builder-edit-grid {
   height: calc(100vh - 430px);
-  margin: 0 6px 0;
 }
 
 .form-label-style:nth-child(1) {
@@ -598,16 +597,16 @@ body::-webkit-scrollbar-thumb {
 .detail-box {
   padding: 10px 20px 0 20px;
 }
-.detail-box-content{
+.detail-box-content {
   display: flex;
   align-items: center;
   padding: 10px;
   border-radius: 3px;
   background-color: var(--colorLeads);
-  h3{
+  h3 {
     padding: 0px;
-    padding-top:1px;
-    color: var(--white)
+    padding-top: 1px;
+    color: var(--white);
   }
 }
 
@@ -796,21 +795,36 @@ body::-webkit-scrollbar-thumb {
   justify-content: center;
 }
 
-@supports (not(gap: 0.25rem)) and (not (-webkit-gap: 0.25rem)) {
+@supports (not (gap: 0.25rem)) and (not (-webkit-gap: 0.25rem)) {
   .quoteHeader > *:not(:nth-child(1)) {
     margin-left: 0.25rem !important;
   }
 }
 
 .quoteBox {
-  padding: 10px 15px;
+  padding: 25px 15px;
   display: flex;
-  //flex-direction: column;
   justify-content: space-between;
-  align-items: center;
-  border-right: 1px solid #c3bdbd;
-  background-color: #418887;
-  border-radius: 8px;
+  border-radius: 4px;
+  flex-direction: column;
+  box-shadow: 2px 3px 5px #737573;
+  flex: 1;
+}
+
+.quoteProfit {
+  background: #055405;
+}
+
+.quoteSale {
+  background: #018b85;
+}
+
+.quoteCost {
+  background: #997906;
+}
+
+.quoteRed{
+ background: #650e0e;
 }
 .redQuoteBox {
   padding: 4px 15px;
@@ -822,20 +836,22 @@ body::-webkit-scrollbar-thumb {
   align-items: center;
   border-right: 1px solid #c3bdbd;
 }
-.quoteBoxContent{
+.quoteBoxContent {
   display: flex;
   align-items: center;
   padding-right: 15px;
 }
-.quoteBoxicon{
+.quoteBoxicon {
   padding: 5px 4px 0 4px;
   border-radius: 6px;
   background-color: white;
-  color: #378280 ;
+  color: #378280;
   margin-right: 5px;
 }
-.quoteDetailHeading{
+.quoteDetailHeading {
   color: white;
+  font-size: 14px;
+  font-weight: normal;
 }
 
 .noBorder {
@@ -849,6 +865,7 @@ body::-webkit-scrollbar-thumb {
 }
 .quoteAmount {
   color: white;
+  font-size: 24px;
   // font-size: 30px;
 }
 .customSelect {
@@ -1039,9 +1056,8 @@ body::-webkit-scrollbar-thumb {
   .grid-without-activity {
     display: grid;
     grid-template-columns: 1fr;
-
   }
-  .detail-box{
+  .detail-box {
     padding: 5px 0px 0px 0px;
   }
 }
@@ -1049,10 +1065,9 @@ body::-webkit-scrollbar-thumb {
   .redQuoteBox {
     display: none;
   }
-
 }
 
-.actio-pos-quote{
+.actio-pos-quote {
   position: absolute;
   top: 20px;
   right: 20px;

@@ -641,7 +641,7 @@ const ProductBuilder = (props) => {
           </Grid>
         )}
       </Grid>
-      <Box mt={1}>
+      <Box className="mt-1">
         {columns ? (
           <CustomAgGridEditable
             currency={currency}
