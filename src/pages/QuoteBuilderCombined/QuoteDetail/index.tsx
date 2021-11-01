@@ -916,7 +916,7 @@ export default function QuoteDetail() {
                       className={"tabLayout"}
                       style={{
                         background: tabValue === 1 ? "white" : "",
-                        color: tabValue === 1 ? "blue" : "#163340",
+                        color: tabValue === 1 ? "#163340" : "#163340",
                       }}
                       label={
                         <div className="d-flex align-items-center tab-font">
