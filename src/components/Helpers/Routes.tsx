@@ -289,6 +289,10 @@ const routes = {
     title: storedRoutes ? storedRoutes.packages?.title : RESOURCE_LABEL.packages,
     path: "/packages/detail",
   },
+  purchaseOrder:{
+    title: storedRoutes ? storedRoutes.purchaseOrder?.title : RESOURCE_LABEL.purchaseOrder,
+    path: "/purchase-order",
+  }
 };
 
 export default routes;
