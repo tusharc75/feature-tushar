@@ -416,34 +416,6 @@ export default function QuoteProcess(props) {
                     : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
         }));
 
-        // if (ProcessStatus === "Price Builder") {
-        // let hasPrice = false;
-        // BuilderData.forEach((data) => {
-        //     if (
-        //         data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
-        //         data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-        //         "undefined"
-        //     ) {
-        //         hasPrice = true;
-        //     } else {
-        //         hasPrice = false;
-        //     }
-        // });
-        // const withZeroQty = BuilderData.filter((d) => d.qty === 0);
-        // let withZeroAmt = [];
-        // if (hasPrice) {
-        //     withZeroAmt = BuilderData.filter(
-        //         (d) =>
-        //             d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
-        //     );
-        // }
-
-        // if (!withZeroAmt.length && hasPrice && !withZeroQty.length) {
-        //     setNextStep(true);
-        // } else {
-        //     setNextStep(false);
-        // }
-        // }
         let colName = [];
         let dynamicTable = [];
         let requiredValuesData = []
@@ -492,7 +464,7 @@ export default function QuoteProcess(props) {
                                 })
                             } else if (data.units && !data.displayCurrency) {
                                 data.units.forEach((unit) => {
-                                    const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`
+                                    const casedLabel = `${fieldName}_${unit.toLowerCase()}`
                                     if (required) {
                                         requiredValues[casedLabel] = quoteRows[casedLabel]
                                     }
@@ -546,7 +518,28 @@ export default function QuoteProcess(props) {
                 })
 
                 if (DOASteps.findIndex(d => d?.key === ProcessStatus) === 1 || ProcessStatus === "Price Builder") {
-                    if (ungivenValues && ungivenValues.length > 0) {
+                    let hasPrice = false;
+                    BuilderData.forEach((data) => {
+                        if (
+                            data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
+                            data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
+                            "undefined"
+                        ) {
+                            hasPrice = true;
+                        } else {
+                            hasPrice = false;
+                        }
+                    });
+                    const withZeroQty = BuilderData.filter((d) => d.qty === 0);
+                    let withZeroAmt = [];
+                    if (hasPrice) {
+                        withZeroAmt = BuilderData.filter(
+                            (d) =>
+                                d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
+                        );
+                    }
+                    console.log(ungivenValues, ungivenValues.length, withZeroAmt.length, hasPrice, withZeroQty.length)
+                    if (((ungivenValues && ungivenValues.length > 0) || (withZeroAmt.length === 0 && !hasPrice && withZeroQty.length === 0))) {
                         setNextStep(false)
                     } else {
                         setNextStep(true)
