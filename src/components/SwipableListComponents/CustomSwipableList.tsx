@@ -13,10 +13,12 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { isMobile, isTablet } from 'react-device-detect';
 import AddIcon from "@material-ui/icons/Add"
+import FileCopyIcon from "@material-ui/icons/FileCopy";
 
 export default function CustomSwipableList({
     // columns,
     allowSelection,
+    allowSwipe,
     primaryField,
     onClick,
     dataRows,
@@ -24,18 +26,21 @@ export default function CustomSwipableList({
     dispatch,
     onEdit,
     onDelete,
+    extraParamsToCheckDelete,
     rowCount,
     page,
     loading,
     chips,
     permissions,
-    onCreate
+    onCreate,
+    showClone,
+    onClone
 }) {
     const [isAllChecked, setIsAllChecked] = useState(false);
 
-    useEffect(() => {
-        setIsAllChecked(selectedRecords.length > 0 && selectedRecords.length === dataRows.filter(f => f.isChecked)?.length)
-    }, [selectedRecords])
+    // useEffect(() => {
+    //     setIsAllChecked(selectedRecords.length > 0 && selectedRecords.length === dataRows.filter(f => f.isChecked)?.length)
+    // }, [selectedRecords])
 
     // const [dataToShow, setDataToShow] = useState([])
 
@@ -126,7 +131,15 @@ export default function CustomSwipableList({
                                     key={d._id}
                                     // leadingActions={leadingActions()}
                                     trailingActions={
-                                        <TrailingActions>
+                                        allowSwipe ? <TrailingActions>
+                                            {
+                                                showClone ? <div style={{ width: 60, background: "var(--link)" }} className="h-100 d-flex align-items-center">
+                                                    <SwipeAction onClick={() => onClone(d)}>
+                                                        <FileCopyIcon fontSize="small" style={{ color: "white" }} />
+                                                    </SwipeAction>
+                                                </div> : <></>
+                                            }
+
                                             {
                                                 permissions.isUpdate && d.allowedToEdit ? <div style={{ width: 60, background: "#163340" }} className="h-100 d-flex align-items-center">
                                                     <SwipeAction onClick={() => onEdit(d)}>
@@ -136,13 +149,13 @@ export default function CustomSwipableList({
                                             }
 
                                             {
-                                                permissions.isDelete && d.canDelete ? <div style={{ width: 60, background: "#dc3545" }} className="h-100 d-flex align-items-center">
+                                                extraParamsToCheckDelete && permissions.isDelete && d.canDelete ? <div style={{ width: 60, background: "#dc3545" }} className="h-100 d-flex align-items-center">
                                                     <SwipeAction onClick={() => onDelete(d)}>
                                                         <DeleteIcon fontSize="small" style={{ color: "white" }} />
                                                     </SwipeAction>
                                                 </div> : <></>
                                             }
-                                        </TrailingActions>
+                                        </TrailingActions> : <></>
                                     }
                                 >
                                     <Grid container className="pb-2">
@@ -153,7 +166,7 @@ export default function CustomSwipableList({
                                                     checked={d.isChecked}
                                                     onChange={(e) => {
                                                         dataRows[index].isChecked = e.target.checked;
-                                                        setIsAllChecked(!dataRows.some(d => d.isChecked === false));
+                                                        setIsAllChecked(dataRows.every(d => d.isChecked === true));
 
                                                         dispatch({
                                                             type: 'selection',
@@ -179,8 +192,8 @@ export default function CustomSwipableList({
                                                 {
                                                     [
                                                         ...chips.map(c => (
-                                                            d[c.field] ? <Chip key={c.field} variant="outlined" onClick={c.onClick ? () => c.onClick(d) : null}
-                                                                size="small" label={`${c.label} ${d[c.field]}`} style={c.chipColorVariable ? generateChipStyle(c.chipColorVariable, d[c.field]?.toLowerCase()) : {}}
+                                                            c.forceShow === true || d[c.field] ? <Chip key={c.field} variant="outlined" onClick={c.onClick ? () => c.onClick(d, index) : null}
+                                                                size="small" label={`${c.label} ${d[c.field] ?? ""}`} style={c.chipColorVariable ? generateChipStyle(c.chipColorVariable, d[c.field]?.toLowerCase()) : {}}
                                                             /> : <Fragment key={c.field}></Fragment>
                                                         ))
                                                     ]
@@ -190,7 +203,7 @@ export default function CustomSwipableList({
                                         </Grid>
 
                                         {
-                                            permissions.isUpdate && d.allowedToEdit && permissions.isDelete && d.canDelete && <Grid item xs={1} sm={1} className="d-flex align-items-center">
+                                            allowSwipe && permissions.isUpdate && d.allowedToEdit && permissions.isDelete && d.canDelete && <Grid item xs={1} sm={1} className="d-flex align-items-center">
                                                 <ChevronRightIcon color="disabled" />
                                             </Grid>
                                         }
