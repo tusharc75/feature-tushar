@@ -283,6 +283,20 @@ const CreateProduct = (props) => {
     setExpanded(temp)
   }
 
+  const handleScroll = (errors) => {
+    const err = Object.keys(errors);
+    if (err.length) {
+      const input = document.querySelector(
+        `input[name=${err[0]}]`,
+      );
+      input.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'start',
+      });
+    }
+  }
+
   return (
     <Dialog
       maxWidth="md"
@@ -489,7 +503,11 @@ const CreateProduct = (props) => {
                   variant="contained"
                   color="primary"
                   type="submit"
-                  onClick={submitForm}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleScroll(errors)
+                    submitForm();
+                  }}
                   disabled={uploadingImageOrFileProgress > 0}
                 >
                   {" "}
