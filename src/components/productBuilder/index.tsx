@@ -29,7 +29,8 @@ import { handleAutoCalculation } from "../../constants/formulaUtility";
 import { CustomDialogTransition, gridLoadingTimeout } from "../../constants/helpers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import routes from "../../components/Helpers/Routes";
-import { isMobile } from 'react-device-detect'
+import { isMobile } from "react-device-detect";
+import { MdEditNote } from 'react-icons/md';
 import CustomSwipableList from "../SwipableListComponents/CustomSwipableList";
 import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
@@ -614,11 +615,11 @@ const ProductBuilder = (props) => {
                 color="primary"
                 size="small"
                 className="float-right ml-1 mr-2"
+                startIcon={<MdEditNote />}
                 onClick={handelOpenBulkEdit}
                 disabled={checkUniqTemplate()}
-                aria-controls="action-menu"
-              >
-                Bulk Edit
+                aria-controls="action-menu">
+                {isMobile ? "" : "Bulk Edit"}
               </Button>
             )}
             {permissions.isUpdate && (
@@ -628,10 +629,10 @@ const ProductBuilder = (props) => {
                 size="small"
                 className="float-right"
                 onClick={openActions}
+                startIcon={<ExpandMore />}
                 disabled={selectedRecords.length ? false : true}
-                aria-controls="action-menu"
-              >
-                Actions <ExpandMore />
+                aria-controls="action-menu">
+                {isMobile ? "" : "Actions"}
               </Button>
             )}
             <Menu
