@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, CircularProgress, useMediaQuery } from "@material-ui/core";
+import { Grid, Box, Button, Paper, CircularProgress, useMediaQuery, Typography } from "@material-ui/core";
 import { Skeleton, Autocomplete, Alert } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import { isMobile, isTablet } from "react-device-detect";
@@ -12,7 +12,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow } from "../../constants/helpers";
+import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow, dateFormat } from "../../constants/helpers";
 import Steps from "./Steps";
 import AddExistingProductInventory from "./AddExistingProductInventory";
 import { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
@@ -39,12 +39,15 @@ import HideWhenOffline from "../../components/HideWhenOffline";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import AssignQuantityDialog from "../../components/Helpers/AssignQuantityDialog";
 import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
 import { GiMineExplosion } from 'react-icons/gi'
 import HtmlTooltip from '../../components/CustomTooltipTitle'
 import BulkEditInventoryDialog from './BulkEditInventoryDialog'
 import SerializedAssetStep from "./SerializedAssetStep";
 import MaterialTableComponent from "../../components/Shared/MaterialTableComponent";
+import { Column } from "material-table";
+import moment from "moment";
 
 const rentalProcessSteps = ["New", "Additional Cost", "Serialized Asset", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
@@ -90,6 +93,7 @@ const RentalManagementDetailsPage = () => {
   const [showReceivingTicketDialog, setShowReceivingTicketDialog] = useState(false);
   const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState(null)
+  const [packageForProducts, setPackageForProducts] = useState(null)
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
@@ -334,85 +338,223 @@ const RentalManagementDetailsPage = () => {
   };
 
 
-  const NameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data.id}`}>
-      {params.value}
-    </Link>
-  );
-
-  const ProductRenderer = (params) => (
-    <Link className="link" title={params.value} to={params.data.type === "Product" ? `${routes.productDetail.path}/${params.data.id}` : `${routes.packagesDetail.path}/${params.data.id}`}>
-      {params.value}
-    </Link>
-  );
-
-  // const PackageNameRenderer = (params) => (
-  //   params.value ? <Link className="link" title={params.value} to={`${routes.packagesDetail.path}/${params.data.packageId}`}>
+  // const NameRenderer = (params) => (
+  //   <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data.id}`}>
   //     {params.value}
-  //   </Link> : <NoDataCell />
+  //   </Link>
   // );
 
-  const ActionsRenderer = (params) => (
-    <>
-      <GridDeleteIcon
-        hasDeletePermission={permissions?.rentalManagement?.isDelete}
-        ownerId={user?.user?._id}
-        userId={user?.user?._id}
-        onDelete={() => {
-          deleteInventories([{
-            id: params.data.id,
-            type: params.data?.type.toLowerCase()
-          }])
-        }
-        }
-        entity="rentalManagement"
-      />
-      {params.data.type === "Package" &&
-        <HtmlTooltip title="Explode package">
-          <IconButton
-            onClick={() => explodePackage(params.data.id)}
-            size="small"
-            color='primary'
-          >
-            <GiMineExplosion />
-          </IconButton>
-        </HtmlTooltip>
-      }
-    </>
-  );
+  // const ProductRenderer = (params) => (
+  //   <Link className="link" title={params.value} to={params.data.type === "Product" ? `${routes.productDetail.path}/${params.data.id}` : `${routes.packagesDetail.path}/${params.data.id}`}>
+  //     {params.value}
+  //   </Link>
+  // );
 
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    productRenderer: ProductRenderer,
-    // packageNameRenderer: PackageNameRenderer,
-    commonRenderer: CommonRenderer,
-    actionsRenderer: ActionsRenderer,
-    dateRenderer: DateRenderer,
-  };
-  const columns = [
-    { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "productRenderer" },
-    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    // { field: "package", headerName: "Package", show: true, disabled: true, cellRenderer: "packageNameRenderer" },
-    { field: "startDate", headerName: "Start Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
-    { field: "endDate", headerName: "End Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
-    { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    { field: "UOM", headerName: "UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Pcs"] }, editable: true },
-    { field: "pricingMethod", headerName: "Pricing Method", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Per Day", "Per Week", "Per Month"] }, editable: true },
-    { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    { field: "discount", headerName: "Discount (%)", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-  ];
+  // // const PackageNameRenderer = (params) => (
+  // //   params.value ? <Link className="link" title={params.value} to={`${routes.packagesDetail.path}/${params.data.packageId}`}>
+  // //     {params.value}
+  // //   </Link> : <NoDataCell />
+  // // );
 
-  const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageInventory"));
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
+  // const ActionsRenderer = (params) => (
+  //   <>
+  //     <GridDeleteIcon
+  //       hasDeletePermission={permissions?.rentalManagement?.isDelete}
+  //       ownerId={user?.user?._id}
+  //       userId={user?.user?._id}
+  //       onDelete={() => {
+  //         deleteInventories([{
+  //           id: params.data.id,
+  //           type: params.data?.type.toLowerCase()
+  //         }])
+  //       }
+  //       }
+  //       entity="rentalManagement"
+  //     />
+  //     {params.data.type === "Package" &&
+  //       <HtmlTooltip title="Explode package">
+  //         <IconButton
+  //           onClick={() => explodePackage(params.data.id)}
+  //           size="small"
+  //           color='primary'
+  //         >
+  //           <GiMineExplosion />
+  //         </IconButton>
+  //       </HtmlTooltip>
+  //     }
+  //   </>
+  // );
+
+  // const frameworkComponents = {
+  //   nameRenderer: NameRenderer,
+  //   productRenderer: ProductRenderer,
+  //   // packageNameRenderer: PackageNameRenderer,
+  //   commonRenderer: CommonRenderer,
+  //   actionsRenderer: ActionsRenderer,
+  //   dateRenderer: DateRenderer,
+  // };
+  // const columns = [
+  //   { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "productRenderer" },
+  //   { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
+  //   // { field: "package", headerName: "Package", show: true, disabled: true, cellRenderer: "packageNameRenderer" },
+  //   { field: "startDate", headerName: "Start Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
+  //   { field: "endDate", headerName: "End Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
+  //   { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+  //   { field: "UOM", headerName: "UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Pcs"] }, editable: true },
+  //   { field: "pricingMethod", headerName: "Pricing Method", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Per Day", "Per Week", "Per Month"] }, editable: true },
+  //   { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+  //   { field: "discount", headerName: "Discount (%)", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+  //   { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+  // ];
+
+  // const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageInventory"));
+  // if (columnState) {
+  //   columns.forEach((item) => {
+  //     columnState.forEach((d) => {
+  //       if (d.colId === item.field) {
+  //         item.show = !d.hide;
+  //       }
+  //     });
+  //   });
+  // }
+
+  const handleClick = (rowData) => {
+    setProductEdit(true)
+    setSelectedProductData(rowData)
   }
+
+  const columns: Column<any>[] = [
+    {
+      field: 'detail',
+      title: 'Detail',
+      cellStyle: { padding: "0px 4px" },
+      render: (rowData) => (
+        <div style={{ width: 200, display: "flex", alignItems: 'center' }}>
+          <p
+            onClick={() => handleClick(rowData)}
+            className="link text-truncate"
+            title={rowData.detail}
+          // to={rowData.type === 'Product' ? `${routes.productDetail.path}/${rowData.id}` : `${routes.packagesDetail.path}/${rowData.id}`}
+          >
+            {rowData.detail}
+          </p>
+          {rowData?.type === 'Package' && !rowData.hasOwnProperty("packageId") &&
+            <Box ml={1}>
+              <HtmlTooltip title="Add Product">
+                <IconButton onClick={() => setPackageForProducts(rowData)} size="small" color="primary">
+                  <Add color='disabled' />
+                </IconButton>
+              </HtmlTooltip>
+            </Box>
+          }
+        </div>
+      )
+    },
+    {
+      field: 'type',
+      title: 'Type',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 80 }}>
+          <p>{rowData.type}</p>
+        </div>
+      )
+
+    },
+    {
+      field: 'startDate',
+      title: 'Start Date',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 80 }}>
+          <h5 className="createBy" title={`${moment(rowData.startDate.slice(0, 10)).format(dateFormat)}`}>
+            <span className="">{moment(rowData.startDate.slice(0, 10)).format(dateFormat)}</span>
+          </h5>
+        </div>
+      )
+    },
+    {
+      filtering: false,
+      field: 'endDate',
+      title: 'End Date',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 80 }}>
+          <h5 className="createBy" title={`${moment(rowData.endDate.slice(0, 10)).format(dateFormat)}`}>
+            <span className="">{moment(rowData.endDate.slice(0, 10)).format(dateFormat)}</span>
+          </h5>
+        </div>
+      )
+    },
+    {
+      field: 'qty',
+      title: 'Quantity',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 80 }}>
+          <p>{rowData.qty}</p>
+        </div>
+      )
+    },
+    {
+      field: 'UOM',
+      title: 'UOM',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 80 }}>
+          <p>{rowData.UOM}</p>
+        </div>
+      )
+    },
+    {
+      field: 'pricingMethod',
+      title: 'Pricing Method',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 100 }}>
+          <p>{rowData.pricingMethod}</p>
+        </div>
+      )
+    },
+    {
+      field: 'price',
+      title: 'Price',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 100 }}>
+          <p>{rowData.price}</p>
+        </div>
+      )
+    },
+    {
+      field: 'discount',
+      title: 'Discount (%)',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 100 }}>
+          <p>{rowData.discount}</p>
+        </div>
+      )
+    },
+    {
+      field: 'finalPrice',
+      title: 'Final Price',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 100 }}>
+          <p>{rowData.finalPrice}</p>
+        </div>
+      )
+    }
+  ]
 
 
 
@@ -465,14 +607,14 @@ const RentalManagementDetailsPage = () => {
       });
   }
 
-  const explodePackage = (packageId) => {
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/products-packages/explode/${packageId}`)
-      .then(() => {
-        fetchProductInventory()
-      }).catch((error) => {
-        toastConfig.setToastConfig(error)
-      });
-  }
+  // const explodePackage = (packageId) => {
+  //   axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/products-packages/explode/${packageId}`)
+  //     .then(() => {
+  //       fetchProductInventory()
+  //     }).catch((error) => {
+  //       toastConfig.setToastConfig(error)
+  //     });
+  // }
 
   const updateProductData = (data) => {
 
@@ -573,7 +715,6 @@ const RentalManagementDetailsPage = () => {
       });
   }
 
-
   return (
     <>
       <Fragment>
@@ -665,7 +806,7 @@ const RentalManagementDetailsPage = () => {
               {(currentStep === 0) && (
                 <>
                   <Box display="flex" justifyContent="space-between" m={1}>
-                    <Box display="flex">
+                    <Box display="flex" alignItems="center">
                       <Button
                         variant="contained"
                         color="primary"
@@ -689,6 +830,8 @@ const RentalManagementDetailsPage = () => {
                       >
                         {`Add ${routes.packages.title}`}
                       </Button>
+                      <Box mx={1} />
+                      {selectedProducts && selectedProducts.length > 0 && <Typography>Selected ({selectedProducts.length})</Typography>}
                     </Box>
                     <Box display="flex">
                       <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
@@ -756,21 +899,20 @@ const RentalManagementDetailsPage = () => {
                             ? "calc(100vw - 20px)"
                             : isSmallScreen
                               ? "calc(100vw - 78px)"
-                              : showActivity ? "100%" : "calc(100vw - 100px)"}
-                        maxHeight={"600px"}
-                        minHeight={"600px"}
+                              : showActivity ? "100%" : "calc(100vw - 100px)"
+                        }
+
                       >
                         <MaterialTableComponent
                           columns={columns}
                           rowData={dataRows}
                           title={""}
                           loading={loading}
-                          updateProductData={updateProductData}
                           onSelection={(d) => setSelectedProducts(d)}
-                          onRowClick={(rowData) => {
-                            setProductEdit(true)
-                            setSelectedProductData(rowData)
-                          }}
+                        // onRowClick={(rowData) => {
+                        //   setProductEdit(true)
+                        //   setSelectedProductData(rowData)
+                        // }}
                         />
                       </Box>
 
@@ -1171,6 +1313,31 @@ const RentalManagementDetailsPage = () => {
         onOk={() => handleRemoveProductInventory(deleteData)}
         okBtnLoading={isDeleting}
       />}
+      {Boolean(packageForProducts)
+        && <AssignQuantityDialog
+          ids={[packageForProducts?._id]}
+          label="Select Product"
+          onClose={() => setPackageForProducts(null)}
+          onSuccess={() => {
+            setPackageForProducts(null)
+            fetchProductInventory()
+          }}
+          resource="/product"
+          resourceData={
+            packageForProducts?.productRelationship?.map((p1) => {
+              let obj = {}
+              packageForProducts?.products?.forEach(p2 => {
+                if (p2.productId === p1._id) {
+                  obj = { ...p1, ...p2 }
+                }
+              })
+
+              return obj
+            })
+          }
+          title="Assign Products"
+        />
+      }
       {isProductEdit &&
         <BulkEditInventoryDialog
           isSaving={isUpdating}

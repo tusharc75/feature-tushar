@@ -12,7 +12,10 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { gridLoadingTimeout, rentalManagement } from "../../constants/helpers";
+import { dateFormat, gridLoadingTimeout, rentalManagement } from "../../constants/helpers";
+import { Column } from "material-table";
+import moment from "moment";
+import MaterialTableComponent from "../../components/Shared/MaterialTableComponent";
 
 
 const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId }) => {
@@ -29,6 +32,7 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
     selectedRecords: selectedRecordsSerializedAssets } = stateSerializedAssets;
   const [downlodingFile, setDownlodingFile] = useState(false)
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
+  const [selectedProducts, setSelectedProducts] = useState([])
 
   useEffect(() => {
 
@@ -106,19 +110,142 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
     commonRenderer: CommonRenderer,
   };
 
-  const columns = [
-    { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "productRenderer" },
-    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "package", headerName: "Package", show: true, disabled: true, cellRenderer: "packageNameRenderer" },
-    { field: "startDate", headerName: "Start Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
-    { field: "endDate", headerName: "End Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
-    { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    { field: "UOM", headerName: "UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Gram", "Liter"] }, editable: true },
-    { field: "pricingMethod", headerName: "Pricing Method", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Per Day", "Per Week", "Per Month"] }, editable: true },
-    { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    { field: "discount", headerName: "Discount (%)", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-  ];
+  // const columns = [
+  //   { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "productRenderer" },
+  //   { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
+  //   { field: "package", headerName: "Package", show: true, disabled: true, cellRenderer: "packageNameRenderer" },
+  //   { field: "startDate", headerName: "Start Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
+  //   { field: "endDate", headerName: "End Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
+  //   { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+  //   { field: "UOM", headerName: "UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Gram", "Liter"] }, editable: true },
+  //   { field: "pricingMethod", headerName: "Pricing Method", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Per Day", "Per Week", "Per Month"] }, editable: true },
+  //   { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+  //   { field: "discount", headerName: "Discount (%)", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+  //   { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+  // ];
+  const columns: Column<any>[] = [
+    {
+      field: 'detail',
+      title: 'Detail',
+      cellStyle: { padding: "0px 4px" },
+      render: (rowData) => (
+        <div style={{ width: 200, display: "flex", alignItems: 'center' }}>
+          <p
+            className="text-truncate"
+            title={rowData.detail}
+          // to={rowData.type === 'Product' ? `${routes.productDetail.path}/${rowData.id}` : `${routes.packagesDetail.path}/${rowData.id}`}
+          >
+            {rowData.detail}
+          </p>
+        </div>
+      )
+    },
+    {
+      field: 'type',
+      title: 'Type',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 80 }}>
+          <p>{rowData.type}</p>
+        </div>
+      )
+
+    },
+    {
+      field: 'startDate',
+      title: 'Start Date',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 80 }}>
+          <h5 className="createBy" title={`${moment(rowData.startDate.slice(0, 10)).format(dateFormat)}`}>
+            <span className="">{moment(rowData.startDate.slice(0, 10)).format(dateFormat)}</span>
+          </h5>
+        </div>
+      )
+    },
+    {
+      filtering: false,
+      field: 'endDate',
+      title: 'End Date',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 80 }}>
+          <h5 className="createBy" title={`${moment(rowData.endDate.slice(0, 10)).format(dateFormat)}`}>
+            <span className="">{moment(rowData.endDate.slice(0, 10)).format(dateFormat)}</span>
+          </h5>
+        </div>
+      )
+    },
+    {
+      field: 'qty',
+      title: 'Quantity',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 80 }}>
+          <p>{rowData.qty}</p>
+        </div>
+      )
+    },
+    {
+      field: 'UOM',
+      title: 'UOM',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 80 }}>
+          <p>{rowData.UOM}</p>
+        </div>
+      )
+    },
+    {
+      field: 'pricingMethod',
+      title: 'Pricing Method',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 100 }}>
+          <p>{rowData.pricingMethod}</p>
+        </div>
+      )
+    },
+    {
+      field: 'price',
+      title: 'Price',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 100 }}>
+          <p>{rowData.price}</p>
+        </div>
+      )
+    },
+    {
+      field: 'discount',
+      title: 'Discount (%)',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 100 }}>
+          <p>{rowData.discount}</p>
+        </div>
+      )
+    },
+    {
+      field: 'finalPrice',
+      title: 'Final Price',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 100 }}>
+          <p>{rowData.finalPrice}</p>
+        </div>
+      )
+    }
+  ]
+
 
   const columnsSerializedAssets = [
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
@@ -130,16 +257,16 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
     // { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
   ];
 
-  const columnStateProductAndPackage = JSON.parse(localStorage.getItem("rentalManagementDetailsPageSerializedAssetsProductAndPackage"));
-  if (columnStateProductAndPackage) {
-    columns.forEach((item) => {
-      columnStateProductAndPackage.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
+  // const columnStateProductAndPackage = JSON.parse(localStorage.getItem("rentalManagementDetailsPageSerializedAssetsProductAndPackage"));
+  // if (columnStateProductAndPackage) {
+  //   columns.forEach((item) => {
+  //     columnStateProductAndPackage.forEach((d) => {
+  //       if (d.colId === item.field) {
+  //         item.show = !d.hide;
+  //       }
+  //     });
+  //   });
+  // }
 
   const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageSerializedAssets"));
   if (columnState) {
@@ -196,7 +323,8 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
       </Grid>
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns ?
-          <CustomAgGrid
+          <>
+            {/* <CustomAgGrid
             columns={columns}
             dataRows={dataRows}
             frameworkComponents={frameworkComponents}
@@ -209,7 +337,16 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
             allowAction={false}
             loading={loading}
             renderedFrom="rentalManagementDetailsPageSerializedAssetsProductAndPackage"
-          />
+            /> */}
+            <MaterialTableComponent
+              columns={columns}
+              rowData={dataRows}
+              title={""}
+              loading={loading}
+              onSelection={(d) => setSelectedProducts(d)}
+
+            />
+          </>
           : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
 
         }
