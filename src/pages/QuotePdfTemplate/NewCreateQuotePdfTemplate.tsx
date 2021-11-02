@@ -361,10 +361,12 @@ export default function NewCreateQuotePdfTemplate() {
                                             {isUpdating && <CircularProgress size={24} />} {" "} Save
                                         </Button>
 
-                                        <Button disabled={isUpdatingAndPreview || !hasPermissionToUpdate} size="small" color="primary"
-                                            onClick={() => { setIsPreview(true); submitForm() }} variant="contained">
-                                            {isUpdatingAndPreview && <CircularProgress size={24} />} {" "} Save & Preview
-                                        </Button>
+                                        {!quoteData &&
+                                            <Button disabled={isUpdatingAndPreview || !hasPermissionToUpdate} size="small" color="primary"
+                                                onClick={() => { setIsPreview(true); submitForm() }} variant="contained">
+                                                {isUpdatingAndPreview && <CircularProgress size={24} />} {" "} Save & Preview
+                                            </Button>
+                                        }
 
                                         <Button
                                             size="small"
