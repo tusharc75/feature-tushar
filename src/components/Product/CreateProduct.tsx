@@ -512,9 +512,9 @@ const CreateProduct = (props) => {
                                     <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                                     {productFields && productFields.map((section, i) => (
                                         <div key={i}>
-                                            <h2 className="form-label-style" onClick={() => handleExpand(i)}>
-                                                <IconButton className="p-0" color="primary" style={{ marginTop: "-5px" }} size="small"  >
-                                                    {expanded[i] ? <ExpandLess fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                                            <h2 className="form-label-style" >
+                                                <IconButton className="p-0" color="primary" style={{ marginTop: "-5px" }} size="small" onClick={() => handleExpand(i)} >
+                                                    {expanded[i] ? <ExpandLess fontSize="medium" /> : <ExpandMoreIcon fontSize="medium" />}
                                                 </IconButton>
                                                 {section.name}
                                                 <IconButton style={{ float: "right", marginTop: "-10px" }} color="primary" size="small" onClick={(e) => handleOpenAddField(e, section.name)} >
