@@ -289,7 +289,7 @@ const CreateProduct = (props) => {
       const input = document.querySelector(
         `input[name=${err[0]}]`,
       );
-      input.scrollIntoView({
+      input?.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
         inline: 'start',
@@ -339,9 +339,9 @@ const CreateProduct = (props) => {
                     {productFields &&
                       productFields.map((section, i) => (
                         <div key={i}>
-                          <h2 className="form-label-style" onClick={() => handleExpand(i)}>
-                            <IconButton className="p-0" color="primary" style={{ marginTop: "-5px" }} size="small"  >
-                              {expanded[i] ? <ExpandLess fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                          <h2 className="form-label-style" >
+                            <IconButton className="p-0" color="primary" style={{ marginTop: "-5px" }} size="small" onClick={() => handleExpand(i)} >
+                              {expanded[i] ? <ExpandLess fontSize="medium" /> : <ExpandMoreIcon fontSize="medium" />}
                             </IconButton>
                             {section.name}
                             <span

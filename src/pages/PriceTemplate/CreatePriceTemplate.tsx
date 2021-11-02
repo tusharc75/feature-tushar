@@ -574,7 +574,7 @@ const PriceTemplate = () => {
                     deleteField={deleteField}
                     setDeleteField={setDeleteField}
                     isCustomField={true}
-                    extraFields={templateField}
+                    extraFields={[...productField, ...templateField]}
                     module="price-template"
                   />
                 </Box>
