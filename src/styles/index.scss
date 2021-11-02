@@ -413,7 +413,6 @@ body::-webkit-scrollbar-thumb {
 
 .ag-grid-listing-grid {
   height: calc(100vh - 260px);
-  margin: 0 6px 0;
 }
 
 .agPagination {
@@ -812,25 +811,37 @@ body::-webkit-scrollbar-thumb {
 }
 
 .quoteProfit {
-  background: #055405;
+  background: #d1f2be;
+  .quoteAmount, .quoteDetailHeading {
+    color: #306411;
+  }
 }
 
 .quoteSale {
-  background: #018b85;
+  background: #84e4e0;
+
+  .quoteAmount, .quoteDetailHeading {
+    color: #0b4e4c;
+  }
 }
 
 .quoteCost {
-  background: #997906;
+  background: #ffeac1;
+  .quoteAmount, .quoteDetailHeading {
+    color: #66532f;
+  }
 }
 
-.quoteRed{
- background: #650e0e;
+.quoteRed {
+  background: #fa928e;
+  .quoteAmount, .quoteDetailHeadingB {
+    color: #742b29;
+  }
 }
 .redQuoteBox {
   padding: 4px 15px;
   border-radius: 4px;
   background: #ffcdcd;
-  color: #650e0e;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -864,9 +875,7 @@ body::-webkit-scrollbar-thumb {
   border-top-right-radius: 0 !important;
 }
 .quoteAmount {
-  color: white;
   font-size: 24px;
-  // font-size: 30px;
 }
 .customSelect {
   padding: 6px 15px;

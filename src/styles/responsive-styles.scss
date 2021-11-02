@@ -1,26 +1,26 @@
 /* Extra small devices (phones, 600px and down) */
-.buttonStyleSmallScreen{
+.buttonStyleSmallScreen {
     display: none !important;
 }
-.buttonDeleteSmallScreen{
+.buttonDeleteSmallScreen {
     display: none !important;
 }
-.buttonDeleteBigScreen{
+.buttonDeleteBigScreen {
     color: #f44336 !important;
     border: 1px solid #f44336 !important;
     background: #fff !important;
 }
-.DetailCube{
+.DetailCube {
     display: none;
 }
-.deleteIconNew{
+.deleteIconNew {
     display: none;
 }
-.uio{
+.uio {
     border: 1px solid grey;
     flex-grow: 1;
 }
-.detailHeaderDashboard{
+.detailHeaderDashboard {
     display: none;
 }
 
@@ -112,8 +112,8 @@
         min-width: auto !important;
     }
 
-    .headerbox{
-        padding: 2px 6px;;
+    .headerbox {
+        padding: 2px 6px;
     }
 
     //.detailHeaderDashboard {
@@ -169,10 +169,10 @@
             width: 98vw;
         }
     }
-    .buttonStyleBigScreen{
+    .buttonStyleBigScreen {
         display: none !important;
     }
-    .buttonStyleSmallScreen{
+    .buttonStyleSmallScreen {
         background-color: transparent !important;
         box-shadow: none !important;
         display: flex !important;
@@ -180,10 +180,10 @@
         min-width: 40px !important;
         color: var(--primary) !important;
     }
-    .buttonDeleteBigScreen{
+    .buttonDeleteBigScreen {
         display: none !important;
     }
-    .buttonDeleteSmallScreen{
+    .buttonDeleteSmallScreen {
         background-color: transparent !important;
         box-shadow: none !important;
         display: flex !important;
@@ -191,58 +191,60 @@
         min-width: 40px !important;
         color: var(--danger-light) !important;
     }
-    .mobileHeading{
-         padding: 5px 8px;
+    .mobileHeading {
+        padding: 5px 8px;
         color: white !important;
         border-radius: 8px;
     }
-    .listingHeader{
+    .listingHeader {
         padding-right: 0px !important;
         font-size: 0.9rem;
     }
-    .DetailCube{
+    .DetailCube {
         display: flex !important;
         padding: 8px;
-
     }
-    .detailHeading{
+    .detailHeading {
         padding: 0px 16px;
     }
-    .deleteButtonIcon{
-       color: var(--danger-light) !important;
+    .deleteButtonIcon {
+        color: var(--danger-light) !important;
         margin: 0px !important;
     }
-    .deleteIconNew{
+    .deleteIconNew {
         display: flex;
         color: var(--danger-light);
         padding-bottom: 3px;
     }
-    .uio{
+    .uio {
         border: 1px solid grey;
         flex-grow: 0;
     }
 
-    .MuiButton-root{
+    .MuiButton-root {
         min-width: auto !important;
     }
 
-    .MuiButton-startIcon{
+    .MuiButton-startIcon {
         margin-right: 0px !important;
     }
-    .MuiButton-endIcon{
+    .MuiButton-endIcon {
         margin-left: 0px !important;
     }
 
-    .MuiButton-outlinedSizeSmall{
+    .MuiButton-outlinedSizeSmall {
         padding: 2px;
     }
 
-    .quoteHeader{
+    .quoteHeader {
         flex-direction: column;
     }
 
-    .quoteBoxicon{
-        color: #ffffff
+    .quoteBoxicon {
+        color: #ffffff;
+    }
+    .actio-pos-quote {
+        top: 2px;
     }
 }
 
@@ -258,23 +260,22 @@
     }
 }
 @media only screen and (max-width: 770px) {
-    .detail-container{
+    .detail-container {
         top: 0;
         margin: 0;
     }
 
-    .main-container{
+    .main-container {
         top: 0;
         margin: 0;
     }
-    .tabLayout{
+    .tabLayout {
         padding: 3px 0 !important;
         flex: 1;
     }
     .tab-font {
         font-size: 12px;
     }
-    
 }
 /* Medium devices (landscape tablets, 768px and up) */
 @media only screen and (max-width: 959px) {
@@ -302,9 +303,8 @@
     .activityHide {
         display: none;
     }
-
 }
 
-.scroll-y-hidden{
+.scroll-y-hidden {
     overflow-y: hidden;
 }
