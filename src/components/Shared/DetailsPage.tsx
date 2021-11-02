@@ -16,6 +16,7 @@ import { GetApp, InfoOutlined, InsertDriveFile } from "@material-ui/icons";
 import { kebabCase } from "lodash";
 import axios from "axios";
 import { FcApproval } from "react-icons/fc";
+import { FaDiceOne } from "react-icons/fa";
 import { camelCase, getObjKeysWithValues, sidebarResource } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -27,7 +28,7 @@ import CarouselDialog from "../CarouselDialog";
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
-    padding: theme.spacing(0.5, 0.5, 0.5, 1),
+    padding: theme.spacing(0, 0.5, 0.2, 1),
     borderRadius: 4,
     cursor: "normal",
     textOverflow: "ellipsis",
@@ -67,8 +68,9 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.primary.main,
   },
   detailLabel: {
-    fontSize: "0.8rem",
-    fontWeight: "normal",
+    padding:"4px 10px 4px 4px",
+    fontSize: "0.9rem",
+    fontWeight: "bold",
     color: "#656464",
   },
   approvalIcon: {
@@ -76,6 +78,15 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "2px",
     top: "4px",
   },
+  "@media only screen and (max-width: 600px)":{
+    detailLabel: {
+      padding:"2px 10px 2px 4px",
+      fontSize: "0.8rem",
+    },
+    fieldText: {
+      fontSize:"0.8rem"
+    }
+  }
 }));
 
 interface DetailProps {
@@ -362,10 +373,13 @@ const Details = (props: DetailProps) => {
           form.name && (
             <React.Fragment key={form.name}>
               <div className="detail-box">
+                <div className={"detail-box-content"}>
+                <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
                 <h3 className="form-label-style" title={form.name}>
-                  {form.name}
+                   {form.name}
                 </h3>
-                <Grid container>
+                </div>
+                <Grid container style={{paddingTop:"6px"}}>
                   {form.sectionFields.map((field, i) => (
                     <Grid
                       key={i}
@@ -374,21 +388,20 @@ const Details = (props: DetailProps) => {
                       sm={dynamicSize(6, field.fieldData.type)}
                       md={dynamicSize(6, field.fieldData.type)}
                     >
-                      <Grid container alignItems="center">
+                      <Grid container alignItems="center" style={{border:"1px solid #EDEDED"}} >
                         <Grid
                           item
                           xs={dynamicSize(6, field.fieldData.type)}
                           sm={dynamicSize(5, field.fieldData.type)}
                           md={dynamicSize(5, field.fieldData.type)}
                         >
-                          <Box height="100%" display="flex" alignItems="center">
+                          <div style={{textAlign:"right", backgroundColor:"#F5F5F5", padding:"3px 0"}}>
                             <h4
                               title={field.fieldData.fieldLabel}
                               className={classes.detailLabel}
                             >
                               {field.fieldData.fieldLabel}
                             </h4>
-                            <Box marginX="2px" />
                             {field.fieldData.isTooltip && (
                               <HtmlTooltip title={field.fieldData.tooltipMessage}>
                                 <InfoOutlined
@@ -397,8 +410,9 @@ const Details = (props: DetailProps) => {
                                 />
                               </HtmlTooltip>
                             )}
-                          </Box>
+                          </div>
                         </Grid>
+
                         <Grid
                           item
                           xs={dynamicSize(6, field.fieldData.type)}
