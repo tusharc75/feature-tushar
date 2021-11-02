@@ -395,10 +395,10 @@ const Details = (props: DetailProps) => {
                           sm={dynamicSize(5, field.fieldData.type)}
                           md={dynamicSize(5, field.fieldData.type)}
                         >
-                          <div style={{textAlign:"right", backgroundColor:"#F5F5F5", padding:"3px 0"}}>
+                          <div className="d-flex align-items-center justify-content-end pr-1" style={{backgroundColor:"#F5F5F5", padding:"3px 0"}}>
                             <h4
                               title={field.fieldData.fieldLabel}
-                              className={classes.detailLabel}
+                              className={`text-truncate ${classes.detailLabel}`}
                             >
                               {field.fieldData.fieldLabel}
                             </h4>
