@@ -30,7 +30,7 @@ import { CustomDialogTransition, gridLoadingTimeout } from "../../constants/help
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import routes from "../../components/Helpers/Routes";
 import { isMobile } from "react-device-detect";
-import { MdEditNote } from 'react-icons/md';
+import { AiTwotoneEdit } from 'react-icons/ai';
 import CustomSwipableList from "../SwipableListComponents/CustomSwipableList";
 import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
@@ -584,10 +584,8 @@ const ProductBuilder = (props) => {
 
   return (
     <Box p={1} pt={0}>
-      <Grid container>
-        <Grid item xs={2} className="d-flex align-items-center gap-1"></Grid>
         {Editable && (
-          <Grid xs={10} container justify="flex-end">
+          <div  className="d-flex align-items justify-content-end">
             {permissions.isUpdate && (
               <ImportExportLinks
                 permissions={permissions}
@@ -615,7 +613,7 @@ const ProductBuilder = (props) => {
                 color="primary"
                 size="small"
                 className="float-right ml-1 mr-2"
-                startIcon={<MdEditNote />}
+                startIcon={<AiTwotoneEdit />}
                 onClick={handelOpenBulkEdit}
                 disabled={checkUniqTemplate()}
                 aria-controls="action-menu">
@@ -652,9 +650,8 @@ const ProductBuilder = (props) => {
               </MenuItem>
               <MenuItem onClick={handleOpenAddField}>Add Field</MenuItem>
             </Menu>
-          </Grid>
+          </div>
         )}
-      </Grid>
       <Box mt={1}>
         {
           isMobile ?
