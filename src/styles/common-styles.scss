@@ -329,3 +329,7 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
     animation: blink 1s linear 10;
     -webkit-animation: blink 1s linear 10;
 }
+
+.overflow-hidden {
+    overflow: hidden !important;
+}

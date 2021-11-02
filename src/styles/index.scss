@@ -415,6 +415,12 @@ body::-webkit-scrollbar-thumb {
   margin: 0 6px 0;
 }
 
+.ag-header-cell-resize {
+  background: #e7e7e7;
+  width: 6px;
+  cursor: col-resize;
+}
+
 .agPagination {
   margin: 0px 5px;
   background: #f7f7f7;

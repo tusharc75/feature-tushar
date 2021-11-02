@@ -69,11 +69,10 @@ export default function CustomSwipableList({
     return <>
         {
             allowSelection && <Grid container>
-                <Grid item xs={12} sm={12} className="pl-1 ml-3">
+                <Grid item xs={12} sm={12} className="pl-2">
                     <FormControlLabel
                         control={
                             <Checkbox
-                                className="pl-2"
                                 checked={isAllChecked}
                                 onChange={(e) => {
                                     setIsAllChecked(e.target.checked);
@@ -133,25 +132,25 @@ export default function CustomSwipableList({
                                     trailingActions={
                                         allowSwipe ? <TrailingActions>
                                             {
-                                                showClone ? <div style={{ width: 60, background: "var(--link)" }} className="h-100 d-flex align-items-center">
+                                                showClone ? <div style={{ width: 40 }} className="h-100 d-flex align-items-center">
                                                     <SwipeAction onClick={() => onClone(d)}>
-                                                        <FileCopyIcon fontSize="small" style={{ color: "white" }} />
+                                                        <FileCopyIcon fontSize="small" style={{ color: "var(--link)" }} />
                                                     </SwipeAction>
                                                 </div> : <></>
                                             }
 
                                             {
-                                                permissions.isUpdate && d.allowedToEdit ? <div style={{ width: 60, background: "#163340" }} className="h-100 d-flex align-items-center">
+                                                permissions.isUpdate && d.allowedToEdit ? <div style={{ width: 40 }} className="h-100 d-flex align-items-center">
                                                     <SwipeAction onClick={() => onEdit(d)}>
-                                                        <HiPencil size={20} style={{ color: "white" }} />
+                                                        <HiPencil size={20} style={{ color: "#163340" }} />
                                                     </SwipeAction>
                                                 </div> : <></>
                                             }
 
                                             {
-                                                extraParamsToCheckDelete && permissions.isDelete && d.canDelete ? <div style={{ width: 60, background: "#dc3545" }} className="h-100 d-flex align-items-center">
+                                                extraParamsToCheckDelete && permissions.isDelete && d.canDelete ? <div style={{ width: 40 }} className="h-100 d-flex align-items-center">
                                                     <SwipeAction onClick={() => onDelete(d)}>
-                                                        <DeleteIcon fontSize="small" style={{ color: "white" }} />
+                                                        <DeleteIcon fontSize="small" style={{ color: "#dc3545" }} />
                                                     </SwipeAction>
                                                 </div> : <></>
                                             }
@@ -192,7 +191,7 @@ export default function CustomSwipableList({
                                                 {
                                                     [
                                                         ...chips.map(c => (
-                                                            c.forceShow === true || d[c.field] ? <Chip key={c.field} variant="outlined" onClick={c.onClick ? () => c.onClick(d, index) : null}
+                                                            c.forceShow === true || d[c.field] ? <Chip className="overflow-hidden" key={c.field} variant="outlined" onClick={c.onClick ? () => c.onClick(d, index) : null}
                                                                 size="small" label={`${c.label} ${d[c.field] ?? ""}`} style={c.chipColorVariable ? generateChipStyle(c.chipColorVariable, d[c.field]?.toLowerCase()) : {}}
                                                             /> : <Fragment key={c.field}></Fragment>
                                                         ))

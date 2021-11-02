@@ -79,6 +79,7 @@ const ProductBuilder = (props) => {
   const [productDataList, setproductDataList] = useState([]);
   const [showProductNumberOrProductNameUpdate, setShowProductNumberOrProductNameUpdate] =
     useState({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
+  const [dataToShowForMobile, setDataToShowForMobile] = useState([]);
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -204,6 +205,7 @@ const ProductBuilder = (props) => {
         },
       ];
       GenrateColoum(data.data.productFields, column);
+      setDataToShowForMobile([...column]);
       data = data.data.product?.map((u, index) => {
         const { entity, ...restProperties } = u;
         const [firstEntity, ...restEntity] = entity ? entity : [];
@@ -680,7 +682,7 @@ const ProductBuilder = (props) => {
               page={page}
               loading={loading}
               chips={
-                columns ? columns.some(f => f.editable === true) ? [...columns.filter(f => f.editable === true).map(m => {
+                dataToShowForMobile ? dataToShowForMobile.some(f => f.editable === true) ? [...dataToShowForMobile.filter(f => f.editable === true).map(m => {
                   return {
                     label: `${m.headerName}: `,
                     field: m.field,
