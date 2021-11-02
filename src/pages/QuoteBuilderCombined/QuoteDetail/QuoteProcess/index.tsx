@@ -55,7 +55,6 @@ const useStyles = makeStyles((theme) => ({
     },
     bgProduct: {
         background: "#f5f5f5 !important",
-        padding: "5px 10px",
         paddingBottom: "0",
         border: "1px solid #163340",
         borderTop: "0px",
@@ -87,7 +86,6 @@ const useStyles = makeStyles((theme) => ({
         top: "1px",
         left: "6px",
         [theme.breakpoints.down("xs")]: {
-            position: "static",
             display: "flex",
             alignItems: "center"
         },
@@ -1370,7 +1368,7 @@ export default function QuoteProcess(props) {
                         >
                             {!ifQuoteApproved.approved &&
                                 ProcessStatus === "New" && allowedToEdit ? (
-                                <span className={`${classes.productPos} m-2 position-absolute`}>
+                                <span className={`${classes.productPos} m-2`}>
                                     <Tooltip title="Add New Product">
                                         <Button
                                             variant="outlined"
