@@ -278,7 +278,7 @@ export default function NewCreateQuotePdfTemplate() {
                         setIsUpdatingAndPreview(false);
                         if (quoteData?._id) {
                             history.push(`/quotes/detail/${quoteData?._id}`, {
-                                versionNumber: `${version}`, tabValue: 2
+                                versionNumber: `${version}`, tabValue: 1
                             })
                         }
                         else {
@@ -288,7 +288,7 @@ export default function NewCreateQuotePdfTemplate() {
                     } else {
                         if (quoteData?._id) {
                             history.push(`/quotes/detail/${quoteData?._id}`, {
-                                versionNumber: `${version}`, tabValue: 2
+                                versionNumber: `${version}`, tabValue: 1
                             })
                         }
                         else {
@@ -371,9 +371,9 @@ export default function NewCreateQuotePdfTemplate() {
                                             color="primary"
                                             variant="contained"
                                             onClick={() => {
-                                                if (history.location?.state?.quoteId) {
-                                                    history.push(`/quotes/detail/${history.location?.state?.quoteId}`, {
-                                                        versionNumber: `${history.location?.state?.version}`, tabValue: 2
+                                                if (quoteData?._id) {
+                                                    history.push(`/quotes/detail/${quoteData?._id}`, {
+                                                        versionNumber: `${version}`, tabValue: 1
                                                     })
                                                 }
                                                 else {
