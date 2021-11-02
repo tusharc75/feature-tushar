@@ -3,10 +3,10 @@ import { Autocomplete } from "@material-ui/lab";
 import React, { useEffect, useMemo, useState } from "react";
 import { useContext } from "react";
 import { useHistory } from "react-router-dom";
-import { AiFillEdit, AiOutlineEye } from "react-icons/ai";
 import { BiLayerPlus, BiMailSend } from "react-icons/bi";
 import { FiDownloadCloud } from "react-icons/fi";
 import { GiVintageRobot, GiProfit } from "react-icons/gi";
+import { AiFillEdit, AiFillPlusCircle, AiOutlineEye } from "react-icons/ai";
 import { HiPencil } from "react-icons/hi";
 import axiosInstance from "../../../../axios/axiosInstance";
 import Loader from "../../../../components/Loader";
@@ -30,12 +30,13 @@ import ColumnsDialog from "./ColumnsDialog";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useData } from "../../../../StateProvider/Provider";
-
 import DOAReasonDialog from "../../../DOA/DOAReasonDialog";
 import { camelCase, isEqual, startCase } from "lodash";
 import { VscVersions } from "react-icons/vsc";
 import { MdDelete } from "react-icons/md";
 import { AiOutlineFileExcel, AiOutlineFilePdf } from 'react-icons/ai';
+import ThumbUpIcon from "@material-ui/icons/ThumbUp";
+import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -81,8 +82,67 @@ const useStyles = makeStyles((theme) => ({
         top: "4px",
         right: "20px",
     },
+    productPos: {
+        position: "absolute",
+        top: "1px",
+        left: "6px",
+        [theme.breakpoints.down("xs")]: {
+            position: "static",
+            display: "flex",
+            alignItems: "center"
+        },
+    }
 }));
 
+
+const DOASteps = [
+    {
+        key: "New",
+        label: "Product Builder",
+    },
+    {
+        key: "Price Builder",
+        label: "Price Builder",
+    },
+    {
+        key: "Quote Builder",
+        label: "Quote Builder",
+    },
+    {
+        key: "DOA Process",
+        label: "DOA Process",
+    },
+    {
+        key: "Send To Customer",
+        label: "Send To Customer",
+    },
+    {
+        key: "End",
+        label: "End",
+    },
+];
+const OtherSteps = [
+    {
+        key: "New",
+        label: "Product Builder",
+    },
+    {
+        key: "Price Builder",
+        label: "Price Builder",
+    },
+    {
+        key: "Quote Builder",
+        label: "Quote Builder",
+    },
+    {
+        key: "Send To Customer",
+        label: "Send To Customer",
+    },
+    {
+        key: "End",
+        label: "End",
+    },
+];
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
@@ -105,18 +165,8 @@ export default function QuoteProcess(props) {
         handleVersionUpdate,
         updatingVersion,
         globalLoading,
-        DOASteps,
-        OtherSteps,
-        DOAneeded,
-        setDOAneeded,
-        setDOAApprovedFromQuoteDetails,
-        setDOARequestIdFromQuoteDetails,
-        showTotalSalesDialog,
         setShowTotalSalesDialog,
-        setIsAddNewProduct,
-        isAddNewProduct,
-        setIsAddExistingProduct,
-        isAddExistingProduct
+        showTotalSalesDialog,
     } = props
     const defaultSelectColumns = [
         "Product Description",
@@ -129,7 +179,7 @@ export default function QuoteProcess(props) {
     const toastConfig = useContext(CustomToastContext);
     const { qbResource, qbApi } = quoteBuilder;
     const {
-        state: { user, permissions, selectedEntity },
+        state: { user, permissions },
     }: any = useData();
     const history = useHistory();
 
@@ -160,6 +210,7 @@ export default function QuoteProcess(props) {
 
     const [buttonMessage, setButtonMessage] = useState("Send to Customer");
     const [DOAreq, setDOAreq] = useState(false);
+    const [DOAneeded, setDOAneeded] = useState(false);
     const [Customerreq, setCustomerreq] = useState(true);
     const [DOAData, setDOAData] = useState(null);
     const [DOAlimit, setDOALimit] = useState(0);
@@ -170,10 +221,15 @@ export default function QuoteProcess(props) {
     const [visibleColumns, setVisibleColumns] = useState(defaultSelectColumns);
     const [ColumnName, setColName] = useState([]);
     const [dynamicTableData, setDynamicTableData] = useState([]);
+    const [deletingDOA, setDeletingDOA] = useState(false);
     const [reminderLoading, setReminderLoading] = useState(false);
+    const [isCloning, setCloning] = useState(false);
     const [isRearrangeColumns, setRearrangeColumns] = useState(false);
+    const [isAddNewProduct, setIsAddNewProduct] = useState(false);
+    const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
     const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
     const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
+    const [approvedButtonText] = useState("Accept");
     const [loading, setLoading] = useState(false);
     const [pdfFileBase64, setPdfFileBase64] = useState(null);
     const [excelFileBase64, setExcelFileBase64] = useState(null);
@@ -183,7 +239,6 @@ export default function QuoteProcess(props) {
     const [showAiDialog, setShowAiDialog] = useState(false);
     const [viewDownloadLoading, setViewDownloadLoading] = useState(false);
     const [showPDFArrangeColumns, setShowPDFArrangeColumns] = useState(false);
-    const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState(false);
 
     const [messageDialog, setMessageDialog] = useState({
         open: false,
@@ -218,9 +273,7 @@ export default function QuoteProcess(props) {
                         .get(`/doa-request/can-i-approve/${quoteData._id}/${currentVersion}`)
                         .then(({ data: { data } }) => {
                             setDOAApproved(data.canApprove)
-                            setDOAApprovedFromQuoteDetails(data.canApprove)
                             setDOARequestId(data.requestId)
-                            setDOARequestIdFromQuoteDetails(data.requestId)
                         })
                         .catch((err) => {
                             // toastConfig.setToastConfig(err);
@@ -371,34 +424,6 @@ export default function QuoteProcess(props) {
                     : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`],
         }));
 
-        // if (ProcessStatus === "Price Builder") {
-        // let hasPrice = false;
-        // BuilderData.forEach((data) => {
-        //     if (
-        //         data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
-        //         data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-        //         "undefined"
-        //     ) {
-        //         hasPrice = true;
-        //     } else {
-        //         hasPrice = false;
-        //     }
-        // });
-        // const withZeroQty = BuilderData.filter((d) => d.qty === 0);
-        // let withZeroAmt = [];
-        // if (hasPrice) {
-        //     withZeroAmt = BuilderData.filter(
-        //         (d) =>
-        //             d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
-        //     );
-        // }
-
-        // if (!withZeroAmt.length && hasPrice && !withZeroQty.length) {
-        //     setNextStep(true);
-        // } else {
-        //     setNextStep(false);
-        // }
-        // }
         let colName = [];
         let dynamicTable = [];
         let requiredValuesData = []
@@ -447,7 +472,7 @@ export default function QuoteProcess(props) {
                                 })
                             } else if (data.units && !data.displayCurrency) {
                                 data.units.forEach((unit) => {
-                                    const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`
+                                    const casedLabel = `${fieldName}_${unit.toLowerCase()}`
                                     if (required) {
                                         requiredValues[casedLabel] = quoteRows[casedLabel]
                                     }
@@ -501,11 +526,36 @@ export default function QuoteProcess(props) {
                 })
 
                 if (DOASteps.findIndex(d => d?.key === ProcessStatus) === 1 || ProcessStatus === "Price Builder") {
-                    if (ungivenValues && ungivenValues.length > 0) {
-                        setNextStep(false)
-                    } else {
-                        setNextStep(true)
+                    let hasPrice = false;
+                    BuilderData.forEach((data) => {
+                        if (
+                            data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
+                            data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
+                            "undefined"
+                        ) {
+                            hasPrice = true;
+                        } else {
+                            hasPrice = false;
+                        }
+                    });
+                    const withZeroQty = BuilderData.filter((d) => d.qty === 0);
+                    let withZeroAmt = [];
+                    if (hasPrice) {
+                        withZeroAmt = BuilderData.filter(
+                            (d) =>
+                                d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
+                        );
                     }
+
+                    // console.log(BuilderData)
+                    // console.log(`totalSalesPrice_${quoteData?.currency.toLowerCase()}`)
+
+                    if ((!ungivenValues && ungivenValues.length === 0) || !withZeroAmt.length && hasPrice && !withZeroQty.length) {
+                        setNextStep(true);
+                    } else {
+                        setNextStep(false);
+                    }
+
                 }
 
 
@@ -617,7 +667,7 @@ export default function QuoteProcess(props) {
     const fetchDoaLimit = () => {
         if (quoteData) {
             axiosInstance()
-                .post("doa-request/limit", { entity: selectedEntity })
+                .post("doa-request/limit", { user: quoteData?.createdBy?.user?._id })
                 .then(({ data: { data } }) => {
                     setDOAsetup(data.doasetup);
                     setDOALimit(data.limit ? data.limit : 0);
@@ -679,6 +729,43 @@ export default function QuoteProcess(props) {
                 setCustomerreq(false);
             }
         }
+    };
+
+    const cloneVersion = () => {
+        const previousVersionTNC = quoteData.versions[currentVersion]?.acceptedColumns
+        setCloning(true);
+        axiosInstance()
+            .post(
+                `/quote-builder/createVersion/${quoteData._id}?version=${currentVersion}`,
+                { TNC: previousVersionTNC }
+            )
+            .then(() => {
+                fetchQuoteData(0);
+                setCloning(false);
+            })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+                setCloning(false);
+            });
+    };
+
+
+    const deleteVersion = () => {
+        let versions = quoteData?.versions;
+
+        delete versions[currentVersion];
+
+        setDeletingDOA(true);
+        axiosInstance()
+            .delete(`${qbApi}/${quoteData._id}/${currentVersion}`)
+            .then(() => {
+                setDeletingDOA(false);
+                fetchQuoteData(0);
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+                setDeletingDOA(false);
+            });
     };
 
     const handleSendReminder = () => {
@@ -1170,18 +1257,14 @@ export default function QuoteProcess(props) {
                         ) : null}
                         <div>
                             <Button
-                                // className="customSelect mx-1"
-                                variant="text"
+                                className="customSelect mx-1"
+                                variant="outlined"
                                 color="primary"
                                 size="small"
                                 aria-controls="simple-menu"
                                 aria-haspopup="true"
-                                className={`${isMobile ? "buttonIconMobile" : "buttonIconDesktop"}`}
-                                style={{color:"var(--warning)"}}
-                                onClick={handleClick}
-                                startIcon={<VscVersions style={{paddingTop:"2px"}} size={ isMobile ? `20` : `16`}/>}>
-                                { isMobile ? "" : `Version : ${currentVersion}`}
-
+                                onClick={handleClick}>
+                                {`Version : ${currentVersion}`}
                             </Button>
                             <Menu
                                 id="simple-menu"
@@ -1285,6 +1368,39 @@ export default function QuoteProcess(props) {
                             md={12}
                             className="d-flex align-items-center gap-1"
                         >
+                            {!ifQuoteApproved.approved &&
+                                ProcessStatus === "New" && allowedToEdit ? (
+                                <span className={`${classes.productPos} m-2 position-absolute`}>
+                                    <Tooltip title="Add New Product">
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            className="mr-1"
+                                            startIcon={<AiFillPlusCircle/>}
+                                            color="primary"
+                                            disabled={!permissions.product?.isCreate}
+                                            onClick={() => {
+                                                setIsAddNewProduct(true);
+                                            }}
+                                        >
+                                            {isMobile ? "" : "Add New Product"}
+                                        </Button>
+                                    </Tooltip>
+                                    <Tooltip title="Add Existing Product">
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            startIcon={<BiLayerPlus/>}
+                                            color="primary"
+                                            onClick={() => {
+                                                setIsAddExistingProduct(true);
+                                            }}
+                                        >
+                                            {isMobile ? "" : "Add Existing Product"}
+                                        </Button>
+                                    </Tooltip>
+                                </span>
+                            ) : null}
                             {(ProcessStatus === "DOA Process" &&
                                 versionStatus === "Building Quote" && DOAneeded) ||
                                 (ProcessStatus === "Send To Customer" &&

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, Fragment } from "react";
 import { Box, Chip, Grid, Paper, Typography } from "@material-ui/core";
 import { MdDateRange } from 'react-icons/md';
 import moment from "moment";
-import { useLocation } from 'react-router-dom'
+import { useLocation, useHistory } from 'react-router-dom'
 
 import axiosInstance from "../../axios/axiosInstance";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -11,6 +11,7 @@ import ActivityModelHandler from "../../components/Activity/ActivityModelHandler
 import routes from "../../components/Helpers/Routes";
 
 const Reminder = () => {
+  const history = useHistory()
   const { state } = useLocation()
   const [events, setEvents] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -19,6 +20,21 @@ const Reminder = () => {
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [loadingCases, setLoadingCases] = useState(true);
   const [selectedActivity, setSelectedActivity] = useState(null);
+  let searchData: any = window.location.search;
+  searchData = searchData ? searchData.split("?") : null
+  searchData = searchData ? searchData[1].split("&") : null
+  searchData = searchData ? searchData.map(q => {
+    let obj: any = {};
+    if (q.includes("type")) {
+      obj["type"] = q.split("=")[1]
+    }
+    if (q.includes("id")) {
+      obj["id"] = q.split("=")[1]
+    }
+    return obj
+  }) : null
+  searchData = searchData ? Object.assign({}, { ...searchData[0], ...searchData[1] }) : null
+
 
   useEffect(() => {
     if (!state) return;
@@ -28,6 +44,15 @@ const Reminder = () => {
       setSelectedActivity({ type: data?.type, id: data?._id })
     }
   }, [state])
+
+  useEffect(() => {
+    if (!searchData) return;
+
+    if (searchData && !selectedActivity) {
+      setSelectedActivity(searchData)
+    }
+
+  }, [searchData])
 
 
   const fetchTasks = useCallback(() => {
@@ -120,6 +145,12 @@ const Reminder = () => {
           activityId={selectedActivity.id}
           setActivityData={setSelectedActivity}
           activityType={selectedActivity.type}
+          onClose={() => {
+            setSelectedActivity(null);
+            if (searchData) {
+              history.push('/reminder')
+            }
+          }}
           fetchBoard={() => {
             fetchTasks();
             fetchEvents();

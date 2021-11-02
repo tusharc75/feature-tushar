@@ -11,7 +11,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import FileCopyIcon from "@material-ui/icons/FileCopy";
 import { Link } from "react-router-dom";
 import { ExpandMore } from "@material-ui/icons";
-import { Menu, MenuItem } from "@material-ui/core";
+import { Menu, MenuItem, Dialog, TextField } from "@material-ui/core";
 import { AddField } from "../FormBuilder/AddField";
 import ConfirmationDialog from "../Helpers/ConfirmationDialog";
 import Grid from "@material-ui/core/Grid";
@@ -26,11 +26,16 @@ import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCe
 import BulkEditDialog from "./BulkEditDialog";
 import Loader from "../Loader";
 import { handleAutoCalculation } from "../../constants/formulaUtility";
-import { gridLoadingTimeout } from "../../constants/helpers";
+import { CustomDialogTransition, gridLoadingTimeout } from "../../constants/helpers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import routes from "../../components/Helpers/Routes";
 import { isMobile } from "react-device-detect";
 import { MdEditNote } from 'react-icons/md';
+import CustomSwipableList from "../SwipableListComponents/CustomSwipableList";
+import CustomDialogContent from "../CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
+import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
+import CustomButton from "../Helpers/CustomButton";
 
 let levalOrderBy = [
   "product",
@@ -73,6 +78,8 @@ const ProductBuilder = (props) => {
   const [isClone, setIsClone] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [productDataList, setproductDataList] = useState([]);
+  const [showProductNumberOrProductNameUpdate, setShowProductNumberOrProductNameUpdate] =
+    useState({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -190,10 +197,11 @@ const ProductBuilder = (props) => {
         {
           field: "srno",
           headerName: "Item #",
-          width: 70,
+          width: 150,
           show: true,
           disabled: true,
           cellRenderer: "productNameRenderer",
+          primaryField: true
         },
       ];
       GenrateColoum(data.data.productFields, column);
@@ -207,7 +215,11 @@ const ProductBuilder = (props) => {
           entity: firstEntity?.optionLabel,
           entityId: firstEntity?.optionValue,
           restEntity: restEntity,
-          serializedProduct: u.serializedProduct && u.serializedProduct === true ? "True" : "False"
+          serializedProduct: u.serializedProduct && u.serializedProduct === true ? "True" : "False",
+
+          isChecked: false,
+          canDelete: permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true,
+          allowedToEdit: permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true
         }
         for (let col in res) {
           if (res[col] && res[col].optionLabel) {
@@ -643,33 +655,79 @@ const ProductBuilder = (props) => {
           </Grid>
         )}
       </Grid>
-      <Box className="mt-1">
-        {columns ? (
-          <CustomAgGridEditable
-            currency={currency}
-            forProductBuilder={isPriceBuilder}
-            fromProductGrid={true}
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowSelection={Editable}
-            allowAction={Editable}
-            actionWidth={150}
-            isClientSideGrid={true}
-            onCellValueChanged={onCellValueChanged}
-            loading={loading}
-            className="product-builder-edit-grid"
-            renderedFrom="productBuilderGrid"
-          />
-        ) : (
-          <Loader style={{ minHeight: 300 }} text="Loading..." />
-        )}
+      <Box mt={1}>
+        {
+          isMobile ?
+            <CustomSwipableList
+              allowSelection={Editable}
+              allowSwipe={Editable}
+              permissions={permissions}
+              primaryField={columns?.find(d => d.primaryField)}
+              onClick={(data) => {
+                openProductModel(data._id)
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(data) => {
+                openProductModel(data._id)
+              }}
+              extraParamsToCheckDelete={permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true}
+              onDelete={(data) => {
+                setDeleteRecord(data);
+                setShowDeleteConfirmBox(true);
+              }}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              chips={
+                columns ? columns.some(f => f.editable === true) ? [...columns.filter(f => f.editable === true).map(m => {
+                  return {
+                    label: `${m.headerName}: `,
+                    field: m.field,
+                    forceShow: true,
+                    onClick: (data, index) => {
+                      setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
+                    }
+                  }
+                })
+                ] : [{
+                  label: `Product Description: `,
+                  field: "productName",
+                  forceShow: true
+                }] : []
+              }
+              onCreate={null}
+              showClone={permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true}
+              onClone={(data) => {
+                openProductModel(data._id)
+                setIsClone(true);
+              }}
+            /> : (columns ? <CustomAgGridEditable
+              currency={currency}
+              forProductBuilder={isPriceBuilder}
+              fromProductGrid={true}
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameworkComponents}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              allowSelection={Editable}
+              allowAction={Editable}
+              actionWidth={150}
+              isClientSideGrid={true}
+              onCellValueChanged={onCellValueChanged}
+              loading={loading}
+              className="product-builder-edit-grid"
+              renderedFrom="productBuilderGrid"
+            /> : (
+              <Loader style={{ minHeight: 300 }} text="Loading..." />
+            ))
+        }
       </Box>
       {isAddNewProduct && (
         <CreateProduct
@@ -727,6 +785,74 @@ const ProductBuilder = (props) => {
           onOk={handleDelete}
         />
       )}
+
+      {
+        showProductNumberOrProductNameUpdate.open && <Dialog
+          maxWidth="lg"
+          fullWidth={true}
+          fullScreen={false}
+          TransitionComponent={CustomDialogTransition}
+          aria-labelledby="customized-dialog-title"
+          onClose={() => {
+            setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
+          }}
+          open={showProductNumberOrProductNameUpdate.open}
+          disableBackdropClick={true}
+        >
+          <CustomDialogHeader title="Update" onClose={() => {
+            setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
+          }}
+            isMinimized={!false}
+            onMinimizeMaximize={() => { }}
+            showManimizeMaximize={true}
+          />
+
+          <CustomDialogContent>
+
+            <TextField id="standard-basic" label={showProductNumberOrProductNameUpdate.title}
+              value={showProductNumberOrProductNameUpdate.value}
+              fullWidth
+              onChange={(e) => {
+                setShowProductNumberOrProductNameUpdate((prevState) => {
+                  return { ...prevState, value: e.target.value }
+                })
+              }}
+            />
+
+          </CustomDialogContent>
+
+          <CustomDialogFooter>
+            <Button type="button" variant="outlined" color="primary" size="small" onClick={() => {
+              setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
+            }}>
+              Cancel
+            </Button>
+
+            <CustomButton
+              variant="contained"
+              color="primary"
+              onClick={(e) => {
+
+                let updatedData = [...dataRows];
+                updatedData[showProductNumberOrProductNameUpdate.indexOfRecord][showProductNumberOrProductNameUpdate.property] = showProductNumberOrProductNameUpdate.value;
+
+                dispatch({ type: "initialize", data: updatedData, count: updatedData.length });
+                setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
+
+                onCellValueChanged({
+                  data: updatedData[showProductNumberOrProductNameUpdate.indexOfRecord],
+                  column: { colId: showProductNumberOrProductNameUpdate.property },
+                  newValue: showProductNumberOrProductNameUpdate.value
+                })
+
+              }}
+            >
+              Save
+            </CustomButton>
+          </CustomDialogFooter>
+
+        </Dialog>
+      }
     </Box>
   );
 };

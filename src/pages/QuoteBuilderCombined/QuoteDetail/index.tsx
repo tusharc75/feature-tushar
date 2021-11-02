@@ -793,7 +793,7 @@ export default function QuoteDetail() {
                             <Button
                               variant="text"
                               size="small"
-                              startIcon={<MdDelete />}
+                              startIcon={<MdDelete  className={isMobile ? "mr-1" : ""}/>}
                               onClick={() => setShowConfirmBox(true)}
                             >
                               Delete Quote
@@ -811,46 +811,13 @@ export default function QuoteDetail() {
                                   ? DOASteps.findIndex(d => d?.key === processStatus) > 1
                                   : OtherSteps.findIndex(d => d?.key === processStatus) > 1)
                               }
-                              startIcon={<MdDeleteSweep />}
+                              startIcon={<MdDeleteSweep className={isMobile ? "mr-1" : ""} />}
                               onClick={deleteVersion}
                             >
                               Delete Version-{currentVersion}
                             </Button>
                           </MenuItem>
                         )}
-                        {!ifQuoteApproved.approved &&
-                          processStatus === "New" && allowedToEdit && (
-                            <>
-                              <MenuItem disabled={!permissions.product?.isCreate}>
-                                <Button
-                                  variant="text"
-                                  size="small"
-                                  className="mr-1"
-                                  startIcon={<AiFillPlusCircle />}
-                                  color="primary"
-
-                                  onClick={() => {
-                                    setIsAddNewProduct(true);
-                                  }}
-                                >
-                                  Add New Product
-                                </Button>
-                              </MenuItem>
-                              <MenuItem>
-                                <Button
-                                  variant="text"
-                                  size="small"
-                                  startIcon={<MdLibraryAdd />}
-                                  color="primary"
-                                  onClick={() => {
-                                    setIsAddExistingProduct(true);
-                                  }}
-                                >
-                                  Add Existing Product
-                                </Button>
-                              </MenuItem>
-                            </>
-                          )}
                         <MenuItem>
                           <Button
                             disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
@@ -864,7 +831,7 @@ export default function QuoteDetail() {
                                   size={16}
                                 />
                               ) : (
-                                <BiLayerPlus size={isMobile ? `20` : `16`} />
+                                <BiLayerPlus className={isMobile ? "mr-1" : ""} />
                               )
                             }
                             onClick={() => {
@@ -885,7 +852,7 @@ export default function QuoteDetail() {
                               variant="outlined"
                               color="primary"
                               size="small"
-                              startIcon={<HiPencil size={isMobile ? `20` : `16`} />}
+                              startIcon={<HiPencil  className={isMobile ? "mr-1" : ""} />}
                               disabled={quoteReOpening}
                               onClick={() => setReopenReasonDialog(true)}
                             >
@@ -899,7 +866,7 @@ export default function QuoteDetail() {
                               variant="outlined"
                               color="primary"
                               size="small"
-                              startIcon={<HiPencil />}
+                              startIcon={<HiPencil  className={isMobile ? "mr-1" : ""}/>}
                               onClick={handleOpenUpdateDialog}
                             >
                               Edit Information
