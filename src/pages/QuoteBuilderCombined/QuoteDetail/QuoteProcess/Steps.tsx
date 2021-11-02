@@ -288,7 +288,7 @@ const Steps = (props) => {
         manual: true,
         comment: tempComment
       };
-      if (selectedOption === "Invalid") {
+      if (selectedOption === "Invalid" || selectedOption === "Not Booked") {
         dataObj.comment.push(comment);
       }
 
@@ -298,7 +298,7 @@ const Steps = (props) => {
 
       dataObj.comment = msg
 
-      if (selectedOption === "Invalid" && comment === "") {
+      if ((selectedOption === "Invalid" || selectedOption === "Not Booked") && comment === "") {
         setCommentError("Please write your comment!")
       } else {
         setSubmitting(true)
@@ -726,7 +726,7 @@ const Steps = (props) => {
                   </ListItem>
                 ))}
               </List>
-              {selectedOption === "Invalid" && (
+              {(selectedOption === "Invalid" || selectedOption === "Not Booked") && (
                 <Box my={2}>
                   <TextField
                     fullWidth
