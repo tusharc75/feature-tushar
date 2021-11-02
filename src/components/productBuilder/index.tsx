@@ -584,10 +584,8 @@ const ProductBuilder = (props) => {
 
   return (
     <Box p={1} pt={0}>
-      <Grid container>
-        <Grid item xs={2} className="d-flex align-items-center gap-1"></Grid>
         {Editable && (
-          <Grid xs={10} container justify="flex-end">
+          <div  className="d-flex align-items justify-content-end">
             {permissions.isUpdate && (
               <ImportExportLinks
                 permissions={permissions}
@@ -652,9 +650,8 @@ const ProductBuilder = (props) => {
               </MenuItem>
               <MenuItem onClick={handleOpenAddField}>Add Field</MenuItem>
             </Menu>
-          </Grid>
+          </div>
         )}
-      </Grid>
       <Box mt={1}>
         {
           isMobile ?
