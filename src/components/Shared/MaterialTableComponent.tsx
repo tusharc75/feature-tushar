@@ -1,10 +1,7 @@
 import { FC, useEffect, useState } from 'react';
-import { Box, Paper } from '@material-ui/core';
-import MaterialTable from 'material-table';
-import { Link } from 'react-router-dom';
+import MaterialTable, { Column } from 'material-table';
 
 import { dateFormat, materialTableIcons } from '../../constants/helpers';
-import routes from '../Helpers/Routes';
 import moment from 'moment';
 
 interface TableProps {
@@ -14,13 +11,12 @@ interface TableProps {
   options?: object;
   loading: boolean;
   updateProductData?: any;
-  onSelection: any
+  onSelection: any;
+  onRowClick?: any;
 }
 
 const MaterialTableComponent: FC<TableProps> = (props) => {
-  const { columns, rowData, title, loading, updateProductData, onSelection } = props;
-  const [newColumns, setNewColumns] = useState();
-  const [newRowData, setNewRowData] = useState([]);
+  const { rowData, title, loading, updateProductData, onSelection, onRowClick } = props;
 
   // useEffect(() => {
   //   (() => {
@@ -30,234 +26,158 @@ const MaterialTableComponent: FC<TableProps> = (props) => {
   // }, [rowData]);
 
 
-  const onRowUpdate = (newData, oldData) => {
-    return new Promise((resolve, reject) => {
-      updateProductData(newData)
-      setTimeout(() => {
-        resolve('');
-      }, 1000);
-    });
-  };
-
-  const onBulkUpdate = changes => {
-    return new Promise((resolve, reject) => {
-      console.log(changes);
-      setTimeout(() => {
-        resolve("");
-      }, 1000);
-    })
+  const handleClick = (rowData) => {
+    if (onRowClick) {
+      onRowClick(rowData)
+    }
   }
+
+  const columns: Column<any>[] = [
+    {
+      field: 'detail',
+      title: 'Detail',
+      cellStyle: { padding: "0px 4px" },
+      render: (rowData) => (
+        <div style={{ width: 200 }}>
+          <p
+            onClick={() => handleClick(rowData)}
+            className="link text-truncate"
+            title={rowData.detail}
+          // to={rowData.type === 'Product' ? `${routes.productDetail.path}/${rowData.id}` : `${routes.packagesDetail.path}/${rowData.id}`}
+          >
+            {rowData.detail}
+          </p>
+        </div>
+      )
+    },
+    {
+      field: 'type',
+      title: 'Type',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 80 }}>
+          <p>{rowData.type}</p>
+        </div>
+      )
+
+    },
+    {
+      field: 'startDate',
+      title: 'Start Date',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 80 }}>
+          <h5 className="createBy" title={`${moment(rowData.startDate.slice(0, 10)).format(dateFormat)}`}>
+            <span className="">{moment(rowData.startDate.slice(0, 10)).format(dateFormat)}</span>
+          </h5>
+        </div>
+      )
+    },
+    {
+      filtering: false,
+      field: 'endDate',
+      title: 'End Date',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 80 }}>
+          <h5 className="createBy" title={`${moment(rowData.endDate.slice(0, 10)).format(dateFormat)}`}>
+            <span className="">{moment(rowData.endDate.slice(0, 10)).format(dateFormat)}</span>
+          </h5>
+        </div>
+      )
+    },
+    {
+      field: 'qty',
+      title: 'Quantity',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 80 }}>
+          <p>{rowData.qty}</p>
+        </div>
+      )
+    },
+    {
+      field: 'UOM',
+      title: 'UOM',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 80 }}>
+          <p>{rowData.UOM}</p>
+        </div>
+      )
+    },
+    {
+      field: 'pricingMethod',
+      title: 'Pricing Method',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 100 }}>
+          <p>{rowData.pricingMethod}</p>
+        </div>
+      )
+    },
+    {
+      field: 'price',
+      title: 'Price',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 100 }}>
+          <p>{rowData.price}</p>
+        </div>
+      )
+    },
+    {
+      field: 'discount',
+      title: 'Discount (%)',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 100 }}>
+          <p>{rowData.discount}</p>
+        </div>
+      )
+    },
+    {
+      field: 'finalPrice',
+      title: 'Final Price',
+      emptyValue: '- - - - -',
+      cellStyle: { padding: "0px" },
+      render: (rowData) => (
+        <div style={{ width: 100 }}>
+          <p>{rowData.finalPrice}</p>
+        </div>
+      )
+    }
+  ]
 
   return (
     <div>
       <MaterialTable
+        style={{
+          minHeight: "590px",
+          maxHeight: "590px"
+        }}
         isLoading={loading}
         data={rowData}
         onSelectionChange={onSelection}
-        editable={{
-          onRowUpdate,
-          onBulkUpdate
-        }}
         parentChildData={(row, rows) => rows.find((a) => a.id === row.packageId)}
         options={{
           selection: true,
           hideFilterIcons: false,
-          actionsColumnIndex: -1,
-          actionsCellStyle: { width: 100 },
+          headerStyle: { backgroundColor: '#efefef', color: "#232323", padding: "0px" },
+          rowStyle: { color: "black", padding: '0px !important' },
+          sorting: false,
+          search: false,
         }}
         title={title}
         icons={materialTableIcons}
-        columns={[
-          {
-            field: 'detail',
-            title: 'Detail',
-            editable: 'never',
-            render: (rowData) => (
-              <div style={{ width: 150 }}>
-                <Link
-                  className="link"
-                  title={rowData.detail}
-                  to={rowData.type === 'Product' ? `${routes.productDetail.path}/${rowData.id}` : `${routes.packagesDetail.path}/${rowData.id}`}
-                >
-                  {rowData.detail}
-                </Link>
-              </div>
-            )
-          },
-          {
-            field: 'type',
-            title: 'Type',
-            editable: 'never',
-            render: (rowData) => (
-              <div style={{ width: 150 }}>
-                <p>{rowData.type}</p>
-              </div>
-            )
-
-          },
-          {
-            field: 'startDate',
-            title: 'Start Date',
-            editable: 'onUpdate',
-            emptyValue: '- - - - - - -',
-            editComponent: props => (
-              <input
-                type="date"
-                value={props.value}
-                onChange={e => {
-                  console.log(e.target.value)
-                  props.onChange(e.target.value)
-                }}
-              />
-            ),
-            render: (rowData) => (
-              <div style={{ width: 150 }}>
-                <h5 className="createBy" title={`${moment(rowData.startDate.slice(0, 10)).format(dateFormat)}`}>
-                  <span className="">{moment(rowData.startDate.slice(0, 10)).format(dateFormat)}</span>
-                </h5>
-              </div>
-            )
-          },
-          {
-            filtering: false,
-            field: 'endDate',
-            title: 'End Date',
-            editable: 'onUpdate',
-            emptyValue: '- - - - - - -',
-            editComponent: props => (
-              <input
-                type="date"
-                value={props.value}
-                onChange={e => props.onChange(e.target.value)}
-              />
-            ),
-            render: (rowData) => (
-              <div style={{ width: 150 }}>
-                <h5 className="createBy" title={`${moment(rowData.endDate.slice(0, 10)).format(dateFormat)}`}>
-                  <span className="">{moment(rowData.endDate.slice(0, 10)).format(dateFormat)}</span>
-                </h5>
-              </div>
-            )
-          },
-          {
-            field: 'qty',
-            title: 'Quantity',
-            editable: 'onUpdate',
-            emptyValue: '- - - - - - -',
-            editComponent: props => (
-              <input
-                disabled={props.rowData.hasOwnProperty("packageId")}
-                type="number"
-                value={props.value}
-                onChange={e => props.onChange(e.target.value)}
-              />
-            ),
-            render: (rowData) => (
-              <div style={{ width: 150 }}>
-                <p>{rowData.qty}</p>
-              </div>
-            )
-          },
-          {
-            field: 'UOM',
-            title: 'UOM',
-            editable: 'onUpdate',
-            // lookup: { 1: 'Pcs', 2: 'Gram' },
-            emptyValue: '- - - - - - -',
-            editComponent: props => (
-              <select
-                disabled={props.rowData.hasOwnProperty("packageId")}
-                value={props.value}
-                onChange={(e) => props.onChange(e.target.value)}
-              >
-                <option value="pcs">Pcs</option>
-                <option value="gram">Gram</option>
-              </select>
-            ),
-            render: (rowData) => (
-              <div style={{ width: 150 }}>
-                <p>{rowData.UOM}</p>
-              </div>
-            )
-          },
-          {
-            field: 'pricingMethod',
-            title: 'Pricing Method',
-            editable: 'onUpdate',
-            emptyValue: '- - - - - - -',
-            editComponent: props => (
-              <select
-                disabled={props.rowData.hasOwnProperty("packageId")}
-                value={props.value}
-                onChange={(e) => props.onChange(e.target.value)}
-              >
-                <option value="Per Day">Per Day</option>
-                <option value="Per Week">Per Week</option>
-                <option value="Per Month">Per Month</option>
-              </select>
-            ),
-            render: (rowData) => (
-              <div style={{ width: 150 }}>
-                <p>{rowData.pricingMethod}</p>
-              </div>
-            )
-          },
-          {
-            field: 'price',
-            title: 'Price',
-            editable: 'onUpdate',
-            emptyValue: '- - - - - - -',
-            editComponent: props => (
-              <input
-                type="number"
-                value={props.value}
-                onChange={e => props.onChange(e.target.value)}
-              />
-            ),
-            render: (rowData) => (
-              <div style={{ width: 150 }}>
-                <p>{rowData.price}</p>
-              </div>
-            )
-          },
-          {
-            field: 'discount',
-            title: 'Discount (%)',
-            editable: 'onUpdate',
-            emptyValue: '- - - - - - -',
-            editComponent: props => (
-              <input
-                type="number"
-                value={props.value}
-                onChange={e => props.onChange(e.target.value)}
-              />
-            ),
-            render: (rowData) => (
-              <div style={{ width: 150 }}>
-                <p>{rowData.discount}</p>
-              </div>
-            )
-          },
-          {
-            field: 'finalPrice',
-            title: 'Final Price',
-            editable: 'onUpdate',
-            emptyValue: '- - - - - - -',
-            editComponent: props => (
-              <input
-                disabled={props.rowData.hasOwnProperty("packageId")}
-                type="number"
-                value={props.value}
-                onChange={e => props.onChange(e.target.value)}
-              />
-            ),
-            render: (rowData) => (
-              <div style={{ width: 150 }}>
-                <p>{rowData.finalPrice}</p>
-              </div>
-            )
-          }
-        ]}
+        columns={columns}
 
       />
     </div>

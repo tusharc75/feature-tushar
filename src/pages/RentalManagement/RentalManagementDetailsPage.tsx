@@ -62,7 +62,8 @@ const RentalManagementDetailsPage = () => {
   const [headingLbl, setHeadingLbl] = useState("");
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [isUpdating, setUpdating] = useState(false);
-  const [isBulkEdit, setBulkEdit] = useState(false);
+  const [isProductEdit, setProductEdit] = useState(false);
+  const [selectedProductData, setSelectedProductData] = useState(null)
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -508,27 +509,63 @@ const RentalManagementDetailsPage = () => {
       });
   }
 
-  const bulkEditData = (values: any) => {
-    let updatedArr = dataRows.map(d => ({
-      "id": d.id,
-      "type": d.type.toLowerCase(),
-      "detail": d.detail,
-      "pricingMethod": values.pricingMethod ? values.pricingMethod : d.pricingMethod,
-      "UOM": values.UOM ? values.UOM : d.UOM,
-      "finalPrice": values.finalPrice ? values.finalPrice : d.finalPrice,
-      "discount": values.discount ? values.discount : d.discount,
-      "startDate": values.startDate ? values.startDate : d.startDate,
-      "endDate": values.endDate ? values.endDate : d.endDate,
-      "qty": values.qty ? values.qty : d.qty,
-      "price": values.price ? values.price : d.price
-    })
-    )
+  const handleBulkEditData = (values: any) => {
+    console.log(values)
+    let updatedArr = []
+    if (selectedProductData) {
+      updatedArr = dataRows.map(d => {
+        let newObj: any = d
+        if (d.id === values.id) {
+          newObj = {
+            "id": d.id,
+            "type": d?.type?.toLowerCase() || "",
+            "detail": d.detail,
+            "pricingMethod": values.pricingMethod ? values.pricingMethod : d.pricingMethod,
+            "UOM": values.UOM ? values.UOM : d.UOM,
+            "finalPrice": values.finalPrice ? values.finalPrice : d.finalPrice,
+            "discount": values.discount ? values.discount : d.discount,
+            "startDate": values.startDate ? values.startDate : d.startDate,
+            "endDate": values.endDate ? values.endDate : d.endDate,
+            "qty": values.qty ? values.qty : d.qty,
+            "price": values.price ? values.price : d.price
+          }
+        }
+        return {
+          "id": newObj.id,
+          "type": newObj?.type?.toLowerCase(),
+          "detail": newObj?.detail,
+          "pricingMethod": newObj?.pricingMethod || "",
+          "UOM": newObj?.UOM || "",
+          "finalPrice": newObj?.finalPrice || 0,
+          "discount": newObj?.discount || 0,
+          "startDate": newObj?.startDate,
+          "endDate": newObj?.endDate,
+          "qty": newObj?.qty || 0,
+          "price": newObj?.price || 0
+        }
+      })
+    } else {
+      updatedArr = dataRows.map(d => ({
+        "id": d.id,
+        "type": d.type.toLowerCase(),
+        "detail": d.detail,
+        "pricingMethod": values.pricingMethod ? values.pricingMethod : d.pricingMethod,
+        "UOM": values.UOM ? values.UOM : d.UOM,
+        "finalPrice": values.finalPrice ? values.finalPrice : d.finalPrice,
+        "discount": values.discount ? values.discount : d.discount,
+        "startDate": values.startDate ? values.startDate : d.startDate,
+        "endDate": values.endDate ? values.endDate : d.endDate,
+        "qty": values.qty ? values.qty : d.qty,
+        "price": values.price ? values.price : d.price
+      })
+      )
+    }
 
     setUpdating(true)
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": updatedArr })
       .then(() => {
         setUpdating(false)
-        setBulkEdit(false)
+        setProductEdit(false)
         fetchProductInventory()
       }).catch((error) => {
         setUpdating(false)
@@ -654,32 +691,32 @@ const RentalManagementDetailsPage = () => {
                       </Button>
                     </Box>
                     <Box display="flex">
-                      <HtmlTooltip title={Boolean(selectedRecords.length) ? "Buld edit selected records" : "Select records to edit"}>
+                      <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
                         <span>
                           <Button
                             variant="contained"
                             color="primary"
                             size="small"
-                            disabled={!Boolean(selectedRecords.length)}
-                            onClick={() => setBulkEdit(true)}
+                            disabled={!Boolean(selectedProducts && selectedProducts.length)}
+                            onClick={() => setProductEdit(true)}
                           >
                             Bulk Edit
                           </Button>
                         </span>
                       </HtmlTooltip>
                       <Box mx={1} />
-                      <HtmlTooltip title={Boolean(selectedRecords.length) ? "Delete selected records" : "Select records to delete"}>
+                      <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Delete selected records" : "Select records to delete"}>
                         <span>
 
                           <Button
                             variant="contained"
                             color="primary"
                             size="small"
-                            disabled={!Boolean(selectedRecords.length) || isDeleting}
+                            disabled={!Boolean(selectedProducts && selectedProducts.length) || isDeleting}
                             onClick={() => {
-                              const dataToDelete = selectedRecords.map(rec => ({
+                              const dataToDelete = selectedProducts && selectedProducts.map(rec => ({
                                 id: rec._id ?? rec.id,
-                                type: rec.type.toLowerCase()
+                                type: rec?.type.toLowerCase()
                               }))
                               setDeleteData(dataToDelete)
                             }}
@@ -694,7 +731,7 @@ const RentalManagementDetailsPage = () => {
                   </Box>
                   {columns ?
                     <>
-                      <CustomAgGridEditable
+                      {/* <CustomAgGridEditable
                         columns={columns}
                         dataRows={dataRows}
                         frameworkComponents={frameworkComponents}
@@ -710,7 +747,7 @@ const RentalManagementDetailsPage = () => {
                         onCellValueChanged={(row) => { updateProductData(row.data) }}
                         renderedFrom="rentalManagementDetailsPageInventory"
                         refreshGrid={fetchProductInventory}
-                      />
+                      /> */}
                       <Box
                         p="6px"
                         zIndex={5}
@@ -720,7 +757,9 @@ const RentalManagementDetailsPage = () => {
                             : isSmallScreen
                               ? "calc(100vw - 78px)"
                               : showActivity ? "100%" : "calc(100vw - 100px)"}
-                        height={"600px"}>
+                        maxHeight={"600px"}
+                        minHeight={"600px"}
+                      >
                         <MaterialTableComponent
                           columns={columns}
                           rowData={dataRows}
@@ -728,6 +767,10 @@ const RentalManagementDetailsPage = () => {
                           loading={loading}
                           updateProductData={updateProductData}
                           onSelection={(d) => setSelectedProducts(d)}
+                          onRowClick={(rowData) => {
+                            setProductEdit(true)
+                            setSelectedProductData(rowData)
+                          }}
                         />
                       </Box>
 
@@ -1128,12 +1171,16 @@ const RentalManagementDetailsPage = () => {
         onOk={() => handleRemoveProductInventory(deleteData)}
         okBtnLoading={isDeleting}
       />}
-      {isBulkEdit &&
+      {isProductEdit &&
         <BulkEditInventoryDialog
           isSaving={isUpdating}
-          onClose={() => setBulkEdit(false)}
-          submitBulkEdit={bulkEditData}
+          onClose={() => {
+            setProductEdit(false)
+            setSelectedProductData(null)
+          }}
+          submitBulkEdit={handleBulkEditData}
           currencySymbol={currencySymbol}
+          data={selectedProductData}
         />}
     </>
   );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Button, Dialog, TextField, Grid, Box, CircularProgress, FormControl, InputLabel, Select, MenuItem, InputAdornment } from '@material-ui/core';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
 import DateUtils from '@date-io/date-fns';
@@ -8,32 +8,66 @@ import { dateFormatForInputControl } from '../../constants/helpers';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import { Field } from 'formik';
 
-const BulkEditInventoryDialog = ({ onClose, isSaving, submitBulkEdit, currencySymbol }) => {
+interface EditDialogProps {
+  onClose: VoidFunction | any;
+  isSaving: boolean;
+  submitBulkEdit: VoidFunction | any;
+  currencySymbol: string;
+  data?: object | any
+}
+
+const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submitBulkEdit, currencySymbol, data }) => {
   const [values, setValues] = useState(null)
+  const [isDisabled, setDisabled] = useState(false);
+
+  useEffect(() => {
+    if (data) {
+
+      if (data.hasOwnProperty("packageId")) {
+        setDisabled(true)
+      }
+
+      const newValues = {
+        ...data,
+        qty: data?.qty || 0,
+        pricingMethod: data?.pricingMethod || '',
+        startDate: data?.startDate || new Date(),
+        endDate: data?.endDate || new Date(),
+        UOM: data?.UOM || "",
+        price: data?.price || 0,
+        discount: data?.discount || 0,
+        finalPrice: data?.finalPrice || 0
+      }
+      setValues(newValues)
+    }
+
+  }, [data])
 
   const handleChange = (name: string, value: any) => {
     setValues((prevState) => {
       const newState = { ...prevState, [name]: value };
-      console.log(newState)
       return newState
     });
-
   };
 
-  const handleClose = () => !isSaving && onClose
+  const handleClose = () => {
+    if (isSaving === false) {
+      onClose()
+    }
+  }
 
 
   return (
     <Dialog open fullWidth maxWidth="md" onClose={handleClose}>
-      <CustomDialogHeader title={'Bulk Edit'} onClose={handleClose} />
+      <CustomDialogHeader title={data ? "Edit" : 'Bulk Edit'} onClose={handleClose} />
       <CustomDialogContent>
         <MuiPickersUtilsProvider utils={DateUtils}>
           <Box p={2}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  disabled={isDisabled}
                   label="Qty"
                   name="qty"
                   fullWidth
@@ -45,7 +79,7 @@ const BulkEditInventoryDialog = ({ onClose, isSaving, submitBulkEdit, currencySy
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <FormControl size="small" variant="outlined" fullWidth>
+                <FormControl disabled={isDisabled} size="small" variant="outlined" fullWidth>
                   <InputLabel id="pricing-method-label">
                     Pricing Method
                   </InputLabel>
@@ -64,6 +98,7 @@ const BulkEditInventoryDialog = ({ onClose, isSaving, submitBulkEdit, currencySy
               </Grid>
               <Grid item xs={12} sm={6}>
                 <KeyboardDatePicker
+                  disabled={isDisabled}
                   maxDate={values?.endDate || new Date()}
                   label="Start Date"
                   name="startDate"
@@ -83,6 +118,7 @@ const BulkEditInventoryDialog = ({ onClose, isSaving, submitBulkEdit, currencySy
               </Grid>
               <Grid item xs={12} sm={6}>
                 <KeyboardDatePicker
+                  disabled={isDisabled}
                   label="End Date"
                   name="endDate"
                   fullWidth
@@ -101,7 +137,7 @@ const BulkEditInventoryDialog = ({ onClose, isSaving, submitBulkEdit, currencySy
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <FormControl size="small" variant="outlined" fullWidth>
+                <FormControl disabled={isDisabled} size="small" variant="outlined" fullWidth>
                   <InputLabel id="UOM-label">
                     UOM
                   </InputLabel>
@@ -154,6 +190,7 @@ const BulkEditInventoryDialog = ({ onClose, isSaving, submitBulkEdit, currencySy
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  disabled={isDisabled}
                   label="Final Price"
                   name="finalPrice"
                   fullWidth
