@@ -30,7 +30,7 @@ import { CustomDialogTransition, gridLoadingTimeout } from "../../constants/help
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import routes from "../../components/Helpers/Routes";
 import { isMobile } from "react-device-detect";
-import { MdEditNote } from 'react-icons/md';
+import { AiTwotoneEdit } from 'react-icons/ai';
 import CustomSwipableList from "../SwipableListComponents/CustomSwipableList";
 import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
@@ -613,7 +613,7 @@ const ProductBuilder = (props) => {
                 color="primary"
                 size="small"
                 className="float-right ml-1 mr-2"
-                startIcon={<MdEditNote />}
+                startIcon={<AiTwotoneEdit />}
                 onClick={handelOpenBulkEdit}
                 disabled={checkUniqTemplate()}
                 aria-controls="action-menu">
