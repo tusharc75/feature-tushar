@@ -339,7 +339,7 @@ export default function NewCreateQuotePdfTemplate() {
                         {({ submitForm, touched, errors, setFieldValue, values }) => (
                             <Form>
                                 <Grid container>
-                                    <Grid item xs={4}>
+                                    <Grid item xs={12} md={6}>
                                         <TextField
                                             disabled={!hasPermissionToUpdate}
                                             variant="outlined"
@@ -355,7 +355,7 @@ export default function NewCreateQuotePdfTemplate() {
                                             onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                         />
                                     </Grid>
-                                    <Grid item xs={3} className={`${classes.saveButtonContainer} gap-2`}>
+                                    <Grid item xs={12} md={6} className={`${classes.saveButtonContainer} gap-2`}>
                                         <Button disabled={isUpdating || !hasPermissionToUpdate} size="small" color="primary"
                                             onClick={submitForm} variant="contained">
                                             {isUpdating && <CircularProgress size={24} />} {" "} Save
