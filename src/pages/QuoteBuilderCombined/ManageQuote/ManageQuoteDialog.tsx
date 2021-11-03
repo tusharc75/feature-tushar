@@ -470,6 +470,11 @@ export default function ManageQuoteDialog({
 
             if (selectedEntityDetails) {
               initialData["currency"] = selectedEntityDetails.currency || "";
+              setCurrencySymbol(
+                getUniqueCurrencies().find(
+                  (d) => d.currencyCode === initialData["currency"]
+                )?.symbolNative
+              );            
             }
           }
         }
