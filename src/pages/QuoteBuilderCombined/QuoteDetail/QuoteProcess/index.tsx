@@ -303,7 +303,7 @@ export default function QuoteProcess(props) {
     useEffect(() => {
         if (DOAsetup) {
             axiosInstance()
-                .get(`/productbuilder/getproduct/` + productBuilderId)
+                .get(`/productbuilder/old/getproduct/` + productBuilderId)
                 .then(({ data: { data } }) => {
                     data = data.data?.product?.map((u, index) => ({
                         ...u,

@@ -17,79 +17,84 @@ import DateEditor from "./DateEditor";
 
 export function reducer(state, action) {
   switch (action.type) {
-    case "loading":
+    case 'loading':
       return {
         ...state,
         loading: action.loading,
+        appendRows: action.loading === false ? false : state.appendRows
       };
 
-    case "initialize":
+    case 'initialize':
       return {
         ...state,
         dataRows: action.data,
         rowCount: action.count,
+        selectedRecords: []
       };
 
-    case "selection":
+    case 'selection':
       return {
         ...state,
-        selectedRecords: action.selectedRecords,
+        selectedRecords: action.selectedRecords
       };
 
-    case "update":
+    case 'update':
       return {
         ...state,
         dataRows: action.data,
-        loading: false,
+        loading: false
       };
 
-    case "filter":
+    case 'filter':
       return {
         ...state,
         loading: true,
         filters: action.filters,
-        page: 0,
+        page: 0
       };
 
-    case "sort":
+    case 'sort':
       return {
         ...state,
         sorting: action.sorting,
-        loading: true,
+        loading: true
       };
 
-    case "search":
+    case 'search':
       return {
         ...state,
+        page: 0,
         search: action.search,
-        loading: true,
+        loading: true
       };
 
-    case "pageChange":
+    case 'pageChange':
       return {
         ...state,
         page: action.page,
+        appendRows: isMobile,
       };
 
-    case "pageSizeChange":
+    case 'pageSizeChange':
       return {
         ...state,
         limit: action.limit,
         page: 0,
-        loading: true,
+        appendRows: isMobile,
+        loading: false
       };
 
-    case "count":
+    case 'count':
       return {
         ...state,
         rowCount: action.count,
-        loading: false,
+        loading: false
       };
 
-    case "complete":
+    case 'complete':
       return {
         ...state,
-        loading: false,
+        loading: false
       };
 
     default:
@@ -137,6 +142,7 @@ export default function CustomAgGridEditable({
   fromProductGrid = false,
   currency = null,
   renderedFrom = null,
+  customGridOptions = null,
   selectedRecords = [],
 }) {
   const [, setColumns] = useState(columns);
@@ -228,6 +234,7 @@ export default function CustomAgGridEditable({
         filter={column.filter ?? "agTextColumnFilter"}
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
+        cellRendererParams={column.cellRendererParams ?? null}
         minWidth={column.width ?? 250}
         flex={1}
         rowDrag={column.rowDrag ?? false}
@@ -249,6 +256,7 @@ export default function CustomAgGridEditable({
         filter={column.filter ?? "agTextColumnFilter"}
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
+        cellRendererParams={column.cellRendererParams ?? null}
         minWidth={column.width ?? 250}
         flex={1}
         filterParams={customFilterParams}
@@ -286,6 +294,7 @@ export default function CustomAgGridEditable({
             columnApi={columnApi}
             refreshGrid={refreshGrid}
             renderedFrom={renderedFrom}
+            isClientSideGrid={isClientSideGrid}
           />
 
           <div
@@ -293,6 +302,7 @@ export default function CustomAgGridEditable({
             style={{ zIndex: -500, position: "inherit" }}
           >
             <AgGridReact
+              gridOptions={customGridOptions}
               rowData={dataRows}
               onColumnMoved={onColumnMoved}
               rowClassRules={{
