@@ -245,7 +245,7 @@ const Steps = (props) => {
     const icons: { [index: string]: React.ReactElement } = {
       1: <GiBackwardTime size={20} />,
       2: <GoPencil size={20} />,
-
+      3: <BsCheckCircle size={20} />,
       4: <AiOutlineCloseCircle size={20} color={rejected ? "red" : ""} />,
       5: <FaHourglassHalf size={20} />,
     };
@@ -721,6 +721,32 @@ const Steps = (props) => {
                   )}
                 </Grid>
               </Grid>
+              <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={activeStep}>
+                {steps.map((label, i) => (
+                  <Step
+                    key={label.label}
+                    className={clsx(classes.step, {
+                      [classes.active]:
+                        currentStep > i ||
+                        steps[currentStep]?.key === "End" || approvedQuote.approved,
+                      [classes.currentStep]: currentStep === i,
+                      [classes.inActive]: currentStep !== i,
+                    })}
+                  >
+                    <StepLabel
+                      style={{ color: "#555" }}
+                      StepIconComponent={ColorlibStepIcon}
+                      className={
+                        currentStep === i || approvedQuote.approved
+                          ? "currentStepColor"
+                          : null
+                      }
+                    >
+                      {label.label}
+                    </StepLabel>
+                  </Step>
+                ))}
+              </Stepper>
             </div>
 
             {children}
