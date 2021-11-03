@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.30.0](https://github.com/vebholic/oms_frontend/compare/v1.29.0...v1.30.0) (2021-11-03)
+
+
+### Features
+
+* doa issues ([dc1b8e6](https://github.com/vebholic/oms_frontend/commit/dc1b8e6ed449b75ede04c234a34a1e8bb17abc77))
+* icon updated for build issue ([e7d210e](https://github.com/vebholic/oms_frontend/commit/e7d210e3e3422ceb625b79a0ebcc8abd239923cd))
+* jhon : add existing and new products in quote position changes ([ee8d777](https://github.com/vebholic/oms_frontend/commit/ee8d777cbc6b30db5d895536539f60bc50c1ea7f))
+* jhon :UI changes quote ([23b88f1](https://github.com/vebholic/oms_frontend/commit/23b88f1f14146c35789115b46a4bcdc046190f8c))
+* quore detail screen actions changes ([ce4fd0c](https://github.com/vebholic/oms_frontend/commit/ce4fd0c3fff7c4f45a5c89a949d27f47ec97dc4f))
+* uI ([bf5a386](https://github.com/vebholic/oms_frontend/commit/bf5a386eb5668a91a00b4c507488a24bfc29aed2))
+* ui change ([459a45a](https://github.com/vebholic/oms_frontend/commit/459a45a6461620fed9f1c2b5bc3f22b98ede039d))
+* ui change-color changes, tooltip added in header ([cc8056c](https://github.com/vebholic/oms_frontend/commit/cc8056c0e74e85cea8730894efbd62f9e1f173da))
+* uI changes on Quote ([6b5a798](https://github.com/vebholic/oms_frontend/commit/6b5a798917d209b110170956e370293c1ed05b14))
+
+
+### Bug Fixes
+
+* product page ([5b340d8](https://github.com/vebholic/oms_frontend/commit/5b340d8e6c6f1c0067f90696d56422167b8a7419))
+* quote tab changes ([5c75aa8](https://github.com/vebholic/oms_frontend/commit/5c75aa8dfcff2b4d3a6e1448b6a6830f6331cfb6))
+
 ## [1.29.0](https://github.com/vebholic/oms_frontend/compare/v1.28.0...v1.29.0) (2021-11-02)
 
 
