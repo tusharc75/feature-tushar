@@ -186,7 +186,7 @@ export default function CustomAgGridEditable({
   };
 
   const onColumnResized = (params) => {
-    if (params?.type === "columnResized") {
+    if (params?.source === "uiColumnDragged") {
       const columnState = JSON.stringify(params.columnApi.getColumnState());
       localStorage.setItem(renderedFrom, columnState);
     }
