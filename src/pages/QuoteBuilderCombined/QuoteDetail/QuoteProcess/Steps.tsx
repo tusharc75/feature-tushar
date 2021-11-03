@@ -241,7 +241,7 @@ const Steps = (props) => {
     const icons: { [index: string]: React.ReactElement } = {
       1: <GiBackwardTime size={20} />,
       2: <GoPencil size={20} />,
-
+      3: <BsCheckCircle size={20} />,
       4: <AiOutlineCloseCircle size={20} color={rejected ? "red" : ""} />,
       5: <FaHourglassHalf size={20} />,
     };
@@ -627,7 +627,7 @@ const Steps = (props) => {
                   >
                     <StepLabel
                       style={{ color: "#555" }}
-                      // StepIconComponent={ColorlibStepIcon}
+                      StepIconComponent={ColorlibStepIcon}
                       className={
                         currentStep === i || approvedQuote.approved
                           ? "currentStepColor"
