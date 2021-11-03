@@ -1,21 +1,11 @@
-import React, { useState, useEffect, Fragment } from 'react'
+import { useState, Fragment } from 'react'
 import { Grid, Checkbox, FormControlLabel, Fab, Chip, Tooltip, Menu, MenuItem } from '@material-ui/core'
-import {
-    SwipeableList,
-    SwipeableListItem,
-    SwipeAction,
-    TrailingActions,
-    Type as ListType,
-} from 'react-swipeable-list';
-import { HiPencil } from "react-icons/hi";
-import DeleteIcon from "@material-ui/icons/Delete";
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { isMobile, isTablet } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz"
-import FileCopyIcon from "@material-ui/icons/FileCopy";
 import AddIcon from "@material-ui/icons/Add";
 
+//  Swipe functionalities are removed as we are facing overlap issue in mobile quote details screen
 export default function CustomSwipableList({
     // columns,
     allowSelection,
@@ -64,7 +54,6 @@ export default function CustomSwipableList({
     //     setIsAllChecked(false);
     // }, [dataRows])
 
-
     const generateChipStyle = (chipColorVariable, value) => {
         if (value) {
             return {
@@ -110,7 +99,7 @@ export default function CustomSwipableList({
             </Grid>
         }
 
-        <div className="custom-swipeable-list" id="scrollableDiv">
+        <div style={{ overflowY: "auto", height: "calc(100vh - 215px)" }} id="scrollableDiv">
             <div>
                 <InfiniteScroll
                     dataLength={dataRows.length}
@@ -133,15 +122,9 @@ export default function CustomSwipableList({
                         </h3> : <></>
                     }
                 >
-                    {/* <SwipeableList
-                        fullSwipe={false}
-                        style={{ backgroundColor: '#f0f2f3' }}
-                        threshold={0.5}
-                        type={ListType.IOS}
-                    > */}
                     {
                         dataRows.map((d, index) => (
-                            <Grid container className={`pb-2 mb-2 border-bottom ${index === 0 ? "mt-1" : ""}`}>
+                            <Grid key={d._id} container className={`pb-2 mb-2 border-bottom ${index === 0 ? "mt-1" : ""}`}>
                                 {
                                     allowSelection && <Grid item xs={1} sm={1}>
                                         <Checkbox
@@ -225,30 +208,30 @@ export default function CustomSwipableList({
                         }}
                     >
                         {
-                            menuData.showClone ? <MenuItem onClick={() => {
+                            menuData.showClone && <MenuItem onClick={() => {
                                 setAnchorEl(null);
                                 menuData.onClone()
                             }}>
                                 Clone
-                            </MenuItem> : <></>
+                            </MenuItem>
                         }
 
                         {
-                            menuData.showEdit ? <MenuItem onClick={() => {
+                            menuData.showEdit && <MenuItem onClick={() => {
                                 menuData.onEdit()
                                 setAnchorEl(null)
                             }}>
                                 Edit
-                            </MenuItem> : <></>
+                            </MenuItem>
                         }
 
                         {
-                            menuData.showDelete ? <MenuItem onClick={() => {
+                            menuData.showDelete && <MenuItem onClick={() => {
                                 setAnchorEl(null)
                                 menuData.onDelete()
                             }}>
                                 Delete
-                            </MenuItem> : <></>
+                            </MenuItem>
                         }
                     </Menu>
                 </InfiniteScroll>
