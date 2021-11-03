@@ -1374,7 +1374,7 @@ export default function QuoteProcess(props) {
                                             variant="outlined"
                                             size="small"
                                             className="mr-1"
-                                            startIcon={<AiFillPlusCircle/>}
+                                            startIcon={<AiFillPlusCircle />}
                                             color="primary"
                                             disabled={!permissions.product?.isCreate}
                                             onClick={() => {
@@ -1388,7 +1388,7 @@ export default function QuoteProcess(props) {
                                         <Button
                                             variant="outlined"
                                             size="small"
-                                            startIcon={<BiLayerPlus/>}
+                                            startIcon={<BiLayerPlus />}
                                             color="primary"
                                             onClick={() => {
                                                 setIsAddExistingProduct(true);
@@ -1460,9 +1460,8 @@ export default function QuoteProcess(props) {
                                         {isMobile ? "" : "Download"}
                                     </Button>
                                 </Tooltip>
-                                {(permissions[qbResource]?.isUpdate && permissions?.quotePdfTemplate.isUpdate &&
-                                    (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some(d => d === user?.user?._id)) &&
-                                    (user?.user?._id === quoteData?.pDFTemplate?.owner || quoteData?.pDFTemplate?.collaborator?.some(d => d === user?.user?._id))) &&
+                                {(permissions[qbResource]?.isUpdate &&
+                                    (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some(d => d === user?.user?._id))) &&
                                     <Tooltip title="Edit Template">
                                         <Button
                                             onClick={() => {
