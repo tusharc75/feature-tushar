@@ -99,7 +99,7 @@ export default function CustomSwipableList({
             </Grid>
         }
 
-        <div style={{ overflowY: "auto", height: "calc(100vh - 230px)" }} id="scrollableDiv">
+        <div style={{ overflowY: "auto", height: "calc(100vh - 215px)" }} id="scrollableDiv">
             <div>
                 <InfiniteScroll
                     dataLength={dataRows.length}
@@ -208,30 +208,30 @@ export default function CustomSwipableList({
                         }}
                     >
                         {
-                            menuData.showClone ? <MenuItem onClick={() => {
+                            menuData.showClone && <MenuItem onClick={() => {
                                 setAnchorEl(null);
                                 menuData.onClone()
                             }}>
                                 Clone
-                            </MenuItem> : <></>
+                            </MenuItem>
                         }
 
                         {
-                            menuData.showEdit ? <MenuItem onClick={() => {
+                            menuData.showEdit && <MenuItem onClick={() => {
                                 menuData.onEdit()
                                 setAnchorEl(null)
                             }}>
                                 Edit
-                            </MenuItem> : <></>
+                            </MenuItem>
                         }
 
                         {
-                            menuData.showDelete ? <MenuItem onClick={() => {
+                            menuData.showDelete && <MenuItem onClick={() => {
                                 setAnchorEl(null)
                                 menuData.onDelete()
                             }}>
                                 Delete
-                            </MenuItem> : <></>
+                            </MenuItem>
                         }
                     </Menu>
                 </InfiniteScroll>
