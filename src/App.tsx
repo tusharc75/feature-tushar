@@ -105,6 +105,7 @@ import SalesOrderDetails from "./pages/SalesOrderCreation/SalesOrderDetails";
 import PackageList from "./pages/Packages";
 import PackageDetails from "./pages/Packages/PackageDetails";
 import BOMTable from "./pages/BOM";
+import PurchaseOrder from "./pages/PurchaseOrder";
 import { entity } from "./constants/helpers"
 
 function App() {
@@ -631,7 +632,9 @@ function App() {
             <PrivateRoute exact path={`${routes.packagesDetail.path}/:id`} >
               <PackageDetails />
             </PrivateRoute>
-
+            <PrivateRoute exact path={routes.purchaseOrder.path} >
+              <PurchaseOrder />
+            </PrivateRoute>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
           </Switch>

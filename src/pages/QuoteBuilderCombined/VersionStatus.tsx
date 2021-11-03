@@ -25,7 +25,7 @@ export default function VersionStatus({ loadingVersions, versionStatusData }) {
                             onClick={() => {
                                 history.push(`${routes.quoteBuilderDetail.path}/${d._id}`, {
                                     versionNumber: `${d.versionNumber}`,
-                                    tabValue: 2
+                                    tabValue: 1
                                 })
                             }}
                         >

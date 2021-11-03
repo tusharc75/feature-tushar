@@ -142,7 +142,6 @@ const DOAApproval = () => {
   const [PDFName, setPDFName] = useState("");
   const [buttontext, setButton] = useState("Accept");
   const [QStatus, setQStatus] = useState(true);
-  const [doaName, setDoaName] = useState("");
   const [showAIDialog, setShowAIDialog] = useState(false);
   const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
   const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
@@ -165,23 +164,6 @@ const DOAApproval = () => {
       setActivityShow(true);
     }
   }, [isSmallScreen]);
-
-  const fetchDOA = (user) => {
-    axiosInstance()
-      .post("doa-request/limit", { user: user })
-      .then(({ data }) => {
-        DOAsetup = data.data.doasetup;
-        DOALimit = data.data.limit;
-        if (DOALimit < data.TotalSellingPrice && DOAsetup) {
-          setneedDOA(true);
-          setButton("Send for DOA");
-        }
-        setDoaName(data.data.doaName);
-      })
-      .catch((err) => {
-        setToastConfig(err);
-      });
-  };
 
   const fetchQuote = () => {
     dispatch({ type: "loading", loading: true });
@@ -218,7 +200,6 @@ const DOAApproval = () => {
         setTimeout(() => {
           dispatch({ type: "loading", loading: false });
         }, gridLoadingTimeout);
-        fetchDOA(data.Quotedby);
         setPDFName(data.PDF);
 
         setQData(data);
@@ -292,7 +273,7 @@ const DOAApproval = () => {
         <CustomBreadCrumbs
           routes={[
             { title: "DOA Requests", path: "/doa-request" },
-            { title: doaName ?? id },
+            { title: id },
           ]}
         />
       </div>
