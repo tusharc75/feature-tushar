@@ -168,13 +168,17 @@ export default function CustomAgGridEditable({
     setColumnApi(params.columnApi);
     setClientSideGridApi(params.api);
     if (handleGridReady) handleGridReady(params);
-
-    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-
-    if (columnState) {
-      params.columnApi.setColumnState(columnState);
-    }
   };
+
+  useEffect(() => {
+    if (columnApi && loading === false) {
+      const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+
+      if (columnState) {
+        columnApi.setColumnState(columnState);
+      }
+    }
+  }, [columnApi, loading])
 
   const onColumnMoved = (params) => {
     const columnState = JSON.stringify(params.columnApi.getColumnState());
@@ -182,7 +186,7 @@ export default function CustomAgGridEditable({
   };
 
   const onColumnResized = (params) => {
-    if (params?.type === "columnResized") {
+    if (params?.source === "uiColumnDragged") {
       const columnState = JSON.stringify(params.columnApi.getColumnState());
       localStorage.setItem(renderedFrom, columnState);
     }
@@ -244,7 +248,7 @@ export default function CustomAgGridEditable({
     }
     return columnWidth;
   }
-  
+
   const generateColumns = columns.map((column: any, index) => {
     return isClientSideGrid ? (
       <AgGridColumn
@@ -255,7 +259,8 @@ export default function CustomAgGridEditable({
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
         cellRendererParams={column.cellRendererParams ?? null}
-        minWidth={getWidth(column.field, column.width) ?? 250}
+        minWidth={column.width ?? 250}
+        width={getWidth(column.field, column.width) ?? 250}
         flex={1}
         rowDrag={column.rowDrag ?? false}
         editable={column.editable ?? false}
@@ -276,7 +281,8 @@ export default function CustomAgGridEditable({
         filter={column.filter ?? "agTextColumnFilter"}
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
-        minWidth={getWidth(column.field, column.width) ?? 250}
+        minWidth={column.width ?? 250}
+        width={getWidth(column.field, column.width) ?? 250}
         flex={1}
         filterParams={customFilterParams}
         comparator={() => {
