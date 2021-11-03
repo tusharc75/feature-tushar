@@ -62,18 +62,15 @@ const PurchaseOrder = () => {
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    if (o?.fieldData?.primaryField === true || o?.fieldData?.fieldName === "purchaseOrderNumber") {
-                        columns = [...columns,
-                        { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" }]
+                    if (o?.fieldData?.fieldName === "purchaseOrderNumber") {
+                        o.fieldData.primaryField = true
                     }
-                    else {
-                        let currentColumn = getColumnData(routes.purchaseOrder?.title, o?.fieldData, routes.purchaseOrder.path, true)
+                    let currentColumn = getColumnData(routes.purchaseOrder?.title, o?.fieldData, routes.purchaseOrderDetail.path, true)
 
-                        if (currentColumn !== null) {
-                            columns = [...columns, currentColumn?.columnData]
-                            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                                rendererNames.push(currentColumn?.rendererName)
-                            }
+                    if (currentColumn !== null) {
+                        columns = [...columns, currentColumn?.columnData]
+                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                            rendererNames.push(currentColumn?.rendererName)
                         }
                     }
 
@@ -81,7 +78,6 @@ const PurchaseOrder = () => {
                 let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
                 tempFrameworkComponent = {
                     ...tempFrameworkComponent,
-                    nameRenderer: NameRenderer,
                     actionsRenderer: ActionsRenderer
                 }
                 setFrameWorkComponent({ ...tempFrameworkComponent })
@@ -172,20 +168,7 @@ const PurchaseOrder = () => {
         });
     }
 
-    const NameRenderer = params => (
-        <>
-            {
-                permissions.budget.isUpdate ?
-                    <span className="link"
-                        onClick={() => {
-                            setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: params.data._id });
-                        }}>
-                        <CustomRenderCell value={params?.value} />
-                    </span>
-                    : params?.value
-            }
-        </>
-    )
+
 
     const ActionsRenderer = params => (
         <>
