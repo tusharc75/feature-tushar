@@ -20,6 +20,8 @@ import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import axiosInstance from '../../../axios/axiosInstance'
 import { FixedSizeList } from 'react-window';
+import SortIcon from '@material-ui/icons/Sort';
+import { orderBy } from "lodash";
 
 export const Option = ({ values, setFieldValue, fields, _id }) => {
 
@@ -27,6 +29,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
   const [options, setOptions] = useState(values.option ? values.option.length == 0 ? defaultOption : values.option : defaultOption);
   const [lookupOption, setlookupOption] = useState([]);
   const [isUpdate, setUpdate] = useState(false);
+  const [isAsc, setIsAsc] = useState(true);
 
   useEffect(() => {
     if (values["isDependentDropdown"] && values["dropdowDependentOn"]) {
@@ -194,6 +197,14 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
     ));
   }, [isUpdate]);
 
+  const sortOptions = () => {
+    let _option = values["option"];
+    _option = orderBy(_option, ['optionLabel'], [isAsc ? 'asc' : "desc"]);
+    setFieldValue("option", _option);
+    setUpdate(!isUpdate);
+    setIsAsc(!isAsc)
+  }
+
   return (<Box pt={2} pb={2}>
     {(values["type"] === "dropDown" || values["type"] === "multiSelect") && (
       <Grid spacing={3} container>
@@ -247,7 +258,11 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
     )}
     <Grid spacing={3} container>
       <Grid item xs={12} sm={6} md={6}>
-        <Typography variant="body2">Options</Typography>
+        <Typography variant="body2">Options
+          <IconButton className="ml-2 p-0" color="primary" size="small" onClick={sortOptions}  >
+            <SortIcon fontSize="small" />
+          </IconButton>
+        </Typography>
       </Grid>
       <Grid item xs={12} sm={6} md={6} container justify="flex-end">
         <label
