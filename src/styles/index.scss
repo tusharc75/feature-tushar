@@ -45,7 +45,8 @@
 @import "~ag-grid-community/dist/styles/ag-theme-material/sass/_ag-theme-material-mixin.scss";
 .ag-theme-material {
   border: 1px solid #eeeaea;
-  @include ag-theme-material((
+  @include ag-theme-material(
+    (
       font-family: (
         Nunito,
         BlinkMacSystemFont,
@@ -412,7 +413,12 @@ body::-webkit-scrollbar-thumb {
 
 .ag-grid-listing-grid {
   height: calc(100vh - 260px);
-  margin: 0 6px 0;
+}
+
+.ag-header-cell-resize {
+  background: #e7e7e7;
+  width: 6px;
+  cursor: col-resize;
 }
 
 .agPagination {
@@ -422,13 +428,11 @@ body::-webkit-scrollbar-thumb {
 }
 
 .ag-grid-listing-grid-header-options {
-  margin: 0px 6px;
   background: #f0f2f3 !important;
 }
 
 .product-builder-edit-grid {
   height: calc(100vh - 430px);
-  margin: 0 6px 0;
 }
 
 .form-label-style:nth-child(1) {
@@ -438,11 +442,9 @@ body::-webkit-scrollbar-thumb {
 .form-label-style {
   color: var(--secondary);
   font-size: 0.8rem;
-  margin-top: 1.5rem;
-  border-bottom: 3px solid var(--secondary);
-  margin-bottom: 10px;
-  padding: 0 0 0 2px;
+  padding: 0 0 0 6px;
   text-align: left;
+  padding-bottom: 6px;
 }
 
 .link {
@@ -592,13 +594,25 @@ body::-webkit-scrollbar-thumb {
 }
 
 .quote-tab {
-  border-bottom: 3px solid #163340;
+  //border-bottom: 3px solid #163340;
   background: #f5f5f5;
   min-height: auto !important;
 }
 
 .detail-box {
-  padding: 10px 20px;
+  padding: 10px 20px 0 20px;
+}
+.detail-box-content {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 3px;
+  background-color: var(--colorLeads);
+  h3 {
+    padding: 0px;
+    padding-top: 1px;
+    color: var(--white);
+  }
 }
 
 .detailHeader {
@@ -786,28 +800,75 @@ body::-webkit-scrollbar-thumb {
   justify-content: center;
 }
 
-@supports (not(gap: 0.25rem)) and (not (-webkit-gap: 0.25rem)) {
+@supports (not (gap: 0.25rem)) and (not (-webkit-gap: 0.25rem)) {
   .quoteHeader > *:not(:nth-child(1)) {
     margin-left: 0.25rem !important;
   }
 }
 
 .quoteBox {
-  padding: 4px 15px;
+  padding: 25px 15px;
   display: flex;
+  justify-content: space-between;
+  border-radius: 4px;
   flex-direction: column;
-  align-items: center;
-  border-right: 1px solid #c3bdbd;
+  box-shadow: 2px 3px 5px #737573;
+  flex: 1;
+}
+
+.quoteProfit {
+  background: #d1f2be;
+  .quoteAmount, .quoteDetailHeading {
+    color: #306411;
+  }
+}
+
+.quoteSale {
+  background: #84e4e0;
+
+  .quoteAmount, .quoteDetailHeading {
+    color: #0b4e4c;
+  }
+}
+
+.quoteCost {
+  background: #ffeac1;
+  .quoteAmount, .quoteDetailHeading {
+    color: #66532f;
+  }
+}
+
+.quoteRed {
+  background: #fa928e;
+  .quoteAmount, .quoteDetailHeadingB {
+    color: #742b29;
+  }
 }
 .redQuoteBox {
   padding: 4px 15px;
   border-radius: 4px;
   background: #ffcdcd;
-  color: #650e0e;
   display: flex;
   flex-direction: column;
   align-items: center;
   border-right: 1px solid #c3bdbd;
+}
+.quoteBoxContent {
+  display: flex;
+  align-items: center;
+  padding-right: 15px;
+}
+.quoteBoxicon {
+  padding: 5px 4px 0 4px;
+  border-radius: 6px;
+  background-color: white;
+  color: #378280;
+  margin-right: 5px;
+}
+.quoteDetailHeading {
+  color: white;
+  font-size: 14px;
+  font-weight: normal;
 }
 
 .noBorder {
@@ -820,7 +881,7 @@ body::-webkit-scrollbar-thumb {
   border-top-right-radius: 0 !important;
 }
 .quoteAmount {
-  // font-size: 30px;
+  font-size: 24px;
 }
 .customSelect {
   padding: 6px 15px;
@@ -1004,4 +1065,25 @@ body::-webkit-scrollbar-thumb {
 
 .errorColor {
   color: var(--error) !important;
+}
+
+@media only screen and (max-width: 560px) {
+  .grid-without-activity {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .detail-box {
+    padding: 5px 0px 0px 0px;
+  }
+}
+@media only screen and (max-width: 830px) {
+  .redQuoteBox {
+    display: none;
+  }
+}
+
+.actio-pos-quote {
+  position: absolute;
+  top: 20px;
+  right: 20px;
 }

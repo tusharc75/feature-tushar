@@ -181,6 +181,13 @@ export default function CustomAgGridEditable({
     localStorage.setItem(renderedFrom, columnState);
   };
 
+  const onColumnResized = (params) => {
+    if (params?.type === "columnResized") {
+      const columnState = JSON.stringify(params.columnApi.getColumnState());
+      localStorage.setItem(renderedFrom, columnState);
+    }
+  }
+
   let customFilterParams = {
     filterOptions: ["contains"],
     textCustomComparator: () => {
@@ -225,6 +232,19 @@ export default function CustomAgGridEditable({
     return [dataObj]
   }
 
+  const getWidth = (field, columnWidth) => {
+    if (localStorage.getItem(renderedFrom)) {
+      const storedColumns = JSON.parse(localStorage.getItem(renderedFrom));
+
+      const indexOfField = storedColumns.findIndex((d) => d.colId === field);
+      if (indexOfField > -1) {
+        return storedColumns[indexOfField].width;
+      }
+      return columnWidth;
+    }
+    return columnWidth;
+  }
+  
   const generateColumns = columns.map((column: any, index) => {
     return isClientSideGrid ? (
       <AgGridColumn
@@ -235,7 +255,7 @@ export default function CustomAgGridEditable({
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
         cellRendererParams={column.cellRendererParams ?? null}
-        minWidth={column.width ?? 250}
+        minWidth={getWidth(column.field, column.width) ?? 250}
         flex={1}
         rowDrag={column.rowDrag ?? false}
         editable={column.editable ?? false}
@@ -256,8 +276,7 @@ export default function CustomAgGridEditable({
         filter={column.filter ?? "agTextColumnFilter"}
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
-        cellRendererParams={column.cellRendererParams ?? null}
-        minWidth={column.width ?? 250}
+        minWidth={getWidth(column.field, column.width) ?? 250}
         flex={1}
         filterParams={customFilterParams}
         comparator={() => {
@@ -322,6 +341,7 @@ export default function CustomAgGridEditable({
               headerHeight={AgGridHeaderHeight}
               floatingFiltersHeight={AgGridFloatingFiltersHeight}
               rowHeight={AgGridRowHeight}
+              onColumnResized={onColumnResized}
               frameworkComponents={{
                 ...frameworkComponents,
                 commonRenderer: frameworkComponents["commonRenderer"] ?? CommonRenderer,

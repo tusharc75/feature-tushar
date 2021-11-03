@@ -1,20 +1,11 @@
-import React, { useState, useEffect, Fragment } from 'react'
-import { Grid, Checkbox, FormControlLabel, Fab, Chip, Tooltip } from '@material-ui/core'
-import {
-    SwipeableList,
-    SwipeableListItem,
-    SwipeAction,
-    TrailingActions,
-    Type as ListType,
-} from 'react-swipeable-list';
-import { HiPencil } from "react-icons/hi";
-import DeleteIcon from "@material-ui/icons/Delete";
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import { useState, Fragment } from 'react'
+import { Grid, Checkbox, FormControlLabel, Fab, Chip, Tooltip, Menu, MenuItem } from '@material-ui/core'
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { isMobile, isTablet } from 'react-device-detect';
-import AddIcon from "@material-ui/icons/Add"
-import FileCopyIcon from "@material-ui/icons/FileCopy";
+import { isMobile } from 'react-device-detect';
+import MoreHorizIcon from "@material-ui/icons/MoreHoriz"
+import AddIcon from "@material-ui/icons/Add";
 
+//  Swipe functionalities are removed as we are facing overlap issue in mobile quote details screen
 export default function CustomSwipableList({
     // columns,
     allowSelection,
@@ -37,6 +28,15 @@ export default function CustomSwipableList({
     onClone
 }) {
     const [isAllChecked, setIsAllChecked] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [menuData, setMenuData] = useState({
+        showClone: false,
+        onClone: null,
+        showEdit: false,
+        onEdit: null,
+        showDelete: false,
+        onDelete: null,
+    })
 
     // useEffect(() => {
     //     setIsAllChecked(selectedRecords.length > 0 && selectedRecords.length === dataRows.filter(f => f.isChecked)?.length)
@@ -54,7 +54,6 @@ export default function CustomSwipableList({
     //     setIsAllChecked(false);
     // }, [dataRows])
 
-
     const generateChipStyle = (chipColorVariable, value) => {
         if (value) {
             return {
@@ -66,14 +65,18 @@ export default function CustomSwipableList({
         return {};
     }
 
+    const handleOpenMenu = (event) => {
+        event.stopPropagation();
+        setAnchorEl(event.currentTarget);
+    };
+
     return <>
         {
             allowSelection && <Grid container>
-                <Grid item xs={12} sm={12} className="pl-1 ml-3">
+                <Grid item xs={12} sm={12} className="pl-2 border-bottom">
                     <FormControlLabel
                         control={
                             <Checkbox
-                                className="pl-2"
                                 checked={isAllChecked}
                                 onChange={(e) => {
                                     setIsAllChecked(e.target.checked);
@@ -96,7 +99,7 @@ export default function CustomSwipableList({
             </Grid>
         }
 
-        <div className="custom-swipeable-list" id="scrollableDiv">
+        <div style={{ overflowY: "auto", height: "calc(100vh - 215px)" }} id="scrollableDiv">
             <div>
                 <InfiniteScroll
                     dataLength={dataRows.length}
@@ -119,123 +122,122 @@ export default function CustomSwipableList({
                         </h3> : <></>
                     }
                 >
-                    <SwipeableList
-                        fullSwipe={false}
-                        style={{ backgroundColor: '#f0f2f3' }}
-                        threshold={0.5}
-                        type={ListType.IOS}
+                    {
+                        dataRows.map((d, index) => (
+                            <Grid key={d._id} container className={`pb-2 mb-2 border-bottom ${index === 0 ? "mt-1" : ""}`}>
+                                {
+                                    allowSelection && <Grid item xs={1} sm={1}>
+                                        <Checkbox
+                                            className="pt-0"
+                                            color="primary"
+                                            checked={d.isChecked}
+                                            onChange={(e) => {
+                                                dataRows[index].isChecked = e.target.checked;
+                                                setIsAllChecked(dataRows.every(d => d.isChecked === true));
+
+                                                dispatch({
+                                                    type: 'selection',
+                                                    selectedRecords: dataRows.filter(d => d.isChecked)
+                                                });
+
+                                                dispatch({ type: "update", data: dataRows });
+                                            }}
+                                            inputProps={{ 'aria-label': 'primary checkbox' }}
+                                        />
+                                    </Grid>
+                                }
+
+                                <Grid item xs={10} sm={10} className="pl-2">
+
+                                    {
+                                        primaryField && <h4 className="ml-2 mb-2">
+                                            <span onClick={() => onClick(d)} className="link">{d[primaryField.field]}</span>
+                                        </h4>
+                                    }
+
+                                    <div className="d-flex gap-2 mt-2 mb-1 flex-wrap">
+                                        {
+                                            [
+                                                ...chips.map(c => (
+                                                    c.forceShow === true || d[c.field] ? <Chip className="overflow-hidden" key={c.field} variant="outlined"
+                                                        //  onClick={c.onClick ? () => c.onClick(d, index) : null}
+                                                        size="small" label={`${c.label} ${d[c.field] ?? ""}`} style={c.chipColorVariable ? generateChipStyle(c.chipColorVariable, d[c.field]?.toLowerCase()) : {}}
+                                                    /> : <Fragment key={c.field}></Fragment>
+                                                ))
+                                            ]
+                                        }
+                                    </div>
+
+                                </Grid>
+
+                                {
+                                    allowSwipe && permissions.isUpdate && d.allowedToEdit && permissions.isDelete && d.canDelete && <Grid item xs={1} sm={1} className="d-flex align-items-center">
+                                        <MoreHorizIcon color="disabled" className="cursor-pointer" onClick={(event) => {
+                                            handleOpenMenu(event)
+                                            setMenuData({
+                                                showClone: showClone,
+                                                onClone: () => onClone(d),
+                                                showEdit: permissions.isUpdate && d.allowedToEdit,
+                                                onEdit: () => onEdit(d),
+                                                showDelete: extraParamsToCheckDelete && permissions.isDelete && d.canDelete,
+                                                onDelete: () => onDelete(d),
+                                            })
+                                        }} />
+                                    </Grid>
+                                }
+
+                            </Grid>
+                        ))
+
+                    }
+
+                    <Menu
+                        id="menu-actions"
+                        anchorEl={anchorEl}
+                        keepMounted
+                        open={Boolean(anchorEl)}
+                        onClose={() => {
+                            setAnchorEl(null)
+                            setMenuData({
+                                showClone: false,
+                                onClone: null,
+                                showEdit: false,
+                                onEdit: null,
+                                showDelete: false,
+                                onDelete: null,
+                            })
+                        }}
                     >
                         {
-                            dataRows.map((d, index) => (
-                                <SwipeableListItem
-                                    key={d._id}
-                                    // leadingActions={leadingActions()}
-                                    trailingActions={
-                                        allowSwipe ? <TrailingActions>
-                                            {
-                                                showClone ? <div style={{ width: 60, background: "var(--link)" }} className="h-100 d-flex align-items-center">
-                                                    <SwipeAction onClick={() => onClone(d)}>
-                                                        <FileCopyIcon fontSize="small" style={{ color: "white" }} />
-                                                    </SwipeAction>
-                                                </div> : <></>
-                                            }
-
-                                            {
-                                                permissions.isUpdate && d.allowedToEdit ? <div style={{ width: 60, background: "#163340" }} className="h-100 d-flex align-items-center">
-                                                    <SwipeAction onClick={() => onEdit(d)}>
-                                                        <HiPencil size={20} style={{ color: "white" }} />
-                                                    </SwipeAction>
-                                                </div> : <></>
-                                            }
-
-                                            {
-                                                extraParamsToCheckDelete && permissions.isDelete && d.canDelete ? <div style={{ width: 60, background: "#dc3545" }} className="h-100 d-flex align-items-center">
-                                                    <SwipeAction onClick={() => onDelete(d)}>
-                                                        <DeleteIcon fontSize="small" style={{ color: "white" }} />
-                                                    </SwipeAction>
-                                                </div> : <></>
-                                            }
-                                        </TrailingActions> : <></>
-                                    }
-                                >
-                                    <Grid container className="pb-2">
-                                        {
-                                            allowSelection && <Grid item xs={1} sm={1}>
-                                                <Checkbox
-                                                    color="primary"
-                                                    checked={d.isChecked}
-                                                    onChange={(e) => {
-                                                        dataRows[index].isChecked = e.target.checked;
-                                                        setIsAllChecked(dataRows.every(d => d.isChecked === true));
-
-                                                        dispatch({
-                                                            type: 'selection',
-                                                            selectedRecords: dataRows.filter(d => d.isChecked)
-                                                        });
-
-                                                        dispatch({ type: "update", data: dataRows });
-                                                    }}
-                                                    inputProps={{ 'aria-label': 'primary checkbox' }}
-                                                />
-                                            </Grid>
-                                        }
-
-                                        <Grid item xs={10} sm={10} className="pl-2">
-
-                                            {
-                                                primaryField && <h4 className="ml-2 mb-2">
-                                                    <span onClick={() => onClick(d)} className="link">{d[primaryField.field]}</span>
-                                                </h4>
-                                            }
-
-                                            <div className="d-flex gap-2 mt-2 mb-1 flex-wrap">
-                                                {
-                                                    [
-                                                        ...chips.map(c => (
-                                                            c.forceShow === true || d[c.field] ? <Chip key={c.field} variant="outlined" onClick={c.onClick ? () => c.onClick(d, index) : null}
-                                                                size="small" label={`${c.label} ${d[c.field] ?? ""}`} style={c.chipColorVariable ? generateChipStyle(c.chipColorVariable, d[c.field]?.toLowerCase()) : {}}
-                                                            /> : <Fragment key={c.field}></Fragment>
-                                                        ))
-                                                    ]
-                                                }
-                                            </div>
-
-                                        </Grid>
-
-                                        {
-                                            allowSwipe && permissions.isUpdate && d.allowedToEdit && permissions.isDelete && d.canDelete && <Grid item xs={1} sm={1} className="d-flex align-items-center">
-                                                <ChevronRightIcon color="disabled" />
-                                            </Grid>
-                                        }
-
-                                    </Grid>
-                                </SwipeableListItem>
-                            ))
+                            menuData.showClone && <MenuItem onClick={() => {
+                                setAnchorEl(null);
+                                menuData.onClone()
+                            }}>
+                                Clone
+                            </MenuItem>
                         }
-                    </SwipeableList>
+
+                        {
+                            menuData.showEdit && <MenuItem onClick={() => {
+                                menuData.onEdit()
+                                setAnchorEl(null)
+                            }}>
+                                Edit
+                            </MenuItem>
+                        }
+
+                        {
+                            menuData.showDelete && <MenuItem onClick={() => {
+                                setAnchorEl(null)
+                                menuData.onDelete()
+                            }}>
+                                Delete
+                            </MenuItem>
+                        }
+                    </Menu>
                 </InfiniteScroll>
             </div>
         </div>
-
-        {/* <TablePagination
-            component="div"
-            count={rowCount}
-            page={page}
-            className="agPagination"
-            onPageChange={(event, newPage) => {
-                dispatch({ type: 'pageChange', page: newPage });
-            }}
-            rowsPerPage={limit}
-            onRowsPerPageChange={(event) => {
-                dispatch({ type: 'pageSizeChange', limit: event.target.value });
-            }}
-            rowsPerPageOptions={pageSizes}
-            labelRowsPerPage={<>Rows</>}
-        /> */}
-
-        {/* {
-            dataRows.length !== rowCount && <div style={{ height: 70 }}></div>
-        } */}
 
         {
             permissions?.isCreate && isMobile && onCreate && <Tooltip title="Create">

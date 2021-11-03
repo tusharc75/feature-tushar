@@ -9,7 +9,10 @@ import axiosInstance from "../../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../../StateProvider/CustomToastContext/CustomToastContext";
 import clsx from "clsx";
 import { GiBackwardTime } from "react-icons/gi";
+import { RiShareForwardFill } from "react-icons/ri";
+import { TiArrowBack } from "react-icons/ti";
 import IconButton from '@material-ui/core/IconButton';
+
 
 import {
   StepIconProps,
@@ -49,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: "bold",
   },
   pStepper: {
-    padding: "10px 4px",
+    padding: "5px 4px",
     borderRadius: "4px",
     [theme.breakpoints.down("xs")]: {
       padding: "4px",
@@ -64,14 +67,13 @@ const useStyles = makeStyles((theme) => ({
   step: {
     paddingLeft: "8px",
     paddingRight: "8px",
-    padding: "5px 8px",
+    padding: "10px 8px",
     width: "20%",
     textAlign: "center",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    margin: "1px",
-    borderRadius: "4px",
+    borderRadius: "12px 40px 40px 50px",
     border: "1px solid #d6d5d5",
     [theme.breakpoints.down("xs")]: {
       width: "50%",
@@ -80,12 +82,22 @@ const useStyles = makeStyles((theme) => ({
   },
   inActive: {
     background: "#ebebeb",
+    borderLeft:"6px solid var(--grey)",
   },
   currentStep: {
     background: "#ffffff",
+    borderLeft:"6px solid #378280",
+    color:"#378280 !important",
+    // borderLeft:"4px solid #378280",
+
   },
   active: {
-    background: "#53ac65",
+    background: "#f9f1e2",
+    borderBottom:"0px solid var(--warning)",
+    color:"#378280 !important",
+    borderLeft:"6px solid var(--warning)",
+
+
   },
   sent: {
     color: "#00acc1",
@@ -99,6 +111,12 @@ const useStyles = makeStyles((theme) => ({
     color: "#d60f0f",
     fontWeight: "bold",
   },
+  "@media (max-width: 760px)": {
+      step: {
+        padding: "5px 6px",
+    },
+
+  }
 }));
 
 const useColorlibStepIconStyles = makeStyles((theme) => ({
@@ -111,7 +129,7 @@ const useColorlibStepIconStyles = makeStyles((theme) => ({
     alignItems: "center",
   },
   active: {
-    color: "#047d1c !important",
+    color: "#378280 !important",
   },
   completed: {
     color: "#3f3f02 !important",
@@ -223,7 +241,7 @@ const Steps = (props) => {
     const icons: { [index: string]: React.ReactElement } = {
       1: <GiBackwardTime size={20} />,
       2: <GoPencil size={20} />,
-      3: <BsCheckCircle size={20} />,
+
       4: <AiOutlineCloseCircle size={20} color={rejected ? "red" : ""} />,
       5: <FaHourglassHalf size={20} />,
     };
@@ -270,7 +288,7 @@ const Steps = (props) => {
         manual: true,
         comment: tempComment
       };
-      if (selectedOption === "Invalid") {
+      if (selectedOption === "Invalid" || selectedOption === "Not Booked") {
         dataObj.comment.push(comment);
       }
 
@@ -280,7 +298,7 @@ const Steps = (props) => {
 
       dataObj.comment = msg
 
-      if (selectedOption === "Invalid" && comment === "") {
+      if ((selectedOption === "Invalid" || selectedOption === "Not Booked") && comment === "") {
         setCommentError("Please write your comment!")
       } else {
         setSubmitting(true)
@@ -478,15 +496,14 @@ const Steps = (props) => {
             xs={12}
             sm={2}
             md={1}
-            className="d-flex align-items-center justify-content-center mt-2"
+            className="d-flex align-items-center justify-content-center "
           >
             {!isMobile && activeStep !== steps.length - 1 && (
               <>
                 <div>
                   {(
                     <div>
-                      <Button
-                        variant="contained"
+                      <IconButton
                         color="primary"
                         disabled={
                           currentStep <= 0 || !allowedToEdit ||
@@ -497,25 +514,24 @@ const Steps = (props) => {
                           versionStatus.includes("Sent to Customer") ||
                           loading || globalLoading
                         }
+                        className={"stepperButton"}
                         onClick={handleBack}
-                        size="small"
-                        startIcon={<IoIosArrowDropleftCircle />}
                       >
-                        Back
-                      </Button>
+                        <TiArrowBack size={32}/>
+                      </IconButton>
                     </div>
                   )}
                 </div>
               </>
             )}
           </Grid>
-          <Grid item xs={12} sm={8} md={10}>
+          <Grid item xs={12} sm={12} md={10}>
             <div className={classes.pStepper}>
               <Grid container>
                 <Grid
                   item
                   xs={6}
-                  className="d-flex align-items-center justify-content-start mt-1 mb-1"
+                  className="d-flex align-items-center justify-content-start "
                 >
                   {isMobile && activeStep !== steps.length - 1 && (
                     <>
@@ -537,7 +553,7 @@ const Steps = (props) => {
                               onClick={handleBack}
                               size="small"
                             >
-                              <IoIosArrowDropleftCircle />
+                              <TiArrowBack  size={24}/>
                             </IconButton>
                           </div>
                         )}
@@ -548,7 +564,7 @@ const Steps = (props) => {
                 <Grid
                   item
                   xs={6}
-                  className="d-flex align-items-center justify-content-end mt-1 mb-1"
+                  className="d-flex align-items-center justify-content-end"
                 >
                   {isMobile && activeStep !== steps.length - 1 && (
                     <>
@@ -585,7 +601,7 @@ const Steps = (props) => {
                               >
                                 {versionStatus.includes("Accepted  by DOA")
                                   ? "End"
-                                  : <IoIosArrowDroprightCircle />}
+                                  : <RiShareForwardFill size={20}/>}
                               </IconButton>
                             ) : (
                               <p>{versionStatus}</p>
@@ -611,7 +627,7 @@ const Steps = (props) => {
                   >
                     <StepLabel
                       style={{ color: "#555" }}
-                      StepIconComponent={ColorlibStepIcon}
+                      // StepIconComponent={ColorlibStepIcon}
                       className={
                         currentStep === i || approvedQuote.approved
                           ? "currentStepColor"
@@ -638,9 +654,7 @@ const Steps = (props) => {
                   {(
                     <div>
                       {versionStatus.split(" ")[0] !== "Rejected" ? (
-                        <Button
-                          variant="contained"
-                          color="primary"
+                        <IconButton
                           onClick={() => {
                             if (
                               versionStatus.includes("Sent to Customer") ||
@@ -652,7 +666,6 @@ const Steps = (props) => {
                               handleNext();
                             }
                           }}
-                          size="small"
                           disabled={
                             !allowedToEdit ||
                             loading || globalLoading ||
@@ -662,12 +675,13 @@ const Steps = (props) => {
                             steps[currentStep]?.key === "DOA Process" ||
                             approvedQuote.approved
                           }
-                          endIcon={<IoIosArrowDroprightCircle />}
+                          className={"stepperButtonNext"}
                         >
+                          <RiShareForwardFill/>
                           {versionStatus.includes("Accepted  by DOA")
-                            ? "End"
-                            : "Next"}
-                        </Button>
+                            ? ""
+                            : ""}
+                        </IconButton>
                       ) : (
                         <p>{versionStatus}</p>
                       )}
@@ -712,7 +726,7 @@ const Steps = (props) => {
                   </ListItem>
                 ))}
               </List>
-              {selectedOption === "Invalid" && (
+              {(selectedOption === "Invalid" || selectedOption === "Not Booked") && (
                 <Box my={2}>
                   <TextField
                     fullWidth

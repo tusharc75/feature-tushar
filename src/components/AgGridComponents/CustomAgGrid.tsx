@@ -168,6 +168,13 @@ export default function CustomAgGrid({
     }
   };
 
+  const onColumnResized = (params) => {
+    if (params?.type === "columnResized") {
+      const columnState = JSON.stringify(params.columnApi.getColumnState());
+      localStorage.setItem(renderedFrom, columnState);
+    }
+  }
+
   useEffect(() => {
     if (clientSideGridApi && selectedRecords.length) {
       clientSideGridApi.forEachNode(function (node) {
@@ -187,6 +194,19 @@ export default function CustomAgGrid({
     // trimInput: true,
     // debounceMs: 1000,
   };
+
+  const getWidth = (field, columnWidth) => {
+    if (localStorage.getItem(renderedFrom)) {
+      const storedColumns = JSON.parse(localStorage.getItem(renderedFrom));
+
+      const indexOfField = storedColumns.findIndex((d) => d.colId === field);
+      if (indexOfField > -1) {
+        return storedColumns[indexOfField].width;
+      }
+      return columnWidth;
+    }
+    return columnWidth;
+  }
 
   const getActionColumn = (
     <AgGridColumn
@@ -215,7 +235,7 @@ export default function CustomAgGrid({
           sortable={column.sortable ?? true}
           cellRenderer={column.cellRenderer ?? null}
           cellRendererParams={column.cellRendererParams ?? null}
-          minWidth={column.width ?? 250}
+          minWidth={getWidth(column.field, column.width) ?? 250}
           flex={1}
           rowDrag={column.rowDrag ?? false}
           hide={staticColumns.indexOf(column.field) >= 0 ? checkStaticField(renderedFrom, column.field) :
@@ -241,7 +261,7 @@ export default function CustomAgGrid({
           sortable={column.sortable ?? true}
           cellRenderer={column.cellRenderer ?? null}
           cellRendererParams={column.cellRendererParams ?? null}
-          minWidth={column.width ?? 250}
+          minWidth={getWidth(column.field, column.width) ?? 250}
           flex={1}
           filterParams={customFilterParams}
           hide={(column.hasOwnProperty("show") && !column?.show) ? true : false}
@@ -294,6 +314,7 @@ export default function CustomAgGrid({
               headerHeight={AgGridHeaderHeight}
               floatingFiltersHeight={AgGridFloatingFiltersHeight}
               rowHeight={AgGridRowHeight}
+              onColumnResized={onColumnResized}
               frameworkComponents={{
                 ...frameworkComponents,
                 commonRenderer: frameworkComponents["commonRenderer"] ?? CommonRenderer,
