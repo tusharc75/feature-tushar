@@ -25,7 +25,8 @@ export default function CustomSwipableList({
     permissions,
     onCreate,
     showClone,
-    onClone
+    onClone,
+    fullHeight = false
 }) {
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
@@ -99,7 +100,7 @@ export default function CustomSwipableList({
             </Grid>
         }
 
-        <div style={{ overflowY: "auto", height: "calc(100vh - 215px)" }} id="scrollableDiv">
+        <div style={{ overflowY: "auto", height: fullHeight === true ? "auto" : "calc(100vh - 215px)" }} id="scrollableDiv">
             <div>
                 <InfiniteScroll
                     dataLength={dataRows.length}
