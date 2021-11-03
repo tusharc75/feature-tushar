@@ -86,7 +86,7 @@ export const AgGridHeaderHeight = 40;
 export const AgGridRowHeight = 30;
 export const AgGridFloatingFiltersHeight = 38;
 
-export const gridPageSizes = [8, 16, 25];
+export const gridPageSizes = [25, 50, 75];
 export const gridLoadingTimeout = 500;
 export const processFieldName = 'process';
 

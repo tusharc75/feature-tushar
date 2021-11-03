@@ -159,7 +159,8 @@ export default function CustomSwipableList({
                                         {
                                             [
                                                 ...chips.map(c => (
-                                                    c.forceShow === true || d[c.field] ? <Chip className="overflow-hidden" key={c.field} variant="outlined" onClick={c.onClick ? () => c.onClick(d, index) : null}
+                                                    c.forceShow === true || d[c.field] ? <Chip className="overflow-hidden" key={c.field} variant="outlined"
+                                                        //  onClick={c.onClick ? () => c.onClick(d, index) : null}
                                                         size="small" label={`${c.label} ${d[c.field] ?? ""}`} style={c.chipColorVariable ? generateChipStyle(c.chipColorVariable, d[c.field]?.toLowerCase()) : {}}
                                                     /> : <Fragment key={c.field}></Fragment>
                                                 ))

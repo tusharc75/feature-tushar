@@ -78,8 +78,8 @@ const ProductBuilder = (props) => {
   const [isClone, setIsClone] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [productDataList, setproductDataList] = useState([]);
-  const [showProductNumberOrProductNameUpdate, setShowProductNumberOrProductNameUpdate] =
-    useState({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
+  // const [showProductNumberOrProductNameUpdate, setShowProductNumberOrProductNameUpdate] =
+  //   useState({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
   const [dataToShowForMobile, setDataToShowForMobile] = useState([]);
 
   //  Grid Variables - Start
@@ -586,74 +586,74 @@ const ProductBuilder = (props) => {
 
   return (
     <Box p={1} pt={0}>
-        {Editable && (
-          <div  className="d-flex align-items justify-content-end">
-            {permissions.isUpdate && (
-              <ImportExportLinks
-                permissions={permissions}
-                module="builder"
-                api={"productbuilder"}
-                refrenceId={productBuilderId}
-                onSuccessfulImport={(isImportedSuccessfully) => {
-                  if (isImportedSuccessfully) {
-                    fetchProduct(productBuilderId);
-                  }
-                }}
-                isExportAllOrSomeFeature={true}
-                total={rowCount}
-                recordsToExport={selectedRecords.length}
-                ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
-                onExportToExcelSuccess={() => {
-                  if (gridApi) gridApi.deselectAll()
-                  else fetchProduct(productBuilderId)
-                }}
-              />
-            )}
-            {stage === "cost" && permissions.isUpdate && (
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                className="float-right ml-1 mr-2"
-                startIcon={<AiTwotoneEdit />}
-                onClick={handelOpenBulkEdit}
-                disabled={checkUniqTemplate()}
-                aria-controls="action-menu">
-                {isMobile ? "" : "Bulk Edit"}
-              </Button>
-            )}
-            {permissions.isUpdate && (
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                className="float-right"
-                onClick={openActions}
-                startIcon={<ExpandMore />}
-                disabled={selectedRecords.length ? false : true}
-                aria-controls="action-menu">
-                {isMobile ? "" : "Actions"}
-              </Button>
-            )}
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
+      {Editable && (
+        <div className="d-flex align-items justify-content-end">
+          {permissions.isUpdate && (
+            <ImportExportLinks
+              permissions={permissions}
+              module="builder"
+              api={"productbuilder"}
+              refrenceId={productBuilderId}
+              onSuccessfulImport={(isImportedSuccessfully) => {
+                if (isImportedSuccessfully) {
+                  fetchProduct(productBuilderId);
+                }
               }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>
-                Delete
-              </MenuItem>
-              <MenuItem onClick={handleOpenAddField}>Add Field</MenuItem>
-            </Menu>
-          </div>
-        )}
+              isExportAllOrSomeFeature={true}
+              total={rowCount}
+              recordsToExport={selectedRecords.length}
+              ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+              onExportToExcelSuccess={() => {
+                if (gridApi) gridApi.deselectAll()
+                else fetchProduct(productBuilderId)
+              }}
+            />
+          )}
+          {stage === "cost" && permissions.isUpdate && (
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              className="float-right ml-1 mr-2"
+              startIcon={<AiTwotoneEdit />}
+              onClick={handelOpenBulkEdit}
+              disabled={checkUniqTemplate()}
+              aria-controls="action-menu">
+              {isMobile ? "" : "Bulk Edit"}
+            </Button>
+          )}
+          {permissions.isUpdate && (
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              className="float-right"
+              onClick={openActions}
+              startIcon={<ExpandMore />}
+              disabled={selectedRecords.length ? false : true}
+              aria-controls="action-menu">
+              {isMobile ? "" : "Actions"}
+            </Button>
+          )}
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+            id="action-menu"
+            open={Boolean(anchorEl)}
+            onClose={closeActions}
+          >
+            <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>
+              Delete
+            </MenuItem>
+            <MenuItem onClick={handleOpenAddField}>Add Field</MenuItem>
+          </Menu>
+        </div>
+      )}
       <Box mt={1}>
         {
           isMobile ?
@@ -685,9 +685,9 @@ const ProductBuilder = (props) => {
                     label: `${m.headerName}: `,
                     field: m.field,
                     forceShow: true,
-                    onClick: (data, index) => {
-                      setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
-                    }
+                    // onClick: (data, index) => {
+                    //   setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
+                    // }
                   }
                 })
                 ] : [{
@@ -785,7 +785,7 @@ const ProductBuilder = (props) => {
         />
       )}
 
-      {
+      {/* {
         showProductNumberOrProductNameUpdate.open && <Dialog
           maxWidth="lg"
           fullWidth={true}
@@ -851,7 +851,7 @@ const ProductBuilder = (props) => {
           </CustomDialogFooter>
 
         </Dialog>
-      }
+      } */}
     </Box>
   );
 };
