@@ -153,14 +153,19 @@ export default function CustomAgGrid({
     setColumnApi(params.columnApi);
     setClientSideGridApi(params.api);
     if (handleGridReady) handleGridReady(params);
-    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-
-    if (columnState) {
-      setTimeout(() => {
-        params.columnApi.setColumnState(columnState);
-      }, 50)
-    }
   };
+
+  useEffect(() => {
+    if (columnApi && loading === false) {
+      const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+
+      if (columnState) {
+        setTimeout(() => {
+          columnApi.setColumnState(columnState);
+        }, 50)
+      }
+    }
+  }, [columnApi, loading])
 
   const onColumnMoved = (params) => {
     if (params?.source === "uiColumnDragged") {
@@ -170,7 +175,7 @@ export default function CustomAgGrid({
   };
 
   const onColumnResized = (params) => {
-    if (params?.type === "columnResized") {
+    if (params?.source === "uiColumnDragged") {
       const columnState = JSON.stringify(params.columnApi.getColumnState());
       localStorage.setItem(renderedFrom, columnState);
     }
@@ -238,7 +243,8 @@ export default function CustomAgGrid({
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
         cellRendererParams={column.cellRendererParams ?? null}
-        minWidth={getWidth(column.field, column.width) ?? 250}
+        minWidth={column.width ?? 250}
+        width={getWidth(column.field, column.width) ?? 250}
         flex={1}
         rowDrag={column.rowDrag ?? false}
         hide={staticColumns.indexOf(column.field) >= 0 ? checkStaticField(renderedFrom, column.field) :
@@ -259,7 +265,8 @@ export default function CustomAgGrid({
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
         cellRendererParams={column.cellRendererParams ?? null}
-        minWidth={getWidth(column.field, column.width) ?? 250}
+        minWidth={column.width ?? 250}
+        width={getWidth(column.field, column.width) ?? 250}
         flex={1}
         filterParams={customFilterParams}
         hide={(column.hasOwnProperty("show") && !column?.show) ? true : false}
