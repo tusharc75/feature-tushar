@@ -2,6 +2,66 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.30.0](https://github.com/vebholic/oms_frontend/compare/v1.29.0...v1.30.0) (2021-11-03)
+
+
+### Features
+
+* doa issues ([dc1b8e6](https://github.com/vebholic/oms_frontend/commit/dc1b8e6ed449b75ede04c234a34a1e8bb17abc77))
+* icon updated for build issue ([e7d210e](https://github.com/vebholic/oms_frontend/commit/e7d210e3e3422ceb625b79a0ebcc8abd239923cd))
+* jhon : add existing and new products in quote position changes ([ee8d777](https://github.com/vebholic/oms_frontend/commit/ee8d777cbc6b30db5d895536539f60bc50c1ea7f))
+* jhon :UI changes quote ([23b88f1](https://github.com/vebholic/oms_frontend/commit/23b88f1f14146c35789115b46a4bcdc046190f8c))
+* quore detail screen actions changes ([ce4fd0c](https://github.com/vebholic/oms_frontend/commit/ce4fd0c3fff7c4f45a5c89a949d27f47ec97dc4f))
+* uI ([bf5a386](https://github.com/vebholic/oms_frontend/commit/bf5a386eb5668a91a00b4c507488a24bfc29aed2))
+* ui change ([459a45a](https://github.com/vebholic/oms_frontend/commit/459a45a6461620fed9f1c2b5bc3f22b98ede039d))
+* ui change-color changes, tooltip added in header ([cc8056c](https://github.com/vebholic/oms_frontend/commit/cc8056c0e74e85cea8730894efbd62f9e1f173da))
+* uI changes on Quote ([6b5a798](https://github.com/vebholic/oms_frontend/commit/6b5a798917d209b110170956e370293c1ed05b14))
+
+
+### Bug Fixes
+
+* product page ([5b340d8](https://github.com/vebholic/oms_frontend/commit/5b340d8e6c6f1c0067f90696d56422167b8a7419))
+* quote tab changes ([5c75aa8](https://github.com/vebholic/oms_frontend/commit/5c75aa8dfcff2b4d3a6e1448b6a6830f6331cfb6))
+
+## [1.29.0](https://github.com/vebholic/oms_frontend/compare/v1.28.0...v1.29.0) (2021-11-02)
+
+
+### Features
+
+* - All Transaction list screen changed to mobile responsive ([b41b340](https://github.com/vebholic/oms_frontend/commit/b41b340513d1b4917b2d5ab80ad23d23c57301b9))
+* - fetch data api call done on scroll in list screen ([21ad416](https://github.com/vebholic/oms_frontend/commit/21ad4164fa9b92f5ccd3f096bfaebcd586d18874))
+* - Swipeable added in first 2 tabs in quote details screen ([de176ba](https://github.com/vebholic/oms_frontend/commit/de176ba72b6282661f7704a2f063ff7aaf2e8225))
+* - Version count not visible issue fixed ([62db447](https://github.com/vebholic/oms_frontend/commit/62db4479b4e37f64bea1c6ea980f952512365cbc))
+* doa changes ([a0d325b](https://github.com/vebholic/oms_frontend/commit/a0d325b18633df97b8ed5029da6202035247d225))
+* doa changes in entity ([d61302e](https://github.com/vebholic/oms_frontend/commit/d61302e10163351c1aef0fb7fbaac66c75c73d33))
+* next button disable ([6a5af14](https://github.com/vebholic/oms_frontend/commit/6a5af14aab434ed09414a408e6c9fab0c9fb1b4e))
+* purchase order ([8184ebd](https://github.com/vebholic/oms_frontend/commit/8184ebd0ee238493256c696c02a7a2cdcfdcef74))
+* ui ([f4e2566](https://github.com/vebholic/oms_frontend/commit/f4e25668d78efd25d62c7caf421ae7b7f5b091cf))
+* ui change ([d360525](https://github.com/vebholic/oms_frontend/commit/d360525e1d930493340374a82c1782b9d62ee2da))
+
+
+### Bug Fixes
+
+* bug fix ([5341798](https://github.com/vebholic/oms_frontend/commit/53417985a8b40e852c73f95177a3486cba9ced12))
+* changes added ([cf5f4be](https://github.com/vebholic/oms_frontend/commit/cf5f4be92a808e439038cff55608d4d9bd843b84))
+* changes added ([5bcf449](https://github.com/vebholic/oms_frontend/commit/5bcf449e1a087c461becfe45011517221f14deb2))
+* changes added ([a137444](https://github.com/vebholic/oms_frontend/commit/a1374449c6496bd976f265f72d4f3947d162eac7))
+* dependent dd changes ([1a160aa](https://github.com/vebholic/oms_frontend/commit/1a160aa5470dcce980e379326f3c17f7a71efd9c))
+* dependent dd changes ([cd5db98](https://github.com/vebholic/oms_frontend/commit/cd5db98b590ec1d3331c4c9058fd38b86b67eb99))
+* detail page issue ([aee6a09](https://github.com/vebholic/oms_frontend/commit/aee6a096c906fcb1c44b0a3e1d5c1c128e35675f))
+* multiselect validation ([d7f26cb](https://github.com/vebholic/oms_frontend/commit/d7f26cbe008b9f75320f928e62ca3a3f9ff2784b))
+* oAT-234 ([c87298b](https://github.com/vebholic/oms_frontend/commit/c87298ba79864fabb1b95a92fb972ab55d0ee381))
+* **pricetemplate:** percent field error ([3eeb153](https://github.com/vebholic/oms_frontend/commit/3eeb1531178a2837c2688224b0f92cfc10e4e918))
+* product ([dd57b71](https://github.com/vebholic/oms_frontend/commit/dd57b71cd7cd1576118d50546af4c35dac7f025a))
+* product fix ([9ed9108](https://github.com/vebholic/oms_frontend/commit/9ed9108f587c0c509aef4de28d4dd3118ea9574a))
+* **quote new step:** Changed button names ([05c1f8a](https://github.com/vebholic/oms_frontend/commit/05c1f8a7bb71cd8f30372464d5ef82dc282d57c2))
+* **quote new step:** Changed button names ([55e0336](https://github.com/vebholic/oms_frontend/commit/55e033643a5dfeb6ff36046111d21a15c2fb85ba))
+* **quotebuilder:** conflict resolve ([c82908a](https://github.com/vebholic/oms_frontend/commit/c82908aa28ae684fbcb43408d0cacc774d048d93))
+* **quotebuilder:** keep next button disabled ([38903a0](https://github.com/vebholic/oms_frontend/commit/38903a0032f5df18e67f39eec390c35f83235411))
+* **quotes:** disbale button ([827e4ce](https://github.com/vebholic/oms_frontend/commit/827e4ce23bab437d5fe126adae61024d8bbbb136))
+* **quotes:** remove console ([67ce704](https://github.com/vebholic/oms_frontend/commit/67ce704abbaef4f2168f02d177f4c0471593006f))
+* **reminder:** changes for reminder ([d8b96a7](https://github.com/vebholic/oms_frontend/commit/d8b96a7e1a204e64eec35dbd90ba3b6edfe05c0b))
+
 ## [1.28.0](https://github.com/vebholic/oms_frontend/compare/v1.27.0...v1.28.0) (2021-10-29)
 
 

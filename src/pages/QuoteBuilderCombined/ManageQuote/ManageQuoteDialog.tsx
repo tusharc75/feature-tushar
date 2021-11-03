@@ -136,7 +136,7 @@ export default function ManageQuoteDialog({
   const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
-  
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
@@ -470,6 +470,11 @@ export default function ManageQuoteDialog({
 
             if (selectedEntityDetails) {
               initialData["currency"] = selectedEntityDetails.currency || "";
+              setCurrencySymbol(
+                getUniqueCurrencies().find(
+                  (d) => d.currencyCode === initialData["currency"]
+                )?.symbolNative
+              );            
             }
           }
         }
@@ -480,7 +485,9 @@ export default function ManageQuoteDialog({
           rest.owner = user?.user?._id
           setEntityData({
             fields: newFields,
-            initialValues: getObjKeysWithValues(rest, newFields),
+            initialValues: {
+              ...getObjKeysWithValues(rest, newFields),
+            },
           })
           setFormValues(getObjKeysWithValues(rest, newFields))
         }

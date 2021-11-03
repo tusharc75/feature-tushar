@@ -278,7 +278,7 @@ export default function NewCreateQuotePdfTemplate() {
                         setIsUpdatingAndPreview(false);
                         if (quoteData?._id) {
                             history.push(`/quotes/detail/${quoteData?._id}`, {
-                                versionNumber: `${version}`, tabValue: 2
+                                versionNumber: `${version}`, tabValue: 1
                             })
                         }
                         else {
@@ -288,7 +288,7 @@ export default function NewCreateQuotePdfTemplate() {
                     } else {
                         if (quoteData?._id) {
                             history.push(`/quotes/detail/${quoteData?._id}`, {
-                                versionNumber: `${version}`, tabValue: 2
+                                versionNumber: `${version}`, tabValue: 1
                             })
                         }
                         else {
@@ -339,7 +339,7 @@ export default function NewCreateQuotePdfTemplate() {
                         {({ submitForm, touched, errors, setFieldValue, values }) => (
                             <Form>
                                 <Grid container>
-                                    <Grid item xs={4}>
+                                    <Grid item xs={12} md={6}>
                                         <TextField
                                             disabled={!hasPermissionToUpdate}
                                             variant="outlined"
@@ -355,25 +355,27 @@ export default function NewCreateQuotePdfTemplate() {
                                             onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                         />
                                     </Grid>
-                                    <Grid item xs={3} className={`${classes.saveButtonContainer} gap-2`}>
+                                    <Grid item xs={12} md={6} className={`${classes.saveButtonContainer} gap-2`}>
                                         <Button disabled={isUpdating || !hasPermissionToUpdate} size="small" color="primary"
                                             onClick={submitForm} variant="contained">
                                             {isUpdating && <CircularProgress size={24} />} {" "} Save
                                         </Button>
 
-                                        <Button disabled={isUpdatingAndPreview || !hasPermissionToUpdate} size="small" color="primary"
-                                            onClick={() => { setIsPreview(true); submitForm() }} variant="contained">
-                                            {isUpdatingAndPreview && <CircularProgress size={24} />} {" "} Save & Preview
-                                        </Button>
+                                        {!quoteData &&
+                                            <Button disabled={isUpdatingAndPreview || !hasPermissionToUpdate} size="small" color="primary"
+                                                onClick={() => { setIsPreview(true); submitForm() }} variant="contained">
+                                                {isUpdatingAndPreview && <CircularProgress size={24} />} {" "} Save & Preview
+                                            </Button>
+                                        }
 
                                         <Button
                                             size="small"
                                             color="primary"
                                             variant="contained"
                                             onClick={() => {
-                                                if (history.location?.state?.quoteId) {
-                                                    history.push(`/quotes/detail/${history.location?.state?.quoteId}`, {
-                                                        versionNumber: `${history.location?.state?.version}`, tabValue: 2
+                                                if (quoteData?._id) {
+                                                    history.push(`/quotes/detail/${quoteData?._id}`, {
+                                                        versionNumber: `${version}`, tabValue: 1
                                                     })
                                                 }
                                                 else {

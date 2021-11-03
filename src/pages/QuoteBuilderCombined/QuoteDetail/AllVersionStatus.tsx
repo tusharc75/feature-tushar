@@ -1,7 +1,7 @@
-import { IconButton, Tooltip } from '@material-ui/core';
+import { Dialog, IconButton, Tooltip } from '@material-ui/core';
 import { useContext, useReducer, useState } from 'react'
 import axiosInstance from '../../../axios/axiosInstance';
-import { formatAmountWithCurrency, gridLoadingTimeout, isObjectEmpty } from '../../../constants/helpers';
+import { formatAmountWithCurrency, gridLoadingTimeout } from '../../../constants/helpers';
 import { Link } from "react-router-dom";
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useEffect } from 'react';
@@ -9,6 +9,9 @@ import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridCo
 import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomRenderCell from '../../../components/Helpers/CustomRenderCell';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const DOASteps = [
     {
@@ -37,20 +40,21 @@ const DOASteps = [
     },
 ];
 
-export default function AllVersionStatus({ quoteId, quoteData, quotePermissions, fetchQuoteData, handleChangeVersionFromAllVersion, handleCloneQuoteWithVersionFromAllVersion }) {
+export default function AllVersionStatus({ open, onClose, quoteId, quoteData, quotePermissions, fetchQuoteData, handleChangeVersionFromAllVersion, handleCloneQuoteWithVersionFromAllVersion }) {
 
     const toastConfig = useContext(CustomToastContext);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, filters, pageSizes } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     const [columns,] = useState([
-        { field: "versionNumber", headerName: "Version #", show: true, width: 140, disabled: true,filter: false, cellRenderer: "nameRenderer" },
+        { field: "versionNumber", headerName: "Version #", show: true, width: 140, disabled: true, cellRenderer: "nameRenderer" },
         { field: "status", headerName: "Status", show: true, cellRenderer: "nameRenderer" },
-        { field: "processStatus", headerName: "Current Step", show: true, filter:false, cellRenderer: "nameRenderer" },
-        { field: "comment", headerName: "Comment", show: true,filter: false, cellRenderer: "commonRenderer" },
-        { field: "totalcost", headerName: "Total Cost", show: true, filter: false, cellRenderer: "commonRenderer" },
-        { field: "totalSalesPrice", headerName: "Total Sales Price", show: true, filter: false, cellRenderer: "commonRenderer" },
+        { field: "processStatus", headerName: "Current Step", show: true, cellRenderer: "nameRenderer" },
+        { field: "comment", headerName: "Comment", show: true, cellRenderer: "commonRenderer" },
+        { field: "totalcost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
+        { field: "totalSalesPrice", headerName: "Total Sales Price", show: true, cellRenderer: "commonRenderer" },
     ]);
     const NameRenderer = params =>
         <span className="link"
@@ -95,22 +99,18 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
         if (quoteId) {
             getVersionStatus()
         }
-    }, [quoteId, filters]);
+    }, [quoteId]);
 
     const getVersionStatus = () => {
         dispatch({ type: "loading", loading: true });
+
         if (gridApi) {
             gridApi.setRowData([]);
         }
         axiosInstance()
             .get(`/quote-builder/quote-hierarchy/${quoteId}`)
             .then(({ data: { data } }) => {
-                if (!isObjectEmpty(filters)) {
-                    data = data.versions.filter((item) => {
-                        return item.status.toLowerCase().search(`${filters.status.filter}`.toLowerCase()) !== -1
-                    });
-                }
-                const newData = isObjectEmpty(filters) ? data.versions.map((d, index) => {
+                const newData = data.versions.map((d, index) => {
                     return {
                         ...d,
                         id: index + 1,
@@ -125,25 +125,7 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
                         ).fullFormatAmount,
                         processStatus: DOASteps.find(obj => obj.key === d.processStatus)?.label
                     };
-                }) :
-                    data.map((d, index) => {
-                        return {
-                            ...d,
-                            id: index + 1,
-                            comment: d.comment ? d.comment : "",
-                            totalcost: formatAmountWithCurrency(
-                                quoteData?.currency,
-                                d.productData.totalCost
-                            ).fullFormatAmount,
-                            totalSalesPrice: formatAmountWithCurrency(
-                                quoteData?.currency,
-                                d.productData.totalSalesPrice
-                            ).fullFormatAmount,
-                            processStatus: DOASteps.find(obj => obj.key === d.processStatus)?.label
-                        };
-
-                    })
-                    ;
+                });
 
                 dispatch({ type: "initialize", data: newData, count: newData.length });
                 setTimeout(() => {
@@ -158,7 +140,24 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
     };
 
     return (
-        <div style={{ maxHeight: 500, width: "100%" }} className="mt-2">
+        <Dialog
+            maxWidth="md"
+            aria-labelledby="customized-dialog-title"
+            open={open}
+            onClose={onClose}
+            fullWidth
+            fullScreen={fullScreen || (isMobile || isTablet)}
+        >
+            <CustomDialogHeader
+                title={`All Version Status`}
+                onClose={onClose}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                    setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
+            />
+            <CustomDialogContent>
                 <CustomAgGrid
                     columns={columns}
                     dataRows={dataRows}
@@ -174,6 +173,8 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
                     loading={loading}
                     refreshGrid={getVersionStatus}
                 />
-        </div>
+            </CustomDialogContent>
+        </Dialog>
+
     )
 }

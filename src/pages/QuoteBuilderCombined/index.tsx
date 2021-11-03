@@ -132,7 +132,7 @@ const QuoteBuilders = () => {
             onClick={() => {
               history.push(`quotes/detail/${params.row._id}`, {
                 versionNumber: `${params.row.versionNumber}`,
-                tabValue: 2
+                tabValue: 1
               })
             }}
           >
