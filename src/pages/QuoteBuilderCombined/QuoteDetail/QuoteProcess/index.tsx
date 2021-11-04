@@ -1606,7 +1606,7 @@ export default function QuoteProcess(props) {
           TransitionComponent={CustomDialogTransition}
         >
           <CustomDialogHeader
-            title="Total Sales"
+            title="Quote Summary"
             onClose={() => {
               setShowTotalSalesDialog(false);
             }}
