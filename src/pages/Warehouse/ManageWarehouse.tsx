@@ -24,12 +24,11 @@ const ManageWarehouse = (props) => {
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-    // console.log(props)
-    console.log(addressResource?.id,"address")
+ 
     useEffect(() => {
         axiosInstance().get("/field?resource=Warehouse").then(({ data: { data } }) => {
             const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-            // console.log(fieldsDataForCreate)
+          
             const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
             if (addressResource) {

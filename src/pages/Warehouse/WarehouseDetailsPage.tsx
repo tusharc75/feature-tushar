@@ -59,7 +59,6 @@ const WarehouseDetailsPage = () => {
       } = await axiosInstance().get(`/warehouse/${id}`);
 
       handleMainPoints(data);
-      console.log(data,"fetchWaregouseData")
       setHeadingLbl(data.warehouseName);
       setWarehouseData(data);
       setAddressResource({ id: data._id });
