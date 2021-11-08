@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, Fragment } from "react";
+import { useRef, useState, useEffect, Fragment, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -22,6 +22,8 @@ import Checkbox from '@material-ui/core/Checkbox';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import Tooltip from '@material-ui/core/Tooltip';
 import { autoCalculateSpecificFields } from "../../constants/formulaUtility";
+import axiosInstance from "../../axios/axiosInstance";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 var levalOrderBy = [
     "product",
@@ -32,11 +34,14 @@ var levalOrderBy = [
     "price-builder-custom",
 ];
 
-const BulkEditDialog = (props) => {
+const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handleSaveProduct, stage, loading }) => {
 
-    const { productDataList, handleClose, handleSaveProduct, stage, loading } = props;
+    const toastConfig = useContext(CustomToastContext);
+
     const [productFields, setProductFields] = useState([]);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
+    const [allFields, setAllFields] = useState([]);
+
     const [, setUploadingImageOrFileProgress] = useState(0)
 
     const [isAddField, setIsAddField] = useState(false);
@@ -49,49 +54,46 @@ const BulkEditDialog = (props) => {
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
-
         const productData = productDataList[0]
-
-        var _fields = [];
-        productData.fields.forEach((_f) => {
-            _f.required = false
-            if (stage === "product") {
-                if (_f.fieldName === "qty" || (_f.leval === "product-template" || _f.leval === "product-builder-custom")) {
-                    _fields.push({ ..._f })
+        axiosInstance().get(`/productbuilder/getoneproduct/${productBuilderId}/${productData._id}`).then(({ data: { data } }) => {
+            setAllFields(data.productData.fields)
+            var _fields = [];
+            data.productData.fields.forEach((_f) => {
+                _f.required = false
+                if (stage === "product") {
+                    if (_f.fieldName === "qty" || (_f.leval === "product-template" || _f.leval === "product-builder-custom")) {
+                        _fields.push({ ..._f })
+                    }
                 }
-            }
-            else {
-                if (_f.fieldName === "qty" || _f.leval === "product-template" || _f.leval === "price-template" || _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom") {
-                    _fields.push({ ..._f })
+                else {
+                    if (_f.fieldName === "qty" || _f.leval === "product-template" || _f.leval === "price-template" || _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom") {
+                        _fields.push({ ..._f })
+                    }
                 }
+            })
+            if (productData.fieldChanges) {
+                setFieldChanges(productData.fieldChanges)
             }
-        })
-
-        if (productData.fieldChanges) {
-            setFieldChanges(productData.fieldChanges)
-        }
-        _fields = orderBy(_fields, 'order', 'asc');
-        _fields = sortBy(_fields, function (item) {
-            return levalOrderBy.indexOf(item.leval)
+            _fields = orderBy(_fields, 'order', 'asc');
+            _fields = sortBy(_fields, function (item) {
+                return levalOrderBy.indexOf(item.leval)
+            });
+            setFields(_fields.filter((_f) => _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom"))
+            let values = { ...productData }
+            delete values.fields
+            _fields.forEach((_f) => {
+                _f.isFormulaColor = _f.isFormula;
+                _f.isFormula = false;
+                _f.isMulitFormula = false;
+            })
+            setInitialData({
+                fields: _fields,
+                values: { ...getObjKeys("", _fields) },
+            });
+            EvaluteproductFields(_fields)
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
         });
-
-        setFields(_fields.filter((_f) => _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom"))
-        let values = { ...productData }
-        delete values.fields
-        // setInitialData({
-        //     fields: _fields,
-        //     values: { ...getObjKeysWithValues(values, _fields) },
-        // });
-        _fields.forEach((_f) => {
-            _f.isFormulaColor = _f.isFormula;
-            _f.isFormula = false;
-            _f.isMulitFormula = false;
-        })
-        setInitialData({
-            fields: _fields,
-            values: { ...getObjKeys("", _fields) },
-        });
-        EvaluteproductFields(_fields)
     }, []);
 
     const handleSubmit = (values) => {
@@ -102,7 +104,7 @@ const BulkEditDialog = (props) => {
         }
         const products = []
         productDataList.forEach(element => {
-            const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, element.fields)
+            const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
             products.push({ ...element, ...calValues })
         });
         products.forEach(element => {

@@ -124,7 +124,7 @@ export default function CustomSwipableList({
                 >
                     {
                         dataRows.map((d, index) => (
-                            <Grid key={d._id} container className={`pb-2 mb-2 border-bottom ${index === 0 ? "mt-1" : ""}`}>
+                            <Grid key={d._id} container className={`pb-2 mb-2 border-bottom card-shadow ${index === 0 ? "mt-1" : ""} `}>
                                 {
                                     allowSelection && <Grid item xs={1} sm={1}>
                                         <Checkbox
