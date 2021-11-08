@@ -62,7 +62,7 @@ const AddExistingProduct = (props) => {
     useEffect(() => {
         if (isProductTemplate) {
             if (productCategory && productCategory !== "") {
-                axiosInstance().post(`/product-template/template/` + productCategory, { entity: [] }).then(({ data: { data } }) => {
+                axiosInstance().post(`/product-template/template/` + productCategory, { entity: null }).then(({ data: { data } }) => {
                     setProductTemplateList(data.data)
                     setProductTemplate(null);
                 })
