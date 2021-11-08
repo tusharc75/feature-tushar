@@ -132,7 +132,7 @@ const QuoteBuilders = () => {
             onClick={() => {
               history.push(`quotes/detail/${params.row._id}`, {
                 versionNumber: `${params.row.versionNumber}`,
-                tabValue: 2
+                tabValue: 1
               })
             }}
           >
@@ -879,6 +879,7 @@ const QuoteBuilders = () => {
             isMobile ?
               <CustomSwipableList
                 allowSelection={true}
+                allowSwipe={true}
                 permissions={permissions.quoteBuilder}
                 primaryField={columns?.find(d => d.primaryField)}
                 onClick={(data) => {
@@ -890,6 +891,7 @@ const QuoteBuilders = () => {
                 onEdit={(data) => {
                   history.push(`${routes.quoteBuilderDetail.path}/${data._id}?openEdit=true`)
                 }}
+                extraParamsToCheckDelete={true}
                 onDelete={(data) => {
                   setSingleQuoteDelete({
                     show: true,
@@ -916,6 +918,8 @@ const QuoteBuilders = () => {
                   }
                 ]}
                 onCreate={clickCreateNew}
+                showClone={false}
+                onClone={() => { }}
               /> : (
                 Object.keys(frameWorkComponent).length > 0 ?
                   <CustomAgGrid

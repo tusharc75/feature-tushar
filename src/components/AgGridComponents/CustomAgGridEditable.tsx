@@ -17,79 +17,84 @@ import DateEditor from "./DateEditor";
 
 export function reducer(state, action) {
   switch (action.type) {
-    case "loading":
+    case 'loading':
       return {
         ...state,
         loading: action.loading,
+        appendRows: action.loading === false ? false : state.appendRows
       };
 
-    case "initialize":
+    case 'initialize':
       return {
         ...state,
         dataRows: action.data,
         rowCount: action.count,
+        selectedRecords: []
       };
 
-    case "selection":
+    case 'selection':
       return {
         ...state,
-        selectedRecords: action.selectedRecords,
+        selectedRecords: action.selectedRecords
       };
 
-    case "update":
+    case 'update':
       return {
         ...state,
         dataRows: action.data,
-        loading: false,
+        loading: false
       };
 
-    case "filter":
+    case 'filter':
       return {
         ...state,
         loading: true,
         filters: action.filters,
-        page: 0,
+        page: 0
       };
 
-    case "sort":
+    case 'sort':
       return {
         ...state,
         sorting: action.sorting,
-        loading: true,
+        loading: true
       };
 
-    case "search":
+    case 'search':
       return {
         ...state,
+        page: 0,
         search: action.search,
-        loading: true,
+        loading: true
       };
 
-    case "pageChange":
+    case 'pageChange':
       return {
         ...state,
         page: action.page,
+        appendRows: isMobile,
       };
 
-    case "pageSizeChange":
+    case 'pageSizeChange':
       return {
         ...state,
         limit: action.limit,
         page: 0,
-        loading: true,
+        appendRows: isMobile,
+        loading: false
       };
 
-    case "count":
+    case 'count':
       return {
         ...state,
         rowCount: action.count,
-        loading: false,
+        loading: false
       };
 
-    case "complete":
+    case 'complete':
       return {
         ...state,
-        loading: false,
+        loading: false
       };
 
     default:
@@ -137,6 +142,7 @@ export default function CustomAgGridEditable({
   fromProductGrid = false,
   currency = null,
   renderedFrom = null,
+  customGridOptions = null,
   selectedRecords = [],
 }) {
   const [, setColumns] = useState(columns);
@@ -162,18 +168,29 @@ export default function CustomAgGridEditable({
     setColumnApi(params.columnApi);
     setClientSideGridApi(params.api);
     if (handleGridReady) handleGridReady(params);
-
-    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-
-    if (columnState) {
-      params.columnApi.setColumnState(columnState);
-    }
   };
+
+  useEffect(() => {
+    if (columnApi && loading === false) {
+      const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+
+      if (columnState) {
+        columnApi.setColumnState(columnState);
+      }
+    }
+  }, [columnApi, loading])
 
   const onColumnMoved = (params) => {
     const columnState = JSON.stringify(params.columnApi.getColumnState());
     localStorage.setItem(renderedFrom, columnState);
   };
+
+  const onColumnResized = (params) => {
+    if (params?.source === "uiColumnDragged") {
+      const columnState = JSON.stringify(params.columnApi.getColumnState());
+      localStorage.setItem(renderedFrom, columnState);
+    }
+  }
 
   let customFilterParams = {
     filterOptions: ["contains"],
@@ -219,6 +236,19 @@ export default function CustomAgGridEditable({
     return [dataObj]
   }
 
+  const getWidth = (field, columnWidth) => {
+    if (localStorage.getItem(renderedFrom)) {
+      const storedColumns = JSON.parse(localStorage.getItem(renderedFrom));
+
+      const indexOfField = storedColumns.findIndex((d) => d.colId === field);
+      if (indexOfField > -1) {
+        return storedColumns[indexOfField].width;
+      }
+      return columnWidth;
+    }
+    return columnWidth;
+  }
+
   const generateColumns = columns.map((column: any, index) => {
     return isClientSideGrid ? (
       <AgGridColumn
@@ -228,7 +258,9 @@ export default function CustomAgGridEditable({
         filter={column.filter ?? "agTextColumnFilter"}
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
+        cellRendererParams={column.cellRendererParams ?? null}
         minWidth={column.width ?? 250}
+        width={getWidth(column.field, column.width) ?? 250}
         flex={1}
         rowDrag={column.rowDrag ?? false}
         editable={column.editable ?? false}
@@ -250,6 +282,7 @@ export default function CustomAgGridEditable({
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
         minWidth={column.width ?? 250}
+        width={getWidth(column.field, column.width) ?? 250}
         flex={1}
         filterParams={customFilterParams}
         comparator={() => {
@@ -286,6 +319,7 @@ export default function CustomAgGridEditable({
             columnApi={columnApi}
             refreshGrid={refreshGrid}
             renderedFrom={renderedFrom}
+            isClientSideGrid={isClientSideGrid}
           />
 
           <div
@@ -293,6 +327,7 @@ export default function CustomAgGridEditable({
             style={{ zIndex: -500, position: "inherit" }}
           >
             <AgGridReact
+              gridOptions={customGridOptions}
               rowData={dataRows}
               onColumnMoved={onColumnMoved}
               rowClassRules={{
@@ -312,6 +347,7 @@ export default function CustomAgGridEditable({
               headerHeight={AgGridHeaderHeight}
               floatingFiltersHeight={AgGridFloatingFiltersHeight}
               rowHeight={AgGridRowHeight}
+              onColumnResized={onColumnResized}
               frameworkComponents={{
                 ...frameworkComponents,
                 commonRenderer: frameworkComponents["commonRenderer"] ?? CommonRenderer,

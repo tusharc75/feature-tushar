@@ -25,8 +25,10 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(0.5, 1.5),
     borderRadius: "4px",
     boxShadow: "2px 2px 4px #747474",
-    background: "linear-gradient(to bottom right, #010c02  0%, #378280 100%)",
+    backgroundColor: "#378280",
+    opacity: "0.95",
     border: "#03232e",
+    display:"flex",
     [theme.breakpoints.down("xs")]: {
       borderRadius: "4px",
       boxShadow: "2px 2px 4px #747474",
@@ -37,7 +39,13 @@ const useStyles = makeStyles((theme) => ({
       justifyContent: "space-between",
       padding: "4px 6px"
     },
-
+  },
+  lineAddStyle:{
+    width:"2px",
+    backgroundColor:"white",
+    paddingRight:"5px",
+    margin:"5px 7px",
+    borderRadius:"2px"
   },
   labelColor: {
     color: "#fff",
@@ -62,13 +70,14 @@ const DetailsPageHeader = (props) => {
   const classes = useStyles();
   return (
     <>
-      <Paper elevation={0}>
+      <Paper elevation={0} className={"mainHeader"}>
         <Grid container justify="space-between" className="detailHeader">
           <Grid item className="d-flex align-items-center">
             {loading ? (
               <Skeleton width={100} />
             ) : showHeading ? (
               <>
+                <Grid className={"mobileHeading"}>
                 <Typography
                   className="text-capitalize"
                   style={{ display: "inline-block" }}
@@ -79,6 +88,7 @@ const DetailsPageHeader = (props) => {
                 >
                   <span className="d-flex align-items-center"><span className="listingHeader">{heading}
                   </span>
+
                     {
                       isApproved && <Tooltip title="Approved"><FcApproval title="Approved" size={20} /></Tooltip>
                     }
@@ -92,6 +102,7 @@ const DetailsPageHeader = (props) => {
                     }
                   </span>
                 </Typography>
+                </Grid>
               </>
             ) : null}
           </Grid>
@@ -143,10 +154,12 @@ const DetailsPageHeader = (props) => {
                       )
                       : (
                         <Box className={classes.box}>
+                          <div className={classes.lineAddStyle}> </div>
+                          <div>
                           <Typography
-                            align="center"
+                            align="left"
                             variant="subtitle1"
-                            style={{ opacity: 0.9 }}
+                            style={{ opacity: 0.9, fontSize:"0.8rem", lineHeight:"20px" }}
                             className={`text-capitalize ${classes.labelColor}`}
                           >
                             {key}
@@ -159,6 +172,7 @@ const DetailsPageHeader = (props) => {
                             {mainPoints[key] || ""}
                             {["email", "phone"].indexOf(key.toLocaleLowerCase()) >= 0 ? <CopyToClipboard textToCopy={mainPoints[key]} style={{ color: isMobile || isTablet ? "#010c02" : "white" }} /> : null}
                           </Typography>
+                          </div>
                         </Box>
                       )) : null}
                 </React.Fragment>

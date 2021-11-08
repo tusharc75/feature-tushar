@@ -18,10 +18,10 @@ import { Autocomplete } from '@material-ui/lab';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
-import { AiFillEdit, AiFillPlusCircle, AiOutlineEye } from 'react-icons/ai';
 import { BiLayerPlus, BiMailSend } from 'react-icons/bi';
 import { FiDownloadCloud } from 'react-icons/fi';
-import { GiVintageRobot } from 'react-icons/gi';
+import { GiVintageRobot, GiProfit } from 'react-icons/gi';
+import { AiFillEdit, AiFillPlusCircle, AiOutlineEye } from 'react-icons/ai';
 import { HiPencil } from 'react-icons/hi';
 import axiosInstance from '../../../../axios/axiosInstance';
 import Loader from '../../../../components/Loader';
@@ -56,10 +56,13 @@ import ColumnsDialog from './ColumnsDialog';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useData } from '../../../../StateProvider/Provider';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
-import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import DOAReasonDialog from '../../../DOA/DOAReasonDialog';
 import { camelCase, isEqual, startCase } from 'lodash';
+import { VscVersions } from 'react-icons/vsc';
+import { MdDelete } from 'react-icons/md';
+import { AiOutlineFileExcel, AiOutlineFilePdf } from 'react-icons/ai';
+import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
@@ -78,9 +81,9 @@ const useStyles = makeStyles((theme) => ({
   },
   bgProduct: {
     background: '#f5f5f5 !important',
-    padding: '10px',
     paddingBottom: '0',
     border: '1px solid #163340',
+    borderTop: '0px',
     borderBottom: 'none',
     boxShadow: 'none',
     borderRadius: '0'
@@ -109,7 +112,6 @@ const useStyles = makeStyles((theme) => ({
     top: '1px',
     left: '6px',
     [theme.breakpoints.down('xs')]: {
-      position: 'static',
       display: 'flex',
       alignItems: 'center'
     }
@@ -185,7 +187,9 @@ export default function QuoteProcess(props) {
     fetchTNC,
     handleVersionUpdate,
     updatingVersion,
-    globalLoading
+    globalLoading,
+    setShowTotalSalesDialog,
+    showTotalSalesDialog
   } = props;
   const defaultSelectColumns = [
     'Product Description',
@@ -257,6 +261,8 @@ export default function QuoteProcess(props) {
   const [sendEmail, setSendEmail] = useState(false);
   const [showAiDialog, setShowAiDialog] = useState(false);
   const [viewDownloadLoading, setViewDownloadLoading] = useState(false);
+  const [showPDFArrangeColumns, setShowPDFArrangeColumns] = useState(false);
+
   const [messageDialog, setMessageDialog] = useState({
     open: false,
     message: null
@@ -325,7 +331,7 @@ export default function QuoteProcess(props) {
   useEffect(() => {
     if (DOAsetup) {
       axiosInstance()
-        .get(`/productbuilder/getproduct/` + productBuilderId)
+        .get(`/productbuilder/old/getproduct/` + productBuilderId)
         .then(({ data: { data } }) => {
           data = data.data?.product?.map((u, index) => ({
             ...u,
@@ -412,39 +418,11 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
 
-    // if (ProcessStatus === "Price Builder") {
-    // let hasPrice = false;
-    // BuilderData.forEach((data) => {
-    //     if (
-    //         data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
-    //         data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !==
-    //         "undefined"
-    //     ) {
-    //         hasPrice = true;
-    //     } else {
-    //         hasPrice = false;
-    //     }
-    // });
-    // const withZeroQty = BuilderData.filter((d) => d.qty === 0);
-    // let withZeroAmt = [];
-    // if (hasPrice) {
-    //     withZeroAmt = BuilderData.filter(
-    //         (d) =>
-    //             d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0
-    //     );
-    // }
-
-    // if (!withZeroAmt.length && hasPrice && !withZeroQty.length) {
-    //     setNextStep(true);
-    // } else {
-    //     setNextStep(false);
-    // }
-    // }
     let colName = [];
     let dynamicTable = [];
     let requiredValuesData = [];
@@ -471,8 +449,7 @@ export default function QuoteProcess(props) {
                 data.displayCurrency.forEach((cur) => {
                   if (data.units) {
                     data.units.forEach((unit) => {
-                      // const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`;
-                      const casedLabel = `${fieldName}_${cur.toLowerCase()}_${unit.toLowerCase()}`
+                      const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`;
                       if (required) {
                         requiredValues[casedLabel] = quoteRows[casedLabel];
                       }
@@ -482,8 +459,7 @@ export default function QuoteProcess(props) {
                       }
                     });
                   } else {
-                    // const casedLabel = `${fieldName}_${cur.toLowerCase()}`;
-                    const casedLabel = `${fieldName}_${cur.toLowerCase()}`
+                    const casedLabel = `${fieldName}_${cur.toLowerCase()}`;
                     if (required) {
                       requiredValues[casedLabel] = quoteRows[casedLabel];
                     }
@@ -495,8 +471,7 @@ export default function QuoteProcess(props) {
                 });
               } else if (data.units && !data.displayCurrency) {
                 data.units.forEach((unit) => {
-                  // const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`;
-                  const casedLabel = `${camelCase(fieldName)}_${unit.toLowerCase()}`
+                  const casedLabel = `${fieldName}_${unit.toLowerCase()}`;
                   if (required) {
                     requiredValues[casedLabel] = quoteRows[casedLabel];
                   }
@@ -550,10 +525,30 @@ export default function QuoteProcess(props) {
           });
 
         if (DOASteps.findIndex((d) => d?.key === ProcessStatus) === 1 || ProcessStatus === 'Price Builder') {
-          if (ungivenValues && ungivenValues.length > 0) {
-            setNextStep(false);
-          } else {
+          let hasPrice = false;
+          BuilderData.forEach((data) => {
+            if (
+              data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
+              data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !== 'undefined'
+            ) {
+              hasPrice = true;
+            } else {
+              hasPrice = false;
+            }
+          });
+          const withZeroQty = BuilderData.filter((d) => d.qty === 0);
+          let withZeroAmt = [];
+          if (hasPrice) {
+            withZeroAmt = BuilderData.filter((d) => d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0);
+          }
+
+          // console.log(BuilderData)
+          // console.log(`totalSalesPrice_${quoteData?.currency.toLowerCase()}`)
+
+          if ((!ungivenValues && ungivenValues.length === 0) || (!withZeroAmt.length && hasPrice && !withZeroQty.length)) {
             setNextStep(true);
+          } else {
+            setNextStep(false);
           }
         }
 
@@ -1130,134 +1125,132 @@ export default function QuoteProcess(props) {
   return (
     <>
       <Paper className={classes.bgProduct}>
-        <Grid container className="detailHeader d-flex align-items-center form-label-style mt-0 mb-0">
-          {ProcessStatus === 'New' ? null : (
-            <Grid item xs={12} sm={7} md={7} className="quoteHeader">
-              <div className={redCard ? 'redQuoteBox' : 'quoteBox'}>
-                <span>Total Profit </span>
-                <span className="quoteAmount" title={totalProfit.fullFormatAmount}>
-                  {totalProfit.fullFormatAmount ? totalProfit.fullFormatAmount : defaultTotalValue}
-                </span>
-              </div>
-              <div className="quoteBox">
-                <span>Total Cost Price </span>
-                <span className="quoteAmount" title={totalcost.fullFormatAmount}>
-                  {totalcost.fullFormatAmount ? totalcost.fullFormatAmount : defaultTotalValue}
-                </span>
-              </div>
-              {redCard ? (
-                <div className="redQuoteBox">
-                  <span>Total Selling Price </span>
-                  <span className="quoteAmount" title={totalsale.fullFormatAmount}>
-                    {totalsale.fullFormatAmount ? totalsale.fullFormatAmount : defaultTotalValue}
-                  </span>
-                </div>
-              ) : (
-                <div className="quoteBox">
-                  <span>Total Selling Price </span>
-                  <span className="quoteAmount" title={totalsale.fullFormatAmount}>
-                    {totalsale.fullFormatAmount ? totalsale.fullFormatAmount : defaultTotalValue}
-                  </span>
-                </div>
-              )}
-            </Grid>
-          )}
-          <Grid
-            item
-            xs={ProcessStatus === 'New' ? 12 : 12}
-            sm={ProcessStatus === 'New' ? 12 : 5}
-            md={ProcessStatus === 'New' ? 12 : 5}
-            className="d-flex align-items-center justify-content-end"
-          >
-            {DOAApproved && versionStatus === 'Sent for DOA' && (
-              <>
-                <Button
-                  onClick={() => {
-                    QuoteStatusChange('Accepted', '', '');
-                  }}
-                  variant="outlined"
-                  size="small"
-                  startIcon={<ThumbUpIcon />}
-                  color="primary"
-                >
-                  {approvedButtonText}
-                </Button>
-                <Button
-                  onClick={() => {
-                    setQuoteStatusChangeData('Rejected');
-                    setShowQuoteStatusChangeDialog(true);
-                  }}
-                  startIcon={<ThumbDownIcon />}
-                  variant="contained"
-                  size="small"
-                  color="primary"
-                >
-                  Reject
-                </Button>
-              </>
-            )}
-            {allowedToEdit && ifQuoteApproved.approved ? (
-              <Button variant="outlined" color="primary" size="small" startIcon={<HiPencil />} onClick={handleOpenUpdateDialog}>
-                Edit Information
-              </Button>
-            ) : null}
-            <div>
-              <Button
-                className="customSelect mx-1"
-                variant="outlined"
-                color="primary"
-                size="small"
-                aria-controls="simple-menu"
-                aria-haspopup="true"
-                onClick={handleClick}
-              >
-                {`Version : ${currentVersion}`}
-              </Button>
-              <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-                {Object?.keys(quoteData.versions).map((versionNumber) => (
-                  <MenuItem onClick={handleChangeVersionInQuote} key={versionNumber} value={versionNumber}>
-                    {'Version : ' + versionNumber}
-                  </MenuItem>
-                ))}
-              </Menu>
-            </div>
-            {
-              <>
-                {currentVersion !== 1 && ifQuoteApproved.approved === false && (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    disabled={
-                      !allowedToEdit ||
-                      deletingDOA ||
-                      loading ||
-                      (DOAneeded
-                        ? DOASteps.findIndex((d) => d?.key === ProcessStatus) > 1
-                        : OtherSteps.findIndex((d) => d?.key === ProcessStatus) > 1)
-                    }
-                    onClick={deleteVersion}
-                  >
-                    Delete
-                  </Button>
-                )}
-                <Button
-                  disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
-                  variant="contained"
-                  type="button"
-                  size="small"
-                  startIcon={isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus />}
-                  className="mx-1"
-                  color="primary"
-                  onClick={() => {
-                    cloneVersion();
-                  }}
-                >
-                  {isCloning ? <>Cloning v{currentVersion}</> : `Clone ${currentVersion}`}
-                </Button>{' '}
-              </>
-            }
-          </Grid>
-        </Grid>
+        {/* <Grid
+                    container
+                    className="detailHeader d-flex align-items-center form-label-style mt-0 mb-0"
+                > */}
+        {/* <Grid
+                        item
+                        xs={ProcessStatus === "New" ? 12 : 12}
+                        sm={ProcessStatus === "New" ? 12 : 5}
+                        md={ProcessStatus === "New" ? 12 : 5}
+                        className="d-flex align-items-center justify-content-end"
+                    >
+                        {DOAApproved && versionStatus === "Sent for DOA" && (
+                            <>
+                                <Button
+                                    onClick={() => {
+                                        QuoteStatusChange("Accepted", "", "")
+                                    }}
+                                    variant="outlined"
+                                    size="small"
+                                    startIcon={<ThumbUpIcon />}
+                                    color="primary"
+                                >
+                                    {approvedButtonText}
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        setQuoteStatusChangeData("Rejected")
+                                        setShowQuoteStatusChangeDialog(true)
+                                    }}
+                                    startIcon={<ThumbDownIcon />}
+                                    variant="contained"
+                                    size="small"
+                                    color="primary"
+                                >
+                                    Reject
+                                </Button>
+                            </>
+                        )}
+                        {allowedToEdit && ifQuoteApproved.approved ? (
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                size="small"
+                                startIcon={<HiPencil />}
+                                onClick={handleOpenUpdateDialog}
+                            >
+                                Edit Information
+                            </Button>
+                        ) : null}
+                        <div>
+                            <Button
+                                className="customSelect mx-1"
+                                variant="outlined"
+                                color="primary"
+                                size="small"
+                                aria-controls="simple-menu"
+                                aria-haspopup="true"
+                                onClick={handleClick}>
+                                {`Version : ${currentVersion}`}
+                            </Button>
+                            <Menu
+                                id="simple-menu"
+                                anchorEl={anchorEl}
+                                keepMounted
+                                open={Boolean(anchorEl)}
+                                onClose={handleClose}
+                            >
+                                {Object?.keys(quoteData.versions).map((versionNumber) => (
+                                    <MenuItem onClick={handleChangeVersionInQuote} key={versionNumber} value={versionNumber}>
+                                        {"Version : " + versionNumber}
+                                    </MenuItem>
+                                ))}
+                            </Menu>
+                        </div>
+                        {(
+                            <>
+                                {currentVersion !== 1 && ifQuoteApproved.approved === false && (
+                                    <Button
+                                        variant="text"
+                                        size="small"
+                                        style={{color:"var(--error)"}}
+                                        className={`${isMobile ? "buttonIconMobile" : "buttonIconDesktop"}`}
+                                        disabled={
+                                            !allowedToEdit ||
+                                            deletingDOA || loading || (DOAneeded
+                                                ? DOASteps.findIndex(d => d?.key === ProcessStatus) > 1
+                                                : OtherSteps.findIndex(d => d?.key === ProcessStatus) > 1)
+                                        }
+                                        startIcon={<MdDelete size={ isMobile ? `20` : `16`}/>}
+                                        onClick={deleteVersion}
+                                    >
+                                        { isMobile ? "" : "Delete"}
+                                    </Button>
+                                )}
+                                <Button
+                                    disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
+                                    variant="text"
+
+                                    type="button"
+                                    size="small"
+                                    startIcon={
+                                        isCloning ? (
+                                            <CircularProgress
+                                                color="inherit"
+                                                size={16}
+                                            />
+                                        ) : (
+                                            <BiLayerPlus size={ isMobile ? `20` : `16`}/>
+                                        )
+                                    }
+                                    className={`${isMobile ? "buttonIconMobile" : "buttonIconDesktop"}`}
+                                    style={{color:"var(--success-light)"}}
+                                    onClick={() => {
+                                        cloneVersion();
+                                    }}
+                                >
+                                    {isCloning ? (
+                                        <>Cloning v{currentVersion}</>
+                                    ) : ( isMobile ? "" :
+                                        `Clone ${currentVersion}`
+                                    )}
+                                </Button>{" "}
+                            </>
+                        )}
+                    </Grid> */}
+        {/* </Grid> */}
         <div>
           <Steps
             steps={DOAneeded ? DOASteps : OtherSteps}
@@ -1265,8 +1258,8 @@ export default function QuoteProcess(props) {
               DOAneeded
                 ? DOASteps.findIndex((d) => d?.key === ProcessStatus)
                 : ProcessStatus === 'DOA Process'
-                  ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
-                  : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
+                ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
+                : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
             }
             id={quoteData._id}
             version={currentVersion}
@@ -1290,77 +1283,45 @@ export default function QuoteProcess(props) {
           />
         </div>
       </Paper>
-      <div className={`mt-0 subDetailModule ${classes.detailBox}`}>
+      <div className={`pt-1 subDetailModule ${classes.detailBox}`}>
         {!loading && quoteData ? (
           <Grid container className="position-relative">
             <Grid item xs={12} sm={12} md={12} className="d-flex align-items-center gap-1">
               {!ifQuoteApproved.approved && ProcessStatus === 'New' && allowedToEdit ? (
                 <span className={`${classes.productPos} m-2`}>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    className="mr-1"
-                    startIcon={<AiFillPlusCircle />}
-                    color="primary"
-                    disabled={!permissions.product?.isCreate}
-                    onClick={() => {
-                      setIsAddNewProduct(true);
-                    }}
-                  >
-                    Add New Product
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<BiLayerPlus />}
-                    color="primary"
-                    onClick={() => {
-                      setIsAddExistingProduct(true);
-                    }}
-                  >
-                    Add Existing Product
-                  </Button>
+                  <Tooltip title="Add New Product">
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      className="mr-1"
+                      startIcon={<AiFillPlusCircle />}
+                      color="primary"
+                      disabled={!permissions.product?.isCreate}
+                      onClick={() => {
+                        setIsAddNewProduct(true);
+                      }}
+                    >
+                      {isMobile ? '' : 'Add New Product'}
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title="Add Existing Product">
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<BiLayerPlus />}
+                      color="primary"
+                      onClick={() => {
+                        setIsAddExistingProduct(true);
+                      }}
+                    >
+                      {isMobile ? '' : 'Add Existing Product'}
+                    </Button>
+                  </Tooltip>
                 </span>
               ) : null}
-
-              {ProcessStatus === 'Quote Builder' ? (
-                <Grid container justify="space-between" alignItems="center">
-                  <Grid item xs={11} md={11} sm={11}>
-                    <FormControl fullWidth className={classes.formControl}>
-                      <Autocomplete
-                        id="demo-mutiple-chip"
-                        disabled={!allowedToEdit}
-                        fullWidth
-                        size="small"
-                        multiple
-                        value={visibleColumns}
-                        onChange={(e, val) => {
-                          setVisibleColumns(val);
-                          handleVersionUpdate(val, versionStatus, state?.selectedRecords);
-                        }}
-                        options={ColumnName}
-                        disableCloseOnSelect
-                        getOptionLabel={(option) => option}
-                        renderOption={(option, { selected }) => (
-                          <React.Fragment>
-                            <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={selected} />
-                            {option}
-                          </React.Fragment>
-                        )}
-                        renderInput={(params) => <TextField {...params} variant="outlined" label="Visible Columns in Quote" placeholder="Select " />}
-                      />
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={1} md={1} sm={1}>
-                    <IconButton disabled={!allowedToEdit} title="Re-arrange columns" color="inherit" onClick={() => setRearrangeColumns(true)}>
-                      <ImportExportIcon />
-                    </IconButton>
-                  </Grid>
-                </Grid>
-              ) : null}
               {(ProcessStatus === 'DOA Process' && versionStatus === 'Building Quote' && DOAneeded) ||
-                (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
-                <div className="w-100 d-flex align-items-center justify-content-end doaAction">
+              (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
+                <div className={`d-flex align-items-center justify-content-end doaAction ${isMobile ? 'actio-pos-quote' : ''}`}>
                   {!ifQuoteApproved.approved && (
                     <Button
                       onClick={() => {
@@ -1373,74 +1334,119 @@ export default function QuoteProcess(props) {
                       size="small"
                       color="primary"
                     >
-                      {buttonMessage}
+                      {isMobile ? '' : `${buttonMessage}`}
                     </Button>
                   )}
                 </div>
               ) : null}
             </Grid>
             {ProcessStatus !== 'New' && ProcessStatus !== 'Price Builder' ? (
-              <span className="d-flex align-items-center justify-content-end mt-3 ml-3">
-                <Button
-                  onClick={() => {
-                    handleViewPdf(true, false);
-                  }}
-                  variant="outlined"
-                  disabled={viewDownloadLoading || updatingVersion}
-                  size="small"
-                  className="mr-1"
-                  startIcon={<AiOutlineEye />}
-                  color="primary"
-                >
-                  View
-                </Button>
-                <Button
-                  disabled={viewDownloadLoading || updatingVersion}
-                  onClick={() => {
-                    handleViewPdf(false, true);
-                    exportToCSV();
-                  }}
-                  variant="outlined"
-                  size="small"
-                  startIcon={<FiDownloadCloud />}
-                  color="primary"
-                >
-                  Download
-                </Button>
+              <span className="d-flex align-items-center justify-content-end ml-3">
+                <Tooltip title="View">
+                  <Button
+                    onClick={() => {
+                      handleViewPdf(true, false);
+                    }}
+                    variant="outlined"
+                    disabled={viewDownloadLoading || updatingVersion}
+                    size="small"
+                    className="mr-1 setIconForMobile"
+                    startIcon={isMobile ? '' : <AiOutlineEye />}
+                    color="primary"
+                  >
+                    {isMobile ? <AiOutlineEye size={20} /> : ''}
+                    {isMobile ? '' : 'View'}
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Download">
+                  <Button
+                    disabled={viewDownloadLoading || updatingVersion}
+                    onClick={() => {
+                      handleViewPdf(false, true);
+                      exportToCSV();
+                    }}
+                    variant="outlined"
+                    size="small"
+                    className="mr-1 setIconForMobile"
+                    startIcon={isMobile ? '' : <FiDownloadCloud />}
+                    color="primary"
+                  >
+                    {isMobile ? <FiDownloadCloud size={20} /> : ''}
+                    {isMobile ? '' : 'Download'}
+                  </Button>
+                </Tooltip>
                 {permissions[qbResource]?.isUpdate &&
-                  permissions?.quotePdfTemplate.isUpdate &&
-                  (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some((d) => d === user?.user?._id)) &&
-                  (user?.user?._id === quoteData?.pDFTemplate?.owner || quoteData?.pDFTemplate?.collaborator?.some((d) => d === user?.user?._id)) && (
-                    <Button
-                      onClick={() => {
-                        quoteData?.pDFTemplate.optionValue &&
-                          history.push(`/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}`, {
-                            quoteData: quoteData,
-                            version: currentVersion,
-                            redirectTo: `/quotes/detail/${quoteData._id}`
-                          });
-                      }}
-                      variant="outlined"
-                      size="small"
-                      className="mx-1"
-                      startIcon={<AiFillEdit />}
-                      color="primary"
-                    >
-                      Edit Template
-                    </Button>
+                  (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some((d) => d === user?.user?._id)) && (
+                    <Tooltip title="Edit Quote PDF Template">
+                      <Button
+                        onClick={() => {
+                          quoteData?.pDFTemplate.optionValue &&
+                            history.push(`/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}`, {
+                              quoteData: quoteData,
+                              version: currentVersion,
+                              redirectTo: `/quotes/detail/${quoteData._id}`
+                            });
+                        }}
+                        variant="outlined"
+                        size="small"
+                        className="mr-1"
+                        startIcon={isMobile ? '' : <AiFillEdit />}
+                        color="primary"
+                      >
+                        {isMobile ? <AiFillEdit size={20} /> : ''}
+                        {isMobile ? '' : 'Quote Template'}
+                      </Button>
+                    </Tooltip>
                   )}
                 <Tooltip title="AI Suggestion">
-                  <IconButton
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color="primary"
+                    className="mr-1"
+                    startIcon={<GiVintageRobot />}
                     onClick={() => {
                       setShowAiDialog(true);
                     }}
                   >
-                    <GiVintageRobot />
-                  </IconButton>
+                    {isMobile ? '' : 'AI Suggestion'}
+                  </Button>
                 </Tooltip>
+                {ProcessStatus === 'Quote Builder' && (
+                  <Tooltip title="PDF Columns">
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<AiOutlineFilePdf />}
+                      color="primary"
+                      className="mr-1"
+                      onClick={() => {
+                        setShowPDFArrangeColumns(true);
+                      }}
+                    >
+                      {isMobile ? '' : 'PDF Columns'}
+                    </Button>
+                  </Tooltip>
+                )}
+                {ProcessStatus === 'Quote Builder' && (
+                  <Tooltip title="Excel Columns">
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      className="mr-1"
+                      startIcon={<AiOutlineFileExcel />}
+                      color="primary"
+                      onClick={() => {
+                        setShowPDFArrangeColumns(true);
+                      }}
+                    >
+                      {isMobile ? '' : 'Excel Columns'}
+                    </Button>
+                  </Tooltip>
+                )}
               </span>
             ) : null}
-            <Grid item xs={12} sm={12} md={12} className="mt-2">
+            <Grid item xs={12} sm={12} md={12} className="mt-1">
               {quoteData && !loading && productBuilderId ? (
                 // ProcessStatus === "Quote Builder" &&
                 //     visibleColumns.length > 0 ? (
@@ -1586,6 +1592,131 @@ export default function QuoteProcess(props) {
           QuoteStatusChange={QuoteStatusChange}
           accepted={quoteStatusChangeData}
         />
+      )}
+      {showTotalSalesDialog && ProcessStatus !== 'New' && (
+        <Dialog
+          open={showTotalSalesDialog}
+          aria-labelledby="customized-dialog-title"
+          maxWidth="sm"
+          onClose={() => {
+            setShowTotalSalesDialog(false);
+          }}
+          fullWidth
+          fullScreen={fullScreen || isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
+        >
+          <CustomDialogHeader
+            title="Quote Summary"
+            onClose={() => {
+              setShowTotalSalesDialog(false);
+            }}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+              setFullScreen((prevState) => !prevState);
+            }}
+            showManimizeMaximize={true}
+          />
+          <CustomDialogContent>
+            <Grid item className="quoteHeader">
+              <div className={redCard ? 'quoteBox quoteRed' : 'quoteBox quoteProfit'}>
+                <span className="quoteAmount" title={totalProfit.fullFormatAmount}>
+                  {totalProfit.fullFormatAmount ? totalProfit.fullFormatAmount : defaultTotalValue}
+                </span>
+                <div className={'quoteBoxContent'}>
+                  <span className={'quoteDetailHeading'}>Total Profit </span>
+                </div>
+              </div>
+              <div className="quoteBox quoteCost">
+                <span className="quoteAmount" title={totalcost.fullFormatAmount}>
+                  {totalcost.fullFormatAmount ? totalcost.fullFormatAmount : defaultTotalValue}
+                </span>
+                <div className={'quoteBoxContent'}>
+                  <span className={'quoteDetailHeading'}>Total Cost Price </span>
+                </div>
+              </div>
+              {redCard ? (
+                <div className="quoteBox quoteRed">
+                  <div className={'quoteBoxContent'}>
+                    {' '}
+                    <span>Total Selling Price </span>
+                  </div>
+                  <span className="quoteAmount" title={totalsale.fullFormatAmount}>
+                    {totalsale.fullFormatAmount ? totalsale.fullFormatAmount : defaultTotalValue}
+                  </span>
+                </div>
+              ) : (
+                <div className="quoteBox quoteSale">
+                  <span className="quoteAmount" title={totalsale.fullFormatAmount}>
+                    {totalsale.fullFormatAmount ? totalsale.fullFormatAmount : defaultTotalValue}
+                  </span>
+                  <div className={'quoteBoxContent'}>
+                    <span className={'quoteDetailHeading'}>Total Selling Price </span>
+                  </div>
+                </div>
+              )}
+            </Grid>
+          </CustomDialogContent>
+        </Dialog>
+      )}
+      {showPDFArrangeColumns && ProcessStatus !== 'New' && (
+        <Dialog
+          open={showPDFArrangeColumns}
+          aria-labelledby="customized-dialog-title"
+          maxWidth="sm"
+          onClose={() => {
+            setShowPDFArrangeColumns(false);
+          }}
+          fullWidth
+          fullScreen={fullScreen || isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
+        >
+          <CustomDialogHeader
+            title="View Columns"
+            onClose={() => {
+              setShowPDFArrangeColumns(false);
+            }}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+              setFullScreen((prevState) => !prevState);
+            }}
+            showManimizeMaximize={true}
+          />
+          <CustomDialogContent>
+            <Grid container justify="space-between" alignItems="center">
+              <Grid item xs={11} md={11} sm={11}>
+                <FormControl fullWidth className={classes.formControl}>
+                  <Autocomplete
+                    id="demo-mutiple-chip"
+                    disabled={!allowedToEdit}
+                    fullWidth
+                    size="small"
+                    multiple
+                    value={visibleColumns}
+                    onChange={(e, val) => {
+                      setVisibleColumns(val);
+                      handleVersionUpdate(val, versionStatus, state?.selectedRecords);
+                    }}
+                    options={ColumnName}
+                    disableCloseOnSelect
+                    getOptionLabel={(option) => option}
+                    renderOption={(option, { selected }) => (
+                      <React.Fragment>
+                        <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={selected} />
+                        {option}
+                      </React.Fragment>
+                    )}
+                    renderInput={(params) => <TextField {...params} variant="outlined" label="Visible Columns in Quote" placeholder="Select " />}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={1} md={1} sm={1}>
+                <IconButton disabled={!allowedToEdit} title="Re-arrange columns" color="inherit" onClick={() => setRearrangeColumns(true)}>
+                  <ImportExportIcon />
+                </IconButton>
+              </Grid>
+            </Grid>
+          </CustomDialogContent>
+        </Dialog>
       )}
     </>
   );

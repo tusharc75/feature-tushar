@@ -516,6 +516,7 @@ const RepairJob = () => {
         {isMobile ?
           <CustomSwipableList
             allowSelection={true}
+            allowSwipe={true}
             permissions={permissions.repairJob}
             primaryField={columns?.find(d => d.primaryField)}
             onClick={(data) => {
@@ -527,6 +528,7 @@ const RepairJob = () => {
             onEdit={(data) => {
               history.push(`${routes.repairJobDetail.path}/${data._id}?openEdit=true`)
             }}
+            extraParamsToCheckDelete={true}
             onDelete={(data) => {
               setDeleteRecord(data._id);
               setIsConformDialogVisible(true);
@@ -545,6 +547,8 @@ const RepairJob = () => {
               }
             ]}
             onCreate={clickCreateNew}
+            showClone={false}
+            onClone={() => { }}
           /> :
           <CustomAgGrid
             columns={columns}

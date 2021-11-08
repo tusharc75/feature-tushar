@@ -1,3 +1,6 @@
+.MuiStepLabel-label{
+  font-size: 12px !important;
+}
 .nameLink {
   color: #0645ad;
   cursor: pointer;
@@ -14,18 +17,20 @@
 
 .doaAction {
   position: absolute;
-  top: 14px;
+  top: 2px;
   right: 14px;
 }
 .currentStepColor {
   & .MuiStepLabel-iconContainer {
-    color: #0e7723 !important;
+    color: #378280 !important;
     opacity: 1;
-    font-Size: 12px
-
+    font-Size: 12px;
+      active{
+        color: #378280 !important;
+      }
   }
   & .MuiStepLabel-label {
-    color: #0e7723 !important;
+    color: #378280 !important;
     font-weight: 600 !important;
     font-Size: 12px
   }
@@ -33,13 +38,43 @@
 
 .MuiTab-textColorPrimary.Mui-selected {
       border-radius: 0;
-      background: #163340;
-      color: white !important;
-      border-top-right-radius: 12px;
-      border-top-left-radius: 12px;
-}
+      background: white;
+      color: var(--primary) !important;
+      border: 1px solid lightgray;
+  border-top: 4px solid #1B7D1C !important;
+  border-bottom: 0px !important;
 
+      //border-top-right-radius: 12px;
+      //border-top-left-radius: 12px;
+}
+.MuiTab-textColorPrimary{
+  border: 1px solid grey !important;
+  border-radius: 0px !important;
+}
 .tab-font{
   font-size: 14px;
 }
-
+.stepperButton{
+  padding: 0px !important;
+  margin-left: 20px !important;
+  color: #418887 !important;
+}
+.stepperButtonNext{
+  padding: 0px !important;
+  margin-right: 20px !important;
+  color: #418887 !important;
+}
+.MuiButtonBase-root.Mui-disabled{
+  color: grey !important;
+}
+.buttonIconMobile{
+  min-width: 40px !important;
+}
+.setIconForMobile{
+  min-width: 40px !important;
+}
+@media (max-width: 760px){
+  .MuiStepLabel-label{
+    font-size: 10px !important;
+  }
+}

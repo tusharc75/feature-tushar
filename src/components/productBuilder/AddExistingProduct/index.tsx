@@ -54,7 +54,7 @@ const AddExistingProduct = (props) => {
 
 
     useEffect(() => {
-        axiosInstance().get("/product-category").then(({ data: { data } }) => {
+        axiosInstance().get("/product-category?sortBy=name&orderBy=asc").then(({ data: { data } }) => {
             setProductCategoryList(data)
         })
     }, [])
@@ -405,6 +405,7 @@ const AddExistingProduct = (props) => {
                     allowAction={false}
                     loading={loading}
                     refreshGrid={fetchProduct}
+                    renderedFrom="productPage"
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>

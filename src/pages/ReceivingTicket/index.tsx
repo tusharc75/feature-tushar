@@ -564,6 +564,7 @@ const ReceivingTicket = () => {
         {isMobile ?
           <CustomSwipableList
             allowSelection={true}
+            allowSwipe={true}
             permissions={permissions.receivingTicket}
             primaryField={columns?.find(d => d.primaryField)}
             onClick={(data) => {
@@ -575,6 +576,7 @@ const ReceivingTicket = () => {
             onEdit={(data) => {
               history.push(`${routes.receivingTicketDetail.path}/${data._id}?openEdit=true`)
             }}
+            extraParamsToCheckDelete={true}
             onDelete={(data) => {
               setSingleTicketDelete({
                 show: true,
@@ -592,6 +594,8 @@ const ReceivingTicket = () => {
               }
             ]}
             onCreate={clickCreateNew}
+            showClone={false}
+            onClone={() => { }}
           /> :
           <CustomAgGrid
             columns={columns}

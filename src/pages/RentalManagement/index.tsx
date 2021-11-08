@@ -579,6 +579,7 @@ const RentalManagement = () => {
               isMobile ?
                 <CustomSwipableList
                   allowSelection={true}
+                  allowSwipe={true}
                   permissions={permissions.rentalManagement}
                   primaryField={columns?.find(d => d.primaryField)}
                   onClick={(data) => {
@@ -590,6 +591,7 @@ const RentalManagement = () => {
                   onEdit={(data) => {
                     history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
                   }}
+                  extraParamsToCheckDelete={true}
                   onDelete={(data) => {
                     setSingleRentalManagementDelete({
                       show: true,
@@ -607,6 +609,8 @@ const RentalManagement = () => {
                     }
                   ]}
                   onCreate={clickCreateNew}
+                  showClone={false}
+                  onClone={() => { }}
                 /> :
                 <CustomAgGrid
                   columns={columns}
