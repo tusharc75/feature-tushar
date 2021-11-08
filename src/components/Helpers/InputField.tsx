@@ -3,6 +3,7 @@ import { Grid, Box, InputAdornment } from "@material-ui/core";
 
 import FormTypes from "./FormTypes";
 import { setFieldsInAscendingOrder } from "../../constants/helpers";
+import {FaDiceOne} from "react-icons/fa";
 
 const InputField = (props) => {
   const { fieldsData, errors, touched, values, setFieldValue, onImageUploadCompletePercentage, ...rest } = props;
@@ -20,7 +21,10 @@ const InputField = (props) => {
       {formsData &&
         formsData.map((form, i) => (
           <div key={i}>
-            <h2 className="form-label-style">{form.name}</h2>
+            <div className={"detail-box-content"}>
+              <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+              <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+            </div>
             <Box marginY={2}>
               <Grid spacing={3} container>
                 {form.sectionFields.map((field) => (

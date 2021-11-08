@@ -334,7 +334,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                 ></CustomDialogHeader>
                 <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
-                        <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                        {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                         <Box padding={1}>
                             <Grid container spacing={3}>
                                 <Grid item xs={12}>
