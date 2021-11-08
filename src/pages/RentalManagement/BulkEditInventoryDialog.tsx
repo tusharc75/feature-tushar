@@ -9,20 +9,45 @@ import { dateFormatForInputControl } from '../../constants/helpers';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import { startCase } from 'lodash';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
   isSaving: boolean;
   submitBulkEdit: VoidFunction | any;
   currencySymbol: string;
-  data?: object | any
+  data?: object | any;
+  calculatePrice?: VoidFunction | any
 }
 
-const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submitBulkEdit, currencySymbol, data }) => {
-  const [productData, setProductData] = useState(null);
+const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose, isSaving, submitBulkEdit, currencySymbol, data }) => {
+  const [pricing, setPricing] = useState(null);
   const [values, setValues] = useState(null)
   const [isDisabled, setDisabled] = useState(false);
   const [errors, setErrors] = useState(null);
+  const [isPkgInProduct, setPkgInProduct] = useState(false)
+
+
+  useEffect(() => {
+    (async () => {
+      let timeout: ReturnType<typeof setTimeout> = null;
+      if (data) {
+        if (values?.qty > 0 && values?.pricingMethod && values?.UOM) {
+          if (timeout) {
+            clearTimeout(timeout)
+          }
+          timeout = setTimeout(async () => {
+            const priceData = await calculatePrice([data])
+            if (priceData && priceData.length) {
+              setPricing(priceData)
+            }
+          }, 1000)
+
+        } else
+          return
+      }
+    })()
+  }, [values, data])
 
   useEffect(() => {
     if (data) {
@@ -42,6 +67,10 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
         finalPrice: data?.finalPrice || 0
       }
       setValues(newValues)
+
+      if (data.type === "productInPackage") {
+        setPkgInProduct(true)
+      }
     }
 
   }, [data])
@@ -90,7 +119,8 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
   const handleErrors = () => {
     let errs: any = {}
 
-    if (!values.qty) {
+
+    if (!isPkgInProduct && !values.qty) {
       errs.qty = getErrorMsg("Qty.")
     }
     if (!values.price) {
@@ -119,7 +149,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
-                  disabled={isDisabled}
+                  // disabled={isDisabled}
                   label="Qty"
                   name="qty"
                   fullWidth
@@ -147,11 +177,11 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormControl
-                  disabled={isDisabled}
+                  // disabled={isDisabled}
                   size="small"
                   variant="outlined"
                   fullWidth
-                  error={!isDisabled && Boolean(errors?.pricingMethod)}
+                  error={Boolean(errors?.pricingMethod)}
                   required={true}
                 >
                   <InputLabel id="pricing-method-label">
@@ -168,12 +198,12 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
                     <MenuItem value="perWeek">Per Week</MenuItem>
                     <MenuItem value="perMonth">Per Month</MenuItem>
                   </Select>
-                  <FormHelperText id="pricing-method-label">{!isDisabled && Boolean(errors?.pricingMethod) && errors.pricingMethod}</FormHelperText>
+                  <FormHelperText id="pricing-method-label">{Boolean(errors?.pricingMethod) && errors.pricingMethod}</FormHelperText>
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <KeyboardDatePicker
-                  disabled={isDisabled}
+                  disabled={true}
                   maxDate={values?.endDate || new Date()}
                   label="Start Date"
                   name="startDate"
@@ -192,7 +222,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
               </Grid>
               <Grid item xs={12} sm={6}>
                 <KeyboardDatePicker
-                  disabled={isDisabled}
+                  disabled={true}
                   label="End Date"
                   name="endDate"
                   fullWidth
@@ -211,12 +241,12 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormControl
-                  disabled={isDisabled}
+                  // disabled={isDisabled}
                   size="small"
                   variant="outlined"
                   required
                   fullWidth
-                  error={!isDisabled && Boolean(errors?.UOM)}>
+                  error={Boolean(errors?.UOM)}>
                   <InputLabel id="UOM-label">
                     UOM
                   </InputLabel>
@@ -229,17 +259,17 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
                   >
                     <MenuItem value="pcs">Pcs</MenuItem>
                   </Select>
-                  <FormHelperText id="UOM-label">{!isDisabled && Boolean(errors?.UOM) && errors.UOM}</FormHelperText>
+                  <FormHelperText id="UOM-label">{Boolean(errors?.UOM) && errors.UOM}</FormHelperText>
 
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
-                  label="Price"
+                  label={`Price ${(startCase(values?.UOM)) || ""} ${startCase(values?.pricingMethod) || ""}`}
                   name="price"
                   required
-                  error={!isDisabled && Boolean(errors?.price)}
-                  helperText={!isDisabled && Boolean(errors?.price) && errors.price}
+                  error={Boolean(errors?.price)}
+                  helperText={Boolean(errors?.price) && errors.price}
                   fullWidth
                   InputProps={{
                     startAdornment: (

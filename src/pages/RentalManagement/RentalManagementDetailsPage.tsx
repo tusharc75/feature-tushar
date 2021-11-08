@@ -49,8 +49,9 @@ import SerializedAssetStep from "./SerializedAssetStep";
 import MaterialTableComponent from "../../components/Shared/MaterialTableComponent";
 import { Column } from "material-table";
 import moment from "moment";
-import { startCase } from "lodash";
+import { camelCase, startCase } from "lodash";
 import queryString from "query-string";
+import PackageProductsDialog from './PackageProductsDialog'
 
 const rentalProcessSteps = ["New", "Additional Cost", "Serialized Asset", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
@@ -172,10 +173,19 @@ const RentalManagementDetailsPage = () => {
       data.supplier = [];
       data.customer = [rentalManagementData?.customerAccount.optionValue];
       data.warehouse = [];
-      axiosInstance().post(pricingConditionApi + `/calculatePrice`, data).then(({ data: { data } }) => {
-        console.log(data)
+
+      return new Promise((resolve, reject) => {
+        axiosInstance().post(pricingConditionApi + `/calculatePrice`, data)
+          .then(({ data: { data } }) => {
+            resolve(data)
+          }).catch(err => {
+
+            reject(err)
+
+          })
       })
     }
+
   };
 
   const updateStatus = () => {
@@ -671,12 +681,12 @@ const RentalManagementDetailsPage = () => {
     },
     {
       field: 'price',
-      title: `Price ${currencySymbol}`,
+      title: `Price (${currencySymbol})`,
       cellStyle: { padding: "0px" },
       emptyValue: '- - - - -',
       render: (rowData) => (
         <div style={{ width: 100 }}>
-          <p>{rowData.price && rowData.price !== 0 ? rowData.price : "- - - - -"} </p>
+          <p>{rowData.price ? rowData.price : "- - - - -"} </p>
         </div>
       )
     },
@@ -693,12 +703,12 @@ const RentalManagementDetailsPage = () => {
     },
     {
       field: 'finalPrice',
-      title: `Final Price ${currencySymbol}`,
+      title: `Final Price (${currencySymbol})`,
       emptyValue: '- - - - -',
       cellStyle: { padding: "0px" },
       render: (rowData) => (
         <div style={{ width: 100 }}>
-          <p>{rowData.finalPrice && rowData.finalPrice !== 0 ? rowData.finalPrice : "- - - - -"}</p>
+          <p>{rowData.finalPrice ? rowData.finalPrice : "- - - - -"}</p>
         </div>
       )
     }
@@ -832,14 +842,25 @@ const RentalManagementDetailsPage = () => {
   }
 
 
-  const handleSingleEdit = (values: any) => {
-
-    console.log(values)
-
-    calculatePricing([values])
-
+  const handleSingleEdit = async (values: any) => {
     setUpdating(true)
-    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/updateOne`, values)
+    const newValues = { ...values };
+    const pricing: any = await calculatePricing([values])
+
+    newValues.type = camelCase(newValues.type)
+    if (pricing && pricing.length) {
+      newValues.price = pricing[0].mrp
+      const startDate = moment(newValues?.startDate)
+      const endDate = moment(newValues?.endDate)
+      const diff = endDate.diff(startDate, "days");
+
+      newValues.finalPrice = diff !== 0
+        ? newValues.price * diff * newValues.qty
+        : newValues.price * newValues.qty
+
+    }
+
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/updateOne`, newValues)
       .then(() => {
         setUpdating(false)
         setProductEdit(false)
@@ -1477,21 +1498,21 @@ const RentalManagementDetailsPage = () => {
         okBtnLoading={isDeleting}
       />}
       {Boolean(packageForProducts)
-        && <AssignQuantityDialog
-          ids={[packageForProducts?._id]}
-          label="Select Product"
+        && <PackageProductsDialog
+          rentalId={id}
+          packageId={packageForProducts?._id}
+          products={packageForProducts?.products.map(p => p._id)}
           onClose={() => setPackageForProducts(null)}
+          rentalApi={rentalManagement.rentalManagementApi}
           onSuccess={() => {
             setPackageForProducts(null)
             fetchProductInventory()
           }}
-          resource="/product"
-          resourceData={packageForProducts?.products}
-          title="Assign Products"
         />
       }
       {isProductEdit &&
         <BulkEditInventoryDialog
+          calculatePrice={calculatePricing}
           isSaving={isUpdating}
           onClose={() => {
             setProductEdit(false)
