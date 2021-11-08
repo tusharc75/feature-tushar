@@ -1093,6 +1093,23 @@ body::-webkit-scrollbar-thumb {
   .detail-box {
     padding: 5px 0px 0px 0px;
   }
+  .form-label-style {
+    color: var(--secondary);
+    font-size: 0.6rem;
+    padding: 0 0 0 6px;
+    text-align: left;
+    //padding-bottom: 6px;
+  }
+  .title-layout{
+    font-size: 0.8rem !important;
+  }
+  .close{
+    top: 8px !important;
+  }
+  .close-button{
+    width: 18px !important;
+    height: auto;
+  }
 }
 @media only screen and (max-width: 830px) {
   .redQuoteBox {
