@@ -317,7 +317,7 @@ const Product = () => {
 
     const ProductNameRenderer = params => (
         <Link className="link text-truncate" title={params?.data?.productDescription} to={`${routes.productDetail.path}/${params.data._id}`}>
-            {params?.data?.productDescription}
+            {params?.data?.productDescription ?? params?.data?.productName}
         </Link>
     )
 
