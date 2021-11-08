@@ -55,7 +55,7 @@ export const UpdatedByRenderer = params => params.value ? (
 
 const getTitle = data => {
     if (data.length) {
-        let restParams = data.map(o => o?.optionLabel ? o?.optionLabel : typeof o !== "object" ? o : "").join(" , ")
+        let restParams = data.map(o => o?.optionLabel ? o?.optionLabel : typeof o !== "object" ? o : "").join(", ")
         return restParams
     }
     return ""

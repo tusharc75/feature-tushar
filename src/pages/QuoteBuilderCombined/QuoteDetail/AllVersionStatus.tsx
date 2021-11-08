@@ -1,4 +1,4 @@
-import { IconButton, Tooltip } from '@material-ui/core';
+import { Dialog, IconButton, Tooltip } from '@material-ui/core';
 import { useContext, useReducer, useState } from 'react'
 import axiosInstance from '../../../axios/axiosInstance';
 import { formatAmountWithCurrency, gridLoadingTimeout } from '../../../constants/helpers';
@@ -9,6 +9,9 @@ import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridCo
 import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomRenderCell from '../../../components/Helpers/CustomRenderCell';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const DOASteps = [
     {
@@ -37,12 +40,13 @@ const DOASteps = [
     },
 ];
 
-export default function AllVersionStatus({ quoteId, quoteData, quotePermissions, fetchQuoteData, handleChangeVersionFromAllVersion, handleCloneQuoteWithVersionFromAllVersion }) {
+export default function AllVersionStatus({ open, onClose, quoteId, quoteData, quotePermissions, fetchQuoteData, handleChangeVersionFromAllVersion, handleCloneQuoteWithVersionFromAllVersion }) {
 
     const toastConfig = useContext(CustomToastContext);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     const [columns,] = useState([
         { field: "versionNumber", headerName: "Version #", show: true, width: 140, disabled: true, cellRenderer: "nameRenderer" },
@@ -136,22 +140,41 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
     };
 
     return (
-        <div style={{ maxHeight: 500, width: "100%" }} className="mt-2">
-            <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameworkComponents}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={150}
-                allowSelection={false}
-                loading={loading}
-                refreshGrid={getVersionStatus}
+        <Dialog
+            maxWidth="md"
+            aria-labelledby="customized-dialog-title"
+            open={open}
+            onClose={onClose}
+            fullWidth
+            fullScreen={fullScreen || (isMobile || isTablet)}
+        >
+            <CustomDialogHeader
+                title={`All Version Status`}
+                onClose={onClose}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                    setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
             />
-        </div>
+            <CustomDialogContent>
+                <CustomAgGrid
+                    columns={columns}
+                    dataRows={dataRows}
+                    frameworkComponents={frameworkComponents}
+                    setGridApi={setGridApi}
+                    dispatch={dispatch}
+                    rowCount={rowCount}
+                    limit={limit}
+                    pageSizes={pageSizes}
+                    page={page}
+                    actionWidth={150}
+                    allowSelection={false}
+                    loading={loading}
+                    refreshGrid={getVersionStatus}
+                />
+            </CustomDialogContent>
+        </Dialog>
+
     )
 }

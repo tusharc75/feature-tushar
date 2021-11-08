@@ -105,17 +105,21 @@ import SalesOrderDetails from "./pages/SalesOrderCreation/SalesOrderDetails";
 import PackageList from "./pages/Packages";
 import PackageDetails from "./pages/Packages/PackageDetails";
 import BOMTable from "./pages/BOM";
+import PurchaseOrder from "./pages/PurchaseOrder";
+import { entity } from "./constants/helpers"
 
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
   const [isOffline, setIsOffline] = useState(false);
+  let mappedEntities = JSON.parse(localStorage.getItem("mappedEntities"))
 
   const {
     state: { user },
     dispatch,
   }: any = useData();
+  const { entityApi } = entity
 
   const history = useHistory();
 
@@ -157,6 +161,23 @@ function App() {
       setIsOffline(true);
     }
   }, false);
+
+  useEffect(() => {
+    if (!mappedEntities) {
+      axiosInstance()
+        .get(`${entityApi}`)
+        .then(({ data: { data } }) => {
+          let mappedEntities = []
+          if (data && data.length) {
+            data.forEach(o => {
+              mappedEntities = [...mappedEntities,
+              { optionLabel: o?.entityName, optionValue: o?._id }]
+            })
+          }
+          localStorage.setItem("mappedEntities", JSON.stringify(mappedEntities))
+        })
+    }
+  }, [mappedEntities])
 
   const getNotification = async () => {
     if (localStorage.getItem("token")) {
@@ -611,7 +632,9 @@ function App() {
             <PrivateRoute exact path={`${routes.packagesDetail.path}/:id`} >
               <PackageDetails />
             </PrivateRoute>
-
+            <PrivateRoute exact path={routes.purchaseOrder.path} >
+              <PurchaseOrder />
+            </PrivateRoute>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
           </Switch>

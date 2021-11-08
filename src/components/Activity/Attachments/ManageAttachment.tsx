@@ -462,13 +462,17 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                             if (isFieldNotTouched(initialValues, values)) handleClose()
                             else setShowConfirmDialog(true)
                         }}>Cancel</Button>
-                    <CustomButton
-                        type="button"
+                    {
+                        canEdit &&
+                        <CustomButton
+                            type="button"
 
-                        color="primary"
-                        disabled={loading || uploadingImageOrFileProgress > 0 || otherAttachments.length === 0}
-                        loading={loading}
-                        variant="contained" onClick={submitForm}>Save</CustomButton>
+                            color="primary"
+                            disabled={loading || uploadingImageOrFileProgress > 0 || otherAttachments.length === 0}
+                            loading={loading}
+                            variant="contained" onClick={submitForm}>
+                            Save
+                        </CustomButton>}
                 </CustomDialogFooter>
                 {
                     showConfirmDialog ?

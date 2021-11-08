@@ -125,7 +125,7 @@
 .MuiOutlinedInput-input {
   font-size: 0.9rem !important;
 }
-Button.MuiButtonBase-root {
+Button.MuiButtonBase-root:not(.MuiFab-root) {
   border-radius: 0.2rem;
   // text-transform: capitalize !important;
 }
@@ -368,4 +368,10 @@ Button.MuiButtonBase-root {
   .MuiDialog-paper {
     overflow-y: hidden !important;
   }
+}
+
+.fab-position-b-r {
+  position: fixed !important;
+  bottom: 10px !important;
+  right: 20px !important;
 }

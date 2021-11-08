@@ -26,6 +26,7 @@ import ButtonGroup from "@material-ui/core/ButtonGroup/ButtonGroup";
 import Add from "@material-ui/icons/Add";
 import Delete from "@material-ui/icons/Delete";
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import { MdEdit, MdDelete } from 'react-icons/md';
 import DeliveryTicket from "./DeliveryTicket";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementDialog";
@@ -49,6 +50,7 @@ import MaterialTableComponent from "../../components/Shared/MaterialTableCompone
 import { Column } from "material-table";
 import moment from "moment";
 import { startCase } from "lodash";
+import queryString from "query-string";
 
 const rentalProcessSteps = ["New", "Additional Cost", "Serialized Asset", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
@@ -58,6 +60,9 @@ const RentalManagementDetailsPage = () => {
 
   const { id } = useParams();
   const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit } = parsed;
+
   const {
     state: { user, permissions }
   }: any = useData();
@@ -269,7 +274,18 @@ const RentalManagementDetailsPage = () => {
           (d) => d.currencyCode === data["currency"]
         )?.symbolNative
       );
-      setAllowedToEdit([...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id));
+
+      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+
+      setAllowedToEdit(isAllowedToEdit);
+
+      if (isAllowedToEdit && openEdit === "true") {
+        setOpenUpdateDialog(true)
+        const params = new URLSearchParams()
+        params.delete("openEdit")
+        history.push({ search: params.toString() })
+      }
+
     } catch (error) {
       setLoadingDetails(false)
       toastConfig.setToastConfig(error);
@@ -350,8 +366,21 @@ const RentalManagementDetailsPage = () => {
         id: u._id,
         detail: u.packageName,
         description: u.packageDescription,
-
       })));
+      tempInventory = tempInventory.map(u => {
+        let qty = parseInt(u?.quantity || u?.qty) || 0
+        let price = qty > 0 ? (parseInt(u?.price) * qty) || (parseInt(u?.mrp) * qty) || 0 : (parseInt(u.price) || 0)
+        let discount = parseInt(u?.discount) || 0
+        let finalPrice = parseInt(u?.finalPrice) || 0
+
+        finalPrice = (discount > 0 && price > 0) ? price - ((price * discount) / 100) : price
+        return {
+          ...u,
+          qty: qty,
+          finalPrice: finalPrice
+        }
+      })
+
       setProductInventory(tempInventory)
 
       tempInventory = restructureRowData(tempInventory)
@@ -858,12 +887,24 @@ const RentalManagementDetailsPage = () => {
 
                     {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
                       <Button
+                        className="buttonStyleBigScreen"
                         variant="contained"
                         color="primary"
                         size="small"
                         onClick={handleOpenUpdateDialog}
                       >
                         Edit
+                      </Button>
+                    )}
+                    {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
+                      <Button
+                        className="buttonStyleSmallScreen"
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={handleOpenUpdateDialog}
+                      >
+                        <MdEdit size={24} />
                       </Button>
                     )}
 
@@ -873,9 +914,24 @@ const RentalManagementDetailsPage = () => {
                         user?.user?._id &&
                         rentalManagementData.owner.optionValue === user.user._id ? (
                         <DeleteButton
+
                           text="Delete"
+                          className={"buttonDeleteBigScreen"}
                           onClick={() => setShowConfirmBox(true)}
                         />
+                      ) : null}
+                    </HideWhenOffline>
+                    <HideWhenOffline>
+                      {permissions?.rentalManagement?.isDelete &&
+                        rentalManagementData?.owner?.optionValue &&
+                        user?.user?._id &&
+                        rentalManagementData.owner.optionValue === user.user._id ? (
+                        <Button
+                          className="buttonDeleteSmallScreen"
+                          onClick={() => setShowConfirmBox(true)}
+                        >
+                          <MdDelete size={24} />
+                        </Button>
                       ) : null}
                     </HideWhenOffline>
                   </DetailsPageHeader>

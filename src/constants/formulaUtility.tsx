@@ -123,9 +123,14 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
         }
         resultValues = handleFormula(fieldData, fields, values, name, value, resultValues, true);
         resultValues = handleCheckVlookupReverse(fieldData, fields, values, name, value, resultValues);
-        if (fieldData.type === 'dropDown') {
-            fields && fields.filter((_f: any) => _f.type === "dropDown" && _f.isDependentDropdown && _f.dropdowDependentOn === fieldData.fieldName).forEach((_r: any) => {
-                resultValues[_r.fieldName] = ""
+        if (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') {
+            fields && fields.filter((_f: any) => (_f.type === "dropDown" || _f.type === 'multiSelect') && _f.isDependentDropdown && _f.dropdowDependentOn === fieldData.fieldName).forEach((_r: any) => {
+                if (fieldData.type === 'dropDown') {
+                    resultValues[_r.fieldName] = ""
+                }
+                else {
+                    resultValues[_r.fieldName] = []
+                }
             });
         }
         for (var x in resultValues) {
@@ -450,6 +455,36 @@ export const extractFields = (fields) => {
     return result
 }
 
+export const extractFieldsForDisplay = (fields) => {
+    const result: any = []
+    fields.forEach(_field => {
+        let ele = { ..._field }
+        if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
+            if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
+                ele.displayUnits && ele.displayUnits.forEach(_unit => {
+                    result.push({ ...ele, fieldLabel: ele.fieldLabel + " (" + _unit + ")", fieldName: ele.fieldName + "_" + _unit.toLowerCase() })
+                })
+            }
+            else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
+                ele.displayCurrency && ele.displayCurrency.forEach(_currency => {
+                    ele.displayUnits && ele.displayUnits.forEach(_unit => {
+                        result.push({ ...ele, fieldLabel: ele.fieldLabel + " (" + _currency + "/" + _unit + ")", fieldName: ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase() })
+                    })
+                })
+            }
+            else if (ele.type === 'currencyAmount') {
+                ele.displayCurrency && ele.displayCurrency.forEach(_currency => {
+                    result.push({ ...ele, fieldLabel: ele.fieldLabel + " (" + _currency + ")", fieldName: ele.fieldName + "_" + _currency.toLowerCase() })
+                })
+            }
+        }
+        else {
+            result.push(ele)
+        }
+    })
+    return result
+}
+
 export const autoCalculate = (values: any, fieldList: any) => {
     const returnvalues: any = values;
     fieldList.forEach((ele: any) => {
@@ -521,7 +556,7 @@ export const autoCalculate = (values: any, fieldList: any) => {
                 }
             }
             for (const x in calValues) {
-                if (calValues[x] === 0 || calValues[x] === '') {
+                if (calValues[x] === 0 || calValues[x] === '' || (values[x] && values[x] !== '')) {
                     delete calValues[x];
                 }
             }

@@ -11,24 +11,29 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import FileCopyIcon from "@material-ui/icons/FileCopy";
 import { Link } from "react-router-dom";
 import { ExpandMore } from "@material-ui/icons";
-import { Menu, MenuItem } from "@material-ui/core";
+import { Menu, MenuItem, Dialog, TextField } from "@material-ui/core";
 import { AddField } from "../FormBuilder/AddField";
 import ConfirmationDialog from "../Helpers/ConfirmationDialog";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import ImportExportLinks from "../Product/ImportExportLinks";
 import { orderBy, sortBy, uniq, map } from "lodash";
-import CustomAgGridEditable, {
-  reducer,
-  intialState,
-} from "../../components/AgGridComponents/CustomAgGridEditable";
+import CustomAgGridEditable, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGridEditable";
 import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import BulkEditDialog from "./BulkEditDialog";
 import Loader from "../Loader";
-import { handleAutoCalculation } from "../../constants/formulaUtility";
-import { gridLoadingTimeout } from "../../constants/helpers";
-import NoDataCell from "../../components/Helpers/NoDataCell";
+import { handleAutoCalculation, extractFields } from "../../constants/formulaUtility";
+import { CustomDialogTransition, gridLoadingTimeout } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
+import { isMobile } from "react-device-detect";
+import { AiTwotoneEdit } from 'react-icons/ai';
+import CustomSwipableList from "../SwipableListComponents/CustomSwipableList";
+import CustomDialogContent from "../CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
+import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
+import CustomButton from "../Helpers/CustomButton";
+import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import { prepareDataForGrid } from "../../constants/helpers";
 
 let levalOrderBy = [
   "product",
@@ -58,11 +63,10 @@ const ProductBuilder = (props) => {
 
   const toastConfig = useContext(CustomToastContext);
 
-  const [product, setProduct] = useState([]);
-  const [productFields, setProductFields] = useState([]);
-
-  const [columns, setColumns] = useState(null);
   const [productData, setProductData] = useState(null);
+  const [productId, setProductId] = useState(null);
+  const [productDataList, setproductDataList] = useState([]);
+
   const [anchorEl, setAnchorEl] = useState(null);
   const [isAddField, setIsAddField] = useState(false);
   const [addFieldData, setaddFieldData] = useState({ section: [], fields: [] });
@@ -70,24 +74,80 @@ const ProductBuilder = (props) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isClone, setIsClone] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
-  const [productDataList, setproductDataList] = useState([]);
+  // const [showProductNumberOrProductNameUpdate, setShowProductNumberOrProductNameUpdate] =
+  //   useState({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
+
+  const [dataToShowForMobile, setDataToShowForMobile] = useState([]);
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const {
-    dataRows,
-    rowCount,
-    loading,
-    page,
-    limit,
-    pageSizes,
-    selectedRecords,
-  } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  const [frameWorkComponent, setFrameWorkComponent] = useState(null)
+  const [columns, setColumns] = useState(null);
 
   useEffect(() => {
     fetchProduct(productBuilderId);
   }, [productBuilderId]);
+
+  const fetchProduct = (id) => {
+    dispatch({ type: "loading", loading: true });
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+    axiosInstance().get(`/productbuilder/getproduct/${id}`).then(({ data: { data } }) => {
+      setProductData(data);
+      let rows = data.product.map((item, index) => {
+        let res: any = {
+          ...prepareDataForGrid(item),
+        };
+        res.srno = index + 1;
+        res.isChecked = false;
+        res.canDelete = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
+        res.allowedToEdit = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
+        return res;
+      });
+      let columns = []
+      columns = [
+        {
+          field: "srno",
+          headerName: "Item #",
+          width: 150,
+          show: true,
+          disabled: true,
+          cellRenderer: "productNameRenderer",
+          primaryField: true
+        },
+      ];
+      let rendererNames = [];
+      let fields = data.productFields
+      data.productTemplate?.forEach((ele) => {
+        fields = [...fields, ...ele.fields]
+      })
+      data.priceTemplate?.forEach((ele) => {
+        fields = [...fields, ...ele.fields]
+      })
+      GenrateColoum(fields, columns, rendererNames);
+      columns = sortBy(columns, function (item: any) {
+        return levalOrderBy.indexOf(item.leval)
+      });
+      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+      tempFrameworkComponent = {
+        commonRenderer: CommonRenderer,
+        productNameRenderer: ProductNameRenderer,
+        actionsRenderer: ActionsRenderer,
+        ...tempFrameworkComponent,
+      }
+      setFrameWorkComponent({ ...tempFrameworkComponent })
+      setColumns([...columns])
+      dispatch({ type: "initialize", data: rows, count: rows.length });
+      setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
+      refreshProducts(data.product);
+    })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const ActionsRenderer = (params) => {
     const permission = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
@@ -109,6 +169,7 @@ const ProductBuilder = (props) => {
         </IconButton>
         <IconButton
           disabled={permission ? false : true}
+          size="small"
           aria-label="Edit"
           onClick={() => {
             openProductModel(params.data._id)
@@ -121,6 +182,7 @@ const ProductBuilder = (props) => {
         </IconButton>
         <IconButton
           disabled={permission ? false : true}
+          size="small"
           aria-label="Delete"
           onClick={() => {
             setDeleteRecord(params.data);
@@ -135,21 +197,6 @@ const ProductBuilder = (props) => {
       </>
     );
   };
-
-  const EntityNameRenderer = (params) => params.value ? (
-    <>
-      <h5 className="createBy d-flex">
-        <Link className="link" title={params.value} to={`${routes.entity.path}/detail/${params.data.entityId}`}>
-          {params.value}
-        </Link>
-        {params.data.restEntity.length > 0 && (
-          <span className="createdAtTime badge-date">{`+${params.data.restEntity.length} more..`}</span>
-        )}
-      </h5>
-    </>
-  ) : (
-    <NoDataCell />
-  );
 
   const ProductNameRenderer = (params) => (
     <>
@@ -168,193 +215,113 @@ const ProductBuilder = (props) => {
     </>
   );
 
-  const frameworkComponents = {
-    actionsRenderer: ActionsRenderer,
-    commonRenderer: CommonRenderer,
-    entityRenderer: EntityNameRenderer,
-    productNameRenderer: ProductNameRenderer,
-  };
-
-  const fetchProduct = (id) => {
-    dispatch({ type: "loading", loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-    axiosInstance().get(`/productbuilder/getproduct/${id}`).then(({ data: { data } }) => {
-      setProduct(data.data.product);
-      setProductFields(data.data.productFields);
-      setColumns(null);
-      let column = [
-        {
-          field: "srno",
-          headerName: "Item #",
-          width: 70,
-          show: true,
-          disabled: true,
-          cellRenderer: "productNameRenderer",
-        },
-      ];
-      GenrateColoum(data.data.productFields, column);
-      data = data.data.product?.map((u, index) => {
-        const { entity, ...restProperties } = u;
-        const [firstEntity, ...restEntity] = entity ? entity : [];
-        let res = {
-          ...restProperties,
-          id: u._id,
-          srno: index + 1,
-          entity: firstEntity?.optionLabel,
-          entityId: firstEntity?.optionValue,
-          restEntity: restEntity,
-          serializedProduct: u.serializedProduct && u.serializedProduct.toString()
-        }
-        for (let col in res) {
-          if (res[col] && res[col].optionLabel) {
-            res[col] = res[col].optionLabel;
-          }
-        }
-        return res;
-      });
-      data.forEach((row) => {
-        GenrateColoum(row.fields, column);
-      });
-      column = orderBy(column, "order", "asc");
-      column = sortBy(column, (item: any) => {
-        return levalOrderBy.indexOf(item.leval);
-      });
-      column.forEach(m => {
-        m.show = true
-      })
-      const columnState = JSON.parse(localStorage.getItem("productBuilderGrid"));
-      if (columnState) {
-        column.forEach((item) => {
-          columnState.forEach((d) => {
-            if (d.colId == item.field) {
-              item.show = !d.hide;
-            }
-          });
-        });
-      }
-      setColumns(column);
-      dispatch({ type: "initialize", data: [], count: 0 });
-      dispatch({ type: "initialize", data: data, count: data.length });
-      setTimeout(() => {
-        dispatch({ type: "loading", loading: false });
-      }, gridLoadingTimeout);
-      refreshProducts(data);
-    })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const GenrateColoum = (fields, column) => {
+  const GenrateColoum = (fields, column, rendererNames) => {
     let _fields = fields;
-    if (stage && stage === "product") { _fields = fields.filter((t) => t.leval === "product" || t.leval === "product-custom" || t.leval === "product-template"); }
+    if (stage && stage === "product") {
+      _fields = fields.filter((t) => t.leval === "product" || t.leval === "product-custom" || t.leval === "product-template");
+    }
     _fields.forEach((ele) => {
       if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
         if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
-          ele.displayUnits && Array.isArray(ele.displayUnits) && ele.displayUnits.forEach((_unit) => {
-            let fieldName = ele.fieldName + "_" + _unit.toLowerCase();
-            let fieldLabel = ele.fieldLabel + " " + _unit;
+          ele.displayUnits.forEach((_unit) => {
+            let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
+            let fieldLabel = ele.fieldLabel + " " + _unit
             if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-              let col: any = {};
-              col.field = fieldName;
-              col.headerName = fieldLabel;
-              col.width = 180;
-              if (!ele.isFormula && !ele.isUneditable && Editable) {
+              let col: any = {}
+              col.field = fieldName
+              col.headerName = fieldLabel
+              col.width = 180
+              col.show = true
+              col.leval = ele.leval
+              if (!ele.isFormula && !ele.isUneditable && Editable && ele.leval !== 'product' && ele.leval !== 'product-custom') {
                 col.cellRenderer = "commonRenderer";
                 col.cellEditor = "numericCellEditor";
                 col.editable = true;
               } else {
                 col.cellRenderer = "commonRenderer";
               }
-              column.push(col);
+              column.push(col)
             }
-          });
-        } else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
-          ele.displayUnits && Array.isArray(ele.displayUnits) && ele.displayUnits.forEach((_unit) => {
-            ele.displayCurrency && Array.isArray(ele.displayCurrency) && ele.displayCurrency.forEach((_currency) => {
-              let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase();
-              let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency;
+          })
+        }
+        else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+          ele.displayUnits.forEach((_unit) => {
+            ele.displayCurrency.forEach((_currency) => {
+              let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
+              let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
               if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                let col: any = {};
-                col.field = fieldName;
-                col.headerName = fieldLabel;
-                col.width = 180;
-                if (!ele.isFormula && !ele.isUneditable && Editable) {
+                let col: any = {}
+                col.field = fieldName
+                col.headerName = fieldLabel
+                col.width = 180
+                col.show = true
+                col.leval = ele.leval
+                if (!ele.isFormula && !ele.isUneditable && Editable && ele.leval !== 'product' && ele.leval !== 'product-custom') {
                   col.cellRenderer = "commonRenderer";
                   col.cellEditor = "numericCellEditor";
                   col.editable = true;
                 } else {
                   col.cellRenderer = "commonRenderer";
                 }
-                column.push(col);
+                column.push(col)
               }
-            });
-          });
-        } else if (ele.type === "currencyAmount") {
-          ele.displayCurrency && Array.isArray(ele.displayCurrency) && ele.displayCurrency.forEach((_currency) => {
-            let fieldName = ele.fieldName + "_" + _currency.toLowerCase();
-            let fieldLabel = ele.fieldLabel + " " + _currency;
+            })
+          })
+        }
+        else if (ele.type === "currencyAmount") {
+          ele.displayCurrency.forEach((_currency) => {
+            let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
+            let fieldLabel = ele.fieldLabel + " " + _currency
             if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-              let col: any = {};
-              col.field = fieldName;
-              col.headerName = fieldLabel;
-              col.width = 180;
-              if (!ele.isFormula && !ele.isUneditable && Editable) {
+              let col: any = {}
+              col.field = fieldName
+              col.headerName = fieldLabel
+              col.width = 180
+              col.show = true
+              col.leval = ele.leval
+              if (!ele.isFormula && !ele.isUneditable && Editable && ele.leval !== 'product' && ele.leval !== 'product-custom') {
                 col.cellRenderer = "commonRenderer";
                 col.cellEditor = "numericCellEditor";
                 col.editable = true;
               } else {
                 col.cellRenderer = "commonRenderer";
               }
-              column.push(col);
+              column.push(col)
             }
-          });
-        }
-      } else {
-        if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-          let col: any = {};
-          col.field = ele.fieldName;
-          col.headerName = ele.fieldLabel;
-          col.width = 180;
-          col.cellRenderer = "commonRenderer";
-          if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
-            if (!ele.isFormula && !ele.isUneditable && Editable) {
-              col.cellRenderer = "commonRenderer";
-              if (ele.type === "decimal" || ele.type === "percent") {
-                col.cellEditor = "numericCellEditor";
-              }
-              col.editable = true;
-            } else {
-              col.cellRenderer = "commonRenderer";
-            }
-          }
-          if (ele.fieldName === "entity") {
-            col.cellRenderer = "entityRenderer"
-          }
-          column.push(col);
+          })
         }
       }
-    });
+      else {
+        if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
+          let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path, true)
+          if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
+            if (!ele.isFormula && !ele.isUneditable && Editable && ele.leval !== 'product' && ele.leval !== 'product-custom') {
+              if (ele.type === "decimal" || ele.type === "percent") {
+                currentColumn.columnData.cellEditor = "numericCellEditor";
+              }
+              currentColumn.columnData.editable = true;
+            }
+          }
+          column.push({ ...currentColumn.columnData, leval: ele.leval });
+          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+            rendererNames.push(currentColumn?.rendererName)
+          }
+        }
+      }
+    })
   }
 
   const openProductModel = (id) => {
-    const result = product.filter((_f) => _f._id === id);
-    if (result.length) {
-      setProductData({ ...result[0], fields: [...productFields, ...result[0].fields] });
-    }
+    setProductId(id);
   }
 
   const addProductInBuilder = (rows) => {
     let data: any = {};
     data.product = rows;
     data._id = productBuilderId;
-    axiosInstance()
-      .post(`/productbuilder/addproduct`, data)
-      .then(() => {
-        fetchProduct(productBuilderId);
-      })
+    axiosInstance().post(`/productbuilder/addproduct`, data).then(() => {
+      fetchProduct(productBuilderId);
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -363,20 +330,18 @@ const ProductBuilder = (props) => {
   const handleSaveProduct = (rows) => {
     if (isClone) {
       addProductInBuilder(rows);
-      setProductData(null);
+      setProductId(null);
       setIsClone(false);
     } else {
       let data: any = {};
       data.product = rows;
       data._id = productBuilderId;
-      axiosInstance()
-        .put(`/productbuilder/updateProduct`, data)
-        .then(() => {
-          setProductData(null);
-          setIsBulkEdit(false);
-          setproductDataList([]);
-          fetchProduct(productBuilderId);
-        })
+      axiosInstance().put(`/productbuilder/updateProduct`, data).then(() => {
+        setProductId(null);
+        setIsBulkEdit(false);
+        setproductDataList([]);
+        fetchProduct(productBuilderId);
+      })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -393,14 +358,12 @@ const ProductBuilder = (props) => {
     let data: any = {};
     data.productBuilderId = productBuilderId;
     data._ids = ids;
-    axiosInstance()
-      .post(`/productbuilder/deleteproduct`, data)
-      .then(() => {
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
-        setAnchorEl(null);
-        fetchProduct(productBuilderId);
-      })
+    axiosInstance().post(`/productbuilder/deleteproduct`, data).then(() => {
+      setShowDeleteConfirmBox(false);
+      setDeleteRecord(null);
+      setAnchorEl(null);
+      fetchProduct(productBuilderId);
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -415,58 +378,27 @@ const ProductBuilder = (props) => {
   };
 
   const handleOpenAddField = () => {
-    const rows: any = product.filter((data) =>
+    const rows: any = productData.product.filter((data) =>
       selectedRecords.some((rec) => rec._id === data._id)
     );
-    let section: any = [];
-    let fields: any = [];
-    section = uniq(map(rows[0].fields, "sectionName"));
-    rows[0].fields.forEach((_field) => {
-      let fid = { ..._field };
-      if (
-        fid.type !== "currencyAmount" &&
-        (fid.type === "converter" || fid.isConverter === true)
-      ) {
-        fid.displayUnits &&
-          fid.displayUnits.forEach((_unit) => {
-            fields.push({
-              ...fid,
-              fieldLabel: fid.fieldLabel + " " + _unit,
-              fieldName: fid.fieldName + "_" + _unit.toLowerCase(),
-            });
-          });
-      } else if (fid.type === "currencyAmount") {
-        fid.displayCurrency &&
-          fid.displayCurrency.forEach((_currency) => {
-            if (fid.isConverter) {
-              fid.displayUnits &&
-                fid.displayUnits.forEach((_unit) => {
-                  fields.push({
-                    ...fid,
-                    fieldLabel: fid.fieldLabel + " " + _unit,
-                    fieldName:
-                      fid.fieldName +
-                      "_" +
-                      _currency.toLowerCase() +
-                      "_" +
-                      _unit.toLowerCase(),
-                  });
-                });
-            } else {
-              fields.push({
-                ...fid,
-                fieldLabel: fid.fieldLabel + " " + _currency,
-                fieldName: fid.fieldName + "_" + _currency.toLowerCase(),
-              });
-            }
-          });
-      } else {
-        fields.push(fid);
+    if (rows.length) {
+      let section: any = [];
+      let fields = productData.productFields
+      fields = [...fields, ...rows[0].fields]
+      const productTemplate: any = productData?.productTemplate?.filter((e) => e._id === rows[0]?.productTemplate?.optionValue);
+      if (productTemplate.length) {
+        fields = [...fields, ...productTemplate[0].fields]
       }
-    });
-    setaddFieldData({ section: section, fields: fields });
-    setIsAddField(true);
-    setAnchorEl(null);
+      const priceTemplate: any = productData?.priceTemplate?.filter((e) => e._id === rows[0]?.priceTemplate?.optionValue);
+      if (priceTemplate.length) {
+        fields = [...fields, ...priceTemplate[0].fields]
+      }
+      section = uniq(map(fields, "sectionName"));
+      fields = extractFields(fields)
+      setaddFieldData({ section: section, fields: fields });
+      setIsAddField(true);
+      setAnchorEl(null);
+    }
   };
 
   const handleCloseAddField = () => {
@@ -494,7 +426,7 @@ const ProductBuilder = (props) => {
   };
 
   const handelOpenBulkEdit = () => {
-    const rows: any = product.filter((data) =>
+    const rows: any = productData.product.filter((data) =>
       selectedRecords.some((rec) => rec._id === data._id)
     );
     setproductDataList(rows);
@@ -512,14 +444,24 @@ const ProductBuilder = (props) => {
   };
 
   const onCellValueChanged = (row) => {
-    const changeRow: any = product.filter((_p) => _p._id === row.data.id);
+    const changeRow: any = productData.product.filter((_p) => _p._id === row.data.id);
     if (changeRow.length) {
       const productRow: any = changeRow[0];
       let fieldName = row.column.colId;
       if (row.column.colId.split("_").length) {
         fieldName = row.column.colId.split("_")[0];
       }
-      const fieldData = [...productFields, ...productRow.fields].filter((_f) => _f.fieldName === fieldName);
+      let fields = productData.productFields
+      fields = [...fields, ...productRow.fields]
+      const productTemplate: any = productData?.productTemplate?.filter((e) => e._id === productRow?.productTemplate?.optionValue);
+      if (productTemplate.length) {
+        fields = [...fields, ...productTemplate[0].fields]
+      }
+      const priceTemplate: any = productData?.priceTemplate?.filter((e) => e._id === productRow?.priceTemplate?.optionValue);
+      if (priceTemplate.length) {
+        fields = [...fields, ...priceTemplate[0].fields]
+      }
+      const fieldData = fields.filter((_f) => _f.fieldName === fieldName);
       if (fieldData.length) {
         let currency = "";
         let unit = "";
@@ -547,7 +489,7 @@ const ProductBuilder = (props) => {
         }
         const result = handleAutoCalculation(
           fieldData[0],
-          productRow.fields,
+          fields,
           productRow,
           row.column.colId,
           currency,
@@ -570,104 +512,147 @@ const ProductBuilder = (props) => {
 
   return (
     <Box p={1} pt={0}>
-      <Grid container>
-        <Grid item xs={2} className="d-flex align-items-center gap-1"></Grid>
-        {Editable && (
-          <Grid xs={10} container justify="flex-end">
-            {permissions.isUpdate && (
-              <ImportExportLinks
-                permissions={permissions}
-                module="builder"
-                api={"productbuilder"}
-                refrenceId={productBuilderId}
-                onSuccessfulImport={(isImportedSuccessfully) => {
-                  if (isImportedSuccessfully) {
-                    fetchProduct(productBuilderId);
-                  }
-                }}
-                isExportAllOrSomeFeature={true}
-                total={rowCount}
-                recordsToExport={selectedRecords.length}
-                ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
-                onExportToExcelSuccess={() => {
-                  if (gridApi) gridApi.deselectAll()
-                  else fetchProduct(productBuilderId)
-                }}
-              />
-            )}
-            {stage === "cost" && permissions.isUpdate && (
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                className="float-right ml-1 mr-2"
-                onClick={handelOpenBulkEdit}
-                disabled={checkUniqTemplate()}
-                aria-controls="action-menu"
-              >
-                Bulk Edit
-              </Button>
-            )}
-            {permissions.isUpdate && (
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                className="float-right"
-                onClick={openActions}
-                disabled={selectedRecords.length ? false : true}
-                aria-controls="action-menu"
-              >
-                Actions <ExpandMore />
-              </Button>
-            )}
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
+      {Editable && (
+        <div className="d-flex align-items justify-content-end">
+          {permissions.isUpdate && (
+            <ImportExportLinks
+              permissions={permissions}
+              module="builder"
+              api={"productbuilder"}
+              refrenceId={productBuilderId}
+              onSuccessfulImport={(isImportedSuccessfully) => {
+                if (isImportedSuccessfully) {
+                  fetchProduct(productBuilderId);
+                }
               }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>
-                Delete
-              </MenuItem>
-              <MenuItem onClick={handleOpenAddField}>Add Field</MenuItem>
-            </Menu>
-          </Grid>
-        )}
-      </Grid>
+              isExportAllOrSomeFeature={true}
+              total={rowCount}
+              recordsToExport={selectedRecords.length}
+              ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+              onExportToExcelSuccess={() => {
+                if (gridApi) gridApi.deselectAll()
+                else fetchProduct(productBuilderId)
+              }}
+            />
+          )}
+          {stage === "cost" && permissions.isUpdate && (
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              className="float-right ml-1 mr-2"
+              startIcon={<AiTwotoneEdit />}
+              onClick={handelOpenBulkEdit}
+              disabled={checkUniqTemplate()}
+              aria-controls="action-menu">
+              {isMobile ? "" : "Bulk Edit"}
+            </Button>
+          )}
+          {permissions.isUpdate && (
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              className="float-right"
+              onClick={openActions}
+              startIcon={<ExpandMore />}
+              disabled={selectedRecords.length ? false : true}
+              aria-controls="action-menu">
+              {isMobile ? "" : "Actions"}
+            </Button>
+          )}
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+            id="action-menu"
+            open={Boolean(anchorEl)}
+            onClose={closeActions}
+          >
+            <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>
+              Delete
+            </MenuItem>
+            <MenuItem onClick={handleOpenAddField}>Add Field</MenuItem>
+          </Menu>
+        </div>
+      )}
       <Box mt={1}>
-        {columns ? (
-          <CustomAgGridEditable
-            currency={currency}
-            forProductBuilder={isPriceBuilder}
-            fromProductGrid={true}
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowSelection={Editable}
-            allowAction={Editable}
-            actionWidth={150}
-            isClientSideGrid={true}
-            onCellValueChanged={onCellValueChanged}
-            loading={loading}
-            className="product-builder-edit-grid"
-            renderedFrom="productBuilderGrid"
-          />
-        ) : (
-          <Loader style={{ minHeight: 300 }} text="Loading..." />
-        )}
+        {
+          isMobile ?
+            <CustomSwipableList
+              allowSelection={Editable}
+              allowSwipe={Editable}
+              permissions={permissions}
+              primaryField={columns?.find(d => d.primaryField)}
+              onClick={(data) => {
+                openProductModel(data._id)
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(data) => {
+                openProductModel(data._id)
+              }}
+              extraParamsToCheckDelete={permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true}
+              onDelete={(data) => {
+                setDeleteRecord(data);
+                setShowDeleteConfirmBox(true);
+              }}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              chips={
+                dataToShowForMobile ? dataToShowForMobile.some(f => f.editable === true) ? [...dataToShowForMobile.filter(f => f.editable === true).map(m => {
+                  return {
+                    label: `${m.headerName}: `,
+                    field: m.field,
+                    forceShow: true,
+                    // onClick: (data, index) => {
+                    //   setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
+                    // }
+                  }
+                })
+                ] : [{
+                  label: `Product Description: `,
+                  field: "productName",
+                  forceShow: true
+                }] : []
+              }
+              onCreate={null}
+              showClone={permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true}
+              onClone={(data) => {
+                openProductModel(data._id)
+                setIsClone(true);
+              }}
+            /> : ((columns && frameWorkComponent) ? <CustomAgGridEditable
+              currency={currency}
+              forProductBuilder={isPriceBuilder}
+              fromProductGrid={true}
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              allowSelection={Editable}
+              allowAction={Editable}
+              actionWidth={150}
+              isClientSideGrid={true}
+              onCellValueChanged={onCellValueChanged}
+              loading={loading}
+              className="product-builder-edit-grid"
+              renderedFrom="productBuilderGrid"
+            /> : (
+              <Loader style={{ minHeight: 300 }} text="Loading..." />
+            ))
+        }
       </Box>
       {isAddNewProduct && (
         <CreateProduct
@@ -686,14 +671,14 @@ const ProductBuilder = (props) => {
           handleClose={() => setIsAddExistingProduct(false)}
         />
       )}
-      {productData && (
+      {productId && (
         <ProductDialog
           isClone={isClone}
-          productData={productData}
+          productBuilderId={productBuilderId}
+          productId={productId}
           handleSaveProduct={handleSaveProduct}
           handleClose={() => {
-            setProductData(null);
-            fetchProduct(productBuilderId);
+            setProductId(null);
           }}
           stage={stage}
         />
@@ -714,6 +699,7 @@ const ProductBuilder = (props) => {
           handleSaveProduct={handleSaveProduct}
           handleClose={() => setIsBulkEdit(null)}
           loading={loading}
+          productBuilderId={productBuilderId}
           stage={stage}
         />
       )}
@@ -725,6 +711,74 @@ const ProductBuilder = (props) => {
           onOk={handleDelete}
         />
       )}
+
+      {/* {
+        showProductNumberOrProductNameUpdate.open && <Dialog
+          maxWidth="lg"
+          fullWidth={true}
+          fullScreen={false}
+          TransitionComponent={CustomDialogTransition}
+          aria-labelledby="customized-dialog-title"
+          onClose={() => {
+            setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
+          }}
+          open={showProductNumberOrProductNameUpdate.open}
+          disableBackdropClick={true}
+        >
+          <CustomDialogHeader title="Update" onClose={() => {
+            setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
+          }}
+            isMinimized={!false}
+            onMinimizeMaximize={() => { }}
+            showManimizeMaximize={true}
+          />
+
+          <CustomDialogContent>
+
+            <TextField id="standard-basic" label={showProductNumberOrProductNameUpdate.title}
+              value={showProductNumberOrProductNameUpdate.value}
+              fullWidth
+              onChange={(e) => {
+                setShowProductNumberOrProductNameUpdate((prevState) => {
+                  return { ...prevState, value: e.target.value }
+                })
+              }}
+            />
+
+          </CustomDialogContent>
+
+          <CustomDialogFooter>
+            <Button type="button" variant="outlined" color="primary" size="small" onClick={() => {
+              setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
+            }}>
+              Cancel
+            </Button>
+
+            <CustomButton
+              variant="contained"
+              color="primary"
+              onClick={(e) => {
+
+                let updatedData = [...dataRows];
+                updatedData[showProductNumberOrProductNameUpdate.indexOfRecord][showProductNumberOrProductNameUpdate.property] = showProductNumberOrProductNameUpdate.value;
+
+                dispatch({ type: "initialize", data: updatedData, count: updatedData.length });
+                setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
+
+                onCellValueChanged({
+                  data: updatedData[showProductNumberOrProductNameUpdate.indexOfRecord],
+                  column: { colId: showProductNumberOrProductNameUpdate.property },
+                  newValue: showProductNumberOrProductNameUpdate.value
+                })
+
+              }}
+            >
+              Save
+            </CustomButton>
+          </CustomDialogFooter>
+
+        </Dialog>
+      } */}
     </Box>
   );
 };

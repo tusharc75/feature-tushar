@@ -147,6 +147,8 @@ const PriceTemplate = () => {
             data.owner = user.user._id
           }
           if (isClone) {
+            data.name = "";
+            setHasPermissionToUpdate(true);
             const { _id, name, createdBy, updatedBy, isSystem, ...rest } = data;
             setInitialValues(rest);
             handleProductTemplateField(data.productTemplate);
@@ -572,7 +574,7 @@ const PriceTemplate = () => {
                     deleteField={deleteField}
                     setDeleteField={setDeleteField}
                     isCustomField={true}
-                    extraFields={templateField}
+                    extraFields={[...productField, ...templateField]}
                     module="price-template"
                   />
                 </Box>

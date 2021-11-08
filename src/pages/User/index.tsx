@@ -28,7 +28,6 @@ import CustomAgGrid, { reducer, intialState } from "../../components/AgGridCompo
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import ApprovalProcessDialog from "./ApprovalProcessDialog";
 import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
-import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import UserSetupDialog from "./UserSetupDialog";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -46,7 +45,6 @@ const User: FC = () => {
   const [showApprovalProcessDialog, setShowApprovalProcessDialog] = useState(false);
   const [globalRolesDialogOpen, setGlobalRolesDialogOpen] = useState(false);
   const [regionalRolesDialogOpen, setRegionalRolesDialogOpen] = useState(false);
-  const [doaDialogOpen, setDoaDialogOpen] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
   const [deleteRec, setDeleteRec] = useState<any>({});
@@ -350,7 +348,6 @@ const User: FC = () => {
             regionalWideRoleId: firstRegionalWideRole?._id ?? "",
             regionalWideRole: firstRegionalWideRole?.name ?? "",
             restRegionalWideRoles: restRegionalWideRoles,
-            doaSetup: permissions?.doaSetup
           };
           return res;
         });
@@ -450,14 +447,6 @@ const User: FC = () => {
 
   const handleRegionalRolesCloseDialog = () => {
     setRegionalRolesDialogOpen(false);
-  };
-
-  const handleDOAOpenDialog = () => {
-    setDoaDialogOpen(true);
-  };
-
-  const handleDOACloseDialog = () => {
-    setDoaDialogOpen(false);
   };
 
   const unAssignUsersFromEntity = () => {
@@ -579,26 +568,7 @@ const User: FC = () => {
           />
         </Dialog>
       )}
-      {doaDialogOpen && (
-        <Dialog
-          open={doaDialogOpen}
-          onClose={handleDOACloseDialog}
-          scroll="body"
-          maxWidth="md"
-          fullWidth
-        >
-          <DoaDialog
-            userList={userList.filter(user => !selectedRecords.some(item => item?._id === user?.id))}
-            doa={[]}
-            doaCurrency={null}
-            userSelected={selectedRecords.map((d) => d._id)}
-            open={doaDialogOpen}
-            from={"UserListPage"}
-            onSuccess={handleDOACloseDialog}
-            onClose={handleDOACloseDialog}
-          />
-        </Dialog>
-      )}
+      
       <Fragment>
         <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>
@@ -639,7 +609,6 @@ const User: FC = () => {
               openApprovalProcessDialog={() => setShowApprovalProcessDialog(true)}
               openGlobalRolesDialog={handleGlobalRolesOpenDialog}
               openRegionalRolesDialog={handleRegionalRolesOpenDialog}
-              openDOADialog={handleDOAOpenDialog}
               rolesActionDisabled={selectedRecords.length === 0}
               approvalProcessActionDisabled={selectedRecords.length === 0 || !(user?.user?.userType === userType.brandAdmin)}
               canDelete={selectedRecords.length === 0}
@@ -654,7 +623,6 @@ const User: FC = () => {
               openUserSetupDialog={() => {
                 setOpenUserSetupDialog(true);
               }}
-              assignDoaDisabled={selectedRecords.length === 0 || selectedRecords?.some((item => item.doaSetup === false))}
               userSetupDisabled={selectedRecords.length === 0 || !(user?.user?.userType === userType.brandAdmin)}
             />
           </div>

@@ -80,7 +80,7 @@ const ProductGrid = (props) => {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`/productbuilder/getproduct/` + id)
+      .get(`/productbuilder/old/getproduct/` + id)
       .then(({ data: { data } }) => {
         data = data.data?.map((u, index) => ({
           ...u,

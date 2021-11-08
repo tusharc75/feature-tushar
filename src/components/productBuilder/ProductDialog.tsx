@@ -3,6 +3,7 @@ import {
   useState,
   useEffect,
   Fragment,
+  useContext
 } from "react";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
@@ -26,6 +27,10 @@ import { CustomDialogTransition } from "./../../constants/helpers";
 import Tooltip from "@material-ui/core/Tooltip";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import { autoCalculateSpecificFields } from "../../constants/formulaUtility";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import { Collapse } from '@material-ui/core';
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 var levalOrderBy = [
   "product",
@@ -36,80 +41,57 @@ var levalOrderBy = [
   "price-builder-custom",
 ];
 
-const CreateProduct = (props) => {
-  const { productData, handleClose, handleSaveProduct, stage } = props;
-  const [masterFields, setMasterFields] = useState([]);
+const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, handleSaveProduct, stage }) => {
+
+  const toastConfig = useContext(CustomToastContext);
+
   const [productFields, setProductFields] = useState([]);
-  const [loading,] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
+  const [productData, setProductData] = useState(null);
 
   const [isAddField, setIsAddField] = useState(false);
   const [fields, setFields] = useState([]);
   const [sectionName, setSectionName] = useState("");
-  const ref = useRef(null);
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [fieldChanges, setFieldChanges] = useState([]);
 
+  const ref = useRef(null);
+  const [loading] = useState(false);
+  const [expanded, setExpanded] = useState({});
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
+
   useEffect(() => {
-    let _fields = [];
-    productData.fields.forEach((_f) => {
-      if (stage === "product") {
-        if (_f.leval === "product" || _f.leval === "product-custom" || _f.leval === "product-template" || _f.leval === "product-builder-custom") {
+    axiosInstance().get(`/productbuilder/getoneproduct/${productBuilderId}/${productId}`).then(({ data: { data } }) => {
+      const productData = data.productData;
+      setProductData(productData);
+      let _fields = [];
+      productData.fields.forEach((_f) => {
+        if (stage === "product") {
+          if (_f.leval === "product" || _f.leval === "product-custom" || _f.leval === "product-template" || _f.leval === "product-builder-custom") {
+            _fields.push(_f);
+          }
+        } else {
           _fields.push(_f);
         }
-      } else {
-        _fields.push(_f);
+      });
+      if (productData.fieldChanges) {
+        setFieldChanges(productData.fieldChanges);
       }
+      _fields = orderBy(_fields, "order", "asc");
+      _fields = sortBy(_fields, function (item) {
+        return levalOrderBy.indexOf(item.leval);
+      });
+      setFields(_fields.filter((_f) => _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom"));
+      let values = { ...productData };
+      delete values.fields;
+      setInitialData({
+        fields: _fields,
+        values: { ...getObjKeys("", _fields), ...values },
+      });
+      EvaluteproductFields(_fields);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
     });
-    if (productData.fieldChanges) {
-      setFieldChanges(productData.fieldChanges);
-    }
-    _fields = orderBy(_fields, "order", "asc");
-    _fields = sortBy(_fields, function (item) {
-      return levalOrderBy.indexOf(item.leval);
-    });
-
-    setMasterFields(_fields.filter((_f) => _f.leval !== "cost"));
-    setFields(_fields.filter((_f) => _f.leval === "product-builder-custom" || _f.leval === "price-builder-custom"));
-
-    let values = { ...productData };
-
-    for (const [key, value] of Object.entries(values)) {
-      if (typeof value === 'object' && value && value["optionValue"]) {
-        values[key] = value["optionValue"]
-      }
-      if (Array.isArray(value) && value.length && value[0].optionValue) {
-        const entity = []
-        value && value.forEach((ele) => {
-          entity.push(ele.optionValue)
-        })
-        values[key] = entity
-      }
-    }
-    delete values.fields;
-
-    setInitialData({
-      fields: _fields,
-      values: { ...getObjKeys("", _fields), ...values },
-    });
-    EvaluteproductFields(_fields);
-    // axiosInstance().get(`/field?resource=Product Builder`).then(({ data: { data } }) => {
-    //     const _fields = [];
-    //     productData.fields.map((_f) => _fields.push(_f));
-    //     let values = { ...productData }
-    //     values.productCategory = values.productCategory._id
-    //     delete values.fields
-    //     data.map((_f) => _fields.push(_f.fieldData));
-    //     setMasterFields(_fields)
-    //     setInitialData({
-    //         fields: _fields,
-    //         values: values,
-    //     });
-    //     EvaluteproductFields(_fields)
-    // }).catch((error) => {
-    //     toastConfig.setToastConfig(error);
-    // });
   }, []);
 
   const handleSubmit = (values) => {
@@ -125,6 +107,11 @@ const CreateProduct = (props) => {
       return { name, sectionFields };
     });
     setProductFields(customData);
+    const _expanded = {}
+    customData.forEach((ele: any, index) => {
+      _expanded[index] = true;
+    })
+    setExpanded(_expanded)
   };
 
   const handleOpenAddField = (name) => {
@@ -267,6 +254,26 @@ const CreateProduct = (props) => {
     return label;
   };
 
+  const handleExpand = (index) => {
+    const temp = { ...expanded };
+    temp[index] = !temp[index]
+    setExpanded(temp)
+  }
+
+  const handleScroll = (errors) => {
+    const err = Object.keys(errors);
+    if (err.length) {
+      const input = document.querySelector(
+        `input[name=${err[0]}]`,
+      );
+      input?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'start',
+      });
+    }
+  }
+
   return (
     <Dialog
       maxWidth="md"
@@ -306,24 +313,27 @@ const CreateProduct = (props) => {
               <CustomDialogContent>
                 <Box>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                    {productFields &&
-                      productFields.map((section, i) => (
-                        <div key={i}>
-                          <h2 className="form-label-style">
-                            {section.name}
-                            <span
-                              style={{ float: "right", marginTop: "-10px" }}
+                    {productFields && productFields.map((section, i) => (
+                      <div key={i}>
+                        <h2 className="form-label-style" >
+                          <IconButton className="p-0" color="primary" style={{ marginTop: "-5px" }} size="small" onClick={() => handleExpand(i)} >
+                            {expanded[i] ? <ExpandLess fontSize="medium" /> : <ExpandMoreIcon fontSize="medium" />}
+                          </IconButton>
+                          {section.name}
+                          <span
+                            style={{ float: "right", marginTop: "-10px" }}
+                          >
+                            <IconButton
+                              color="primary"
+                              size="small"
+                              onClick={() => handleOpenAddField(section.name)}
                             >
-                              <IconButton
-                                color="primary"
-                                size="small"
-                                onClick={() => handleOpenAddField(section.name)}
-                              >
-                                <ControlPointIcon />
-                              </IconButton>
-                            </span>
-                          </h2>
-                          <Box marginY={2}>
+                              <ControlPointIcon />
+                            </IconButton>
+                          </span>
+                        </h2>
+                        <Box marginY={2}>
+                          <Collapse in={expanded[i]} timeout="auto" unmountOnExit>
                             <Grid spacing={3} container>
                               {section.sectionFields &&
                                 section.sectionFields.map((field) =>
@@ -453,9 +463,10 @@ const CreateProduct = (props) => {
                                   )
                                 )}
                             </Grid>
-                          </Box>
-                        </div>
-                      ))}
+                          </Collapse>
+                        </Box>
+                      </div>
+                    ))}
                   </Form>
                 </Box>
               </CustomDialogContent>
@@ -468,7 +479,11 @@ const CreateProduct = (props) => {
                   variant="contained"
                   color="primary"
                   type="submit"
-                  onClick={submitForm}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleScroll(errors)
+                    submitForm();
+                  }}
                   disabled={uploadingImageOrFileProgress > 0}
                 >
                   {" "}

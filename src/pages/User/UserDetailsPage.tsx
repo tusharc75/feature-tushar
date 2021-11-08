@@ -146,7 +146,6 @@ const UserDetailsPage = () => {
       getUserFields();
       fetchUserData();
       getRoleUnion();
-      fetchDoa();
       fetchUsers()
       fetchUserRelatedDetail()
       setCurrentTabIndex(0);
@@ -323,37 +322,7 @@ const UserDetailsPage = () => {
       })
   }
 
-  const fetchDoa = async () => {
-    axiosInstance()
-      .get(`/doa/${id}`)
-      .then(({ data: { data } }) => {
-        let doaData = [];
-
-        data.doa.forEach((item) => {
-          //  When the user set in doa was deleted, we are getting {} in array like this [{}]
-          //  So added this check
-          if (!isObjectEmpty(item)) {
-            doaData.push({
-              id: item.user?._id,
-              name: [item.user?.firstName, item.user?.lastName].filter(f => f).join(" "),
-              firstName: item.user?.firstName,
-              lastName: item.user?.lastName,
-              amount: item.amount,
-            });
-          }
-        });
-
-        setDoa(doaData);
-        setDoaCurrency(data.doaCurrency)
-        setDoaType(data.doaType)
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setLoading(false);
-        setDoa([]);
-      });
-  };
-
+  
   const fetchUsers = () => {
     axiosInstance()
       .get("/user")
@@ -891,69 +860,7 @@ const UserDetailsPage = () => {
                   </Grid>
                 </Grid>
               </Box>
-              {
-                <>
-                  <Box>
-                    <Box
-                      width="100%"
-                      padding={1}
-                      bgcolor="grey.200"
-                      display="flex"
-                      justifyContent="space-between"
-                    >
-                      <Grid container>
-                        <Grid item xs={8}>
-                          <Box display="flex">
-                            <Box padding="5px">
-                              <Typography variant="subtitle2">
-                                {"DOA Details of " +
-                                  userData?.firstName +
-                                  " " +
-                                  userData?.lastName}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </Grid>
-                        <Grid item container xs={4} justify="flex-end">
-                          {permissions.user.isUpdate && user?.user?.permissions?.doaSetup && (
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              size="small"
-                              onClick={() => setDoaDialogOpen(true)}
-                            >
-                              {doa.length > 0 ? "Edit DOA" : "Add DOA"}
-                            </Button>
-                          )}
-                        </Grid>
-                      </Grid>
-                    </Box>
-                  </Box>
-                  <Grid container style={{ padding: "8px" }} spacing={1}>
-                    <Grid item xs={12} sm={12}>
-                      <BoxWithBorder
-                        style={{
-                          padding: "0px",
-                        }}
-                      >
-                        {doa.length > 0 ? (
-                          <NewStepper
-                            heading={" "}
-                            steps={doa}
-                            doaCurrency={doaCurrency}
-                          />
-                        ) : (
-                          <Box textAlign="center" marginTop={2}>
-                            <Typography variant="body2">
-                              User doesn't have any DOA
-                            </Typography>
-                          </Box>
-                        )}
-                      </BoxWithBorder>
-                    </Grid>
-                  </Grid>
-                </>
-              }
+              
               <Box>
                 <Box
                   width="100%"
@@ -1344,34 +1251,7 @@ const UserDetailsPage = () => {
           }
         />
       ) : null}
-      {doaDialogOpen && (
-        <Dialog
-          open={doaDialogOpen}
-          onClose={() => {
-            setDoaDialogOpen(false);
-          }}
-          scroll="body"
-          maxWidth="md"
-          fullWidth
-        >
-          <DoaDialog
-            userList={userList}
-            doa={doa}
-            doaCurrency={doaCurrency}
-            userSelected={[id]}
-            open={doaDialogOpen}
-            onSuccess={() => {
-              setDoaDialogOpen(false);
-              fetchDoa();
-            }}
-            onClose={() => {
-              setDoaDialogOpen(false);
-            }}
-            doaType={doaType}
-          />
-        </Dialog>
-      )}
-
+      
       {
         orgChartInFullScreenDialog && <FullScreenDialog
           heading="Org Chart"
@@ -1397,8 +1277,6 @@ const UserDetailsPage = () => {
             });
             setShowSetupUserDialog(false)
             fetchUserData()
-            fetchDoa()
-
           }}
           userIds={[id]}
           onSuccess={() => {
@@ -1408,7 +1286,6 @@ const UserDetailsPage = () => {
               search: '',
             });
             fetchUserData()
-            fetchDoa()
           }}
           fetchUsers={() => fetchUsers()}
           userList={userList}

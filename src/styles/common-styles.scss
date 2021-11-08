@@ -102,8 +102,20 @@
     border: 1px solid var(--common-border-color) !important;
 }
 
+.border-bottom {
+    border-bottom: 1px solid var(--common-border-color) !important;
+}
+
 .border-0 {
     border: 0 !important;
+}
+
+.grey {
+    color: grey !important;
+}
+
+.lightgrey {
+    color: lightgrey !important;
 }
 
 $directions: top, bottom, left, right;
@@ -141,6 +153,8 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
 
 // Font size
 @include fixed-list-loop(".font-size-", "font-size", "rem");
+
+@include fixed-list-loop(".border-radius-", "border-radius", "rem");
 
 // Gap
 
@@ -298,7 +312,7 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
     display: flex;
     align-items: center;
     justify-content: left;
-    padding: 12px;
+    padding: 4px 14px 14px;
 }
 .formActioButton {
     border: 1px solid #d9d8d8;
@@ -314,7 +328,18 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
         opacity: 0.5;
     }
 }
+
 .blink {
     animation: blink 1s linear 10;
     -webkit-animation: blink 1s linear 10;
+}
+
+@media only screen and (max-width: 600px) {
+    .detailHeaderDashboard {
+        display: none !important;
+    }
+}
+
+.overflow-hidden {
+    overflow: hidden !important;
 }

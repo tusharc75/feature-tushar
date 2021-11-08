@@ -160,7 +160,7 @@ const ProductTemplate = () => {
     };
 
     const fetchProductCategory = () => {
-        axiosInstance().get(`/product-category`).then(({ data: { data } }) => {
+        axiosInstance().get(`/product-category?sortBy=name&orderBy=asc`).then(({ data: { data } }) => {
             setProductCategory(data);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
@@ -519,7 +519,7 @@ const ProductTemplate = () => {
                                     deleteField={deleteField}
                                     setDeleteField={setDeleteField}
                                     isCustomField={true}
-                                    extraFields={[]}
+                                    extraFields={productField}
                                     module="product-template"
                                 />
                             </Box>
