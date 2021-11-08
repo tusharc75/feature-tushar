@@ -20,6 +20,7 @@ import { getObjKeys, yupSchema, isFieldNotTouched, setFieldsInAscendingOrder, ge
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import FormTypes from "../../components/Helpers/FormTypes";
 import { isMobile , isTablet } from 'react-device-detect';
+import {FaDiceOne} from "react-icons/fa";
 interface InitialData {
   fields: any[];
   values: object;
@@ -207,12 +208,15 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
             <>
               <CustomDialogContent>
                 <Form noValidate>
-                  <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                  {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                   {
                     formsData &&
                     formsData.map((form, i) => (
                       <div key={i}>
-                        <h2 className="form-label-style">{form.name}</h2>
+                          <div className={"detail-box-content"}>
+                              <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                              <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                          </div>
                         <Box marginY={2}>
                           <Grid spacing={3} container>
                             {form.sectionFields.map((field, index2) => (

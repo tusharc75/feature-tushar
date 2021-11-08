@@ -40,6 +40,7 @@ import { result, find, startCase, isEqual, camelCase } from 'lodash';
 import { Delete } from "@material-ui/icons";
 import Badge from '@material-ui/core/Badge';
 import { makeStyles } from '@material-ui/core/styles';
+import {FaDiceOne} from "react-icons/fa";
 
 const rentType = ["perHour", "perDay", "perWeek", "perFortnight", "perMonth", "perYear"]
 
@@ -305,7 +306,7 @@ function PricingConditionsDetailsPage() {
                         <Form>
                             <Grid container>
                                 <Grid item md={6} sm={6} xs={6}>
-                                    <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                                    <h2 className="form-label-style" style={{ borderBottom: "none", paddingLeft:"12px" }}>* Required Fields</h2>
                                 </Grid>
                                 <Grid container justify="flex-end" item md={6} sm={6} xs={6}>
                                     <Box ml={1}>
@@ -346,7 +347,10 @@ function PricingConditionsDetailsPage() {
                             <Box className={classes.screenHeightAuto}>
                                 {formsData && formsData.map((form, index) => {
                                     return <div key={index}>
-                                        <h2 className="form-label-style">{form.name}</h2>
+                                        <div className={"detail-box-content"}>
+                                            <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                            <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                                        </div>
                                         <Box marginY={2}>
                                             <Grid spacing={3} container>
                                                 {form.sectionFields.map((field, index2) => (

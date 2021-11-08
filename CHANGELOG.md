@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.31.0](https://github.com/vebholic/oms_frontend/compare/v1.30.0...v1.31.0) (2021-11-04)
+
+
+### Features
+
+* - Background removed in swipe action ([1c9933e](https://github.com/vebholic/oms_frontend/commit/1c9933ef2396ec186354b08b1548fb7009998d23))
+* - Column Resize issue fixed ([038bdc9](https://github.com/vebholic/oms_frontend/commit/038bdc9770654dec6d0dcb3c7075af5d84b51289))
+* - Column Resize issue fixed ([5b2b0b6](https://github.com/vebholic/oms_frontend/commit/5b2b0b6f0d4fe59d1a45670d218df32499b6d23c))
+* - Grid resize keeping on refresh fixed ([bbfed36](https://github.com/vebholic/oms_frontend/commit/bbfed3601f35ad79f8ee5a38d56d5258db716b27))
+* - Pagesizes changed, Swipe issue fixed ([c189fd8](https://github.com/vebholic/oms_frontend/commit/c189fd80cc83b4ef1182327356a0c39e6ea9b829))
+* - Swipe is changed to 3 dots in list screen ([71954e3](https://github.com/vebholic/oms_frontend/commit/71954e31eba909d4b6e0ab9775ff5e31a59d939e))
+* - Swipe is changed to 3 dots in list screen ([ca52448](https://github.com/vebholic/oms_frontend/commit/ca5244855fc9e0cc648f26ece69a057f4c33a3e5))
+* - Swipeable style changed ([35f6295](https://github.com/vebholic/oms_frontend/commit/35f629525106f9ce16829eddb5968a1779ba368a))
+* - Swipeable unused code removed ([e692ef4](https://github.com/vebholic/oms_frontend/commit/e692ef4890d4b05138a018a85e1570ba73dc83c4))
+* edit template permission changes ([b335ad0](https://github.com/vebholic/oms_frontend/commit/b335ad0ed0cb845a30bbb624190f32f9932f70a5))
+* ui changes ([2298c2e](https://github.com/vebholic/oms_frontend/commit/2298c2ea17fc236c7138b38d7929f90d0dc22aff))
+
+
+### Bug Fixes
+
+*  issue in free style multi-select in dynamic grid ([0d7035f](https://github.com/vebholic/oms_frontend/commit/0d7035f1dc6037fec3e9d4f7271eb52dcdfee90c))
+* bug fix ([8bc31ec](https://github.com/vebholic/oms_frontend/commit/8bc31eccfa2046f3b15be60d06fb47ea324a2ff7))
+* changes added ([95f4383](https://github.com/vebholic/oms_frontend/commit/95f43831344e5e7f98f8784226c67351079602da))
+* changes added ([633c079](https://github.com/vebholic/oms_frontend/commit/633c079a73ddf9ad290c800360b4908795f64495))
+* changes added ([9224d80](https://github.com/vebholic/oms_frontend/commit/9224d80e0562bef4be06afebd07454be37d7b084))
+* product builder optimization ([9d5f026](https://github.com/vebholic/oms_frontend/commit/9d5f0265f4a7ce8d66c4cb172abc1194e5bea96a))
+* product builder optimization ([e4cf7c8](https://github.com/vebholic/oms_frontend/commit/e4cf7c8cdfd56e10d058281a25a03e77bc8ed101))
+* **product category:** sorted the product category filter by name ([efe9479](https://github.com/vebholic/oms_frontend/commit/efe9479fe063bbcf778db57f6d851cb05a832af1))
+* **quote detail:** changed button name ([96009bb](https://github.com/vebholic/oms_frontend/commit/96009bbe0b7a4505cfddf7cfb210df252030abdb))
+* **quote detail:** changed button name ([da9bd4b](https://github.com/vebholic/oms_frontend/commit/da9bd4ba3c2e973cdb55cfdc90f8b9e760791c3d))
+
 ## [1.30.0](https://github.com/vebholic/oms_frontend/compare/v1.29.0...v1.30.0) (2021-11-03)
 
 
