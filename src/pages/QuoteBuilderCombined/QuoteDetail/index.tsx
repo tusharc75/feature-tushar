@@ -995,7 +995,7 @@ export default function QuoteDetail() {
               )}
             </Paper>
           </div>
-          <div className="position-relative">
+          <div className={`${tabValue === 1 && isMobile ? "mb-5" : ""} position-relative`}>
             {/* {showActivity ?
               <Paper>
                 {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
