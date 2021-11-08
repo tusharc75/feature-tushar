@@ -351,26 +351,42 @@ const Steps = (props) => {
       {
         isMobile ? <div>
           <MobileStepper
+            style={{ background: "#dee2e6" }}
             variant="dots"
-            steps={steps.length}
+            steps={DOAData ? DOAData.length : steps.length}
             position="bottom"
             activeStep={activeStep}
-            // className={classes.root}
             nextButton={
-              <Button size="small" onClick={handleNext} disabled={activeStep === 5}>
-                {steps[activeStep + 1]?.label ?? ""} <KeyboardArrowRight />
-              </Button>
+              !allowedToEdit ||
+                loading || globalLoading ||
+                !nextStep ||
+                versionStatus.includes("Sent for DOA") ||
+                versionStatus.includes("Accepted  by DOA") ||
+                steps[currentStep]?.key === "DOA Process" ||
+                approvedQuote.approved
+                ? <Button size="small" disabled variant="contained">
+                  {steps[activeStep + 1]?.label ?? ""}
+                </Button>
+                : <Button size="small" disabled={loading} color="primary" onClick={handleNext} variant="contained" endIcon={<KeyboardArrowRight />}>
+                  {steps[activeStep + 1]?.label ?? ""}
+                </Button>
             }
             backButton={
-              <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
-                <KeyboardArrowLeft /> {steps[activeStep - 1]?.label ?? ""}
-              </Button>
+              currentStep <= 0 || !allowedToEdit ||
+                versionStatus.includes("Rejected by Customer") ||
+                (steps.length === 5 && currentStep > 3) ||
+                versionStatus.includes("Sent for DOA") ||
+                (steps.length === 6 && currentStep >= 4) ||
+                versionStatus.includes("Sent to Customer") ||
+                loading || globalLoading
+                ? <Button size="small" disabled variant="contained" startIcon={<KeyboardArrowLeft />}>
+                  {steps[activeStep - 1]?.label ?? ""}
+                </Button>
+                : <Button size="small" disabled={loading} color="primary" onClick={handleBack} variant="contained" startIcon={<KeyboardArrowLeft />}>
+                  {steps[activeStep - 1]?.label ?? ""}
+                </Button>
             }
           />
-          <div>
-            {children}
-          </div>
-
         </div> :
           <>
             <div className="position-relative">
@@ -721,35 +737,7 @@ const Steps = (props) => {
                   )}
                 </Grid>
               </Grid>
-              <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={activeStep}>
-                {steps.map((label, i) => (
-                  <Step
-                    key={label.label}
-                    className={clsx(classes.step, {
-                      [classes.active]:
-                        currentStep > i ||
-                        steps[currentStep]?.key === "End" || approvedQuote.approved,
-                      [classes.currentStep]: currentStep === i,
-                      [classes.inActive]: currentStep !== i,
-                    })}
-                  >
-                    <StepLabel
-                      style={{ color: "#555" }}
-                      StepIconComponent={ColorlibStepIcon}
-                      className={
-                        currentStep === i || approvedQuote.approved
-                          ? "currentStepColor"
-                          : null
-                      }
-                    >
-                      {label.label}
-                    </StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
             </div>
-
-            {children}
           </>
       }
 

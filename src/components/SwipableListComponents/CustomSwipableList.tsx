@@ -21,6 +21,7 @@ export default function CustomSwipableList({
     rowCount,
     page,
     loading,
+    checkError = null,
     chips,
     permissions,
     onCreate,
@@ -125,7 +126,7 @@ export default function CustomSwipableList({
                 >
                     {
                         dataRows.map((d, index) => (
-                            <Grid key={d._id} container className={`pb-2 mb-2 border-bottom card-shadow ${index === 0 ? "mt-1" : ""} `}>
+                            <Grid key={d._id} container className={`py-2 border-bottom ${index === 0 ? "mt-1" : ""} ${checkError && checkError(d) ? "red-data-row" : ""}`}>
                                 {
                                     allowSelection && <Grid item xs={1} sm={1}>
                                         <Checkbox
@@ -172,7 +173,7 @@ export default function CustomSwipableList({
                                 </Grid>
 
                                 {
-                                    allowSwipe && permissions.isUpdate && d.allowedToEdit && permissions.isDelete && d.canDelete && <Grid item xs={1} sm={1} className="d-flex align-items-center">
+                                    allowSwipe && permissions.isUpdate && d.allowedToEdit && permissions.isDelete && d.canDelete && <Grid item xs={1} sm={1} className="d-flex align-items-center justify-content-center">
                                         <MoreHorizIcon color="disabled" className="cursor-pointer" onClick={(event) => {
                                             handleOpenMenu(event)
                                             setMenuData({
