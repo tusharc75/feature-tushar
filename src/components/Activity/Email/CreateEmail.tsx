@@ -575,7 +575,7 @@ export const CreateEmail = ({
               <>
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                    <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                    {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                     <MuiPickersUtilsProvider utils={MomentUtils}>
                       <Box padding={1}>
                         {emailId ? (

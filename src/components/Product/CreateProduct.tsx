@@ -27,6 +27,7 @@ import { autoCalculateSpecificFields, handleAutoCalculation } from "../../consta
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLess from '@material-ui/icons/ExpandLess';
+import {FaDiceOne} from "react-icons/fa";
 
 const ignoreField = ["priceTemplate"]
 
@@ -509,18 +510,32 @@ const CreateProduct = (props) => {
                         <CustomDialogContent>
                             <Box>
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
-                                    <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                                    {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                                     {productFields && productFields.map((section, i) => (
                                         <div key={i}>
-                                            <h2 className="form-label-style" >
-                                                <IconButton className="p-0" color="primary" style={{ marginTop: "-5px" }} size="small" onClick={() => handleExpand(i)} >
-                                                    {expanded[i] ? <ExpandLess fontSize="medium" /> : <ExpandMoreIcon fontSize="medium" />}
+                                            <div className={"detail-box-content detail-product-box"}>
+                                                <div className={"product-form-layout"}>
+                                                <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                                <h2 className={`${"form-label-style"} ${"form-label-product"}`} >
+                                                    {section.name}
+                                                </h2>
+                                                <IconButton className="p-0" style={{ marginTop: "-5px", color:"white" }} size="small" onClick={() => handleExpand(i)} >
+                                                    {expanded[i] ? <ExpandLess fontSize="medium" style={{ paddingTop: "5px", color:"white" }}/> : <ExpandMoreIcon fontSize="medium" style={{ paddingTop: "5px", color:"white" }}/>}
                                                 </IconButton>
-                                                {section.name}
-                                                <IconButton style={{ float: "right", marginTop: "-10px" }} color="primary" size="small" onClick={(e) => handleOpenAddField(e, section.name)} >
-                                                    <ControlPointIcon />
+                                                </div>
+                                                <IconButton style={{ padding:"0px" , marginTop: "-5px" }} color="primary" size="small" onClick={(e) => handleOpenAddField(e, section.name)} >
+                                                    <ControlPointIcon style={{ paddingTop:"2px" , color:"white" }}/>
                                                 </IconButton>
-                                            </h2>
+                                            </div>
+                                            {/*<h2 className="form-label-style" >*/}
+                                            {/*    <IconButton className="p-0" color="primary" style={{ marginTop: "-5px" }} size="small" onClick={() => handleExpand(i)} >*/}
+                                            {/*        {expanded[i] ? <ExpandLess fontSize="medium" /> : <ExpandMoreIcon fontSize="medium" />}*/}
+                                            {/*    </IconButton>*/}
+                                            {/*    {section.name}*/}
+                                            {/*    <IconButton style={{ float: "right", marginTop: "-10px" }} color="primary" size="small" onClick={(e) => handleOpenAddField(e, section.name)} >*/}
+                                            {/*        <ControlPointIcon />*/}
+                                            {/*    </IconButton>*/}
+                                            {/*</h2>*/}
                                             <Box marginY={2}>
                                                 <Collapse in={expanded[i]} timeout="auto" unmountOnExit>
                                                     <Grid spacing={3} container>
@@ -530,9 +545,9 @@ const CreateProduct = (props) => {
                                                                     <Grid container spacing={1}>
                                                                         <Grid
                                                                             item
-                                                                            xs={permissions.productCategory.isCreate ? 10 : 11}
-                                                                            sm={permissions.productCategory.isCreate ? 10 : 11}
-                                                                            md={permissions.productCategory.isCreate ? 10 : 11}
+                                                                            xs={permissions.productCategory.isCreate ? 11 : 11}
+                                                                            sm={permissions.productCategory.isCreate ? 11 : 11}
+                                                                            md={permissions.productCategory.isCreate ? 11 : 11}
                                                                         >
                                                                             <FormTypes
                                                                                 isNew={Boolean(productId)}
