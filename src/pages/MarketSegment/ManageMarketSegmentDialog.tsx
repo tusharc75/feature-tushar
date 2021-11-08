@@ -17,6 +17,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { Box, Grid } from '@material-ui/core';
 import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
+import {FaDiceOne} from "react-icons/fa";
 
 const ManageMarketSegmentDialog = (props) => {
 
@@ -134,12 +135,15 @@ const ManageMarketSegmentDialog = (props) => {
                         <CustomDialogContent>
 
                             <Form noValidate>
-                                <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                                {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                                 {formsData &&
                                     formsData.map((form, index1) => {
                                         return form.name ? (
                                             <div key={index1}>
-                                                <h2 className="form-label-style">{form.name}</h2>
+                                                <div className={"detail-box-content"}>
+                                                    <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                                    <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                                                </div>
                                                 <Box marginY={2}>
                                                     <Grid spacing={3} container>
                                                         {form.sectionFields.map((field, index2) => (
