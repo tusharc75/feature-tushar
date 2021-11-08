@@ -363,7 +363,7 @@ const ReceivingTicket = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -421,7 +421,7 @@ const ReceivingTicket = () => {
         } else {
           dispatch({ type: "initialize", data: rows, count: count });
         }
-        
+
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
