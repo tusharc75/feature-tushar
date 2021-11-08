@@ -16,6 +16,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { Box, Grid } from '@material-ui/core';
 import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
+import {FaDiceOne} from "react-icons/fa";
 
 const ManageProductInventory = ({ isClone = false, productInventoryId = null, onClose, onSuccess, productId = null, productCategory = null }) => {
 
@@ -167,11 +168,15 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                         ></CustomDialogHeader>
                         <CustomDialogContent>
                             <Form autoComplete="off" autoCorrect="off" noValidate >
-                                <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                                {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                                 {initialData.fields.length > 0 &&
                                     initialData.fields.map((form, i) => (
                                         <div key={i}>
-                                            <h2 className="form-label-style">{form.name}</h2>
+                                            <div className={"detail-box-content"}>
+                                                <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                                <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                                            </div>
+
                                             <Box marginY={2}>
                                                 <Grid spacing={3} container>
                                                     {form.sectionFields.map((field, index2) => (

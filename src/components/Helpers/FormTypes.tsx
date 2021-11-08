@@ -20,7 +20,7 @@ import {
   Dialog,
   ImageList,
   ImageListItem,
-  ImageListItemBar,
+  ImageListItemBar, makeStyles,
 } from '@material-ui/core';
 import { result, find, throttle } from 'lodash';
 import DateUtils from '@date-io/date-fns';
@@ -122,6 +122,11 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
 
 const autocompleteService = { current: null };
 
+const useStyles = makeStyles(() => ({
+  noBorder: {
+    border: "none",
+  },
+}));
 const RedSwitch = withStyles({
   switchBase: {
     color: red[500],
@@ -1001,9 +1006,13 @@ const FormTypes = (props) => {
                 name={name}
                 label={getLabel(label)}
                 variant="outlined"
+                style={{outline:"1px solid white"}}
                 error={touched[name] && Boolean(errors[name])}
                 helperText={touched[name] && errors[name]}
                 required={required}
+
+
+
               />
             )}
           />
