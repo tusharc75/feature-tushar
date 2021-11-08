@@ -12,7 +12,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow, dateFormat } from "../../constants/helpers";
+import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow, dateFormat, pricingCondition } from "../../constants/helpers";
 import Steps from "./Steps";
 import AddExistingProductInventory from "./AddExistingProductInventory";
 import { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
@@ -48,6 +48,7 @@ import SerializedAssetStep from "./SerializedAssetStep";
 import MaterialTableComponent from "../../components/Shared/MaterialTableComponent";
 import { Column } from "material-table";
 import moment from "moment";
+import { startCase } from "lodash";
 
 const rentalProcessSteps = ["New", "Additional Cost", "Serialized Asset", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
@@ -95,6 +96,8 @@ const RentalManagementDetailsPage = () => {
   const [selectedProducts, setSelectedProducts] = useState(null)
   const [packageForProducts, setPackageForProducts] = useState(null)
 
+  const { pricingConditionApi } = pricingCondition
+
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
   }
@@ -131,6 +134,44 @@ const RentalManagementDetailsPage = () => {
       setActivityShow(true)
     }
   }, [isSmallScreen])
+
+  const calculatePricing = (arr: any[]) => {
+    //materialType can be =["product","packages","productCategory"]
+    //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
+    if (rentalManagementData) {
+      const data: any = {}
+      data.conditionType = ["Rent"]
+      data.material = arr.map(pkg => ({
+        materialId: pkg?._id,
+        materialType: pkg?.type.includes("roduct") ? "product" : "packages",
+        qty: pkg?.qty,
+        rentType: pkg?.pricingMethod,
+        unit: pkg?.UOM,
+        currency: rentalManagementData?.currency
+      }))
+      // data.material = [{
+      //   materialId: "617044747098be0594ca47b8",
+      //   materialType: "product",
+      //   qty: 0,
+      //   rentType: "perDay",
+      //   unit: "well",
+      //   currency: "USD"
+      // }, {
+      //   materialId: "617044897098be0594ca47ba",
+      //   materialType: "product",
+      //   qty: 0,
+      //   rentType: "perDay",
+      //   unit: "Two Well Pad",
+      //   currency: "USD"
+      // }]
+      data.supplier = [];
+      data.customer = [rentalManagementData?.customerAccount.optionValue];
+      data.warehouse = [];
+      axiosInstance().post(pricingConditionApi + `/calculatePrice`, data).then(({ data: { data } }) => {
+        console.log(data)
+      })
+    }
+  };
 
   const updateStatus = () => {
     if (productInventory.length > 0 && rentalManagementData) {
@@ -313,6 +354,8 @@ const RentalManagementDetailsPage = () => {
       })));
       setProductInventory(tempInventory)
 
+      tempInventory = restructureRowData(tempInventory)
+
       // let tempWareHouse = []
       // data.data.map(d => {
       //   if (!tempWareHouse.some(t => t.optionValue === d.inventory.warehouse.optionValue)) {
@@ -331,11 +374,87 @@ const RentalManagementDetailsPage = () => {
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
       }, gridLoadingTimeout);
+      setSelectedProducts(null)
     }).catch((error) => {
       toastConfig.setToastConfig(error);
       dispatch({ type: "loading", loading: false });
     });
   };
+
+  const restructureRowData = (rowData: any) => {
+    let extractedProducts = []
+    let newDataOfRow = [...rowData]
+
+    newDataOfRow.forEach((rd) => {
+      let productsInPkg = []
+
+      newDataOfRow.forEach((rd1) => {
+        if (rd.type === "Package" && rd._id === rd1.packageId) {
+          productsInPkg.push(rd1);
+        }
+      })
+
+      if (rd.type === "Package") { rd.products = productsInPkg; }
+
+      if (rd) {
+        extractedProducts.push(rd)
+      }
+    })
+
+    extractedProducts = extractedProducts.filter((product) => product.type !== "productInPackage");
+
+
+    let newExtractedData = []
+
+    if (extractedProducts.length > 0) {
+
+      extractedProducts.forEach((pkg, indx) => {
+
+        let pkgData = { ...pkg };
+        pkgData = { ...pkgData, detail: `${indx + 1} - ${pkgData.detail}` };
+
+        if (pkgData.type === "Package") {
+
+          const { products } = pkgData;
+
+          if (products && products.length > 0) {
+
+            products.forEach((product, i) => {
+
+              let productData = { ...product };
+
+              let qty = pkg.qty !== 0 && product.qty !== 0
+                ? pkg.qty * product.qty
+                : pkg.qty !== 0 && product.qty === 0
+                  ? pkg.qty
+                  : pkg.qty === 0 && product.qty !== 0
+                    ? product.qty : product.qty
+
+              productData = {
+                ...productData,
+                detail: `${indx + 1}.${i + 1} - ${productData.detail}`,
+                qty,
+                UOM: pkg?.UOM,
+                pricingMethod: pkg?.pricingMethod,
+                price: pkg.price && pkg.price !== 0 && 0,
+                finalPrice: parseInt(product?.mrp) && qty
+                  ? parseInt(product.mrp) * qty
+                  : parseInt(product.mrp)
+                    ? parseInt(product.mrp)
+                    : 0,
+                discount: product.discount ? product.discount : 0,
+              }
+
+              newExtractedData.push(productData)
+            })
+          }
+        }
+        newExtractedData.push(pkgData)
+      })
+    }
+
+    return newExtractedData
+  }
 
 
   // const NameRenderer = (params) => (
@@ -429,17 +548,17 @@ const RentalManagementDetailsPage = () => {
       title: 'Detail',
       cellStyle: { padding: "0px 4px" },
       render: (rowData) => (
-        <div style={{ width: 200, display: "flex", alignItems: 'center' }}>
+        <div style={{ width: 250, display: "flex", alignItems: 'center' }}>
           <p
             onClick={() => handleClick(rowData)}
             className="link text-truncate"
             title={rowData.detail}
-          // to={rowData.type === 'Product' ? `${routes.productDetail.path}/${rowData.id}` : `${routes.packagesDetail.path}/${rowData.id}`}
           >
             {rowData.detail}
           </p>
           {rowData?.type === 'Package' && !rowData.hasOwnProperty("packageId") &&
             <Box ml={1}>
+              <span title={`There are ${rowData?.products?.length} product(s) in this package`}>({rowData?.products?.length})</span>
               <HtmlTooltip title="Add Product">
                 <IconButton onClick={() => setPackageForProducts(rowData)} size="small" color="primary">
                   <Add color='disabled' />
@@ -450,17 +569,17 @@ const RentalManagementDetailsPage = () => {
         </div>
       )
     },
-    {
-      field: 'type',
-      title: 'Type',
-      cellStyle: { padding: "0px" },
-      render: (rowData) => (
-        <div style={{ width: 80 }}>
-          <p>{rowData.type}</p>
-        </div>
-      )
+    // {
+    //   field: 'type',
+    //   title: 'Type',
+    //   cellStyle: { padding: "0px" },
+    //   render: (rowData) => (
+    //     <div style={{ width: 80 }}>
+    //       <p>{rowData.type}</p>
+    //     </div>
+    //   )
 
-    },
+    // },
     {
       field: 'startDate',
       title: 'Start Date',
@@ -517,18 +636,18 @@ const RentalManagementDetailsPage = () => {
       cellStyle: { padding: "0px" },
       render: (rowData) => (
         <div style={{ width: 100 }}>
-          <p>{rowData.pricingMethod}</p>
+          <p>{startCase(rowData.pricingMethod)}</p>
         </div>
       )
     },
     {
       field: 'price',
-      title: 'Price',
-      emptyValue: '- - - - -',
+      title: `Price ${currencySymbol}`,
       cellStyle: { padding: "0px" },
+      emptyValue: '- - - - -',
       render: (rowData) => (
         <div style={{ width: 100 }}>
-          <p>{rowData.price}</p>
+          <p>{rowData.price && rowData.price !== 0 ? rowData.price : "- - - - -"} </p>
         </div>
       )
     },
@@ -539,18 +658,18 @@ const RentalManagementDetailsPage = () => {
       cellStyle: { padding: "0px" },
       render: (rowData) => (
         <div style={{ width: 100 }}>
-          <p>{rowData.discount}</p>
+          <p>{rowData.discount === 0 ? "- - - - -" : rowData.discount}</p>
         </div>
       )
     },
     {
       field: 'finalPrice',
-      title: 'Final Price',
+      title: `Final Price ${currencySymbol}`,
       emptyValue: '- - - - -',
       cellStyle: { padding: "0px" },
       render: (rowData) => (
         <div style={{ width: 100 }}>
-          <p>{rowData.finalPrice}</p>
+          <p>{rowData.finalPrice && rowData.finalPrice !== 0 ? rowData.finalPrice : "- - - - -"}</p>
         </div>
       )
     }
@@ -652,59 +771,46 @@ const RentalManagementDetailsPage = () => {
   }
 
   const handleBulkEditData = (values: any) => {
-    console.log(values)
-    let updatedArr = []
-    if (selectedProductData) {
-      updatedArr = dataRows.map(d => {
-        let newObj: any = d
-        if (d.id === values.id) {
-          newObj = {
-            "id": d.id,
-            "type": d?.type?.toLowerCase() || "",
-            "detail": d.detail,
-            "pricingMethod": values.pricingMethod ? values.pricingMethod : d.pricingMethod,
-            "UOM": values.UOM ? values.UOM : d.UOM,
-            "finalPrice": values.finalPrice ? values.finalPrice : d.finalPrice,
-            "discount": values.discount ? values.discount : d.discount,
-            "startDate": values.startDate ? values.startDate : d.startDate,
-            "endDate": values.endDate ? values.endDate : d.endDate,
-            "qty": values.qty ? values.qty : d.qty,
-            "price": values.price ? values.price : d.price
-          }
-        }
-        return {
-          "id": newObj.id,
-          "type": newObj?.type?.toLowerCase(),
-          "detail": newObj?.detail,
-          "pricingMethod": newObj?.pricingMethod || "",
-          "UOM": newObj?.UOM || "",
-          "finalPrice": newObj?.finalPrice || 0,
-          "discount": newObj?.discount || 0,
-          "startDate": newObj?.startDate,
-          "endDate": newObj?.endDate,
-          "qty": newObj?.qty || 0,
-          "price": newObj?.price || 0
-        }
-      })
-    } else {
-      updatedArr = dataRows.map(d => ({
-        "id": d.id,
-        "type": d.type.toLowerCase(),
-        "detail": d.detail,
-        "pricingMethod": values.pricingMethod ? values.pricingMethod : d.pricingMethod,
-        "UOM": values.UOM ? values.UOM : d.UOM,
-        "finalPrice": values.finalPrice ? values.finalPrice : d.finalPrice,
-        "discount": values.discount ? values.discount : d.discount,
-        "startDate": values.startDate ? values.startDate : d.startDate,
-        "endDate": values.endDate ? values.endDate : d.endDate,
-        "qty": values.qty ? values.qty : d.qty,
-        "price": values.price ? values.price : d.price
-      })
-      )
-    }
+    let updatedArr = selectedProducts.filter(d => d.type !== "productInPackage")
+
+    updatedArr = updatedArr.map(d => ({
+      "id": d.id,
+      "type": d?.type.toLowerCase(),
+      "detail": d.detail,
+      "pricingMethod": values.pricingMethod ? values.pricingMethod : d.pricingMethod,
+      "UOM": values.UOM ? values.UOM : d.UOM,
+      "finalPrice": values.finalPrice ? values.finalPrice : d.finalPrice,
+      "discount": values.discount ? values.discount : d.discount,
+      "startDate": values.startDate ? values.startDate : d.startDate,
+      "endDate": values.endDate ? values.endDate : d.endDate,
+      "qty": values.qty ? values.qty : d.qty,
+      "price": values.price ? values.price : d.price
+    })
+
+    )
 
     setUpdating(true)
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": updatedArr })
+      .then(() => {
+        setUpdating(false)
+        setProductEdit(false)
+        fetchProductInventory()
+
+      }).catch((error) => {
+        setUpdating(false)
+        toastConfig.setToastConfig(error)
+      });
+  }
+
+
+  const handleSingleEdit = (values: any) => {
+
+    console.log(values)
+
+    calculatePricing([values])
+
+    setUpdating(true)
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/updateOne`, values)
       .then(() => {
         setUpdating(false)
         setProductEdit(false)
@@ -904,6 +1010,7 @@ const RentalManagementDetailsPage = () => {
 
                       >
                         <MaterialTableComponent
+                          // calculatePricing={calculatePricing}
                           columns={columns}
                           rowData={dataRows}
                           title={""}
@@ -1323,18 +1430,7 @@ const RentalManagementDetailsPage = () => {
             fetchProductInventory()
           }}
           resource="/product"
-          resourceData={
-            packageForProducts?.productRelationship?.map((p1) => {
-              let obj = {}
-              packageForProducts?.products?.forEach(p2 => {
-                if (p2.productId === p1._id) {
-                  obj = { ...p1, ...p2 }
-                }
-              })
-
-              return obj
-            })
-          }
+          resourceData={packageForProducts?.products}
           title="Assign Products"
         />
       }
@@ -1345,7 +1441,7 @@ const RentalManagementDetailsPage = () => {
             setProductEdit(false)
             setSelectedProductData(null)
           }}
-          submitBulkEdit={handleBulkEditData}
+          submitBulkEdit={selectedProductData ? handleSingleEdit : handleBulkEditData}
           currencySymbol={currencySymbol}
           data={selectedProductData}
         />}

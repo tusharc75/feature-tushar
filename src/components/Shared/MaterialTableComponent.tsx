@@ -12,44 +12,88 @@ interface TableProps {
   updateProductData?: any;
   onSelection: any;
   onRowClick?: any;
+  calculatePricing?: any
 }
 
 const MaterialTableComponent: FC<TableProps> = (props) => {
-  const { columns, rowData, title, loading, onSelection } = props;
+  const { columns, rowData, title, loading, onSelection, calculatePricing } = props;
   const [newRowData, setNewRowData] = useState([]);
 
   useEffect(() => {
-    (async () => {
-      let extractedProducts = []
+    // (async () => {
+    //   let extractedProducts = []
+    //   let newDataOfRow = [...rowData]
 
-      for (const rd of rowData) {
-        if (rd.type === "Package") {
-          const { products, productRelationship } = rd
-          products.forEach((p) => {
-            let dataObj = {}
-            productRelationship.forEach((pr) => {
-              if (p.productId === pr._id) {
-                dataObj = {
-                  ...p,
-                  ...pr,
-                  qty: p.qty !== 0 && rd.qty !== 0 ? p.qty * rd.qty : p.qty === 0 && rd.qty !== 0 ? rd.qty : p.qty !== 0 && rd.qty === 0 ? p.qty : 0,
-                  endDate: rd?.endDate,
-                  startDate: rd?.startDate,
-                  type: "Package",
-                  UOM: rd?.UOM || "",
-                  pricingMethod: rd?.pricingMethod || "",
-                }
-              }
-            })
-            extractedProducts.push(dataObj)
-          })
-        } else {
-          extractedProducts.push(rd)
-        }
-      }
+    //   newDataOfRow.forEach((rd) => {
+    //     let productsInPkg = []
 
-      setNewRowData(extractedProducts);
-    })();
+    //     newDataOfRow.forEach((rd1) => {
+    //       if (rd.type === "Package" && rd._id === rd1.packageId) {
+    //         productsInPkg.push(rd1);
+    //       }
+    //     })
+
+    //     if (rd.type === "Package") { rd.products = productsInPkg; }
+
+    //     if (rd) {
+    //       extractedProducts.push(rd)
+    //     }
+    //   })
+
+    //   extractedProducts = extractedProducts.filter((product) => product.type !== "productInPackage");
+
+
+    //   if (extractedProducts.length > 0) {
+    //     let newExtractedData = []
+
+    //     extractedProducts.forEach((pkg, indx) => {
+
+    //       let pkgData = { ...pkg };
+    //       pkgData = { ...pkgData, detail: `${indx + 1} - ${pkgData.detail}` };
+
+    //       if (pkgData.type === "Package") {
+
+    //         const { products } = pkgData;
+
+    //         if (products && products.length > 0) {
+
+    //           products.forEach((product, i) => {
+
+    //             let productData = { ...product };
+
+    //             let qty = pkg.qty !== 0 && product.qty !== 0
+    //               ? pkg.qty * product.qty
+    //               : pkg.qty !== 0 && product.qty === 0
+    //                 ? pkg.qty
+    //                 : pkg.qty === 0 && product.qty !== 0
+    //                   ? product.qty : product.qty
+
+    //             productData = {
+    //               ...productData,
+    //               detail: `${indx + 1}.${i + 1} - ${productData.detail}`,
+    //               qty,
+    //               UOM: pkg?.UOM,
+    //               pricingMethod: pkg?.pricingMethod,
+    //               price: parseInt(product?.mrp) || 0,
+    //               finalPrice: parseInt(product?.mrp) && qty
+    //                 ? parseInt(product.mrp) * qty
+    //                 : parseInt(product.mrp)
+    //                   ? parseInt(product.mrp)
+    //                   : 0,
+    //               discount: product.discount ? product.discount : 0,
+    //             }
+
+    //             newExtractedData.push(productData)
+    //           })
+    //         }
+    //       }
+    //       newExtractedData.push(pkgData)
+    //       setNewRowData(newExtractedData);
+    //       calculatePricing(newExtractedData)
+    //     })
+    //   }
+
+    // })();
   }, [rowData]);
 
 

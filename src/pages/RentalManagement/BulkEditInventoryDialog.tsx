@@ -1,7 +1,8 @@
 import { FC, useEffect, useState } from 'react';
-import { Button, Dialog, TextField, Grid, Box, CircularProgress, FormControl, InputLabel, Select, MenuItem, InputAdornment } from '@material-ui/core';
+import { Button, Dialog, TextField, Grid, Box, CircularProgress, FormControl, InputLabel, Select, MenuItem, InputAdornment, FormHelperText } from '@material-ui/core';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
 import DateUtils from '@date-io/date-fns';
+import moment from 'moment'
 
 
 import { dateFormatForInputControl } from '../../constants/helpers';
@@ -18,12 +19,13 @@ interface EditDialogProps {
 }
 
 const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submitBulkEdit, currencySymbol, data }) => {
+  const [productData, setProductData] = useState(null);
   const [values, setValues] = useState(null)
   const [isDisabled, setDisabled] = useState(false);
+  const [errors, setErrors] = useState(null);
 
   useEffect(() => {
     if (data) {
-
       if (data.hasOwnProperty("packageId")) {
         setDisabled(true)
       }
@@ -45,10 +47,28 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
   }, [data])
 
   const handleChange = (name: string, value: any) => {
-    setValues((prevState) => {
-      const newState = { ...prevState, [name]: value };
-      return newState
-    });
+    setValues((prevState) => ({ ...prevState, [name]: value }));
+
+    let errs = { ...errors }
+
+    if (Boolean(errs?.qty) && name === 'qty' && value) {
+      delete errs.qty
+    }
+    if (Boolean(errs?.price) && name === 'price' && value) {
+      delete errs.price
+    }
+    if (Boolean(errs?.pricingMethod) && name === 'pricingMethod' && value) {
+      delete errs.pricingMethod
+    }
+    if (Boolean(errs?.UOM) && name === 'UOM' && value) {
+      delete errs.UOM
+    }
+
+    if (Object.keys(errs).length === 0) {
+      setErrors(null)
+    } else {
+      setErrors(errs)
+    }
   };
 
   const handleClose = () => {
@@ -56,6 +76,38 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
       onClose()
     }
   }
+
+  const handleSubmit = () => {
+    const errs = handleErrors();
+
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs)
+    } else {
+      submitBulkEdit(values)
+    }
+  }
+
+  const handleErrors = () => {
+    let errs: any = {}
+
+    if (!values.qty) {
+      errs.qty = getErrorMsg("Qty.")
+    }
+    if (!values.price) {
+      errs.price = getErrorMsg("Price")
+    }
+    if (!values.pricingMethod) {
+      errs.pricingMethod = getErrorMsg("Pricing Method")
+    }
+    if (!values.UOM) {
+      errs.UOM = getErrorMsg("UOM")
+    }
+
+    return errs
+
+  }
+
+  const getErrorMsg = (str: string) => `${str} is a required field`
 
 
   return (
@@ -71,15 +123,37 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
                   label="Qty"
                   name="qty"
                   fullWidth
+                  required={true}
+                  error={!isDisabled && Boolean(errors?.qty)}
+                  helperText={!isDisabled && Boolean(errors?.qty) && errors.qty}
                   size="small"
                   type="number"
                   variant={"outlined"}
                   value={values?.qty || 0}
-                  onChange={(e) => handleChange(e.target.name, parseInt(e.target.value))}
+                  onChange={(e) => {
+                    let qty = parseInt(e.target.value);
+                    const startDate = moment(values?.startDate)
+                    const endDate = moment(values?.endDate)
+                    const diff = endDate.diff(startDate, "days");
+
+                    let finalPrice = qty && values?.price
+                      ? values?.pricingMethod === "perDay" && diff !== 0
+                        ? diff * qty * values?.price : qty * values?.price : values?.price;
+
+                    handleChange("finalPrice", finalPrice)
+                    handleChange(e.target.name, qty <= 0 ? 0 : qty)
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <FormControl disabled={isDisabled} size="small" variant="outlined" fullWidth>
+                <FormControl
+                  disabled={isDisabled}
+                  size="small"
+                  variant="outlined"
+                  fullWidth
+                  error={!isDisabled && Boolean(errors?.pricingMethod)}
+                  required={true}
+                >
                   <InputLabel id="pricing-method-label">
                     Pricing Method
                   </InputLabel>
@@ -90,10 +164,11 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
                     value={values?.pricingMethod || ""}
                     onChange={(e) => handleChange(e.target.name, e.target.value)}
                   >
-                    <MenuItem value="Per Day">Per Day</MenuItem>
-                    <MenuItem value="Per Week">Per Week</MenuItem>
-                    <MenuItem value="Per Month">Per Month</MenuItem>
+                    <MenuItem value="perDay">Per Day</MenuItem>
+                    <MenuItem value="perWeek">Per Week</MenuItem>
+                    <MenuItem value="perMonth">Per Month</MenuItem>
                   </Select>
+                  <FormHelperText id="pricing-method-label">{!isDisabled && Boolean(errors?.pricingMethod) && errors.pricingMethod}</FormHelperText>
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -107,7 +182,6 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
                   inputVariant="outlined"
                   variant='inline'
                   format={dateFormatForInputControl}
-                  clearable
                   autoOk
                   value={values?.startDate || new Date()}
                   onChange={(date) => handleChange("startDate", date)}
@@ -126,7 +200,6 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
                   inputVariant="outlined"
                   variant='inline'
                   format={dateFormatForInputControl}
-                  clearable
                   autoOk
                   value={values?.endDate || new Date()}
                   minDate={values?.startDate || new Date()}
@@ -137,7 +210,13 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <FormControl disabled={isDisabled} size="small" variant="outlined" fullWidth>
+                <FormControl
+                  disabled={isDisabled}
+                  size="small"
+                  variant="outlined"
+                  required
+                  fullWidth
+                  error={!isDisabled && Boolean(errors?.UOM)}>
                   <InputLabel id="UOM-label">
                     UOM
                   </InputLabel>
@@ -148,15 +227,19 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
                     value={values?.UOM || ""}
                     onChange={(e) => handleChange(e.target.name, e.target.value)}
                   >
-                    <MenuItem value="Litre">Litre</MenuItem>
-                    <MenuItem value="Gram">Gram</MenuItem>
+                    <MenuItem value="pcs">Pcs</MenuItem>
                   </Select>
+                  <FormHelperText id="UOM-label">{!isDisabled && Boolean(errors?.UOM) && errors.UOM}</FormHelperText>
+
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="Price"
                   name="price"
+                  required
+                  error={!isDisabled && Boolean(errors?.price)}
+                  helperText={!isDisabled && Boolean(errors?.price) && errors.price}
                   fullWidth
                   InputProps={{
                     startAdornment: (
@@ -169,7 +252,21 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
                   type="number"
                   variant={"outlined"}
                   value={values?.price || 0}
-                  onChange={(e) => handleChange(e.target.name, parseInt(e.target.value))}
+                  onChange={(e) => {
+                    let price = parseInt(e.target.value);
+                    const startDate = moment(values?.startDate)
+                    const endDate = moment(values?.endDate)
+                    const diff = endDate.diff(startDate, "days");
+
+                    let finalPrice = values?.qty && price
+                      ? values?.pricingMethod === "perDay" && diff !== 0
+                        ? values?.qty * price * diff
+                        : values?.qty * price
+                      : price;
+
+                    handleChange("finalPrice", finalPrice <= 0 ? 0 : finalPrice)
+                    handleChange(e.target.name, price <= 0 ? 0 : price)
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -185,7 +282,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
                   type="number"
                   variant={"outlined"}
                   value={values?.discount || 0}
-                  onChange={(e) => handleChange(e.target.name, parseInt(e.target.value))}
+                  onChange={(e) => handleChange(e.target.name, parseInt(e.target.value) <= 0 ? 0 : parseInt(e.target.value))}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -205,7 +302,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
                   type="number"
                   variant={"outlined"}
                   value={values?.finalPrice || 0}
-                  onChange={(e) => handleChange(e.target.name, parseInt(e.target.value))}
+                  onChange={(e) => handleChange(e.target.name, parseInt(e.target.value) <= 0 ? 0 : parseInt(e.target.value))}
                 />
               </Grid>
             </Grid>
@@ -221,7 +318,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ onClose, isSaving, submi
           color="primary"
           disabled={isSaving || !Boolean(values)}
           size="small"
-          onClick={() => submitBulkEdit(values)}
+          onClick={handleSubmit}
           endIcon={isSaving && <CircularProgress size={20} />}
         >
           Save
