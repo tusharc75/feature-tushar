@@ -82,7 +82,7 @@ const CreateSerializedAsset = (props) => {
                                                             >
                                                                 <Grid item md={1}> # </Grid>
                                                                 <Grid item md={4}> Product </Grid>
-                                                                <Grid item md={4}> WareHouse </Grid>
+                                                                <Grid item md={4}> Plants </Grid>
                                                                 <Grid item md={2}> Quantity </Grid>
                                                                 <Grid item md={1}></Grid>
 
@@ -146,8 +146,8 @@ const CreateSerializedAsset = (props) => {
                                                                                             renderInput={(params) => <TextField
                                                                                                 {...params}
                                                                                                 variant="outlined"
-                                                                                                name="warehouse"
-                                                                                                label="warehouse"
+                                                                                                name="plants"
+                                                                                                label="Plants"
                                                                                             />}
                                                                                         />
                                                                                     </Grid>
