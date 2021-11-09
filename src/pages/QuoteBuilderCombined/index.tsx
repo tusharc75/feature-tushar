@@ -50,6 +50,8 @@ import AddIcon from "@material-ui/icons/Add"
 import { isMobile, isTablet } from 'react-device-detect';
 import { quoteStepColors } from '../../constants/helpers';
 import InfiniteScroll from "react-infinite-scroll-component";
+import {MdAccountCircle} from "react-icons/md";
+import {AiFillCrown} from "react-icons/all";
 
 let quoteTimeout;
 const QuoteType = [
@@ -901,6 +903,24 @@ const QuoteBuilders = () => {
                 rowCount={rowCount}
                 page={page}
                 loading={loading}
+                additionalDetails={[
+                  {
+                    icon: <AiFillCrown size={18} />,
+                    field: "owner"
+                  },
+                  {
+                    icon: <MdAccountCircle size={18} />,
+                    field: "owner"
+                  },
+                  // {
+                  //   icon: <MdAccountCircle size={18} />,
+                  //   field: "owner"
+                  // },
+                  // {
+                  //   icon: <MdAccountCircle size={18} />,
+                  //   field: "owner"
+                  // }
+                ]}
                 chips={[
                   {
                     label: "Version(s): ",
