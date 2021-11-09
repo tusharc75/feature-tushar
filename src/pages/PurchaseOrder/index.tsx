@@ -43,7 +43,7 @@ const PurchaseOrder = () => {
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
     const {
-        state: { permissions },
+        state: { user, permissions },
     }: any = useData();
     const history = useHistory();
 
@@ -62,10 +62,7 @@ const PurchaseOrder = () => {
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    if (o?.fieldData?.fieldName === "purchaseOrderNumber") {
-                        o.fieldData.primaryField = true
-                    }
-                    let currentColumn = getColumnData(routes.purchaseOrder?.title, o?.fieldData, routes.purchaseOrderDetail.path, true)
+                    let currentColumn = getColumnData(routes.purchaseOrder?.title, o?.fieldData, routes.purchaseOrderDetail.path)
 
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
@@ -96,7 +93,7 @@ const PurchaseOrder = () => {
         const queryString = getQueryString();
         axiosInstance().get(`${purchaseOrder.api}${queryString}`).then(({ data }) => {
             data.data = data.data?.map((u, i) => ({
-                ...prepareDataForGrid(u),
+                ...prepareDataForGrid(u, user)
             }));
 
             dispatch({ type: "initialize", data: data.data, count: data.count });

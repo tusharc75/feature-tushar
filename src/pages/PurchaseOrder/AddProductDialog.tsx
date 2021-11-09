@@ -41,7 +41,7 @@ const AddProductDialog = ({ addProductInventory, handleProductInventoryClose, ty
     const columns = type === "product" ? [
         { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
-        { field: "entity", headerName: "Entity", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        // { field: "entity", headerName: "Entity", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
     ] : [
@@ -99,14 +99,14 @@ const AddProductDialog = ({ addProductInventory, handleProductInventoryClose, ty
             gridApi.setRowData([]);
         }
         axiosInstance().get(`${product.api}`).then(({ data }) => {
-            data.data = data.data?.map((u) => ({
-                    ...u,
-                    id: u._id,
-                    productCategory: u.productCategory?.optionLabel,
-                    priceTemplate: u.priceTemplate?.optionLabel,
-                    type: type,
-                    quantity: 0,
-                }));
+            data.data = data.data?.filter(u => u?.serializedProduct).map((u) => ({
+                ...u,
+                id: u._id,
+                productCategory: u.productCategory?.optionLabel,
+                priceTemplate: u.priceTemplate?.optionLabel,
+                type: type,
+                quantity: 0,
+            }));
             setProductData(data.data)
             dispatch({ type: "initialize", data: data.data, count: data.data.length });
             setTimeout(() => {

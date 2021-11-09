@@ -27,6 +27,10 @@ import AddProductDialog from "./AddProductDialog";
 import Add from "@material-ui/icons/Add";
 import { Delete } from "@material-ui/icons";
 import { Formik, Form, FieldArray, Field } from "formik";
+import CreateSeriaizedAsset from "./CreateSeriaizedAsset";
+import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
+import CreateProduct from "../../components/Product/CreateProduct";
+import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -37,7 +41,7 @@ const PurchaseOrderDetailsPage = () => {
     const { id } = useParams();
     const history = useHistory();
     const {
-        state: { permissions }
+        state: { user, permissions }
     }: any = useData();
     const [headingLbl, setHeadingLbl] = useState("");
     const [loadingPurchaseOrder, setLoadingPurchaseOrder] = useState(false);
@@ -54,42 +58,46 @@ const PurchaseOrderDetailsPage = () => {
     const [product, setProduct] = useState<any[]>([]);
     const [additionalCost, setAdditionalCost] = useState<any[]>([]);
     const [currencySymbol, setCurrencySymbol] = useState(null);
-
+    const [showCreateAssetDIalog, setShowCreateAssetDIalog] = useState(false)
+    const [updateLoading, setUpdateLoading] = useState(false)
+    const [isAddNewProduct, setIsAddNewProduct] = useState(false)
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [statusOptions, setStatusOptions] = useState([])
+    const [purchaseOrderProduct, setPurchaseOrderProduct] = useState([])
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-    const NameRenderer = (params) => (
-        <>{
-            params.value ? (
-                params.data.type === "Receiving Ticket" ?
-                    <Link className="link" title={params.value} to={`${routes.receivingTicketDetail.path}/${params.data.referenceId}`}>
-                        {params.value}
-                    </Link> : params.data.type.toLowerCase() === "repair" ?
-                        <Link className="link" title={params.value} to={`${routes.repairJobDetail.path}/${params.data.referenceId}`}>
-                            {params.value}
-                        </Link>
-                        : params.data.type.toLowerCase() === "rental" ?
-                            <Link className="link" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`}>
-                                {params.value}
-                            </Link> : params.value
-            ) : (
-                <NoDataCell />
-            )
-        }
-
+    const ActionsRenderer = (params) => (
+        <>
+            <GridDeleteIcon
+                hasDeletePermission={permissions?.rentalManagement?.isDelete}
+                ownerId={user?.user?._id}
+                userId={user?.user?._id}
+                onDelete={() => {
+                    deletePurchaseOrderProduct([{
+                        id: params.data._id,
+                    }])
+                }
+                }
+                entity="rentalManagement"
+            />
         </>
     );
+
     const frameworkComponents = {
-        nameRenderer: NameRenderer,
         commonRenderer: CommonRenderer,
+        actionsRenderer: ActionsRenderer,
         dateRenderer: DateRenderer,
     };
     const columns = [
         { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
-        { field: "entity", headerName: "Entity", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "expectedDelivery", headerName: "Expected Delivery", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
+        { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+        { field: "uom", headerName: "Base UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Hour", "Day", "Week", "Month"] }, editable: true },
+        { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+        { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: false },
     ];
 
     useEffect(() => {
@@ -114,7 +122,15 @@ const PurchaseOrderDetailsPage = () => {
             gridApi.setRowData([]);
         }
         axiosInstance().get(`${purchaseOrder.api}/${id}/order-details`).then(({ data: { data } }) => {
-            data = data?.map((u) => u.productId);
+            data = data?.map((u) => ({
+                ...u,
+                productName: u.productId?.productName,
+                productNumber: u.productId?.productNumber,
+                entity: u.productId?.entity,
+                quantity: u.qty
+
+            }));
+            setPurchaseOrderProduct(data)
             dispatch({ type: "initialize", data: data, count: data.length });
             dispatch({ type: "loading", loading: false });
         }).catch((error) => {
@@ -135,7 +151,7 @@ const PurchaseOrderDetailsPage = () => {
             setCustomizedRoutes([routes.purchaseOrder,
             { title: `${data?.purchaseOrderNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
             setPurchaseOrderData(data);
-            setAdditionalCost(data.additionalCost ? data.additionalCost : [{ "type": "", "value": 0 }]);
+            setAdditionalCost(data.additionalCost ? data.additionalCost.map(u => ({ "type": u.type, "value": u.value })) : [{ "type": "", "value": 0 }]);
             setLoadingPurchaseOrder(false);
         } catch (error) {
             toastConfig.setToastConfig(error);
@@ -147,6 +163,14 @@ const PurchaseOrderDetailsPage = () => {
             .get("/field?resource=Purchase Order")
             .then(({ data }) => {
                 setPurchaseOrderFields(data.data);
+                if (data.data && data.data.length) {
+                    data.data.some(o => {
+                        if (o?.fieldData?.fieldName === "status") {
+                            setStatusOptions([...o.fieldData.option])
+                            return true
+                        }
+                    })
+                }
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -191,6 +215,48 @@ const PurchaseOrderDetailsPage = () => {
             });
     }
 
+    const addProductInBuilder = (productInventoryArray) => {
+
+        setAddingProducts(true)
+        let tempProductArray = productInventoryArray.map(d => ({
+            "productId": d.productId,
+            "qty": parseInt(d.quantity || d.qty) || 0,
+            "value": parseInt(d.price || d.mrp) || 0,
+        }))
+        axiosInstance().post(`${purchaseOrder.api}/${id}/order-details/add`, { "orderDetails": tempProductArray }).then(() => {
+            setAddProductDialog(false)
+            fetchPurchaseOrderProduct()
+            setAddingProducts(false)
+        })
+            .catch((error) => {
+                setAddProductDialog(false)
+                toastConfig.setToastConfig(error)
+                setAddingProducts(false)
+            });
+    };
+
+    const handleUpdateOrderProduct = (row) => {
+        let tempProductArray = {
+            "qty": parseInt(row.quantity || row.qty) || 0,
+            "value": parseInt(row.price || row.value) || 0,
+            "expectedDelivery": row.expectedDelivery || "",
+            "uom": row.uom || "",
+            "price": row.price || 0,
+            "finalPrice": row.finalPrice || 0
+        }
+
+        axiosInstance().post(`${purchaseOrder.api}/${id}/order-details/update?orderId=${row._id}`, tempProductArray)
+            .then(() => {
+                setAddProductDialog(false)
+                fetchPurchaseOrderProduct()
+                setAddingProducts(false)
+            }).catch((error) => {
+                setAddProductDialog(false)
+                toastConfig.setToastConfig(error)
+                setAddingProducts(false)
+            });
+    }
+
     const handleSaveAdditionalCost = (additionalCostTemp) => {
 
         let tempProductArray = additionalCostTemp.map(d => ({
@@ -205,6 +271,50 @@ const PurchaseOrderDetailsPage = () => {
                 toastConfig.setToastConfig(error)
             });
     }
+
+    const openActions = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const closeActions = () => {
+        setAnchorEl(null);
+    };
+    const handleStatusChange = o => {
+        if (o.optionValue === "Received") {
+            setShowCreateAssetDIalog(true)
+        }
+        else {
+            handleUpdateData({ status: o.optionValue })
+        }
+    }
+
+    const handleUpdateData = (obj) => {
+
+        if (obj.status) {
+            const fieldsDataForUpdate = purchaseOrderFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+            let values = getObjKeysWithValues(purchaseOrderData, fieldsDataForUpdate)
+            values["status"] = obj.status
+            if (obj.reason) values["scrapingReason"] = obj.reason
+            values["_id"] = id
+            axiosInstance().put(`${purchaseOrder.api}`, values).then(({ data: { data } }) => {
+                getPurchaseOrderFields();
+                fetchPurchaseOrderData();
+                fetchPurchaseOrderProduct();
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+        }
+    }
+
+    const deletePurchaseOrderProduct = (products) => {
+        axiosInstance().delete(`${purchaseOrder.api}/${id}/order-details/delete?orderId=${products.map(d => d.id)}`)
+            .then(() => {
+                fetchPurchaseOrderProduct()
+            }).catch((error) => {
+                toastConfig.setToastConfig(error)
+            });
+    }
+
 
     return (
         <>
@@ -262,6 +372,43 @@ const PurchaseOrderDetailsPage = () => {
                                             >
                                                 Download
                                             </Button>
+                                        </>
+                                    )}
+                                    {(permissions?.purchaseOrder?.isUpdate &&
+                                        <>
+                                            <Button
+                                                variant="outlined"
+                                                color="default"
+                                                size="small"
+                                                onClick={openActions}
+                                                disabled={updateLoading || purchaseOrderData?.status === "Received"}
+                                                aria-controls="action-menu"
+                                                endIcon={<ExpandMore />}
+                                            >
+                                                Change Status
+                                            </Button>
+                                            <Menu
+                                                anchorEl={anchorEl}
+                                                keepMounted
+                                                getContentAnchorEl={null}
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'left'
+                                                }}
+                                                id="action-menu"
+                                                open={Boolean(anchorEl)}
+                                                onClose={closeActions}>
+                                                {
+                                                    statusOptions.map(o => {
+                                                        return <MenuItem
+                                                            onClick={() => {
+                                                                closeActions()
+                                                                handleStatusChange(o)
+                                                            }}
+                                                            value={o}>{o?.optionLabel}</MenuItem>
+                                                    })
+                                                }
+                                            </Menu>
                                         </>
                                     )}
                                     {permissions?.purchaseOrder?.isUpdate && (
@@ -331,16 +478,26 @@ const PurchaseOrderDetailsPage = () => {
                                                     color="primary"
                                                     size="small"
                                                     onClick={() => {
+                                                        setIsAddNewProduct(true);
+                                                    }}
+                                                >
+                                                    {`Add New ${routes.product.title}`}
+                                                </Button>
+                                                <Box mx={1} />
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    size="small"
+                                                    onClick={() => {
                                                         setAddProductDialog(true);
                                                     }}
                                                 >
-                                                    {`Add ${routes.product.title}`}
+                                                    {`Add Existing ${routes.product.title}`}
                                                 </Button>
-                                                <Box mx={1} />
                                             </Box>
                                         </Box>
                                         {columns ?
-                                            <CustomAgGrid
+                                            <CustomAgGridEditable
                                                 columns={columns}
                                                 dataRows={dataRows}
                                                 frameworkComponents={frameworkComponents}
@@ -350,10 +507,14 @@ const PurchaseOrderDetailsPage = () => {
                                                 limit={limit}
                                                 pageSizes={pageSizes}
                                                 page={page}
-                                                allowAction={false}
-                                                allowSelection={false}
+                                                allowAction={true}
+                                                actionWidth={150}
+                                                allowSelection={true}
                                                 isClientSideGrid={true}
                                                 loading={loading}
+                                                onCellValueChanged={(row) => {
+                                                    handleUpdateOrderProduct(row.data)
+                                                }}
                                                 renderedFrom="purchaseOrderDetailsPageInventory"
                                                 refreshGrid={fetchPurchaseOrderProduct}
                                             />
@@ -426,7 +587,7 @@ const PurchaseOrderDetailsPage = () => {
                                                                                                     component={TextField}
                                                                                                     name="type"
                                                                                                     placeholder="Type"
-                                                                                                    value={userVal.description}
+                                                                                                    value={userVal.type}
                                                                                                     onChange={(e) => {
                                                                                                         arrayHelpers.replace(index, {
                                                                                                             ...values.additionalCost[index],
@@ -453,7 +614,7 @@ const PurchaseOrderDetailsPage = () => {
                                                                                                         component={TextField}
                                                                                                         name="value"
                                                                                                         placeholder="Enter Value"
-                                                                                                        value={userVal.amount}
+                                                                                                        value={userVal.value}
                                                                                                         onChange={(e) => {
                                                                                                             arrayHelpers.replace(index, {
                                                                                                                 ...values.additionalCost[index],
@@ -562,6 +723,29 @@ const PurchaseOrderDetailsPage = () => {
                     type={"product"}
                 />
             }
+            {showCreateAssetDIalog &&
+                <CreateSeriaizedAsset
+                    purchaseOrderID={id}
+                    onClose={() => setShowCreateAssetDIalog(false)}
+                    onSuccess={() => {
+                        setShowCreateAssetDIalog(false)
+                        handleUpdateData({ status: "Received" })
+                    }}
+                    title="Create Asset"
+                    productList={purchaseOrderProduct}
+                />
+            }
+            {isAddNewProduct && (
+                <CreateProduct
+                    isClone={false}
+                    productId={null}
+                    handleClose={() => setIsAddNewProduct(false)}
+                    isAddInBuilder={true}
+                    addProductInBuilder={addProductInBuilder}
+                    openFrom="builder"
+                    fromQuote={true}
+                />
+            )}
         </>
     );
 };
