@@ -27,7 +27,8 @@ export default function CustomSwipableList({
     onCreate,
     showClone,
     onClone,
-    fullHeight = false
+    fullHeight = false,
+    renderedFrom
 }) {
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
@@ -39,22 +40,6 @@ export default function CustomSwipableList({
         showDelete: false,
         onDelete: null,
     })
-
-    // useEffect(() => {
-    //     setIsAllChecked(selectedRecords.length > 0 && selectedRecords.length === dataRows.filter(f => f.isChecked)?.length)
-    // }, [selectedRecords])
-
-    // const [dataToShow, setDataToShow] = useState([])
-
-    // useEffect(() => {
-    //     setDataToShow(prevState => [...prevState, ...dataRows]);
-    // }, [dataRows])
-
-    // const primaryField = columns.find(d => d.primaryField);
-
-    // useEffect(() => {
-    //     setIsAllChecked(false);
-    // }, [dataRows])
 
     const generateChipStyle = (chipColorVariable, value) => {
         if (value) {
@@ -90,6 +75,7 @@ export default function CustomSwipableList({
                                         selectedRecords: updatedMetadata.filter(d => d.isChecked)
                                     });
                                     dispatch({ type: "update", data: updatedMetadata });
+                                    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(updatedMetadata.filter(d => d.isChecked).map(m => m._id)));
                                 }}
                                 name="checkedB"
                                 color="primary"
@@ -143,6 +129,7 @@ export default function CustomSwipableList({
                                                 });
 
                                                 dispatch({ type: "update", data: dataRows });
+                                                localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(dataRows.filter(d => d.isChecked).map(m => m._id)));
                                             }}
                                             inputProps={{ 'aria-label': 'primary checkbox' }}
                                         />

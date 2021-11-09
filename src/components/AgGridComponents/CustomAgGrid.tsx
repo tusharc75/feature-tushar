@@ -25,7 +25,7 @@ export function reducer(state, action) {
         ...state,
         dataRows: action.data,
         rowCount: action.count,
-        selectedRecords: []
+        selectedRecords: action.selectedRecords ?? state.selectedRecords
       };
 
     case 'selection':

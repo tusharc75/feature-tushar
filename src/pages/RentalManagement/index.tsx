@@ -611,6 +611,7 @@ const RentalManagement = () => {
                   onCreate={clickCreateNew}
                   showClone={false}
                   onClone={() => { }}
+                  renderedFrom={pageTitle}
                 /> :
                 <CustomAgGrid
                   columns={columns}
