@@ -5,6 +5,7 @@ import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { FilterList } from '@material-ui/icons';
 import FormTypes from '../../components/Helpers/FormTypes';
+import { dateFormatForInputControl } from '../../constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -280,7 +281,7 @@ const Filters = (props) => {
                   size="small"
                   disableFuture
                   openTo="year"
-                  format="MM/dd/yyyy"
+                  format={dateFormatForInputControl}
                   maxDate={salesFilter.between.to}
                   label="From"
                   views={['year', 'month', 'date']}
@@ -300,7 +301,7 @@ const Filters = (props) => {
                   minDate={salesFilter.between.from}
                   disableFuture
                   openTo="year"
-                  format="MM/dd/yyyy"
+                  format={dateFormatForInputControl}
                   label="To"
                   views={['year', 'month', 'date']}
                   value={salesFilter.between.to}
