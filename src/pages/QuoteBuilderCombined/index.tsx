@@ -910,7 +910,7 @@ const QuoteBuilders = () => {
                   },
                   {
                     icon: <MdAccountCircle size={18} />,
-                    field: "owner"
+                    field: "customerAccountName"
                   },
                 ]}
                 chips={[
