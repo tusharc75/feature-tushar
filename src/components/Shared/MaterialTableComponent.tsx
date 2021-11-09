@@ -12,11 +12,13 @@ interface TableProps {
   updateProductData?: any;
   onSelection: any;
   onRowClick?: any;
-  calculatePricing?: any
+  calculatePricing?: any;
+  cellEditable?: any;
+  parentChildData?: any;
 }
 
 const MaterialTableComponent: FC<TableProps> = (props) => {
-  const { columns, rowData, title, loading, onSelection, calculatePricing } = props;
+  const { columns, rowData, title, loading, onSelection, calculatePricing, cellEditable, parentChildData } = props;
   const [newRowData, setNewRowData] = useState([]);
 
   useEffect(() => {
@@ -109,7 +111,9 @@ const MaterialTableComponent: FC<TableProps> = (props) => {
         isLoading={loading}
         data={rowData}
         onSelectionChange={onSelection}
-        parentChildData={(row, rows) => rows.find((a) => a.id === row.packageId)}
+        totalCount={25}
+        cellEditable={cellEditable}
+        parentChildData={(row, rows) => rows.find((a) => a.treeId === row.parent)}
         options={{
           selection: true,
           hideFilterIcons: false,
@@ -119,7 +123,11 @@ const MaterialTableComponent: FC<TableProps> = (props) => {
           search: false,
           maxBodyHeight: 400,
           minBodyHeight: 400,
+          paging: false,
           toolbar: false,
+          editCellStyle: {
+            borderBottomWidth: 0
+          }
         }}
         title={title}
         icons={materialTableIcons}

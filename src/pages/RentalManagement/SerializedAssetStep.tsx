@@ -18,7 +18,9 @@ import moment from "moment";
 import MaterialTableComponent from "../../components/Shared/MaterialTableComponent";
 
 
-const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId }) => {
+const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId, isTabletScreen,
+  isSmallScreen,
+  showActivity, currencySymbol }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [gridApi, setGridApi] = useState(null);
@@ -34,81 +36,81 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState([])
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    dispatch({ type: "loading", loading: true });
-    dispatch({
-      type: "initialize", data: productInventory, count: productInventory.length
-    });
-    setTimeout(() => {
-      dispatch({ type: "loading", loading: false });
-    }, gridLoadingTimeout);
+  //   dispatch({ type: "loading", loading: true });
+  //   dispatch({
+  //     type: "initialize", data: productInventory, count: productInventory.length
+  //   });
+  //   setTimeout(() => {
+  //     dispatch({ type: "loading", loading: false });
+  //   }, gridLoadingTimeout);
 
-    fetchSerializedAsset()
-    // eslint-disable-next-line
-  }, [productInventory]);
+  //   fetchSerializedAsset()
+  //   // eslint-disable-next-line
+  // }, [productInventory]);
 
-  const fetchSerializedAsset = () => {
-    dispatchSerializedAssets({ type: "loading", loading: true });
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`)
-      .then(({ data }) => {
-        setAddSerializedAssetDialog(false)
-        setAssignedSerializedAsset(data.data.map(d => d.inventory))
-        dispatchSerializedAssets({
-          type: "initialize", data: data.data.map(d => d.inventory), count: data.data.length
-        });
-        setTimeout(() => {
-          dispatchSerializedAssets({ type: "loading", loading: false });
-        }, gridLoadingTimeout);
-      }).catch((error) => {
-        setAddSerializedAssetDialog(false)
-        dispatch({ type: "loading", loading: false });
-        toastConfig.setToastConfig(error)
-      });
-  };
+  // const fetchSerializedAsset = () => {
+  //   dispatchSerializedAssets({ type: "loading", loading: true });
+  //   axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`)
+  //     .then(({ data }) => {
+  //       setAddSerializedAssetDialog(false)
+  //       setAssignedSerializedAsset(data.data.map(d => d.inventory))
+  //       dispatchSerializedAssets({
+  //         type: "initialize", data: data.data.map(d => d.inventory), count: data.data.length
+  //       });
+  //       setTimeout(() => {
+  //         dispatchSerializedAssets({ type: "loading", loading: false });
+  //       }, gridLoadingTimeout);
+  //     }).catch((error) => {
+  //       setAddSerializedAssetDialog(false)
+  //       dispatch({ type: "loading", loading: false });
+  //       toastConfig.setToastConfig(error)
+  //     });
+  // };
 
-  const NameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
-      {params.value}
-    </Link>
-  );
+  // const NameRenderer = (params) => (
+  //   <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
+  //     {params.value}
+  //   </Link>
+  // );
 
-  const SerializedAssetRenderer = (params) => (
-    <h5 className="createBy d-flex">
-      {params.data?.serializedAsset[0]}
-      {params.data?.serializedAsset?.length > 0 && (
-        <span className="createdAtTime badge-date">{`+${params.data?.serializedAsset.length} more..`}</span>
-      )}
-    </h5>
-  )
+  // const SerializedAssetRenderer = (params) => (
+  //   <h5 className="createBy d-flex">
+  //     {params.data?.serializedAsset[0]}
+  //     {params.data?.serializedAsset?.length > 0 && (
+  //       <span className="createdAtTime badge-date">{`+${params.data?.serializedAsset.length} more..`}</span>
+  //     )}
+  //   </h5>
+  // )
 
-  const TicketRenderer = (params) => (
-    params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
-        {params.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    )
-  );
+  // const TicketRenderer = (params) => (
+  //   params?.value ? (
+  //     <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
+  //       {params.value}
+  //     </Link>
+  //   ) : (
+  //     <NoDataCell />
+  //   )
+  // );
 
-  const ProductRenderer = (params) => (
-    <Link className="link" title={params.value} to={params.data.type === "Product" ? `${routes.productDetail.path}/${params.data.id}` : `${routes.packagesDetail.path}/${params.data.id}`}>
-      {params.value}
-    </Link>
-  );
+  // const ProductRenderer = (params) => (
+  //   <Link className="link" title={params.value} to={params.data.type === "Product" ? `${routes.productDetail.path}/${params.data.id}` : `${routes.packagesDetail.path}/${params.data.id}`}>
+  //     {params.value}
+  //   </Link>
+  // );
 
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    productRenderer: ProductRenderer,
-    commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer,
-    serializedAssetRenderer: SerializedAssetRenderer
-  };
+  // const frameworkComponents = {
+  //   nameRenderer: NameRenderer,
+  //   productRenderer: ProductRenderer,
+  //   commonRenderer: CommonRenderer,
+  //   dateRenderer: DateRenderer,
+  //   serializedAssetRenderer: SerializedAssetRenderer
+  // };
 
-  const frameworkComponentsSerializedAssets = {
-    commonRenderer: CommonRenderer,
-  };
+  // const frameworkComponentsSerializedAssets = {
+  //   commonRenderer: CommonRenderer,
+  // };
 
   // const columns = [
   //   { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "productRenderer" },
@@ -139,17 +141,6 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
           </p>
         </div>
       )
-    },
-    {
-      field: 'type',
-      title: 'Type',
-      cellStyle: { padding: "0px" },
-      render: (rowData) => (
-        <div style={{ width: 80 }}>
-          <p>{rowData.type}</p>
-        </div>
-      )
-
     },
     {
       field: 'startDate',
@@ -213,7 +204,7 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
     },
     {
       field: 'price',
-      title: 'Price',
+      title: `Price + (${currencySymbol})`,
       emptyValue: '- - - - -',
       cellStyle: { padding: "0px" },
       render: (rowData) => (
@@ -235,7 +226,7 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
     },
     {
       field: 'finalPrice',
-      title: 'Final Price',
+      title: `Final Price + (${currencySymbol})`,
       emptyValue: '- - - - -',
       cellStyle: { padding: "0px" },
       render: (rowData) => (
@@ -247,15 +238,15 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
   ]
 
 
-  const columnsSerializedAssets = [
-    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
-    // { field: "warehouse", headerName: "Plant", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    // { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
-  ];
+  // const columnsSerializedAssets = [
+  //   { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
+  //   { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
+  //   { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
+  //   { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+  //   { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
+  //   // { field: "warehouse", headerName: "Plant", show: true, disabled: true, cellRenderer: "commonRenderer" },
+  //   // { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
+  // ];
 
   // const columnStateProductAndPackage = JSON.parse(localStorage.getItem("rentalManagementDetailsPageSerializedAssetsProductAndPackage"));
   // if (columnStateProductAndPackage) {
@@ -268,23 +259,23 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
   //   });
   // }
 
-  const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageSerializedAssets"));
-  if (columnState) {
-    columnsSerializedAssets.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
+  // const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageSerializedAssets"));
+  // if (columnState) {
+  //   columnsSerializedAssets.forEach((item) => {
+  //     columnState.forEach((d) => {
+  //       if (d.colId === item.field) {
+  //         item.show = !d.hide;
+  //       }
+  //     });
+  //   });
+  // }
 
   const handleAddSerializedAsset = (productInventoryArray) => {
     let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id } })
     axiosInstance().post(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`, { "products": tempProductArray })
       .then(({ data }) => {
         setAddSerializedAssetDialog(false)
-        fetchSerializedAsset()
+        // fetchSerializedAsset()
         toastConfig.setToastConfig({
           open: true,
           type: "success",
@@ -305,7 +296,7 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
         color="primary"
         type="button"
         size="small"
-        disabled={(selectedRecords.length === 0)}
+        disabled={(selectedProducts.length === 0)}
         onClick={() => {
           setAddSerializedAssetDialog(true)
         }}
@@ -338,20 +329,32 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
             loading={loading}
             renderedFrom="rentalManagementDetailsPageSerializedAssetsProductAndPackage"
             /> */}
-            <MaterialTableComponent
-              columns={columns}
-              rowData={dataRows}
-              title={""}
-              loading={loading}
-              onSelection={(d) => setSelectedProducts(d)}
+            <Box p="6px"
+              zIndex={5}
+              width={
+                isTabletScreen
+                  ? "calc(100vw - 20px)"
+                  : isSmallScreen
+                    ? "calc(100vw - 78px)"
+                    : showActivity ? "100%" : "calc(100vw - 100px)"
+              }>
+              <MaterialTableComponent
+                columns={columns}
+                rowData={productInventory}
+                title={""}
+                loading={loading}
+                onSelection={(d) => setSelectedProducts(d)}
+                parentChildData={(row, rows) => rows.find((a) => a.treeId === row.parent)}
 
-            />
+              />
+            </Box>
+
           </>
           : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
 
         }
       </Grid>
-      <Grid item xs={12} sm={12} md={12} lg={12}>
+      {/* <Grid item xs={12} sm={12} md={12} lg={12}>
         <div className="detail-box">
           <h3 className="form-label-style" title={"Searlized Assets"}>
             {"Searlized Assets"}
@@ -377,13 +380,16 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
           : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
 
         }
-      </Grid>
+      </Grid> */}
     </Grid>
     {addSerializedAssetDialog &&
       <AddSerializedAsset
         addSerializedAsset={handleAddSerializedAsset}
-        handleSerializedAssetClose={() => { setAddSerializedAssetDialog(false) }}
-        selectedProducts={selectedRecords}
+        handleSerializedAssetClose={() => {
+          setAddSerializedAssetDialog(false);
+          setSelectedProducts([])
+        }}
+        selectedProducts={selectedProducts}
       // type={inventoryType}
       />
     }

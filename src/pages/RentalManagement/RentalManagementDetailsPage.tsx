@@ -89,6 +89,7 @@ const RentalManagementDetailsPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [additionalCost, setAdditionalCost] = useState<any[]>([]);
   const [productInventory, setProductInventory] = useState<any[]>([]);
+  const [serializeAssets, setSerializeAssets] = useState<any[]>([]);
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
@@ -142,6 +143,7 @@ const RentalManagementDetailsPage = () => {
   }, [isSmallScreen])
 
   const calculatePricing = (arr: any[]) => {
+    console.log(arr)
     //materialType can be =["product","packages","productCategory"]
     //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
     if (rentalManagementData) {
@@ -392,6 +394,7 @@ const RentalManagementDetailsPage = () => {
       })
 
       setProductInventory(tempInventory)
+      setSerializeAssets(data.data?.inventory)
 
       tempInventory = restructureRowData(tempInventory)
 
@@ -472,7 +475,9 @@ const RentalManagementDetailsPage = () => {
               productData = {
                 ...productData,
                 detail: `${indx + 1}.${i + 1} - ${productData.detail}`,
-                qty,
+                totalQty: qty,
+                pkgQty: pkgData.qty,
+                qty: productData.qty,
                 UOM: pkg?.UOM,
                 pricingMethod: pkg?.pricingMethod,
                 price: pkg.price && pkg.price !== 0 && 0,
@@ -586,6 +591,8 @@ const RentalManagementDetailsPage = () => {
       field: 'detail',
       title: 'Detail',
       cellStyle: { padding: "0px 4px" },
+      editable: "never",
+      align: 'left',
       render: (rowData) => (
         <div style={{ width: 250, display: "flex", alignItems: 'center' }}>
           <p
@@ -623,9 +630,12 @@ const RentalManagementDetailsPage = () => {
       field: 'startDate',
       title: 'Start Date',
       emptyValue: '- - - - -',
+      editable: "never",
       cellStyle: { padding: "0px" },
+      align: 'left',
+      type: 'date',
       render: (rowData) => (
-        <div style={{ width: 80 }}>
+        <div style={{ width: 100 }}>
           <h5 className="createBy" title={`${moment(rowData.startDate.slice(0, 10)).format(dateFormat)}`}>
             <span className="">{moment(rowData.startDate.slice(0, 10)).format(dateFormat)}</span>
           </h5>
@@ -636,10 +646,13 @@ const RentalManagementDetailsPage = () => {
       filtering: false,
       field: 'endDate',
       title: 'End Date',
+      editable: "never",
       emptyValue: '- - - - -',
+      align: 'left',
+      type: 'date',
       cellStyle: { padding: "0px" },
       render: (rowData) => (
-        <div style={{ width: 80 }}>
+        <div style={{ width: 100 }}>
           <h5 className="createBy" title={`${moment(rowData.endDate.slice(0, 10)).format(dateFormat)}`}>
             <span className="">{moment(rowData.endDate.slice(0, 10)).format(dateFormat)}</span>
           </h5>
@@ -650,20 +663,30 @@ const RentalManagementDetailsPage = () => {
       field: 'qty',
       title: 'Quantity',
       emptyValue: '- - - - -',
+      editable: 'onUpdate',
+      type: "numeric",
+      align: 'left',
       cellStyle: { padding: "0px" },
       render: (rowData) => (
-        <div style={{ width: 80 }}>
-          <p>{rowData.qty}</p>
+        <div style={{ width: 150 }}>
+          <p className="text-truncate">
+            {rowData.type === "productInPackage"
+              ? rowData.pkgQty !== 0 ? `${rowData.pkgQty} * ${rowData.qty} = ${rowData.totalQty}` : rowData.qty
+              : rowData.qty}
+          </p>
         </div>
       )
     },
     {
       field: 'UOM',
       title: 'UOM',
+      editable: "never",
+      align: 'left',
+      type: "string",
       emptyValue: '- - - - -',
       cellStyle: { padding: "0px" },
       render: (rowData) => (
-        <div style={{ width: 80 }}>
+        <div style={{ width: 100 }}>
           <p>{rowData.UOM}</p>
         </div>
       )
@@ -671,6 +694,8 @@ const RentalManagementDetailsPage = () => {
     {
       field: 'pricingMethod',
       title: 'Pricing Method',
+      editable: "never",
+      align: 'left',
       emptyValue: '- - - - -',
       cellStyle: { padding: "0px" },
       render: (rowData) => (
@@ -683,6 +708,9 @@ const RentalManagementDetailsPage = () => {
       field: 'price',
       title: `Price (${currencySymbol})`,
       cellStyle: { padding: "0px" },
+      editable: "never",
+      type: "numeric",
+      align: 'left',
       emptyValue: '- - - - -',
       render: (rowData) => (
         <div style={{ width: 100 }}>
@@ -694,6 +722,9 @@ const RentalManagementDetailsPage = () => {
       field: 'discount',
       title: 'Discount (%)',
       emptyValue: '- - - - -',
+      editable: "never",
+      type: "numeric",
+      align: 'left',
       cellStyle: { padding: "0px" },
       render: (rowData) => (
         <div style={{ width: 100 }}>
@@ -705,6 +736,9 @@ const RentalManagementDetailsPage = () => {
       field: 'finalPrice',
       title: `Final Price (${currencySymbol})`,
       emptyValue: '- - - - -',
+      editable: "never",
+      type: "numeric",
+      align: 'left',
       cellStyle: { padding: "0px" },
       render: (rowData) => (
         <div style={{ width: 100 }}>
@@ -778,10 +812,6 @@ const RentalManagementDetailsPage = () => {
 
     let updatedArr = dataRows.map(d => {
       if (d.id === data.id) {
-        if (data.endData || data.startDate) {
-          data["endDate"] = new Date(data.endDate)
-          data["startDate"] = new Date(data.startDate)
-        }
         return data
       } else {
         return d
@@ -789,7 +819,7 @@ const RentalManagementDetailsPage = () => {
     }).map(d => ({
       "id": d.id,
       "qty": parseInt(d.quantity || d.qty) || 0,
-      "type": d?.type || "",
+      "type": d?.type ? camelCase(d.type) : "",
       "detail": d.detail,
       "pricingMethod": d?.pricingMethod || "",
       "UOM": d?.UOM || "",
@@ -849,7 +879,7 @@ const RentalManagementDetailsPage = () => {
 
     newValues.type = camelCase(newValues.type)
     if (pricing && pricing.length) {
-      newValues.price = pricing[0].mrp
+      newValues.price = pricing[0]?.mrp || newValues.price;
       const startDate = moment(newValues?.startDate)
       const endDate = moment(newValues?.endDate)
       const diff = endDate.diff(startDate, "days");
@@ -1040,10 +1070,17 @@ const RentalManagementDetailsPage = () => {
                             size="small"
                             disabled={!Boolean(selectedProducts && selectedProducts.length) || isDeleting}
                             onClick={() => {
-                              const dataToDelete = selectedProducts && selectedProducts.map(rec => ({
-                                id: rec._id ?? rec.id,
-                                type: rec?.type.toLowerCase()
-                              }))
+                              const dataToDelete = selectedProducts && selectedProducts.map((rec: any) => {
+                                const obj: any = {};
+
+                                obj.id = rec._id ?? rec.id;
+                                obj.type = rec?.type.includes("roduct") ? "product" : "package";
+                                if (rec?.type === "productInPackage") {
+                                  obj.packageId = rec.packageId
+                                }
+
+                                return obj
+                              })
                               setDeleteData(dataToDelete)
                             }}
 
@@ -1091,8 +1128,19 @@ const RentalManagementDetailsPage = () => {
                           columns={columns}
                           rowData={dataRows}
                           title={""}
-                          loading={loading}
+                          loading={loading || isUpdating}
                           onSelection={(d) => setSelectedProducts(d)}
+                          parentChildData={(row, rows) => rows.find((a) => a.id === row.packageId)}
+                          cellEditable={{
+                            onCellEditApproved: (newValue, oldValue, rowData, columnDef) => {
+                              return new Promise((resolve, reject) => {
+                                rowData[columnDef.field] = parseInt(newValue)
+                                handleSingleEdit(rowData)
+
+                                setTimeout(resolve, 100)
+                              });
+                            }
+                          }}
                         // onRowClick={(rowData) => {
                         //   setProductEdit(true)
                         //   setSelectedProductData(rowData)
@@ -1324,8 +1372,17 @@ const RentalManagementDetailsPage = () => {
               {(currentStep === 2) && (
                 <SerializedAssetStep
                   rentalManagementId={id}
-                  productInventory={productInventory}
+                  productInventory={[
+                    ...productInventory,
+                    ...serializeAssets.map(d => ({
+                      ...d,
+                      detail: `${d.assetNumber} ${d.serialNumber ? `- ${d.serialNumber}` : ""}`
+                    }))]}
+                  isSmallScreen={isSmallScreen}
+                  isTabletScreen={isTabletScreen}
+                  showActivity={showActivity}
                   currentStep={currentStep}
+                  currencySymbol={currencySymbol}
                 />
               )}
               {(currentStep === 3) && (

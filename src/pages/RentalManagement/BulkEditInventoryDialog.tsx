@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { ChangeEvent, FC, FormEvent, useEffect, useState } from 'react';
 import { Button, Dialog, TextField, Grid, Box, CircularProgress, FormControl, InputLabel, Select, MenuItem, InputAdornment, FormHelperText } from '@material-ui/core';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
 import DateUtils from '@date-io/date-fns';
@@ -26,28 +26,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
   const [isDisabled, setDisabled] = useState(false);
   const [errors, setErrors] = useState(null);
   const [isPkgInProduct, setPkgInProduct] = useState(false)
-
-
-  useEffect(() => {
-    (async () => {
-      let timeout: ReturnType<typeof setTimeout> = null;
-      if (data) {
-        if (values?.qty > 0 && values?.pricingMethod && values?.UOM) {
-          if (timeout) {
-            clearTimeout(timeout)
-          }
-          timeout = setTimeout(async () => {
-            const priceData = await calculatePrice([data])
-            if (priceData && priceData.length) {
-              setPricing(priceData)
-            }
-          }, 1000)
-
-        } else
-          return
-      }
-    })()
-  }, [values, data])
+  let timeoutPricing: ReturnType<typeof setTimeout> = null;
 
   useEffect(() => {
     if (data) {
@@ -76,10 +55,13 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
   }, [data])
 
   const handleChange = (name: string, value: any) => {
-    setValues((prevState) => ({ ...prevState, [name]: value }));
+    setValues((prevState) => {
+      const newValues = { ...prevState, [name]: value }
+      getPricing(newValues);
+      return newValues
+    });
 
     let errs = { ...errors }
-
     if (Boolean(errs?.qty) && name === 'qty' && value) {
       delete errs.qty
     }
@@ -100,12 +82,38 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
     }
   };
 
+  const getPricing = (values: any) => {
+    if (timeoutPricing) {
+      clearTimeout(timeoutPricing)
+    }
+    if (data) {
+      if (values?.qty > 0 && values?.pricingMethod !== "" && values?.UOM !== "") {
+        timeoutPricing = setTimeout(async () => {
+          const priceData = await calculatePrice([values])
+          if (priceData && priceData.length) {
+            setPricing(priceData)
+          }
+        }, 1000)
+
+      }
+    }
+
+  }
+
+
+
+  /**
+   * HANDLE CLOSE DIALOG
+   */
   const handleClose = () => {
     if (isSaving === false) {
       onClose()
     }
   }
 
+  /**
+   * HANDLE SUBMIT FOR FORM
+   */
   const handleSubmit = () => {
     const errs = handleErrors();
 
@@ -116,6 +124,11 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
     }
   }
 
+
+  /**
+   * HANDLE ERRORS IN FORM
+   * @returns Errors for not given value
+   */
   const handleErrors = () => {
     let errs: any = {}
 
