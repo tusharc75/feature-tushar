@@ -18,21 +18,21 @@ const LogIn = () => {
     try {
       await instance.loginPopup().then(async () => {
 
-        localStorage.setItem("dateFormat", "MM/DD/YYYY")
-        localStorage.setItem("dateTimeFormat", "MM/DD/YYYY hh:mm A")
-        localStorage.setItem("cardDateFormat", "MMM,DD YYYY")
+        // localStorage.setItem("dateFormat", "MM/DD/YYYY")
+        // localStorage.setItem("dateTimeFormat", "MM/DD/YYYY hh:mm A")
+        // localStorage.setItem("cardDateFormat", "MMM,DD YYYY")
 
-        localStorage.setItem("dateFormatForInputControl", "MM/dd/yyyy")
+        // localStorage.setItem("dateFormatForInputControl", "MM/dd/yyyy")
 
-        await axios.get("http://ip-api.com/json").then(({ data }) => {
-          if (data?.countryCode === "US") {
-            localStorage.setItem("dateFormat", "DD/MM/YYYY")
-            localStorage.setItem("dateTimeFormat", "DD/MM/YYYY hh:mm A")
-            localStorage.setItem("cardDateFormat", "DDD,MM YYYY")
+        // await axios.get("http://ip-api.com/json").then(({ data }) => {
+        //   if (data?.countryCode === "US") {
+        //     localStorage.setItem("dateFormat", "DD/MM/YYYY")
+        //     localStorage.setItem("dateTimeFormat", "DD/MM/YYYY hh:mm A")
+        //     localStorage.setItem("cardDateFormat", "DDD,MM YYYY")
 
-            localStorage.setItem("dateFormatForInputControl", "dd/MM/yyyy")
-          }
-        });
+        //     localStorage.setItem("dateFormatForInputControl", "dd/MM/yyyy")
+        //   }
+        // });
 
       })
     } catch (e) { }
