@@ -912,14 +912,6 @@ const QuoteBuilders = () => {
                     icon: <MdAccountCircle size={18} />,
                     field: "owner"
                   },
-                  // {
-                  //   icon: <MdAccountCircle size={18} />,
-                  //   field: "owner"
-                  // },
-                  // {
-                  //   icon: <MdAccountCircle size={18} />,
-                  //   field: "owner"
-                  // }
                 ]}
                 chips={[
                   {
