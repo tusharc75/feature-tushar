@@ -215,7 +215,7 @@ const PurchaseOrderDetailsPage = () => {
             });
     }
 
-    const addProductInBuilder = (productInventoryArray) => {
+    const addProductInPurchaseOrder = (productInventoryArray) => {
 
         setAddingProducts(true)
         let tempProductArray = productInventoryArray.map(d => ({
@@ -741,7 +741,7 @@ const PurchaseOrderDetailsPage = () => {
                     productId={null}
                     handleClose={() => setIsAddNewProduct(false)}
                     isAddInBuilder={true}
-                    addProductInBuilder={addProductInBuilder}
+                    addProductInBuilder={addProductInPurchaseOrder}
                     openFrom="builder"
                     fromQuote={true}
                 />
