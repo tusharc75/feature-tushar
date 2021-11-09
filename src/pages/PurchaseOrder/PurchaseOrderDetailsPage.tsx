@@ -27,7 +27,7 @@ import AddProductDialog from "./AddProductDialog";
 import Add from "@material-ui/icons/Add";
 import { Delete } from "@material-ui/icons";
 import { Formik, Form, FieldArray, Field } from "formik";
-import CreateSeriaizedAsset from "./CreateSeriaizedAsset";
+import CreateSeriaizedAsset from "./CreateSerializedAsset";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CreateProduct from "../../components/Product/CreateProduct";
 import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
@@ -717,9 +717,9 @@ const PurchaseOrderDetailsPage = () => {
             {addProductDialog &&
                 <AddProductDialog
                     isAddingProducts={isAddingProducts}
-                    addProductInventory={handleAddProduct}
-                    handleProductInventoryClose={() => { setAddProductDialog(false) }}
-                    productInventory={product}
+                    addProductInPurchaseOrder={handleAddProduct}
+                    handleProductInPurchaseOrderClose={() => { setAddProductDialog(false) }}
+                    productInPurchaseOrder={product}
                     type={"product"}
                 />
             }

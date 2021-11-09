@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { generateUniqueId, packages, product, purchaseOrder } from '../../constants/helpers';
 import { Formik, Form, FieldArray, Field } from 'formik';
 
-const CreateSeriaizedAsset = (props) => {
+const CreateSerializedAsset = (props) => {
     const { purchaseOrderID, onClose, onSuccess, title, productList } = props;
     const [currencySymbol, setCurrencySymbol] = useState(null);
     const [wareHouseList, setwareHouseList] = useState([]);
@@ -240,4 +240,4 @@ const CreateSeriaizedAsset = (props) => {
     );
 };
 
-export default CreateSeriaizedAsset;
+export default CreateSerializedAsset;

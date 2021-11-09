@@ -20,7 +20,7 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
 
-const AddProductDialog = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts }) => {
+const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOrderClose, type, productInPurchaseOrder, isAddingProducts }) => {
     const toastConfig = useContext(CustomToastContext)
     const [quantityDialog, setQuantityDialog] = useState(false);
     const [packageDialog, setPackageDialog] = useState(false);
@@ -34,7 +34,7 @@ const AddProductDialog = ({ addProductInventory, handleProductInventoryClose, ty
     const [disableSaveButton, setDisableSaveButton] = useState(false);
 
     useEffect(() => {
-        if (type === "product") fetchProductInventory();
+        if (type === "product") fetchProductInPurchaseOrder();
         if (type === "package") fetchPackage();
     }, []);
 
@@ -74,7 +74,7 @@ const AddProductDialog = ({ addProductInventory, handleProductInventoryClose, ty
             gridApi.setRowData([]);
         }
         axiosInstance().get(`${packages.packageApi}`).then(({ data }) => {
-            data.data = data.data?.filter(d => !productInventory.some(obj => obj.id === d._id)).map((u) => ({
+            data.data = data.data?.filter(d => !productInPurchaseOrder.some(obj => obj.id === d._id)).map((u) => ({
                 ...u,
                 id: u._id,
                 type: type,
@@ -92,7 +92,7 @@ const AddProductDialog = ({ addProductInventory, handleProductInventoryClose, ty
         });
     };
 
-    const fetchProductInventory = () => {
+    const fetchProductInPurchaseOrder = () => {
         dispatch({ type: "loading", loading: true });
 
         if (gridApi) {
@@ -172,52 +172,54 @@ const AddProductDialog = ({ addProductInventory, handleProductInventoryClose, ty
                 aria-labelledby="customized-dialog-title"
                 open={true}
             >
-                <CustomDialogHeader title={`Add ${type}`} onClose={handleProductInventoryClose} ></CustomDialogHeader>
-                <div className="listing-grid p-3">
-                    <Box mb={2}>
-                        <Grid container >
-                            <Grid item xs={12} sm={6}>
+                <CustomDialogHeader title={`Add ${type}`} onClose={handleProductInPurchaseOrderClose} ></CustomDialogHeader>
+                <CustomDialogContent>
+                    <div className="listing-grid p-3">
+                        <Box mb={2}>
+                            <Grid container >
+                                <Grid item xs={12} sm={6}>
 
+                                </Grid>
+                                <Grid item xs={12} sm={6} container justify="flex-end">
+                                    <SearchBox
+                                        onSearch={handleSearch}
+                                        searchbox="terms_header_search_bar"
+                                        width="300px"
+                                        value={search}
+                                    />
+                                    <Box ml={1} mt={1} >
+                                        <Button
+                                            size="small"
+                                            color="primary"
+                                            onClick={() => addProductInPurchaseOrder(selectedRecords)}
+                                            variant="contained"
+                                            disabled={!Boolean(selectedRecords.length) || isAddingProducts}
+                                            endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
+                                            {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
+                                            Add</Button>
+                                    </Box>
+                                </Grid>
                             </Grid>
-                            <Grid item xs={12} sm={6} container justify="flex-end">
-                                <SearchBox
-                                    onSearch={handleSearch}
-                                    searchbox="terms_header_search_bar"
-                                    width="300px"
-                                    value={search}
-                                />
-                                <Box ml={1} mt={1} >
-                                    <Button
-                                        size="small"
-                                        color="primary"
-                                        onClick={() => addProductInventory(selectedRecords)}
-                                        variant="contained"
-                                        disabled={!Boolean(selectedRecords.length) || isAddingProducts}
-                                        endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
-                                        {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
-                                        Add</Button>
-                                </Box>
-                            </Grid>
-                        </Grid>
-                    </Box>
-                    {columns ?
-                        <CustomAgGridEditable
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameworkComponents}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            allowAction={false}
-                            loading={loading}
-                            isClientSideGrid={true}
-                            onCellValueChanged={onCellValueChanged}
-                        />
-                        : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
-                </div>
+                        </Box>
+                        {columns ?
+                            <CustomAgGridEditable
+                                columns={columns}
+                                dataRows={dataRows}
+                                frameworkComponents={frameworkComponents}
+                                setGridApi={setGridApi}
+                                dispatch={dispatch}
+                                rowCount={rowCount}
+                                limit={limit}
+                                pageSizes={pageSizes}
+                                page={page}
+                                allowAction={false}
+                                loading={loading}
+                                isClientSideGrid={true}
+                                onCellValueChanged={onCellValueChanged}
+                            />
+                            : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+                    </div>
+                </CustomDialogContent>
             </Dialog>
             )}
             {packageDialog && <Dialog open fullWidth maxWidth="md" onClose={() => setPackageDialog(false)}>
