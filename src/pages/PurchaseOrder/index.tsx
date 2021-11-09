@@ -43,7 +43,7 @@ const PurchaseOrder = () => {
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
     const {
-        state: { permissions },
+        state: { user, permissions },
     }: any = useData();
     const history = useHistory();
 
@@ -62,18 +62,12 @@ const PurchaseOrder = () => {
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    if (o?.fieldData?.primaryField === true || o?.fieldData?.fieldName === "purchaseOrderNumber") {
-                        columns = [...columns,
-                        { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" }]
-                    }
-                    else {
-                        let currentColumn = getColumnData(routes.purchaseOrder?.title, o?.fieldData, routes.purchaseOrder.path, true)
+                    let currentColumn = getColumnData(routes.purchaseOrder?.title, o?.fieldData, routes.purchaseOrderDetail.path)
 
-                        if (currentColumn !== null) {
-                            columns = [...columns, currentColumn?.columnData]
-                            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                                rendererNames.push(currentColumn?.rendererName)
-                            }
+                    if (currentColumn !== null) {
+                        columns = [...columns, currentColumn?.columnData]
+                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                            rendererNames.push(currentColumn?.rendererName)
                         }
                     }
 
@@ -81,7 +75,6 @@ const PurchaseOrder = () => {
                 let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
                 tempFrameworkComponent = {
                     ...tempFrameworkComponent,
-                    nameRenderer: NameRenderer,
                     actionsRenderer: ActionsRenderer
                 }
                 setFrameWorkComponent({ ...tempFrameworkComponent })
@@ -100,7 +93,7 @@ const PurchaseOrder = () => {
         const queryString = getQueryString();
         axiosInstance().get(`${purchaseOrder.api}${queryString}`).then(({ data }) => {
             data.data = data.data?.map((u, i) => ({
-                ...prepareDataForGrid(u),
+                ...prepareDataForGrid(u, user)
             }));
 
             dispatch({ type: "initialize", data: data.data, count: data.count });
@@ -172,20 +165,7 @@ const PurchaseOrder = () => {
         });
     }
 
-    const NameRenderer = params => (
-        <>
-            {
-                permissions.budget.isUpdate ?
-                    <span className="link"
-                        onClick={() => {
-                            setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: params.data._id });
-                        }}>
-                        <CustomRenderCell value={params?.value} />
-                    </span>
-                    : params?.value
-            }
-        </>
-    )
+
 
     const ActionsRenderer = params => (
         <>
