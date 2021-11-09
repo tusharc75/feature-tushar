@@ -16,7 +16,7 @@ export default function VersionStatus({ loadingVersions, versionStatusData }) {
             <List className="p-0">
                 {
                     versionStatusData?.data?.map(d => (
-                        <ListItem alignItems="flex-start" key={d._id} className="mb-2 border border-radius-2" button
+                        <ListItem alignItems="flex-start" key={d.versionNumber} className="mb-2 border border-radius-2" button
                             style={{
                                 backgroundColor: quoteStepColors[d.status?.toLowerCase()]?.backgroundColor ?? quoteStepColors["__default__"].backgroundColor,
                                 border: `1px solid ${quoteStepColors[d.status?.toLowerCase()]?.backgroundColor ?? quoteStepColors["__default__"].backgroundColor}`,
@@ -25,7 +25,7 @@ export default function VersionStatus({ loadingVersions, versionStatusData }) {
                             onClick={() => {
                                 history.push(`${routes.quoteBuilderDetail.path}/${d._id}`, {
                                     versionNumber: `${d.versionNumber}`,
-                                    tabValue: 2
+                                    tabValue: 1
                                 })
                             }}
                         >

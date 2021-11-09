@@ -45,6 +45,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import routes from "../../../components/Helpers/Routes";
 import ManageMarketSegmentDialog from "../../MarketSegment/ManageMarketSegmentDialog";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
+import {FaDiceOne} from "react-icons/fa";
 
 const arr = [...Array(9).keys()];
 export default function ManageQuoteDialog({
@@ -136,7 +137,7 @@ export default function ManageQuoteDialog({
   const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
-  
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
@@ -470,6 +471,11 @@ export default function ManageQuoteDialog({
 
             if (selectedEntityDetails) {
               initialData["currency"] = selectedEntityDetails.currency || "";
+              setCurrencySymbol(
+                getUniqueCurrencies().find(
+                  (d) => d.currencyCode === initialData["currency"]
+                )?.symbolNative
+              );            
             }
           }
         }
@@ -480,7 +486,9 @@ export default function ManageQuoteDialog({
           rest.owner = user?.user?._id
           setEntityData({
             fields: newFields,
-            initialValues: getObjKeysWithValues(rest, newFields),
+            initialValues: {
+              ...getObjKeysWithValues(rest, newFields),
+            },
           })
           setFormValues(getObjKeysWithValues(rest, newFields))
         }
@@ -821,13 +829,17 @@ export default function ManageQuoteDialog({
               <>
                 <CustomDialogContent>
                   <Form>
-                    <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                    {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
 
                     {formsData &&
                       formsData.map((form, index1) => {
                         return form.name ? (
                           <div key={index1}>
-                            <h2 className="form-label-style">{form.name}</h2>
+                              <div className={"detail-box-content"}>
+                                <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                              </div>
+
                             <Box marginY={2}>
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field, index2) => (
@@ -867,19 +879,19 @@ export default function ManageQuoteDialog({
                                           xs={
                                             permissions.customerAccount
                                               ?.isCreate && !accountFieldDisable
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                           sm={
                                             permissions.customerAccount
                                               ?.isCreate && !accountFieldDisable
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                           md={
                                             permissions.customerAccount
                                               ?.isCreate && !accountFieldDisable
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                         >
@@ -973,17 +985,17 @@ export default function ManageQuoteDialog({
                                           item
                                           xs={
                                             permissions.customerContact?.isCreate
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                           sm={
                                             permissions.customerContact?.isCreate
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                           md={
                                             permissions.customerContact?.isCreate
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                         >
@@ -1020,8 +1032,9 @@ export default function ManageQuoteDialog({
                                         </Grid>
                                         {permissions.customerContact?.isCreate &&
                                           contactId === null && (
-                                            <Grid item xs={1} sm={1} md={1}>
+                                            <Grid item xs={1} sm={1} md={1} >
                                               <Tooltip
+
                                                 title="Create Contact"
                                                 className="mt-1"
                                               >
@@ -1036,7 +1049,8 @@ export default function ManageQuoteDialog({
                                                 >
                                                   <AddIcon color={isClone ? "primary" : (contactId ? true : false) || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
-                                              </Tooltip>
+                                              </Tooltip
+>
                                             </Grid>
                                           )}
                                         {field?.tooltipMessage ? (
@@ -1058,19 +1072,19 @@ export default function ManageQuoteDialog({
                                           xs={
                                             permissions.opportunity?.isCreate &&
                                               !isRenderedFromOpportunity
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                           sm={
                                             permissions.opportunity?.isCreate &&
                                               !isRenderedFromOpportunity
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                           md={
                                             permissions.opportunity?.isCreate &&
                                               !isRenderedFromOpportunity
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                         >
@@ -1152,9 +1166,9 @@ export default function ManageQuoteDialog({
                                       <Grid container spacing={1}>
                                         <Grid
                                           item
-                                          xs={10}
-                                          sm={10}
-                                          md={10}
+                                          xs={11}
+                                          sm={11}
+                                          md={11}
                                         >
                                           <FormTypes
                                             {...field}
@@ -1534,15 +1548,15 @@ export default function ManageQuoteDialog({
                                         <Grid
                                           item
                                           xs={
-                                            permissions.marketSegment?.isCreate ? 10
+                                            permissions.marketSegment?.isCreate ? 11
                                               : 11
                                           }
                                           sm={
-                                            permissions.marketSegment?.isCreate ? 10
+                                            permissions.marketSegment?.isCreate ? 11
                                               : 11
                                           }
                                           md={
-                                            permissions.marketSegment?.isCreate ? 10
+                                            permissions.marketSegment?.isCreate ? 11
                                               : 11
                                           }
                                         >
@@ -1621,15 +1635,15 @@ export default function ManageQuoteDialog({
                                           <Grid
                                             item
                                             xs={
-                                              permissions.marketSegment?.isCreate ? 10
+                                              permissions.marketSegment?.isCreate ? 11
                                                 : 11
                                             }
                                             sm={
-                                              permissions.marketSegment?.isCreate ? 10
+                                              permissions.marketSegment?.isCreate ? 11
                                                 : 11
                                             }
                                             md={
-                                              permissions.marketSegment?.isCreate ? 10
+                                              permissions.marketSegment?.isCreate ? 11
                                                 : 11
                                             }
                                           >

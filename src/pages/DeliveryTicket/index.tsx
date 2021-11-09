@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
-import { Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import axiosInstance from "../../axios/axiosInstance";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -26,12 +26,14 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import ManageDeliveryTicketDialog from "./ManageDeliveryTicket"
 import { sidebarResource, prepareDataForGrid } from "../../constants/helpers"
 import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import { isMobile } from 'react-device-detect';
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 let deliveryTicketTimeout;
 
 const DeliveryTicket = () => {
   const toastConfig = useContext(CustomToastContext);
-
+  const history = useHistory();
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
@@ -68,6 +70,7 @@ const DeliveryTicket = () => {
     filters,
     sorting,
     selectedRecords,
+    appendRows
   } = state;
 
   const fetchGridMetadata = () => {
@@ -237,11 +240,18 @@ const DeliveryTicket = () => {
           let rows = data.map((u) => {
             let res = {
               ...prepareDataForGrid(u, user),
-              canDelete: u?.createdBy?.user?._id === user?.user._id,
+              //  Commenting canDelete because right now we are neither showing checkbox for multiple delete nor delete icon in row
+              //  canDelete: u?.createdBy?.user?._id === user?.user._id,
             };
             return res;
           });
-          dispatch({ type: "initialize", data: rows, count: count });
+
+          if (appendRows) {
+            dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
+          } else {
+            dispatch({ type: "initialize", data: rows, count: count });
+          }
+
           setTimeout(() => {
             dispatch({ type: "loading", loading: false });
           }, gridLoadingTimeout);
@@ -387,25 +397,58 @@ const DeliveryTicket = () => {
           </div>
 
           {
-            Object.keys(frameWorkComponent).length > 0 ?
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={100}
-                loading={loading}
+            isMobile ?
+              <CustomSwipableList
                 allowSelection={false}
-                allowAction={false}
+                allowSwipe={true}
+                permissions={permissions.deliveryTicket}
+                primaryField={columns?.find(d => d.primaryField)}
+                onClick={(data) => {
+                  history.push(`${routes.deliveryTicketDetail.path}/${data._id}`)
+                }}
+                dataRows={dataRows}
+                selectedRecords={selectedRecords}
+                dispatch={dispatch}
+                onEdit={() => { }}
+                extraParamsToCheckDelete={true}
+                onDelete={() => { }}
+                rowCount={rowCount}
+                page={page}
+                loading={loading}
+                chips={[
+                  {
+                    label: "Status: ",
+                    field: "status"
+                  },
+                  {
+                    label: "Job Name: ",
+                    field: "deliveryJobName"
+                  }
+                ]}
+                onCreate={null}
+                showClone={false}
+                onClone={() => { }}
                 renderedFrom={deliveryTicketResource}
-                refreshGrid={fetchDeliveryTicket}
-              /> : null}
-
+              />
+              : Object.keys(frameWorkComponent).length > 0 ?
+                <CustomAgGrid
+                  columns={columns}
+                  dataRows={dataRows}
+                  frameworkComponents={frameWorkComponent}
+                  setGridApi={setGridApi}
+                  dispatch={dispatch}
+                  rowCount={rowCount}
+                  limit={limit}
+                  pageSizes={pageSizes}
+                  page={page}
+                  actionWidth={100}
+                  loading={loading}
+                  allowSelection={false}
+                  allowAction={false}
+                  renderedFrom={deliveryTicketResource}
+                  refreshGrid={fetchDeliveryTicket}
+                /> : null
+          }
 
           {showDeleteWarningConfirmBox ? (
             <MessageDialog

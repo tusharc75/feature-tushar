@@ -41,6 +41,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
 import ManageMarketSegmentDialog from "../../MarketSegment/ManageMarketSegmentDialog";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
+import {FaDiceOne} from "react-icons/fa";
 
 const arr = [...Array(9).keys()];
 export default function ManageOpportunityDialog({
@@ -258,6 +259,11 @@ export default function ManageOpportunityDialog({
           const selectedEntityDetails = user?.entity?.find(d => d?._id === selectedEntity)
           if (selectedEntityDetails) {
             initialData["currency"] = selectedEntityDetails.currency || "";
+            setCurrencySymbol(
+              getUniqueCurrencies().find(
+                (d) => d.currencyCode === initialData["currency"]
+              )?.symbolNative
+            );
           }
         }
 
@@ -467,12 +473,16 @@ export default function ManageOpportunityDialog({
               <>
                 <CustomDialogContent>
                   <Form>
-                    <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                    {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                     {formsData &&
                       formsData.filter((item) => item.name !== additionalFieldName).map((form, index1) => {
                         return form.name ? (
                           <div key={index1}>
-                            <h2 className="form-label-style">{form.name}</h2>
+                            {/*<h2 className="form-label-style">{form.name}</h2>*/}
+                            <div className={"detail-box-content"}>
+                              <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                              <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                            </div>
                             <Box marginY={2}>
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field, index2) => (
@@ -484,17 +494,17 @@ export default function ManageOpportunityDialog({
                                           item
                                           xs={
                                             permissions.customerAccount.isCreate
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                           sm={
                                             permissions.customerAccount.isCreate
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                           md={
                                             permissions.customerAccount.isCreate
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                         >
@@ -787,15 +797,15 @@ export default function ManageOpportunityDialog({
                                         <Grid
                                           item
                                           xs={
-                                            permissions.marketSegment?.isCreate ? 10
+                                            permissions.marketSegment?.isCreate ? 11
                                               : 11
                                           }
                                           sm={
-                                            permissions.marketSegment?.isCreate ? 10
+                                            permissions.marketSegment?.isCreate ? 11
                                               : 11
                                           }
                                           md={
-                                            permissions.marketSegment?.isCreate ? 10
+                                            permissions.marketSegment?.isCreate ? 11
                                               : 11
                                           }
                                         >
@@ -876,15 +886,15 @@ export default function ManageOpportunityDialog({
                                           <Grid
                                             item
                                             xs={
-                                              permissions.marketSegment?.isCreate ? 10
+                                              permissions.marketSegment?.isCreate ? 11
                                                 : 11
                                             }
                                             sm={
-                                              permissions.marketSegment?.isCreate ? 10
+                                              permissions.marketSegment?.isCreate ? 11
                                                 : 11
                                             }
                                             md={
-                                              permissions.marketSegment?.isCreate ? 10
+                                              permissions.marketSegment?.isCreate ? 11
                                                 : 11
                                             }
                                           >

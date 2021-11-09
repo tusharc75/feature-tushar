@@ -9,7 +9,10 @@ import axiosInstance from "../../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../../StateProvider/CustomToastContext/CustomToastContext";
 import clsx from "clsx";
 import { GiBackwardTime } from "react-icons/gi";
+import { RiShareForwardFill } from "react-icons/ri";
+import { TiArrowBack } from "react-icons/ti";
 import IconButton from '@material-ui/core/IconButton';
+
 
 import {
   StepIconProps,
@@ -40,6 +43,9 @@ import CustomDialogFooter from "../../../../components/CustomDialog/CustomDialog
 import CustomDialogContent from "../../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogHeader from "../../../../components/CustomDialog/CustomDialogHeader";
 import { isMobile } from "react-device-detect";
+import MobileStepper from '@material-ui/core/MobileStepper';
+import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
+import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 
 const useStyles = makeStyles((theme) => ({
   backButton: {
@@ -49,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: "bold",
   },
   pStepper: {
-    padding: "10px 4px",
+    padding: "5px 4px",
     borderRadius: "4px",
     [theme.breakpoints.down("xs")]: {
       padding: "4px",
@@ -64,14 +70,13 @@ const useStyles = makeStyles((theme) => ({
   step: {
     paddingLeft: "8px",
     paddingRight: "8px",
-    padding: "5px 8px",
+    padding: "10px 8px",
     width: "20%",
     textAlign: "center",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    margin: "1px",
-    borderRadius: "4px",
+    borderRadius: "12px 40px 40px 50px",
     border: "1px solid #d6d5d5",
     [theme.breakpoints.down("xs")]: {
       width: "50%",
@@ -80,12 +85,22 @@ const useStyles = makeStyles((theme) => ({
   },
   inActive: {
     background: "#ebebeb",
+    borderLeft: "6px solid var(--grey)",
   },
   currentStep: {
     background: "#ffffff",
+    borderLeft: "6px solid #378280",
+    color: "#378280 !important",
+    // borderLeft:"4px solid #378280",
+
   },
   active: {
-    background: "#53ac65",
+    background: "#f9f1e2",
+    borderBottom: "0px solid var(--warning)",
+    color: "#378280 !important",
+    borderLeft: "6px solid var(--warning)",
+
+
   },
   sent: {
     color: "#00acc1",
@@ -99,6 +114,12 @@ const useStyles = makeStyles((theme) => ({
     color: "#d60f0f",
     fontWeight: "bold",
   },
+  "@media (max-width: 760px)": {
+    step: {
+      padding: "5px 6px",
+    },
+
+  }
 }));
 
 const useColorlibStepIconStyles = makeStyles((theme) => ({
@@ -111,7 +132,7 @@ const useColorlibStepIconStyles = makeStyles((theme) => ({
     alignItems: "center",
   },
   active: {
-    color: "#047d1c !important",
+    color: "#378280 !important",
   },
   completed: {
     color: "#3f3f02 !important",
@@ -137,7 +158,8 @@ const Steps = (props) => {
     allowedToEdit,
     DOAData = null,
     quoteData,
-    globalLoading = false
+    globalLoading = false,
+    children
   } = props;
   const classes = useStyles();
   let activeStep = currentStep;
@@ -270,7 +292,7 @@ const Steps = (props) => {
         manual: true,
         comment: tempComment
       };
-      if (selectedOption === "Invalid") {
+      if (selectedOption === "Invalid" || selectedOption === "Not Booked") {
         dataObj.comment.push(comment);
       }
 
@@ -280,7 +302,7 @@ const Steps = (props) => {
 
       dataObj.comment = msg
 
-      if (selectedOption === "Invalid" && comment === "") {
+      if ((selectedOption === "Invalid" || selectedOption === "Not Booked") && comment === "") {
         setCommentError("Please write your comment!")
       } else {
         setSubmitting(true)
@@ -326,18 +348,59 @@ const Steps = (props) => {
 
   return (
     <div>
-      <div className="position-relative">
-        {!versionStatus.includes("Accepted by Customer") &&
-          approvedQuote.approved && approvedQuote.versionApproved === version && (
-            <div className="d-flex align-items-center justify-content-center flex-column m-3">
-              <Typography className={classes.approved}>
-                Quote version - {approvedQuote.versionApproved} of this quote has
-                been Approved
-              </Typography>
-            </div>
-          )}
-        <>
-          {/* {steps[currentStep] === "DOA Process" && totalCost > DOAlimit && (
+      {
+        isMobile ? <div>
+          <MobileStepper
+            style={{ background: "#dee2e6" }}
+            variant="dots"
+            steps={DOAData ? DOAData.length : steps.length}
+            position="bottom"
+            activeStep={activeStep}
+            nextButton={
+              !allowedToEdit ||
+                loading || globalLoading ||
+                !nextStep ||
+                versionStatus.includes("Sent for DOA") ||
+                versionStatus.includes("Accepted  by DOA") ||
+                steps[currentStep]?.key === "DOA Process" ||
+                approvedQuote.approved
+                ? <Button size="small" disabled variant="contained">
+                  {steps[activeStep + 1]?.label ?? ""}
+                </Button>
+                : <Button size="small" disabled={loading} color="primary" onClick={handleNext} variant="contained" endIcon={<KeyboardArrowRight />}>
+                  {steps[activeStep + 1]?.label ?? ""}
+                </Button>
+            }
+            backButton={
+              currentStep <= 0 || !allowedToEdit ||
+                versionStatus.includes("Rejected by Customer") ||
+                (steps.length === 5 && currentStep > 3) ||
+                versionStatus.includes("Sent for DOA") ||
+                (steps.length === 6 && currentStep >= 4) ||
+                versionStatus.includes("Sent to Customer") ||
+                loading || globalLoading
+                ? <Button size="small" disabled variant="contained" startIcon={<KeyboardArrowLeft />}>
+                  {steps[activeStep - 1]?.label ?? ""}
+                </Button>
+                : <Button size="small" disabled={loading} color="primary" onClick={handleBack} variant="contained" startIcon={<KeyboardArrowLeft />}>
+                  {steps[activeStep - 1]?.label ?? ""}
+                </Button>
+            }
+          />
+        </div> :
+          <>
+            <div className="position-relative">
+              {!versionStatus.includes("Accepted by Customer") &&
+                approvedQuote.approved && approvedQuote.versionApproved === version && (
+                  <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                    <Typography className={classes.approved}>
+                      Quote version - {approvedQuote.versionApproved} of this quote has
+                      been Approved
+                    </Typography>
+                  </div>
+                )}
+              <>
+                {/* {steps[currentStep] === "DOA Process" && totalCost > DOAlimit && (
               <div className="d-flex align-items-center justify-content-center flex-column m-3">
                 <Typography
                   className={classes.rejected}
@@ -348,52 +411,52 @@ const Steps = (props) => {
                 </Typography>
               </div>
             )} */}
-          {versionStatus === "Sent for DOA" && (
-            <>
-              {DOAData &&
-                <>
-                  <NewStepper heading={" "} quoteDOA={DOAData} />
+                {versionStatus === "Sent for DOA" && (
+                  <>
+                    {DOAData &&
+                      <>
+                        <NewStepper heading={" "} quoteDOA={DOAData} />
+                        <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                          <FcClock size={30} />
+                          <Typography className={classes.sent}>DOA Sent</Typography>
+                        </div>
+                      </>
+                    }
+                  </>
+                )}
+                {versionStatus.split(" (")[0] === "Accepted  by DOA" && (
+                  <>
+                    {DOAData && <NewStepper heading={" "} quoteDOA={DOAData} />}
+
+                    <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                      <FcApproval size={30} />
+                      <Typography className={classes.approved}>
+                        Approved by DOA
+                      </Typography>
+                    </div>
+                  </>
+                )}
+                {versionStatus.split(" (")[0] === "Rejected by DOA" && (
+                  <>
+                    {DOAData && <NewStepper heading={" "} quoteDOA={DOAData} />}
+
+                    <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                      <FcCancel size={30} />
+                      <Typography className={classes.rejected}>
+                        Rejected by DOA
+                      </Typography>
+                    </div>
+                  </>
+                )}
+                {versionStatus === "Sent to Customer" && (
                   <div className="d-flex align-items-center justify-content-center flex-column m-3">
                     <FcClock size={30} />
-                    <Typography className={classes.sent}>DOA Sent</Typography>
+                    <Typography className={classes.sent}>
+                      Quote has been sent to customer
+                    </Typography>
                   </div>
-                </>
-              }
-            </>
-          )}
-          {versionStatus.split(" (")[0] === "Accepted  by DOA" && (
-            <>
-              {DOAData && <NewStepper heading={" "} quoteDOA={DOAData} />}
-
-              <div className="d-flex align-items-center justify-content-center flex-column m-3">
-                <FcApproval size={30} />
-                <Typography className={classes.approved}>
-                  Approved by DOA
-                </Typography>
-              </div>
-            </>
-          )}
-          {versionStatus.split(" (")[0] === "Rejected by DOA" && (
-            <>
-              {DOAData && <NewStepper heading={" "} quoteDOA={DOAData} />}
-
-              <div className="d-flex align-items-center justify-content-center flex-column m-3">
-                <FcCancel size={30} />
-                <Typography className={classes.rejected}>
-                  Rejected by DOA
-                </Typography>
-              </div>
-            </>
-          )}
-          {versionStatus === "Sent to Customer" && (
-            <div className="d-flex align-items-center justify-content-center flex-column m-3">
-              <FcClock size={30} />
-              <Typography className={classes.sent}>
-                Quote has been sent to customer
-              </Typography>
-            </div>
-          )}
-          {/* {versionStatus === "Sent to Customer" && !hideReminderButton ? (
+                )}
+                {/* {versionStatus === "Sent to Customer" && !hideReminderButton ? (
               <div className="d-flex align-items-center justify-content-center flex-column m-3">
                 <Button
                   className="mx-1"
@@ -409,24 +472,24 @@ const Steps = (props) => {
               </div>
             )
              : null} */}
-          {versionStatus.includes("Accepted by Customer") && (
-            <div className="d-flex align-items-center justify-content-center flex-column m-3">
-              <FcApproval size={30} />
-              <Typography className={classes.approved}>
-                Approved by Customer
-              </Typography>
-            </div>
-          )}
-          {versionStatus.includes("Rejected by Customer") && (
-            <div className="d-flex align-items-center justify-content-center flex-column m-3">
-              <FcCancel size={30} />
-              <Typography className={classes.rejected}>
-                Rejected by Customer
-              </Typography>
-            </div>
-          )}
-        </>
-        {/* 
+                {versionStatus.includes("Accepted by Customer") && (
+                  <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                    <FcApproval size={30} />
+                    <Typography className={classes.approved}>
+                      Approved by Customer
+                    </Typography>
+                  </div>
+                )}
+                {versionStatus.includes("Rejected by Customer") && (
+                  <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                    <FcCancel size={30} />
+                    <Typography className={classes.rejected}>
+                      Rejected by Customer
+                    </Typography>
+                  </div>
+                )}
+              </>
+              {/* 
         {activeStep !== steps.length - 1 && (
           <>
             <div>
@@ -472,52 +535,15 @@ const Steps = (props) => {
             </div>
           </>
         )} */}
-        <Grid container>
-          <Grid
-            item
-            xs={12}
-            sm={2}
-            md={1}
-            className="d-flex align-items-center justify-content-center mt-2"
-          >
-            {!isMobile && activeStep !== steps.length - 1 && (
-              <>
-                <div>
-                  {(
-                    <div>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        disabled={
-                          currentStep <= 0 || !allowedToEdit ||
-                          versionStatus.includes("Rejected by Customer") ||
-                          (steps.length === 5 && currentStep > 3) ||
-                          versionStatus.includes("Sent for DOA") ||
-                          (steps.length === 6 && currentStep >= 4) ||
-                          versionStatus.includes("Sent to Customer") ||
-                          loading || globalLoading
-                        }
-                        onClick={handleBack}
-                        size="small"
-                        startIcon={<IoIosArrowDropleftCircle />}
-                      >
-                        Back
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </Grid>
-          <Grid item xs={12} sm={8} md={10}>
-            <div className={classes.pStepper}>
               <Grid container>
                 <Grid
                   item
-                  xs={6}
-                  className="d-flex align-items-center justify-content-start mt-1 mb-1"
+                  xs={12}
+                  sm={2}
+                  md={1}
+                  className="d-flex align-items-center justify-content-center "
                 >
-                  {isMobile && activeStep !== steps.length - 1 && (
+                  {!isMobile && activeStep !== steps.length - 1 && (
                     <>
                       <div>
                         {(
@@ -525,8 +551,7 @@ const Steps = (props) => {
                             <IconButton
                               color="primary"
                               disabled={
-                                !allowedToEdit ||
-                                approvedQuote.approved ||
+                                currentStep <= 0 || !allowedToEdit ||
                                 versionStatus.includes("Rejected by Customer") ||
                                 (steps.length === 5 && currentStep > 3) ||
                                 versionStatus.includes("Sent for DOA") ||
@@ -534,10 +559,10 @@ const Steps = (props) => {
                                 versionStatus.includes("Sent to Customer") ||
                                 loading || globalLoading
                               }
+                              className={"stepperButton"}
                               onClick={handleBack}
-                              size="small"
                             >
-                              <IoIosArrowDropleftCircle />
+                              <TiArrowBack size={32} />
                             </IconButton>
                           </div>
                         )}
@@ -545,19 +570,136 @@ const Steps = (props) => {
                     </>
                   )}
                 </Grid>
+                <Grid item xs={12} sm={12} md={10}>
+                  <div className={classes.pStepper}>
+                    <Grid container>
+                      <Grid
+                        item
+                        xs={6}
+                        className="d-flex align-items-center justify-content-start "
+                      >
+                        {isMobile && activeStep !== steps.length - 1 && (
+                          <>
+                            <div>
+                              {(
+                                <div>
+                                  <IconButton
+                                    color="primary"
+                                    disabled={
+                                      !allowedToEdit ||
+                                      approvedQuote.approved ||
+                                      versionStatus.includes("Rejected by Customer") ||
+                                      (steps.length === 5 && currentStep > 3) ||
+                                      versionStatus.includes("Sent for DOA") ||
+                                      (steps.length === 6 && currentStep >= 4) ||
+                                      versionStatus.includes("Sent to Customer") ||
+                                      loading || globalLoading
+                                    }
+                                    onClick={handleBack}
+                                    size="small"
+                                  >
+                                    <TiArrowBack size={24} />
+                                  </IconButton>
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </Grid>
+                      <Grid
+                        item
+                        xs={6}
+                        className="d-flex align-items-center justify-content-end"
+                      >
+                        {isMobile && activeStep !== steps.length - 1 && (
+                          <>
+                            <div>
+                              {(
+                                <div>
+                                  {versionStatus.split(" ")[0] !== "Rejected" ? (
+                                    <IconButton
+                                      color="primary"
+                                      onClick={() => {
+                                        if (
+                                          versionStatus.includes("Sent to Customer") ||
+                                          steps[currentStep]?.key === "Send To Customer" ||
+                                          versionStatus === "Sent to Customer"
+                                        ) {
+                                          setShowManualCustomerActionDialog(true);
+                                        } else {
+                                          handleNext();
+                                        }
+                                      }}
+                                      size="small"
+                                      disabled={
+                                        !allowedToEdit ||
+                                        loading || globalLoading ||
+                                        !nextStep ||
+                                        versionStatus.includes("Sent for DOA") ||
+                                        versionStatus.includes("Accepted  by DOA") ||
+                                        steps[currentStep]?.key === "DOA Process" ||
+                                        approvedQuote.approved
+                                        // || versionStatus.includes("Sent to Customer") ||
+                                        // steps[currentStep] === "Send To Customer" ||
+                                        // versionStatus === "Sent to Customer"
+                                      }
+                                    >
+                                      {versionStatus.includes("Accepted  by DOA")
+                                        ? "End"
+                                        : <RiShareForwardFill size={20} />}
+                                    </IconButton>
+                                  ) : (
+                                    <p>{versionStatus}</p>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </Grid>
+                    </Grid>
+                    <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={activeStep}>
+                      {steps.map((label, i) => (
+                        <Step
+                          key={label.label}
+                          className={clsx(classes.step, {
+                            [classes.active]:
+                              currentStep > i ||
+                              steps[currentStep]?.key === "End" || approvedQuote.approved,
+                            [classes.currentStep]: currentStep === i,
+                            [classes.inActive]: currentStep !== i,
+                          })}
+                        >
+                          <StepLabel
+                            style={{ color: "#555" }}
+                            // StepIconComponent={ColorlibStepIcon}
+                            className={
+                              currentStep === i || approvedQuote.approved
+                                ? "currentStepColor"
+                                : null
+                            }
+                          >
+                            {label.label}
+                          </StepLabel>
+                        </Step>
+                      ))}
+                    </Stepper>
+                  </div>
+                </Grid>
                 <Grid
                   item
-                  xs={6}
-                  className="d-flex align-items-center justify-content-end mt-1 mb-1"
+                  xs={12}
+                  sm={2}
+                  md={1}
+                  className="d-flex align-items-center justify-content-center"
                 >
-                  {isMobile && activeStep !== steps.length - 1 && (
+                  {!isMobile && activeStep !== steps.length - 1 && (
                     <>
                       <div>
                         {(
                           <div>
                             {versionStatus.split(" ")[0] !== "Rejected" ? (
                               <IconButton
-                                color="primary"
                                 onClick={() => {
                                   if (
                                     versionStatus.includes("Sent to Customer") ||
@@ -569,7 +711,6 @@ const Steps = (props) => {
                                     handleNext();
                                   }
                                 }}
-                                size="small"
                                 disabled={
                                   !allowedToEdit ||
                                   loading || globalLoading ||
@@ -578,14 +719,13 @@ const Steps = (props) => {
                                   versionStatus.includes("Accepted  by DOA") ||
                                   steps[currentStep]?.key === "DOA Process" ||
                                   approvedQuote.approved
-                                  // || versionStatus.includes("Sent to Customer") ||
-                                  // steps[currentStep] === "Send To Customer" ||
-                                  // versionStatus === "Sent to Customer"
                                 }
+                                className={"stepperButtonNext"}
                               >
+                                <RiShareForwardFill />
                                 {versionStatus.includes("Accepted  by DOA")
-                                  ? "End"
-                                  : <IoIosArrowDroprightCircle />}
+                                  ? ""
+                                  : ""}
                               </IconButton>
                             ) : (
                               <p>{versionStatus}</p>
@@ -597,88 +737,9 @@ const Steps = (props) => {
                   )}
                 </Grid>
               </Grid>
-              <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={activeStep}>
-                {steps.map((label, i) => (
-                  <Step
-                    key={label.label}
-                    className={clsx(classes.step, {
-                      [classes.active]:
-                        currentStep > i ||
-                        steps[currentStep]?.key === "End" || approvedQuote.approved,
-                      [classes.currentStep]: currentStep === i,
-                      [classes.inActive]: currentStep !== i,
-                    })}
-                  >
-                    <StepLabel
-                      style={{ color: "#555" }}
-                      StepIconComponent={ColorlibStepIcon}
-                      className={
-                        currentStep === i || approvedQuote.approved
-                          ? "currentStepColor"
-                          : null
-                      }
-                    >
-                      {label.label}
-                    </StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
             </div>
-          </Grid>
-          <Grid
-            item
-            xs={12}
-            sm={2}
-            md={1}
-            className="d-flex align-items-center justify-content-center"
-          >
-            {!isMobile && activeStep !== steps.length - 1 && (
-              <>
-                <div>
-                  {(
-                    <div>
-                      {versionStatus.split(" ")[0] !== "Rejected" ? (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => {
-                            if (
-                              versionStatus.includes("Sent to Customer") ||
-                              steps[currentStep]?.key === "Send To Customer" ||
-                              versionStatus === "Sent to Customer"
-                            ) {
-                              setShowManualCustomerActionDialog(true);
-                            } else {
-                              handleNext();
-                            }
-                          }}
-                          size="small"
-                          disabled={
-                            !allowedToEdit ||
-                            loading || globalLoading ||
-                            !nextStep ||
-                            versionStatus.includes("Sent for DOA") ||
-                            versionStatus.includes("Accepted  by DOA") ||
-                            steps[currentStep]?.key === "DOA Process" ||
-                            approvedQuote.approved
-                          }
-                          endIcon={<IoIosArrowDroprightCircle />}
-                        >
-                          {versionStatus.includes("Accepted  by DOA")
-                            ? "End"
-                            : "Next"}
-                        </Button>
-                      ) : (
-                        <p>{versionStatus}</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </Grid>
-        </Grid>
-      </div>
+          </>
+      }
 
       {showManualCustomerActionDialog && (
         <Dialog
@@ -712,7 +773,7 @@ const Steps = (props) => {
                   </ListItem>
                 ))}
               </List>
-              {selectedOption === "Invalid" && (
+              {(selectedOption === "Invalid" || selectedOption === "Not Booked") && (
                 <Box my={2}>
                   <TextField
                     fullWidth

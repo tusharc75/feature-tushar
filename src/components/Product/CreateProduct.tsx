@@ -27,6 +27,7 @@ import { autoCalculateSpecificFields, handleAutoCalculation } from "../../consta
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLess from '@material-ui/icons/ExpandLess';
+import {FaDiceOne} from "react-icons/fa";
 
 const ignoreField = ["priceTemplate"]
 
@@ -58,6 +59,7 @@ const CreateProduct = (props) => {
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     const [expanded, setExpanded] = useState({});
+    const [fieldChanges, setFieldChanges] = useState([]);
 
 
     useEffect(() => {
@@ -88,6 +90,9 @@ const CreateProduct = (props) => {
                 axiosInstance().get(`/product/` + productId).then(({ data: { data } }) => {
                     data.fields?.map((_f) => newField.push(_f));
                     data.productData.fields?.map((_f) => newField.push(_f));
+                    if (data.productData.fieldChanges) {
+                        setFieldChanges(data.productData.fieldChanges);
+                    }
                     setFields(data.productData.fields)
                     if (isClone) {
                         data.productData.productName = ""
@@ -159,6 +164,7 @@ const CreateProduct = (props) => {
     const handleSubmit = (values) => {
         setSubmitting(true);
         values.fields = fields;
+        values.fieldChanges = fieldChanges;
         if (productId && !isClone) {
             values._id = productId;
             axiosInstance().put(`/product`, values).then(({ data: { data } }) => {
@@ -365,6 +371,99 @@ const CreateProduct = (props) => {
         setExpanded(temp)
     }
 
+    const addDisplayType = (displayType, field, displayValue) => {
+        let _fieldChanges = fieldChanges;
+        if (_fieldChanges.filter((_f) => _f.fieldName === field.fieldName).length === 0) {
+            if (displayType === "currency") {
+                _fieldChanges.push({
+                    fieldName: field.fieldName,
+                    displayCurrency: [displayValue],
+                });
+            } else if (displayType === "converter") {
+                _fieldChanges.push({
+                    fieldName: field.fieldName,
+                    displayUnits: [displayValue],
+                });
+            }
+        } else {
+            _fieldChanges.forEach((_f) => {
+                if (_f.fieldName === field.fieldName) {
+                    if (displayType === "currency") {
+                        if (_f.displayCurrency) {
+                            _f.displayCurrency.push(displayValue);
+                        } else {
+                            _f.displayCurrency = [displayValue];
+                        }
+                    } else if (displayType === "converter") {
+                        if (_f.displayUnits) {
+                            _f.displayUnits.push(displayValue);
+                        } else {
+                            _f.displayUnits = [displayValue];
+                        }
+                    }
+                }
+            });
+        }
+        let newField = initialData.fields;
+        newField.forEach((_e) => {
+            if (_e.fieldName === field.fieldName) {
+                _e.fieldChanges = _fieldChanges.filter(
+                    (_f) => _f.fieldName === field.fieldName
+                )[0];
+            }
+        });
+        setInitialData({
+            fields: newField,
+            values: { ...getObjKeys("", newField), ...ref.current.values },
+        });
+        EvaluteproductFields(newField);
+        setFieldChanges(_fieldChanges);
+    };
+
+    const removeDisplayType = (displayType, field, displayValue) => {
+        let _fieldChanges = fieldChanges;
+        _fieldChanges.forEach((_f) => {
+            if (_f.fieldName === field.fieldName) {
+                if (displayType === "currency") {
+                    _f.displayCurrency = _f.displayCurrency.filter(
+                        (e) => e !== displayValue
+                    );
+                } else if (displayType === "converter") {
+                    _f.displayUnits = _f.displayUnits.filter((e) => e !== displayValue);
+                }
+            }
+        });
+        let newField = initialData.fields;
+        newField.forEach((_e) => {
+            if (_e.fieldName === field.fieldName) {
+                _e.fieldChanges = _fieldChanges.filter(
+                    (_f) => _f.fieldName === field.fieldName
+                )[0];
+            }
+        });
+        setInitialData({
+            fields: newField,
+            values: { ...getObjKeys("", newField), ...ref.current.values },
+        });
+        EvaluteproductFields(newField);
+        setFieldChanges(_fieldChanges);
+    };
+
+    const handleScroll = (errors) => {
+        console.log(errors)
+        const err = Object.keys(errors);
+        if (err.length) {
+            const input = document.querySelector(
+                `input[name=${err[0]}]`,
+            );
+            input?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'start',
+            });
+        }
+    }
+
     return (<Dialog
         maxWidth="md"
         fullScreen={fullScreen || (isMobile || isTablet)}
@@ -411,18 +510,32 @@ const CreateProduct = (props) => {
                         <CustomDialogContent>
                             <Box>
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
-                                    <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                                    {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                                     {productFields && productFields.map((section, i) => (
                                         <div key={i}>
-                                            <h2 className="form-label-style" onClick={() => handleExpand(i)}>
-                                                <IconButton className="p-0" color="primary" style={{ marginTop: "-5px" }} size="small"  >
-                                                    {expanded[i] ? <ExpandLess fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                                            <div className={"detail-box-content detail-product-box"}>
+                                                <div className={"product-form-layout"}>
+                                                <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                                <h2 className={`${"form-label-style"} ${"form-label-product"}`} >
+                                                    {section.name}
+                                                </h2>
+                                                <IconButton className="p-0" style={{ marginTop: "-5px", color:"white" }} size="small" onClick={() => handleExpand(i)} >
+                                                    {expanded[i] ? <ExpandLess fontSize="medium" style={{ paddingTop: "5px", color:"white" }}/> : <ExpandMoreIcon fontSize="medium" style={{ paddingTop: "5px", color:"white" }}/>}
                                                 </IconButton>
-                                                {section.name}
-                                                <IconButton style={{ float: "right", marginTop: "-10px" }} color="primary" size="small" onClick={(e) => handleOpenAddField(e, section.name)} >
-                                                    <ControlPointIcon />
+                                                </div>
+                                                <IconButton style={{ padding:"0px" , marginTop: "-5px" }} color="primary" size="small" onClick={(e) => handleOpenAddField(e, section.name)} >
+                                                    <ControlPointIcon style={{ paddingTop:"2px" , color:"white" }}/>
                                                 </IconButton>
-                                            </h2>
+                                            </div>
+                                            {/*<h2 className="form-label-style" >*/}
+                                            {/*    <IconButton className="p-0" color="primary" style={{ marginTop: "-5px" }} size="small" onClick={() => handleExpand(i)} >*/}
+                                            {/*        {expanded[i] ? <ExpandLess fontSize="medium" /> : <ExpandMoreIcon fontSize="medium" />}*/}
+                                            {/*    </IconButton>*/}
+                                            {/*    {section.name}*/}
+                                            {/*    <IconButton style={{ float: "right", marginTop: "-10px" }} color="primary" size="small" onClick={(e) => handleOpenAddField(e, section.name)} >*/}
+                                            {/*        <ControlPointIcon />*/}
+                                            {/*    </IconButton>*/}
+                                            {/*</h2>*/}
                                             <Box marginY={2}>
                                                 <Collapse in={expanded[i]} timeout="auto" unmountOnExit>
                                                     <Grid spacing={3} container>
@@ -432,9 +545,9 @@ const CreateProduct = (props) => {
                                                                     <Grid container spacing={1}>
                                                                         <Grid
                                                                             item
-                                                                            xs={permissions.productCategory.isCreate ? 10 : 11}
-                                                                            sm={permissions.productCategory.isCreate ? 10 : 11}
-                                                                            md={permissions.productCategory.isCreate ? 10 : 11}
+                                                                            xs={permissions.productCategory.isCreate ? 11 : 11}
+                                                                            sm={permissions.productCategory.isCreate ? 11 : 11}
+                                                                            md={permissions.productCategory.isCreate ? 11 : 11}
                                                                         >
                                                                             <FormTypes
                                                                                 isNew={Boolean(productId)}
@@ -677,6 +790,8 @@ const CreateProduct = (props) => {
                                                                                     errors={errors}
                                                                                     touched={touched}
                                                                                     label={field.fieldLabel}
+                                                                                    addDisplayType={addDisplayType}
+                                                                                    removeDisplayType={removeDisplayType}
                                                                                     name={field.fieldName}
                                                                                     type={field.type}
                                                                                     options={field.option}
@@ -758,7 +873,11 @@ const CreateProduct = (props) => {
                                 disabled={uploadingImageOrFileProgress > 0 || submitting}
                                 // disabled={Object.values(simplifyValues(initialData.values, initialData.fields)).toString() ===
                                 //     Object.values(simplifyValues(values, initialData.fields)).toString()}
-                                onClick={submitForm}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleScroll(errors)
+                                    submitForm();
+                                }}
                             > Save</CustomButton>
                         </CustomDialogFooter>
                         {

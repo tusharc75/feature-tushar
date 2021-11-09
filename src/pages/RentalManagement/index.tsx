@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
-import { Grid, Chip, IconButton, Tooltip } from "@material-ui/core";
+import { Grid, Chip, IconButton, Tooltip, Fab } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import axiosInstance from "../../axios/axiosInstance";
@@ -10,6 +10,7 @@ import routes from "./../../components/Helpers/Routes";
 import { prepareDataForGrid } from "../../constants/helpers"
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FaRegistered } from "react-icons/fa";
+import AddIcon from "@material-ui/icons/Add"
 
 import {
   isObjectEmpty,
@@ -40,6 +41,8 @@ import { CustomOfflineContext } from "../../StateProvider/OfflineContext/Offline
 import HideWhenOffline from "../../components/HideWhenOffline";
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
 import { camelCase } from "lodash";
+import { isMobile, isTablet } from 'react-device-detect'
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 let rentalManagementTimeout;
 const RentalManagementType = [
@@ -104,6 +107,7 @@ const RentalManagement = () => {
     filters,
     sorting,
     selectedRecords,
+    appendRows
   } = state;
 
   useEffect(() => {
@@ -143,6 +147,7 @@ const RentalManagement = () => {
       }
       return o?.fieldData
     })
+
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
@@ -407,10 +412,19 @@ const RentalManagement = () => {
         let res = {
           ...prepareDataForGrid(u, user),
         };
+
+        res["canDelete"] = u.owner?.optionValue === user?.user._id;
+        res["isChecked"] = false;
+        res["allowedToEdit"] = true;
         return res;
       });
 
-      dispatch({ type: "initialize", data: rows, count: count });
+      if (appendRows) {
+        dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
+      } else {
+        dispatch({ type: "initialize", data: rows, count: count });
+      }
+
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
       }, gridLoadingTimeout);
@@ -562,23 +576,60 @@ const RentalManagement = () => {
 
           {
             Object.keys(frameWorkComponent).length > 0 ?
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={100}
-                loading={loading}
-                renderedFrom={pageTitle}
-                allowSelection={!isOffline}
-                isClientSideGrid={isOffline}
-                refreshGrid={fetchRentalManagement}
-              /> : null
+              isMobile ?
+                <CustomSwipableList
+                  allowSelection={true}
+                  allowSwipe={true}
+                  permissions={permissions.rentalManagement}
+                  primaryField={columns?.find(d => d.primaryField)}
+                  onClick={(data) => {
+                    history.push(`${routes.rentalManagementDetail.path}/${data._id}`)
+                  }}
+                  dataRows={dataRows}
+                  selectedRecords={selectedRecords}
+                  dispatch={dispatch}
+                  onEdit={(data) => {
+                    history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
+                  }}
+                  extraParamsToCheckDelete={true}
+                  onDelete={(data) => {
+                    setSingleRentalManagementDelete({
+                      show: true,
+                      id: data._id,
+                      rentalJobName: `${data.rentalJobName}`,
+                    })
+                  }}
+                  rowCount={rowCount}
+                  page={page}
+                  loading={loading}
+                  chips={[
+                    {
+                      label: "Status: ",
+                      field: "status",
+                    }
+                  ]}
+                  onCreate={clickCreateNew}
+                  showClone={false}
+                  onClone={() => { }}
+                  renderedFrom={pageTitle}
+                /> :
+                <CustomAgGrid
+                  columns={columns}
+                  dataRows={dataRows}
+                  frameworkComponents={frameWorkComponent}
+                  setGridApi={setGridApi}
+                  dispatch={dispatch}
+                  rowCount={rowCount}
+                  limit={limit}
+                  pageSizes={pageSizes}
+                  page={page}
+                  actionWidth={100}
+                  loading={loading}
+                  renderedFrom={pageTitle}
+                  allowSelection={!isOffline}
+                  isClientSideGrid={isOffline}
+                  refreshGrid={fetchRentalManagement}
+                /> : null
           }
 
           {showDeleteWarningConfirmBox ? (

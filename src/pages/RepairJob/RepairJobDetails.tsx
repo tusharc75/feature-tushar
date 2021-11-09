@@ -14,12 +14,15 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { repairJob } from '../../constants/helpers';
 import ManageRepairJob from './ManageRepairJob';
 import DeleteButton from '../../components/Helpers/DeleteButton';
+import queryString from "query-string";
 
 const RepairJobDetails = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
   const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit } = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -72,6 +75,14 @@ const RepairJobDetails = () => {
         setHeadingLabel(data.repairJobName);
         setCustomizedRoutes([routes.repairJob, { title: data.repairJobName }]);
         getRessourceFields();
+
+        if (permissions?.repairJob?.isUpdate && openEdit === "true") {
+          setOpenUpdateDialog(true)
+          const params = new URLSearchParams()
+          params.delete("openEdit")
+          history.push({ search: params.toString() })
+        }
+        
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);

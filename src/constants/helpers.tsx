@@ -16,7 +16,7 @@ import {
   Search,
   ViewColumn
 } from '@material-ui/icons';
-import { object, string, array, boolean } from 'yup';
+import { object, string, array, boolean, number } from 'yup';
 import moment from 'moment';
 import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
@@ -155,6 +155,8 @@ export const sidebarResource = {
   priceBuilder: 'Price Builder',
   flags: 'Flags',
   projectSales: 'Project Sales',
+  purchaseOrder: 'Purchase Order'
+
 };
 
 export const RESOURCE_LABEL = {
@@ -205,6 +207,7 @@ export const RESOURCE_LABEL = {
   salesOrder: 'Sales Order',
   eCommerce: 'e-Commerce',
   packages: 'Packages',
+  purchaseOrder: 'Purchase Order'
 };
 
 export const lead = {
@@ -365,6 +368,12 @@ export const marketSegment = {
   marketSegmentResource: 'marketSegment'
 };
 
+export const purchaseOrder = {
+  api: '/purchase-order',
+  route: '/purchase-order',
+  permission: 'purchaseOrder'
+};
+
 export const profileMenuItems = {
   profile: 1,
   notification: 2,
@@ -425,18 +434,23 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
 
   const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data.optionValue : '');
   for (const key of arr) {
+
+    let defaultValue
+    if (key?.isDefaultValue && key?.defaultValue) {
+      defaultValue = key.defaultValue
+    }
     if (key.type === 'switch' || key.type === 'checkBox') {
-      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : false;
+      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue ? defaultValue : false;
     } else if (key.type === 'multiSelect') {
       const values = dataObj[key.fieldName] && dataObj[key.fieldName].length
         ? typeof dataObj[key.fieldName] === 'string'
           ? dataObj[key.fieldName]
           : dataObj[key.fieldName].map((val: any) => filterValues(val))
-        : [];
+        : defaultValue || [];
       obj[key.fieldName] = values;
     } else if (key.type === 'dropDown') {
       const value = filterValues(dataObj[key.fieldName]);
-      obj[key.fieldName] = value ? value : '';
+      obj[key.fieldName] = value ? value : defaultValue || '';
     } else if (key.type === 'converter' || key.type === 'currencyAmount' || key.isConverter === true) {
       if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
         key.displayUnits &&
@@ -445,7 +459,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
             if (key.fieldName.includes('_')) {
               fieldName = key.fieldName;
             }
-            obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
+            obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : defaultValue || 0;
           });
       } else if (key.type === 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
         key.displayCurrency &&
@@ -470,9 +484,9 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
           });
       }
     } else if (key.type === 'decimal' || key.type === 'percent' || key.type === 'formula') {
-      obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
+      obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : defaultValue || 0;
     } else {
-      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
+      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue || '';
     }
   }
   return obj;
@@ -513,7 +527,11 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
         : string().min(10, 'Mobile number is too short');
     } else if (input.type === 'multiSelect') {
-      schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`) : array();
+      schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
+    } else if (input.type === 'percent') {
+      schema[input.fieldName] = input.required 
+        ? number().required(`${input.fieldLabel} is required`).nullable()
+        : number().nullable();
     } else if (input.type === 'email') {
       schema[input.fieldName] =
         input.required && validEmail
@@ -1142,7 +1160,7 @@ export const prepareDataForGrid = (data, user = {}) => {
     if (typeof data[key] === "object") {
 
       if (Array.isArray(data[key])) {
-        if (data[key].length > 0 && data[key][0].hasOwnProperty("optionLabel")) {
+        if (data[key].length > 0 && data[key][0] && data[key][0].hasOwnProperty("optionLabel")) {
           const [first, ...rest] = data[key];
 
           restProperties[key] = first["optionLabel"];
@@ -1150,16 +1168,15 @@ export const prepareDataForGrid = (data, user = {}) => {
           restProperties[`rest${key}`] = rest
         }
         else if (typeof data[key][0] !== "object") {
-          restProperties[key] = data[key].join(",")
+          restProperties[key] = data[key].join(" , ")
         }
-
-      } else {
+      }
+      else {
         objectValues[key] = data[key];
       }
     } else {
       restProperties[key] = data[key];
     }
-
   })
 
   let finalObject = { ...restProperties };

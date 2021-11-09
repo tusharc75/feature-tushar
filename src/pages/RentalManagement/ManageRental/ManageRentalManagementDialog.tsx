@@ -17,6 +17,7 @@ import Skeleton from "@material-ui/lab/Skeleton/Skeleton";
 import { useHistory } from 'react-router-dom'
 import routes from "../../../components/Helpers/Routes";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
+import {FaDiceOne} from "react-icons/fa";
 
 const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManagementData = null, onClose, onSuccess, open }) => {
 
@@ -334,13 +335,17 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                             <>
                                 <CustomDialogContent>
                                     <Form>
-                                        <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                                        {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                                         {formsData &&
                                             formsData.map((form, i) => {
                                                 return (
                                                     form.name && (
                                                         <div key={i}>
-                                                            <h2 className="form-label-style">{form.name}</h2>
+                                                            <div className={"detail-box-content"}>
+                                                                <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                                                <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                                                            </div>
+                                                            {/*<h2 className="form-label-style">{form.name}</h2>*/}
                                                             <Box marginY={2}>
                                                                 <Grid spacing={3} container>
                                                                     {form.sectionFields.map((field) => (

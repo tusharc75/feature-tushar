@@ -334,7 +334,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                 ></CustomDialogHeader>
                 <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
-                        <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                        {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                         <Box padding={1}>
                             <Grid container spacing={3}>
                                 <Grid item xs={12}>
@@ -462,13 +462,17 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                             if (isFieldNotTouched(initialValues, values)) handleClose()
                             else setShowConfirmDialog(true)
                         }}>Cancel</Button>
-                    <CustomButton
-                        type="button"
+                    {
+                        canEdit &&
+                        <CustomButton
+                            type="button"
 
-                        color="primary"
-                        disabled={loading || uploadingImageOrFileProgress > 0 || otherAttachments.length === 0}
-                        loading={loading}
-                        variant="contained" onClick={submitForm}>Save</CustomButton>
+                            color="primary"
+                            disabled={loading || uploadingImageOrFileProgress > 0 || otherAttachments.length === 0}
+                            loading={loading}
+                            variant="contained" onClick={submitForm}>
+                            Save
+                        </CustomButton>}
                 </CustomDialogFooter>
                 {
                     showConfirmDialog ?

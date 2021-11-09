@@ -54,7 +54,7 @@ const AddExistingProduct = (props) => {
 
 
     useEffect(() => {
-        axiosInstance().get("/product-category").then(({ data: { data } }) => {
+        axiosInstance().get("/product-category?sortBy=name&orderBy=asc").then(({ data: { data } }) => {
             setProductCategoryList(data)
         })
     }, [])
@@ -62,7 +62,7 @@ const AddExistingProduct = (props) => {
     useEffect(() => {
         if (isProductTemplate) {
             if (productCategory && productCategory !== "") {
-                axiosInstance().post(`/product-template/template/` + productCategory, { entity: [] }).then(({ data: { data } }) => {
+                axiosInstance().post(`/product-template/template/` + productCategory, { entity: null }).then(({ data: { data } }) => {
                     setProductTemplateList(data.data)
                     setProductTemplate(null);
                 })
@@ -193,6 +193,11 @@ const AddExistingProduct = (props) => {
             }
             setFrameWorkComponent({ ...tempFrameworkComponent })
             columns = [...columns, ...getStaticFields()]
+            columns.forEach((e) => {
+                if (e.cellRenderer === "linkRenderer") {
+                    e.cellRenderer = "commonRenderer";
+                }
+            })
             setColumns([...columns])
             dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
@@ -316,6 +321,7 @@ const AddExistingProduct = (props) => {
         <CustomDialogHeader title={"Add Existing Product"} onClose={handleClose} ></CustomDialogHeader>
         <div className="listing-grid p-3">
             <Box mb={2}>
+                <h6 className="form-label-style mt-0 mb-0" style={{ borderBottom: "none" }}>* Select product using checkbox and click Add button for add product</h6>
                 <Grid container >
                     <Grid className="d-flex align-items-center gap-1" item xs={12} sm={6}>
                         <Autocomplete
@@ -399,6 +405,7 @@ const AddExistingProduct = (props) => {
                     allowAction={false}
                     loading={loading}
                     refreshGrid={fetchProduct}
+                    renderedFrom="productPage"
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>

@@ -20,6 +20,7 @@ import {
   prepareDataForGrid,
   customerContact,
   supplierContact,
+  quote
 } from "../../constants/helpers";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
@@ -69,6 +70,7 @@ const QuoteBuilders = () => {
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
+  const { quoteResource } = quote;
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -109,7 +111,6 @@ const QuoteBuilders = () => {
   const [showVersionsDialog, setShowVersionsDialog] = useState(false);
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const [columns, setColumns] = useState([])
-  const [isAllChecked, setIsAllChecked] = useState(false);
 
   const [versionStatusData, setVersionStatusData] = useState({
     columns: [
@@ -132,7 +133,7 @@ const QuoteBuilders = () => {
             onClick={() => {
               history.push(`quotes/detail/${params.row._id}`, {
                 versionNumber: `${params.row.versionNumber}`,
-                tabValue: 2
+                tabValue: 1
               })
             }}
           >
@@ -202,6 +203,7 @@ const QuoteBuilders = () => {
     filters,
     sorting,
     selectedRecords,
+    appendRows
   } = state;
 
   // const columns = [
@@ -267,11 +269,24 @@ const QuoteBuilders = () => {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData]
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName)
+      if (["quoteName"].find(d => d === o?.fieldData?.fieldName)) {
+        columns = [...columns, {
+          disabled: true,
+          field: "quoteName",
+          headerName: "Quote Name",
+          pivotIndex: 0,
+          show: true,
+          cellRenderer: "quoteNameRenderer",
+          primaryField: true
+        }]
+      }
+      else {
+        let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
+        if (currentColumn !== null) {
+          columns = [...columns, currentColumn?.columnData]
+          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+            rendererNames.push(currentColumn?.rendererName)
+          }
         }
       }
     })
@@ -578,8 +593,6 @@ const QuoteBuilders = () => {
       ])}`
     }
 
-
-
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
@@ -616,6 +629,16 @@ const QuoteBuilders = () => {
         gridApi.setRowData([]);
       }
 
+      let oldSelectedRecords = [];
+      const localStorageKey = `${quoteResource}_selected`;
+      try {
+        if (localStorage.getItem(localStorageKey)) {
+          oldSelectedRecords = [...JSON.parse(localStorage.getItem(localStorageKey))]
+        }
+      } catch (ex) {
+        console.error("Error is parsing quote localstorage value")
+      }
+
       axiosInstance()
         .get(`${qbApi}${queryString}`)
         .then(({ data: { data, count } }) => {
@@ -649,7 +672,7 @@ const QuoteBuilders = () => {
             finalObject["versionCount"] = versionCount;
             finalObject["versionData"] = versionArray;
 
-            finalObject["isChecked"] = false;
+            finalObject["isChecked"] = oldSelectedRecords.some(s => s === u._id);
             finalObject["allowedToEdit"] = (
               [...(u.collaborator ?? []), u.owner].some(
                 (d) => d?.optionValue === user?.user?._id
@@ -660,9 +683,19 @@ const QuoteBuilders = () => {
           });
           //  Dynamic grid code - end
 
-          setIsAllChecked(false);
 
-          dispatch({ type: "initialize", data: rows, count: count });
+          if (appendRows) {
+            dispatch({
+              type: "initialize", data: [...dataRows, ...rows],
+              count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+            });
+          } else {
+            dispatch({
+              type: "initialize", data: rows, count: count,
+              selectedRecords: rows.filter(f => f.isChecked === true)
+            });
+          }
+
           setTimeout(() => {
             dispatch({ type: "loading", loading: false });
           }, gridLoadingTimeout);
@@ -843,35 +876,21 @@ const QuoteBuilders = () => {
           </div>
           {
             isMobile ?
-
-              // <InfiniteScroll
-              //   dataLength={dataRows.length}
-              //   // height="500px"
-              //   scrollableTarget="scrollableDiv"
-              //   next={() => {
-              //     debugger;
-              //     setTimeout(() => {
-              //       dispatch({ type: 'pageChange', page: page + 1 })
-              //     }, 1500)
-              //   }}
-              //   hasMore={true}
-              //   loader={
-              //     <h3 className="text-center border mt-3 p-3 loading-dots">
-              //       Loading more items
-              //     </h3>
-              //   }
-              // >
               <CustomSwipableList
-                // columns={columns}
+                allowSelection={true}
+                allowSwipe={true}
+                permissions={permissions.quoteBuilder}
                 primaryField={columns?.find(d => d.primaryField)}
                 onClick={(data) => {
                   history.push(`${routes.quoteBuilderDetail.path}/${data._id}`)
                 }}
                 dataRows={dataRows}
+                selectedRecords={selectedRecords}
                 dispatch={dispatch}
                 onEdit={(data) => {
                   history.push(`${routes.quoteBuilderDetail.path}/${data._id}?openEdit=true`)
                 }}
+                extraParamsToCheckDelete={true}
                 onDelete={(data) => {
                   setSingleQuoteDelete({
                     show: true,
@@ -881,8 +900,7 @@ const QuoteBuilders = () => {
                 }}
                 rowCount={rowCount}
                 page={page}
-                limit={limit}
-                pageSizes={pageSizes}
+                loading={loading}
                 chips={[
                   {
                     label: "Version(s): ",
@@ -898,12 +916,11 @@ const QuoteBuilders = () => {
                     chipColorVariable: quoteStepColors
                   }
                 ]}
-              // onClick={(data) => {
-              //   history.push(`${routes.quoteBuilderDetail.path}/${data._id}`)
-              // }}
-              />
-              // </InfiniteScroll>
-              : (
+                onCreate={clickCreateNew}
+                showClone={false}
+                onClone={() => { }}
+                renderedFrom={quoteResource}
+              /> : (
                 Object.keys(frameWorkComponent).length > 0 ?
                   <CustomAgGrid
                     columns={columns}
@@ -917,16 +934,10 @@ const QuoteBuilders = () => {
                     page={page}
                     actionWidth={100}
                     loading={loading}
-                    renderedFrom={routes.quoteBuilder.title}
+                    renderedFrom={quoteResource}
                     refreshGrid={fetchQuoteBuilder}
                   /> : null
               )
-          }
-
-          {
-            quotePermissions.isCreate && isMobile && <Fab size="small" onClick={clickCreateNew} className="fab-position-b-r" color="primary" aria-label="add">
-              <AddIcon />
-            </Fab>
           }
 
           {showDeleteWarningConfirmBox ? (

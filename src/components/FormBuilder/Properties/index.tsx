@@ -254,7 +254,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             // }
 
             if (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect' || fieldData.type === 'radio' || fieldData.type === 'process' || ele.isDropdown) {
-              if (fieldData.type === 'dropDown') {
+              if (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') {
                 ele.isDependentDropdown = values.isDependentDropdown;
                 ele.dropdowDependentOn = values.dropdowDependentOn;
               }

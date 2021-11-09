@@ -10,19 +10,22 @@ import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGrid
 import { orderBy } from 'lodash';
 import { checkStaticField, staticColumns } from "../../constants/columns"
 
+
 export function reducer(state, action) {
   switch (action.type) {
     case 'loading':
       return {
         ...state,
-        loading: action.loading
+        loading: action.loading,
+        appendRows: action.loading === false ? false : state.appendRows
       };
 
     case 'initialize':
       return {
         ...state,
         dataRows: action.data,
-        rowCount: action.count
+        rowCount: action.count,
+        selectedRecords: action.selectedRecords ?? state.selectedRecords
       };
 
     case 'selection':
@@ -64,7 +67,8 @@ export function reducer(state, action) {
     case 'pageChange':
       return {
         ...state,
-        page: action.page
+        page: action.page,
+        appendRows: isMobile,
       };
 
     case 'pageSizeChange':
@@ -72,6 +76,7 @@ export function reducer(state, action) {
         ...state,
         limit: action.limit,
         page: 0,
+        appendRows: isMobile,
         loading: false
       };
 
@@ -105,7 +110,8 @@ export const intialState = {
   search: '',
   filters: {},
   sorting: [],
-  selectedRecords: []
+  selectedRecords: [],
+  appendRows: false
 };
 
 export default function CustomAgGrid({
@@ -138,23 +144,59 @@ export default function CustomAgGrid({
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
 
-  const [clientSideGridApi, setClientSideGridApi] = useState(null);
+  const [currentGridApi, setCurrentGridApi] = useState(null);
   const enableRowDrag = columns.some((d) => d.rowDrag);
 
   //  If you want to do something once grid binding done
   const onGridReady = (params) => {
     setGridApi(params.api);
     setColumnApi(params.columnApi);
-    setClientSideGridApi(params.api);
+    setCurrentGridApi(params.api);
     if (handleGridReady) handleGridReady(params);
-    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
-    if (columnState) {
-      setTimeout(() => {
-        params.columnApi.setColumnState(columnState);
-      }, 50)
+    if (!isClientSideGrid) {
+
+      try {
+        let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
+        if (oldSelectedRecords.length > 0) {
+          params.api.forEachNode(function (node) {
+            node.setSelected(
+              oldSelectedRecords.some((o) => o === node.data._id)
+            );
+          });
+        }
+      } catch (ex) {
+        console.error("Error in getting selected records from local storage")
+      }
     }
   };
+
+  useEffect(() => {
+    if (columnApi && loading === false) {
+      const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+
+      if (columnState) {
+        setTimeout(() => {
+          columnApi.setColumnState(columnState);
+        }, 50)
+      }
+
+      if (!isClientSideGrid && currentGridApi) {
+        try {
+          let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
+          if (oldSelectedRecords.length > 0) {
+            currentGridApi.forEachNode(function (node) {
+              node.setSelected(
+                oldSelectedRecords.some((o) => o === node.data._id)
+              );
+            });
+          }
+        } catch (ex) {
+          console.error("Error in getting selected records from local storage")
+        }
+      }
+    }
+  }, [columnApi, loading])
 
   const onColumnMoved = (params) => {
     if (params?.source === "uiColumnDragged") {
@@ -163,16 +205,23 @@ export default function CustomAgGrid({
     }
   };
 
+  const onColumnResized = (params) => {
+    if (params?.source === "uiColumnDragged") {
+      const columnState = JSON.stringify(params.columnApi.getColumnState());
+      localStorage.setItem(renderedFrom, columnState);
+    }
+  }
+
   useEffect(() => {
-    if (clientSideGridApi && selectedRecords.length) {
-      clientSideGridApi.forEachNode(function (node) {
+    if (currentGridApi && selectedRecords.length) {
+      currentGridApi.forEachNode(function (node) {
         node.setSelected(
           selectedRecords.some((o) => o._id === node.data._id)
         );
       });
     }
 
-  }, [clientSideGridApi, selectedRecords])
+  }, [currentGridApi, selectedRecords])
 
   var customFilterParams = {
     filterOptions: ['contains'],
@@ -183,78 +232,85 @@ export default function CustomAgGrid({
     // debounceMs: 1000,
   };
 
-  const getActionColumn = (
-    <AgGridColumn
-      width={actionWidth}
-      field="actions"
-      headerName={actionLabel ? actionLabel : "Actions"}
-      pinned={isMobile || isTablet ? false : 'right'}
-      lockPinned={isMobile || isTablet ? false : true}
-      resizable={false}
-      sortable={false}
-      editable={actionEditable}
-      filter={false}
-      onCellValueChanged={onCellValueChanged}
-      cellRenderer="actionsRenderer"
-    ></AgGridColumn>
-  )
+  const getWidth = (field, columnWidth) => {
+    if (localStorage.getItem(renderedFrom)) {
+      const storedColumns = JSON.parse(localStorage.getItem(renderedFrom));
 
-  const generateColumns = columns.map((column: any, index) => {
+      const indexOfField = storedColumns.findIndex((d) => d.colId === field);
+      if (indexOfField > -1) {
+        return storedColumns[indexOfField].width;
+      }
+      return columnWidth;
+    }
+    return columnWidth;
+  }
+
+  const getActionColumn = () => {
+    if (allowAction) {
+      return <AgGridColumn
+        width={actionWidth}
+        field="actions"
+        headerName={actionLabel ? actionLabel : "Actions"}
+        pinned={isMobile || isTablet ? false : 'right'}
+        lockPinned={isMobile || isTablet ? false : true}
+        resizable={false}
+        sortable={false}
+        editable={actionEditable}
+        filter={false}
+        onCellValueChanged={onCellValueChanged}
+        cellRenderer="actionsRenderer"
+      ></AgGridColumn>
+    }
+    else return null
+  }
+
+  const generateColumns = [...columns, { isAction: true }].map((column: any, index) => {
     return isClientSideGrid ? (
-      <>
-        <AgGridColumn
-          key={index}
-          field={column.field}
-          headerName={column.headerName}
-          filter={column.filter ?? 'agTextColumnFilter'}
-          sortable={column.sortable ?? true}
-          cellRenderer={column.cellRenderer ?? null}
-          cellRendererParams={column.cellRendererParams ?? null}
-          minWidth={column.width ?? 180}
-          flex={1}
-          rowDrag={column.rowDrag ?? false}
-          hide={staticColumns.indexOf(column.field) >= 0 ? checkStaticField(renderedFrom, column.field) :
-            (column.hasOwnProperty("show") && !column?.show) ? true : false}
-          floatingFilterComponent="customFloatingFilter"
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
-        ></AgGridColumn>
-        {
-          (index === columns.length - 1) && allowAction ? getActionColumn : null
-        }
-      </>
-    ) : (
-      <>
-        <AgGridColumn
-          lockPosition={column?.lockPosition ? true : false}
-          key={index}
-          field={column.field}
-          headerName={column.headerName}
-          filter={column.filter ?? 'agTextColumnFilter'}
-          sortable={column.sortable ?? true}
-          cellRenderer={column.cellRenderer ?? null}
-          cellRendererParams={column.cellRendererParams ?? null}
-          minWidth={column.width ?? 180}
-          flex={1}
-          filterParams={customFilterParams}
-          hide={(column.hasOwnProperty("show") && !column?.show) ? true : false}
-          comparator={() => {
-            return 0;
-          }}
-          floatingFilterComponent="customFloatingFilter"
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
-        ></AgGridColumn>
-        {
-          (index === columns.length - 1) && allowAction ? getActionColumn : null
-        }
-      </>
-    );
-  });
+      <AgGridColumn
+        key={index}
+        field={column.field}
+        headerName={column.headerName}
+        filter={column.filter ?? 'agTextColumnFilter'}
+        sortable={column.sortable ?? true}
+        cellRenderer={column.cellRenderer ?? null}
+        cellRendererParams={column.cellRendererParams ?? null}
+        minWidth={column.width ?? 180}
+        width={getWidth(column.field, column.width) ?? 180}
+        flex={1}
+        rowDrag={column.rowDrag ?? false}
+        hide={staticColumns.indexOf(column.field) >= 0 ? checkStaticField(renderedFrom, column.field) :
+          (column.hasOwnProperty("show") && !column?.show) ? true : false}
+        floatingFilterComponent="customFloatingFilter"
+      // floatingFilterComponent={column.floatingFilterComponent ?? null}
+      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+      //   suppressFilterButton: true,
+      // }}
+      ></AgGridColumn>
+    ) : column.isAction ? getActionColumn() :
+      < AgGridColumn
+        lockPosition={column?.lockPosition ? true : false}
+        key={index}
+        field={column.field}
+        headerName={column.headerName}
+        filter={column.filter ?? 'agTextColumnFilter'}
+        sortable={column.sortable ?? true}
+        cellRenderer={column.cellRenderer ?? null}
+        cellRendererParams={column.cellRendererParams ?? null}
+        minWidth={column.width ?? 180}
+        width={getWidth(column.field, column.width) ?? 180}
+        flex={1}
+        filterParams={customFilterParams}
+        hide={(column.hasOwnProperty("show") && !column?.show) ? true : false}
+        comparator={() => {
+          return 0;
+        }}
+        floatingFilterComponent="customFloatingFilter"
+      // floatingFilterComponent={column.floatingFilterComponent ?? null}
+      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+      //   suppressFilterButton: true,
+      // }}
+      ></AgGridColumn >
+  })
 
   return (
     <>
@@ -289,6 +345,7 @@ export default function CustomAgGrid({
               headerHeight={AgGridHeaderHeight}
               floatingFiltersHeight={AgGridFloatingFiltersHeight}
               rowHeight={AgGridRowHeight}
+              onColumnResized={onColumnResized}
               frameworkComponents={{
                 ...frameworkComponents,
                 commonRenderer: frameworkComponents["commonRenderer"] ?? CommonRenderer,
@@ -323,10 +380,10 @@ export default function CustomAgGrid({
               }}
               onFilterChanged={(e) => {
                 if (isClientSideGrid) {
-                  clientSideGridApi.paginationGoToPage(0);
+                  currentGridApi.paginationGoToPage(0);
                   dispatch({
                     type: 'count',
-                    count: clientSideGridApi.getModel().rootNode.allChildrenCount
+                    count: currentGridApi.getModel().rootNode.allChildrenCount
                   });
                   dispatch({ type: 'pageChange', page: 0 });
                 } else {
@@ -340,8 +397,7 @@ export default function CustomAgGrid({
               // loadingOverlayComponentParams={{
               //     loadingMessage: 'Loading...',
               // }}
-              animateRows={enableRowDrag ?? false
-              }
+              animateRows={enableRowDrag ?? false}
               suppressAnimationFrame={!enableRowDrag}
               suppressMaintainUnsortedOrder={true}
               rowBuffer={limit}
@@ -354,12 +410,38 @@ export default function CustomAgGrid({
 
               suppressRowClickSelection={true}
               rowSelection={'multiple'}
+              onRowSelected={(event) => {
+                if (!isClientSideGrid && event.rowIndex !== null && event.node.isSelected() === false) {
+                  try {
+                    let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
+                    if (oldSelectedRecords.length > 0) {
+                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords.filter(f => f !== (event.data._id ?? event.data.id))));
+                    }
+                  } catch (ex) {
+                    console.error("Error in getting / storing selected records")
+                  }
+                }
+              }}
               onSelectionChanged={(event: any) => {
                 if (onSelection) onSelection(event.api.getSelectedRows());
                 dispatch({
                   type: 'selection',
                   selectedRecords: event.api.getSelectedRows()
                 });
+
+                if (renderedFrom) {
+                  try {
+                    let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
+                    if (oldSelectedRecords.length > 0) {
+                      const uniqueRecords = [...new Set([...oldSelectedRecords, ...event.api.getSelectedRows().map(m => m._id)])]
+                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(uniqueRecords));
+                    } else {
+                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(event.api.getSelectedRows().map(m => m._id)))
+                    }
+                  } catch (ex) {
+                    console.error("Error in getting / storing selected records")
+                  }
+                }
               }}
               onRowDragEnd={(event: any) => {
                 if (onRowDragEnd) {
@@ -389,7 +471,10 @@ export default function CustomAgGrid({
                 ></AgGridColumn>
               )}
 
-              {generateColumns}
+              {
+                columns.length > 0 ?
+                  generateColumns : null
+              }
 
             </AgGridReact>
           </div>
@@ -403,17 +488,17 @@ export default function CustomAgGrid({
               onPageChange={(event, newPage) => {
                 dispatch({ type: 'pageChange', page: newPage });
 
-                if (clientSideGridApi) {
-                  clientSideGridApi.paginationGoToPage(newPage);
+                if (currentGridApi) {
+                  currentGridApi.paginationGoToPage(newPage);
                 }
               }}
               rowsPerPage={limit}
               onRowsPerPageChange={(event) => {
                 dispatch({ type: 'pageSizeChange', limit: event.target.value });
 
-                if (clientSideGridApi) {
-                  clientSideGridApi.paginationGoToPage(0);
-                  clientSideGridApi.paginationSetPageSize(event.target.value);
+                if (currentGridApi) {
+                  currentGridApi.paginationGoToPage(0);
+                  currentGridApi.paginationSetPageSize(event.target.value);
                 }
               }}
               rowsPerPageOptions={pageSizes}

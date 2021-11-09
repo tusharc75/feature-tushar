@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
 
@@ -21,6 +21,9 @@ import RepairJobHeader from './RepairJobHeader';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import AddIcon from "@material-ui/icons/Add"
 
 let repairJobTimeout;
 const RepairJobType = [
@@ -60,15 +63,16 @@ const RepairJob = () => {
   });
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+  const [isAllChecked, setIsAllChecked] = useState(false);
   const columns = [
     {
       field: 'repairJobName',
       headerName: 'Repair Job Name',
       show: true,
       disabled: true,
-      cellRenderer: 'repairJobNameRenderer'
+      cellRenderer: 'repairJobNameRenderer',
+      primaryField: 'true'
     },
     {
       field: 'status',
@@ -355,12 +359,21 @@ const RepairJob = () => {
             createdBy: u.createdBy?.user?.concatedName,
             createdByDate: u.createdBy?.date,
             updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
+            updatedByDate: u.updatedBy?.date,
+
+            canDelete: u.createdBy?.user?._id === user?.user._id,
+            isChecked: false,
+            allowedToEdit: permissions?.repairJob?.isUpdate
           };
           return res;
         });
 
-        dispatch({ type: 'initialize', data: rows, count: count });
+        if (appendRows) {
+          dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
+        } else {
+          dispatch({ type: "initialize", data: rows, count: count });
+        }
+
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -500,22 +513,60 @@ const RepairJob = () => {
             )}
           </RepairJobHeader>
         </div>
-
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={100}
-          loading={loading}
-          renderedFrom={'repairJobPage'}
-          refreshGrid={fetchRepairJobs}
-        />
+        {isMobile ?
+          <CustomSwipableList
+            allowSelection={true}
+            allowSwipe={true}
+            permissions={permissions.repairJob}
+            primaryField={columns?.find(d => d.primaryField)}
+            onClick={(data) => {
+              history.push(`${routes.repairJobDetail.path}/${data._id}`)
+            }}
+            dataRows={dataRows}
+            selectedRecords={selectedRecords}
+            dispatch={dispatch}
+            onEdit={(data) => {
+              history.push(`${routes.repairJobDetail.path}/${data._id}?openEdit=true`)
+            }}
+            extraParamsToCheckDelete={true}
+            onDelete={(data) => {
+              setDeleteRecord(data._id);
+              setIsConformDialogVisible(true);
+            }}
+            rowCount={rowCount}
+            page={page}
+            loading={loading}
+            chips={[
+              {
+                label: "Status: ",
+                field: "status",
+              },
+              {
+                label: "Status: ",
+                field: "typeOfRepair",
+              }
+            ]}
+            onCreate={clickCreateNew}
+            showClone={false}
+            onClone={() => { }}
+            renderedFrom='repairJobPage'
+          /> :
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={100}
+            loading={loading}
+            renderedFrom='repairJobPage'
+            refreshGrid={fetchRepairJobs}
+          />
+        }
 
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
