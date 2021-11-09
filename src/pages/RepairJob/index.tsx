@@ -549,6 +549,7 @@ const RepairJob = () => {
             onCreate={clickCreateNew}
             showClone={false}
             onClone={() => { }}
+            renderedFrom='repairJobPage'
           /> :
           <CustomAgGrid
             columns={columns}
@@ -562,7 +563,7 @@ const RepairJob = () => {
             page={page}
             actionWidth={100}
             loading={loading}
-            renderedFrom={'repairJobPage'}
+            renderedFrom='repairJobPage'
             refreshGrid={fetchRepairJobs}
           />
         }

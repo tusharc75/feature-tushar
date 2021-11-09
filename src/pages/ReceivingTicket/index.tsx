@@ -596,6 +596,7 @@ const ReceivingTicket = () => {
             onCreate={clickCreateNew}
             showClone={false}
             onClone={() => { }}
+            renderedFrom='receivingTicketPage'
           /> :
           <CustomAgGrid
             columns={columns}
@@ -609,7 +610,7 @@ const ReceivingTicket = () => {
             page={page}
             actionWidth={100}
             loading={loading}
-            renderedFrom={'receivingTicketPage'}
+            renderedFrom='receivingTicketPage'
             refreshGrid={fetchReceivingTickets}
           />
         }
