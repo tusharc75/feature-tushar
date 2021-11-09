@@ -15,10 +15,11 @@ interface TableProps {
   calculatePricing?: any;
   cellEditable?: any;
   parentChildData?: any;
+  selectionProps?: any;
 }
 
 const MaterialTableComponent: FC<TableProps> = (props) => {
-  const { columns, rowData, title, loading, onSelection, calculatePricing, cellEditable, parentChildData } = props;
+  const { columns, rowData, title, loading, onSelection, calculatePricing, cellEditable, selectionProps } = props;
   const [newRowData, setNewRowData] = useState([]);
 
   useEffect(() => {
@@ -121,13 +122,15 @@ const MaterialTableComponent: FC<TableProps> = (props) => {
           rowStyle: { color: "black", padding: '0px !important' },
           sorting: false,
           search: false,
+          padding: 'default',
           maxBodyHeight: 400,
           minBodyHeight: 400,
           paging: false,
           toolbar: false,
           editCellStyle: {
             borderBottomWidth: 0
-          }
+          },
+          selectionProps,
         }}
         title={title}
         icons={materialTableIcons}

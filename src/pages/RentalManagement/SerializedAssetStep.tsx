@@ -6,7 +6,7 @@ import { CommonRenderer, DateRenderer, } from "../../components/AgGridComponents
 import { Link } from 'react-router-dom'
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button } from "@material-ui/core";
+import { Button, Chip } from "@material-ui/core";
 import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -16,6 +16,7 @@ import { dateFormat, gridLoadingTimeout, rentalManagement } from "../../constant
 import { Column } from "material-table";
 import moment from "moment";
 import MaterialTableComponent from "../../components/Shared/MaterialTableComponent";
+import { startCase } from "lodash";
 
 
 const SerializedAssetStep = ({ productInventory, currentStep, fetchProductsData, rentalManagementId, isTabletScreen,
@@ -133,12 +134,13 @@ const SerializedAssetStep = ({ productInventory, currentStep, fetchProductsData,
       render: (rowData) => (
         <div style={{ width: 200, display: "flex", alignItems: 'center' }}>
           <p
-            className="text-truncate"
+            className="text-truncate mr-2"
             title={rowData.detail}
           // to={rowData.type === 'Product' ? `${routes.productDetail.path}/${rowData.id}` : `${routes.packagesDetail.path}/${rowData.id}`}
           >
             {rowData.detail}
           </p>
+          {rowData.hasOwnProperty("assetNumber") && <Chip label="Asset" size="small" color="primary" />}
         </div>
       )
     },
@@ -187,7 +189,7 @@ const SerializedAssetStep = ({ productInventory, currentStep, fetchProductsData,
       cellStyle: { padding: "0px" },
       render: (rowData) => (
         <div style={{ width: 80 }}>
-          <p>{rowData.UOM}</p>
+          <p>{startCase(rowData.UOM)}</p>
         </div>
       )
     },
@@ -198,7 +200,7 @@ const SerializedAssetStep = ({ productInventory, currentStep, fetchProductsData,
       cellStyle: { padding: "0px" },
       render: (rowData) => (
         <div style={{ width: 100 }}>
-          <p>{rowData.pricingMethod}</p>
+          <p>{startCase(rowData.pricingMethod)}</p>
         </div>
       )
     },
@@ -358,9 +360,13 @@ const SerializedAssetStep = ({ productInventory, currentStep, fetchProductsData,
                 rowData={productInventory}
                 title={""}
                 loading={loading}
-                onSelection={(d) => setSelectedProducts(d)}
+                onSelection={(d) => setSelectedProducts(d.filter(r => !r.hasOwnProperty("assetNumber")))}
                 parentChildData={(row, rows) => rows.find((a) => a.treeId === row.parent)}
+                selectionProps={rowData => ({
+                  disabled: rowData.hasOwnProperty("assetNumber"),
+                  color: "primary",
 
+                })}
               />
             </Box>
 
