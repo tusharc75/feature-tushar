@@ -91,7 +91,8 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
         timeoutPricing = setTimeout(async () => {
           const priceData = await calculatePrice([values])
           if (priceData && priceData.length) {
-            setPricing(priceData)
+            setPricing(priceData[0])
+            handleChange("price", priceData[0].mrp)
           }
         }, 1000)
 

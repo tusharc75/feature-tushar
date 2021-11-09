@@ -368,7 +368,6 @@ const RentalManagementDetailsPage = () => {
       data.data?.products.map((u: any) => (tempInventory.push({
         ...u,
         id: u._id,
-        detail: u.productName,
         productCategory: u.productCategory?.optionLabel,
         // package: u.hasOwnProperty("package") ? u.package.packageName : "",
         // packageId: u.hasOwnProperty("package") ? u.package._id : ""
@@ -376,7 +375,6 @@ const RentalManagementDetailsPage = () => {
       data.data?.packages.map((u) => (tempInventory.push({
         ...u,
         id: u._id,
-        detail: u.packageName,
         description: u.packageDescription,
       })));
       tempInventory = tempInventory.map(u => {
@@ -453,7 +451,7 @@ const RentalManagementDetailsPage = () => {
       extractedProducts.forEach((pkg, indx) => {
 
         let pkgData = { ...pkg };
-        pkgData = { ...pkgData, detail: `${indx + 1} - ${pkgData.detail}` };
+        pkgData = { ...pkgData, detail: pkgData.detail };
 
         if (pkgData.type === "Package") {
 
@@ -474,7 +472,7 @@ const RentalManagementDetailsPage = () => {
 
               productData = {
                 ...productData,
-                detail: `${indx + 1}.${i + 1} - ${productData.detail}`,
+                detail: productData.detail,
                 totalQty: qty,
                 pkgQty: pkgData.qty,
                 qty: productData.qty,
@@ -636,8 +634,8 @@ const RentalManagementDetailsPage = () => {
       type: 'date',
       render: (rowData) => (
         <div style={{ width: 100 }}>
-          <h5 className="createBy" title={`${moment(rowData.startDate.slice(0, 10)).format(dateFormat)}`}>
-            <span className="">{moment(rowData.startDate.slice(0, 10)).format(dateFormat)}</span>
+          <h5 className="createBy text-truncate" title={`${moment(rowData.startDate.slice(0, 10)).format(dateFormat)}`}>
+            <span className="">{moment(rowData.startDate.slice(0, 10)).format("MM/DD/YYYY")}</span>
           </h5>
         </div>
       )
@@ -653,7 +651,7 @@ const RentalManagementDetailsPage = () => {
       cellStyle: { padding: "0px" },
       render: (rowData) => (
         <div style={{ width: 100 }}>
-          <h5 className="createBy" title={`${moment(rowData.endDate.slice(0, 10)).format(dateFormat)}`}>
+          <h5 className="createBy text-truncate" title={`${moment(rowData.endDate.slice(0, 10)).format(dateFormat)}`}>
             <span className="">{moment(rowData.endDate.slice(0, 10)).format(dateFormat)}</span>
           </h5>
         </div>
@@ -875,20 +873,20 @@ const RentalManagementDetailsPage = () => {
   const handleSingleEdit = async (values: any) => {
     setUpdating(true)
     const newValues = { ...values };
-    const pricing: any = await calculatePricing([values])
+    // const pricing: any = await calculatePricing([values])
 
     newValues.type = camelCase(newValues.type)
-    if (pricing && pricing.length) {
-      newValues.price = pricing[0]?.mrp || newValues.price;
-      const startDate = moment(newValues?.startDate)
-      const endDate = moment(newValues?.endDate)
-      const diff = endDate.diff(startDate, "days");
+    // if (pricing && pricing.length) {
+    //   newValues.price = pricing[0]?.mrp || newValues.price;
+    //   const startDate = moment(newValues?.startDate)
+    //   const endDate = moment(newValues?.endDate)
+    //   const diff = endDate.diff(startDate, "days");
 
-      newValues.finalPrice = diff !== 0
-        ? newValues.price * diff * newValues.qty
-        : newValues.price * newValues.qty
+    //   newValues.finalPrice = diff !== 0
+    //     ? newValues.price * diff * newValues.qty
+    //     : newValues.price * newValues.qty
 
-    }
+    // }
 
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/updateOne`, newValues)
       .then(() => {
@@ -1374,10 +1372,9 @@ const RentalManagementDetailsPage = () => {
                   rentalManagementId={id}
                   productInventory={[
                     ...productInventory,
-                    ...serializeAssets.map(d => ({
-                      ...d,
-                      detail: `${d.assetNumber} ${d.serialNumber ? `- ${d.serialNumber}` : ""}`
-                    }))]}
+                    ...serializeAssets
+                  ]}
+                  fetchProductsData={fetchProductInventory}
                   isSmallScreen={isSmallScreen}
                   isTabletScreen={isTabletScreen}
                   showActivity={showActivity}

@@ -18,7 +18,7 @@ import moment from "moment";
 import MaterialTableComponent from "../../components/Shared/MaterialTableComponent";
 
 
-const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId, isTabletScreen,
+const SerializedAssetStep = ({ productInventory, currentStep, fetchProductsData, rentalManagementId, isTabletScreen,
   isSmallScreen,
   showActivity, currencySymbol }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -173,7 +173,7 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
       field: 'qty',
       title: 'Quantity',
       emptyValue: '- - - - -',
-      cellStyle: { padding: "0px" },
+      cellStyle: { padding: "0px 4px" },
       render: (rowData) => (
         <div style={{ width: 80 }}>
           <p>{rowData.qty}</p>
@@ -204,7 +204,7 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
     },
     {
       field: 'price',
-      title: `Price + (${currencySymbol})`,
+      title: `Price (${currencySymbol})`,
       emptyValue: '- - - - -',
       cellStyle: { padding: "0px" },
       render: (rowData) => (
@@ -226,7 +226,7 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
     },
     {
       field: 'finalPrice',
-      title: `Final Price + (${currencySymbol})`,
+      title: `Final Price (${currencySymbol})`,
       emptyValue: '- - - - -',
       cellStyle: { padding: "0px" },
       render: (rowData) => (
@@ -271,11 +271,26 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
   // }
 
   const handleAddSerializedAsset = (productInventoryArray) => {
-    let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id } })
+    console.log(productInventoryArray)
+    let tempProductArray = [];
+    let product = selectedProducts[0]
+    productInventoryArray.forEach(d => {
+      let obj: any = {};
+      obj.inventory = d._id;
+      if (product.type === "productInPackage") {
+        obj.product = product.id
+        obj.package = product.packageId
+      } else {
+        obj.product = product.id
+      }
+
+      tempProductArray.push(obj)
+    })
     axiosInstance().post(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`, { "products": tempProductArray })
       .then(({ data }) => {
         setAddSerializedAssetDialog(false)
-        // fetchSerializedAsset()
+        fetchProductsData()
+        setSelectedProducts([])
         toastConfig.setToastConfig({
           open: true,
           type: "success",
@@ -296,7 +311,7 @@ const SerializedAssetStep = ({ productInventory, currentStep, rentalManagementId
         color="primary"
         type="button"
         size="small"
-        disabled={(selectedProducts.length === 0)}
+        disabled={(selectedProducts.length !== 1)}
         onClick={() => {
           setAddSerializedAssetDialog(true)
         }}
