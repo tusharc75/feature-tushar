@@ -210,7 +210,7 @@ export default function CustomAgGrid({
           sortable={column.sortable ?? true}
           cellRenderer={column.cellRenderer ?? null}
           cellRendererParams={column.cellRendererParams ?? null}
-          minWidth={column.width ?? 250}
+          minWidth={column.width ?? 180}
           flex={1}
           rowDrag={column.rowDrag ?? false}
           hide={staticColumns.indexOf(column.field) >= 0 ? checkStaticField(renderedFrom, column.field) :
@@ -236,7 +236,7 @@ export default function CustomAgGrid({
           sortable={column.sortable ?? true}
           cellRenderer={column.cellRenderer ?? null}
           cellRendererParams={column.cellRendererParams ?? null}
-          minWidth={column.width ?? 250}
+          minWidth={column.width ?? 180}
           flex={1}
           filterParams={customFilterParams}
           hide={(column.hasOwnProperty("show") && !column?.show) ? true : false}
