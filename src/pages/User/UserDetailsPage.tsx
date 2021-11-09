@@ -46,7 +46,7 @@ import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDia
 import RoleEngine from "../../components/Shared/RoleEngine";
 import NewStepper from "../../components/Helpers/NewStepper";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
-import { displayDate, isObjectEmpty, userType, defaultActivityShow } from "../../constants/helpers";
+import { displayDate, isObjectEmpty, userType, defaultActivityShow, dateFormatForInputControl } from "../../constants/helpers";
 import OpportunityAccordionInUserDetail from "./OpportunityAccordionInUserDetail";
 import LeadAccordionInUserDetailPage from "./LeadAccordionInUserDetailPage";
 import AccountAccordionDetail from "./AccountAccordionInDetail";
@@ -907,7 +907,7 @@ const UserDetailsPage = () => {
                             disableFuture
                             size="small"
                             openTo="year"
-                            format="dd/MM/yyyy"
+                            format={dateFormatForInputControl}
                             maxDate={trackingTime.between.to}
                             label="From"
                             views={['year', 'month', 'date']}
@@ -930,7 +930,7 @@ const UserDetailsPage = () => {
                             size="small"
                             minDate={trackingTime.between.from}
                             openTo="year"
-                            format="dd/MM/yyyy"
+                            format={dateFormatForInputControl}
                             label="To"
                             views={['year', 'month', 'date']}
                             value={trackingTime.between.to}

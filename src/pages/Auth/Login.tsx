@@ -18,6 +18,7 @@ import { SiMicrosoftoffice } from 'react-icons/si';
 import { SVG } from '../../assets';
 import { SET_GRID_METADATA } from "../../StateProvider/actionTypes"
 import { entity } from "../../constants/helpers"
+import axios from 'axios';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -102,10 +103,26 @@ const Login = () => {
 
     axiosInstance()
       .post('/user/login', data)
-      .then(({ data: response }) => {
+      .then(async ({ data: response }) => {
         setSubmitting(false);
         const { data } = response;
         localStorage.setItem('token', data.token);
+
+        localStorage.setItem("dateFormat", "MM/DD/YYYY")
+        localStorage.setItem("dateTimeFormat", "MM/DD/YYYY hh:mm A")
+        localStorage.setItem("cardDateFormat", "MMM,DD YYYY")
+
+        localStorage.setItem("dateFormatForInputControl", "MM/dd/yyyy")
+
+        await axios.get("http://ip-api.com/json").then(({ data }) => {
+          if (data?.countryCode === "US") {
+            localStorage.setItem("dateFormat", "DD/MM/YYYY")
+            localStorage.setItem("dateTimeFormat", "DD/MM/YYYY hh:mm A")
+            localStorage.setItem("cardDateFormat", "DDD,MM YYYY")
+
+            localStorage.setItem("dateFormatForInputControl", "dd/MM/yyyy")
+          }
+        });
 
         axiosInstance()
           .get(`${entityApi}`)

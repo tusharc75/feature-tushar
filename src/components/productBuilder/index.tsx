@@ -637,6 +637,7 @@ const ProductBuilder = (props) => {
                 setIsClone(true);
               }}
               fullHeight={true}
+              renderedFrom="productBuilderGrid"
             /> : ((columns && frameWorkComponent) ? <CustomAgGridEditable
               currency={currency}
               forProductBuilder={isPriceBuilder}

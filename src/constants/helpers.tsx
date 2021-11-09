@@ -635,11 +635,11 @@ export const initializeDropdownById = (field, fieldName, id) => {
 
   return field;
 };
-export const dateFormat = 'MM/DD/YYYY';
-export const dateTimeFormat = 'MM/DD/YYYY hh:mm A';
-export const cardDateFormat = 'MMM,DD YYYY';
+export const dateFormat = localStorage.getItem("dateFormat");
+export const dateTimeFormat = localStorage.getItem("dateTimeFormat");
+export const cardDateFormat = localStorage.getItem("cardDateFormat");
 
-export const dateFormatForInputControl = 'MM/dd/yyyy';
+export const dateFormatForInputControl = localStorage.getItem("dateFormatForInputControl");
 // export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
 // export const cardDateFormat = "MMM,dd yyyy"
 

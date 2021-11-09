@@ -24,6 +24,10 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { autoCalculateSpecificFields } from "../../constants/formulaUtility";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { FaDiceOne } from "react-icons/fa";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import { Collapse } from '@material-ui/core';
 
 var levalOrderBy = [
     "product",
@@ -52,6 +56,7 @@ const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handle
     const [isShowProductTemplate, setIsShowProductTemplate] = useState(false);
     const [fieldChanges, setFieldChanges] = useState([]);
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+    const [expanded, setExpanded] = useState({});
 
     useEffect(() => {
         const productData = productDataList[0]
@@ -134,6 +139,11 @@ const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handle
             return { name, sectionFields };
         });
         setProductFields(customData)
+        const _expanded = {}
+        customData.forEach((ele: any, index) => {
+            _expanded[index] = true;
+        })
+        setExpanded(_expanded)
     }
 
     const handleOpenAddField = (name) => {
@@ -249,6 +259,12 @@ const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handle
         setFieldChanges(_fieldChanges)
     }
 
+    const handleExpand = (index) => {
+        const temp = { ...expanded };
+        temp[index] = !temp[index]
+        setExpanded(temp)
+    }
+
 
     return (<Dialog
         maxWidth="md"
@@ -286,93 +302,102 @@ const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handle
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
                                     {productFields && productFields.map((section, i) => (
                                         <div key={i}>
-                                            <h2 className="form-label-style">{section.name}
-                                                <span style={{ float: "right", marginTop: "-10px" }}>
-                                                    <IconButton color="primary" size="small" onClick={() => handleOpenAddField(section.name)} >
-                                                        <ControlPointIcon />
+                                            <div className={"detail-box-content detail-product-box"}>
+                                                <div className={"product-form-layout"}>
+                                                    <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                                                    <h2 className={`${"form-label-style"} ${"form-label-product"}`} >
+                                                        {section.name}
+                                                    </h2>
+                                                    <IconButton className="p-0" style={{ marginTop: "-5px", color: "white" }} size="small" onClick={() => handleExpand(i)} >
+                                                        {expanded[i] ? <ExpandLess fontSize="medium" style={{ paddingTop: "5px", color: "white" }} /> : <ExpandMoreIcon fontSize="medium" style={{ paddingTop: "5px", color: "white" }} />}
                                                     </IconButton>
-                                                </span>
-                                            </h2>
+                                                </div>
+                                                <IconButton style={{ padding: "0px", marginTop: "-5px" }} color="primary" size="small" onClick={(e) => handleOpenAddField(section.name)} >
+                                                    <ControlPointIcon style={{ paddingTop: "2px", color: "white" }} />
+                                                </IconButton>
+                                            </div>
                                             <Box marginY={2}>
-                                                <Grid spacing={3} container>
-                                                    {section.sectionFields && section.sectionFields.map((field) => (
-                                                        field.fieldName === "priceTemplate" && !isShowProductTemplate ?
-                                                            <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                                <FormControlLabel
-                                                                    control={
-                                                                        <Checkbox
-                                                                            checked={isShowProductTemplate}
-                                                                            onChange={() => setIsShowProductTemplate(true)}
-                                                                            name="isShowProductTemplate"
-                                                                            color="primary"
-                                                                        />
-                                                                    }
-                                                                    label="Show Product Template"
-                                                                />
-                                                            </Grid> : field.type === "converter" || field.type === "currencyAmount" ?
-                                                                <FormTypes
-                                                                    style={{ background: field?.isUneditable ? "#EBEBE4" : field?.isFormulaColor ? "#1e768221" : "" }}
-                                                                    fields={initialData.fields}
-                                                                    fieldData={field}
-                                                                    values={values}
-                                                                    errors={errors}
-                                                                    touched={touched}
-                                                                    label={field.fieldLabel + (field.isUneditable ? " (Auto Calculated Field)" : "")}
-                                                                    name={field.fieldName}
-                                                                    type={field.type}
-                                                                    options={field.option}
-                                                                    setFieldValue={setFieldValue}
-                                                                    required={field.required}
-                                                                    fullWidth
-                                                                    isTooltip={field.isTooltip}
-                                                                    tooltipMessage={field.tooltipMessage}
-                                                                    doNotShowInfoTooltip={true}
-                                                                    decimalPlaces={field.decimalPlaces}
-                                                                    isvlookupReverse={field.isvlookupReverse}
-                                                                    size="small"
-                                                                    addDisplayType={addDisplayType}
-                                                                    removeDisplayType={removeDisplayType}
-                                                                /> :
+                                                <Collapse in={expanded[i]} timeout="auto" unmountOnExit>
+                                                    <Grid spacing={3} container>
+                                                        {section.sectionFields && section.sectionFields.map((field) => (
+                                                            field.fieldName === "priceTemplate" && !isShowProductTemplate ?
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                                    <Box display="flex" >
-                                                                        <Box flexGrow={1}  >
-                                                                            <FormTypes
-                                                                                style={{ background: field?.isUneditable ? "#EBEBE4" : field?.isFormulaColor ? "#1e768221" : "" }}
-                                                                                fields={initialData.fields}
-                                                                                fieldData={field}
-                                                                                values={values}
-                                                                                errors={errors}
-                                                                                touched={touched}
-                                                                                label={field.fieldLabel + (field.isUneditable ? " (Auto Calculated Field)" : "")}
-                                                                                name={field.fieldName}
-                                                                                type={field.type}
-                                                                                options={field.option}
-                                                                                setFieldValue={setFieldValue}
-                                                                                required={field.required}
-                                                                                fullWidth
-                                                                                isTooltip={field.isTooltip}
-                                                                                tooltipMessage={field.tooltipMessage}
-                                                                                decimalPlaces={field.decimalPlaces}
-                                                                                isvlookupReverse={field.isvlookupReverse}
-                                                                                size="small"
-                                                                                disabled={['productCategory', 'priceTemplate'].includes(field.fieldName) ? true : false}
-                                                                                imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
-                                                                                    setUploadingImageOrFileProgress(completePercentage);
-                                                                                } : null}
+                                                                    <FormControlLabel
+                                                                        control={
+                                                                            <Checkbox
+                                                                                checked={isShowProductTemplate}
+                                                                                onChange={() => setIsShowProductTemplate(true)}
+                                                                                name="isShowProductTemplate"
+                                                                                color="primary"
                                                                             />
+                                                                        }
+                                                                        label="Show Product Template"
+                                                                    />
+                                                                </Grid> : field.type === "converter" || field.type === "currencyAmount" ?
+                                                                    <FormTypes
+                                                                        style={{ background: field?.isUneditable ? "#EBEBE4" : field?.isFormulaColor ? "#1e768221" : "" }}
+                                                                        fields={initialData.fields}
+                                                                        fieldData={field}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel + (field.isUneditable ? " (Auto Calculated Field)" : "")}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={setFieldValue}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field.isTooltip}
+                                                                        tooltipMessage={field.tooltipMessage}
+                                                                        doNotShowInfoTooltip={true}
+                                                                        decimalPlaces={field.decimalPlaces}
+                                                                        isvlookupReverse={field.isvlookupReverse}
+                                                                        size="small"
+                                                                        addDisplayType={addDisplayType}
+                                                                        removeDisplayType={removeDisplayType}
+                                                                    /> :
+                                                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                        <Box display="flex" >
+                                                                            <Box flexGrow={1}  >
+                                                                                <FormTypes
+                                                                                    style={{ background: field?.isUneditable ? "#EBEBE4" : field?.isFormulaColor ? "#1e768221" : "" }}
+                                                                                    fields={initialData.fields}
+                                                                                    fieldData={field}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel + (field.isUneditable ? " (Auto Calculated Field)" : "")}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    setFieldValue={setFieldValue}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field.isTooltip}
+                                                                                    tooltipMessage={field.tooltipMessage}
+                                                                                    decimalPlaces={field.decimalPlaces}
+                                                                                    isvlookupReverse={field.isvlookupReverse}
+                                                                                    size="small"
+                                                                                    disabled={['productCategory', 'priceTemplate'].includes(field.fieldName) ? true : false}
+                                                                                    imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                                                                        setUploadingImageOrFileProgress(completePercentage);
+                                                                                    } : null}
+                                                                                />
+                                                                            </Box>
+                                                                            {(field.leval === "product-builder-custom" || field.leval === "price-builder-custom") &&
+                                                                                <Box>
+                                                                                    <Tooltip title="Remove" className="mt-1">
+                                                                                        <IconButton onClick={() => handleRemoveField(field)} color="primary" size="small"  >
+                                                                                            <HighlightOffIcon color="error" />
+                                                                                        </IconButton>
+                                                                                    </Tooltip>
+                                                                                </Box>}
                                                                         </Box>
-                                                                        {(field.leval === "product-builder-custom" || field.leval === "price-builder-custom") &&
-                                                                            <Box>
-                                                                                <Tooltip title="Remove" className="mt-1">
-                                                                                    <IconButton onClick={() => handleRemoveField(field)} color="primary" size="small"  >
-                                                                                        <HighlightOffIcon color="error" />
-                                                                                    </IconButton>
-                                                                                </Tooltip>
-                                                                            </Box>}
-                                                                    </Box>
-                                                                </Grid>
-                                                    ))}
-                                                </Grid>
+                                                                    </Grid>
+                                                        ))}
+                                                    </Grid>
+                                                </Collapse>
                                             </Box>
                                         </div>
                                     ))}
