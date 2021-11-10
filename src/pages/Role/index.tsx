@@ -447,6 +447,7 @@ const Roles: FC = () => {
             dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
             loading={loading}
             refreshGrid={fetchRoles}
+            renderedFrom={routes.role.title}
           />
 
         </CustomContainer>

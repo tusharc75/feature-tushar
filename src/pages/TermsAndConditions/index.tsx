@@ -288,6 +288,7 @@ export default function TermsAndCondition(props) {
                     actionWidth={150}
                     loading={loading}
                     refreshGrid={fetchTermsAndConditions}
+                    renderedFrom={routes.termsAndConditions.title}
                 />
 
                 {
