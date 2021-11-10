@@ -605,6 +605,14 @@ const ProductBuilder = (props) => {
               rowCount={rowCount}
               page={page}
               loading={loading}
+              checkError={(data) => {
+                if (isPriceBuilder) {
+                  const tsp = data[`totalSalesPrice_${currency}`] || 0;
+                  const qty = data.qty;
+                  return qty === 0 || tsp === 0;
+                }
+                return false;
+              }}
               chips={
                 dataToShowForMobile ? dataToShowForMobile.some(f => f.editable === true) ? [...dataToShowForMobile.filter(f => f.editable === true).map(m => {
                   return {
@@ -628,6 +636,8 @@ const ProductBuilder = (props) => {
                 openProductModel(data._id)
                 setIsClone(true);
               }}
+              fullHeight={true}
+              renderedFrom="productBuilderGrid"
             /> : ((columns && frameWorkComponent) ? <CustomAgGridEditable
               currency={currency}
               forProductBuilder={isPriceBuilder}
