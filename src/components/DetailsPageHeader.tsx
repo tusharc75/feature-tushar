@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "#378280",
     opacity: "0.95",
     border: "#03232e",
-    display:"flex",
+    display: "flex",
     [theme.breakpoints.down("xs")]: {
       borderRadius: "4px",
       boxShadow: "2px 2px 4px #747474",
@@ -40,12 +40,12 @@ const useStyles = makeStyles((theme) => ({
       padding: "4px 6px"
     },
   },
-  lineAddStyle:{
-    width:"2px",
-    backgroundColor:"white",
-    paddingRight:"5px",
-    margin:"5px 7px",
-    borderRadius:"2px"
+  lineAddStyle: {
+    width: "2px",
+    backgroundColor: "white",
+    paddingRight: "5px",
+    margin: "5px 7px",
+    borderRadius: "2px"
   },
   labelColor: {
     color: "#fff",
@@ -78,30 +78,29 @@ const DetailsPageHeader = (props) => {
             ) : showHeading ? (
               <>
                 <Grid className={"mobileHeading"}>
-                <Typography
-                  className="text-capitalize"
-                  style={{ display: "inline-block" }}
-                  variant="h6"
-                  component="h2"
-                  color="primary"
-                  id="detailHeaderPageTitle"
-                >
-                  <span className="d-flex align-items-center"><span className="listingHeader">{heading}
-                  </span>
-
-                    {
-                      isApproved && <Tooltip title="Approved"><FcApproval title="Approved" size={20} /></Tooltip>
-                    }
-                    {
-                      leadStatus ?
-                        <>
-                          {leadStatus === "Qualified" ? <FiCheckCircle title={leadStatus} className={classes.qualified} color="green" /> :
-                            leadStatus === "Unqualified" ? <AiOutlineCloseCircle title={leadStatus} className={classes.unQulified} /> : ""}
-                        </>
-                        : null
-                    }
-                  </span>
-                </Typography>
+                  <Typography
+                    className="text-capitalize"
+                    style={{ display: "inline-block" }}
+                    variant="h6"
+                    component="h2"
+                    color="primary"
+                    id="detailHeaderPageTitle"
+                  >
+                    <span className="d-flex align-items-center">
+                      <span className="listingHeader"> {heading}</span>
+                      {
+                        isApproved && <Tooltip title="Approved"><FcApproval title="Approved" size={20} /></Tooltip>
+                      }
+                      {
+                        leadStatus ?
+                          <>
+                            {leadStatus === "Qualified" ? <FiCheckCircle title={leadStatus} className={classes.qualified} color="green" /> :
+                              leadStatus === "Unqualified" ? <AiOutlineCloseCircle title={leadStatus} className={classes.unQulified} /> : ""}
+                          </>
+                          : null
+                      }
+                    </span>
+                  </Typography>
                 </Grid>
               </>
             ) : null}
@@ -156,22 +155,22 @@ const DetailsPageHeader = (props) => {
                         <Box className={classes.box}>
                           <div className={classes.lineAddStyle}> </div>
                           <div>
-                          <Typography
-                            align="left"
-                            variant="subtitle1"
-                            style={{ opacity: 0.9, fontSize:"0.8rem", lineHeight:"20px" }}
-                            className={`text-capitalize ${classes.labelColor}`}
-                          >
-                            {key}
-                          </Typography>
-                          <Typography
-                            align="center"
-                            className={`text-truncate ${classes.labelColor}`}
-                            style={{ fontWeight: 500 }}
-                          >
-                            {mainPoints[key] || ""}
-                            {["email", "phone"].indexOf(key.toLocaleLowerCase()) >= 0 ? <CopyToClipboard textToCopy={mainPoints[key]} style={{ color: isMobile || isTablet ? "#010c02" : "white" }} /> : null}
-                          </Typography>
+                            <Typography
+                              align="left"
+                              variant="subtitle1"
+                              style={{ opacity: 0.9, fontSize: "0.8rem", lineHeight: "20px" }}
+                              className={`text-capitalize ${classes.labelColor}`}
+                            >
+                              {key}
+                            </Typography>
+                            <Typography
+                              align="center"
+                              className={`text-truncate ${classes.labelColor}`}
+                              style={{ fontWeight: 500 }}
+                            >
+                              {mainPoints[key] || ""}
+                              {["email", "phone"].indexOf(key.toLocaleLowerCase()) >= 0 ? <CopyToClipboard textToCopy={mainPoints[key]} style={{ color: isMobile || isTablet ? "#010c02" : "white" }} /> : null}
+                            </Typography>
                           </div>
                         </Box>
                       )) : null}
@@ -189,7 +188,7 @@ DetailsPageHeader.propTypes = {
   total: PropTypes.any,
   active: PropTypes.any,
   inactive: PropTypes.any,
-  heading: PropTypes.string.isRequired,
+  heading: PropTypes.any,
   children: PropTypes.node,
   loading: PropTypes.any,
   logo: PropTypes.any,

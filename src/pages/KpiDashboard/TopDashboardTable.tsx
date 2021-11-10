@@ -95,7 +95,7 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates 
         doc.setFontSize(16);
         doc.text(`Sales Data By Region`, 70, 10);
 
-        let col = ['Region', 'Total Booked Value'];
+        let col = ['Region', 'Total Offered Value'];
         let row = [];
 
         if (regionSales && regionSales.length) {

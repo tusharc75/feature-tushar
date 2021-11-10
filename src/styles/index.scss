@@ -173,6 +173,11 @@ a {
   cursor: pointer !important;
 }
 
+.underlined:hover{
+  text-decoration: underline !important;
+  cursor: pointer !important;
+}
+
 .text-truncate {
   overflow: hidden;
   text-overflow: ellipsis;
