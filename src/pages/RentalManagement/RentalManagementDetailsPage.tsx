@@ -478,12 +478,6 @@ const RentalManagementDetailsPage = () => {
                 qty: productData.qty,
                 UOM: pkg?.UOM,
                 pricingMethod: pkg?.pricingMethod,
-                price: pkg.price && pkg.price !== 0 && 0,
-                finalPrice: parseInt(product?.mrp) && qty
-                  ? parseInt(product.mrp) * qty
-                  : parseInt(product.mrp)
-                    ? parseInt(product.mrp)
-                    : 0,
                 discount: product.discount ? product.discount : 0,
               }
 
