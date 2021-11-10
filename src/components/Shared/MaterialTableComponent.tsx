@@ -130,7 +130,7 @@ const MaterialTableComponent: FC<TableProps> = (props) => {
           editCellStyle: {
             borderBottomWidth: 0
           },
-          selectionProps,
+          selectionProps
         }}
         title={title}
         icons={materialTableIcons}
