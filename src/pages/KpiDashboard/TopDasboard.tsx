@@ -294,7 +294,7 @@ const TopDashboard = (props) => {
                     <Grid item xs={9} sm={9} md={10} className="pull-left">
                       {!loadingChart ? (
                         <Typography variant="h5" className={styles.price}>
-                          {salesRevenue?.profitValue}({salesRevenue.profit}%)
+                          {salesRevenue?.profitValue ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue?.profitValue).fullFormatAmount : 0}({salesRevenue.profit}%)
                         </Typography>
                       ) : (
                         <Skeleton variant="text" width={200} height={40} />
