@@ -28,7 +28,7 @@ const CreateSerializedAsset = (props) => {
     const handleCreateSerializedAsset = (values) => {
         let tempArray = values.map(u => ({
             PurchaseOrderId: purchaseOrderID,
-            productMaster: u.product?.productId?._id,
+            productMaster: u.product?._id,
             wareHouse: u.warehouse?._id,
             quantity: parseInt(u?.quantity)
         }))
@@ -40,6 +40,32 @@ const CreateSerializedAsset = (props) => {
                 type: 'success',
                 message: data.message
             });
+
+            values.map(d => {
+                let tempProductArray = {
+                    "qty": parseInt(d.row?.quantity || d.row?.qty) || 0,
+                    "value": parseInt(d.row?.price || d.row?.value) || 0,
+                    "expectedDelivery": d.row?.expectedDelivery || "",
+                    "uom": d.row?.uom || "",
+                    "price": d.row?.price || 0,
+                    "finalPrice": d.row?.finalPrice || 0,
+                    "actualReceived": d.quantity || 0,
+                    "billed": d.row?.billed || 0,
+                    "taxSchedule": d.row?.taxSchedule || "",
+                    "tax": d.row?.tax || 0,
+                    "taxPerUnit": d.row?.taxPerUnit || 0,
+                    "totalTax": d.row?.totalTax || 0
+                }
+
+                axiosInstance().post(`${purchaseOrder.api}/${purchaseOrderID}/order-details/update?orderId=${d.row?._id}`, tempProductArray)
+                    .then(() => {
+
+                    }).catch((error) => {
+                        toastConfig.setToastConfig(error)
+                    });
+
+            })
+
             onSuccess()
         }).catch((error) => {
             toastConfig.setToastConfig(error)
@@ -52,7 +78,7 @@ const CreateSerializedAsset = (props) => {
         <Dialog open fullWidth maxWidth="md" onClose={onClose}>
             <CustomDialogHeader title={title} onClose={onClose} />
             <Formik
-                initialValues={{ seriaizedAsset: [{ "product": "", "warehouse": "", "quantity": 0 }] }}
+                initialValues={{ seriaizedAsset: productList.map(d => ({ "product": d.productId, "warehouse": "", "quantity": d.quantity - d.actualReceived, "row": d })) }}
                 enableReinitialize={true}
                 onSubmit={() => { }}>
                 {({ values }) => (
@@ -94,7 +120,7 @@ const CreateSerializedAsset = (props) => {
                                                             name="seriaizedAsset"
                                                             render={arrayHelpers => (
                                                                 <div>
-                                                                    {values.seriaizedAsset && values.seriaizedAsset.length > 0 ? (
+                                                                    {values.seriaizedAsset && values.seriaizedAsset.length > 0 && (
                                                                         values.seriaizedAsset.map((userVal, index) => (
                                                                             <Grid
                                                                                 container
@@ -112,6 +138,7 @@ const CreateSerializedAsset = (props) => {
                                                                                         style={{ minWidth: 200 }}
                                                                                         value={userVal.product}
                                                                                         options={productList}
+                                                                                        disabled
                                                                                         getOptionLabel={(option: any) => option ? option.productName : ""}
                                                                                         onChange={(_, newValue) => {
                                                                                             arrayHelpers.replace(index, {
@@ -135,7 +162,7 @@ const CreateSerializedAsset = (props) => {
                                                                                             style={{ minWidth: 200 }}
                                                                                             value={userVal.warehouse}
                                                                                             options={wareHouseList}
-                                                                                            getOptionLabel={(option: any) => option ? option.warehouseName : ""}
+                                                                                            getOptionLabel={(option: any) => option ? option?.warehouseID || option?.warehouseName : ""}
                                                                                             onChange={(_, newValue) => {
                                                                                                 arrayHelpers.replace(index, {
                                                                                                     ...values.seriaizedAsset[index],
@@ -143,11 +170,13 @@ const CreateSerializedAsset = (props) => {
                                                                                                 });
                                                                                             }}
 
+
                                                                                             renderInput={(params) => <TextField
                                                                                                 {...params}
                                                                                                 variant="outlined"
                                                                                                 name="plants"
                                                                                                 label="Plants"
+                                                                                                required
                                                                                             />}
                                                                                         />
                                                                                     </Grid>
@@ -157,7 +186,7 @@ const CreateSerializedAsset = (props) => {
                                                                                     <Field
                                                                                         fullWidth
                                                                                         variant="outlined"
-                                                                                        type="text"
+                                                                                        type="number"
                                                                                         size="small"
                                                                                         component={TextField}
                                                                                         name="quantity"
@@ -171,39 +200,8 @@ const CreateSerializedAsset = (props) => {
                                                                                         }}
                                                                                     />
                                                                                 </Grid>
-                                                                                <Grid item md={1}>
-                                                                                    <ButtonGroup size="small" aria-label="small outlined button group">
-                                                                                        <IconButton
-                                                                                            size="small"
-                                                                                            aria-label="add"
-                                                                                            onClick={() => {
-                                                                                                arrayHelpers.push({
-                                                                                                    "product": "", "warehouse": "", "quantity": 0
-                                                                                                })
-                                                                                            }
-                                                                                            } >
-                                                                                            <Add />
-                                                                                        </IconButton>
-                                                                                        <IconButton size="small" aria-label="delete" style={{ color: "#f44336" }} onClick={() => arrayHelpers.remove(index)} >
-                                                                                            <Delete />
-                                                                                        </IconButton>
-                                                                                    </ButtonGroup>
-                                                                                </Grid>
                                                                             </Grid>
                                                                         ))
-                                                                    ) : (
-                                                                        <Grid item md={12} className="d-flex  align-items-center justify-content-center">
-                                                                            <Button
-                                                                                variant="contained"
-                                                                                color="primary"
-                                                                                size="large"
-                                                                                onClick={() => {
-                                                                                    arrayHelpers.push({ "product": "", "warehouse": "", "quantity": 0 })
-                                                                                }}
-                                                                            >
-                                                                                Add Product
-                                                                            </Button>
-                                                                        </Grid>
                                                                     )}
                                                                 </div>
                                                             )}
