@@ -19,7 +19,7 @@ import MaterialTableComponent from "../../components/Shared/MaterialTableCompone
 import { startCase } from "lodash";
 
 
-const SerializedAssetStep = ({ productInventory, currentStep, fetchProductsData, rentalManagementId, isTabletScreen,
+const SerializedAssetStep = ({ loading, productInventory, currentStep, fetchProductsData, rentalManagementId, isTabletScreen,
   isSmallScreen,
   showActivity, currencySymbol }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -28,11 +28,11 @@ const SerializedAssetStep = ({ productInventory, currentStep, fetchProductsData,
   const [assignedSerializedAsset, setAssignedSerializedAsset] = useState([]);
   const [state, dispatch] = useReducer(reducer, intialState);
   const [stateSerializedAssets, dispatchSerializedAssets] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
-  const { dataRows: dataRowsSerializedAssets, rowCount: rowCountSerializedAssets,
-    loading: loadingSerializedAssets, page: pageSerializedAssets,
-    limit: limitSerializedAssets, pageSizes: pageSizesSerializedAssets,
-    selectedRecords: selectedRecordsSerializedAssets } = stateSerializedAssets;
+  // const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  // const { dataRows: dataRowsSerializedAssets, rowCount: rowCountSerializedAssets,
+  //   loading: loadingSerializedAssets, page: pageSerializedAssets,
+  //   limit: limitSerializedAssets, pageSizes: pageSizesSerializedAssets,
+  //   selectedRecords: selectedRecordsSerializedAssets } = stateSerializedAssets;
   const [downlodingFile, setDownlodingFile] = useState(false)
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState([])
