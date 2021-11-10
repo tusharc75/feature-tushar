@@ -92,7 +92,22 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
           const priceData = await calculatePrice([values])
           if (priceData && priceData.length) {
             setPricing(priceData[0])
-            handleChange("price", priceData[0].mrp)
+            let price = priceData[0].mrp
+            let qty = priceData[0].qty
+
+            handleChange("price", price)
+
+            const startDate = moment(values?.startDate)
+            const endDate = moment(values?.endDate)
+            const diff = endDate.diff(startDate, "days");
+
+            let finalPrice = qty && price
+              ? values?.pricingMethod === "perDay" && diff !== 0
+                ? qty * price * diff
+                : qty * price
+              : price;
+
+            handleChange("finalPrice", finalPrice <= 0 ? 0 : finalPrice)
           }
         }, 1000)
 
