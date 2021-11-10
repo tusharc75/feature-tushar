@@ -50,8 +50,8 @@ import AddIcon from "@material-ui/icons/Add"
 import { isMobile, isTablet } from 'react-device-detect';
 import { quoteStepColors } from '../../constants/helpers';
 import InfiniteScroll from "react-infinite-scroll-component";
-import {MdAccountCircle} from "react-icons/md";
-import {AiFillCrown} from "react-icons/all";
+import { MdAccountCircle } from "react-icons/md";
+import { AiFillCrown } from "react-icons/all";
 
 let quoteTimeout;
 const QuoteType = [

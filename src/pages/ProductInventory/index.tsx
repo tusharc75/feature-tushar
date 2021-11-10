@@ -57,7 +57,7 @@ const ProductInventory = () => {
 
     useEffect(() => {
         fetchProductInventory()
-    }, [page, limit, filters, sorting, search, warehouse]);
+    }, [page, limit, filters, sorting, search, warehouse, redirectProduct]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -116,9 +116,19 @@ const ProductInventory = () => {
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
 
-        if (warehouse?.optionValue && redirectProduct?.id) {
-            deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "warehouse", term: warehouse?.optionValue }, { field: "product", term: redirectProduct?.id }])}`
+        let filterById = [];
+
+        if (warehouse?.optionValue) {
+            filterById.push({ field: "warehouse", term: warehouse?.optionValue });
         }
+        if (redirectProduct?.id) {
+            filterById.push({ field: "product", term: redirectProduct?.id });
+        }
+
+        if (filterById.length > 0) {
+            deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
+        }
+
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
@@ -128,7 +138,7 @@ const ProductInventory = () => {
                     term: filters[field].filter
                 })
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}`
         }
 
         if (sorting.length > 0) {
@@ -139,7 +149,7 @@ const ProductInventory = () => {
             deepFilter = `${deepFilter}&search=${search}`;
         }
 
-        return deepFilter;
+        return `${deepFilter}&filterType=and`;
     };
 
     const handleDelete = () => {
@@ -251,7 +261,6 @@ const ProductInventory = () => {
                                 color="primary"
                                 label={`Plants : ${warehouse.optionLabel}`}
                                 onDelete={() => {
-                                    setRedirectProduct(null);
                                     setWarehouse(null);
                                 }}
                             />
@@ -262,7 +271,6 @@ const ProductInventory = () => {
                                 color="primary"
                                 label={`Product : ${redirectProduct.name}`}
                                 onDelete={() => {
-                                    setWarehouse(null);
                                     setRedirectProduct(null);
                                 }}
                             />

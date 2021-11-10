@@ -46,7 +46,7 @@ const RepairJobDetails = () => {
     let mainPoint = {};
     mainPoint['Repair Job Name'] = data?.repairJobName || '';
     mainPoint['Status'] = data?.status || '';
-    mainPoint['Repair Person'] = data?.repairPerson.optionLabel || '';
+    mainPoint['Repair Person'] = data?.repairPerson?.optionLabel || '';
     setMainPoints(mainPoint);
   };
 
