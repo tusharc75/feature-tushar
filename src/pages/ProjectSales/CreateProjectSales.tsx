@@ -33,7 +33,8 @@ interface InitialData {
   values: object;
 }
 
-const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = null, projectSalesId = null, fields = null, onSuccess = null }) => {
+const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = null, projectSalesId = null, fields = null,
+  onSuccess = null, accountId = null, resource = null }) => {
   const {
     state: {
       user: { user }, permissions
@@ -85,7 +86,15 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
 
         const filterData = projectSalesId
           ? data.filter((d) => d.isUpdate)
-          : data.filter((d) => d.isCreate);
+          : data.filter((d) => {
+            if (accountId && ["customerAccountName", "supplierAccountName"].some(
+              (_f) => _f === d.fieldData.fieldName
+            )
+            ) {
+              d = initializeDropdownById(d, d.fieldData.fieldName, accountId);
+            }
+            return d.isCreate
+          });
 
 
         // const fieldsData = projectSalesId ?
@@ -205,7 +214,7 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
         .then(({ data }) => {
           console.log('data', data?.data)
           if (onSuccess) {
-            onSuccess(data?.data)
+            onSuccess(data)
           }
           const newId = data.data?._id;
           setSubmitting(false);

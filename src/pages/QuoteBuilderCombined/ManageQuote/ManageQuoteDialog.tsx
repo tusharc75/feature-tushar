@@ -671,7 +671,6 @@ export default function ManageQuoteDialog({
       ];
 
       setOpportunityMainDataSource(entityFields[projectSalesFieldIndex].option);
-
       setProjectSalesDataSource((prevState) => [...prevState, newProjectSales]);
     }
 
@@ -1077,6 +1076,7 @@ export default function ManageQuoteDialog({
                                         {field?.tooltipMessage ? (
                                           <Grid item xs={1} sm={1} md={1}>
                                             <Tooltip
+                                              style={{ marginTop: "2px" }}
                                               title={
                                                 field?.tooltipMessage ?? ""
                                               }
@@ -1902,6 +1902,7 @@ export default function ManageQuoteDialog({
 
                         setFieldValue("customerAccountName", data._id);
                         setFieldValue("customerContactName", "");
+                        onProjectSalesDropDownOpen(data._id)
                       }}
                       isRedirectToDetailPage={false}
                     />
@@ -1959,6 +1960,28 @@ export default function ManageQuoteDialog({
                       }
                     />
                   )}
+                  {showAddProjectSalesDialog && (
+                    <CreateProjectSales
+                      open={showAddProjectSalesDialog}
+                      isClone={false}
+                      projectSalesId={null}
+                      close={() => {
+                        setShowAddProjectSalesDialog(false)
+                      }}
+                      onSuccess={({ data }) => {
+                        setShowAddProjectSalesDialog(false)
+                        updateProjectSalesDropdown(data);
+                        setFieldValue("projectSales", data._id);
+                      }}
+                      accountId={
+                        values["customerAccountName"]
+                          ? values["customerAccountName"]
+                          : accountId
+                      }
+                      resource={accountResource}
+                      fetchData={null}
+                    />
+                  )}
                 </CustomDialogContent>
 
                 <CustomDialogFooter>
@@ -2009,23 +2032,7 @@ export default function ManageQuoteDialog({
                       }}
                     /> : null
                 }
-                {showAddProjectSalesDialog && (
-                  <CreateProjectSales
-                    open={showAddProjectSalesDialog}
-                    isClone={false}
-                    projectSalesId={null}
-                    close={() => {
-                      setShowAddProjectSalesDialog(false)
-                    }}
-                    onSuccess={({ data }) => {
-                      setShowAddProjectSalesDialog(false)
-                      setNewAddedProjectSalesId(data._id);
-                      updateProjectSalesDropdown(data);
-                      setFieldValue("projectSales", data._id);
-                    }}
-                    fetchData={null}
-                  />
-                )}
+
               </>
             )}
           </Formik>
