@@ -195,7 +195,6 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
                             routes[`${joinedFieldName}Detail`]?.path ? routes[`${joinedFieldName}Detail`]?.path : ""
 
             }
-
             return {
                 columnData: {
                     ...commonFieldData,
@@ -222,7 +221,8 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
                 columnData: {
                     ...commonFieldData,
                     filter: false, sortable: false,
-                    cellRenderer: 'imageRenderer'
+                    cellRenderer: 'imageRenderer',
+                    width: 100
                 },
                 rendererName: 'imageRenderer'
             }
