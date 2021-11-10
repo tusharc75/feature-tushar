@@ -131,9 +131,9 @@ const RentalManagementDetailsPage = () => {
     // eslint-disable-next-line
   }, [currentStep]);
 
-  useEffect(() => {
-    updateStatus()
-  }, [currentStep, productInventory])
+  // useEffect(() => {
+  //   updateStatus()
+  // }, [currentStep, productInventory])
 
   useEffect(() => {
     if (isSmallScreen) {
@@ -188,43 +188,43 @@ const RentalManagementDetailsPage = () => {
 
   };
 
-  const updateStatus = () => {
-    if (productInventory.length > 0 && rentalManagementData) {
-      const leftItems = [];
-      for (const product of productInventory) {
-        if (!product.deliveryTicket) {
-          leftItems.push(product.id)
-        }
-      }
+  // const updateStatus = () => {
+  //   if (productInventory.length > 0 && rentalManagementData) {
+  //     const leftItems = [];
+  //     for (const product of productInventory) {
+  //       if (!product.deliveryTicket) {
+  //         leftItems.push(product.id)
+  //       }
+  //     }
 
-      if (currentStep === 4 && leftItems.length === 0 && rentalManagementData) {
-        if (rentalManagementData.status === "New") {
-          const tempUpdateData = {
-            "_id": rentalManagementData._id,
-            "rentalJobName": rentalManagementData.rentalJobName,
-            "rentalJobID": rentalManagementData.rentalJobID,
-            "customerAccount": rentalManagementData.customerAccount?.optionValue,
-            "customerContact": rentalManagementData.customerContact?.optionValue,
-            "shippingAddress": rentalManagementData.shippingAddress,
-            "currency": rentalManagementData.currency,
-            "rentalStartDate": rentalManagementData.rentalStartDate,
-            "rentalEndDate": rentalManagementData.rentalEndDate,
-            "jobDescription": rentalManagementData.jobDescription,
-            "status": "Ready to Ship",
-            "owner": rentalManagementData.owner.optionValue,
-            // "collaborator": rentalManagementData.collaborator,
+  //     if (currentStep === 4 && leftItems.length === 0 && rentalManagementData) {
+  //       if (rentalManagementData.status === "New") {
+  //         const tempUpdateData = {
+  //           "_id": rentalManagementData._id,
+  //           "rentalJobName": rentalManagementData.rentalJobName,
+  //           "rentalJobID": rentalManagementData.rentalJobID,
+  //           "customerAccount": rentalManagementData.customerAccount?.optionValue,
+  //           "customerContact": rentalManagementData.customerContact?.optionValue,
+  //           "shippingAddress": rentalManagementData.shippingAddress,
+  //           "currency": rentalManagementData.currency,
+  //           "rentalStartDate": rentalManagementData.rentalStartDate,
+  //           "rentalEndDate": rentalManagementData.rentalEndDate,
+  //           "jobDescription": rentalManagementData.jobDescription,
+  //           "status": "Ready to Ship",
+  //           "owner": rentalManagementData.owner.optionValue,
+  //           // "collaborator": rentalManagementData.collaborator,
 
-          }
-          axiosInstance().put(`${rentalManagement.rentalManagementApi}`, tempUpdateData)
-            .then(() => {
-              fetchRentalManagementData()
-            }).catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        }
-      }
-    }
-  }
+  //         }
+  //         axiosInstance().put(`${rentalManagement.rentalManagementApi}`, tempUpdateData)
+  //           .then(() => {
+  //             fetchRentalManagementData()
+  //           }).catch((error) => {
+  //             toastConfig.setToastConfig(error);
+  //           });
+  //       }
+  //     }
+  //   }
+  // }
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
@@ -1378,9 +1378,11 @@ const RentalManagementDetailsPage = () => {
               )}
               {(currentStep === 3) && (
                 <DeliveryTicket
+                  fetchRentalData={fetchRentalManagementData}
+                  rentalManagementData={rentalManagementData}
                   rentalManagementId={id}
                   warehouselist={warehouseList}
-                  productInventory={productInventory}
+                  productInventory={serializeAssets}
                   currentStep={currentStep}
                   handleDeliveryTicketDialog={handleDeliveryTicketDialog}
                 />
