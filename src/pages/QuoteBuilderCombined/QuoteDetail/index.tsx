@@ -856,6 +856,19 @@ export default function QuoteDetail() {
                             </Button>
                           </MenuItem>
                         )}
+                        {allowedToEdit && (
+                          <MenuItem>
+                            <Button
+                              variant="text"
+                              color="primary"
+                              size="small"
+                              startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
+                              onClick={() => { setOpenUpdateDialog(true) }}
+                            >
+                              Edit Quote
+                            </Button>
+                          </MenuItem>
+                        )}
                       </Menu>
                     </>
                   </Grid>
