@@ -5,6 +5,8 @@ import {
     ListItemText,
     ListItemSecondaryAction,
 } from "@material-ui/core";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
 import { ControlPoint, ExpandLess, ExpandMore, InfoOutlined } from "@material-ui/icons";
 import { Skeleton, ToggleButtonGroup, ToggleButton } from "@material-ui/lab";
 import { useParams, useHistory, Link } from "react-router-dom";
@@ -36,6 +38,28 @@ import {
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 
+interface TabPanelProps {
+    children?: React.ReactNode;
+    index: any;
+    value: any;
+}
+
+function TabPanel(props: TabPanelProps) {
+    const { children, value, index, ...other } = props;
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`main-tabpanel-${index}`}
+            aria-labelledby={`main-tab-${index}`}
+            {...other}
+        >
+            {children}
+        </div>
+    );
+}
+
 const ProductDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
 
@@ -58,8 +82,9 @@ const ProductDetailsPage = () => {
     const [frequentlyBoughtProduct, setFrequentlyBoughtProduct] = useState([]);
     const [inventoriesData, setInventoriesData] = useState([]);
     const [BOMData, setBOMData] = useState([])
-    const [activeTable, setActiveTable] = useState("packages")
+    const [activeTable, setActiveTable] = useState("packages");
     const [productWarehouseData, setProductWarehouseData] = useState([]);
+    const [tabValue, setTabValue] = useState(0);
     const [selectedWarehouse, setSelectedWarehouse] = useState(null)
     const [openProductInventoryDialog, setOpenProductInventoryDialog] = useState(false);
     const [productColoums, setProductColoums] = useState([]);
@@ -68,8 +93,6 @@ const ProductDetailsPage = () => {
     const [state, dispatch] = useReducer(reducer, intialState);
     const [currentTab, setCurrentTab] = useState(null)
     const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
-
     const ignoreField = ["priceTemplate"]
 
     useEffect(() => {
@@ -100,6 +123,19 @@ const ProductDetailsPage = () => {
         // mainPoint['MRP'] = data?.mrp || '';
         // mainPoint['Serialized Product'] = data?.serializedProduct ? "Yes" : 'No';
         setMainPoints(mainPoint);
+    };
+
+    const handleMainTabChange = (
+        event: React.ChangeEvent<{}>,
+        newValue: number
+    ) => {
+        setTabValue(newValue);
+        if (newValue === 1) {
+            setActiveTable("packages");
+        }
+        else if (newValue === 2) {
+            setActiveTable("parent");
+        }
     };
 
     const getProductFieldsAndData = () => {
@@ -293,7 +329,7 @@ const ProductDetailsPage = () => {
 
             ]
         } else {
-            rowsData = packages ? packages.map((p) => ({
+            rowsData = packages ? packages.map(({ products, ...p }) => ({
                 ...p,
                 createdBy: p.createdBy.user.concatedName,
                 createdByDate: p.createdBy.date,
@@ -375,7 +411,6 @@ const ProductDetailsPage = () => {
                                     </Box>
                                 </div>
                             ) : (
-
                                 <DetailsPageHeader
                                     heading={headingLabel}
                                     mainPoints={mainPoints}
@@ -397,57 +432,87 @@ const ProductDetailsPage = () => {
 
                                 </DetailsPageHeader>
                             )}
+                            <Tabs
+                                className="oms-tab"
+                                value={tabValue}
+                                onChange={handleMainTabChange}
+                                indicatorColor="primary"
+                                textColor="primary"
+                                aria-label="icon tabs example"
+                                TabIndicatorProps={{
+                                    style: {
+                                        height: 0
+                                    }
+                                }}
+                            >
+                                <Tab
+                                    label="Details"
+                                    aria-controls="a11y-tabpanel-0"
+                                    id="a11y-tab-0"
+                                />
+                                <Tab
+                                    label="Packages"
+                                    aria-controls="a11y-tabpanel-1"
+                                    id="a11y-tab-1"
+                                />
+                                <Tab
+                                    label="Parent Product"
+                                    aria-controls="a11y-tabpanel-2"
+                                    id="a11y-tab-2"
+                                />
+                            </Tabs>
+                            <TabPanel value={tabValue} index={0}>
+                                <Box>
+                                    {loading || !productFields.length ? (
+                                        <Grid container spacing={2} style={{ padding: "8px" }}>
+                                            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                                        </Grid>
+                                    ) : (
+                                        <div className="pb-3">
+                                            <DetailsPage data={productData} fields={productFields} />
+                                        </div>
+                                    )}
+                                </Box>
 
-
-                            <Box>
-                                {loading || !productFields.length ? (
-                                    <Grid container spacing={2} style={{ padding: "8px" }}>
-                                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                                    </Grid>
-                                ) : (
-                                    <>
-                                        <DetailsPage data={productData} fields={productFields} />
-                                    </>
-                                )}
-                            </Box>
-
-                            <Box ml={1} mb={1} mt={2}>
-                                <ToggleButtonGroup
-                                    size="small"
-                                    value={activeTable}
-                                    exclusive
-                                    onChange={(event, val) => {
-                                        setActiveTable(val);
-                                    }}
-                                    aria-label="parent data"
-                                >
-                                    <ToggleButton value="packages">
-                                        Packages
-                                    </ToggleButton>
-                                    <ToggleButton value="parent">
-                                        Parent
-                                    </ToggleButton>
-                                </ToggleButtonGroup>
-                            </Box>
-
-                            <CustomAgGrid
-                                allowSelection={false}
-                                allowAction={false}
-                                columns={columns}
-                                dataRows={dataRows}
-                                frameworkComponents={frameworkComponents}
-                                setGridApi={setGridApi}
-                                dispatch={dispatch}
-                                rowCount={rowCount}
-                                limit={limit}
-                                pageSizes={pageSizes}
-                                page={page}
-                                actionWidth={150}
-                                loading={gridLoading}
-                                renderedFrom="productMasterDetailsPage"
-                                refreshGrid={getColumns}
-                            />
-
+                            </TabPanel>
+                            <TabPanel value={tabValue} index={1}>
+                                <CustomAgGrid
+                                    allowSelection={false}
+                                    allowAction={false}
+                                    columns={columns}
+                                    dataRows={dataRows}
+                                    frameworkComponents={frameworkComponents}
+                                    setGridApi={setGridApi}
+                                    dispatch={dispatch}
+                                    rowCount={rowCount}
+                                    limit={limit}
+                                    pageSizes={pageSizes}
+                                    page={page}
+                                    actionWidth={150}
+                                    loading={gridLoading}
+                                    renderedFrom="productMasterDetailsPage"
+                                    refreshGrid={getColumns}
+                                />
+                            </TabPanel>
+                            <TabPanel value={tabValue} index={2}>
+                                <CustomAgGrid
+                                    allowSelection={false}
+                                    allowAction={false}
+                                    columns={columns}
+                                    dataRows={dataRows}
+                                    frameworkComponents={frameworkComponents}
+                                    setGridApi={setGridApi}
+                                    dispatch={dispatch}
+                                    rowCount={rowCount}
+                                    limit={limit}
+                                    pageSizes={pageSizes}
+                                    page={page}
+                                    actionWidth={150}
+                                    loading={gridLoading}
+                                    renderedFrom="productMasterDetailsPage"
+                                    refreshGrid={getColumns}
+                                />
+                            </TabPanel>
                         </Paper>
                     </Grid>
                     {
@@ -511,7 +576,6 @@ const ProductDetailsPage = () => {
                                                         unassignProduct={unassignProduct}
                                                     />
                                                     <Box px={1} my={1} >
-
                                                         <Button
                                                             fullWidth
                                                             variant="outlined"
@@ -580,11 +644,9 @@ const ProductDetailsPage = () => {
                                                         <Box key={i}>
                                                             <Box
                                                                 display="flex"
-                                                                p="8px"
-                                                                m="8px 8px 0 8px"
-                                                                bgcolor="#fff"
+                                                                bgcolor="#f7f5f5"
                                                                 borderRadius="3px"
-                                                                border="1px solid #c9c0c0">
+                                                                borderBottom="1px solid #efe7e7">
                                                                 <Grid>
                                                                     <Grid item xs={8}>
                                                                         <Box display="flex" alignItems="center">
@@ -633,16 +695,29 @@ const ProductDetailsPage = () => {
                                                                 {selectedWarehouse === warehouse && inventory?.slice(0, 6).map((i, index) => (
                                                                     <Fragment key={i._id}>
                                                                         {i?.serialNumber ? index === 5 ?
-                                                                            <Chip
-                                                                                label={"show more"}
-                                                                                // color="secondary"
-                                                                                style={{ marginRight: '2px', background: "#1aa3ff" }}
+                                                                            <Button
+                                                                                fullWidth
+                                                                                className="mt-2"
+                                                                                variant="outlined"
+                                                                                color='primary'
                                                                                 onClick={() => {
-                                                                                    history.push(`${routes.productInventory.path}`, {
-                                                                                        warehouse: productWarehouseData.find(d => d?.warehouse?.optionLabel === selectedWarehouse).warehouse,
-                                                                                        product: { "id": id, "name": headingLabel },
-                                                                                    })
-                                                                                }} />
+                                                                                            history.push(`${routes.productInventory.path}`, {
+                                                                                                warehouse: productWarehouseData.find(d => d?.warehouse?.optionLabel === selectedWarehouse).warehouse,
+                                                                                                product: { "id": id, "name": headingLabel },
+                                                                                            })
+                                                                                        }}>
+                                                                                View All
+                                                                            </Button>
+                                                                            // <Chip
+                                                                            //     label={"show more"}
+                                                                            //     // color="secondary"
+                                                                            //     style={{ marginRight: '2px', background: "#1aa3ff" }}
+                                                                            //     onClick={() => {
+                                                                            //         history.push(`${routes.productInventory.path}`, {
+                                                                            //             warehouse: productWarehouseData.find(d => d?.warehouse?.optionLabel === selectedWarehouse).warehouse,
+                                                                            //             product: { "id": id, "name": headingLabel },
+                                                                            //         })
+                                                                            //     }} />
                                                                             : <Chip
                                                                                 label={i?.serialNumber}
                                                                                 // color="secondary"
