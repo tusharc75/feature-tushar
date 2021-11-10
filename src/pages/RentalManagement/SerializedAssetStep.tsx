@@ -306,30 +306,30 @@ const SerializedAssetStep = ({ loading, productInventory, currentStep, fetchProd
 
   return (<>
 
-    <Box display="flex" justifyContent="flex-end">
-      <Box mx={1} />
-      <Button
-        variant="contained"
-        color="primary"
-        type="button"
-        size="small"
-        disabled={(selectedProducts.length !== 1)}
-        onClick={() => {
-          setAddSerializedAssetDialog(true)
-        }}
-      >
-        {`Assign ${routes.productInventory.title}`}
-      </Button>
-    </Box>
+
     <Grid container spacing={2}>
       <Grid item xs={12} sm={12} md={12} lg={12}>
-        <div className="detail-box">
+        <Box display="flex" mt={2} justifyContent="space-between" alignItems="center" padding={"4px"}>
           <h3 className="form-label-style" title={"Products and Packages"}>
             {"Products and Packages"}
           </h3>
-        </div>
+
+          <Button
+            variant="contained"
+            color="primary"
+            type="button"
+            size="small"
+            disabled={(selectedProducts.length !== 1)}
+            onClick={() => {
+              setAddSerializedAssetDialog(true)
+            }}
+          >
+            {`Assign ${routes.productInventory.title}`}
+          </Button>
+        </Box>
+
       </Grid>
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid item xs={12} md={12} sm={12} >
         {columns ?
           <>
             {/* <CustomAgGrid
