@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useContext, useReducer, Fragment } from "react";
-import { Grid, Chip, Typography, Tooltip, Fab } from "@material-ui/core";
+import { useState, useEffect, useContext, useReducer, Fragment } from "react";
+import { Grid, Chip, Typography, Tooltip } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import axiosInstance from "../../axios/axiosInstance";
-import { displayDate } from "../../services/util";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
@@ -41,14 +40,13 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
 import VersionStatus from "./VersionStatus";
 import TransferEntityDialog from "../../components/AssignRolesDialog/TransferEntityDialog";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import AddIcon from "@material-ui/icons/Add"
-import { isMobile, isTablet } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import { quoteStepColors } from '../../constants/helpers';
-import InfiniteScroll from "react-infinite-scroll-component";
+import IconButton from "@material-ui/core/IconButton"
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 let quoteTimeout;
 const QuoteType = [
@@ -110,6 +108,8 @@ const QuoteBuilders = () => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const [columns, setColumns] = useState([])
   const [isAllChecked, setIsAllChecked] = useState(false);
+  const [clonedData, setClonedData] = useState([])
+  const [clonedId, setClonedId] = useState(null)
 
   const [versionStatusData, setVersionStatusData] = useState({
     columns: [
@@ -332,7 +332,6 @@ const QuoteBuilders = () => {
     quoteTimeout = setTimeout(() => {
       fetchQuoteBuilder();
     }, millisec);
-    // eslint-disable-next-line
   }, [search]);
 
   useEffect(() => {
@@ -396,8 +395,6 @@ const QuoteBuilders = () => {
           }
 
         });
-
-
         setLoadingVersions(false);
         // setAllVersionStatusButtonText("All Version Status");
       })
@@ -430,7 +427,6 @@ const QuoteBuilders = () => {
         toastConfig.setToastConfig(error);
       });
   };
-
   const handleShowCloneQuoteDialog = () => {
     setIsClone(true)
     setshowCreateQuoteDialog(true)
@@ -492,6 +488,20 @@ const QuoteBuilders = () => {
         }
         entity="quote"
       />
+      <Tooltip
+        className={quotePermissions?.isCreate ? "" : "cursor-stop"}
+        title={quotePermissions?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            handleShowCloneQuoteDialog()
+            setClonedId(params.data?._id)
+          }}
+        >
+          <FileCopyIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
     </>
   );
 
@@ -633,7 +643,12 @@ const QuoteBuilders = () => {
       axiosInstance()
         .get(`${qbApi}${queryString}`)
         .then(({ data: { data, count } }) => {
+          let clonedData = {}
           let rows = data.map((u) => {
+            clonedData = {
+              ...clonedData,
+              [u.quoteName]: u
+            }
 
             let versionCount = Object.keys(u.versions).length;
             let tempStatus = "Building Quote"
@@ -675,7 +690,7 @@ const QuoteBuilders = () => {
           //  Dynamic grid code - end
 
           setIsAllChecked(false);
-
+          setClonedData(data)
           if (appendRows) {
             dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
           } else {
@@ -965,15 +980,15 @@ const QuoteBuilders = () => {
 
       {showCreateQuoteDialog && (
         <ManageQuoteDialog
-
           open={showCreateQuoteDialog}
           onSuccess={onSuccess}
           onClose={() => {
             setshowCreateQuoteDialog(false);
             setIsClone(false)
+            setClonedId(null)
           }}
           isNew={isClone ? false : true}
-          dataToUpdate={isClone ? { ...selectedRecords[0], ...{ 'owner': { 'optionLabel': selectedRecords[0].owner, 'optionValue': selectedRecords[0].ownerId } } } : null}
+          dataToUpdate={isClone ? clonedId && clonedData ? clonedData.filter(o => o._id === clonedId)[0] : clonedData.filter(o => o._id === selectedRecords[0]._id)[0] : null}
           isClone={isClone ? true : false}
           resource={null}
           isRedirectTodetailPage={isClone ? false : true}

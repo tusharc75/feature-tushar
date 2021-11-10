@@ -157,7 +157,7 @@ const Top2Dashboard = (props) => {
         const dataUrl = canvas.toDataURL('image/png', 1.0);
         const doc = new jsPDF('portrait');
         doc.setFontSize(20);
-        doc.text(`Total Booked Value In ${currency}`, 60, 15);
+        doc.text(`Total offered Value In ${currency}`, 60, 15);
         doc.addImage(dataUrl, 'JPEG', 10, 20, 190, 100);
         doc.save('All Entity Sales Chart.pdf');
         break;
@@ -216,7 +216,7 @@ const Top2Dashboard = (props) => {
           </Menu>
         </Box>
         <Box textAlign="center">
-          <Typography variant="h5">Total booked value in {filterCurrency || currency}</Typography>
+          <Typography variant="h5">Total offered value in {filterCurrency || currency}</Typography>
         </Box>
 
         {!loading ? (
