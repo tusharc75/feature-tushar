@@ -666,7 +666,7 @@ export default function ManageQuoteDialog({
         customerAccountName: data.customerAccountName,
       };
       entityFields[projectSalesFieldIndex].option = [
-        ...entityFields[opportunityFieldIndex].option,
+        ...entityFields[projectSalesFieldIndex].option,
         newProjectSales,
       ];
 
