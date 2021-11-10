@@ -392,7 +392,7 @@ const RentalManagementDetailsPage = () => {
       })
 
       setProductInventory(tempInventory)
-      setSerializeAssets(data.data?.inventory)
+      setSerializeAssets(data.data?.inventory || [])
 
       tempInventory = restructureRowData(tempInventory)
 
@@ -1380,6 +1380,7 @@ const RentalManagementDetailsPage = () => {
                   showActivity={showActivity}
                   currentStep={currentStep}
                   currencySymbol={currencySymbol}
+                  loading={loading}
                 />
               )}
               {(currentStep === 3) && (

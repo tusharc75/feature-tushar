@@ -317,7 +317,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
                     const endDate = moment(values?.endDate)
                     const diff = endDate.diff(startDate, "days");
 
-                    let finalPrice = values?.qty && price
+                    let finalPrice = values?.qty !== 0 && price !== 0
                       ? values?.pricingMethod === "perDay" && diff !== 0
                         ? values?.qty * price * diff
                         : values?.qty * price
