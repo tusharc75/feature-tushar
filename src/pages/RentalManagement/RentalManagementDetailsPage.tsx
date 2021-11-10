@@ -1065,7 +1065,7 @@ const RentalManagementDetailsPage = () => {
                                 const obj: any = {};
 
                                 obj.id = rec._id ?? rec.id;
-                                obj.type = rec?.type.includes("roduct") ? "product" : "package";
+                                obj.type = rec?.type.toLowerCase();
                                 if (rec?.type === "productInPackage") {
                                   obj.packageId = rec.packageId
                                 }
