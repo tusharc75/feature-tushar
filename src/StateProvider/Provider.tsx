@@ -45,17 +45,14 @@ export const Provider = ({ children }) => {
 
     localStorage.setItem("dateFormatForInputControl", "dd/MM/yyyy")
 
-    axios.get("http://ip-api.com/json").then(({ data }) => {
-      if (data?.countryCode === "US") {
-        localStorage.setItem("dateFormat", "MM/DD/YYYY")
-        localStorage.setItem("dateTimeFormat", "MM/DD/YYYY hh:mm A")
-        localStorage.setItem("cardDateFormat", "MMM,DD YYYY")
+    if (Intl.DateTimeFormat().resolvedOptions().timeZone?.indexOf("America/") === 0) {
+      localStorage.setItem("dateFormat", "MM/DD/YYYY")
+      localStorage.setItem("dateTimeFormat", "MM/DD/YYYY hh:mm A")
+      localStorage.setItem("cardDateFormat", "MMM,DD YYYY")
 
-        localStorage.setItem("dateFormatForInputControl", "MM/dd/yyyy")
+      localStorage.setItem("dateFormatForInputControl", "MM/dd/yyyy")
+    }
 
-
-      }
-    });
   }, [token]);
 
   return (
