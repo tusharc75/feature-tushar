@@ -4,8 +4,8 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { isMobile } from 'react-device-detect';
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz"
 import AddIcon from "@material-ui/icons/Add";
-import {MdAccountCircle, MdDelete, MdEdit, } from "react-icons/md";
-import {FaCopy} from "react-icons/all";
+import { MdAccountCircle, MdDelete, MdEdit, } from "react-icons/md";
+import { FaCopy } from "react-icons/all";
 
 //  Swipe functionalities are removed as we are facing overlap issue in mobile quote details screen
 export default function CustomSwipableList({
@@ -31,7 +31,7 @@ export default function CustomSwipableList({
     onClone,
     fullHeight = false,
     renderedFrom,
-    additionalDetails=[]
+    additionalDetails = []
 
 }) {
     const [isAllChecked, setIsAllChecked] = useState(false);
@@ -91,7 +91,7 @@ export default function CustomSwipableList({
             </Grid>
         }
 
-        <div style={{ overflowY: "auto", height: fullHeight === true ? "auto" : "calc(100vh - 215px)" , backgroundColor:"#F5F7F9" }} id="scrollableDiv">
+        <div style={{ overflowY: "auto", height: fullHeight === true ? "auto" : "calc(100vh - 215px)", backgroundColor: "#F5F7F9" }} id="scrollableDiv">
             <div>
                 <InfiniteScroll
                     dataLength={dataRows.length}
@@ -143,55 +143,57 @@ export default function CustomSwipableList({
                                 <Grid item xs={11} sm={11} className="pl-2">
 
                                     <div className="heading-with-icon">
-                                    {
-                                        primaryField && <h4 className="ml-2 quote-name text-truncate">
-                                            <span onClick={() => onClick(d)} className="link quote-name text-truncate">{d[primaryField.field]}</span>
-                                        </h4>
-                                    }
+                                        {
+                                            primaryField && <h4 className="ml-2 quote-name text-truncate">
+                                                <span onClick={() => onClick(d)} className="link quote-name text-truncate">{d[primaryField.field]}</span>
+                                            </h4>
+                                        }
 
-                                    {
-                                        allowSwipe && permissions.isUpdate && d.allowedToEdit && permissions.isDelete && d.canDelete &&
-                                        <div className="icon-layout mr-2 d-flex">
-                                            {
-                                                showClone &&
-                                                <FaCopy onClick={() => onClone(d)} size={20} className="ml-1"/>
-                                            }
-                                            {
-                                                permissions.isUpdate && d.allowedToEdit && <MdEdit size={20} onClick={() => onEdit(d)} className="ml-1" style={{color:"#43AEAA" }}/>
-                                            }
-                                            {
-                                                extraParamsToCheckDelete && permissions.isDelete && d.canDelete &&
-                                                <MdDelete size={20} onClick={() => onDelete(d)} className="ml-1" style={{color:"var(--danger-light)" }}/>
-                                            }
-                                        </div>
-
-                                    }
-                                    </div>
-                                    {
-                                        additionalDetails.map(a => (
-                                            <div key={a.field} className="quotes-relation ml-2 mb-1 mt-1">
-                                                <span style={{color:"#337FFB"}} className="d-flex align-items-center">{a.icon}</span>
-                                                <h5 style={{paddingTop:"2px" , fontWeight:500}}>{d[a.field]}</h5>
+                                        {
+                                            allowSwipe && permissions.isUpdate && d.allowedToEdit && permissions.isDelete && d.canDelete &&
+                                            <div className="icon-layout mr-2 d-flex">
+                                                {
+                                                    showClone &&
+                                                    <FaCopy onClick={() => onClone(d)} size={20} className="ml-1" />
+                                                }
+                                                {
+                                                    permissions.isUpdate && d.allowedToEdit && <MdEdit size={20} onClick={() => onEdit(d)} className="ml-1" style={{ color: "#43AEAA" }} />
+                                                }
+                                                {
+                                                    extraParamsToCheckDelete && permissions.isDelete && d.canDelete &&
+                                                    <MdDelete size={20} onClick={() => onDelete(d)} className="ml-1" style={{ color: "var(--danger-light)" }} />
+                                                }
                                             </div>
-                                        ))
-                                    }
+
+                                        }
+                                    </div>
+
+                                    <div className="swipe-card-additional-details">
+                                        {
+                                            additionalDetails.map((a, index) => (
+                                                <div key={index} className="ml-2 my-1">
+                                                    <div className="swipe-card-additional-details-inner">
+                                                        <span style={{ color: "#337FFB" }} className="d-flex align-items-center">{a.icon}</span>
+                                                        <h5 className="text-truncate" style={{ paddingTop: "2px", fontWeight: 500 }}>{d[a.field]} asdasda sdasdasd asd asda sdasd asdasdad</h5>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        }
+                                    </div>
+
                                     <div className="d-flex gap-2 mt-2 mb-1 flex-wrap ml-2">
                                         {
                                             [
                                                 ...chips.map(c => (
                                                     c.forceShow === true || d[c.field] ? <Chip className="overflow-hidden" key={c.field} variant="outlined"
-                                                        //  onClick={c.onClick ? () => c.onClick(d, index) : null}
+                                                        onClick={c.onClick ? () => c.onClick(d, index) : null}
                                                         size="small" label={`${c.label} ${d[c.field] ?? ""}`} style={c.chipColorVariable ? generateChipStyle(c.chipColorVariable, d[c.field]?.toLowerCase()) : {}}
                                                     /> : <Fragment key={c.field}></Fragment>
                                                 ))
                                             ]
                                         }
                                     </div>
-
                                 </Grid>
-
-
-
                             </Grid>
                         ))
 

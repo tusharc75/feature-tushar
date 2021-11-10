@@ -349,3 +349,21 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
     color: var(--primary) !important;
     border: 0px !important;
 }
+
+.z-index-auto {
+    z-index: auto !important;
+}
+
+$sizes: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10;
+@mixin fixed-list-loop($className, $styleName) {
+    $i: 1;
+    @each $size in $sizes {
+        #{$className + $i} {
+            #{$styleName}: #{$size} !important;
+        }
+        $i: $i + $offset;
+    }
+}
+
+// Margins
+@include fixed-list-loop(".z-index-", "z-index");

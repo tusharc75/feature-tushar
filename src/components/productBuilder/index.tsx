@@ -580,16 +580,18 @@ const ProductBuilder = (props) => {
           </Menu>
         </div>
       )}
-      <Box mt={1}>
+      <Box mt={1} >
         {
           isMobile ?
             <CustomSwipableList
+
               allowSelection={Editable}
               allowSwipe={Editable}
               permissions={permissions}
               primaryField={columns?.find(d => d.primaryField)}
               onClick={(data) => {
                 openProductModel(data._id)
+
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}

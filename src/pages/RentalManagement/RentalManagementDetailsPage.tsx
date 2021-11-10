@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, CircularProgress, useMediaQuery, Typography } from "@material-ui/core";
+import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
+import {Grid, Box, Button, Paper, CircularProgress, useMediaQuery, Typography, Tab, Tabs} from "@material-ui/core";
 import { Skeleton, Autocomplete, Alert } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import { isMobile, isTablet } from "react-device-detect";
@@ -52,6 +52,10 @@ import moment from "moment";
 import { camelCase, startCase } from "lodash";
 import queryString from "query-string";
 import PackageProductsDialog from './PackageProductsDialog'
+import {FaWpforms} from "react-icons/fa";
+import {BiFoodMenu} from "react-icons/bi";
+import TabPanel from "../../components/TabPanel";
+
 
 const rentalProcessSteps = ["New", "Additional Cost", "Serialized Asset", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 const RentalManagementDetailsPage = () => {
@@ -101,11 +105,24 @@ const RentalManagementDetailsPage = () => {
   const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState(null)
   const [packageForProducts, setPackageForProducts] = useState(null)
+  const [tabValue, setTabValue] = useState(0);
 
   const { pricingConditionApi } = pricingCondition
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
+  }
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
   }
 
   useEffect(() => {
@@ -981,113 +998,173 @@ const RentalManagementDetailsPage = () => {
                   </DetailsPageHeader>
                 )}
 
-                <Box>
-                  {loadingDetails || !rentalManagementFields.length ? (
-                    <Grid container spacing={2} style={{ padding: "8px" }}>
-                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                    </Grid>
-                  ) : (
-                    <>
-                      {
-                        isInOfflineSaveQueue && <div className="px-3">
-                          <Alert variant="filled" severity="info">Updates are in offline state, it will be affected once you will be in network</Alert>
+
+
+
+
+                <Tabs
+                    className="quote-tab"
+                    value={tabValue}
+                    onChange={handleMainTabChange}
+                    textColor="primary"
+                    TabIndicatorProps={{
+                      style: {
+                        display: 'none'
+                      }
+                    }}
+                >
+                  {/* <Tab
+                        className={"tabLayout"}
+                      style={{
+                        background: tabValue === 0 ? "white" : "",
+                        color: tabValue === 0 ? "blue" : "#163340",
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font ">
+                          <InfoIcon className="mr-1" fontSize="inherit" /> All
+                          Version Status
                         </div>
                       }
+                      {...a11yProps(0)}
+                    /> */}
+                  <Tab
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 1 ? 'white' : '',
+                        color: tabValue === 1 ? '#163340' : '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <FaWpforms className="mr-1" fontSize="inherit" /> Details
+                        </div>
+                      }
+                      {...a11yProps(0)}
+                  />
+                  <Tab
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 2 ? 'white' : '',
+                        color: tabValue === 2 ? 'blue' : '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Product Cost
+                        </div>
+                      }
+                      {...a11yProps(1)}
+                  />
+                  <div className={'uio'}> </div>
+                </Tabs>
 
-                      <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
-                    </>
-                  )}
-                </Box>
-              </Paper>
-            </div>
-            <Box my={1} />
-            <Paper>
-              <Steps
-                className={styles.steps_box}
-                isNextStep={!Boolean(productInventory.length)}
-                steps={rentalProcessSteps.slice(0, 5)}
-                currentStep={currentStep}
-                setCurrentStep={setCurrentStep}
-              />
-              {(currentStep === 0) && (
-                <>
-                  <Box display="flex" justifyContent="space-between" m={1}>
-                    <Box display="flex" alignItems="center">
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          setAddExistingProductDialog(true);
-                          setInventoryType("product")
-                        }}
-                      >
-                        {`Add ${routes.product.title}`}
-                      </Button>
-                      <Box mx={1} />
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          setAddExistingProductDialog(true);
-                          setInventoryType("package")
-                        }}
-                      >
-                        {`Add ${routes.packages.title}`}
-                      </Button>
-                      <Box mx={1} />
-                      {selectedProducts && selectedProducts.length > 0 && <Typography>Selected ({selectedProducts.length})</Typography>}
-                    </Box>
-                    <Box display="flex">
-                      <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
+
+                <TabPanel value={tabValue} index={0}>
+                  <Box>
+                    {loadingDetails || !rentalManagementFields.length ? (
+                        <Grid container spacing={2} style={{ padding: "8px" }}>
+                          <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                        </Grid>
+                    ) : (
+                        <>
+                          {
+                            isInOfflineSaveQueue && <div className="px-3">
+                              <Alert variant="filled" severity="info">Updates are in offline state, it will be affected once you will be in network</Alert>
+                            </div>
+                          }
+
+                          <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
+                        </>
+                    )}
+                  </Box>
+                </TabPanel>
+
+                <TabPanel value={tabValue} index={1}>
+                  <Paper>
+                    <Steps
+                        className={styles.steps_box}
+                        isNextStep={!Boolean(productInventory.length)}
+                        steps={rentalProcessSteps.slice(0, 5)}
+                        currentStep={currentStep}
+                        setCurrentStep={setCurrentStep}
+                    />
+                    {(currentStep === 0) && (
+                        <>
+                          <Box display="flex" justifyContent="space-between" m={1}>
+                            <Box display="flex" alignItems="center">
+                              <Button
+                                  variant="contained"
+                                  color="primary"
+                                  size="small"
+                                  onClick={() => {
+                                    setAddExistingProductDialog(true);
+                                    setInventoryType("product")
+                                  }}
+                              >
+                                {`Add ${routes.product.title}`}
+                              </Button>
+                              <Box mx={1} />
+                              <Button
+                                  variant="contained"
+                                  color="primary"
+                                  size="small"
+                                  onClick={() => {
+                                    setAddExistingProductDialog(true);
+                                    setInventoryType("package")
+                                  }}
+                              >
+                                {`Add ${routes.packages.title}`}
+                              </Button>
+                              <Box mx={1} />
+                              {selectedProducts && selectedProducts.length > 0 && <Typography>Selected ({selectedProducts.length})</Typography>}
+                            </Box>
+                            <Box display="flex">
+                              <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
                         <span>
                           <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            disabled={!Boolean(selectedProducts && selectedProducts.length)}
-                            onClick={() => setProductEdit(true)}
+                              variant="contained"
+                              color="primary"
+                              size="small"
+                              disabled={!Boolean(selectedProducts && selectedProducts.length)}
+                              onClick={() => setProductEdit(true)}
                           >
                             Bulk Edit
                           </Button>
                         </span>
-                      </HtmlTooltip>
-                      <Box mx={1} />
-                      <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Delete selected records" : "Select records to delete"}>
+                              </HtmlTooltip>
+                              <Box mx={1} />
+                              <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Delete selected records" : "Select records to delete"}>
                         <span>
 
                           <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            disabled={!Boolean(selectedProducts && selectedProducts.length) || isDeleting}
-                            onClick={() => {
-                              const dataToDelete = selectedProducts && selectedProducts.map((rec: any) => {
-                                const obj: any = {};
+                              variant="contained"
+                              color="primary"
+                              size="small"
+                              disabled={!Boolean(selectedProducts && selectedProducts.length) || isDeleting}
+                              onClick={() => {
+                                const dataToDelete = selectedProducts && selectedProducts.map((rec: any) => {
+                                  const obj: any = {};
 
-                                obj.id = rec._id ?? rec.id;
-                                obj.type = rec?.type.toLowerCase();
-                                if (rec?.type === "productInPackage") {
-                                  obj.packageId = rec.packageId
-                                }
+                                  obj.id = rec._id ?? rec.id;
+                                  obj.type = rec?.type.toLowerCase();
+                                  if (rec?.type === "productInPackage") {
+                                    obj.packageId = rec.packageId
+                                  }
 
-                                return obj
-                              })
-                              setDeleteData(dataToDelete)
-                            }}
+                                  return obj
+                                })
+                                setDeleteData(dataToDelete)
+                              }}
 
-                            endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
+                              endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
                           >
                             Delete
                           </Button>
                         </span>
-                      </HtmlTooltip>
-                    </Box>
-                  </Box>
-                  {columns ?
-                    <>
-                      {/* <CustomAgGridEditable
+                              </HtmlTooltip>
+                            </Box>
+                          </Box>
+                          {columns ?
+                              <>
+                                {/* <CustomAgGridEditable
                         columns={columns}
                         dataRows={dataRows}
                         frameworkComponents={frameworkComponents}
@@ -1104,300 +1181,308 @@ const RentalManagementDetailsPage = () => {
                         renderedFrom="rentalManagementDetailsPageInventory"
                         refreshGrid={fetchProductInventory}
                       /> */}
-                      <Box
-                        p="6px"
-                        zIndex={5}
-                        width={
-                          isTabletScreen
-                            ? "calc(100vw - 20px)"
-                            : isSmallScreen
-                              ? "calc(100vw - 78px)"
-                              : showActivity ? "100%" : "calc(100vw - 100px)"
-                        }
+                                <Box
+                                    p="6px"
+                                    zIndex={5}
+                                    width={
+                                      isTabletScreen
+                                          ? "calc(100vw - 20px)"
+                                          : isSmallScreen
+                                              ? "calc(100vw - 78px)"
+                                              : showActivity ? "100%" : "calc(100vw - 100px)"
+                                    }
 
-                      >
-                        <MaterialTableComponent
-                          // calculatePricing={calculatePricing}
-                          columns={columns}
-                          rowData={dataRows}
-                          title={""}
-                          loading={loading || isUpdating}
-                          onSelection={(d) => setSelectedProducts(d)}
-                          parentChildData={(row, rows) => rows.find((a) => a.id === row.packageId)}
-                          cellEditable={{
-                            onCellEditApproved: (newValue, oldValue, rowData, columnDef) => {
-                              return new Promise((resolve, reject) => {
-                                rowData[columnDef.field] = parseInt(newValue)
-                                handleSingleEdit(rowData)
+                                >
+                                  <MaterialTableComponent
+                                      // calculatePricing={calculatePricing}
+                                      columns={columns}
+                                      rowData={dataRows}
+                                      title={""}
+                                      loading={loading || isUpdating}
+                                      onSelection={(d) => setSelectedProducts(d)}
+                                      parentChildData={(row, rows) => rows.find((a) => a.id === row.packageId)}
+                                      cellEditable={{
+                                        onCellEditApproved: (newValue, oldValue, rowData, columnDef) => {
+                                          return new Promise((resolve, reject) => {
+                                            rowData[columnDef.field] = parseInt(newValue)
+                                            handleSingleEdit(rowData)
 
-                                setTimeout(resolve, 100)
-                              });
-                            }
-                          }}
-                        // onRowClick={(rowData) => {
-                        //   setProductEdit(true)
-                        //   setSelectedProductData(rowData)
-                        // }}
-                        />
-                      </Box>
-
-                    </>
-                    : <Box
-                      p={2}
-                      height={500}
-                      bgcolor="white">
-                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                    </Box>
-                  }
-                </>
-              )}
-              {(currentStep === 1) && (
-                <Formik
-                  initialValues={{ additionalCost: additionalCost || [{ "id": "", "description": "", "uom": "", "qty": 0, "type": "", "amount": 0 }] }}
-                  enableReinitialize={true}
-                  onSubmit={() => { }}>
-                  {({ values }) => (
-                    <>
-                      <Form>
-                        {setAdditionalCost(values.additionalCost)}
-                        <Container className="p-0">
-                          <Grid
-                            container
-                            direction="row"
-                            justify="space-evenly"
-                            alignItems="center"
-                          >
-                            <Grid item md={12}>
-                              {values.additionalCost && values.additionalCost.length > 0 && (
-
-                                <Box className={""}>
-                                  <Grid
-                                    container
-                                    spacing={2}
-                                    direction="row"
-                                    justify="flex-start"
-                                    alignItems="center"
-                                  >
-                                    <Grid item md={1}> # </Grid>
-                                    <Grid item md={2}> Cost Type </Grid>
-                                    <Grid item md={2}> Description </Grid>
-                                    <Grid item md={2}> Quantity </Grid>
-                                    <Grid item md={2}> Unit of Measure </Grid>
-                                    <Grid item md={2}> Amount </Grid>
-                                    <Grid item md={1}></Grid>
-
-                                  </Grid>
+                                            setTimeout(resolve, 100)
+                                          });
+                                        }
+                                      }}
+                                      // onRowClick={(rowData) => {
+                                      //   setProductEdit(true)
+                                      //   setSelectedProductData(rowData)
+                                      // }}
+                                  />
                                 </Box>
-                              )}
-                              <Box className="p-1">
-                                <FieldArray
-                                  name="additionalCost"
-                                  render={arrayHelpers => (
-                                    <div>
-                                      {values.additionalCost && values.additionalCost.length > 0 ? (
-                                        values.additionalCost.map((userVal, index) => (
-                                          <Grid
-                                            container
-                                            spacing={2}
-                                            direction="row"
-                                            justify="flex-start"
-                                            alignItems="center"
-                                            key={index}
-                                          >
-                                            <Grid item md={1}>{index + 1}</Grid>
-                                            <Grid item md={2}>
-                                              <Autocomplete
-                                                size="small"
-                                                style={{ minWidth: 200 }}
-                                                value={userVal.type}
-                                                options={costTypeList}
-                                                getOptionLabel={(option: any) => option ? option : ""}
-                                                onChange={(_, newValue) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.additionalCost[index],
-                                                    ["type"]: newValue,
-                                                  });
-                                                }}
 
-                                                renderInput={(params) => <TextField
-                                                  {...params}
-                                                  variant="outlined"
-                                                  name="nameField"
-                                                  label="Cost Type"
-                                                />}
-                                              />
-                                            </Grid>
-                                            <Grid item md={2}>
-                                              <Field
-                                                fullWidth
-                                                variant="outlined"
-                                                type="text"
-                                                size="small"
-                                                component={TextField}
-                                                name="description"
-                                                placeholder="Description"
-                                                value={userVal.description}
-                                                onChange={(e) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.additionalCost[index],
-                                                    ["description"]: e.target.value
-                                                  })
-                                                }}
-                                              />
-                                            </Grid>
-                                            <Grid item md={2}>
-                                              <Field
-                                                fullWidth
-                                                variant="outlined"
-                                                type="text"
-                                                size="small"
-                                                component={TextField}
-                                                name="Quantity"
-                                                placeholder="Quantity"
-                                                value={userVal.qty}
-                                                onChange={(e) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.additionalCost[index],
-                                                    ["qty"]: e.target.value.replace(/[^0-9]/g, '')
-                                                  })
-                                                }}
-                                              />
-                                            </Grid>
-                                            <Grid item md={2}>
-                                              <Autocomplete
-                                                size="small"
-                                                style={{ minWidth: 200 }}
-                                                value={userVal.uom}
-                                                freeSolo
-                                                autoSelect
-                                                options={uomTypeList}
-                                                getOptionLabel={(option: any) => option ? option : ""}
-                                                onChange={(_, newValue) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.additionalCost[index],
-                                                    ["uom"]: newValue,
-                                                  });
-                                                }}
-
-                                                renderInput={(params) => <TextField
-                                                  {...params}
-                                                  variant="outlined"
-                                                  name="nameField"
-                                                  label="UOM"
-                                                />}
-                                              />
-                                            </Grid>
-                                            {
-                                              <Grid item md={2}>
-                                                <Field
-                                                  fullWidth
-                                                  InputProps={{
-                                                    startAdornment: (
-                                                      <InputAdornment position="start">
-                                                        {currencySymbol ? currencySymbol : ""}
-                                                      </InputAdornment>
-                                                    ),
-                                                  }}
-                                                  startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ""}
-                                                  variant="outlined"
-                                                  type="text"
-                                                  size="small"
-                                                  component={TextField}
-                                                  name="amount"
-                                                  placeholder="Enter Amount"
-                                                  value={userVal.amount}
-                                                  onChange={(e) => {
-                                                    arrayHelpers.replace(index, {
-                                                      ...values.additionalCost[index],
-                                                      ["amount"]: e.target.value.replace(/[^0-9]/g, '')
-                                                    })
-                                                  }}
-                                                />
-                                              </Grid>
-                                            }
-                                            <Grid item md={1}>
-                                              <ButtonGroup size="small" aria-label="small outlined button group">
-                                                <IconButton
-                                                  size="small"
-                                                  aria-label="add"
-                                                  onClick={() => {
-                                                    arrayHelpers.push({
-                                                      "id": "", "description": "", "uom": "", "qty": "", "type": "", "amount": 0
-                                                    })
-                                                  }
-                                                  } >
-                                                  <Add />
-                                                </IconButton>
-                                                <IconButton size="small" aria-label="delete" style={{ color: "#f44336" }} onClick={() => arrayHelpers.remove(index)} >
-                                                  <Delete />
-                                                </IconButton>
-                                              </ButtonGroup>
-                                            </Grid>
-                                          </Grid>
-                                        ))
-                                      ) : (
-                                        <Grid item md={12} className="d-flex  align-items-center justify-content-center">
-                                          <Button
-                                            variant="contained"
-                                            color="primary"
-                                            size="large"
-                                            onClick={() => {
-                                              arrayHelpers.push({ "id": "", "description": "", "uom": "", "qty": "", "type": "", "amount": 0 })
-                                            }}
-                                          >
-                                            Add Cost Type
-                                          </Button>
-                                        </Grid>
-                                      )}
-                                    </div>
-                                  )}
-                                />
+                              </>
+                              : <Box
+                                  p={2}
+                                  height={500}
+                                  bgcolor="white">
+                                <CommonSkeleton lenArray={[...Array(10).keys()]} />
                               </Box>
-                            </Grid>
-                          </Grid>
-                        </Container>
-                      </Form>
-                    </>
-                  )}
-                </Formik>
+                          }
+                        </>
+                    )}
+                    {(currentStep === 1) && (
+                        <Formik
+                            initialValues={{ additionalCost: additionalCost || [{ "id": "", "description": "", "uom": "", "qty": 0, "type": "", "amount": 0 }] }}
+                            enableReinitialize={true}
+                            onSubmit={() => { }}>
+                          {({ values }) => (
+                              <>
+                                <Form>
+                                  {setAdditionalCost(values.additionalCost)}
+                                  <Container className="p-0">
+                                    <Grid
+                                        container
+                                        direction="row"
+                                        justify="space-evenly"
+                                        alignItems="center"
+                                    >
+                                      <Grid item md={12}>
+                                        {values.additionalCost && values.additionalCost.length > 0 && (
 
-              )}
-              {(currentStep === 2) && (
-                <SerializedAssetStep
-                  rentalManagementId={id}
-                  productInventory={[
-                    ...productInventory,
-                    ...serializeAssets
-                  ]}
-                  fetchProductsData={fetchProductInventory}
-                  isSmallScreen={isSmallScreen}
-                  isTabletScreen={isTabletScreen}
-                  showActivity={showActivity}
-                  currentStep={currentStep}
-                  currencySymbol={currencySymbol}
-                  loading={loading}
-                />
-              )}
-              {(currentStep === 3) && (
-                <DeliveryTicket
-                  fetchRentalData={fetchRentalManagementData}
-                  rentalManagementData={rentalManagementData}
-                  rentalManagementId={id}
-                  warehouselist={warehouseList}
-                  productInventory={serializeAssets}
-                  currentStep={currentStep}
-                  handleDeliveryTicketDialog={handleDeliveryTicketDialog}
-                />
-              )}
-              {(currentStep === 4 || currentStep === 5) && (
-                <ReceivingTicket
-                  rentalManagementId={id}
-                  productInventory={productInventory}
-                  currentStep={currentStep}
-                  handleReceivingTicketDialog={handleReceivingTicketDialog}
-                />
-              )}
-            </Paper>
+                                            <Box className={""}>
+                                              <Grid
+                                                  container
+                                                  spacing={2}
+                                                  direction="row"
+                                                  justify="flex-start"
+                                                  alignItems="center"
+                                              >
+                                                <Grid item md={1}> # </Grid>
+                                                <Grid item md={2}> Cost Type </Grid>
+                                                <Grid item md={2}> Description </Grid>
+                                                <Grid item md={2}> Quantity </Grid>
+                                                <Grid item md={2}> Unit of Measure </Grid>
+                                                <Grid item md={2}> Amount </Grid>
+                                                <Grid item md={1}></Grid>
+
+                                              </Grid>
+                                            </Box>
+                                        )}
+                                        <Box className="p-1">
+                                          <FieldArray
+                                              name="additionalCost"
+                                              render={arrayHelpers => (
+                                                  <div>
+                                                    {values.additionalCost && values.additionalCost.length > 0 ? (
+                                                        values.additionalCost.map((userVal, index) => (
+                                                            <Grid
+                                                                container
+                                                                spacing={2}
+                                                                direction="row"
+                                                                justify="flex-start"
+                                                                alignItems="center"
+                                                                key={index}
+                                                            >
+                                                              <Grid item md={1}>{index + 1}</Grid>
+                                                              <Grid item md={2}>
+                                                                <Autocomplete
+                                                                    size="small"
+                                                                    style={{ minWidth: 200 }}
+                                                                    value={userVal.type}
+                                                                    options={costTypeList}
+                                                                    getOptionLabel={(option: any) => option ? option : ""}
+                                                                    onChange={(_, newValue) => {
+                                                                      arrayHelpers.replace(index, {
+                                                                        ...values.additionalCost[index],
+                                                                        ["type"]: newValue,
+                                                                      });
+                                                                    }}
+
+                                                                    renderInput={(params) => <TextField
+                                                                        {...params}
+                                                                        variant="outlined"
+                                                                        name="nameField"
+                                                                        label="Cost Type"
+                                                                    />}
+                                                                />
+                                                              </Grid>
+                                                              <Grid item md={2}>
+                                                                <Field
+                                                                    fullWidth
+                                                                    variant="outlined"
+                                                                    type="text"
+                                                                    size="small"
+                                                                    component={TextField}
+                                                                    name="description"
+                                                                    placeholder="Description"
+                                                                    value={userVal.description}
+                                                                    onChange={(e) => {
+                                                                      arrayHelpers.replace(index, {
+                                                                        ...values.additionalCost[index],
+                                                                        ["description"]: e.target.value
+                                                                      })
+                                                                    }}
+                                                                />
+                                                              </Grid>
+                                                              <Grid item md={2}>
+                                                                <Field
+                                                                    fullWidth
+                                                                    variant="outlined"
+                                                                    type="text"
+                                                                    size="small"
+                                                                    component={TextField}
+                                                                    name="Quantity"
+                                                                    placeholder="Quantity"
+                                                                    value={userVal.qty}
+                                                                    onChange={(e) => {
+                                                                      arrayHelpers.replace(index, {
+                                                                        ...values.additionalCost[index],
+                                                                        ["qty"]: e.target.value.replace(/[^0-9]/g, '')
+                                                                      })
+                                                                    }}
+                                                                />
+                                                              </Grid>
+                                                              <Grid item md={2}>
+                                                                <Autocomplete
+                                                                    size="small"
+                                                                    style={{ minWidth: 200 }}
+                                                                    value={userVal.uom}
+                                                                    freeSolo
+                                                                    autoSelect
+                                                                    options={uomTypeList}
+                                                                    getOptionLabel={(option: any) => option ? option : ""}
+                                                                    onChange={(_, newValue) => {
+                                                                      arrayHelpers.replace(index, {
+                                                                        ...values.additionalCost[index],
+                                                                        ["uom"]: newValue,
+                                                                      });
+                                                                    }}
+
+                                                                    renderInput={(params) => <TextField
+                                                                        {...params}
+                                                                        variant="outlined"
+                                                                        name="nameField"
+                                                                        label="UOM"
+                                                                    />}
+                                                                />
+                                                              </Grid>
+                                                              {
+                                                                <Grid item md={2}>
+                                                                  <Field
+                                                                      fullWidth
+                                                                      InputProps={{
+                                                                        startAdornment: (
+                                                                            <InputAdornment position="start">
+                                                                              {currencySymbol ? currencySymbol : ""}
+                                                                            </InputAdornment>
+                                                                        ),
+                                                                      }}
+                                                                      startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ""}
+                                                                      variant="outlined"
+                                                                      type="text"
+                                                                      size="small"
+                                                                      component={TextField}
+                                                                      name="amount"
+                                                                      placeholder="Enter Amount"
+                                                                      value={userVal.amount}
+                                                                      onChange={(e) => {
+                                                                        arrayHelpers.replace(index, {
+                                                                          ...values.additionalCost[index],
+                                                                          ["amount"]: e.target.value.replace(/[^0-9]/g, '')
+                                                                        })
+                                                                      }}
+                                                                  />
+                                                                </Grid>
+                                                              }
+                                                              <Grid item md={1}>
+                                                                <ButtonGroup size="small" aria-label="small outlined button group">
+                                                                  <IconButton
+                                                                      size="small"
+                                                                      aria-label="add"
+                                                                      onClick={() => {
+                                                                        arrayHelpers.push({
+                                                                          "id": "", "description": "", "uom": "", "qty": "", "type": "", "amount": 0
+                                                                        })
+                                                                      }
+                                                                      } >
+                                                                    <Add />
+                                                                  </IconButton>
+                                                                  <IconButton size="small" aria-label="delete" style={{ color: "#f44336" }} onClick={() => arrayHelpers.remove(index)} >
+                                                                    <Delete />
+                                                                  </IconButton>
+                                                                </ButtonGroup>
+                                                              </Grid>
+                                                            </Grid>
+                                                        ))
+                                                    ) : (
+                                                        <Grid item md={12} className="d-flex  align-items-center justify-content-center">
+                                                          <Button
+                                                              variant="contained"
+                                                              color="primary"
+                                                              size="large"
+                                                              onClick={() => {
+                                                                arrayHelpers.push({ "id": "", "description": "", "uom": "", "qty": "", "type": "", "amount": 0 })
+                                                              }}
+                                                          >
+                                                            Add Cost Type
+                                                          </Button>
+                                                        </Grid>
+                                                    )}
+                                                  </div>
+                                              )}
+                                          />
+                                        </Box>
+                                      </Grid>
+                                    </Grid>
+                                  </Container>
+                                </Form>
+                              </>
+                          )}
+                        </Formik>
+
+                    )}
+                    {(currentStep === 2) && (
+                        <SerializedAssetStep
+                            rentalManagementId={id}
+                            productInventory={[
+                              ...productInventory,
+                              ...serializeAssets
+                            ]}
+                            fetchProductsData={fetchProductInventory}
+                            isSmallScreen={isSmallScreen}
+                            isTabletScreen={isTabletScreen}
+                            showActivity={showActivity}
+                            currentStep={currentStep}
+                            currencySymbol={currencySymbol}
+                            loading={loading}
+                        />
+                    )}
+                    {(currentStep === 3) && (
+                        <DeliveryTicket
+                            fetchRentalData={fetchRentalManagementData}
+                            rentalManagementData={rentalManagementData}
+                            rentalManagementId={id}
+                            warehouselist={warehouseList}
+                            productInventory={serializeAssets}
+                            currentStep={currentStep}
+                            handleDeliveryTicketDialog={handleDeliveryTicketDialog}
+                        />
+                    )}
+                    {(currentStep === 4 || currentStep === 5) && (
+                        <ReceivingTicket
+                            rentalManagementId={id}
+                            productInventory={productInventory}
+                            currentStep={currentStep}
+                            handleReceivingTicketDialog={handleReceivingTicketDialog}
+                        />
+                    )}
+                  </Paper>
+                </TabPanel>
+
+
+
+              </Paper>
+            </div>
+            <Box my={1} />
+
           </div>
           <div className="position-relative">
             <HideWhenOffline>
