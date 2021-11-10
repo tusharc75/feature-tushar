@@ -27,13 +27,13 @@ import InfoIcon from "@material-ui/icons/Info";
 import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialog";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { simplifyValues } from "../../constants/helpers"
-import { isMobile , isTablet } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 interface InitialData {
   fields: any[];
   values: object;
 }
 
-const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = null, projectSalesId = null, fields = null }) => {
+const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = null, projectSalesId = null, fields = null, onSuccess = null }) => {
   const {
     state: {
       user: { user }, permissions
@@ -64,7 +64,7 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [formValues, setFormValues] = useState({})
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  
+
   useEffect(() => {
     if (initialData.fields.length > 0) {
       setFormsData(setFieldsInAscendingOrder(initialData.fields));
@@ -203,6 +203,10 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
       axiosInstance()
         .post("/project-Sales", values)
         .then(({ data }) => {
+          console.log('data', data?.data)
+          if (onSuccess) {
+            onSuccess(data?.data)
+          }
           const newId = data.data?._id;
           setSubmitting(false);
           fetchData();
