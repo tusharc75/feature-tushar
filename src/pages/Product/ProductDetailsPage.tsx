@@ -329,7 +329,7 @@ const ProductDetailsPage = () => {
 
             ]
         } else {
-            rowsData = packages ? packages.map(({ products, ...p }) => ({
+            rowsData = packages ? packages.map((p) => ({
                 ...p,
                 createdBy: p.createdBy.user.concatedName,
                 createdByDate: p.createdBy.date,
