@@ -1076,7 +1076,7 @@ export default function ManageQuoteDialog({
                                         {field?.tooltipMessage ? (
                                           <Grid item xs={1} sm={1} md={1}>
                                             <Tooltip
-                                              style={{ marginTop: "2px" }}
+                                              className="mt-2"
                                               title={
                                                 field?.tooltipMessage ?? ""
                                               }
