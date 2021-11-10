@@ -54,7 +54,6 @@ import queryString from "query-string";
 import PackageProductsDialog from './PackageProductsDialog'
 
 const rentalProcessSteps = ["New", "Additional Cost", "Serialized Asset", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
-
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const { isOffline, offlineFieldsData, offlineGridData, updateOfflineGridData } = useContext(CustomOfflineContext);
@@ -143,7 +142,6 @@ const RentalManagementDetailsPage = () => {
   }, [isSmallScreen])
 
   const calculatePricing = (arr: any[]) => {
-    console.log(arr)
     //materialType can be =["product","packages","productCategory"]
     //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
     if (rentalManagementData) {
@@ -377,19 +375,19 @@ const RentalManagementDetailsPage = () => {
         id: u._id,
         description: u.packageDescription,
       })));
-      tempInventory = tempInventory.map(u => {
-        let qty = parseInt(u?.quantity || u?.qty) || 0
-        let price = qty > 0 ? (parseInt(u?.price) * qty) || (parseInt(u?.mrp) * qty) || 0 : (parseInt(u.price) || 0)
-        let discount = parseInt(u?.discount) || 0
-        let finalPrice = parseInt(u?.finalPrice) || 0
+      // tempInventory = tempInventory.map(u => {
+      //   let qty = parseInt(u?.quantity || u?.qty) || 0
+      //   let price = qty > 0 ? (parseInt(u?.price) * qty) || (parseInt(u?.mrp) * qty) || 0 : (parseInt(u.price) || 0)
+      //   let discount = parseInt(u?.discount) || 0
+      //   let finalPrice = parseInt(u?.finalPrice) || 0
 
-        finalPrice = (discount > 0 && price > 0) ? price - ((price * discount) / 100) : price
-        return {
-          ...u,
-          qty: qty,
-          finalPrice: finalPrice
-        }
-      })
+      //   finalPrice = (discount > 0 && price > 0) ? price - ((price * discount) / 100) : price
+      //   return {
+      //     ...u,
+      //     qty: qty,
+      //     finalPrice: finalPrice
+      //   }
+      // })
 
       setProductInventory(tempInventory)
       setSerializeAssets(data.data?.inventory || [])
@@ -425,77 +423,72 @@ const RentalManagementDetailsPage = () => {
     let extractedProducts = []
     let newDataOfRow = [...rowData]
 
-    newDataOfRow.forEach((rd) => {
-      let productsInPkg = []
+    let packageProducts = newDataOfRow.filter(rd => rd.type === "productInPackage")
+    let packages = newDataOfRow.filter(rd => rd.type === "Package")
+    let products = newDataOfRow.filter(rd => rd.type === "Product")
+    let modifiedPkgProducts = [];
 
-      newDataOfRow.forEach((rd1) => {
-        if (rd.type === "Package" && rd._id === rd1.packageId) {
-          productsInPkg.push(rd1);
-        }
+    packages.forEach((pkg: any) => {
+      let currentPkgProducts = packageProducts.filter((p: any) => p.packageId === pkg.id);
+      currentPkgProducts.forEach((p: any) => {
+        let product = { ...p, pkgQty: pkg.qty, totalQty: pkg.qty * p.qty };
+        modifiedPkgProducts.push(product)
       })
-
-      if (rd.type === "Package") { rd.products = productsInPkg; }
-
-      if (rd) {
-        extractedProducts.push(rd)
-      }
     })
 
-    extractedProducts = extractedProducts.filter((product) => product.type !== "productInPackage");
+    extractedProducts = [...products, ...packages, ...modifiedPkgProducts]
 
 
-    let newExtractedData = []
+    // newDataOfRow.forEach((rd) => {
+    //   let productsInPkg = []
+    //   newDataOfRow.forEach((rd1) => {
+    //     if (rd.type === "Package" && rd._id === rd1.packageId) {
+    //       productsInPkg.push(rd1);
+    //     }
+    //   })
+    //   if (rd.type === "Package") { rd.products = productsInPkg; }
+    //   if (rd) {
+    //     extractedProducts.push(rd)
+    //   }
+    // })
+    // extractedProducts = extractedProducts.filter((product) => product.type !== "productInPackage");
+    // let newExtractedData = []
+    // if (extractedProducts.length > 0) {
+    //   extractedProducts.forEach((pkg, indx) => {
+    //     let pkgData = { ...pkg };
+    //     pkgData = { ...pkgData, detail: pkgData.detail };
+    //     if (pkgData.type === "Package") {
+    //       const { products } = pkgData;
+    //       if (products && products.length > 0) {
+    //         products.forEach((product, i) => {
+    //           let productData = { ...product };
+    //           let qty = pkg.qty !== 0 && product.qty !== 0
+    //             ? pkg.qty * product.qty
+    //             : pkg.qty !== 0 && product.qty === 0
+    //               ? pkg.qty
+    //               : pkg.qty === 0 && product.qty !== 0
+    //                 ? product.qty : product.qty
 
-    if (extractedProducts.length > 0) {
+    //           productData = {
+    //             ...productData,
+    //             detail: productData.detail,
+    //             totalQty: qty,
+    //             pkgQty: pkgData.qty,
+    //             qty: productData.qty,
+    //             UOM: pkg?.UOM,
+    //             pricingMethod: pkg?.pricingMethod,
+    //             discount: product.discount ? product.discount : 0,
+    //           }
 
-      extractedProducts.forEach((pkg, indx) => {
+    //           newExtractedData.push(productData)
+    //         })
+    //       }
+    //     }
+    //     newExtractedData.push(pkgData)
+    //   })
+    // }
 
-        let pkgData = { ...pkg };
-        pkgData = { ...pkgData, detail: pkgData.detail };
-
-        if (pkgData.type === "Package") {
-
-          const { products } = pkgData;
-
-          if (products && products.length > 0) {
-
-            products.forEach((product, i) => {
-
-              let productData = { ...product };
-
-              let qty = pkg.qty !== 0 && product.qty !== 0
-                ? pkg.qty * product.qty
-                : pkg.qty !== 0 && product.qty === 0
-                  ? pkg.qty
-                  : pkg.qty === 0 && product.qty !== 0
-                    ? product.qty : product.qty
-
-              productData = {
-                ...productData,
-                detail: productData.detail,
-                totalQty: qty,
-                pkgQty: pkgData.qty,
-                qty: productData.qty,
-                UOM: pkg?.UOM,
-                pricingMethod: pkg?.pricingMethod,
-                price: pkg.price && pkg.price !== 0 && 0,
-                finalPrice: parseInt(product?.mrp) && qty
-                  ? parseInt(product.mrp) * qty
-                  : parseInt(product.mrp)
-                    ? parseInt(product.mrp)
-                    : 0,
-                discount: product.discount ? product.discount : 0,
-              }
-
-              newExtractedData.push(productData)
-            })
-          }
-        }
-        newExtractedData.push(pkgData)
-      })
-    }
-
-    return newExtractedData
+    return extractedProducts
   }
 
 
@@ -661,7 +654,7 @@ const RentalManagementDetailsPage = () => {
       field: 'qty',
       title: 'Quantity',
       emptyValue: '- - - - -',
-      editable: 'onUpdate',
+      editable: 'never',
       type: "numeric",
       align: 'left',
       cellStyle: { padding: "0px" },
@@ -740,7 +733,7 @@ const RentalManagementDetailsPage = () => {
       cellStyle: { padding: "0px" },
       render: (rowData) => (
         <div style={{ width: 100 }}>
-          <p>{rowData.finalPrice ? rowData.finalPrice : "- - - - -"}</p>
+          <p>{rowData.finalPrice}</p>
         </div>
       )
     }
@@ -1072,7 +1065,7 @@ const RentalManagementDetailsPage = () => {
                                 const obj: any = {};
 
                                 obj.id = rec._id ?? rec.id;
-                                obj.type = rec?.type.includes("roduct") ? "product" : "package";
+                                obj.type = rec?.type.toLowerCase();
                                 if (rec?.type === "productInPackage") {
                                   obj.packageId = rec.packageId
                                 }
