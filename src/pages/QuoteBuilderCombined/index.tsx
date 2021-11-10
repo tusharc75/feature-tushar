@@ -19,6 +19,7 @@ import {
   prepareDataForGrid,
   customerContact,
   supplierContact,
+  quote
 } from "../../constants/helpers";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
@@ -45,6 +46,9 @@ import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticFiel
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 import { quoteStepColors } from '../../constants/helpers';
+import InfiniteScroll from "react-infinite-scroll-component";
+import {MdAccountCircle} from "react-icons/md";
+import {AiFillCrown} from "react-icons/all";
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 
@@ -67,6 +71,7 @@ const QuoteBuilders = () => {
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
+  const { quoteResource } = quote;
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -602,8 +607,6 @@ const QuoteBuilders = () => {
       ])}`
     }
 
-
-
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
@@ -638,6 +641,16 @@ const QuoteBuilders = () => {
 
       if (gridApi) {
         gridApi.setRowData([]);
+      }
+
+      let oldSelectedRecords = [];
+      const localStorageKey = `${quoteResource}_selected`;
+      try {
+        if (localStorage.getItem(localStorageKey)) {
+          oldSelectedRecords = [...JSON.parse(localStorage.getItem(localStorageKey))]
+        }
+      } catch (ex) {
+        console.error("Error is parsing quote localstorage value")
       }
 
       axiosInstance()
@@ -678,7 +691,7 @@ const QuoteBuilders = () => {
             finalObject["versionCount"] = versionCount;
             finalObject["versionData"] = versionArray;
 
-            finalObject["isChecked"] = false;
+            finalObject["isChecked"] = oldSelectedRecords.some(s => s === u._id);
             finalObject["allowedToEdit"] = (
               [...(u.collaborator ?? []), u.owner].some(
                 (d) => d?.optionValue === user?.user?._id
@@ -691,10 +704,17 @@ const QuoteBuilders = () => {
 
           setIsAllChecked(false);
           setClonedData(data)
+
           if (appendRows) {
-            dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
+            dispatch({
+              type: "initialize", data: [...dataRows, ...rows],
+              count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+            });
           } else {
-            dispatch({ type: "initialize", data: rows, count: count });
+            dispatch({
+              type: "initialize", data: rows, count: count,
+              selectedRecords: rows.filter(f => f.isChecked === true)
+            });
           }
 
           setTimeout(() => {
@@ -902,6 +922,16 @@ const QuoteBuilders = () => {
                 rowCount={rowCount}
                 page={page}
                 loading={loading}
+                additionalDetails={[
+                  {
+                    icon: <AiFillCrown size={18} />,
+                    field: "owner"
+                  },
+                  {
+                    icon: <MdAccountCircle size={18} />,
+                    field: "customerAccountName"
+                  },
+                ]}
                 chips={[
                   {
                     label: "Version(s): ",
@@ -920,6 +950,7 @@ const QuoteBuilders = () => {
                 onCreate={clickCreateNew}
                 showClone={false}
                 onClone={() => { }}
+                renderedFrom={quoteResource}
               /> : (
                 Object.keys(frameWorkComponent).length > 0 ?
                   <CustomAgGrid
@@ -934,7 +965,7 @@ const QuoteBuilders = () => {
                     page={page}
                     actionWidth={100}
                     loading={loading}
-                    renderedFrom={routes.quoteBuilder.title}
+                    renderedFrom={quoteResource}
                     refreshGrid={fetchQuoteBuilder}
                   /> : null
               )

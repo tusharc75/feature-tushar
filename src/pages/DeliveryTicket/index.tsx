@@ -428,6 +428,7 @@ const DeliveryTicket = () => {
                 onCreate={null}
                 showClone={false}
                 onClone={() => { }}
+                renderedFrom={deliveryTicketResource}
               />
               : Object.keys(frameWorkComponent).length > 0 ?
                 <CustomAgGrid

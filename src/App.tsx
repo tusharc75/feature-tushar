@@ -85,6 +85,7 @@ import CreateNewQuotePdfTemplate from "./pages/QuotePdfTemplate/NewCreateQuotePd
 import QuotePdfTemplate from "./pages/QuotePdfTemplate";
 import MyOwnCart from "./components/ProductList/MyCart/MyOwnCart";
 import Warehouse from "./pages/Warehouse";
+import WarehouseDetailsPage from "./pages/Warehouse/WarehouseDetailsPage"
 import ProductInventory from "./pages/ProductInventory";
 import EquipmentRentalMaster from "./pages/EquipmentRentalMaster";
 import ProductInventoryDetailsPage from "./pages/ProductInventory/ProductInventoryDetailsPage";
@@ -106,6 +107,7 @@ import PackageList from "./pages/Packages";
 import PackageDetails from "./pages/Packages/PackageDetails";
 import BOMTable from "./pages/BOM";
 import PurchaseOrder from "./pages/PurchaseOrder";
+import PurchaseOrderDetailsPage from "./pages/PurchaseOrder/PurchaseOrderDetailsPage";
 import { entity } from "./constants/helpers"
 
 function App() {
@@ -550,6 +552,9 @@ function App() {
             <PrivateRoute exact path={routes.warehouse.path}>
               <Warehouse />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.warehouseDetail.path + "/:id"}>
+              <WarehouseDetailsPage />
+            </PrivateRoute>
             <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>
               <QuoteDetail />
             </PrivateRoute>
@@ -634,6 +639,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.purchaseOrder.path} >
               <PurchaseOrder />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.purchaseOrderDetail.path}/:id`} >
+              <PurchaseOrderDetailsPage />
             </PrivateRoute>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}

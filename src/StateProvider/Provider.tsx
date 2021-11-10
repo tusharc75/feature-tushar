@@ -1,5 +1,6 @@
 import { createContext, useContext, useReducer, useEffect } from "react";
 import reducer, { initialState } from "./reducer";
+import axios from 'axios'
 import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from "./actionTypes";
 import axiosInstance from "./../axios/axiosInstance";
 
@@ -37,6 +38,21 @@ export const Provider = ({ children }) => {
           dispatch({ type: USER_LOADING, payload: false });
         });
     }
+
+    localStorage.setItem("dateFormat", "DD/MM/YYYY")
+    localStorage.setItem("dateTimeFormat", "DD/MM/YYYY hh:mm A")
+    localStorage.setItem("cardDateFormat", "DDD,MM YYYY")
+
+    localStorage.setItem("dateFormatForInputControl", "dd/MM/yyyy")
+
+    if (Intl.DateTimeFormat().resolvedOptions().timeZone?.indexOf("America/") === 0) {
+      localStorage.setItem("dateFormat", "MM/DD/YYYY")
+      localStorage.setItem("dateTimeFormat", "MM/DD/YYYY hh:mm A")
+      localStorage.setItem("cardDateFormat", "MMM,DD YYYY")
+
+      localStorage.setItem("dateFormatForInputControl", "MM/dd/yyyy")
+    }
+
   }, [token]);
 
   return (

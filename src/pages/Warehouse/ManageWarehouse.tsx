@@ -18,15 +18,17 @@ import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 const ManageWarehouse = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { addressResource, onClose, onSuccess, isClone } = props;
+    const { addressResource, close, onSuccess, isClone=false,open } = props;
+    
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-    
+ 
     useEffect(() => {
         axiosInstance().get("/field?resource=Warehouse").then(({ data: { data } }) => {
             const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+          
             const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
             if (addressResource) {
@@ -65,6 +67,11 @@ const ManageWarehouse = (props) => {
             axiosInstance().put(`/warehouse`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess()
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: data.message,
+                });
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
@@ -74,6 +81,11 @@ const ManageWarehouse = (props) => {
             axiosInstance().post(`/warehouse`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess(data)
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: data.message,
+                });
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
@@ -86,7 +98,7 @@ const ManageWarehouse = (props) => {
         fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
-        open={true}
+        open={open}
         fullWidth
         onClose={(e, reason) => {
             if (reason !== 'backdropClick') {
@@ -114,7 +126,7 @@ const ManageWarehouse = (props) => {
                                 if (isFieldNotTouched({
                                     initialValues: initialData.values,
                                     fields: initialData.fields
-                                }, values)) onClose()
+                                }, values)) close()
                                 else setShowConfirmDialog(true)
                             }}
                             isMinimized={!fullScreen}
@@ -125,7 +137,7 @@ const ManageWarehouse = (props) => {
                         ></CustomDialogHeader>
                         <CustomDialogContent>
                             <Form autoComplete="off" autoCorrect="off" noValidate >
-                                <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                                {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                                 <InputField
                                     errors={errors}
                                     values={values}
@@ -143,7 +155,7 @@ const ManageWarehouse = (props) => {
                                     if (isFieldNotTouched({
                                         initialValues: initialData.values,
                                         fields: initialData.fields
-                                    }, values)) onClose()
+                                    }, values)) close()
                                     else setShowConfirmDialog(true)
                                 }}
                             >Cancel</Button>
@@ -165,7 +177,7 @@ const ManageWarehouse = (props) => {
                                     }}
                                     onClose={() => {
                                         setShowConfirmDialog(false)
-                                        onClose()
+                                        close()
                                     }}
                                 /> : null
                         }

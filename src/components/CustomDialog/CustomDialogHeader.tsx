@@ -23,7 +23,8 @@ const useStyles = makeStyles((theme) => ({
         color: theme.palette.grey[500],
     },
     dialogTitle: {
-        fontSize: "1.2rem"
+        fontSize: "1.2rem",
+
     }
 }));
 
@@ -34,15 +35,15 @@ function CustomDialogHeader({ title, onClose, showManimizeMaximize = false, isMi
     return (
         <React.Fragment>
             <MuiDialogTitle disableTypography className={classes.root}>
-                <Typography variant="h6" className={classes.dialogTitle}>{title}</Typography>
-
-                <div className={classes.closeButton}>
+                <Typography variant="h6" className={`${classes.dialogTitle} ${"title-layout"}`}>{title}</Typography>
+                <div className={`${classes.closeButton} ${"close"}`}>
+                    <span className="form-label-style required-text" style={{ borderBottom: "none" }}>* Required Fields</span>
                     {
                         showManimizeMaximize && (!(isMobile || isTablet)) && <IconButton
                             aria-label="close"
                             onClick={onMinimizeMaximize}
                             size="small"
-                            className="mr-2"
+                            className="mr-2 ml-3 close-button"
                         >
                             {isMinimized ? <FiMaximize2 /> : <FiMinimize2 />}
                         </IconButton>
@@ -52,8 +53,9 @@ function CustomDialogHeader({ title, onClose, showManimizeMaximize = false, isMi
                             aria-label="close"
                             onClick={onClose}
                             size="small"
+
                         >
-                            <CloseIcon />
+                            <CloseIcon className={"close-button"}/>
                         </IconButton>
                     }
                 </div>

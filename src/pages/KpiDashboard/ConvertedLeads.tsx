@@ -2,6 +2,7 @@ import {useState} from 'react';
 import { Grid, Box, TextField } from '@material-ui/core'
 import { Autocomplete } from '@material-ui/lab';
 import { DatePicker } from '@material-ui/pickers';
+import { dateFormatForInputControl } from '../../constants/helpers';
 
 
 const linChartData = {
@@ -55,7 +56,7 @@ const ConvertedLeads = ({ Chart }) => {
                         size="small"
                         disableFuture
                         openTo="year"
-                        format="dd/MM/yyyy"
+                        format={dateFormatForInputControl}
                         label="Date Created By"
                         views={['year', 'month', 'date']}
                         value={selectedDate}
