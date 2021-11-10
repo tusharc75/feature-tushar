@@ -191,6 +191,7 @@ const handleFormula = (fieldData, fields, values, name, value, resultValues, isO
             if (_data.inputFields.includes(name)) {
                 loop_count++
                 if (loop_count > 100) {
+                    console.warn("Loop in formula")
                     return resultValues
                 }
                 let inputFields = {};
@@ -218,6 +219,7 @@ const handleFormula = (fieldData, fields, values, name, value, resultValues, isO
                     if (resultValues[_fieldName] === undefined || isOverride) {
                         resultValues[_fieldName] = calValue;
                         resultValues = handleFormula(fieldData, fields, values, _fieldName, calValue, resultValues, true);
+                        resultValues = handleCheckVlookupReverse(fieldData, fields, values, _fieldName, calValue, resultValues);
                         if (_data.type !== 'currencyAmount' && (_data.type === 'converter' || _data.isConverter === true)) {
                             if (_data.displayUnits && _data.displayUnits.length) {
                                 resultValues = handleConverter(
@@ -269,6 +271,7 @@ const handleFormula = (fieldData, fields, values, name, value, resultValues, isO
                     if (resultValues[_fieldName] === undefined || isOverride) {
                         resultValues[_fieldName] = calValue;
                         resultValues = handleFormula(fieldData, fields, values, _fieldName, calValue, resultValues, true);
+                        resultValues = handleCheckVlookupReverse(fieldData, fields, values, _fieldName, calValue, resultValues);
                         if (_data.isMulitFormula && isOverride) {
                             resultValues = handleMulitFormula(_data, fields, values, resultValues);
                         }
@@ -302,10 +305,9 @@ const handleCheckVlookupReverse = (fieldData, fields, values, name, value, resul
     if (fields && fields.filter((_f: any) => (_f.type === "vlookupDropdown" || _f.isVlookup) && !_f.isvlookupReverse).length) {
         fields.filter((_f: any) => (_f.type === "vlookupDropdown" || _f.isVlookup) && !_f.isvlookupReverse).forEach((_data: any) => {
             if (_data.vlookupInputFields.includes(name)) {
-
                 let result = _data.option && _data.option.filter(function (val: any) {
                     for (var i = 0; i < _data.vlookupInputFields.length; i++)
-                        if ((_data.vlookupInputFields[i] === name ? value.toString() : values[_data.vlookupInputFields[i]].toString()) !== val[_data.vlookupInputFields[i]].toString())
+                        if ((_data.vlookupInputFields[i] === name ? value : (values[_data.vlookupInputFields[i]])) != (val[_data.vlookupInputFields[i]]))
                             return false;
                     return true;
                 });
