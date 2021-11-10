@@ -23,7 +23,8 @@ const useStyles = makeStyles((theme) => ({
         color: theme.palette.grey[500],
     },
     dialogTitle: {
-        fontSize: "1.2rem"
+        fontSize: "1.2rem",
+
     }
 }));
 

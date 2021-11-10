@@ -110,7 +110,7 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
 
         const queryString = getQueryString();
         axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
-            data.data = data.data?.filter(u => (u?.status === "Available" || u?.status === "New")
+            data.data = data.data?.filter(u => (u.status === "Available" || u?.status === "New")
                 && selectedProducts.some(d => d._id === u?.product?.optionValue || d.products?.some(obj => obj?.productId === u?.product?.optionValue)))
                 .map((u) => ({
                     ...u,
@@ -119,6 +119,7 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
                     productCategory: u.productCategory?.optionLabel,
                     warehouse: u.warehouse?.optionLabel,
                 }));
+
 
             dispatch({ type: "initialize", data: data.data, count: data.count });
             setTimeout(() => {
@@ -145,7 +146,7 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
                     term: filters[field].filter
                 })
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
         }
 
         if (sorting.length > 0) {

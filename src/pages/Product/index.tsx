@@ -35,6 +35,7 @@ import { Autocomplete } from "@material-ui/lab";
 import TextField from "@material-ui/core/TextField";
 import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
 import { prepareDataForGrid } from "../../constants/helpers";
+import Tooltip from '@material-ui/core/Tooltip'
 
 const ignoreField = ["qty", "priceTemplate"]
 
@@ -74,8 +75,7 @@ const Product = () => {
     const [productTemplate, setProductTemplate] = useState(null);
     const [isProductTemplate, setIsProductTemplate] = useState(true);
 
-
-    const { state: { permissions, selectedEntity } }: any = useData();
+    const { state: { permissions, user, selectedEntity } }: any = useData();
     const [productPermissions, setProductPermissions] = useState({
         isCreate: false,
         isUpdate: false,
@@ -276,7 +276,7 @@ const Product = () => {
                     term: filters[field].filter
                 })
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
         }
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
@@ -316,42 +316,55 @@ const Product = () => {
     }
 
     const ProductNameRenderer = params => (
-        <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data._id}`}>
-            {params.value}
+        <Link className="link text-truncate" title={params?.data?.productDescription} to={`${routes.productDetail.path}/${params.data._id}`}>
+            {params?.data?.productDescription ?? params?.data?.productName}
         </Link>
     )
 
     const ActionsRenderer = params => (
         <>
-            {productPermissions.isCreate &&
-                <HtmlTooltip title="Clone">
+            {productPermissions.isCreate ?
+                <Tooltip title="Clone">
                     <IconButton
                         size="small"
                         aria-label="Clone"
                         onClick={() => { OpenProduct(params.data._id); setIsClone(true) }}
                     >
-                        <FileCopyIcon color="primary" />
+                        <FileCopyIcon color="primary" fontSize="small" />
                     </IconButton>
-                </HtmlTooltip>
-            }
-            {productPermissions.isDelete &&
-                <HtmlTooltip title="Delete">
-                    <IconButton size="small" aria-label="Delete" onClick={() => {
-                        setDeleteRecord(params.data);
-                        setShowDeleteConfirmBox(true)
-                    }} >
-                        <DeleteIcon color="error" />
+                </Tooltip> :
+                <Tooltip className="cursor-stop" title="You do not have permission to create an product">
+                    <IconButton aria-label="Clone" size="small">
+                        <FileCopyIcon fontSize="small" />
                     </IconButton>
-                </HtmlTooltip >
+                </Tooltip>
             }
+            {
+                productPermissions.isDelete && (params?.data?.createdById == user?.user?._id) ?
+                    <Tooltip title="Delete">
+                        <IconButton size="small" aria-label="Delete"
+                            onClick={() => {
+                                setDeleteRecord(params.data);
+                                setShowDeleteConfirmBox(true)
+                            }} >
+                            <DeleteIcon color="error" />
+                        </IconButton>
+                    </Tooltip > :
+                    <Tooltip className="cursor-stop" title="You do not have permission to delete an product">
+                        <IconButton aria-label="Delete" size="small">
+                            <DeleteIcon />
+                        </IconButton>
+                    </Tooltip>
+            }
+
             {productPermissions.isRead && (process.env.REACT_APP_ENV !== 'staging') ?
-                <HtmlTooltip title="BOM">
+                <Tooltip title="BOM">
                     <IconButton size="small" aria-label="View BOM" onClick={() => {
                         history.push(`${routes.productDetail.path}/${params.data._id}/bom`, { productName: params.data.productName })
                     }} >
                         <RiBillLine color="primary" />
                     </IconButton>
-                </HtmlTooltip > : null
+                </Tooltip > : null
             }
         </>
     )

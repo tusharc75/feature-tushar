@@ -173,6 +173,11 @@ a {
   cursor: pointer !important;
 }
 
+.underlined:hover{
+  text-decoration: underline !important;
+  cursor: pointer !important;
+}
+
 .text-truncate {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1100,29 +1105,58 @@ body::-webkit-scrollbar-thumb {
     text-align: left;
     //padding-bottom: 6px;
   }
-  .title-layout{
+  .title-layout {
     font-size: 0.8rem !important;
   }
-  .close{
+  .close {
     top: 8px !important;
   }
-  .close-button{
+  .close-button {
     width: 18px !important;
     height: auto;
   }
-}
-@media only screen and (max-width: 830px) {
-  .redQuoteBox {
-    display: none;
+  .card-shadow {
+    width: 95% !important;
+    display: flex !important;
+    justify-content: center;
+    margin: 0 auto;
+    border-radius: 5px !important;
+    background-color: white;
+    border: 1px solid lightgray;
+  }
+  .quote-name {
+    font-weight: bold !important;
+    //word-wrap: break-word;
+    //word-break: break-all;
+    //white-space: normal;
+  }
+  .heading-with-icon {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+  }
+  .quotes-relation {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    h5 {
+      font-size: 13px;
+      padding-top: 1px;
+    }
   }
 }
+  @media only screen and (max-width: 830px) {
+    .redQuoteBox {
+      display: none;
+    }
+  }
 
-.actio-pos-quote {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-}
+  .actio-pos-quote {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
 
-.card-shadow{
-  box-shadow: 0px 1px 8px #beb9b9;
-}
+
