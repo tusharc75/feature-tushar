@@ -113,7 +113,7 @@ const MaterialTableComponent: FC<TableProps> = (props) => {
         data={rowData}
         onSelectionChange={onSelection}
         totalCount={25}
-        cellEditable={cellEditable}
+        // cellEditable={{ ...cellEditable, cellStyle: { border: "none !important" } }}
         parentChildData={(row, rows) => rows.find((a) => a.treeId === row.parent)}
         options={{
           selection: true,

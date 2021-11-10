@@ -54,10 +54,15 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
 
   }, [data])
 
+  useEffect(() => {
+    getPricing(values)
+  }, [values?.qty, values?.UOM, values?.pricingMethod])
+
   const handleChange = (name: string, value: any) => {
+
     setValues((prevState) => {
       const newValues = { ...prevState, [name]: value }
-      getPricing(newValues);
+
       return newValues
     });
 
@@ -82,34 +87,30 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
     }
   };
 
-  const getPricing = (values: any) => {
-    if (timeoutPricing) {
-      clearTimeout(timeoutPricing)
-    }
+  const getPricing = async (values: any) => {
+
     if (data) {
       if (values?.qty > 0 && values?.pricingMethod !== "" && values?.UOM !== "") {
-        timeoutPricing = setTimeout(async () => {
-          const priceData = await calculatePrice([values])
-          if (priceData && priceData.length) {
-            setPricing(priceData[0])
-            let price = priceData[0].mrp
-            let qty = priceData[0].qty
+        const priceData = await calculatePrice([values])
+        if (priceData && priceData.length) {
+          setPricing(priceData[0])
+          let price = priceData[0].mrp
+          let qty = priceData[0].qty
 
-            handleChange("price", price)
+          handleChange("price", price)
 
-            const startDate = moment(values?.startDate)
-            const endDate = moment(values?.endDate)
-            const diff = endDate.diff(startDate, "days");
+          const startDate = moment(values?.startDate)
+          const endDate = moment(values?.endDate)
+          const diff = endDate.diff(startDate, "days");
 
-            let finalPrice = qty && price
-              ? values?.pricingMethod === "perDay" && diff !== 0
-                ? qty * price * diff
-                : qty * price
-              : price;
+          let finalPrice = qty && price
+            ? values?.pricingMethod === "perDay" && diff !== 0
+              ? qty * price * diff
+              : qty * price
+            : price;
 
-            handleChange("finalPrice", finalPrice <= 0 ? 0 : finalPrice)
-          }
-        }, 1000)
+          handleChange("finalPrice", finalPrice <= 0 ? 0 : finalPrice)
+        }
 
       }
     }
