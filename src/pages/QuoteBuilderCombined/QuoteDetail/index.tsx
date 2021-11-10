@@ -390,7 +390,7 @@ export default function QuoteDetail() {
               dispatch({ type: 'selection', selectedRecords: data.versions[version].TNC });
             }
             setCustomizedRoutes([{ title: routes.quoteBuilder.title, path: routes.quoteBuilder.path },
-            { title: `${data?.quoteName} (${tempCurrentVersion})`, hasOnClick: true }]);
+            { title: `${data?.quoteName} (V-${tempCurrentVersion})`, hasOnClick: true }]);
 
             if (isAllowedToEdit && openEdit === 'true') {
               setOpenUpdateDialog(true);
@@ -657,10 +657,9 @@ export default function QuoteDetail() {
 
   const getHeading = (<span>{quoteData ? `${quoteData.quoteName}  ` : ''}
     <span className="cursor-pointer underlined"
-      onClick={() => { setShowAllVersionStatus(true) }}>({currentVersion})</span>
+      onClick={() => { setShowAllVersionStatus(true) }}>(V-{currentVersion})</span>
   </span>);
 
-  console.log('customizedRoutes', customizedRoutes)
   return (
     <>
       <Fragment>
