@@ -685,7 +685,7 @@ const RentalManagementDetailsPage = () => {
       cellStyle: { padding: "0px" },
       render: (rowData) => (
         <div style={{ width: 100 }}>
-          <p>{rowData.UOM}</p>
+          <p>{startCase(rowData.UOM)}</p>
         </div>
       )
     },
