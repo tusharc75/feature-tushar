@@ -122,7 +122,7 @@ const RentalManagementDetailsPage = () => {
       handleSaveAdditionalCost(additionalCost)
     }
 
-    if (currentStep > 0) {
+    if (currentStep >= 0 && currentStep <= 4) {
       axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/process-status`, { "processStatus": rentalProcessSteps[currentStep] }).then(({ data }) => {
       }).catch((error) => {
         toastConfig.setToastConfig(error);
@@ -832,6 +832,8 @@ const RentalManagementDetailsPage = () => {
 
   const handleBulkEditData = (values: any) => {
     let updatedArr = selectedProducts.filter(d => d.type !== "productInPackage")
+
+    console.log(updatedArr)
 
     updatedArr = updatedArr.map(d => ({
       "id": d.id,
