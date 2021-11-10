@@ -2,7 +2,9 @@ import { Breadcrumbs, Typography } from "@material-ui/core";
 import { Fragment } from "react";
 import { Link } from "react-router-dom";
 
-const CustomBreadCrumbs = ({ routes = [], isConfirmBeforeClick = false, onBreadCrumbClick = null }) => {
+const CustomBreadCrumbs = ({
+  routes = [], isConfirmBeforeClick = false,
+  onBreadCrumbClick = null, onRouteClick = null }) => {
 
   return <Breadcrumbs separator="›" aria-label="breadcrumb">
     {
@@ -34,7 +36,12 @@ const CustomBreadCrumbs = ({ routes = [], isConfirmBeforeClick = false, onBreadC
               className={`${"cursor-pointer"} ${"setLink"}`} >
               {route.title}
             </Link>
-        ) : <Typography key={index} className={`${"cursor-pointer"} ${"setLink"}`}>
+        ) : <Typography
+          onClick={() => {
+            if (route?.hasOnClick) {
+              onRouteClick()
+            }
+          }} key={index} className={`${"cursor-pointer"} ${"setLink"}`}>
           {route.title}
         </Typography>
 
