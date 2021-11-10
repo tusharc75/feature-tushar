@@ -23,6 +23,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
+import {FaDiceOne} from "react-icons/fa";
 
 const ManageSalesOrder = (props) => {
   const { isClone, salesOrderId, onClose, onSuccess, open, inventories, fromInventory } = props;
@@ -224,15 +225,19 @@ const ManageSalesOrder = (props) => {
               <>
                 <CustomDialogContent>
                   <Form>
-                    <h2 className="form-label-style" style={{ borderBottom: 'none' }}>
-                      * Required Fields
-                    </h2>
+                    {/*<h2 className="form-label-style" style={{ borderBottom: 'none' }}>*/}
+                    {/*  * Required Fields*/}
+                    {/*</h2>*/}
                     {formsData &&
                       formsData.map((form, i) => {
                         return (
                           form.name && (
                             <div key={i}>
-                              <h2 className="form-label-style">{form.name}</h2>
+                              <div className={"detail-box-content"}>
+                                <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                              </div>
+
                               <Box marginY={2}>
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field) => (

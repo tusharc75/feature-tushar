@@ -4,6 +4,8 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { isMobile } from 'react-device-detect';
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz"
 import AddIcon from "@material-ui/icons/Add";
+import {MdAccountCircle, MdDelete, MdEdit, } from "react-icons/md";
+import {FaCopy} from "react-icons/all";
 
 //  Swipe functionalities are removed as we are facing overlap issue in mobile quote details screen
 export default function CustomSwipableList({
@@ -21,11 +23,16 @@ export default function CustomSwipableList({
     rowCount,
     page,
     loading,
+    checkError = null,
     chips,
     permissions,
     onCreate,
     showClone,
-    onClone
+    onClone,
+    fullHeight = false,
+    renderedFrom,
+    additionalDetails=[]
+
 }) {
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
@@ -37,22 +44,6 @@ export default function CustomSwipableList({
         showDelete: false,
         onDelete: null,
     })
-
-    // useEffect(() => {
-    //     setIsAllChecked(selectedRecords.length > 0 && selectedRecords.length === dataRows.filter(f => f.isChecked)?.length)
-    // }, [selectedRecords])
-
-    // const [dataToShow, setDataToShow] = useState([])
-
-    // useEffect(() => {
-    //     setDataToShow(prevState => [...prevState, ...dataRows]);
-    // }, [dataRows])
-
-    // const primaryField = columns.find(d => d.primaryField);
-
-    // useEffect(() => {
-    //     setIsAllChecked(false);
-    // }, [dataRows])
 
     const generateChipStyle = (chipColorVariable, value) => {
         if (value) {
@@ -88,6 +79,7 @@ export default function CustomSwipableList({
                                         selectedRecords: updatedMetadata.filter(d => d.isChecked)
                                     });
                                     dispatch({ type: "update", data: updatedMetadata });
+                                    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(updatedMetadata.filter(d => d.isChecked).map(m => m._id)));
                                 }}
                                 name="checkedB"
                                 color="primary"
@@ -99,7 +91,7 @@ export default function CustomSwipableList({
             </Grid>
         }
 
-        <div style={{ overflowY: "auto", height: "calc(100vh - 215px)" }} id="scrollableDiv">
+        <div style={{ overflowY: "auto", height: fullHeight === true ? "auto" : "calc(100vh - 215px)" , backgroundColor:"#F5F7F9" }} id="scrollableDiv">
             <div>
                 <InfiniteScroll
                     dataLength={dataRows.length}
@@ -124,7 +116,7 @@ export default function CustomSwipableList({
                 >
                     {
                         dataRows.map((d, index) => (
-                            <Grid key={d._id} container className={`pb-2 mb-2 border-bottom card-shadow ${index === 0 ? "mt-1" : ""} `}>
+                            <Grid key={d._id} container className={`py-2 border-bottom card-shadow mt-2 mb-2 ${index === 0 ? "mt-2 mb-2" : ""} ${checkError && checkError(d) ? "red-data-row" : ""}`}>
                                 {
                                     allowSelection && <Grid item xs={1} sm={1}>
                                         <Checkbox
@@ -141,21 +133,49 @@ export default function CustomSwipableList({
                                                 });
 
                                                 dispatch({ type: "update", data: dataRows });
+                                                localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(dataRows.filter(d => d.isChecked).map(m => m._id)));
                                             }}
                                             inputProps={{ 'aria-label': 'primary checkbox' }}
                                         />
                                     </Grid>
                                 }
 
-                                <Grid item xs={10} sm={10} className="pl-2">
+                                <Grid item xs={11} sm={11} className="pl-2">
 
+                                    <div className="heading-with-icon">
                                     {
-                                        primaryField && <h4 className="ml-2 mb-2">
-                                            <span onClick={() => onClick(d)} className="link">{d[primaryField.field]}</span>
+                                        primaryField && <h4 className="ml-2 quote-name text-truncate">
+                                            <span onClick={() => onClick(d)} className="link quote-name text-truncate">{d[primaryField.field]}</span>
                                         </h4>
                                     }
 
-                                    <div className="d-flex gap-2 mt-2 mb-1 flex-wrap">
+                                    {
+                                        allowSwipe && permissions.isUpdate && d.allowedToEdit && permissions.isDelete && d.canDelete &&
+                                        <div className="icon-layout mr-2 d-flex">
+                                            {
+                                                showClone &&
+                                                <FaCopy onClick={() => onClone(d)} size={20} className="ml-1"/>
+                                            }
+                                            {
+                                                permissions.isUpdate && d.allowedToEdit && <MdEdit size={20} onClick={() => onEdit(d)} className="ml-1" style={{color:"#43AEAA" }}/>
+                                            }
+                                            {
+                                                extraParamsToCheckDelete && permissions.isDelete && d.canDelete &&
+                                                <MdDelete size={20} onClick={() => onDelete(d)} className="ml-1" style={{color:"var(--danger-light)" }}/>
+                                            }
+                                        </div>
+
+                                    }
+                                    </div>
+                                    {
+                                        additionalDetails.map(a => (
+                                            <div key={a.field} className="quotes-relation ml-2 mb-1 mt-1">
+                                                <span style={{color:"#337FFB"}} className="d-flex align-items-center">{a.icon}</span>
+                                                <h5 style={{paddingTop:"2px" , fontWeight:500}}>{d[a.field]}</h5>
+                                            </div>
+                                        ))
+                                    }
+                                    <div className="d-flex gap-2 mt-2 mb-1 flex-wrap ml-2">
                                         {
                                             [
                                                 ...chips.map(c => (
@@ -170,21 +190,7 @@ export default function CustomSwipableList({
 
                                 </Grid>
 
-                                {
-                                    allowSwipe && permissions.isUpdate && d.allowedToEdit && permissions.isDelete && d.canDelete && <Grid item xs={1} sm={1} className="d-flex align-items-center">
-                                        <MoreHorizIcon color="disabled" className="cursor-pointer" onClick={(event) => {
-                                            handleOpenMenu(event)
-                                            setMenuData({
-                                                showClone: showClone,
-                                                onClone: () => onClone(d),
-                                                showEdit: permissions.isUpdate && d.allowedToEdit,
-                                                onEdit: () => onEdit(d),
-                                                showDelete: extraParamsToCheckDelete && permissions.isDelete && d.canDelete,
-                                                onDelete: () => onDelete(d),
-                                            })
-                                        }} />
-                                    </Grid>
-                                }
+
 
                             </Grid>
                         ))

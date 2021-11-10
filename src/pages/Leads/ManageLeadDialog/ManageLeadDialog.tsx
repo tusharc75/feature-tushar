@@ -30,6 +30,7 @@ import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import ManageMarketSegmentDialog from "../../MarketSegment/ManageMarketSegmentDialog";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
+import {FaDiceOne} from "react-icons/fa";
 
 const arr = [...Array(9).keys()];
 
@@ -412,13 +413,16 @@ export default function ManageLeadDialog({
               <>
                 <CustomDialogContent>
                   <Form>
-                    <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                    {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                     {formsData &&
                       formsData.filter((item) => item.name !== additionalFieldName).map((form, i) => {
                         return (
                           form.name && (
                             <div key={i}>
-                              <h2 className="form-label-style">{form.name}</h2>
+                              <div className={"detail-box-content"}>
+                                <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                              </div>
                               <Box marginY={2}>
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field) => (
@@ -522,15 +526,15 @@ export default function ManageLeadDialog({
                                           <Grid
                                             item
                                             xs={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketSegment.isCreate ? 11
                                                 : 11
                                             }
                                             sm={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketSegment.isCreate ? 11
                                                 : 11
                                             }
                                             md={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketSegment.isCreate ? 11
                                                 : 11
                                             }
                                           >
@@ -613,15 +617,15 @@ export default function ManageLeadDialog({
                                             <Grid
                                               item
                                               xs={
-                                                permissions.marketSegment.isCreate ? 10
+                                                permissions.marketSegment.isCreate ? 11
                                                   : 11
                                               }
                                               sm={
-                                                permissions.marketSegment.isCreate ? 10
+                                                permissions.marketSegment.isCreate ? 11
                                                   : 11
                                               }
                                               md={
-                                                permissions.marketSegment.isCreate ? 10
+                                                permissions.marketSegment.isCreate ? 11
                                                   : 11
                                               }
                                             >

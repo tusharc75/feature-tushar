@@ -62,7 +62,7 @@ const AddExistingProduct = (props) => {
     useEffect(() => {
         if (isProductTemplate) {
             if (productCategory && productCategory !== "") {
-                axiosInstance().post(`/product-template/template/` + productCategory, { entity: [] }).then(({ data: { data } }) => {
+                axiosInstance().post(`/product-template/template/` + productCategory, { entity: null }).then(({ data: { data } }) => {
                     setProductTemplateList(data.data)
                     setProductTemplate(null);
                 })
@@ -136,7 +136,7 @@ const AddExistingProduct = (props) => {
                     term: filters[field].filter
                 })
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
         }
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`

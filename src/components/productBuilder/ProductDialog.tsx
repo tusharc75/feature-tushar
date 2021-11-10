@@ -31,6 +31,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import { Collapse } from '@material-ui/core';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { FaDiceOne } from "react-icons/fa";
 
 var levalOrderBy = [
   "product",
@@ -313,25 +314,22 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
               <CustomDialogContent>
                 <Box>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                    {productFields && productFields.map((section, i) => (
+                    {productFields && productFields.map((section: any, i) => (
                       <div key={i}>
-                        <h2 className="form-label-style" >
-                          <IconButton className="p-0" color="primary" style={{ marginTop: "-5px" }} size="small" onClick={() => handleExpand(i)} >
-                            {expanded[i] ? <ExpandLess fontSize="medium" /> : <ExpandMoreIcon fontSize="medium" />}
-                          </IconButton>
-                          {section.name}
-                          <span
-                            style={{ float: "right", marginTop: "-10px" }}
-                          >
-                            <IconButton
-                              color="primary"
-                              size="small"
-                              onClick={() => handleOpenAddField(section.name)}
-                            >
-                              <ControlPointIcon />
+                        <div className={"detail-box-content detail-product-box"}>
+                          <div className={"product-form-layout"}>
+                            <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                            <h2 className={`${"form-label-style"} ${"form-label-product"}`} >
+                              {section.name}
+                            </h2>
+                            <IconButton className="p-0" style={{ marginTop: "-5px", color: "white" }} size="small" onClick={() => handleExpand(i)} >
+                              {expanded[i] ? <ExpandLess fontSize="medium" style={{ paddingTop: "5px", color: "white" }} /> : <ExpandMoreIcon fontSize="medium" style={{ paddingTop: "5px", color: "white" }} />}
                             </IconButton>
-                          </span>
-                        </h2>
+                          </div>
+                          <IconButton style={{ padding: "0px", marginTop: "-5px" }} color="primary" size="small" onClick={(e) => handleOpenAddField(section.name)} >
+                            <ControlPointIcon style={{ paddingTop: "2px", color: "white" }} />
+                          </IconButton>
+                        </div>
                         <Box marginY={2}>
                           <Collapse in={expanded[i]} timeout="auto" unmountOnExit>
                             <Grid spacing={3} container>

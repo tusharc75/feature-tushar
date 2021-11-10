@@ -249,6 +249,10 @@ const routes = {
     title: (storedRoutes && storedRoutes.warehouse && storedRoutes.warehouse.title) ? storedRoutes.warehouse.title : RESOURCE_LABEL.warehouse,
     path: "/warehouse",
   },
+  warehouseDetail: {
+    title: (storedRoutes && storedRoutes.warehouse && storedRoutes.warehouse.title) ? storedRoutes.warehouse.title : RESOURCE_LABEL.warehouse,
+    path: "/warehouse/detail",
+  },
   deliveryTicket: {
     title: storedRoutes ? storedRoutes.deliveryTicket?.title : RESOURCE_LABEL.deliveryTicket,
     path: "/loading-ticket",
@@ -292,6 +296,10 @@ const routes = {
   purchaseOrder:{
     title: storedRoutes ? storedRoutes.purchaseOrder?.title : RESOURCE_LABEL.purchaseOrder,
     path: "/purchase-order",
+  },
+  purchaseOrderDetail:{
+    title: storedRoutes ? storedRoutes.purchaseOrder?.title : RESOURCE_LABEL.purchaseOrder,
+    path: "/purchase-order/detail",
   }
 };
 
