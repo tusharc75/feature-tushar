@@ -205,7 +205,7 @@ const OpportunityDashboards = (props) => {
             <Box mb={2} p={2} display="flex" alignItems="center">
               <Box flex={0.5}>
                 <Typography variant="h6" color="secondary">
-                  Number Of Offers
+                  Number Of Quotes
                 </Typography>
                 <Box display="flex" alignItems="center">
                   <Typography variant="h6" color="textSecondary">
