@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Box, Button, Popover, FormControl, FormGroup, FormControlLabel, Tooltip, Switch, IconButton } from '@material-ui/core';
+import { Box, Button, Popover, FormControl, FormGroup, Divider, FormControlLabel, Tooltip, Switch, IconButton } from '@material-ui/core';
 import ViewWeekIcon from '@material-ui/icons/ViewWeek';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
@@ -8,12 +8,12 @@ import { useData } from '../../StateProvider/Provider';
 import { disabledColumns } from "../../constants/columns"
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 
-
 let timeout
 export default function CustomGridHeaderOptions({ columns, setColumns, columnApi,
-  refreshGrid = null, renderedFrom = null, isClientSideGrid = false }) {
+  refreshGrid = null, renderedFrom = null, isClientSideGrid = false, dispatch: gridDispatch = null, showOnlyShowFilteredRecordSwitch = false }) {
 
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
+  const [checked, setChecked] = useState(false);
   const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null);
   const { isOffline } = useContext(CustomOfflineContext);
   const { state: { user, gridMetaData } }: any = useData();
@@ -64,7 +64,7 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
 
   return (
     <Box className="ag-grid-listing-grid-header-options border px-2 py-1 d-flex gap-2 justify-content-space-between">
-      <div>
+      <div className="d-flex gap-2">
         <Button
           aria-describedby="columnSelection"
           size="small"
@@ -79,7 +79,6 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
         >
           Columns
         </Button>
-
 
         <Popover
           id="columnSelection"
@@ -144,6 +143,32 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
             </FormGroup>
           </FormControl>
         </Popover>
+
+        {
+          showOnlyShowFilteredRecordSwitch && <>
+            <Divider orientation="vertical" flexItem className="mr-2" />
+
+            <FormControlLabel
+              value={checked}
+              checked={checked}
+              onChange={() => {
+                setChecked(!checked)
+
+                if (gridDispatch) {
+                  gridDispatch({
+                    type: 'showFilteredRecordsOnly',
+                    // showFilteredRecordsOnly: columnApi.getColumnState().filter((d) => ['asc', 'desc'].some((s) => s === d.sort))
+                  });
+                }
+
+              }}
+              control={<Switch size="small" color="primary" />}
+              style={{ fontSize: '0.8rem' }}
+              label="Show Only Selected"
+              labelPlacement="end"
+            />
+          </>
+        }
 
       </div>
 
