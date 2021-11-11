@@ -1096,7 +1096,7 @@ body::-webkit-scrollbar-thumb {
 .errorColor {
   color: var(--error) !important;
 }
-@media only screen and (max-height: 676px){
+@media only screen and (max-height: 700px){
   .product-builder-edit-grid {
     height: calc(100vh - 300px);
   }
