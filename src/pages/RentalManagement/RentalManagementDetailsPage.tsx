@@ -1062,14 +1062,13 @@ const RentalManagementDetailsPage = () => {
                         refreshGrid={fetchProductInventory}
                       /> */}
                             <Box
-                              p="6px"
                               zIndex={5}
                               width={
                                 isTabletScreen
                                   ? "calc(100vw - 20px)"
                                   : isSmallScreen
                                     ? "calc(100vw - 78px)"
-                                    : showActivity ? "100%" : "calc(100vw - 100px)"
+                                    : showActivity ? "100%" : "calc(100vw - 94px)"
                               }
 
                             >

@@ -25,6 +25,7 @@ const MaterialTableComponent: FC<TableProps> = (props) => {
   return (
     <div>
       <MaterialTable
+        style={{ boxShadow: "none" }}
         isLoading={loading}
         data={rowData}
         onSelectionChange={onSelection}

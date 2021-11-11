@@ -402,7 +402,7 @@ const SerializedAssetStep = (props) => {
               color="primary"
               type="button"
               size="small"
-              disabled={(selectedProducts.length === 0)}
+              disabled={(selectedProducts.filter(p => !p.hasOwnProperty("assetNumber")).length === 0)}
               onClick={() => {
                 setAddSerializedAssetDialog(true)
               }}
@@ -445,14 +445,14 @@ const SerializedAssetStep = (props) => {
             loading={loading}
             renderedFrom="rentalManagementDetailsPageSerializedAssetsProductAndPackage"
             /> */}
-            <Box p="6px"
+            <Box
               zIndex={5}
               width={
                 isTabletScreen
                   ? "calc(100vw - 20px)"
                   : isSmallScreen
                     ? "calc(100vw - 78px)"
-                    : showActivity ? "100%" : "calc(100vw - 100px)"
+                    : showActivity ? "100%" : "calc(100vw - 94px)"
               }>
               <MaterialTableComponent
                 columns={columns}
