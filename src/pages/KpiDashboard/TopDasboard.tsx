@@ -40,7 +40,8 @@ const TopDashboard = (props) => {
   const [salesRevenue, setSalesRevenue] = useState({
     revenue: 0,
     spend: 0,
-    profit: 0
+    profit: 0,
+    profitValue: 0
   });
 
   const [salesData, setSalesData] = useState({
@@ -98,7 +99,7 @@ const TopDashboard = (props) => {
             const totalCostData = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalCost);
             const budgetData = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.budget);
 
-            saleData.push(totalSelldata? totalSelldata.rates[filterCurrency] : d.totalSell);
+            saleData.push(totalSelldata ? totalSelldata.rates[filterCurrency] : d.totalSell);
             costData.push(totalCostData ? totalCostData.rates[filterCurrency] : d.totalCost);
             budget.push(budgetData ? budgetData.rates[filterCurrency] : d.budget);
           } else {
@@ -118,6 +119,7 @@ const TopDashboard = (props) => {
         let revenueRate, spendRate;
 
         const profit = revenue && spend ? Math.floor(((revenue - spend) / spend) * 100) : 0;
+        const profitValue = revenue && spend ? Math.floor(revenue - spend) : 0
 
         if (filterCurrency !== currency) {
           revenueRate = await getExchangeRates(moment().format('YYYY-MM-DD'), revenue)
@@ -127,7 +129,8 @@ const TopDashboard = (props) => {
         setSalesRevenue({
           revenue: revenueRate ? revenueRate.rates[filterCurrency] : revenue,
           spend: spendRate ? spendRate.rates[filterCurrency] : spend,
-          profit
+          profit: profit,
+          profitValue: profitValue
         });
 
         setSalesData({
@@ -136,7 +139,7 @@ const TopDashboard = (props) => {
           datasets: [
             {
               type: 'line',
-              label: 'Total booked value',
+              label: 'Total offered value',
               borderColor: 'rgb(54, 162, 235)',
               borderWidth: 2,
               fill: true,
@@ -194,7 +197,7 @@ const TopDashboard = (props) => {
         const dataUrl = canvas.toDataURL('image/png', 1.0);
         const doc = new jsPDF('portrait');
         doc.setFontSize(20);
-        doc.text(`Total Booked Value In ${currency}`, 60, 15);
+        doc.text(`Total offered Value In ${currency}`, 60, 15);
         doc.addImage(dataUrl, 'JPEG', 10, 20, 190, 100);
         doc.save('Entity Sales Chart.pdf');
         break;
@@ -251,10 +254,10 @@ const TopDashboard = (props) => {
                         <Skeleton variant="text" width={200} height={40} />
                       )}
                       <Typography variant="h6" className={styles.title}>
-                        Total Booked Value
+                        Total Offered Value
                       </Typography>
                     </Grid>
-                  </Grid> 
+                  </Grid>
                 </Box>
               </Paper>
             </Grid>
@@ -291,13 +294,13 @@ const TopDashboard = (props) => {
                     <Grid item xs={9} sm={9} md={10} className="pull-left">
                       {!loadingChart ? (
                         <Typography variant="h5" className={styles.price}>
-                          {salesRevenue.profit}%
+                          {salesRevenue?.profitValue ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue?.profitValue).fullFormatAmount : 0}({salesRevenue.profit}%)
                         </Typography>
                       ) : (
                         <Skeleton variant="text" width={200} height={40} />
                       )}
                       <Typography variant="h6" className={styles.title}>
-                        Profits
+                        Gross Margin
                       </Typography>
                     </Grid>
                   </Grid>
@@ -307,7 +310,7 @@ const TopDashboard = (props) => {
           </Grid>
         </Box>
 
-        <Paper elevation={2}> 
+        <Paper elevation={2}>
           <Box p={2}>
             <Box display="flex" justifyContent="space-between">
               <Button onClick={handleClickChart} startIcon={<ImportExport />}>
@@ -329,7 +332,7 @@ const TopDashboard = (props) => {
               </Menu>
             </Box>
             <Box textAlign="center" mb={2}>
-              <Typography variant="h5">Total booked value in {filterCurrency || currency}</Typography>
+              <Typography variant="h5">Total offered value in {filterCurrency || currency}</Typography>
             </Box>
             {!loadingChart ? (
               <Box>

@@ -20,11 +20,8 @@ import { GoPencil } from "react-icons/go";
 import { BsCheckCircle } from "react-icons/bs";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import { FaHourglassHalf } from "react-icons/fa";
-import styles from "./Retal.module.scss";
 
 import { isMobile } from "react-device-detect";
-import {RiShareForwardFill} from "react-icons/ri";
-import {TiArrowBack} from "react-icons/ti";
 
 const useStyles = makeStyles((theme) => ({
 
@@ -58,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
         alignItems: "center",
         justifyContent: "center",
         margin: "2px",
-        borderRadius: "12px 40px 40px 50px",
+        borderRadius: "4px",
         border: "1px solid #d6d5d5",
         [theme.breakpoints.down("xs")]: {
             width: "50%",
@@ -68,21 +65,15 @@ const useStyles = makeStyles((theme) => ({
     inActive: {
         flex: "1",
         background: "#ebebeb",
-        borderLeft: "6px solid var(--grey)",
     },
     currentStep: {
         flex: "1",
         background: "#ffffff",
-        borderLeft: "6px solid #378280",
-        color: "#378280 !important",
 
     },
     active: {
         flex: "1",
-        background: "#f9f1e2",
-        borderBottom: "0px solid var(--warning)",
-        color: "#378280 !important",
-        borderLeft: "6px solid var(--warning)",
+        background: "#53ac65",
     },
     sent: {
         color: "#00acc1",
@@ -171,21 +162,10 @@ const Steps = (props) => {
         );
     };
 
-
-
     return (
         <div>
             <div className="position-relative">
-                {/* {!versionStatus.includes("Accepted by Customer") &&
-                    approvedQuote.approved && approvedQuote.versionApproved === version && (
-                        <div className="d-flex align-items-center justify-content-center flex-column m-3">
-                            <Typography className={classes.approved}>
-                                Quote version - {approvedQuote.versionApproved} of this quote has
-                                been Approved
-                            </Typography>
-                        </div>
-                    )} */}
-                <Grid container className={styles.main_step_box} xs={12}>
+                <Grid container xs={10}>
                     <Grid
                         item
                         xs={12}
@@ -198,17 +178,15 @@ const Steps = (props) => {
                                 <div>
                                     {(
                                         <div>
-                                            <IconButton
+                                            <Button
                                                 disabled={currentStep === 5 || currentStep === 0}
-                                                className={"stepperButton"}
                                                 onClick={() => {
                                                     setCurrentStep(currentStep - 1)
                                                 }}
-                                                // size="large"
-                                                // startIcon={<IoIosArrowDropleftCircle />}
+                                                size="large"
+                                                startIcon={<IoIosArrowDropleftCircle />}
                                             >
-                                                <TiArrowBack size={30} />
-                                            </IconButton>
+                                            </Button>
                                         </div>
                                     )}
                                 </div>
@@ -221,7 +199,6 @@ const Steps = (props) => {
                                 <Grid
                                     item
                                     xs={6}
-                                // className="d-flex align-items-center justify-content-start "
                                 >
                                     {isMobile && (
                                         <>
@@ -311,17 +288,16 @@ const Steps = (props) => {
                                     {(
                                         <div>
                                             {(
-                                                <IconButton
+                                                <Button
 
                                                     onClick={() => {
                                                         setCurrentStep(currentStep + 1)
                                                     }}
+                                                    size="large"
                                                     disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
-                                                    // endIcon={<IoIosArrowDroprightCircle />}
-                                                    className={"stepperButtonNext"}
+                                                    endIcon={<IoIosArrowDroprightCircle />}
                                                 >
-                                                    <RiShareForwardFill />
-                                                </IconButton>
+                                                </Button>
                                             )}
                                         </div>
                                     )}

@@ -78,6 +78,7 @@ const FormBuilder = () => {
           dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={false} allowSelection={false}
           isClientSideGrid={true} loading={loading}
           refreshGrid={fetchGetBrandResource}
+          renderedFrom={routes.formBuilder.title}
         />
 
       </CustomContainer>

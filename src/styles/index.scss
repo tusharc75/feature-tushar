@@ -173,6 +173,11 @@ a {
   cursor: pointer !important;
 }
 
+.underlined:hover{
+  text-decoration: underline !important;
+  cursor: pointer !important;
+}
+
 .text-truncate {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1131,7 +1136,11 @@ body::-webkit-scrollbar-thumb {
     align-items: center;
     gap: 15px;
   }
-  .quotes-relation {
+  .swipe-card-additional-details {
+    display: grid;
+    grid-template-columns: 50% 50%;
+  }
+  .swipe-card-additional-details-inner {
     display: flex;
     align-items: center;
     gap: 5px;

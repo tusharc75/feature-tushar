@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, CircularProgress, useMediaQuery, Typography } from "@material-ui/core";
+import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
+import {Grid, Box, Button, Paper, CircularProgress, useMediaQuery, Typography, Tab, Tabs} from "@material-ui/core";
 import { Skeleton, Autocomplete, Alert } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import { isMobile, isTablet } from "react-device-detect";
@@ -52,9 +52,12 @@ import moment from "moment";
 import { camelCase, startCase } from "lodash";
 import queryString from "query-string";
 import PackageProductsDialog from './PackageProductsDialog'
+import {FaWpforms} from "react-icons/fa";
+import {BiFoodMenu} from "react-icons/bi";
+import TabPanel from "../../components/TabPanel";
+
 
 const rentalProcessSteps = ["New", "Additional Cost", "Serialized Asset", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
-
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const { isOffline, offlineFieldsData, offlineGridData, updateOfflineGridData } = useContext(CustomOfflineContext);
@@ -102,11 +105,24 @@ const RentalManagementDetailsPage = () => {
   const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState(null)
   const [packageForProducts, setPackageForProducts] = useState(null)
+  const [tabValue, setTabValue] = useState(0);
 
   const { pricingConditionApi } = pricingCondition
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
+  }
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
   }
 
   useEffect(() => {
@@ -123,7 +139,7 @@ const RentalManagementDetailsPage = () => {
       handleSaveAdditionalCost(additionalCost)
     }
 
-    if (currentStep > 0) {
+    if (currentStep >= 0 && currentStep <= 4) {
       axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/process-status`, { "processStatus": rentalProcessSteps[currentStep] }).then(({ data }) => {
       }).catch((error) => {
         toastConfig.setToastConfig(error);
@@ -132,9 +148,9 @@ const RentalManagementDetailsPage = () => {
     // eslint-disable-next-line
   }, [currentStep]);
 
-  useEffect(() => {
-    updateStatus()
-  }, [currentStep, productInventory])
+  // useEffect(() => {
+  //   updateStatus()
+  // }, [currentStep, productInventory])
 
   useEffect(() => {
     if (isSmallScreen) {
@@ -143,7 +159,6 @@ const RentalManagementDetailsPage = () => {
   }, [isSmallScreen])
 
   const calculatePricing = (arr: any[]) => {
-    console.log(arr)
     //materialType can be =["product","packages","productCategory"]
     //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
     if (rentalManagementData) {
@@ -190,43 +205,43 @@ const RentalManagementDetailsPage = () => {
 
   };
 
-  const updateStatus = () => {
-    if (productInventory.length > 0 && rentalManagementData) {
-      const leftItems = [];
-      for (const product of productInventory) {
-        if (!product.deliveryTicket) {
-          leftItems.push(product.id)
-        }
-      }
+  // const updateStatus = () => {
+  //   if (productInventory.length > 0 && rentalManagementData) {
+  //     const leftItems = [];
+  //     for (const product of productInventory) {
+  //       if (!product.deliveryTicket) {
+  //         leftItems.push(product.id)
+  //       }
+  //     }
 
-      if (currentStep === 4 && leftItems.length === 0 && rentalManagementData) {
-        if (rentalManagementData.status === "New") {
-          const tempUpdateData = {
-            "_id": rentalManagementData._id,
-            "rentalJobName": rentalManagementData.rentalJobName,
-            "rentalJobID": rentalManagementData.rentalJobID,
-            "customerAccount": rentalManagementData.customerAccount?.optionValue,
-            "customerContact": rentalManagementData.customerContact?.optionValue,
-            "shippingAddress": rentalManagementData.shippingAddress,
-            "currency": rentalManagementData.currency,
-            "rentalStartDate": rentalManagementData.rentalStartDate,
-            "rentalEndDate": rentalManagementData.rentalEndDate,
-            "jobDescription": rentalManagementData.jobDescription,
-            "status": "Ready to Ship",
-            "owner": rentalManagementData.owner.optionValue,
-            // "collaborator": rentalManagementData.collaborator,
+  //     if (currentStep === 4 && leftItems.length === 0 && rentalManagementData) {
+  //       if (rentalManagementData.status === "New") {
+  //         const tempUpdateData = {
+  //           "_id": rentalManagementData._id,
+  //           "rentalJobName": rentalManagementData.rentalJobName,
+  //           "rentalJobID": rentalManagementData.rentalJobID,
+  //           "customerAccount": rentalManagementData.customerAccount?.optionValue,
+  //           "customerContact": rentalManagementData.customerContact?.optionValue,
+  //           "shippingAddress": rentalManagementData.shippingAddress,
+  //           "currency": rentalManagementData.currency,
+  //           "rentalStartDate": rentalManagementData.rentalStartDate,
+  //           "rentalEndDate": rentalManagementData.rentalEndDate,
+  //           "jobDescription": rentalManagementData.jobDescription,
+  //           "status": "Ready to Ship",
+  //           "owner": rentalManagementData.owner.optionValue,
+  //           // "collaborator": rentalManagementData.collaborator,
 
-          }
-          axiosInstance().put(`${rentalManagement.rentalManagementApi}`, tempUpdateData)
-            .then(() => {
-              fetchRentalManagementData()
-            }).catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        }
-      }
-    }
-  }
+  //         }
+  //         axiosInstance().put(`${rentalManagement.rentalManagementApi}`, tempUpdateData)
+  //           .then(() => {
+  //             fetchRentalManagementData()
+  //           }).catch((error) => {
+  //             toastConfig.setToastConfig(error);
+  //           });
+  //       }
+  //     }
+  //   }
+  // }
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
@@ -377,19 +392,19 @@ const RentalManagementDetailsPage = () => {
         id: u._id,
         description: u.packageDescription,
       })));
-      tempInventory = tempInventory.map(u => {
-        let qty = parseInt(u?.quantity || u?.qty) || 0
-        let price = qty > 0 ? (parseInt(u?.price) * qty) || (parseInt(u?.mrp) * qty) || 0 : (parseInt(u.price) || 0)
-        let discount = parseInt(u?.discount) || 0
-        let finalPrice = parseInt(u?.finalPrice) || 0
+      // tempInventory = tempInventory.map(u => {
+      //   let qty = parseInt(u?.quantity || u?.qty) || 0
+      //   let price = qty > 0 ? (parseInt(u?.price) * qty) || (parseInt(u?.mrp) * qty) || 0 : (parseInt(u.price) || 0)
+      //   let discount = parseInt(u?.discount) || 0
+      //   let finalPrice = parseInt(u?.finalPrice) || 0
 
-        finalPrice = (discount > 0 && price > 0) ? price - ((price * discount) / 100) : price
-        return {
-          ...u,
-          qty: qty,
-          finalPrice: finalPrice
-        }
-      })
+      //   finalPrice = (discount > 0 && price > 0) ? price - ((price * discount) / 100) : price
+      //   return {
+      //     ...u,
+      //     qty: qty,
+      //     finalPrice: finalPrice
+      //   }
+      // })
 
       setProductInventory(tempInventory)
       setSerializeAssets(data.data?.inventory || [])
@@ -425,77 +440,72 @@ const RentalManagementDetailsPage = () => {
     let extractedProducts = []
     let newDataOfRow = [...rowData]
 
-    newDataOfRow.forEach((rd) => {
-      let productsInPkg = []
+    let packageProducts = newDataOfRow.filter(rd => rd.type === "productInPackage")
+    let packages = newDataOfRow.filter(rd => rd.type === "Package")
+    let products = newDataOfRow.filter(rd => rd.type === "Product")
+    let modifiedPkgProducts = [];
 
-      newDataOfRow.forEach((rd1) => {
-        if (rd.type === "Package" && rd._id === rd1.packageId) {
-          productsInPkg.push(rd1);
-        }
+    packages.forEach((pkg: any) => {
+      let currentPkgProducts = packageProducts.filter((p: any) => p.packageId === pkg.id);
+      currentPkgProducts.forEach((p: any) => {
+        let product = { ...p, pkgQty: pkg.qty, totalQty: pkg.qty * p.qty };
+        modifiedPkgProducts.push(product)
       })
-
-      if (rd.type === "Package") { rd.products = productsInPkg; }
-
-      if (rd) {
-        extractedProducts.push(rd)
-      }
     })
 
-    extractedProducts = extractedProducts.filter((product) => product.type !== "productInPackage");
+    extractedProducts = [...products, ...packages, ...modifiedPkgProducts]
 
 
-    let newExtractedData = []
+    // newDataOfRow.forEach((rd) => {
+    //   let productsInPkg = []
+    //   newDataOfRow.forEach((rd1) => {
+    //     if (rd.type === "Package" && rd._id === rd1.packageId) {
+    //       productsInPkg.push(rd1);
+    //     }
+    //   })
+    //   if (rd.type === "Package") { rd.products = productsInPkg; }
+    //   if (rd) {
+    //     extractedProducts.push(rd)
+    //   }
+    // })
+    // extractedProducts = extractedProducts.filter((product) => product.type !== "productInPackage");
+    // let newExtractedData = []
+    // if (extractedProducts.length > 0) {
+    //   extractedProducts.forEach((pkg, indx) => {
+    //     let pkgData = { ...pkg };
+    //     pkgData = { ...pkgData, detail: pkgData.detail };
+    //     if (pkgData.type === "Package") {
+    //       const { products } = pkgData;
+    //       if (products && products.length > 0) {
+    //         products.forEach((product, i) => {
+    //           let productData = { ...product };
+    //           let qty = pkg.qty !== 0 && product.qty !== 0
+    //             ? pkg.qty * product.qty
+    //             : pkg.qty !== 0 && product.qty === 0
+    //               ? pkg.qty
+    //               : pkg.qty === 0 && product.qty !== 0
+    //                 ? product.qty : product.qty
 
-    if (extractedProducts.length > 0) {
+    //           productData = {
+    //             ...productData,
+    //             detail: productData.detail,
+    //             totalQty: qty,
+    //             pkgQty: pkgData.qty,
+    //             qty: productData.qty,
+    //             UOM: pkg?.UOM,
+    //             pricingMethod: pkg?.pricingMethod,
+    //             discount: product.discount ? product.discount : 0,
+    //           }
 
-      extractedProducts.forEach((pkg, indx) => {
+    //           newExtractedData.push(productData)
+    //         })
+    //       }
+    //     }
+    //     newExtractedData.push(pkgData)
+    //   })
+    // }
 
-        let pkgData = { ...pkg };
-        pkgData = { ...pkgData, detail: pkgData.detail };
-
-        if (pkgData.type === "Package") {
-
-          const { products } = pkgData;
-
-          if (products && products.length > 0) {
-
-            products.forEach((product, i) => {
-
-              let productData = { ...product };
-
-              let qty = pkg.qty !== 0 && product.qty !== 0
-                ? pkg.qty * product.qty
-                : pkg.qty !== 0 && product.qty === 0
-                  ? pkg.qty
-                  : pkg.qty === 0 && product.qty !== 0
-                    ? product.qty : product.qty
-
-              productData = {
-                ...productData,
-                detail: productData.detail,
-                totalQty: qty,
-                pkgQty: pkgData.qty,
-                qty: productData.qty,
-                UOM: pkg?.UOM,
-                pricingMethod: pkg?.pricingMethod,
-                price: pkg.price && pkg.price !== 0 && 0,
-                finalPrice: parseInt(product?.mrp) && qty
-                  ? parseInt(product.mrp) * qty
-                  : parseInt(product.mrp)
-                    ? parseInt(product.mrp)
-                    : 0,
-                discount: product.discount ? product.discount : 0,
-              }
-
-              newExtractedData.push(productData)
-            })
-          }
-        }
-        newExtractedData.push(pkgData)
-      })
-    }
-
-    return newExtractedData
+    return extractedProducts
   }
 
 
@@ -661,7 +671,7 @@ const RentalManagementDetailsPage = () => {
       field: 'qty',
       title: 'Quantity',
       emptyValue: '- - - - -',
-      editable: 'onUpdate',
+      editable: 'never',
       type: "numeric",
       align: 'left',
       cellStyle: { padding: "0px" },
@@ -740,7 +750,7 @@ const RentalManagementDetailsPage = () => {
       cellStyle: { padding: "0px" },
       render: (rowData) => (
         <div style={{ width: 100 }}>
-          <p>{rowData.finalPrice ? rowData.finalPrice : "- - - - -"}</p>
+          <p>{rowData.finalPrice}</p>
         </div>
       )
     }
@@ -839,6 +849,8 @@ const RentalManagementDetailsPage = () => {
 
   const handleBulkEditData = (values: any) => {
     let updatedArr = selectedProducts.filter(d => d.type !== "productInPackage")
+
+    console.log(updatedArr)
 
     updatedArr = updatedArr.map(d => ({
       "id": d.id,
@@ -986,113 +998,173 @@ const RentalManagementDetailsPage = () => {
                   </DetailsPageHeader>
                 )}
 
-                <Box>
-                  {loadingDetails || !rentalManagementFields.length ? (
-                    <Grid container spacing={2} style={{ padding: "8px" }}>
-                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                    </Grid>
-                  ) : (
-                    <>
-                      {
-                        isInOfflineSaveQueue && <div className="px-3">
-                          <Alert variant="filled" severity="info">Updates are in offline state, it will be affected once you will be in network</Alert>
+
+
+
+
+                <Tabs
+                    className="quote-tab"
+                    value={tabValue}
+                    onChange={handleMainTabChange}
+                    textColor="primary"
+                    TabIndicatorProps={{
+                      style: {
+                        display: 'none'
+                      }
+                    }}
+                >
+                  {/* <Tab
+                        className={"tabLayout"}
+                      style={{
+                        background: tabValue === 0 ? "white" : "",
+                        color: tabValue === 0 ? "blue" : "#163340",
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font ">
+                          <InfoIcon className="mr-1" fontSize="inherit" /> All
+                          Version Status
                         </div>
                       }
+                      {...a11yProps(0)}
+                    /> */}
+                  <Tab
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 1 ? 'white' : '',
+                        color: tabValue === 1 ? '#163340' : '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <FaWpforms className="mr-1" fontSize="inherit" /> Details
+                        </div>
+                      }
+                      {...a11yProps(0)}
+                  />
+                  <Tab
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 2 ? 'white' : '',
+                        color: tabValue === 2 ? 'blue' : '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Product Cost
+                        </div>
+                      }
+                      {...a11yProps(1)}
+                  />
+                  <div className={'uio'}> </div>
+                </Tabs>
 
-                      <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
-                    </>
-                  )}
-                </Box>
-              </Paper>
-            </div>
-            <Box my={1} />
-            <Paper>
-              <Steps
-                className={styles.steps_box}
-                isNextStep={!Boolean(productInventory.length)}
-                steps={rentalProcessSteps.slice(0, 5)}
-                currentStep={currentStep}
-                setCurrentStep={setCurrentStep}
-              />
-              {(currentStep === 0) && (
-                <>
-                  <Box display="flex" justifyContent="space-between" m={1}>
-                    <Box display="flex" alignItems="center">
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          setAddExistingProductDialog(true);
-                          setInventoryType("product")
-                        }}
-                      >
-                        {`Add ${routes.product.title}`}
-                      </Button>
-                      <Box mx={1} />
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          setAddExistingProductDialog(true);
-                          setInventoryType("package")
-                        }}
-                      >
-                        {`Add ${routes.packages.title}`}
-                      </Button>
-                      <Box mx={1} />
-                      {selectedProducts && selectedProducts.length > 0 && <Typography>Selected ({selectedProducts.length})</Typography>}
-                    </Box>
-                    <Box display="flex">
-                      <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
+
+                <TabPanel value={tabValue} index={0}>
+                  <Box>
+                    {loadingDetails || !rentalManagementFields.length ? (
+                        <Grid container spacing={2} style={{ padding: "8px" }}>
+                          <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                        </Grid>
+                    ) : (
+                        <>
+                          {
+                            isInOfflineSaveQueue && <div className="px-3">
+                              <Alert variant="filled" severity="info">Updates are in offline state, it will be affected once you will be in network</Alert>
+                            </div>
+                          }
+
+                          <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
+                        </>
+                    )}
+                  </Box>
+                </TabPanel>
+
+                <TabPanel value={tabValue} index={1}>
+                  <Paper>
+                    <Steps
+                        className={styles.steps_box}
+                        isNextStep={!Boolean(productInventory.length)}
+                        steps={rentalProcessSteps.slice(0, 5)}
+                        currentStep={currentStep}
+                        setCurrentStep={setCurrentStep}
+                    />
+                    {(currentStep === 0) && (
+                        <>
+                          <Box display="flex" justifyContent="space-between" m={1}>
+                            <Box display="flex" alignItems="center">
+                              <Button
+                                  variant="contained"
+                                  color="primary"
+                                  size="small"
+                                  onClick={() => {
+                                    setAddExistingProductDialog(true);
+                                    setInventoryType("product")
+                                  }}
+                              >
+                                {`Add ${routes.product.title}`}
+                              </Button>
+                              <Box mx={1} />
+                              <Button
+                                  variant="contained"
+                                  color="primary"
+                                  size="small"
+                                  onClick={() => {
+                                    setAddExistingProductDialog(true);
+                                    setInventoryType("package")
+                                  }}
+                              >
+                                {`Add ${routes.packages.title}`}
+                              </Button>
+                              <Box mx={1} />
+                              {selectedProducts && selectedProducts.length > 0 && <Typography>Selected ({selectedProducts.length})</Typography>}
+                            </Box>
+                            <Box display="flex">
+                              <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
                         <span>
                           <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            disabled={!Boolean(selectedProducts && selectedProducts.length)}
-                            onClick={() => setProductEdit(true)}
+                              variant="contained"
+                              color="primary"
+                              size="small"
+                              disabled={!Boolean(selectedProducts && selectedProducts.length)}
+                              onClick={() => setProductEdit(true)}
                           >
                             Bulk Edit
                           </Button>
                         </span>
-                      </HtmlTooltip>
-                      <Box mx={1} />
-                      <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Delete selected records" : "Select records to delete"}>
+                              </HtmlTooltip>
+                              <Box mx={1} />
+                              <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Delete selected records" : "Select records to delete"}>
                         <span>
 
                           <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            disabled={!Boolean(selectedProducts && selectedProducts.length) || isDeleting}
-                            onClick={() => {
-                              const dataToDelete = selectedProducts && selectedProducts.map((rec: any) => {
-                                const obj: any = {};
+                              variant="contained"
+                              color="primary"
+                              size="small"
+                              disabled={!Boolean(selectedProducts && selectedProducts.length) || isDeleting}
+                              onClick={() => {
+                                const dataToDelete = selectedProducts && selectedProducts.map((rec: any) => {
+                                  const obj: any = {};
 
-                                obj.id = rec._id ?? rec.id;
-                                obj.type = rec?.type.includes("roduct") ? "product" : "package";
-                                if (rec?.type === "productInPackage") {
-                                  obj.packageId = rec.packageId
-                                }
+                                  obj.id = rec._id ?? rec.id;
+                                  obj.type = rec?.type.toLowerCase();
+                                  if (rec?.type === "productInPackage") {
+                                    obj.packageId = rec.packageId
+                                  }
 
-                                return obj
-                              })
-                              setDeleteData(dataToDelete)
-                            }}
+                                  return obj
+                                })
+                                setDeleteData(dataToDelete)
+                              }}
 
-                            endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
+                              endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
                           >
                             Delete
                           </Button>
                         </span>
-                      </HtmlTooltip>
-                    </Box>
-                  </Box>
-                  {columns ?
-                    <>
-                      {/* <CustomAgGridEditable
+                              </HtmlTooltip>
+                            </Box>
+                          </Box>
+                          {columns ?
+                              <>
+                                {/* <CustomAgGridEditable
                         columns={columns}
                         dataRows={dataRows}
                         frameworkComponents={frameworkComponents}
@@ -1109,298 +1181,308 @@ const RentalManagementDetailsPage = () => {
                         renderedFrom="rentalManagementDetailsPageInventory"
                         refreshGrid={fetchProductInventory}
                       /> */}
-                      <Box
-                        p="6px"
-                        zIndex={5}
-                        width={
-                          isTabletScreen
-                            ? "calc(100vw - 20px)"
-                            : isSmallScreen
-                              ? "calc(100vw - 78px)"
-                              : showActivity ? "100%" : "calc(100vw - 100px)"
-                        }
+                                <Box
+                                    p="6px"
+                                    zIndex={5}
+                                    width={
+                                      isTabletScreen
+                                          ? "calc(100vw - 20px)"
+                                          : isSmallScreen
+                                              ? "calc(100vw - 78px)"
+                                              : showActivity ? "100%" : "calc(100vw - 100px)"
+                                    }
 
-                      >
-                        <MaterialTableComponent
-                          // calculatePricing={calculatePricing}
-                          columns={columns}
-                          rowData={dataRows}
-                          title={""}
-                          loading={loading || isUpdating}
-                          onSelection={(d) => setSelectedProducts(d)}
-                          parentChildData={(row, rows) => rows.find((a) => a.id === row.packageId)}
-                          cellEditable={{
-                            onCellEditApproved: (newValue, oldValue, rowData, columnDef) => {
-                              return new Promise((resolve, reject) => {
-                                rowData[columnDef.field] = parseInt(newValue)
-                                handleSingleEdit(rowData)
+                                >
+                                  <MaterialTableComponent
+                                      // calculatePricing={calculatePricing}
+                                      columns={columns}
+                                      rowData={dataRows}
+                                      title={""}
+                                      loading={loading || isUpdating}
+                                      onSelection={(d) => setSelectedProducts(d)}
+                                      parentChildData={(row, rows) => rows.find((a) => a.id === row.packageId)}
+                                      cellEditable={{
+                                        onCellEditApproved: (newValue, oldValue, rowData, columnDef) => {
+                                          return new Promise((resolve, reject) => {
+                                            rowData[columnDef.field] = parseInt(newValue)
+                                            handleSingleEdit(rowData)
 
-                                setTimeout(resolve, 100)
-                              });
-                            }
-                          }}
-                        // onRowClick={(rowData) => {
-                        //   setProductEdit(true)
-                        //   setSelectedProductData(rowData)
-                        // }}
-                        />
-                      </Box>
-
-                    </>
-                    : <Box
-                      p={2}
-                      height={500}
-                      bgcolor="white">
-                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                    </Box>
-                  }
-                </>
-              )}
-              {(currentStep === 1) && (
-                <Formik
-                  initialValues={{ additionalCost: additionalCost || [{ "id": "", "description": "", "uom": "", "qty": 0, "type": "", "amount": 0 }] }}
-                  enableReinitialize={true}
-                  onSubmit={() => { }}>
-                  {({ values }) => (
-                    <>
-                      <Form>
-                        {setAdditionalCost(values.additionalCost)}
-                        <Container className="p-0">
-                          <Grid
-                            container
-                            direction="row"
-                            justify="space-evenly"
-                            alignItems="center"
-                          >
-                            <Grid item md={12}>
-                              {values.additionalCost && values.additionalCost.length > 0 && (
-
-                                <Box className={""}>
-                                  <Grid
-                                    container
-                                    spacing={2}
-                                    direction="row"
-                                    justify="flex-start"
-                                    alignItems="center"
-                                  >
-                                    <Grid item md={1}> # </Grid>
-                                    <Grid item md={2}> Cost Type </Grid>
-                                    <Grid item md={2}> Description </Grid>
-                                    <Grid item md={2}> Quantity </Grid>
-                                    <Grid item md={2}> Unit of Measure </Grid>
-                                    <Grid item md={2}> Amount </Grid>
-                                    <Grid item md={1}></Grid>
-
-                                  </Grid>
+                                            setTimeout(resolve, 100)
+                                          });
+                                        }
+                                      }}
+                                      // onRowClick={(rowData) => {
+                                      //   setProductEdit(true)
+                                      //   setSelectedProductData(rowData)
+                                      // }}
+                                  />
                                 </Box>
-                              )}
-                              <Box className="p-1">
-                                <FieldArray
-                                  name="additionalCost"
-                                  render={arrayHelpers => (
-                                    <div>
-                                      {values.additionalCost && values.additionalCost.length > 0 ? (
-                                        values.additionalCost.map((userVal, index) => (
-                                          <Grid
-                                            container
-                                            spacing={2}
-                                            direction="row"
-                                            justify="flex-start"
-                                            alignItems="center"
-                                            key={index}
-                                          >
-                                            <Grid item md={1}>{index + 1}</Grid>
-                                            <Grid item md={2}>
-                                              <Autocomplete
-                                                size="small"
-                                                style={{ minWidth: 200 }}
-                                                value={userVal.type}
-                                                options={costTypeList}
-                                                getOptionLabel={(option: any) => option ? option : ""}
-                                                onChange={(_, newValue) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.additionalCost[index],
-                                                    ["type"]: newValue,
-                                                  });
-                                                }}
 
-                                                renderInput={(params) => <TextField
-                                                  {...params}
-                                                  variant="outlined"
-                                                  name="nameField"
-                                                  label="Cost Type"
-                                                />}
-                                              />
-                                            </Grid>
-                                            <Grid item md={2}>
-                                              <Field
-                                                fullWidth
-                                                variant="outlined"
-                                                type="text"
-                                                size="small"
-                                                component={TextField}
-                                                name="description"
-                                                placeholder="Description"
-                                                value={userVal.description}
-                                                onChange={(e) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.additionalCost[index],
-                                                    ["description"]: e.target.value
-                                                  })
-                                                }}
-                                              />
-                                            </Grid>
-                                            <Grid item md={2}>
-                                              <Field
-                                                fullWidth
-                                                variant="outlined"
-                                                type="text"
-                                                size="small"
-                                                component={TextField}
-                                                name="Quantity"
-                                                placeholder="Quantity"
-                                                value={userVal.qty}
-                                                onChange={(e) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.additionalCost[index],
-                                                    ["qty"]: e.target.value.replace(/[^0-9]/g, '')
-                                                  })
-                                                }}
-                                              />
-                                            </Grid>
-                                            <Grid item md={2}>
-                                              <Autocomplete
-                                                size="small"
-                                                style={{ minWidth: 200 }}
-                                                value={userVal.uom}
-                                                freeSolo
-                                                autoSelect
-                                                options={uomTypeList}
-                                                getOptionLabel={(option: any) => option ? option : ""}
-                                                onChange={(_, newValue) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.additionalCost[index],
-                                                    ["uom"]: newValue,
-                                                  });
-                                                }}
-
-                                                renderInput={(params) => <TextField
-                                                  {...params}
-                                                  variant="outlined"
-                                                  name="nameField"
-                                                  label="UOM"
-                                                />}
-                                              />
-                                            </Grid>
-                                            {
-                                              <Grid item md={2}>
-                                                <Field
-                                                  fullWidth
-                                                  InputProps={{
-                                                    startAdornment: (
-                                                      <InputAdornment position="start">
-                                                        {currencySymbol ? currencySymbol : ""}
-                                                      </InputAdornment>
-                                                    ),
-                                                  }}
-                                                  startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ""}
-                                                  variant="outlined"
-                                                  type="text"
-                                                  size="small"
-                                                  component={TextField}
-                                                  name="amount"
-                                                  placeholder="Enter Amount"
-                                                  value={userVal.amount}
-                                                  onChange={(e) => {
-                                                    arrayHelpers.replace(index, {
-                                                      ...values.additionalCost[index],
-                                                      ["amount"]: e.target.value.replace(/[^0-9]/g, '')
-                                                    })
-                                                  }}
-                                                />
-                                              </Grid>
-                                            }
-                                            <Grid item md={1}>
-                                              <ButtonGroup size="small" aria-label="small outlined button group">
-                                                <IconButton
-                                                  size="small"
-                                                  aria-label="add"
-                                                  onClick={() => {
-                                                    arrayHelpers.push({
-                                                      "id": "", "description": "", "uom": "", "qty": "", "type": "", "amount": 0
-                                                    })
-                                                  }
-                                                  } >
-                                                  <Add />
-                                                </IconButton>
-                                                <IconButton size="small" aria-label="delete" style={{ color: "#f44336" }} onClick={() => arrayHelpers.remove(index)} >
-                                                  <Delete />
-                                                </IconButton>
-                                              </ButtonGroup>
-                                            </Grid>
-                                          </Grid>
-                                        ))
-                                      ) : (
-                                        <Grid item md={12} className="d-flex  align-items-center justify-content-center">
-                                          <Button
-                                            variant="contained"
-                                            color="primary"
-                                            size="large"
-                                            onClick={() => {
-                                              arrayHelpers.push({ "id": "", "description": "", "uom": "", "qty": "", "type": "", "amount": 0 })
-                                            }}
-                                          >
-                                            Add Cost Type
-                                          </Button>
-                                        </Grid>
-                                      )}
-                                    </div>
-                                  )}
-                                />
+                              </>
+                              : <Box
+                                  p={2}
+                                  height={500}
+                                  bgcolor="white">
+                                <CommonSkeleton lenArray={[...Array(10).keys()]} />
                               </Box>
-                            </Grid>
-                          </Grid>
-                        </Container>
-                      </Form>
-                    </>
-                  )}
-                </Formik>
+                          }
+                        </>
+                    )}
+                    {(currentStep === 1) && (
+                        <Formik
+                            initialValues={{ additionalCost: additionalCost || [{ "id": "", "description": "", "uom": "", "qty": 0, "type": "", "amount": 0 }] }}
+                            enableReinitialize={true}
+                            onSubmit={() => { }}>
+                          {({ values }) => (
+                              <>
+                                <Form>
+                                  {setAdditionalCost(values.additionalCost)}
+                                  <Container className="p-0">
+                                    <Grid
+                                        container
+                                        direction="row"
+                                        justify="space-evenly"
+                                        alignItems="center"
+                                    >
+                                      <Grid item md={12}>
+                                        {values.additionalCost && values.additionalCost.length > 0 && (
 
-              )}
-              {(currentStep === 2) && (
-                <SerializedAssetStep
-                  rentalManagementId={id}
-                  productInventory={[
-                    ...productInventory,
-                    ...serializeAssets
-                  ]}
-                  fetchProductsData={fetchProductInventory}
-                  isSmallScreen={isSmallScreen}
-                  isTabletScreen={isTabletScreen}
-                  showActivity={showActivity}
-                  currentStep={currentStep}
-                  currencySymbol={currencySymbol}
-                  loading={loading}
-                />
-              )}
-              {(currentStep === 3) && (
-                <DeliveryTicket
-                  rentalManagementId={id}
-                  warehouselist={warehouseList}
-                  productInventory={productInventory}
-                  currentStep={currentStep}
-                  handleDeliveryTicketDialog={handleDeliveryTicketDialog}
-                />
-              )}
-              {(currentStep === 4 || currentStep === 5) && (
-                <ReceivingTicket
-                  rentalManagementId={id}
-                  productInventory={productInventory}
-                  currentStep={currentStep}
-                  handleReceivingTicketDialog={handleReceivingTicketDialog}
-                />
-              )}
-            </Paper>
+                                            <Box className={""}>
+                                              <Grid
+                                                  container
+                                                  spacing={2}
+                                                  direction="row"
+                                                  justify="flex-start"
+                                                  alignItems="center"
+                                              >
+                                                <Grid item md={1}> # </Grid>
+                                                <Grid item md={2}> Cost Type </Grid>
+                                                <Grid item md={2}> Description </Grid>
+                                                <Grid item md={2}> Quantity </Grid>
+                                                <Grid item md={2}> Unit of Measure </Grid>
+                                                <Grid item md={2}> Amount </Grid>
+                                                <Grid item md={1}></Grid>
+
+                                              </Grid>
+                                            </Box>
+                                        )}
+                                        <Box className="p-1">
+                                          <FieldArray
+                                              name="additionalCost"
+                                              render={arrayHelpers => (
+                                                  <div>
+                                                    {values.additionalCost && values.additionalCost.length > 0 ? (
+                                                        values.additionalCost.map((userVal, index) => (
+                                                            <Grid
+                                                                container
+                                                                spacing={2}
+                                                                direction="row"
+                                                                justify="flex-start"
+                                                                alignItems="center"
+                                                                key={index}
+                                                            >
+                                                              <Grid item md={1}>{index + 1}</Grid>
+                                                              <Grid item md={2}>
+                                                                <Autocomplete
+                                                                    size="small"
+                                                                    style={{ minWidth: 200 }}
+                                                                    value={userVal.type}
+                                                                    options={costTypeList}
+                                                                    getOptionLabel={(option: any) => option ? option : ""}
+                                                                    onChange={(_, newValue) => {
+                                                                      arrayHelpers.replace(index, {
+                                                                        ...values.additionalCost[index],
+                                                                        ["type"]: newValue,
+                                                                      });
+                                                                    }}
+
+                                                                    renderInput={(params) => <TextField
+                                                                        {...params}
+                                                                        variant="outlined"
+                                                                        name="nameField"
+                                                                        label="Cost Type"
+                                                                    />}
+                                                                />
+                                                              </Grid>
+                                                              <Grid item md={2}>
+                                                                <Field
+                                                                    fullWidth
+                                                                    variant="outlined"
+                                                                    type="text"
+                                                                    size="small"
+                                                                    component={TextField}
+                                                                    name="description"
+                                                                    placeholder="Description"
+                                                                    value={userVal.description}
+                                                                    onChange={(e) => {
+                                                                      arrayHelpers.replace(index, {
+                                                                        ...values.additionalCost[index],
+                                                                        ["description"]: e.target.value
+                                                                      })
+                                                                    }}
+                                                                />
+                                                              </Grid>
+                                                              <Grid item md={2}>
+                                                                <Field
+                                                                    fullWidth
+                                                                    variant="outlined"
+                                                                    type="text"
+                                                                    size="small"
+                                                                    component={TextField}
+                                                                    name="Quantity"
+                                                                    placeholder="Quantity"
+                                                                    value={userVal.qty}
+                                                                    onChange={(e) => {
+                                                                      arrayHelpers.replace(index, {
+                                                                        ...values.additionalCost[index],
+                                                                        ["qty"]: e.target.value.replace(/[^0-9]/g, '')
+                                                                      })
+                                                                    }}
+                                                                />
+                                                              </Grid>
+                                                              <Grid item md={2}>
+                                                                <Autocomplete
+                                                                    size="small"
+                                                                    style={{ minWidth: 200 }}
+                                                                    value={userVal.uom}
+                                                                    freeSolo
+                                                                    autoSelect
+                                                                    options={uomTypeList}
+                                                                    getOptionLabel={(option: any) => option ? option : ""}
+                                                                    onChange={(_, newValue) => {
+                                                                      arrayHelpers.replace(index, {
+                                                                        ...values.additionalCost[index],
+                                                                        ["uom"]: newValue,
+                                                                      });
+                                                                    }}
+
+                                                                    renderInput={(params) => <TextField
+                                                                        {...params}
+                                                                        variant="outlined"
+                                                                        name="nameField"
+                                                                        label="UOM"
+                                                                    />}
+                                                                />
+                                                              </Grid>
+                                                              {
+                                                                <Grid item md={2}>
+                                                                  <Field
+                                                                      fullWidth
+                                                                      InputProps={{
+                                                                        startAdornment: (
+                                                                            <InputAdornment position="start">
+                                                                              {currencySymbol ? currencySymbol : ""}
+                                                                            </InputAdornment>
+                                                                        ),
+                                                                      }}
+                                                                      startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ""}
+                                                                      variant="outlined"
+                                                                      type="text"
+                                                                      size="small"
+                                                                      component={TextField}
+                                                                      name="amount"
+                                                                      placeholder="Enter Amount"
+                                                                      value={userVal.amount}
+                                                                      onChange={(e) => {
+                                                                        arrayHelpers.replace(index, {
+                                                                          ...values.additionalCost[index],
+                                                                          ["amount"]: e.target.value.replace(/[^0-9]/g, '')
+                                                                        })
+                                                                      }}
+                                                                  />
+                                                                </Grid>
+                                                              }
+                                                              <Grid item md={1}>
+                                                                <ButtonGroup size="small" aria-label="small outlined button group">
+                                                                  <IconButton
+                                                                      size="small"
+                                                                      aria-label="add"
+                                                                      onClick={() => {
+                                                                        arrayHelpers.push({
+                                                                          "id": "", "description": "", "uom": "", "qty": "", "type": "", "amount": 0
+                                                                        })
+                                                                      }
+                                                                      } >
+                                                                    <Add />
+                                                                  </IconButton>
+                                                                  <IconButton size="small" aria-label="delete" style={{ color: "#f44336" }} onClick={() => arrayHelpers.remove(index)} >
+                                                                    <Delete />
+                                                                  </IconButton>
+                                                                </ButtonGroup>
+                                                              </Grid>
+                                                            </Grid>
+                                                        ))
+                                                    ) : (
+                                                        <Grid item md={12} className="d-flex  align-items-center justify-content-center">
+                                                          <Button
+                                                              variant="contained"
+                                                              color="primary"
+                                                              size="large"
+                                                              onClick={() => {
+                                                                arrayHelpers.push({ "id": "", "description": "", "uom": "", "qty": "", "type": "", "amount": 0 })
+                                                              }}
+                                                          >
+                                                            Add Cost Type
+                                                          </Button>
+                                                        </Grid>
+                                                    )}
+                                                  </div>
+                                              )}
+                                          />
+                                        </Box>
+                                      </Grid>
+                                    </Grid>
+                                  </Container>
+                                </Form>
+                              </>
+                          )}
+                        </Formik>
+
+                    )}
+                    {(currentStep === 2) && (
+                        <SerializedAssetStep
+                            rentalManagementId={id}
+                            productInventory={[
+                              ...productInventory,
+                              ...serializeAssets
+                            ]}
+                            fetchProductsData={fetchProductInventory}
+                            isSmallScreen={isSmallScreen}
+                            isTabletScreen={isTabletScreen}
+                            showActivity={showActivity}
+                            currentStep={currentStep}
+                            currencySymbol={currencySymbol}
+                            loading={loading}
+                        />
+                    )}
+                    {(currentStep === 3) && (
+                        <DeliveryTicket
+                            fetchRentalData={fetchRentalManagementData}
+                            rentalManagementData={rentalManagementData}
+                            rentalManagementId={id}
+                            warehouselist={warehouseList}
+                            productInventory={serializeAssets}
+                            currentStep={currentStep}
+                            handleDeliveryTicketDialog={handleDeliveryTicketDialog}
+                        />
+                    )}
+                    {(currentStep === 4 || currentStep === 5) && (
+                        <ReceivingTicket
+                            rentalManagementId={id}
+                            productInventory={productInventory}
+                            currentStep={currentStep}
+                            handleReceivingTicketDialog={handleReceivingTicketDialog}
+                        />
+                    )}
+                  </Paper>
+                </TabPanel>
+
+
+
+              </Paper>
+            </div>
+            <Box my={1} />
+
           </div>
           <div className="position-relative">
             <HideWhenOffline>
