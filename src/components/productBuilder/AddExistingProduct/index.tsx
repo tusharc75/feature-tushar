@@ -31,6 +31,7 @@ var levalOrderBy = [
 ];
 
 const ignoreField = ["qty", "priceTemplate"]
+const renderedFrom = "productPage";
 
 const AddExistingProduct = (props) => {
 
@@ -39,7 +40,8 @@ const AddExistingProduct = (props) => {
     const [productList, setProductList] = useState([]);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search,
+        filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
     const [productColoums, setProductColoums] = useState([]);
     const [productRendererNames, setProductRendererNames] = useState([]);
@@ -52,6 +54,7 @@ const AddExistingProduct = (props) => {
     const [productTemplate, setProductTemplate] = useState(null);
     const [isProductTemplate, setIsProductTemplate] = useState(true);
 
+    const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
     useEffect(() => {
         axiosInstance().get("/product-category?sortBy=name&orderBy=asc").then(({ data: { data } }) => {
@@ -79,7 +82,7 @@ const AddExistingProduct = (props) => {
         if (productColoums && productColoums.length) {
             fetchProduct()
         }
-    }, [page, limit, filters, sorting, search, productColoums, productCategory, productTemplate]);
+    }, [page, limit, filters, sorting, search, productColoums, productCategory, productTemplate, showFilteredRecordsOnly]);
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Product").then(({ data: { data } }) => {
@@ -127,6 +130,12 @@ const AddExistingProduct = (props) => {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
+
+        if (showFilteredRecordsOnly) {
+            const savedIds = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedIds)}`;
+          }
+
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
@@ -163,9 +172,21 @@ const AddExistingProduct = (props) => {
 
     const fetchProduct = () => {
         dispatch({ type: "loading", loading: true });
+        
         if (gridApi) {
             gridApi.setRowData([]);
         }
+
+        let oldSelectedRecords = [];
+        const localStorageKey = `${renderedFrom}_selected`;
+        try {
+            if (localStorage.getItem(localStorageKey)) {
+                oldSelectedRecords = [...JSON.parse(localStorage.getItem(localStorageKey))]
+            }
+        } catch (ex) {
+            console.error("Error is parsing products localstorage value")
+        }
+
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
             setProductList(JSON.parse(JSON.stringify(data.data)));
@@ -405,7 +426,8 @@ const AddExistingProduct = (props) => {
                     allowAction={false}
                     loading={loading}
                     refreshGrid={fetchProduct}
-                    renderedFrom="productPage"
+                    renderedFrom={renderedFrom}
+                    showOnlyShowFilteredRecordSwitch={true}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
