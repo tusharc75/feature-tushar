@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ImportExportLinks({ ids = [], permissions, module, api,
   afterImportCompleted, recordsToExport = 0, exportSelectedRecords = null, isExportAllOrSomeFeature = false,
-  onExportToExcelSuccess = () => { }, total = 0, additionalParams = null, isBackgroundWhite = false
+  onExportToExcelSuccess = () => { }, total = 0, additionalParams = null, isBackgroundWhite = false, renderedFrom = null
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery("(max-width: 960px)");
@@ -139,7 +139,13 @@ export default function ImportExportLinks({ ids = [], permissions, module, api,
         exportSelectedRecords()
         return
       }
-      exportApi = exportApi + `&ids=${JSON.stringify(ids)}`
+
+      let selectedIds = [...ids];
+      if (renderedFrom) {
+        selectedIds = [...(localStorage.getItem(renderedFrom) ? JSON.parse(localStorage.getItem(renderedFrom)) : [])]
+      }
+
+      exportApi = exportApi + `&ids=${JSON.stringify(selectedIds)}`
     }
     axiosInstance()
       .get(exportApi, {
