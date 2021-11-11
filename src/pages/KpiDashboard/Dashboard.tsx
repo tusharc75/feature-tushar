@@ -40,14 +40,21 @@ const Dashboard = () => {
     }
   });
 
+  useEffect(() => {
+    if (salesFilter?.customerAccount) {
+      console.log('salesFilter?.customerAccount', salesFilter?.customerAccount)
+    }
+
+  }, [salesFilter?.customerAccount])
+
   const getExchangeRates = async (date, amount) => {
     if (filterCurrency && filterCurrency !== currency) {
-      if (amount > 0) {  
+      if (amount > 0) {
         try {
           const host = 'api.frankfurter.app';
           const res = await fetch(`https://${host}/${date}?amount=${amount}&from=${currency}&to=${filterCurrency}`);
           const data = await res.json();
-          
+
           return data;
         } catch (error) {
           console.error(error);
@@ -114,6 +121,7 @@ const Dashboard = () => {
     axiosInstance()
       .get(`${customerAccount.accountApi}?limit=0`)
       .then(({ data: { data } }) => {
+        console.log('data', data)
         data = data.map((d) => ({
           id: d._id,
           name: d.accountName

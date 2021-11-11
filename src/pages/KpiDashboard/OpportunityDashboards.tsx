@@ -205,7 +205,7 @@ const OpportunityDashboards = (props) => {
             <Box mb={2} p={2} display="flex" alignItems="center">
               <Box flex={0.5}>
                 <Typography variant="h6" color="secondary">
-                  Number Of Quotes
+                  Number Of Offers
                 </Typography>
                 <Box display="flex" alignItems="center">
                   <Typography variant="h6" color="textSecondary">
@@ -230,7 +230,8 @@ const OpportunityDashboards = (props) => {
 
               <Box flex={0.5}>
                 <Typography variant="h6" color="secondary">
-                  {statusText[status] !== 'Lost' ? statusText[status] : 'Open'} Quotes
+                  {statusText[status] === 'Won' ? "Success Rate in" :
+                    statusText[status] !== 'Lost' ? statusText[status] : 'Open'} Quotes
                 </Typography>
                 <Box display="flex" alignItems="center">
                   {openQuoteData.open &&
