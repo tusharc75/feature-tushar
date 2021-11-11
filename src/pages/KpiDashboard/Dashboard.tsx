@@ -42,12 +42,12 @@ const Dashboard = () => {
 
   const getExchangeRates = async (date, amount) => {
     if (filterCurrency && filterCurrency !== currency) {
-      if (amount > 0) {  
+      if (amount > 0) {
         try {
           const host = 'api.frankfurter.app';
           const res = await fetch(`https://${host}/${date}?amount=${amount}&from=${currency}&to=${filterCurrency}`);
           const data = await res.json();
-          
+
           return data;
         } catch (error) {
           console.error(error);
