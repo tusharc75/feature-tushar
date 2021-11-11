@@ -213,10 +213,17 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
       axiosInstance()
         .post("/project-Sales", values)
         .then(({ data }) => {
-          console.log('data', data?.data)
+          if (accountId) {
+            axiosInstance()
+              .put("/project-sales/add-customer-account", {
+                _id: data?.data._id,
+                customerAccount: [accountId]
+              })
+          }
           if (onSuccess) {
             onSuccess(data)
           }
+
           const newId = data.data?._id;
           setSubmitting(false);
           fetchData();
