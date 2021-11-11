@@ -179,7 +179,7 @@ export default function CustomSwipableList({
                                                 <div key={index} className="ml-2 my-1">
                                                     <div className="swipe-card-additional-details-inner">
                                                         <span style={{ color: "#337FFB" }} className="d-flex align-items-center">{a.icon}</span>
-                                                        <h5 className="text-truncate" style={{ paddingTop: "2px", fontWeight: 500 }}>{d[a.field]} asdasda sdasdasd asd asda sdasd asdasdad</h5>
+                                                        <h5 className="text-truncate" style={{ paddingTop: "2px", fontWeight: 500 }}>{d[a.field]}</h5>
                                                     </div>
                                                 </div>
                                             ))
