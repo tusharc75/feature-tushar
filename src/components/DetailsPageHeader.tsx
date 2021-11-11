@@ -71,7 +71,7 @@ const DetailsPageHeader = (props) => {
   return (
     <>
       <Paper elevation={0} className={"mainHeader"}>
-        <Grid container justify="space-between" className="detailHeader detail-header-purchasr-order">
+        <Grid container justify="space-between" className="detailHeader detail-header-purchase-order">
           <Grid item className="d-flex align-items-center">
             {loading ? (
               <Skeleton width={100} />

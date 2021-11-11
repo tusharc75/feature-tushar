@@ -191,7 +191,7 @@ const Steps = (props) => {
                                                 onClick={() => {
                                                     setCurrentStep(currentStep - 1)
                                                 }}
-                                                className={"stepperButton"}
+                                                className="stepperButton"
                                             >
                                                 <TiArrowBack size={30} />
                                             </IconButton>
@@ -274,7 +274,7 @@ const Steps = (props) => {
                                         <StepLabel
                                             style={{ color: "#555" }}
                                             // StepIconComponent={ColorlibStepIcon}
-                                            className={"currentStepColor"}
+                                            className="currentStepColor"
                                         >
                                             {label}
                                         </StepLabel>
@@ -302,7 +302,7 @@ const Steps = (props) => {
                                                         setCurrentStep(currentStep + 1)
                                                     }}
                                                     disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
-                                                    className={"stepperButtonNext"}
+                                                    className="stepperButtonNext"
                                                 >
                                                     <RiShareForwardFill />
                                                 </IconButton>

@@ -63,8 +63,7 @@ const useStyles = makeStyles((theme) => ({
   },
   pbStepper: {
     overflow: "none",
-    gap:"2mj2" +
-        "npx",
+    gap:"2px",
     [theme.breakpoints.down("xs")]: {
       overflow: "auto"
     },
