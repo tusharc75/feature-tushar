@@ -63,6 +63,8 @@ const useStyles = makeStyles((theme) => ({
   },
   pbStepper: {
     overflow: "none",
+    gap:"2mj2" +
+        "npx",
     [theme.breakpoints.down("xs")]: {
       overflow: "auto"
     },
@@ -95,10 +97,10 @@ const useStyles = makeStyles((theme) => ({
 
   },
   active: {
-    background: "#f9f1e2",
+    background: "#c8e9ce",
     borderBottom: "0px solid var(--warning)",
-    color: "#378280 !important",
-    borderLeft: "6px solid var(--warning)",
+    color: "var(--secondary) !important",
+    borderLeft: "6px solid var(--secondary)",
 
 
   },
@@ -125,8 +127,8 @@ const useStyles = makeStyles((theme) => ({
 const useColorlibStepIconStyles = makeStyles((theme) => ({
   root: {
     color: "#d1c4c4",
-    width: 30,
-    height: 30,
+    width: 18,
+    height: 18,
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -660,6 +662,7 @@ const Steps = (props) => {
                     </Grid>
                     <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={activeStep}>
                       {steps.map((label, i) => (
+
                         <Step
                           key={label.label}
                           className={clsx(classes.step, {

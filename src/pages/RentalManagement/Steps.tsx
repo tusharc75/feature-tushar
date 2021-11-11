@@ -51,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
     step: {
         paddingLeft: "8px",
         paddingRight: "8px",
-        padding: "5px 8px",
+        padding: "10px 8px",
         width: "20%",
         textAlign: "center",
         display: "flex",
@@ -79,10 +79,10 @@ const useStyles = makeStyles((theme) => ({
     },
     active: {
         flex: "1",
-        background: "#f9f1e2",
+        background: "#c8e9ce",
         borderBottom: "0px solid var(--warning)",
         color: "#378280 !important",
-        borderLeft: "6px solid var(--warning)",
+        borderLeft: "6px solid var(--secondary)",
     },
     sent: {
         color: "#00acc1",
@@ -288,7 +288,7 @@ const Steps = (props) => {
                                     >
                                         <StepLabel
                                             style={{ color: "#555" }}
-                                            StepIconComponent={ColorlibStepIcon}
+                                            // StepIconComponent={ColorlibStepIcon}
                                             className={"currentStepColor"}
                                         >
                                             {label}
