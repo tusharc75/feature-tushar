@@ -4,38 +4,69 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer, } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import { Link } from 'react-router-dom'
+import NoDataCell from "../../components/Helpers/NoDataCell";
+import { AiFillFilePdf } from "react-icons/ai";
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Chip } from "@material-ui/core";
-import { AiFillFilePdf } from "react-icons/ai";
+import { Button, Chip, IconButton } from "@material-ui/core";
+import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import NoDataCell from "../../components/Helpers/NoDataCell";
 import AddSerializedAsset from "./AddSerializedAsset";
 import { dateFormat, gridLoadingTimeout, rentalManagement } from "../../constants/helpers";
 import { Column } from "material-table";
 import moment from "moment";
 import MaterialTableComponent from "../../components/Shared/MaterialTableComponent";
 import { startCase } from "lodash";
+import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 
 
-const SerializedAssetStep = ({ loading, productInventory, currentStep, fetchProductsData, rentalManagementId, isTabletScreen,
-  isSmallScreen,
-  showActivity, currencySymbol }) => {
+
+const SerializedAssetStep = (props) => {
+  const { loading, productInventory, currentStep, serializeAssets, fetchProductsData, rentalManagementId, isTabletScreen,
+    isSmallScreen, setNextStep,
+    showActivity, currencySymbol } = props
   const toastConfig = useContext(CustomToastContext);
 
-  const [gridApi, setGridApi] = useState(null);
-  const [assignedSerializedAsset, setAssignedSerializedAsset] = useState([]);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const [stateSerializedAssets, dispatchSerializedAssets] = useReducer(reducer, intialState);
+  // const [gridApi, setGridApi] = useState(null);
+  // const [assignedSerializedAsset, setAssignedSerializedAsset] = useState([]);
+  // const [state, dispatch] = useReducer(reducer, intialState);
+  // const [stateSerializedAssets, dispatchSerializedAssets] = useReducer(reducer, intialState);
   // const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   // const { dataRows: dataRowsSerializedAssets, rowCount: rowCountSerializedAssets,
   //   loading: loadingSerializedAssets, page: pageSerializedAssets,
   //   limit: limitSerializedAssets, pageSizes: pageSizesSerializedAssets,
   //   selectedRecords: selectedRecordsSerializedAssets } = stateSerializedAssets;
-  const [downlodingFile, setDownlodingFile] = useState(false)
+  // const [downlodingFile, setDownlodingFile] = useState(false)
+  const [rows, setRows] = useState([])
+  const [deleting, setDeleting] = useState(false)
+  const [isAdding, setAdding] = useState(false)
+  const [showConfirmBox, setShowConfirmBox] = useState(false)
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState([])
+  const [deleteData, setDeleteData] = useState([])
+
+  useEffect(() => {
+    // const products = productInventory.filter(p => p?.type?.includes("roduct"))
+
+    const products = productInventory.map((p: any) => {
+      let currentAssets = []
+      if (p?.type?.includes("roduct")) {
+        currentAssets = serializeAssets.filter((asset: any) => asset?.product === p?._id)
+
+        if (currentAssets.length !== p.qty) {
+          setNextStep(false)
+        } else {
+          setNextStep(true)
+        }
+      }
+
+      return { ...p, assetCount: currentAssets.length || 0 }
+    })
+
+    setRows(products)
+
+  }, [productInventory])
 
   // useEffect(() => {
 
@@ -140,7 +171,27 @@ const SerializedAssetStep = ({ loading, productInventory, currentStep, fetchProd
           >
             {rowData.detail}
           </p>
-          {rowData.hasOwnProperty("assetNumber") && <Chip label="Asset" size="small" color="primary" />}
+          {rowData.hasOwnProperty("assetNumber") &&
+            <span style={{ display: 'flex', alignItems: 'center' }}>
+              <IconButton size="small" onClick={() => {
+                setShowConfirmBox(true)
+                setDeleteData([rowData._id])
+              }}>
+                <Delete color="error" />
+              </IconButton>
+              <Chip label="Asset" size="small" color="primary" />
+            </span>
+          }
+        </div>
+      )
+    },
+    {
+      field: 'assets',
+      title: 'Assets',
+      cellStyle: { padding: "0px 4px" },
+      render: (rowData) => (
+        <div style={{ width: 80 }}>
+          <p>{rowData?.type?.includes("roduct") ? rowData.assetCount : "- - - - -"}</p>
         </div>
       )
     },
@@ -239,6 +290,29 @@ const SerializedAssetStep = ({ loading, productInventory, currentStep, fetchProd
     }
   ]
 
+  const removeInventory = () => {
+    if (deleteData.length >= 1) {
+
+      setDeleting(true)
+      axiosInstance().put(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory/remove`, {
+        products: deleteData
+      })
+        .then(() => {
+          setDeleting(false)
+          fetchProductsData()
+          setDeleteData(null)
+          setShowConfirmBox(false);
+
+        }).catch((error) => {
+          setDeleting(false)
+          toastConfig.setToastConfig(error)
+          setDeleteData(null)
+        });
+    }
+
+
+  }
+
 
   // const columnsSerializedAssets = [
   //   { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
@@ -273,35 +347,42 @@ const SerializedAssetStep = ({ loading, productInventory, currentStep, fetchProd
   // }
 
   const handleAddSerializedAsset = (productInventoryArray) => {
-    console.log(productInventoryArray)
+    // console.log()
     let tempProductArray = [];
-    let product = selectedProducts[0]
     productInventoryArray.forEach(d => {
-      let obj: any = {};
-      obj.inventory = d._id;
-      if (product.type === "productInPackage") {
-        obj.product = product.id
-        obj.package = product.packageId
-      } else {
-        obj.product = product.id
-      }
+      selectedProducts.filter(p => p?.type.toLowerCase() !== "package" || !p.hasOwnProperty("assetNumber")).forEach((product) => {
+        let obj: any = {};
+        obj.inventory = d._id;
+        if (product.type === "productInPackage") {
+          obj.product = product.id
+          obj.package = product.packageId
+        } else {
+          obj.product = product.id
+        }
+        tempProductArray.push(obj)
+      })
 
-      tempProductArray.push(obj)
     })
-    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`, { "products": tempProductArray })
-      .then(({ data }) => {
-        setAddSerializedAssetDialog(false)
-        fetchProductsData()
-        setSelectedProducts([])
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
+    if (tempProductArray.length >= 1) {
+
+      setAdding(true)
+      axiosInstance().post(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`, { "products": tempProductArray })
+        .then(({ data }) => {
+          setAddSerializedAssetDialog(false)
+          fetchProductsData()
+          setSelectedProducts([])
+          setAdding(false)
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+        }).catch((error) => {
+          setAddSerializedAssetDialog(false)
+          setAdding(false)
+          toastConfig.setToastConfig(error)
         });
-      }).catch((error) => {
-        setAddSerializedAssetDialog(false)
-        toastConfig.setToastConfig(error)
-      });
+    }
   };
 
   return (<>
@@ -314,18 +395,36 @@ const SerializedAssetStep = ({ loading, productInventory, currentStep, fetchProd
             {"Products and Packages"}
           </h3>
 
-          <Button
-            variant="contained"
-            color="primary"
-            type="button"
-            size="small"
-            disabled={(selectedProducts.length !== 1)}
-            onClick={() => {
-              setAddSerializedAssetDialog(true)
-            }}
-          >
-            {`Assign ${routes.productInventory.title}`}
-          </Button>
+          <div>
+
+            <Button
+              variant="contained"
+              color="primary"
+              type="button"
+              size="small"
+              disabled={(selectedProducts.length === 0)}
+              onClick={() => {
+                setAddSerializedAssetDialog(true)
+              }}
+            >
+              {`Assign ${routes.productInventory.title}`}
+
+            </Button>
+            <Box mx={1} component="span" />
+            <Button
+              variant="contained"
+              color="primary"
+              type="button"
+              size="small"
+              disabled={(selectedProducts.filter(d => d.hasOwnProperty("assetNumber")).length === 0)}
+              onClick={() => {
+                setDeleteData(selectedProducts.filter(d => d.hasOwnProperty("assetNumber")).map(d => d?._id))
+                setShowConfirmBox(true)
+              }}
+            >
+              Delete Assets
+            </Button>
+          </div>
         </Box>
 
       </Grid>
@@ -357,13 +456,18 @@ const SerializedAssetStep = ({ loading, productInventory, currentStep, fetchProd
               }>
               <MaterialTableComponent
                 columns={columns}
-                rowData={productInventory}
+                rowData={rows}
                 title={""}
                 loading={loading}
-                onSelection={(d) => setSelectedProducts(d.filter(r => !r.hasOwnProperty("assetNumber")))}
+                rowStyle={(rowData) => ({
+                  color: "black",
+                  backgroundColor: rowData?.type?.includes("roduct") && rowData?.assetCount !== rowData?.qty
+                    ? "#EFCCCC" : "white"
+                })}
+                onSelection={(d) => setSelectedProducts(d)}
                 parentChildData={(row, rows) => rows.find((a) => a.treeId === row.parent)}
                 selectionProps={rowData => ({
-                  disabled: rowData.hasOwnProperty("assetNumber"),
+                  disabled: rowData?.type === "Package",
                   color: "primary",
 
                 })}
@@ -410,10 +514,23 @@ const SerializedAssetStep = ({ loading, productInventory, currentStep, fetchProd
           setAddSerializedAssetDialog(false);
           setSelectedProducts([])
         }}
-        selectedProducts={selectedProducts}
+        isAdding={isAdding}
+        selectedProducts={selectedProducts.filter(p => p?.type?.includes("roduct"))}
       // type={inventoryType}
       />
     }
+    {showConfirmBox && (
+      <ConfirmationDialog
+        open={showConfirmBox}
+        message={`Are you sure you want to remove?`}
+        onClose={() => {
+          setShowConfirmBox(false);
+          setDeleteData([])
+        }}
+        okBtnLoading={deleting}
+        onOk={removeInventory}
+      />
+    )}
   </>
   );
 }

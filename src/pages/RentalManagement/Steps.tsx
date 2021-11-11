@@ -23,8 +23,8 @@ import { FaHourglassHalf } from "react-icons/fa";
 import styles from "./Retal.module.scss";
 
 import { isMobile } from "react-device-detect";
-import {RiShareForwardFill} from "react-icons/ri";
-import {TiArrowBack} from "react-icons/ti";
+import { RiShareForwardFill } from "react-icons/ri";
+import { TiArrowBack } from "react-icons/ti";
 
 const useStyles = makeStyles((theme) => ({
 
@@ -122,6 +122,7 @@ const useColorlibStepIconStyles = makeStyles((theme) => ({
 
 const Steps = (props) => {
     const {
+        nextStep,
         isNextStep,
         steps,
         currentStep,
@@ -204,8 +205,8 @@ const Steps = (props) => {
                                                 onClick={() => {
                                                     setCurrentStep(currentStep - 1)
                                                 }}
-                                                // size="large"
-                                                // startIcon={<IoIosArrowDropleftCircle />}
+                                            // size="large"
+                                            // startIcon={<IoIosArrowDropleftCircle />}
                                             >
                                                 <TiArrowBack size={30} />
                                             </IconButton>
@@ -261,7 +262,7 @@ const Steps = (props) => {
                                                                     setCurrentStep(currentStep + 1)
                                                                 }}
                                                                 size="small"
-                                                                disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
+                                                                disabled={currentStep >= 5 || (currentStep === 0 && isNextStep) || nextStep}
 
                                                             >
                                                                 Next
@@ -316,7 +317,7 @@ const Steps = (props) => {
                                                     onClick={() => {
                                                         setCurrentStep(currentStep + 1)
                                                     }}
-                                                    disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
+                                                    disabled={currentStep >= 5 || (currentStep === 0 && isNextStep) || !nextStep}
                                                     // endIcon={<IoIosArrowDroprightCircle />}
                                                     className={"stepperButtonNext"}
                                                 >
