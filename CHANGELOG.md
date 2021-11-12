@@ -2,6 +2,89 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.34.0](https://github.com/vebholic/oms_frontend/compare/v1.33.0...v1.34.0) (2021-11-12)
+
+
+### Features
+
+* - Avatar Code added in quote list screen ([e9e4c3d](https://github.com/vebholic/oms_frontend/commit/e9e4c3d074c2a16ef8df5cfeb70b1c31d2db300b))
+* changes added ([282ed2f](https://github.com/vebholic/oms_frontend/commit/282ed2fd7facf5bbb85623a1601400cab2cbff81))
+* changes added ([9035202](https://github.com/vebholic/oms_frontend/commit/9035202a19edff8a2a8ed08a32392c2dc21752e5))
+* dashboard changes added and quote issue resolved ([b8110f7](https://github.com/vebholic/oms_frontend/commit/b8110f74eacf2f937d8beab267a77159c9bbbe37))
+* extra character removed ([8403ad5](https://github.com/vebholic/oms_frontend/commit/8403ad5a1371085942a696a9496b811857e58d7f))
+* product master ([c219b22](https://github.com/vebholic/oms_frontend/commit/c219b2251abbeb6e7192a124cb8da81111403341))
+* **rentalmanagement:** new changes ([1b84879](https://github.com/vebholic/oms_frontend/commit/1b8487918a0d1f7a96ccc1748a9b08a68056f4fa))
+* success rate card changes added for dashboard ([70c9bce](https://github.com/vebholic/oms_frontend/commit/70c9bce372b38c81af7bf9d524fab54a2989f1b1))
+
+
+### Bug Fixes
+
+* **rental:** edit fix ([819e9a4](https://github.com/vebholic/oms_frontend/commit/819e9a4e5639a9a8b2510d6a9b8bc80a0ebd4cf3))
+
+## [1.33.0](https://github.com/vebholic/oms_frontend/compare/v1.32.0...v1.33.0) (2021-11-11)
+
+
+### Features
+
+* - Date format api calling issue fixed ([b312637](https://github.com/vebholic/oms_frontend/commit/b3126378dcc797ddd5afd4bafa4b5d6fc96d4a7d))
+* - Filter issue solved in serialized assets ([4bf9169](https://github.com/vebholic/oms_frontend/commit/4bf91696eca99938e0fad2d874540b3e3d844efb))
+* add proejct sales in quote create/edit dialog ([7ae7360](https://github.com/vebholic/oms_frontend/commit/7ae7360e41dd0622d02c177d3a77dee5f2f2f8fd))
+* added default width for grid 180px and 100px for image ([35ce54e](https://github.com/vebholic/oms_frontend/commit/35ce54ea320203a1f7199e31afaba6577d1029a4))
+* aggrid changes added for t&c , roles,form Builder , add project sales from create quote ([14519fb](https://github.com/vebholic/oms_frontend/commit/14519fb3449640ff63d401487cf82edc271c6a59))
+* changes added ([9a1e74f](https://github.com/vebholic/oms_frontend/commit/9a1e74ff52c1252f7a24fc1ff32cddca1310f959))
+* dashboard changes added ([3f92736](https://github.com/vebholic/oms_frontend/commit/3f92736f42831c483450653ba78e9515a20a7498))
+* grid api encode URL DeepFilter ([9aabdac](https://github.com/vebholic/oms_frontend/commit/9aabdacf04ce7f65fb0d0c443c3f64cab3afad4d))
+* manageQuoteDialog changes added ([5aaf378](https://github.com/vebholic/oms_frontend/commit/5aaf37857f75dbc793aff1e3422ed645d10faa2c))
+* pO changes ([506db88](https://github.com/vebholic/oms_frontend/commit/506db8891ecad30fbcc37dcc8cf71117405ea13e))
+* profit value showed in currency ([36e0922](https://github.com/vebholic/oms_frontend/commit/36e09225206a2a687728d72eb790aacbbdd0c5ad))
+* **rentalmanagement:** more changes ([ed1f082](https://github.com/vebholic/oms_frontend/commit/ed1f082942312f31ea128ad0543b057e085ab68a))
+* **rental:** ui changes ([c28948e](https://github.com/vebholic/oms_frontend/commit/c28948e5731bf2c172995d244fb82e042a0d237b))
+
+
+### Bug Fixes
+
+* changes added ([f3e4a8f](https://github.com/vebholic/oms_frontend/commit/f3e4a8f4ea686fd731874b59b097bcb3cdf55570))
+* oAT-278 ([398ff50](https://github.com/vebholic/oms_frontend/commit/398ff50370333434d25c1467c6a49561e7981225))
+* quote edit ([651a1ef](https://github.com/vebholic/oms_frontend/commit/651a1efd94e8c9c9dd352660ba887e92fd643f7c))
+* **rental:** bug fix ([50f916d](https://github.com/vebholic/oms_frontend/commit/50f916dcca95e59e2838494310032ec23fe6f7d0))
+* **rental:** final price fix ([2c240ff](https://github.com/vebholic/oms_frontend/commit/2c240ff4984147692e73cfe96aed6ee02a0de388))
+* **rentalmanagement:** fix step keep going to additional step ([184603a](https://github.com/vebholic/oms_frontend/commit/184603a4013d91de2db17c2b11c21b5a7d96678c))
+* **rentalscreen:** update item fix ([c22ced9](https://github.com/vebholic/oms_frontend/commit/c22ced9e77c777d345cb006afc70b76076fe35bf))
+* **rentat:** table data fix ([102401e](https://github.com/vebholic/oms_frontend/commit/102401ee7e6af10767a6145826ef5bb872560f84))
+
+## [1.32.0](https://github.com/vebholic/oms_frontend/compare/v1.31.0...v1.32.0) (2021-11-10)
+
+
+### Features
+
+* - Checkbox issue fixed for mobile screen ([a07efbd](https://github.com/vebholic/oms_frontend/commit/a07efbd604ed9a559852238e3fa8146d1cc2790e))
+* - Date format is done for USA and other countries as well ([48fc424](https://github.com/vebholic/oms_frontend/commit/48fc4243e88906b2362219ef0437659ced1dbe35))
+* - Keeping selected records on page change, filter is done ([06bf548](https://github.com/vebholic/oms_frontend/commit/06bf54839f4715d4d0e1e00b78490b8451284277))
+* - Stepper added in footer for mobile ([0dfa618](https://github.com/vebholic/oms_frontend/commit/0dfa6187c744edae8c825992926117ebbe51eaec))
+* - Stepper changed in quote mobile screen ([c81c338](https://github.com/vebholic/oms_frontend/commit/c81c338c3e2553aa8c94a6e8ac3d1609caeb3acb))
+* purchase order changes ([2206b10](https://github.com/vebholic/oms_frontend/commit/2206b10af5db01fa3de323d0f4ee4323e4df5444))
+* purchase order changes ([939afaf](https://github.com/vebholic/oms_frontend/commit/939afaf6f3f365373c1ca9eeace7cb4d41d8c6fc))
+* purchase order details ([6983f8d](https://github.com/vebholic/oms_frontend/commit/6983f8d74941a7bb970914c3377a5810e8699772))
+* purchase order details ([f696817](https://github.com/vebholic/oms_frontend/commit/f6968173ef3297856f6e705dfc5800bd48b2bedb))
+* **rental:** changes in table ([2b8f28e](https://github.com/vebholic/oms_frontend/commit/2b8f28e4ffb77461ec4c5f824f813775aeba2a96))
+* **rentalmanagement:** changes in edit ([85f7954](https://github.com/vebholic/oms_frontend/commit/85f795421f0e203cf9c1164d8d56e0f57122fc8c))
+* **rentalmanagement:** serialize table change ([e72399f](https://github.com/vebholic/oms_frontend/commit/e72399f0ebb61aae6bcb50106c86067ecf75ba07))
+* **rentalmanagement:** table change ([fb41205](https://github.com/vebholic/oms_frontend/commit/fb41205e7edeeb23527f0da3cb9fc3f3e145e1ee))
+* **rentalmanagement:** table change ([45e3c35](https://github.com/vebholic/oms_frontend/commit/45e3c35bfc84c054237cac184108ea044fc49418))
+* **rentalscree:** tree view table ([1d3a198](https://github.com/vebholic/oms_frontend/commit/1d3a1982b5124c24aee9f7978783060dc8e85442))
+* **rental:** table change progress ([7700ce8](https://github.com/vebholic/oms_frontend/commit/7700ce85c859eaaf8af082dbd50b50fbc0936431))
+* warehouse changes ([30a8efe](https://github.com/vebholic/oms_frontend/commit/30a8efe18003169fe4e6d3f39a8901c6117baf89))
+* warehouseDetailsPage ([f5b0492](https://github.com/vebholic/oms_frontend/commit/f5b0492c091f1143d49bf0e072172dbdedbdc801))
+
+
+### Bug Fixes
+
+* bug fix ([67999ae](https://github.com/vebholic/oms_frontend/commit/67999aec43bce449f65a455e1a1be6e2bc7e0dbd))
+* bug fix in filter ([34f6349](https://github.com/vebholic/oms_frontend/commit/34f634933760d320633a3f16ab3d6b05a49dd760))
+* **everywhere:** fix ([d96e2b9](https://github.com/vebholic/oms_frontend/commit/d96e2b9318b7b4cea3b20a004ec9c839956c2e10))
+* **quote detail:** changed button name ([e2c9c87](https://github.com/vebholic/oms_frontend/commit/e2c9c87fce4b923aabe897408a70abad4f0f51fb))
+* **rentalmanagement:** conflict resolve ([a7a737e](https://github.com/vebholic/oms_frontend/commit/a7a737eb98cd078e79e2d68517821d90e6258ec7))
+
 ## [1.31.0](https://github.com/vebholic/oms_frontend/compare/v1.30.0...v1.31.0) (2021-11-04)
 
 

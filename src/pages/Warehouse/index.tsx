@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Fragment, useContext, useReducer } from 'react';
+import {Link} from "react-router-dom";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
@@ -58,7 +59,7 @@ const AddressResource = () => {
   const [columns, setColumns] = useState([])
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
 
-  // const [selectedCategory, setSelectedCategory] = useState([]);
+
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -165,6 +166,7 @@ const AddressResource = () => {
 
   const NameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
+      <Link to={`${routes.warehouseDetail.path}/${params.data._id}`} title={params.value}>
       <span
         className="link"
         onClick={() => {
@@ -176,8 +178,11 @@ const AddressResource = () => {
       >
         <CustomRenderCell value={params.value} />
       </span>
+      </Link>
     </span>
   );
+
+ 
 
   const ActionsRenderer = (params) => (
     <>
@@ -272,7 +277,7 @@ const AddressResource = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -447,7 +452,7 @@ const AddressResource = () => {
               page={page}
               actionWidth={150}
               loading={loading}
-              renderedFrom={routes.warehouse.title}
+              renderedFrom="warehouse"
               refreshGrid={fetchWarehouses}
             /> : null}
 

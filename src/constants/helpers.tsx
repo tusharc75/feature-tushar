@@ -529,7 +529,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'multiSelect') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else if (input.type === 'percent') {
-      schema[input.fieldName] = input.required 
+      schema[input.fieldName] = input.required
         ? number().required(`${input.fieldLabel} is required`).nullable()
         : number().nullable();
     } else if (input.type === 'email') {
@@ -635,11 +635,11 @@ export const initializeDropdownById = (field, fieldName, id) => {
 
   return field;
 };
-export const dateFormat = 'MM/DD/YYYY';
-export const dateTimeFormat = 'MM/DD/YYYY hh:mm A';
-export const cardDateFormat = 'MMM,DD YYYY';
+export const dateFormat = localStorage.getItem("dateFormat") ?? "MM/DD/YYYY";
+export const dateTimeFormat = localStorage.getItem("dateTimeFormat") ?? "MM/DD/YYYY hh:mm A";
+export const cardDateFormat = localStorage.getItem("cardDateFormat") ?? "MMM,DD YYYY";
 
-export const dateFormatForInputControl = 'MM/dd/yyyy';
+export const dateFormatForInputControl = localStorage.getItem("dateFormatForInputControl") ?? "MM/dd/yyyy";
 // export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
 // export const cardDateFormat = "MMM,dd yyyy"
 
@@ -1209,4 +1209,16 @@ export const prepareDataForGrid = (data, user = {}) => {
   finalObject["id"] = data?._id
 
   return finalObject;
+}
+
+export const getLocalStorageArrayData = (key) => {
+  try {
+    if (localStorage.getItem(key) && JSON.parse(localStorage.getItem(key)).length > 0) {
+      return JSON.parse(localStorage.getItem(key));
+    }
+    return [];
+
+  } catch (ex) {
+    return []
+  }
 }

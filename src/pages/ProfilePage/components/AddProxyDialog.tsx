@@ -152,7 +152,7 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
                                                     label="Start Date"
                                                     required
                                                     fullWidth
-                                                    placeholder="MM/DD/YYYY"
+                                                    placeholder={dateFormat}
                                                     onChange={(date: any) => {
                                                         setFieldValue("startDate", date);
                                                     }}
@@ -184,7 +184,7 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
                                                     label="End Date"
                                                     required
                                                     fullWidth
-                                                    placeholder="MM/DD/YYYY"
+                                                    placeholder={dateFormat}
                                                     onChange={(date: any) => {
                                                         setFieldValue("endDate", date);
                                                     }}

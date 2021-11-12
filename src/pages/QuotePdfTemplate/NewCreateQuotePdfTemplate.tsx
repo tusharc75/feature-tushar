@@ -166,6 +166,9 @@ export default function NewCreateQuotePdfTemplate() {
                     }
                 })();
             }
+            if (quoteData?._id) {
+                setHasPermissionToUpdate(true)
+            }
         }
         else {
             setInitialValues({

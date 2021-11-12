@@ -45,6 +45,8 @@ import { isMobile, isTablet } from "react-device-detect";
 import routes from "../../../components/Helpers/Routes";
 import ManageMarketSegmentDialog from "../../MarketSegment/ManageMarketSegmentDialog";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
+import CreateProjectSales from "../../ProjectSales/CreateProjectSales"
+import { FaDiceOne } from "react-icons/fa";
 
 const arr = [...Array(9).keys()];
 export default function ManageQuoteDialog({
@@ -106,6 +108,7 @@ export default function ManageQuoteDialog({
     useState(false);
   const [showAddCustomerContactDialog, setShowAddCustomerContactDialog] =
     useState(false);
+  const [showAddProjectSalesDialog, setShowAddProjectSalesDialog] = useState(false);
   const [showCreateOpportunity, setShowCreateOpportunity] = useState(false);
   const [accountData, setAccountData] = useState([]);
   const [accountFieldDisable, setAccountFieldDisable] = useState(false);
@@ -123,6 +126,7 @@ export default function ManageQuoteDialog({
   );
   const [opportunityData, setOpportunityData] = useState([]);
   const [newAddedOpportuntiyId, setNewAddedOpportunityId] = useState(null);
+  const [newAddedProjectSalesId, setNewAddedProjectSalesId] = useState(null);
   const [customerContactDataSource, setCustomerContactDataSource] = useState(
     []
   );
@@ -461,7 +465,9 @@ export default function ManageQuoteDialog({
         });
         let initialData = getObjKeys("", newFields);
         if (isRenderedFromOpportunity || isRenderedFromProjectSales) {
-          initialData["quoteName"] = opportunityName;
+          if (opportunityName) {
+            initialData["quoteName"] = opportunityName;
+          }
           initialData["currency"] = currency || "";
           initialData["estimatedAmount"] = estimatedAmount || "";
         } else {
@@ -474,7 +480,7 @@ export default function ManageQuoteDialog({
                 getUniqueCurrencies().find(
                   (d) => d.currencyCode === initialData["currency"]
                 )?.symbolNative
-              );            
+              );
             }
           }
         }
@@ -504,6 +510,7 @@ export default function ManageQuoteDialog({
   };
 
   const onSubmit = (values) => {
+
     isCreateQuoteFromCart ? onHandleSubmit(values) :
       isClone ? handleCloneQuote(values) : isNew ? handleCreateQuote(values) : handleUpdateQuote(values);
   };
@@ -648,6 +655,30 @@ export default function ManageQuoteDialog({
     }
   };
 
+  const updateProjectSalesDropdown = (data) => {
+    const entityFields = entityData.fields;
+    const projectSalesFieldIndex = entityFields.findIndex(
+      (d) => d.fieldName === "projectSales"
+    );
+
+    if (projectSalesFieldIndex > -1) {
+      let newProjectSales = {
+        optionValue: data._id,
+        optionLabel: data.projectName,
+        order: entityFields[projectSalesFieldIndex].option.length,
+        default: false,
+        customerAccount: data?.accountId ? [data?.accountId] : [],
+      };
+      entityFields[projectSalesFieldIndex].option = [
+        ...entityFields[projectSalesFieldIndex].option,
+        newProjectSales,
+      ];
+
+      setProjectSalesMainDataSource(entityFields[projectSalesFieldIndex].option);
+      setProjectSalesDataSource((prevState) => [...prevState, newProjectSales]);
+    }
+
+  };
   const updateContactDropdown = (data) => {
     const entityFields = entityData.fields;
     const customerContactNameFieldIndex = entityFields.findIndex(
@@ -828,13 +859,17 @@ export default function ManageQuoteDialog({
               <>
                 <CustomDialogContent>
                   <Form>
-                    <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                    {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
 
                     {formsData &&
                       formsData.map((form, index1) => {
                         return form.name ? (
                           <div key={index1}>
-                            <h2 className="form-label-style">{form.name}</h2>
+                            <div className={"detail-box-content"}>
+                              <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                              <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                            </div>
+
                             <Box marginY={2}>
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field, index2) => (
@@ -874,19 +909,19 @@ export default function ManageQuoteDialog({
                                           xs={
                                             permissions.customerAccount
                                               ?.isCreate && !accountFieldDisable
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                           sm={
                                             permissions.customerAccount
                                               ?.isCreate && !accountFieldDisable
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                           md={
                                             permissions.customerAccount
                                               ?.isCreate && !accountFieldDisable
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                         >
@@ -980,17 +1015,17 @@ export default function ManageQuoteDialog({
                                           item
                                           xs={
                                             permissions.customerContact?.isCreate
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                           sm={
                                             permissions.customerContact?.isCreate
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                           md={
                                             permissions.customerContact?.isCreate
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                         >
@@ -1027,8 +1062,9 @@ export default function ManageQuoteDialog({
                                         </Grid>
                                         {permissions.customerContact?.isCreate &&
                                           contactId === null && (
-                                            <Grid item xs={1} sm={1} md={1}>
+                                            <Grid item xs={1} sm={1} md={1} >
                                               <Tooltip
+
                                                 title="Create Contact"
                                                 className="mt-1"
                                               >
@@ -1043,12 +1079,14 @@ export default function ManageQuoteDialog({
                                                 >
                                                   <AddIcon color={isClone ? "primary" : (contactId ? true : false) || (!isNew && field.disableOnEdit) ? "disabled" : "primary"} />
                                                 </IconButton>
-                                              </Tooltip>
+                                              </Tooltip
+                                              >
                                             </Grid>
                                           )}
                                         {field?.tooltipMessage ? (
                                           <Grid item xs={1} sm={1} md={1}>
                                             <Tooltip
+                                              className="mt-2"
                                               title={
                                                 field?.tooltipMessage ?? ""
                                               }
@@ -1065,19 +1103,19 @@ export default function ManageQuoteDialog({
                                           xs={
                                             permissions.opportunity?.isCreate &&
                                               !isRenderedFromOpportunity
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                           sm={
                                             permissions.opportunity?.isCreate &&
                                               !isRenderedFromOpportunity
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                           md={
                                             permissions.opportunity?.isCreate &&
                                               !isRenderedFromOpportunity
-                                              ? 10
+                                              ? 11
                                               : 11
                                           }
                                         >
@@ -1159,9 +1197,9 @@ export default function ManageQuoteDialog({
                                       <Grid container spacing={1}>
                                         <Grid
                                           item
-                                          xs={10}
-                                          sm={10}
-                                          md={10}
+                                          xs={11}
+                                          sm={11}
+                                          md={11}
                                         >
                                           <FormTypes
                                             {...field}
@@ -1541,15 +1579,15 @@ export default function ManageQuoteDialog({
                                         <Grid
                                           item
                                           xs={
-                                            permissions.marketSegment?.isCreate ? 10
+                                            permissions.marketSegment?.isCreate ? 11
                                               : 11
                                           }
                                           sm={
-                                            permissions.marketSegment?.isCreate ? 10
+                                            permissions.marketSegment?.isCreate ? 11
                                               : 11
                                           }
                                           md={
-                                            permissions.marketSegment?.isCreate ? 10
+                                            permissions.marketSegment?.isCreate ? 11
                                               : 11
                                           }
                                         >
@@ -1628,15 +1666,15 @@ export default function ManageQuoteDialog({
                                           <Grid
                                             item
                                             xs={
-                                              permissions.marketSegment?.isCreate ? 10
+                                              permissions.marketSegment?.isCreate ? 11
                                                 : 11
                                             }
                                             sm={
-                                              permissions.marketSegment?.isCreate ? 10
+                                              permissions.marketSegment?.isCreate ? 11
                                                 : 11
                                             }
                                             md={
-                                              permissions.marketSegment?.isCreate ? 10
+                                              permissions.marketSegment?.isCreate ? 11
                                                 : 11
                                             }
                                           >
@@ -1709,37 +1747,87 @@ export default function ManageQuoteDialog({
                                           ) : null}
                                         </Grid>
                                       </Grid> : field.fieldName == "projectSales" ?
-                                        <FormTypes
-                                          {...field}
-                                          isNew={isNew}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={projectSalesDataSource}
-                                          disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
-                                          setFieldValue={(name, value) => {
-                                            handleValuesChange({ [name]: value })
-                                            setFieldValue(name, value)
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={
-                                            field?.isTooltip || false
-                                          }
-                                          tooltipMessage={
-                                            field?.tooltipMessage
-                                          }
-                                          doNotShowInfoTooltip={true}
-                                          size="small"
-                                          onOpen={() =>
-                                            onProjectSalesDropDownOpen(
-                                              values.customerAccountName
+                                        <Grid container spacing={1}>
+                                          <Grid
+                                            item
+                                            xs={
+                                              permissions?.projectStrategy?.isCreate ? 10
+                                                : 11
+                                            }
+
+                                            sm={
+                                              permissions?.projectStrategy?.isCreate ? 10
+                                                : 11
+                                            }
+                                            md={
+                                              permissions?.projectStrategy?.isCreate ? 10
+                                                : 11
+                                            }
+                                          >
+                                            <FormTypes
+                                              {...field}
+                                              isNew={isNew}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={projectSalesDataSource}
+                                              disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
+                                              setFieldValue={(name, value) => {
+                                                handleValuesChange({ [name]: value })
+                                                setFieldValue(name, value)
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={
+                                                field?.isTooltip || false
+                                              }
+                                              tooltipMessage={
+                                                field?.tooltipMessage
+                                              }
+                                              doNotShowInfoTooltip={true}
+                                              size="small"
+                                              onOpen={() =>
+                                                onProjectSalesDropDownOpen(
+                                                  values.customerAccountName
+                                                )
+                                              }
+                                            />
+                                          </Grid>
+                                          {
+                                            permissions?.projectStrategy?.isCreate && (
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip
+                                                  title="Add Project Sales"
+                                                  className="mt-1"
+                                                >
+                                                  <IconButton
+                                                    onClick={() => {
+                                                      setShowAddProjectSalesDialog(true);
+                                                    }}
+                                                    disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
+                                                    size="small"
+                                                  >
+                                                    <AddIcon color={isClone ? "primary" : !isNew && field.disableOnEdit ? "disabled" : "primary"} />
+                                                  </IconButton>
+                                                </Tooltip>
+                                              </Grid>
                                             )
                                           }
-                                        />
+                                          {field?.tooltipMessage ? (
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <Tooltip
+                                                title={
+                                                  field?.tooltipMessage ?? ""
+                                                }
+                                              >
+                                                <InfoIcon color="disabled" />
+                                              </Tooltip>
+                                            </Grid>
+                                          ) : null}
+                                        </Grid>
                                         : (
                                           <FormTypes
                                             {...field}
@@ -1824,6 +1912,7 @@ export default function ManageQuoteDialog({
 
                         setFieldValue("customerAccountName", data._id);
                         setFieldValue("customerContactName", "");
+                        onProjectSalesDropDownOpen(data._id)
                       }}
                       isRedirectToDetailPage={false}
                     />
@@ -1881,6 +1970,29 @@ export default function ManageQuoteDialog({
                       }
                     />
                   )}
+                  {showAddProjectSalesDialog && (
+                    <CreateProjectSales
+                      open={showAddProjectSalesDialog}
+                      isClone={false}
+                      projectSalesId={null}
+                      close={() => {
+                        setShowAddProjectSalesDialog(false)
+                      }}
+                      onSuccess={({ data }) => {
+                        setShowAddProjectSalesDialog(false)
+                        let tempAccountId = values["customerAccountName"] ? values["customerAccountName"] : accountId
+                        updateProjectSalesDropdown({ ...data, accountId: tempAccountId });
+                        setFieldValue("projectSales", data._id);
+                      }}
+                      accountId={
+                        values["customerAccountName"]
+                          ? values["customerAccountName"]
+                          : accountId
+                      }
+                      resource={accountResource}
+                      fetchData={null}
+                    />
+                  )}
                 </CustomDialogContent>
 
                 <CustomDialogFooter>
@@ -1931,6 +2043,7 @@ export default function ManageQuoteDialog({
                       }}
                     /> : null
                 }
+
               </>
             )}
           </Formik>

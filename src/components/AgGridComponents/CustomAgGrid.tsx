@@ -10,7 +10,6 @@ import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGrid
 import { orderBy } from 'lodash';
 import { checkStaticField, staticColumns } from "../../constants/columns"
 
-
 export function reducer(state, action) {
   switch (action.type) {
     case 'loading':
@@ -25,7 +24,7 @@ export function reducer(state, action) {
         ...state,
         dataRows: action.data,
         rowCount: action.count,
-        selectedRecords: []
+        selectedRecords: action.selectedRecords ?? state.selectedRecords
       };
 
     case 'selection':
@@ -93,6 +92,13 @@ export function reducer(state, action) {
         loading: false
       };
 
+    case 'showFilteredRecordsOnly':
+      return {
+        ...state,
+        showFilteredRecordsOnly: !state.showFilteredRecordsOnly,
+        page: 0
+      }
+
     default:
       break;
   }
@@ -111,7 +117,8 @@ export const intialState = {
   filters: {},
   sorting: [],
   selectedRecords: [],
-  appendRows: false
+  appendRows: false,
+  showFilteredRecordsOnly: false
 };
 
 export default function CustomAgGrid({
@@ -139,20 +146,38 @@ export default function CustomAgGrid({
   customGridOptions = null,
   actionLabel = null,
   actionEditable = false,
-  onCellValueChanged = () => { }
+  onCellValueChanged = () => { },
+  showOnlyShowFilteredRecordSwitch = false
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
 
-  const [clientSideGridApi, setClientSideGridApi] = useState(null);
+  const [currentGridApi, setCurrentGridApi] = useState(null);
   const enableRowDrag = columns.some((d) => d.rowDrag);
 
   //  If you want to do something once grid binding done
   const onGridReady = (params) => {
     setGridApi(params.api);
     setColumnApi(params.columnApi);
-    setClientSideGridApi(params.api);
+    setCurrentGridApi(params.api);
     if (handleGridReady) handleGridReady(params);
+    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+
+    if (!isClientSideGrid) {
+
+      try {
+        let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
+        if (oldSelectedRecords.length > 0) {
+          params.api.forEachNode(function (node) {
+            node.setSelected(
+              oldSelectedRecords.some((o) => o === node.data._id)
+            );
+          });
+        }
+      } catch (ex) {
+        console.error("Error in getting selected records from local storage")
+      }
+    }
   };
 
   useEffect(() => {
@@ -182,15 +207,30 @@ export default function CustomAgGrid({
   }
 
   useEffect(() => {
-    if (clientSideGridApi && selectedRecords.length) {
-      clientSideGridApi.forEachNode(function (node) {
+    if (currentGridApi && selectedRecords.length) {
+      currentGridApi.forEachNode(function (node) {
         node.setSelected(
           selectedRecords.some((o) => o._id === node.data._id)
         );
       });
     }
 
-  }, [clientSideGridApi, selectedRecords])
+    if (!isClientSideGrid && currentGridApi) {
+      try {
+        let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
+        if (oldSelectedRecords.length > 0) {
+          currentGridApi.forEachNode(function (node) {
+            node.setSelected(
+              oldSelectedRecords.some((o) => o === node.data._id)
+            );
+          });
+        }
+      } catch (ex) {
+        console.error("Error in getting selected records from local storage")
+      }
+    }
+
+  }, [currentGridApi, selectedRecords])
 
   var customFilterParams = {
     filterOptions: ['contains'],
@@ -243,8 +283,8 @@ export default function CustomAgGrid({
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
         cellRendererParams={column.cellRendererParams ?? null}
-        minWidth={column.width ?? 250}
-        width={getWidth(column.field, column.width) ?? 250}
+        minWidth={column.width ?? 180}
+        width={getWidth(column.field, column.width) ?? 180}
         flex={1}
         rowDrag={column.rowDrag ?? false}
         hide={staticColumns.indexOf(column.field) >= 0 ? checkStaticField(renderedFrom, column.field) :
@@ -265,8 +305,8 @@ export default function CustomAgGrid({
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
         cellRendererParams={column.cellRendererParams ?? null}
-        minWidth={column.width ?? 250}
-        width={getWidth(column.field, column.width) ?? 250}
+        minWidth={column.width ?? 180}
+        width={getWidth(column.field, column.width) ?? 180}
         flex={1}
         filterParams={customFilterParams}
         hide={(column.hasOwnProperty("show") && !column?.show) ? true : false}
@@ -278,7 +318,7 @@ export default function CustomAgGrid({
       // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
       //   suppressFilterButton: true,
       // }}
-      ></AgGridColumn >
+      ></AgGridColumn>
   })
 
   return (
@@ -300,6 +340,8 @@ export default function CustomAgGrid({
             refreshGrid={refreshGrid}
             renderedFrom={renderedFrom}
             isClientSideGrid={isClientSideGrid}
+            dispatch={dispatch}
+            showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
           />
 
           <div className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
@@ -349,10 +391,10 @@ export default function CustomAgGrid({
               }}
               onFilterChanged={(e) => {
                 if (isClientSideGrid) {
-                  clientSideGridApi.paginationGoToPage(0);
+                  currentGridApi.paginationGoToPage(0);
                   dispatch({
                     type: 'count',
-                    count: clientSideGridApi.getModel().rootNode.allChildrenCount
+                    count: currentGridApi.getModel().rootNode.allChildrenCount
                   });
                   dispatch({ type: 'pageChange', page: 0 });
                 } else {
@@ -366,8 +408,7 @@ export default function CustomAgGrid({
               // loadingOverlayComponentParams={{
               //     loadingMessage: 'Loading...',
               // }}
-              animateRows={enableRowDrag ?? false
-              }
+              animateRows={enableRowDrag ?? false}
               suppressAnimationFrame={!enableRowDrag}
               suppressMaintainUnsortedOrder={true}
               rowBuffer={limit}
@@ -380,12 +421,47 @@ export default function CustomAgGrid({
 
               suppressRowClickSelection={true}
               rowSelection={'multiple'}
+              onRowSelected={(event) => {
+                if (event.rowIndex !== null && !isClientSideGrid) {
+
+                  try {
+                    let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
+
+                    if (event.node.isSelected() === true) {
+                      oldSelectedRecords = [...oldSelectedRecords, event.node.data.id];
+                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords));
+                    }
+                    else if (event.node.isSelected() === false) {
+
+                      if (oldSelectedRecords.length > 0) {
+                        localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords.filter(f => f !== (event.data._id ?? event.data.id))));
+                      }
+                    }
+                  } catch (ex) {
+                    console.error("Error in getting / storing selected records")
+                  }
+                }
+              }}
               onSelectionChanged={(event: any) => {
                 if (onSelection) onSelection(event.api.getSelectedRows());
                 dispatch({
                   type: 'selection',
                   selectedRecords: event.api.getSelectedRows()
                 });
+
+                if (renderedFrom) {
+                  try {
+                    let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
+                    if (oldSelectedRecords.length > 0) {
+                      const uniqueRecords = [...new Set([...oldSelectedRecords, ...event.api.getSelectedRows().map(m => m._id)])]
+                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(uniqueRecords));
+                    } else {
+                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(event.api.getSelectedRows().map(m => m._id)))
+                    }
+                  } catch (ex) {
+                    console.error("Error in getting / storing selected records")
+                  }
+                }
               }}
               onRowDragEnd={(event: any) => {
                 if (onRowDragEnd) {
@@ -432,17 +508,17 @@ export default function CustomAgGrid({
               onPageChange={(event, newPage) => {
                 dispatch({ type: 'pageChange', page: newPage });
 
-                if (clientSideGridApi) {
-                  clientSideGridApi.paginationGoToPage(newPage);
+                if (currentGridApi) {
+                  currentGridApi.paginationGoToPage(newPage);
                 }
               }}
               rowsPerPage={limit}
               onRowsPerPageChange={(event) => {
                 dispatch({ type: 'pageSizeChange', limit: event.target.value });
 
-                if (clientSideGridApi) {
-                  clientSideGridApi.paginationGoToPage(0);
-                  clientSideGridApi.paginationSetPageSize(event.target.value);
+                if (currentGridApi) {
+                  currentGridApi.paginationGoToPage(0);
+                  currentGridApi.paginationSetPageSize(event.target.value);
                 }
               }}
               rowsPerPageOptions={pageSizes}

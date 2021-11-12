@@ -20,7 +20,7 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
 
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts }) => {
+const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOrderClose, type, productInPurchaseOrder, isAddingProducts }) => {
     const toastConfig = useContext(CustomToastContext)
     const [quantityDialog, setQuantityDialog] = useState(false);
     const [packageDialog, setPackageDialog] = useState(false);
@@ -33,28 +33,22 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
     const [disableSaveButton, setDisableSaveButton] = useState(false);
 
-    const {
-        state: { permissions },
-    }: any = useData();
-
     useEffect(() => {
-        // fetchProductInventory();
-        if (type === "product") fetchProductInventory();
-        else if (type === "package") fetchPackage();
+        if (type === "product") fetchProductInPurchaseOrder();
+        if (type === "package") fetchPackage();
     }, []);
 
-    const columns = type === "product" ?
-        [
-            { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-            { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
-            // { field: "entity", headerName: "Entity", show: true, disabled: true, cellRenderer: "commonRenderer" },
-            { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
-            { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        ] : [
-            { field: "packageName", headerName: "Package Name", show: true, cellRenderer: "nameRenderer" },
-            { field: "packageDescription", headerName: "Package Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-            { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        ];
+    const columns = type === "product" ? [
+        { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
+        // { field: "entity", headerName: "Entity", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+    ] : [
+        { field: "packageName", headerName: "Package Name", show: true, cellRenderer: "nameRenderer" },
+        { field: "packageDescription", headerName: "Package Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+    ];
 
     const fetchPackageProduct = (packageId) => {
         if (type === "package") {
@@ -80,7 +74,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         axiosInstance().get(`${packages.packageApi}`).then(({ data }) => {
-            data.data = data.data?.filter(d => !productInventory.some(obj => obj.id === d._id)).map((u) => ({
+            data.data = data.data?.filter(d => !productInPurchaseOrder.some(obj => obj.id === d._id)).map((u) => ({
                 ...u,
                 id: u._id,
                 type: type,
@@ -98,25 +92,23 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         });
     };
 
-    const fetchProductInventory = () => {
+    const fetchProductInPurchaseOrder = () => {
         dispatch({ type: "loading", loading: true });
 
         if (gridApi) {
             gridApi.setRowData([]);
         }
-        axiosInstance().get(`${product.api}`).then(({ data: { data: products } }) => {
-            products = products?.filter((u: any) => u?.serializedProduct && !productInventory.some(obj => obj.id === u._id))
-                .map((u) => ({
-                    ...u,
-                    id: u._id,
-                    productCategory: u.productCategory?.optionLabel,
-                    priceTemplate: u.priceTemplate?.optionLabel,
-                    type: type,
-                    quantity: 0,
-                }));
-            console.log(products)
-            setProductData(products)
-            dispatch({ type: "initialize", data: products, count: products.length });
+        axiosInstance().get(`${product.api}`).then(({ data }) => {
+            data.data = data.data?.filter(u => u?.serializedProduct).map((u) => ({
+                ...u,
+                id: u._id,
+                productCategory: u.productCategory?.optionLabel,
+                priceTemplate: u.priceTemplate?.optionLabel,
+                type: type,
+                quantity: 0,
+            }));
+            setProductData(data.data)
+            dispatch({ type: "initialize", data: data.data, count: data.data.length });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
@@ -180,52 +172,54 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 aria-labelledby="customized-dialog-title"
                 open={true}
             >
-                <CustomDialogHeader title={`Add ${type}`} onClose={handleProductInventoryClose} ></CustomDialogHeader>
-                <div className="listing-grid p-3">
-                    <Box mb={2}>
-                        <Grid container >
-                            <Grid item xs={12} sm={6}>
+                <CustomDialogHeader title={`Add ${type}`} onClose={handleProductInPurchaseOrderClose} ></CustomDialogHeader>
+                <CustomDialogContent>
+                    <div className="listing-grid p-3">
+                        <Box mb={2}>
+                            <Grid container >
+                                <Grid item xs={12} sm={6}>
 
+                                </Grid>
+                                <Grid item xs={12} sm={6} container justify="flex-end">
+                                    <SearchBox
+                                        onSearch={handleSearch}
+                                        searchbox="terms_header_search_bar"
+                                        width="300px"
+                                        value={search}
+                                    />
+                                    <Box ml={1} mt={1} >
+                                        <Button
+                                            size="small"
+                                            color="primary"
+                                            onClick={() => addProductInPurchaseOrder(selectedRecords)}
+                                            variant="contained"
+                                            disabled={!Boolean(selectedRecords.length) || isAddingProducts}
+                                            endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
+                                            {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
+                                            Add</Button>
+                                    </Box>
+                                </Grid>
                             </Grid>
-                            <Grid item xs={12} sm={6} container justify="flex-end">
-                                <SearchBox
-                                    onSearch={handleSearch}
-                                    searchbox="terms_header_search_bar"
-                                    width="300px"
-                                    value={search}
-                                />
-                                <Box ml={1} mt={1} >
-                                    <Button
-                                        size="small"
-                                        color="primary"
-                                        onClick={() => addProductInventory(selectedRecords)}
-                                        variant="contained"
-                                        disabled={!Boolean(selectedRecords.length) || isAddingProducts}
-                                        endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
-                                        {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
-                                        Add</Button>
-                                </Box>
-                            </Grid>
-                        </Grid>
-                    </Box>
-                    {columns ?
-                        <CustomAgGridEditable
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameworkComponents}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            allowAction={false}
-                            loading={loading}
-                            isClientSideGrid={true}
-                            onCellValueChanged={onCellValueChanged}
-                        />
-                        : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
-                </div>
+                        </Box>
+                        {columns ?
+                            <CustomAgGridEditable
+                                columns={columns}
+                                dataRows={dataRows}
+                                frameworkComponents={frameworkComponents}
+                                setGridApi={setGridApi}
+                                dispatch={dispatch}
+                                rowCount={rowCount}
+                                limit={limit}
+                                pageSizes={pageSizes}
+                                page={page}
+                                allowAction={false}
+                                loading={loading}
+                                isClientSideGrid={true}
+                                onCellValueChanged={onCellValueChanged}
+                            />
+                            : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+                    </div>
+                </CustomDialogContent>
             </Dialog>
             )}
             {packageDialog && <Dialog open fullWidth maxWidth="md" onClose={() => setPackageDialog(false)}>
@@ -289,4 +283,4 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     );
 }
 
-export default AddExistingProductInventory;
+export default AddProductDialog;
