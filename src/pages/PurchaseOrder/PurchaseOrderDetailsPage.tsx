@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from "react";
+import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
 import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs, ButtonGroup, Container, InputAdornment, TextField } from "@material-ui/core";
 import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
@@ -29,6 +29,9 @@ import Service from "./Service";
 import BulkEditDialog from "./BulkEditDialog";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import IssuPO from "./IssuPO";
+import { FaWpforms } from "react-icons/fa";
+import { BiFoodMenu } from "react-icons/bi";
+import TabPanel from "../../components/TabPanel";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -67,6 +70,20 @@ const PurchaseOrderDetailsPage = () => {
     const [currentStep, setCurrentStep] = useState(0);
     const [downlodingFile, setDownlodingFile] = useState(false)
     const [selectedProductData, setSelectedProductData] = useState(null)
+
+    const [tabValue, setTabValue] = useState(0);
+
+    function a11yProps(index: any) {
+        return {
+            id: `main-tab-${index}`,
+            'aria-controls': `main-tabpanel-${index}`
+        };
+    }
+
+    const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+        setTabValue(newValue);
+    };
+
 
 
     const [gridApi, setGridApi] = useState(null);
@@ -390,8 +407,10 @@ const PurchaseOrderDetailsPage = () => {
                     <CustomBreadCrumbs routes={customizedRoutes} />
                 </Grid>
                 <Grid container spacing={1} className="detail-container">
-                    <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
-                        <Paper>
+
+                    <Grid item xs={12} sm={12} spacing={2}>
+
+                        <Paper style={{ height: "650px" }}>
                             {!purchaseOrderData ? (
                                 <div>
                                     <Skeleton variant="text" width="150px" height="40px" />
@@ -473,164 +492,244 @@ const PurchaseOrderDetailsPage = () => {
                             )}
 
 
-                            <Box>
-                                {loadingPurchaseOrder || !purchaseOrderFields.length ? (
-                                    <Grid container spacing={2} style={{ padding: "8px" }}>
-                                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
+
+
+                            <Tabs
+                                className="quote-tab"
+                                value={tabValue}
+                                onChange={handleMainTabChange}
+                                textColor="primary"
+                                TabIndicatorProps={{
+                                    style: {
+                                        display: 'none'
+                                    }
+                                }}
+                            >
+                                {/* <Tab
+                        className={"tabLayout"}
+                      style={{
+                        background: tabValue === 0 ? "white" : "",
+                        color: tabValue === 0 ? "blue" : "#163340",
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font ">
+                          <InfoIcon className="mr-1" fontSize="inherit" /> All
+                          Version Status
+                        </div>
+                      }
+                      {...a11yProps(0)}
+                    /> */}
+                                <Tab
+                                    className={'tabLayout'}
+                                    style={{
+                                        background: tabValue === 1 ? 'white' : '',
+                                        color: tabValue === 1 ? '#163340' : '#163340'
+                                    }}
+                                    label={
+                                        <div className="d-flex align-items-center tab-font">
+                                            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                                        </div>
+                                    }
+                                    {...a11yProps(0)}
+                                />
+                                <Tab
+                                    className={'tabLayout'}
+                                    style={{
+                                        background: tabValue === 2 ? 'white' : '',
+                                        color: tabValue === 2 ? 'blue' : '#163340'
+                                    }}
+                                    label={
+                                        <div className="d-flex align-items-center tab-font">
+                                            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                                        </div>
+                                    }
+                                    {...a11yProps(1)}
+                                />
+                                <div className={'uio'}> </div>
+                            </Tabs>
+
+                            <TabPanel value={tabValue} index={0}>
+                                <Box>
+                                    {loadingPurchaseOrder || !purchaseOrderFields.length ? (
+                                        <Grid container spacing={2} style={{ padding: "8px" }}>
+                                            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                                        </Grid>
+                                    ) : (
+                                        <>
+                                            <DetailsPage data={purchaseOrderData}
+                                                fields={purchaseOrderFields} />
+                                        </>
+                                    )}
+                                </Box>
+                                <Grid container spacing={2}>
+                                </Grid>
+                            </TabPanel>
+
+                            <TabPanel value={tabValue} index={1}>
+                                <Grid item xs={12} sm={12} md={12} lg={12} >
+                                    <Grid item xs={12} sm={12} md={12} lg={12}>
+                                        <>
+
+                                            <Paper>
+                                                <Steps
+                                                    // className={styles.steps_box}
+                                                    isNextStep={!Boolean(purchaseOrderProduct.length)}
+                                                    steps={purchaseOrderSteps.slice(0, 5)}
+                                                    currentStep={currentStep}
+                                                    setCurrentStep={setCurrentStep}
+                                                />
+                                                {currentStep === 0 &&
+                                                    <>
+                                                        <Box display="flex" justifyContent="space-between" m={1}>
+                                                            <Box display="flex">
+                                                                <Button
+                                                                    variant="contained"
+                                                                    color="primary"
+                                                                    size="small"
+                                                                    onClick={() => {
+                                                                        setIsAddNewProduct(true);
+                                                                    }}
+                                                                >
+                                                                    {`Add New ${routes.product.title}`}
+                                                                </Button>
+                                                                <Box mx={1} />
+                                                                <Button
+                                                                    variant="contained"
+                                                                    color="primary"
+                                                                    size="small"
+                                                                    onClick={() => {
+                                                                        setAddProductDialog(true);
+                                                                    }}
+                                                                >
+                                                                    {`Add Existing ${routes.product.title}`}
+                                                                </Button>
+                                                            </Box>
+                                                        </Box>
+                                                        {columns ?
+                                                            <CustomAgGridEditable
+                                                                columns={columns}
+                                                                dataRows={dataRows}
+                                                                frameworkComponents={frameworkComponents}
+                                                                setGridApi={setGridApi}
+                                                                dispatch={dispatch}
+                                                                rowCount={rowCount}
+                                                                limit={limit}
+                                                                pageSizes={pageSizes}
+                                                                page={page}
+                                                                allowAction={true}
+                                                                actionWidth={150}
+                                                                allowSelection={true}
+                                                                isClientSideGrid={true}
+                                                                loading={loading}
+                                                                onCellValueChanged={(row) => {
+                                                                    handleUpdateOrderProduct(row.data)
+                                                                }}
+                                                                renderedFrom="purchaseOrderDetailsPageInventory"
+                                                                refreshGrid={fetchPurchaseOrderProduct}
+                                                            />
+                                                            : <Box
+                                                                p={2}
+                                                                height={500}
+                                                                bgcolor="white">
+                                                                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                                                            </Box>
+                                                        }
+
+                                                    </>
+                                                }
+                                                {(currentStep === 1) && (
+                                                    <Service
+                                                        fetchPurchaseOrderData={fetchPurchaseOrderData}
+                                                        serviceList={serviceList}
+                                                        currencySymbol={currencySymbol}
+                                                        purchaseOrderData={purchaseOrderData} />
+                                                )}
+                                                {currentStep === 2 &&
+                                                    <IssuPO
+                                                        combinedPurchaseOrderList={purchaseOrderProduct}
+                                                        handleViewPdf={handleViewPdf}
+                                                        downlodingFile={downlodingFile}
+                                                        setCurrentStep={setCurrentStep}
+                                                        currentStep={currentStep}
+                                                    />
+                                                }
+                                                {currentStep === 3 &&
+                                                    <>
+                                                        <Box display="flex" justifyContent="space-between" m={1}>
+                                                            <Box display="flex">
+                                                                <Box mx={1} />
+                                                                <Button
+                                                                    variant="contained"
+                                                                    color="primary"
+                                                                    size="small"
+                                                                    disabled={selectedRecords.length === 0}
+                                                                    onClick={() => { setShowCreateAssetDialog(true) }}
+                                                                >
+                                                                    {`Create Asset`}
+                                                                </Button>
+                                                            </Box>
+                                                        </Box>
+                                                        {columns ?
+                                                            <CustomAgGrid
+                                                                columns={
+                                                                    [...columns.map(d => ({
+                                                                        field: d.field, headerName: d.headerName, show: d.show, disabled: d.disabled, cellRenderer: d.cellRenderer
+                                                                    })),
+                                                                    { field: "actualReceived", headerName: "Actual Received", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true }
+                                                                    ]
+                                                                }
+                                                                dataRows={dataRows}
+                                                                frameworkComponents={frameworkComponents}
+                                                                setGridApi={setGridApi}
+                                                                dispatch={dispatch}
+                                                                rowCount={rowCount}
+                                                                limit={limit}
+                                                                pageSizes={pageSizes}
+                                                                page={page}
+                                                                allowAction={false}
+                                                                allowSelection={true}
+                                                                isClientSideGrid={true}
+                                                                loading={loading}
+                                                                renderedFrom="purchaseOrderDetailsPageInventory"
+                                                                refreshGrid={fetchPurchaseOrderProduct}
+                                                            />
+                                                            : <Box
+                                                                p={2}
+                                                                height={500}
+                                                                bgcolor="white">
+                                                                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                                                            </Box>
+                                                        }
+
+                                                    </>
+                                                }
+                                            </Paper>
+                                        </>
                                     </Grid>
-                                ) : (
-                                    <>
-                                        <DetailsPage data={purchaseOrderData}
-                                            fields={purchaseOrderFields} />
-                                    </>
-                                )}
-                            </Box>
-                            <Grid container spacing={2}>
-                            </Grid>
+                                </Grid>
+
+                            </TabPanel>
+
+
+
+
+
+
+
                         </Paper>
+
+
+
+
+
+
+
+
+
+
+
                     </Grid>
                     <Box my={1} />
-                    <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
-                        <Grid item xs={12} sm={12} md={12} lg={12}>
-                            <>
-                                <Box my={1} />
-                                <Paper>
-                                    <Steps
-                                        // className={styles.steps_box}
-                                        isNextStep={!Boolean(purchaseOrderProduct.length)}
-                                        steps={purchaseOrderSteps.slice(0, 5)}
-                                        currentStep={currentStep}
-                                        setCurrentStep={setCurrentStep}
-                                    />
-                                    {currentStep === 0 &&
-                                        <>
-                                            <Box display="flex" justifyContent="space-between" m={1}>
-                                                <Box display="flex">
-                                                    <Button
-                                                        variant="contained"
-                                                        color="primary"
-                                                        size="small"
-                                                        onClick={() => {
-                                                            setIsAddNewProduct(true);
-                                                        }}
-                                                    >
-                                                        {`Add New ${routes.product.title}`}
-                                                    </Button>
-                                                    <Box mx={1} />
-                                                    <Button
-                                                        variant="contained"
-                                                        color="primary"
-                                                        size="small"
-                                                        onClick={() => {
-                                                            setAddProductDialog(true);
-                                                        }}
-                                                    >
-                                                        {`Add Existing ${routes.product.title}`}
-                                                    </Button>
-                                                </Box>
-                                            </Box>
-                                            {columns ?
-                                                <CustomAgGridEditable
-                                                    columns={columns}
-                                                    dataRows={dataRows}
-                                                    frameworkComponents={frameworkComponents}
-                                                    setGridApi={setGridApi}
-                                                    dispatch={dispatch}
-                                                    rowCount={rowCount}
-                                                    limit={limit}
-                                                    pageSizes={pageSizes}
-                                                    page={page}
-                                                    allowAction={true}
-                                                    actionWidth={150}
-                                                    allowSelection={true}
-                                                    isClientSideGrid={true}
-                                                    loading={loading}
-                                                    onCellValueChanged={(row) => {
-                                                        handleUpdateOrderProduct(row.data)
-                                                    }}
-                                                    renderedFrom="purchaseOrderDetailsPageInventory"
-                                                    refreshGrid={fetchPurchaseOrderProduct}
-                                                />
-                                                : <Box
-                                                    p={2}
-                                                    height={500}
-                                                    bgcolor="white">
-                                                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                                                </Box>
-                                            }
-
-                                        </>
-                                    }
-                                    {(currentStep === 1) && (
-                                        <Service
-                                            fetchPurchaseOrderData={fetchPurchaseOrderData}
-                                            serviceList={serviceList}
-                                            currencySymbol={currencySymbol}
-                                            purchaseOrderData={purchaseOrderData} />
-                                    )}
-                                    {currentStep === 2 &&
-                                        <IssuPO
-                                            combinedPurchaseOrderList={purchaseOrderProduct}
-                                            handleViewPdf={handleViewPdf}
-                                            downlodingFile={downlodingFile}
-                                            setCurrentStep={setCurrentStep}
-                                            currentStep={currentStep}
-                                        />
-                                    }
-                                    {currentStep === 3 &&
-                                        <>
-                                            <Box display="flex" justifyContent="space-between" m={1}>
-                                                <Box display="flex">
-                                                    <Box mx={1} />
-                                                    <Button
-                                                        variant="contained"
-                                                        color="primary"
-                                                        size="small"
-                                                        disabled={selectedRecords.length === 0}
-                                                        onClick={() => { setShowCreateAssetDialog(true) }}
-                                                    >
-                                                        {`Create Asset`}
-                                                    </Button>
-                                                </Box>
-                                            </Box>
-                                            {columns ?
-                                                <CustomAgGrid
-                                                    columns={
-                                                        [...columns.map(d => ({
-                                                            field: d.field, headerName: d.headerName, show: d.show, disabled: d.disabled, cellRenderer: d.cellRenderer
-                                                        })),
-                                                        { field: "actualReceived", headerName: "Actual Received", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true }
-                                                        ]
-                                                    }
-                                                    dataRows={dataRows}
-                                                    frameworkComponents={frameworkComponents}
-                                                    setGridApi={setGridApi}
-                                                    dispatch={dispatch}
-                                                    rowCount={rowCount}
-                                                    limit={limit}
-                                                    pageSizes={pageSizes}
-                                                    page={page}
-                                                    allowAction={false}
-                                                    allowSelection={true}
-                                                    isClientSideGrid={true}
-                                                    loading={loading}
-                                                    renderedFrom="purchaseOrderDetailsPageInventory"
-                                                    refreshGrid={fetchPurchaseOrderProduct}
-                                                />
-                                                : <Box
-                                                    p={2}
-                                                    height={500}
-                                                    bgcolor="white">
-                                                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                                                </Box>
-                                            }
-
-                                        </>
-                                    }
-                                </Paper>
-                            </>
-                        </Grid>
-                    </Grid>
                 </Grid>
             </Fragment>
             {showConfirmBox && (

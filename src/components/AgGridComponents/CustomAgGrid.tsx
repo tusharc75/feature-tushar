@@ -10,7 +10,6 @@ import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGrid
 import { orderBy } from 'lodash';
 import { checkStaticField, staticColumns } from "../../constants/columns"
 
-
 export function reducer(state, action) {
   switch (action.type) {
     case 'loading':
@@ -93,6 +92,13 @@ export function reducer(state, action) {
         loading: false
       };
 
+    case 'showFilteredRecordsOnly':
+      return {
+        ...state,
+        showFilteredRecordsOnly: !state.showFilteredRecordsOnly,
+        page: 0
+      }
+
     default:
       break;
   }
@@ -111,7 +117,8 @@ export const intialState = {
   filters: {},
   sorting: [],
   selectedRecords: [],
-  appendRows: false
+  appendRows: false,
+  showFilteredRecordsOnly: false
 };
 
 export default function CustomAgGrid({
@@ -139,7 +146,8 @@ export default function CustomAgGrid({
   customGridOptions = null,
   actionLabel = null,
   actionEditable = false,
-  onCellValueChanged = () => { }
+  onCellValueChanged = () => { },
+  showOnlyShowFilteredRecordSwitch = false
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -153,6 +161,7 @@ export default function CustomAgGrid({
     setColumnApi(params.columnApi);
     setCurrentGridApi(params.api);
     if (handleGridReady) handleGridReady(params);
+    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
 
     if (!isClientSideGrid) {
 
@@ -180,21 +189,6 @@ export default function CustomAgGrid({
           columnApi.setColumnState(columnState);
         }, 50)
       }
-
-      if (!isClientSideGrid && currentGridApi) {
-        try {
-          let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
-          if (oldSelectedRecords.length > 0) {
-            currentGridApi.forEachNode(function (node) {
-              node.setSelected(
-                oldSelectedRecords.some((o) => o === node.data._id)
-              );
-            });
-          }
-        } catch (ex) {
-          console.error("Error in getting selected records from local storage")
-        }
-      }
     }
   }, [columnApi, loading])
 
@@ -219,6 +213,21 @@ export default function CustomAgGrid({
           selectedRecords.some((o) => o._id === node.data._id)
         );
       });
+    }
+
+    if (!isClientSideGrid && currentGridApi) {
+      try {
+        let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
+        if (oldSelectedRecords.length > 0) {
+          currentGridApi.forEachNode(function (node) {
+            node.setSelected(
+              oldSelectedRecords.some((o) => o === node.data._id)
+            );
+          });
+        }
+      } catch (ex) {
+        console.error("Error in getting selected records from local storage")
+      }
     }
 
   }, [currentGridApi, selectedRecords])
@@ -309,7 +318,7 @@ export default function CustomAgGrid({
       // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
       //   suppressFilterButton: true,
       // }}
-      ></AgGridColumn >
+      ></AgGridColumn>
   })
 
   return (
@@ -331,6 +340,8 @@ export default function CustomAgGrid({
             refreshGrid={refreshGrid}
             renderedFrom={renderedFrom}
             isClientSideGrid={isClientSideGrid}
+            dispatch={dispatch}
+            showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
           />
 
           <div className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
@@ -411,11 +422,20 @@ export default function CustomAgGrid({
               suppressRowClickSelection={true}
               rowSelection={'multiple'}
               onRowSelected={(event) => {
-                if (!isClientSideGrid && event.rowIndex !== null && event.node.isSelected() === false) {
+                if (event.rowIndex !== null && !isClientSideGrid) {
+
                   try {
                     let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
-                    if (oldSelectedRecords.length > 0) {
-                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords.filter(f => f !== (event.data._id ?? event.data.id))));
+
+                    if (event.node.isSelected() === true) {
+                      oldSelectedRecords = [...oldSelectedRecords, event.node.data.id];
+                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords));
+                    }
+                    else if (event.node.isSelected() === false) {
+
+                      if (oldSelectedRecords.length > 0) {
+                        localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords.filter(f => f !== (event.data._id ?? event.data.id))));
+                      }
                     }
                   } catch (ex) {
                     console.error("Error in getting / storing selected records")

@@ -343,7 +343,7 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
 .overflow-hidden {
     overflow: hidden !important;
     border-radius: 5px !important;
-    background-color: #BCD6DA !important;
+    background-color: #bcd6da !important;
     font-size: 0.7rem !important;
     font-weight: 600 !important;
     color: var(--primary) !important;
@@ -367,3 +367,7 @@ $sizes: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10;
 
 // Margins
 @include fixed-list-loop(".z-index-", "z-index");
+
+.font-weight-bold {
+    font-weight: bold !important;
+}

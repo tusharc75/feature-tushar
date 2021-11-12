@@ -1,4 +1,4 @@
-import { useState, Fragment } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import { Grid, Checkbox, FormControlLabel, Fab, Chip, Tooltip, Menu, MenuItem } from '@material-ui/core'
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { isMobile } from 'react-device-detect';
@@ -31,9 +31,14 @@ export default function CustomSwipableList({
     onClone,
     fullHeight = false,
     renderedFrom,
-    additionalDetails = []
-
+    additionalDetails = [],
+    owerCollaboratorInitialsOrImages = null
 }) {
+
+    useEffect(() => {
+        localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+    }, [])
+
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const [menuData, setMenuData] = useState({
@@ -174,7 +179,7 @@ export default function CustomSwipableList({
                                                 <div key={index} className="ml-2 my-1">
                                                     <div className="swipe-card-additional-details-inner">
                                                         <span style={{ color: "#337FFB" }} className="d-flex align-items-center">{a.icon}</span>
-                                                        <h5 className="text-truncate" style={{ paddingTop: "2px", fontWeight: 500 }}>{d[a.field]} asdasda sdasdasd asd asda sdasd asdasdad</h5>
+                                                        <h5 className="text-truncate" style={{ paddingTop: "2px", fontWeight: 500 }}>{d[a.field]}</h5>
                                                     </div>
                                                 </div>
                                             ))
@@ -193,6 +198,24 @@ export default function CustomSwipableList({
                                             ]
                                         }
                                     </div>
+
+                                    {
+                                        d[owerCollaboratorInitialsOrImages].length > 0 && <div className="avatars ml-2 mt-2">
+                                            {
+                                                [...d[owerCollaboratorInitialsOrImages].slice(0, 5)].map((d, index) => (
+                                                    <span className="avatars__item" key={index}>
+                                                        <span className="avatar">{d.initials}</span>
+                                                    </span>
+                                                ))
+                                            }
+
+                                            {
+                                                d[owerCollaboratorInitialsOrImages].length > 5 && <span className="font-weight-bold bold mt-2 ml-1">+{d[owerCollaboratorInitialsOrImages].length - 5} more</span>
+                                            }
+                                        </div>
+                                    }
+
+
                                 </Grid>
                             </Grid>
                         ))
