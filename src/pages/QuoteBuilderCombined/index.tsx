@@ -19,7 +19,8 @@ import {
   prepareDataForGrid,
   customerContact,
   supplierContact,
-  quote
+  quote,
+  getLocalStorageArrayData
 } from "../../constants/helpers";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
@@ -859,13 +860,12 @@ const QuoteBuilders = () => {
                     }}
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
-                    recordsToExport={selectedRecords.length}
-                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords).length}
+                    ids={getLocalStorageArrayData(localStorageSelectedRecords)}
                     onExportToExcelSuccess={() => {
                       if (gridApi) gridApi.deselectAll()
                       else fetchQuoteBuilder()
                     }}
-                    renderedFrom={localStorageSelectedRecords}
                   />
                 </Grid>
               </Grid>

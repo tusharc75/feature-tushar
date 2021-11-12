@@ -1210,3 +1210,15 @@ export const prepareDataForGrid = (data, user = {}) => {
 
   return finalObject;
 }
+
+export const getLocalStorageArrayData = (key) => {
+  try {
+    if (localStorage.getItem(key) && JSON.parse(localStorage.getItem(key)).length > 0) {
+      return JSON.parse(localStorage.getItem(key));
+    }
+    return [];
+
+  } catch (ex) {
+    return []
+  }
+}

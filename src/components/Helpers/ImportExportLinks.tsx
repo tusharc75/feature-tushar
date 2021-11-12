@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ImportExportLinks({ ids = [], permissions, module, api,
   afterImportCompleted, recordsToExport = 0, exportSelectedRecords = null, isExportAllOrSomeFeature = false,
-  onExportToExcelSuccess = () => { }, total = 0, additionalParams = null, isBackgroundWhite = false, renderedFrom = null
+  onExportToExcelSuccess = () => { }, total = 0, additionalParams = null, isBackgroundWhite = false
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery("(max-width: 960px)");
@@ -140,12 +140,7 @@ export default function ImportExportLinks({ ids = [], permissions, module, api,
         return
       }
 
-      let selectedIds = [...ids];
-      if (renderedFrom) {
-        selectedIds = [...(localStorage.getItem(renderedFrom) ? JSON.parse(localStorage.getItem(renderedFrom)) : [])]
-      }
-
-      exportApi = exportApi + `&ids=${JSON.stringify(selectedIds)}`
+      exportApi = exportApi + `&ids=${JSON.stringify(ids)}`
     }
     axiosInstance()
       .get(exportApi, {
@@ -235,7 +230,7 @@ export default function ImportExportLinks({ ids = [], permissions, module, api,
           className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}
         >
           Export to Excel {
-            isExportAllOrSomeFeature ? ((recordsToExport === 0 || recordsToExport === total) ? "(All)" : `(${recordsToExport})`)
+            isExportAllOrSomeFeature ? ((recordsToExport === 0 || recordsToExport === total) ? "(All)" : "(Selected)")
               : null
           }
         </label>
@@ -281,7 +276,7 @@ export default function ImportExportLinks({ ids = [], permissions, module, api,
             handleClose();
           }}
         >
-          Export to Excel ({recordsToExport === 0 ? "All" : recordsToExport})
+          Export to Excel ({recordsToExport === 0 ? "All" : "Selected"})
         </MenuItem>
         <MenuItem
           onClick={() => {
