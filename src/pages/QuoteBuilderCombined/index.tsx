@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useContext, useReducer, Fragment } from "react";
-import { Grid, Chip, Typography, Tooltip, Fab } from "@material-ui/core";
+import { useState, useEffect, useContext, useReducer, Fragment } from "react";
+import { Grid, Chip, Typography, Tooltip } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import axiosInstance from "../../axios/axiosInstance";
-import { displayDate } from "../../services/util";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
@@ -20,7 +19,8 @@ import {
   prepareDataForGrid,
   customerContact,
   supplierContact,
-  quote
+  quote,
+  getLocalStorageArrayData
 } from "../../constants/helpers";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
@@ -42,16 +42,16 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
 import VersionStatus from "./VersionStatus";
 import TransferEntityDialog from "../../components/AssignRolesDialog/TransferEntityDialog";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import AddIcon from "@material-ui/icons/Add"
-import { isMobile, isTablet } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import { quoteStepColors } from '../../constants/helpers';
 import InfiniteScroll from "react-infinite-scroll-component";
-import {MdAccountCircle} from "react-icons/md";
-import {AiFillCrown} from "react-icons/all";
+import { MdAccountCircle } from "react-icons/md";
+import { AiFillCrown } from "react-icons/all";
+import IconButton from "@material-ui/core/IconButton"
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 let quoteTimeout;
 const QuoteType = [
@@ -113,6 +113,9 @@ const QuoteBuilders = () => {
   const [showVersionsDialog, setShowVersionsDialog] = useState(false);
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const [columns, setColumns] = useState([])
+  const [isAllChecked, setIsAllChecked] = useState(false);
+  const [clonedData, setClonedData] = useState([])
+  const [clonedId, setClonedId] = useState(null)
 
   const [versionStatusData, setVersionStatusData] = useState({
     columns: [
@@ -205,7 +208,8 @@ const QuoteBuilders = () => {
     filters,
     sorting,
     selectedRecords,
-    appendRows
+    appendRows,
+    showFilteredRecordsOnly
   } = state;
 
   // const columns = [
@@ -256,6 +260,8 @@ const QuoteBuilders = () => {
   //   },
   // ];
   //  Grid Variables - End
+
+  const localStorageSelectedRecords = `${quoteResource}_selected`;
 
   useEffect(() => {
     fetchGridColumns()
@@ -335,7 +341,6 @@ const QuoteBuilders = () => {
     quoteTimeout = setTimeout(() => {
       fetchQuoteBuilder();
     }, millisec);
-    // eslint-disable-next-line
   }, [search]);
 
   useEffect(() => {
@@ -351,7 +356,8 @@ const QuoteBuilders = () => {
     selectedEntity,
     accountDetails,
     contactDetails,
-    opportunityDetails
+    opportunityDetails,
+    showFilteredRecordsOnly
   ]);
 
   const getVersionStatus = (id, currency) => {
@@ -399,8 +405,6 @@ const QuoteBuilders = () => {
           }
 
         });
-
-
         setLoadingVersions(false);
         // setAllVersionStatusButtonText("All Version Status");
       })
@@ -413,6 +417,10 @@ const QuoteBuilders = () => {
 
   const handleSingleDeleteQuote = async () => {
     dispatch({ type: "loading", loading: true });
+
+    const savedIds = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+    localStorage.setItem(localStorageSelectedRecords, JSON.stringify(savedIds.filter(f => f !== singleQuoteDelete.id)));
+    dispatch({ type: "selection", selectedRecords: selectedRecords.filter(f => f._id !== singleQuoteDelete.id) });
 
     axiosInstance()
       .put(`${qbApi}/remove?entity=${selectedEntity}`, {
@@ -433,7 +441,6 @@ const QuoteBuilders = () => {
         toastConfig.setToastConfig(error);
       });
   };
-
   const handleShowCloneQuoteDialog = () => {
     setIsClone(true)
     setshowCreateQuoteDialog(true)
@@ -482,6 +489,21 @@ const QuoteBuilders = () => {
 
   const ActionsRenderer = (params) => (
     <>
+      <Tooltip
+        className={quotePermissions?.isCreate ? "" : "cursor-stop"}
+        title={quotePermissions?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            handleShowCloneQuoteDialog()
+            setClonedId(params.data?._id)
+          }}
+        >
+          <FileCopyIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
+
       <GridDeleteIcon
         hasDeletePermission={quotePermissions.isDelete}
         ownerId={params.data.ownerId}
@@ -536,8 +558,6 @@ const QuoteBuilders = () => {
       case "supplierAccountName":
         return "supplierAccountName.optionLabel";
 
-
-
       default:
         return field;
     }
@@ -548,6 +568,11 @@ const QuoteBuilders = () => {
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+    }
+
+    if (showFilteredRecordsOnly) {
+      const savedIds = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedIds)}`;
     }
 
     if (accountDetails.accountId) {
@@ -631,20 +656,16 @@ const QuoteBuilders = () => {
         gridApi.setRowData([]);
       }
 
-      let oldSelectedRecords = [];
-      const localStorageKey = `${quoteResource}_selected`;
-      try {
-        if (localStorage.getItem(localStorageKey)) {
-          oldSelectedRecords = [...JSON.parse(localStorage.getItem(localStorageKey))]
-        }
-      } catch (ex) {
-        console.error("Error is parsing quote localstorage value")
-      }
-
       axiosInstance()
         .get(`${qbApi}${queryString}`)
         .then(({ data: { data, count } }) => {
+
+          let clonedData = {}
           let rows = data.map((u) => {
+            clonedData = {
+              ...clonedData,
+              [u.quoteName]: u
+            }
 
             let versionCount = Object.keys(u.versions).length;
             let tempStatus = "Building Quote"
@@ -674,17 +695,36 @@ const QuoteBuilders = () => {
             finalObject["versionCount"] = versionCount;
             finalObject["versionData"] = versionArray;
 
-            finalObject["isChecked"] = oldSelectedRecords.some(s => s === u._id);
+            finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
             finalObject["allowedToEdit"] = (
               [...(u.collaborator ?? []), u.owner].some(
                 (d) => d?.optionValue === user?.user?._id
               )
             );
 
+            finalObject["owerCollaboratorInitialsOrImages"] = [];
+            if (finalObject["owner"])
+              finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] });
+            if (finalObject["collaborator"])
+              finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["collaborator"] });
+            if (finalObject["restcollaborator"]?.length > 0) {
+              finalObject["restcollaborator"].forEach((m: any) => {
+                finalObject["owerCollaboratorInitialsOrImages"].push({ initials: m.optionLabel })
+              });
+            }
+
+            finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
+              if (f.initials) {
+                f.initials = f.initials.split(" ").map((i) => i[0]).join("");
+              }
+            })
+
             return finalObject;
           });
           //  Dynamic grid code - end
 
+          setIsAllChecked(false);
+          setClonedData(data)
 
           if (appendRows) {
             dispatch({
@@ -696,6 +736,21 @@ const QuoteBuilders = () => {
               type: "initialize", data: rows, count: count,
               selectedRecords: rows.filter(f => f.isChecked === true)
             });
+          }
+
+          if (gridApi) {
+            try {
+              let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
+              if (oldSelectedRecords.length > 0) {
+                gridApi.forEachNode(function (node) {
+                  node.setSelected(
+                    oldSelectedRecords.some((o) => o === node.data._id)
+                  );
+                });
+              }
+            } catch (ex) {
+              console.error("Error in getting selected records from local storage")
+            }
           }
 
           setTimeout(() => {
@@ -765,6 +820,13 @@ const QuoteBuilders = () => {
             type: "success",
             message: data.message,
           });
+
+          let storedSelectedIds = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+          recordsToDelete.forEach((idToDeleteFromLocalStorage) => {
+            storedSelectedIds = storedSelectedIds.filter(id => id !== idToDeleteFromLocalStorage)
+          })
+          localStorage.setItem(localStorageSelectedRecords, JSON.stringify(storedSelectedIds));
+
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
@@ -798,8 +860,8 @@ const QuoteBuilders = () => {
                     }}
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
-                    recordsToExport={selectedRecords.length}
-                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords).length}
+                    ids={getLocalStorageArrayData(localStorageSelectedRecords)}
                     onExportToExcelSuccess={() => {
                       if (gridApi) gridApi.deselectAll()
                       else fetchQuoteBuilder()
@@ -905,10 +967,6 @@ const QuoteBuilders = () => {
                 loading={loading}
                 additionalDetails={[
                   {
-                    icon: <AiFillCrown size={18} />,
-                    field: "owner"
-                  },
-                  {
                     icon: <MdAccountCircle size={18} />,
                     field: "customerAccountName"
                   },
@@ -928,6 +986,7 @@ const QuoteBuilders = () => {
                     chipColorVariable: quoteStepColors
                   }
                 ]}
+                owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                 onCreate={clickCreateNew}
                 showClone={false}
                 onClone={() => { }}
@@ -948,6 +1007,7 @@ const QuoteBuilders = () => {
                     loading={loading}
                     renderedFrom={quoteResource}
                     refreshGrid={fetchQuoteBuilder}
+                    showOnlyShowFilteredRecordSwitch={true}
                   /> : null
               )
           }
@@ -992,15 +1052,15 @@ const QuoteBuilders = () => {
 
       {showCreateQuoteDialog && (
         <ManageQuoteDialog
-
           open={showCreateQuoteDialog}
           onSuccess={onSuccess}
           onClose={() => {
             setshowCreateQuoteDialog(false);
             setIsClone(false)
+            setClonedId(null)
           }}
           isNew={isClone ? false : true}
-          dataToUpdate={isClone ? { ...selectedRecords[0], ...{ 'owner': { 'optionLabel': selectedRecords[0].owner, 'optionValue': selectedRecords[0].ownerId } } } : null}
+          dataToUpdate={isClone ? clonedId && clonedData ? clonedData.filter(o => o._id === clonedId)[0] : clonedData.filter(o => o._id === selectedRecords[0]._id)[0] : null}
           isClone={isClone ? true : false}
           resource={null}
           isRedirectTodetailPage={isClone ? false : true}

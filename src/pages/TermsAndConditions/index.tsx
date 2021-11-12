@@ -188,7 +188,7 @@ export default function TermsAndCondition(props) {
                     term: filters[field].filter
                 })
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
         }
 
         if (sorting.length > 0) {
@@ -288,6 +288,7 @@ export default function TermsAndCondition(props) {
                     actionWidth={150}
                     loading={loading}
                     refreshGrid={fetchTermsAndConditions}
+                    renderedFrom={routes.termsAndConditions.title}
                 />
 
                 {

@@ -19,7 +19,7 @@ import { displayDate, imageUploadMaxSize } from "../../../constants/helpers"
 import AddProxyDialog from './AddProxyDialog';
 import DeleteIcon from "@material-ui/icons/Delete";
 import routes from '../../../components/Helpers/Routes';
-import { FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
+import {FaDiceOne, FaUserAltSlash, FaUserCheck} from 'react-icons/fa';
 
 const useStyles = makeStyles((theme) => ({
     profileEdit: {
@@ -318,9 +318,13 @@ export default function ManageProfile(props) {
 
 
                                 <div className="detail-box">
-                                    <h3 className="form-label-style" title="DOA Proxy">
-                                        DOA Proxy
-                                    </h3>
+                                    <div className={"detail-box-content"}>
+                                        <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                        <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>DOA Proxy</h2>
+                                    </div>
+                                    {/*<h3 className="form-label-style" title="DOA Proxy">*/}
+                                    {/*    DOA Proxy*/}
+                                    {/*</h3>*/}
 
                                     {userData?.proxyDOA ?
                                         (
@@ -400,9 +404,13 @@ export default function ManageProfile(props) {
                                     }
                                 </div>
                                 <div className="detail-box">
-                                    <h3 className="form-label-style" title="Me as a Proxy">
-                                        Me as a Proxy
-                                    </h3>
+                                    <div className={"detail-box-content"}>
+                                        <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                        <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}> Me as a Proxy</h2>
+                                    </div>
+                                    {/*<h3 className="form-label-style" title="Me as a Proxy">*/}
+                                    {/*    Me as a Proxy*/}
+                                    {/*</h3>*/}
 
                                     {userProxy.length > 0 ?
                                         (

@@ -4,7 +4,7 @@ import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-import { Box, Typography } from "@material-ui/core";
+import { Box, CircularProgress } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
@@ -19,7 +19,7 @@ import Dialog from "@material-ui/core/Dialog/Dialog";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 
-const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, selectedProducts }) => {
+const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts }) => {
     const toastConfig = useContext(CustomToastContext)
 
     const [serializedProducts, setSerializedProducts] = useState([]);
@@ -116,9 +116,10 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
                     ...u,
                     id: u._id,
                     productName: u.product?.optionLabel,
-                    productCategory: u.productCategory?.optionLabel,
-                    warehouse: u.warehouse?.optionLabel,
+                    productCategory: u?.productCategory?.optionLabel,
+                    warehouse: u?.warehouse?.optionLabel,
                 }));
+
 
             dispatch({ type: "initialize", data: data.data, count: data.count });
             setTimeout(() => {
@@ -145,7 +146,7 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
                     term: filters[field].filter
                 })
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
         }
 
         if (sorting.length > 0) {
@@ -227,7 +228,9 @@ const AddSerializedAsset = ({ addSerializedAsset, handleSerializedAssetClose, se
                                         color="primary"
                                         onClick={() => addSerializedAsset(selectedRecords)}
                                         variant="contained"
-                                        disabled={selectedRecords.length > 0 ? false : true}  >
+                                        disabled={selectedRecords.length === 0 || isAdding}
+                                        endIcon={isAdding && <CircularProgress size={20} />}
+                                    >
                                         {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
                                         Add</Button>
                                 </Box>

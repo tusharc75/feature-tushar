@@ -253,7 +253,7 @@ const Roles: FC = () => {
           term: filters[field].filter
         })
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
     }
 
     if (sorting.length > 0) {
@@ -447,6 +447,7 @@ const Roles: FC = () => {
             dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
             loading={loading}
             refreshGrid={fetchRoles}
+            renderedFrom={routes.role.title}
           />
 
         </CustomContainer>

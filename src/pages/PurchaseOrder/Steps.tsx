@@ -20,11 +20,10 @@ import { GoPencil } from "react-icons/go";
 import { BsCheckCircle } from "react-icons/bs";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import { FaHourglassHalf } from "react-icons/fa";
-import styles from "./Retal.module.scss";
 
 import { isMobile } from "react-device-detect";
-import { RiShareForwardFill } from "react-icons/ri";
-import { TiArrowBack } from "react-icons/ti";
+import {TiArrowBack} from "react-icons/ti";
+import {RiShareForwardFill} from "react-icons/ri";
 
 const useStyles = makeStyles((theme) => ({
 
@@ -81,7 +80,7 @@ const useStyles = makeStyles((theme) => ({
         flex: "1",
         background: "#c8e9ce",
         borderBottom: "0px solid var(--warning)",
-        color: "#378280 !important",
+        color: "var(--secondary) !important",
         borderLeft: "6px solid var(--secondary)",
     },
     sent: {
@@ -122,7 +121,6 @@ const useColorlibStepIconStyles = makeStyles((theme) => ({
 
 const Steps = (props) => {
     const {
-        nextStep,
         isNextStep,
         steps,
         currentStep,
@@ -172,21 +170,10 @@ const Steps = (props) => {
         );
     };
 
-
-
     return (
         <div>
             <div className="position-relative">
-                {/* {!versionStatus.includes("Accepted by Customer") &&
-                    approvedQuote.approved && approvedQuote.versionApproved === version && (
-                        <div className="d-flex align-items-center justify-content-center flex-column m-3">
-                            <Typography className={classes.approved}>
-                                Quote version - {approvedQuote.versionApproved} of this quote has
-                                been Approved
-                            </Typography>
-                        </div>
-                    )} */}
-                <Grid container className={styles.main_step_box} xs={12}>
+                <Grid container xs={12}>
                     <Grid
                         item
                         xs={12}
@@ -201,12 +188,10 @@ const Steps = (props) => {
                                         <div>
                                             <IconButton
                                                 disabled={currentStep === 5 || currentStep === 0}
-                                                className={"stepperButton"}
                                                 onClick={() => {
                                                     setCurrentStep(currentStep - 1)
                                                 }}
-                                            // size="large"
-                                            // startIcon={<IoIosArrowDropleftCircle />}
+                                                className="stepperButton"
                                             >
                                                 <TiArrowBack size={30} />
                                             </IconButton>
@@ -222,7 +207,6 @@ const Steps = (props) => {
                                 <Grid
                                     item
                                     xs={6}
-                                // className="d-flex align-items-center justify-content-start "
                                 >
                                     {isMobile && (
                                         <>
@@ -262,7 +246,7 @@ const Steps = (props) => {
                                                                     setCurrentStep(currentStep + 1)
                                                                 }}
                                                                 size="small"
-                                                                disabled={currentStep >= 5 || (currentStep === 0 && isNextStep) || nextStep}
+                                                                disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
 
                                                             >
                                                                 Next
@@ -290,7 +274,7 @@ const Steps = (props) => {
                                         <StepLabel
                                             style={{ color: "#555" }}
                                             // StepIconComponent={ColorlibStepIcon}
-                                            className={"currentStepColor"}
+                                            className="currentStepColor"
                                         >
                                             {label}
                                         </StepLabel>
@@ -317,9 +301,8 @@ const Steps = (props) => {
                                                     onClick={() => {
                                                         setCurrentStep(currentStep + 1)
                                                     }}
-                                                    disabled={currentStep >= 5 || (currentStep === 0 && isNextStep) || !nextStep}
-                                                    // endIcon={<IoIosArrowDroprightCircle />}
-                                                    className={"stepperButtonNext"}
+                                                    disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
+                                                    className="stepperButtonNext"
                                                 >
                                                     <RiShareForwardFill />
                                                 </IconButton>

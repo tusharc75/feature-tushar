@@ -168,7 +168,7 @@ const PriceTemplate: FC = () => {
             history.push(routes.priceTemplate.path + "/" + id, { isClone: true })
         }
         else {
-            history.push(routes.priceTemplate.path + "/0" , { isClone: false })
+            history.push(routes.priceTemplate.path + "/0", { isClone: false })
         }
     }
 
@@ -210,7 +210,7 @@ const PriceTemplate: FC = () => {
                     term: filters[field].filter
                 })
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
         }
 
         if (sorting.length > 0) {
