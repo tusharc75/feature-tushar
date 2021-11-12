@@ -99,7 +99,7 @@ function MultipleEntry({ discount, index, setDiscount, fieldNames, fieldLabels, 
             :
             <Grid item md={12}>
                 <Button
-                    variant="contained"
+                    variant="outlined"
                     color="primary"
                     size="small"
                     onClick={() => {
