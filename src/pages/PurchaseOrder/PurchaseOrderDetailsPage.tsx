@@ -16,21 +16,23 @@ import ManagePurchaseOrder from "./ManagePurchaseOrder";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
+import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import AddProductDialog from "./AddProductDialog";
-import Add from "@material-ui/icons/Add";
-import { Delete } from "@material-ui/icons";
-import { Formik, Form, FieldArray, Field } from "formik";
 import CreateSeriaizedAsset from "./CreateSerializedAsset";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CreateProduct from "../../components/Product/CreateProduct";
 import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
 import Steps from "./Steps";
+import Service from "./Service";
+import BulkEditDialog from "./BulkEditDialog";
+import HtmlTooltip from "../../components/CustomTooltipTitle";
+import IssuPO from "./IssuPO";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
-const purchaseOrderSteps = ["Add Product", "Additional Cost", "Issue PO", "Receiving Asset"]
+const purchaseOrderSteps = ["Add Product", "Add Services", "Issue PO", "Receiving Asset"]
 
 const PurchaseOrderDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -52,17 +54,19 @@ const PurchaseOrderDetailsPage = () => {
     const [addProductDialog, setAddProductDialog] = useState(false);
     const [isAddingProducts, setAddingProducts] = useState(false);
     const [product, setProduct] = useState<any[]>([]);
-    const [additionalCost, setAdditionalCost] = useState<any[]>([]);
+    const [serviceList, setServiceList] = useState<any[]>([]);
     const [currencySymbol, setCurrencySymbol] = useState(null);
-    const [showCreateAssetDIalog, setShowCreateAssetDIalog] = useState(false)
+    const [showCreateAssetDialog, setShowCreateAssetDialog] = useState(false)
     const [updateLoading, setUpdateLoading] = useState(false)
     const [isAddNewProduct, setIsAddNewProduct] = useState(false)
     const [anchorEl, setAnchorEl] = useState(null);
     const [statusOptions, setStatusOptions] = useState([])
     const [purchaseOrderProduct, setPurchaseOrderProduct] = useState([])
-
+    const [showAddServiceDialog, setShowAddServiceDialog] = useState(false)
+    const [isSavingBulkEditDialog, setIsSavingBulkEditDialog] = useState(false)
     const [currentStep, setCurrentStep] = useState(0);
     const [downlodingFile, setDownlodingFile] = useState(false)
+    const [selectedProductData, setSelectedProductData] = useState(null)
 
 
     const [gridApi, setGridApi] = useState(null);
@@ -72,7 +76,7 @@ const PurchaseOrderDetailsPage = () => {
     const ActionsRenderer = (params) => (
         <>
             <GridDeleteIcon
-                hasDeletePermission={permissions?.rentalManagement?.isDelete}
+                hasDeletePermission={permissions?.purchaseOrder?.isUpdate}
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
                 onDelete={() => {
@@ -83,6 +87,20 @@ const PurchaseOrderDetailsPage = () => {
                 }
                 entity="rentalManagement"
             />
+            {
+                <HtmlTooltip title="Edit">
+                    <IconButton
+                        size="small"
+                        aria-label="Clone"
+                        onClick={() => {
+                            setShowAddServiceDialog(true)
+                            setSelectedProductData(params.data)
+                        }}
+                    >
+                        <EditIcon color="primary" />
+                    </IconButton>
+                </HtmlTooltip>
+            }
         </>
     );
 
@@ -166,7 +184,7 @@ const PurchaseOrderDetailsPage = () => {
             { title: `${data?.purchaseOrderNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
             setPurchaseOrderData(data);
             setCurrentStep(purchaseOrderSteps.indexOf(data?.processStatus) !== -1 ? purchaseOrderSteps.indexOf(data?.processStatus) : 0)
-            setAdditionalCost(data.additionalCost ? data.additionalCost.map(u => ({ "type": u.type, "value": u.value })) : [{ "type": "", "value": 0 }]);
+            setServiceList(data.additionalCost ? data.additionalCost : []);
             setCurrencySymbol(
                 getUniqueCurrencies().find(
                     (d) => d.currencyCode === data["currency"]
@@ -281,25 +299,11 @@ const PurchaseOrderDetailsPage = () => {
                 setAddProductDialog(false)
                 fetchPurchaseOrderProduct()
                 setAddingProducts(false)
+                setShowAddServiceDialog(false)
             }).catch((error) => {
                 setAddProductDialog(false)
                 toastConfig.setToastConfig(error)
                 setAddingProducts(false)
-            });
-    }
-
-    const handleSaveAdditionalCost = (additionalCostTemp) => {
-
-        let tempProductArray = additionalCostTemp.map(d => ({
-            "type": d.type,
-            "value": parseInt(d.value),
-        }))
-
-        axiosInstance().post(`${purchaseOrder.api}/${id}/additonal-cost`, { "additionalCost": tempProductArray })
-            .then(() => {
-                fetchPurchaseOrderData()
-            }).catch((error) => {
-                toastConfig.setToastConfig(error)
             });
     }
 
@@ -558,234 +562,20 @@ const PurchaseOrderDetailsPage = () => {
                                         </>
                                     }
                                     {(currentStep === 1) && (
-                                        <Formik
-                                            initialValues={{ additionalCost: additionalCost || [{ "type": "", "value": 0 }] }}
-                                            enableReinitialize={true}
-                                            onSubmit={() => { }}>
-                                            {({ values }) => (
-                                                <>
-                                                    <Form>
-                                                        <Container className="p-0">
-                                                            <Grid
-                                                                container
-                                                                direction="row"
-                                                                justify="space-evenly"
-                                                                alignItems="center"
-                                                            >
-                                                                <Grid item md={12}>
-                                                                    {values.additionalCost && values.additionalCost.length > 0 && (
-
-                                                                        <Box className={""}>
-                                                                            <Grid
-                                                                                container
-                                                                                spacing={2}
-                                                                                direction="row"
-                                                                                justify="flex-start"
-                                                                                alignItems="center"
-                                                                            >
-                                                                                <Grid item md={1}> # </Grid>
-                                                                                <Grid item md={2}> Type </Grid>
-                                                                                <Grid item md={2}> Value </Grid>
-                                                                                <Grid item md={1}></Grid>
-
-                                                                            </Grid>
-                                                                        </Box>
-                                                                    )}
-                                                                    <Box className="p-1">
-                                                                        <FieldArray
-                                                                            name="additionalCost"
-                                                                            render={arrayHelpers => (
-                                                                                <div>
-                                                                                    {values.additionalCost && values.additionalCost.length > 0 ? (
-                                                                                        values.additionalCost.map((userVal, index) => (
-                                                                                            <Grid
-                                                                                                container
-                                                                                                spacing={2}
-                                                                                                direction="row"
-                                                                                                justify="flex-start"
-                                                                                                alignItems="center"
-                                                                                                key={index}
-                                                                                            >
-                                                                                                <Grid item md={1}>{index + 1}</Grid>
-
-                                                                                                <Grid item md={2}>
-                                                                                                    <Field
-                                                                                                        fullWidth
-                                                                                                        variant="outlined"
-                                                                                                        type="text"
-                                                                                                        size="small"
-                                                                                                        component={TextField}
-                                                                                                        name="type"
-                                                                                                        placeholder="Type"
-                                                                                                        value={userVal.type}
-                                                                                                        onChange={(e) => {
-                                                                                                            arrayHelpers.replace(index, {
-                                                                                                                ...values.additionalCost[index],
-                                                                                                                ["type"]: e.target.value
-                                                                                                            })
-                                                                                                        }}
-                                                                                                    />
-                                                                                                </Grid>
-                                                                                                {
-                                                                                                    <Grid item md={2}>
-                                                                                                        <Field
-                                                                                                            fullWidth
-                                                                                                            InputProps={{
-                                                                                                                startAdornment: (
-                                                                                                                    <InputAdornment position="start">
-                                                                                                                        {currencySymbol ? currencySymbol : ""}
-                                                                                                                    </InputAdornment>
-                                                                                                                ),
-                                                                                                            }}
-                                                                                                            startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ""}
-                                                                                                            variant="outlined"
-                                                                                                            type="text"
-                                                                                                            size="small"
-                                                                                                            component={TextField}
-                                                                                                            name="value"
-                                                                                                            placeholder="Enter Value"
-                                                                                                            value={userVal.value}
-                                                                                                            onChange={(e) => {
-                                                                                                                arrayHelpers.replace(index, {
-                                                                                                                    ...values.additionalCost[index],
-                                                                                                                    ["value"]: e.target.value.replace(/[^0-9]/g, '')
-                                                                                                                })
-                                                                                                            }}
-                                                                                                        />
-                                                                                                    </Grid>
-                                                                                                }
-                                                                                                <Grid item md={1}>
-                                                                                                    <ButtonGroup size="small" aria-label="small outlined button group">
-                                                                                                        <IconButton
-                                                                                                            size="small"
-                                                                                                            aria-label="add"
-                                                                                                            onClick={() => {
-                                                                                                                arrayHelpers.push({
-                                                                                                                    "type": "", "value": 0
-                                                                                                                })
-                                                                                                            }
-                                                                                                            } >
-                                                                                                            <Add />
-                                                                                                        </IconButton>
-                                                                                                        <IconButton size="small" aria-label="delete" style={{ color: "#f44336" }} onClick={() => arrayHelpers.remove(index)} >
-                                                                                                            <Delete />
-                                                                                                        </IconButton>
-                                                                                                    </ButtonGroup>
-                                                                                                </Grid>
-                                                                                            </Grid>
-                                                                                        ))
-                                                                                    ) : (
-                                                                                        <Grid item md={12} className="d-flex  align-items-center justify-content-center">
-                                                                                            <Button
-                                                                                                variant="contained"
-                                                                                                color="primary"
-                                                                                                size="large"
-                                                                                                onClick={() => {
-                                                                                                    arrayHelpers.push({ "type": "", "value": 0 })
-                                                                                                }}
-                                                                                            >
-                                                                                                Add Cost Type
-                                                                                            </Button>
-                                                                                        </Grid>
-                                                                                    )}
-                                                                                </div>
-                                                                            )}
-                                                                        />
-                                                                    </Box>
-                                                                    <Box display="flex" justifyContent="space-between" m={1}>
-                                                                        <Box display="flex-end">
-                                                                            <Button
-                                                                                variant="contained"
-                                                                                color="primary"
-                                                                                size="small"
-                                                                                onClick={() => handleSaveAdditionalCost(values.additionalCost)}
-                                                                            >
-                                                                                Save
-                                                                            </Button>
-                                                                            <Box mx={1} />
-                                                                        </Box>
-                                                                    </Box>
-                                                                </Grid>
-                                                            </Grid>
-                                                        </Container>
-                                                    </Form>
-                                                </>
-                                            )}
-                                        </Formik>
+                                        <Service
+                                            fetchPurchaseOrderData={fetchPurchaseOrderData}
+                                            serviceList={serviceList}
+                                            currencySymbol={currencySymbol}
+                                            purchaseOrderData={purchaseOrderData} />
                                     )}
                                     {currentStep === 2 &&
-                                        <>
-                                            <Box display="flex" justifyContent="space-between" m={1}>
-                                                <Box display="flex">
-                                                    {permissions?.purchaseOrder?.isRead && (
-                                                        <>
-                                                            <Button
-                                                                variant="contained"
-                                                                color="primary"
-                                                                size="small"
-                                                                disabled={downlodingFile}
-                                                                onClick={() => { handleViewPdf(false) }}
-                                                            >
-                                                                {downlodingFile ? "Please wait..." : "Preview"}
-                                                            </Button>
-                                                        </>
-                                                    )}
-                                                    <Box mx={1} />
-                                                    {permissions?.purchaseOrder?.isRead && (
-                                                        <>
-                                                            <Button
-                                                                variant="contained"
-                                                                color="primary"
-                                                                size="small"
-                                                                disabled={downlodingFile}
-                                                                onClick={() => { handleViewPdf(false) }}
-                                                            >
-                                                                {downlodingFile ? "Please wait..." : "Download"}
-                                                            </Button>
-                                                        </>
-                                                    )}
-                                                    <Box mx={1} />
-                                                    <Button
-                                                        variant="contained"
-                                                        color="primary"
-                                                        size="small"
-                                                        onClick={() => { setCurrentStep(currentStep + 1) }}
-                                                    >
-                                                        {`Issue PO`}
-                                                    </Button>
-                                                </Box>
-                                            </Box>
-                                            {columns ?
-                                                <CustomAgGridEditable
-                                                    columns={columns}
-                                                    dataRows={dataRows}
-                                                    frameworkComponents={frameworkComponents}
-                                                    setGridApi={setGridApi}
-                                                    dispatch={dispatch}
-                                                    rowCount={rowCount}
-                                                    limit={limit}
-                                                    pageSizes={pageSizes}
-                                                    page={page}
-                                                    allowAction={true}
-                                                    actionWidth={150}
-                                                    allowSelection={true}
-                                                    isClientSideGrid={true}
-                                                    loading={loading}
-                                                    onCellValueChanged={(row) => {
-                                                        handleUpdateOrderProduct(row.data)
-                                                    }}
-                                                    renderedFrom="purchaseOrderDetailsPageInventory"
-                                                    refreshGrid={fetchPurchaseOrderProduct}
-                                                />
-                                                : <Box
-                                                    p={2}
-                                                    height={500}
-                                                    bgcolor="white">
-                                                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                                                </Box>
-                                            }
-
-                                        </>
+                                        <IssuPO
+                                            combinedPurchaseOrderList={purchaseOrderProduct}
+                                            handleViewPdf={handleViewPdf}
+                                            downlodingFile={downlodingFile}
+                                            setCurrentStep={setCurrentStep}
+                                            currentStep={currentStep}
+                                        />
                                     }
                                     {currentStep === 3 &&
                                         <>
@@ -797,7 +587,7 @@ const PurchaseOrderDetailsPage = () => {
                                                         color="primary"
                                                         size="small"
                                                         disabled={selectedRecords.length === 0}
-                                                        onClick={() => { setShowCreateAssetDIalog(true) }}
+                                                        onClick={() => { setShowCreateAssetDialog(true) }}
                                                     >
                                                         {`Create Asset`}
                                                     </Button>
@@ -875,12 +665,12 @@ const PurchaseOrderDetailsPage = () => {
                     type={"product"}
                 />
             }
-            {showCreateAssetDIalog &&
+            {showCreateAssetDialog &&
                 <CreateSeriaizedAsset
                     purchaseOrderID={id}
-                    onClose={() => setShowCreateAssetDIalog(false)}
+                    onClose={() => setShowCreateAssetDialog(false)}
                     onSuccess={() => {
-                        setShowCreateAssetDIalog(false)
+                        setShowCreateAssetDialog(false)
                         handleUpdateData({ status: "Received" })
                     }}
                     title="Create Asset"
@@ -898,6 +688,19 @@ const PurchaseOrderDetailsPage = () => {
                     fromQuote={true}
                 />
             )}
+            {showAddServiceDialog &&
+                <BulkEditDialog
+                    isSaving={isSavingBulkEditDialog}
+                    onClose={() => {
+                        setShowAddServiceDialog(false)
+                        setSelectedProductData(null)
+                    }}
+                    submitBulkEdit={selectedProductData ? handleUpdateOrderProduct : handleUpdateOrderProduct}
+                    currencySymbol={currencySymbol}
+                    data={selectedProductData}
+                    type={"product"}
+                />
+            }
         </>
     );
 };
