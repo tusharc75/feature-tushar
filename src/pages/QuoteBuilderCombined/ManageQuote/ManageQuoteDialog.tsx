@@ -46,7 +46,7 @@ import routes from "../../../components/Helpers/Routes";
 import ManageMarketSegmentDialog from "../../MarketSegment/ManageMarketSegmentDialog";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 import CreateProjectSales from "../../ProjectSales/CreateProjectSales"
-import {FaDiceOne} from "react-icons/fa";
+import { FaDiceOne } from "react-icons/fa";
 
 const arr = [...Array(9).keys()];
 export default function ManageQuoteDialog({
@@ -465,7 +465,9 @@ export default function ManageQuoteDialog({
         });
         let initialData = getObjKeys("", newFields);
         if (isRenderedFromOpportunity || isRenderedFromProjectSales) {
-          initialData["quoteName"] = opportunityName;
+          if (opportunityName) {
+            initialData["quoteName"] = opportunityName;
+          }
           initialData["currency"] = currency || "";
           initialData["estimatedAmount"] = estimatedAmount || "";
         } else {
@@ -508,6 +510,7 @@ export default function ManageQuoteDialog({
   };
 
   const onSubmit = (values) => {
+
     isCreateQuoteFromCart ? onHandleSubmit(values) :
       isClone ? handleCloneQuote(values) : isNew ? handleCreateQuote(values) : handleUpdateQuote(values);
   };
@@ -664,14 +667,14 @@ export default function ManageQuoteDialog({
         optionLabel: data.projectName,
         order: entityFields[projectSalesFieldIndex].option.length,
         default: false,
-        customerAccountName: data.customerAccountName,
+        customerAccount: data?.accountId ? [data?.accountId] : [],
       };
       entityFields[projectSalesFieldIndex].option = [
         ...entityFields[projectSalesFieldIndex].option,
         newProjectSales,
       ];
 
-      setOpportunityMainDataSource(entityFields[projectSalesFieldIndex].option);
+      setProjectSalesMainDataSource(entityFields[projectSalesFieldIndex].option);
       setProjectSalesDataSource((prevState) => [...prevState, newProjectSales]);
     }
 
@@ -1977,7 +1980,8 @@ export default function ManageQuoteDialog({
                       }}
                       onSuccess={({ data }) => {
                         setShowAddProjectSalesDialog(false)
-                        updateProjectSalesDropdown(data);
+                        let tempAccountId = values["customerAccountName"] ? values["customerAccountName"] : accountId
+                        updateProjectSalesDropdown({ ...data, accountId: tempAccountId });
                         setFieldValue("projectSales", data._id);
                       }}
                       accountId={
