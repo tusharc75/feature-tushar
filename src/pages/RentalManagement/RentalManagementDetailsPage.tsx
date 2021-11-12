@@ -83,8 +83,7 @@ const RentalManagementDetailsPage = () => {
   const [isDeleting, setDeleting] = useState(false);
   const [isAddingProducts, setAddingProducts] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [addExistingProductDialog, setAddExistingProductDialog] = useState(false);
-  const [inventoryType, setInventoryType] = useState(null);
+  const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: "" });
   const [rentalManagementFields, setRentalManagementFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
@@ -103,7 +102,7 @@ const RentalManagementDetailsPage = () => {
   const [warehouseForReceivingTicket, setWarehouseForReceivingTicket] = useState<any[]>([]);
   const [showReceivingTicketDialog, setShowReceivingTicketDialog] = useState(false);
   const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false)
-  const [selectedProducts, setSelectedProducts] = useState(null)
+  const [selectedProducts, setSelectedProducts] = useState([])
   const [packageForProducts, setPackageForProducts] = useState(null)
   const [nextStep, setNextStep] = useState(true)
   const [tabValue, setTabValue] = useState(0);
@@ -219,7 +218,7 @@ const RentalManagementDetailsPage = () => {
         }))
       })
       .then(() => {
-        setAddExistingProductDialog(false)
+        setAddExistingProductDialog({ open: false, type: "" })
       }).catch((error) => {
         toastConfig.setToastConfig(error)
       });
@@ -369,7 +368,7 @@ const RentalManagementDetailsPage = () => {
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
       }, gridLoadingTimeout);
-      setSelectedProducts(null)
+      setSelectedProducts([])
     }).catch((error) => {
       toastConfig.setToastConfig(error);
       dispatch({ type: "loading", loading: false });
@@ -668,11 +667,11 @@ const RentalManagementDetailsPage = () => {
     }))
     axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": tempProductArray })
       .then(() => {
-        setAddExistingProductDialog(false)
+        setAddExistingProductDialog({ open: false, type: "" })
         fetchProductInventory()
         setAddingProducts(false)
       }).catch((error) => {
-        setAddExistingProductDialog(false)
+        setAddExistingProductDialog({ open: false, type: "" })
         toastConfig.setToastConfig(error)
         setAddingProducts(false)
       });
@@ -975,8 +974,7 @@ const RentalManagementDetailsPage = () => {
                               color="primary"
                               size="small"
                               onClick={() => {
-                                setAddExistingProductDialog(true);
-                                setInventoryType("product")
+                                setAddExistingProductDialog({ open: true, type: "product" });
                               }}
                             >
                               {`Add ${routes.product.title}`}
@@ -987,8 +985,7 @@ const RentalManagementDetailsPage = () => {
                               color="primary"
                               size="small"
                               onClick={() => {
-                                setAddExistingProductDialog(true);
-                                setInventoryType("package")
+                                setAddExistingProductDialog({ open: true, type: "package" });
                               }}
                             >
                               {`Add ${routes.packages.title}`}
@@ -1100,6 +1097,7 @@ const RentalManagementDetailsPage = () => {
                               //   setSelectedProductData(rowData)
                               // }}
                               />
+
                             </Box>
 
                           </>
@@ -1462,13 +1460,13 @@ const RentalManagementDetailsPage = () => {
           onOk={handleDelete}
         />
       )}
-      {addExistingProductDialog &&
+      {addExistingProductDialog.open &&
         <AddExistingProductInventory
           isAddingProducts={isAddingProducts}
           addProductInventory={handleAddProductInventory}
-          handleProductInventoryClose={() => { setAddExistingProductDialog(false) }}
+          handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "" }) }}
           productInventory={productInventory}
-          type={inventoryType}
+          type={addExistingProductDialog.type}
         />
       }
       {
