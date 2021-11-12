@@ -35,12 +35,10 @@ interface EditDialogProps {
 }
 
 const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose, isSaving, submitBulkEdit, currencySymbol, data, startDate, endDate }) => {
-  const [pricing, setPricing] = useState(null);
   const [values, setValues] = useState(null);
   const [isDisabled, setDisabled] = useState(false);
   const [errors, setErrors] = useState(null);
-  const [isPkgInProduct, setPkgInProduct] = useState(false);
-  let timeoutPricing: ReturnType<typeof setTimeout> = null;
+
 
   useEffect(() => {
     if (data) {
@@ -60,10 +58,6 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
         finalPrice: data?.finalPrice || 0
       };
       setValues(newValues);
-
-      if (data.type === 'productInPackage') {
-        setPkgInProduct(true);
-      }
     }
   }, [data]);
 
@@ -104,7 +98,6 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
       if (values?.qty > 0 && values?.pricingMethod !== '' && values?.UOM !== '') {
         const priceData = await calculatePrice([values]);
         if (priceData && priceData.length) {
-          setPricing(priceData[0]);
           let price = priceData[0].mrp;
           let qty = priceData[0].qty;
 
@@ -181,54 +174,23 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
 
 
     if (type === 'qty') {
-      finalPrice =
-        data > 0 && values?.price > 0 && diff > 0
-          ? values?.pricingMethod === 'perDay'
-            ? discountPrice && discountPrice > 0
-              ? diff * data * values?.price * 1 - discountPrice
-              : diff * data * values?.price * 1
-            : data * values?.price * diff
-          : data > 0 && values?.price > 0
-            ? values?.price * data
-            : values?.price;
+      finalPrice = data > 0 && values?.price > 0 ? values?.price * data : values?.price
     }
-
     if (type === 'price') {
-      finalPrice =
-        values?.qty > 0 && data > 0 && diff > 0 ?
-          values?.pricingMethod === 'perDay'
-            ? discountPrice && discountPrice > 0
-              ? values?.qty * data * diff * 1 - discountPrice
-              : values?.qty * data * diff * 1
-            : values?.qty * data * diff
-          : values?.qty > 0 && data > 0
-            ? values?.qty * data
-            : data;
+      finalPrice = values?.qty > 0 && data > 0 ? values?.qty * data : values?.price;
     }
-
     if (type === 'discount') {
-      finalPrice =
-        values?.qty > 0 && values?.price > 0 && diff > 0
-          ? values?.pricingMethod === 'perDay'
-            ? discountPrice && discountPrice > 0
-              ? (values?.qty * values?.price * diff * 1) - discountPrice
-              : values?.qty * values?.price * diff
-            : values?.qty * values?.price * diff
-          : values?.qty > 0 && values?.price > 0 ? values?.qty * values?.price : values?.price;
-
+      finalPrice = values?.qty > 0 && values?.price > 0 ? values?.qty * values?.price : values?.price
     }
-
     if (type === 'tax') {
-      finalPrice =
-        values?.qty > 0 && values?.price > 0 && diff > 0
-          ? values?.pricingMethod === 'perDay'
-            ? taxPrice && taxPrice > 0
-              ? (values?.qty * values?.price * diff * 1) + taxPrice
-              : values?.qty * values?.price * diff
-            : values?.qty * values?.price * diff
-          : values?.qty > 0 && values?.price > 0 ? values?.qty * values?.price : values?.price;
-
+      finalPrice = values?.qty > 0 && values?.price > 0 ? values?.qty * values?.price : values?.price;
     }
+
+    finalPrice = values?.pricingMethod === 'perDay' ? finalPrice * 1 : finalPrice;
+    finalPrice = diff > 0 ? finalPrice * diff : finalPrice;
+    finalPrice = discountPrice && discountPrice > 0 ? finalPrice - Math.round(discountPrice) : finalPrice;
+
+    finalPrice = taxPrice && taxPrice > 0 ? finalPrice + Math.round(taxPrice) : finalPrice;
 
     handleChange('totalTax', taxPrice > 0 ? parseInt(Math.round(taxPrice).toFixed(1)) : 0);
     handleChange('discountedPrice', discountPrice > 0 ? parseInt(Math.round(discountPrice).toFixed(1)) : 0);

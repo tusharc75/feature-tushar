@@ -127,7 +127,10 @@ export default function NewCreateQuotePdfTemplate() {
                     aboveTable: tempPdfTemplate.aboveTable,
                     belowTable: tempPdfTemplate.belowTable
                 })
-                if (tempPdfTemplate.owner && tempPdfTemplate.owner !== undefined && user.user._id !== tempPdfTemplate.owner && !tempPdfTemplate.collaborator?.some(d => d === user.user._id)) {
+                if (quoteData?._id) {
+                    setHasPermissionToUpdate(true)
+                }
+                else if (tempPdfTemplate.owner && tempPdfTemplate.owner !== undefined && user.user._id !== tempPdfTemplate.owner && !tempPdfTemplate.collaborator?.some(d => d === user.user._id)) {
                     setHasPermissionToUpdate(false)
                 }
             }
@@ -158,7 +161,10 @@ export default function NewCreateQuotePdfTemplate() {
                             aboveTable: data?.aboveTable,
                             belowTable: data?.belowTable
                         })
-                        if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator?.some(d => d === user.user._id)) {
+                        if (quoteData?._id) {
+                            setHasPermissionToUpdate(true)
+                        }
+                        else if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator?.some(d => d === user.user._id)) {
                             setHasPermissionToUpdate(false)
                         }
                     } catch (e) {
@@ -166,9 +172,7 @@ export default function NewCreateQuotePdfTemplate() {
                     }
                 })();
             }
-            if (quoteData?._id) {
-                setHasPermissionToUpdate(true)
-            }
+
         }
         else {
             setInitialValues({

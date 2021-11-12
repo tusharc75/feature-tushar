@@ -422,23 +422,25 @@ export default function CustomAgGrid({
               suppressRowClickSelection={true}
               rowSelection={'multiple'}
               onRowSelected={(event) => {
-                try {
-                  let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
+                if (event.rowIndex !== null && !isClientSideGrid) {
 
-                  if (!isClientSideGrid && event.node.isSelected() === true) {
-                    oldSelectedRecords = [...oldSelectedRecords, event.node.data.id];
-                    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords));
-                  }
-                  else if (!isClientSideGrid && event.rowIndex !== null && event.node.isSelected() === false) {
+                  try {
+                    let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
 
-                    if (oldSelectedRecords.length > 0) {
-                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords.filter(f => f !== (event.data._id ?? event.data.id))));
+                    if (event.node.isSelected() === true) {
+                      oldSelectedRecords = [...oldSelectedRecords, event.node.data.id];
+                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords));
                     }
-                  }
-                } catch (ex) {
-                  console.error("Error in getting / storing selected records")
-                }
+                    else if (event.node.isSelected() === false) {
 
+                      if (oldSelectedRecords.length > 0) {
+                        localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords.filter(f => f !== (event.data._id ?? event.data.id))));
+                      }
+                    }
+                  } catch (ex) {
+                    console.error("Error in getting / storing selected records")
+                  }
+                }
               }}
               onSelectionChanged={(event: any) => {
                 if (onSelection) onSelection(event.api.getSelectedRows());

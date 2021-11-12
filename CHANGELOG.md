@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.34.0](https://github.com/vebholic/oms_frontend/compare/v1.33.0...v1.34.0) (2021-11-12)
+
+
+### Features
+
+* - Avatar Code added in quote list screen ([e9e4c3d](https://github.com/vebholic/oms_frontend/commit/e9e4c3d074c2a16ef8df5cfeb70b1c31d2db300b))
+* changes added ([282ed2f](https://github.com/vebholic/oms_frontend/commit/282ed2fd7facf5bbb85623a1601400cab2cbff81))
+* changes added ([9035202](https://github.com/vebholic/oms_frontend/commit/9035202a19edff8a2a8ed08a32392c2dc21752e5))
+* dashboard changes added and quote issue resolved ([b8110f7](https://github.com/vebholic/oms_frontend/commit/b8110f74eacf2f937d8beab267a77159c9bbbe37))
+* extra character removed ([8403ad5](https://github.com/vebholic/oms_frontend/commit/8403ad5a1371085942a696a9496b811857e58d7f))
+* product master ([c219b22](https://github.com/vebholic/oms_frontend/commit/c219b2251abbeb6e7192a124cb8da81111403341))
+* **rentalmanagement:** new changes ([1b84879](https://github.com/vebholic/oms_frontend/commit/1b8487918a0d1f7a96ccc1748a9b08a68056f4fa))
+* success rate card changes added for dashboard ([70c9bce](https://github.com/vebholic/oms_frontend/commit/70c9bce372b38c81af7bf9d524fab54a2989f1b1))
+
+
+### Bug Fixes
+
+* **rental:** edit fix ([819e9a4](https://github.com/vebholic/oms_frontend/commit/819e9a4e5639a9a8b2510d6a9b8bc80a0ebd4cf3))
+
 ## [1.33.0](https://github.com/vebholic/oms_frontend/compare/v1.32.0...v1.33.0) (2021-11-11)
 
 
