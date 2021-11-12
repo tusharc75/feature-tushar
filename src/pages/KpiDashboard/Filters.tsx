@@ -6,6 +6,7 @@ import { KeyboardDatePicker } from '@material-ui/pickers';
 import { FilterList } from '@material-ui/icons';
 import FormTypes from '../../components/Helpers/FormTypes';
 import { dateFormatForInputControl } from '../../constants/helpers';
+import Countries from "../../constants/Country.json"
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -21,13 +22,13 @@ const useStyles = makeStyles((theme) => ({
       height: "auto",
     }
   },
-  currencyBox:{
+  currencyBox: {
     width: "250px",
     [theme.breakpoints.down("xs")]: {
       width: "auto",
     }
   },
-  status:{
+  status: {
     width: "100%",
     [theme.breakpoints.down("xs")]: {
       width: "auto",
@@ -167,7 +168,14 @@ const Filters = (props) => {
               getOptionLabel={(option) => option.name || ''}
               getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
               onChange={(_, val) => {
-                setSalesFilter({ ...salesFilter, customerAccount: val });
+                let data = { ...salesFilter, customerAccount: val }
+                if (val?.country) {
+                  let foundCountry = Countries.find(o => o.optionValue === val?.country)
+                  if (foundCountry) {
+                    data.country = foundCountry
+                  }
+                }
+                setSalesFilter({ ...data });
               }}
               renderInput={(params) => <TextField {...params} label="Customer Account" variant="outlined" />}
             />
@@ -213,6 +221,19 @@ const Filters = (props) => {
               getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
               onChange={(_, val) => setSalesFilter({ ...salesFilter, productCategory: val })}
               renderInput={(params) => <TextField {...params} label="Product Category" variant="outlined" />}
+            />
+            <Box mt={1} />
+
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={Countries}
+              autoHighlight
+              value={salesFilter.country}
+              getOptionLabel={(option) => option.optionLabel || ''}
+              getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
+              onChange={(_, val) => setSalesFilter({ ...salesFilter, country: val })}
+              renderInput={(params) => <TextField {...params} label="Country" variant="outlined" />}
             />
           </Box>
         </Box>
