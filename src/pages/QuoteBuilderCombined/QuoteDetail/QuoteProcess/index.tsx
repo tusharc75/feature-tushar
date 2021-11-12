@@ -183,6 +183,7 @@ export default function QuoteProcess(props) {
     versionStatus,
     fetchQuoteData,
     columnView,
+    columnViewExcel,
     handleOpenUpdateDialog,
     fetchTNC,
     handleVersionUpdate,
@@ -242,12 +243,14 @@ export default function QuoteProcess(props) {
   const [DOAApproved, setDOAApproved] = useState(false);
   const [DOARequestId, setDOARequestId] = useState(null);
   const [visibleColumns, setVisibleColumns] = useState(defaultSelectColumns);
+  const [visibleColumnsExcel, setVisibleColumnsExcel] = useState(defaultSelectColumns);
   const [ColumnName, setColName] = useState([]);
   const [dynamicTableData, setDynamicTableData] = useState([]);
   const [deletingDOA, setDeletingDOA] = useState(false);
   const [reminderLoading, setReminderLoading] = useState(false);
   const [isCloning, setCloning] = useState(false);
   const [isRearrangeColumns, setRearrangeColumns] = useState(false);
+  const [isRearrangeColumnsExcel, setRearrangeColumnsExcel] = useState(false);
   const [isAddNewProduct, setIsAddNewProduct] = useState(false);
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
@@ -262,6 +265,7 @@ export default function QuoteProcess(props) {
   const [showAiDialog, setShowAiDialog] = useState(false);
   const [viewDownloadLoading, setViewDownloadLoading] = useState(false);
   const [showPDFArrangeColumns, setShowPDFArrangeColumns] = useState(false);
+  const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState(false);
 
   const [messageDialog, setMessageDialog] = useState({
     open: false,
@@ -309,6 +313,7 @@ export default function QuoteProcess(props) {
 
   useEffect(() => {
     setVisibleColumns(columnView && columnView.length ? columnView : defaultSelectColumns);
+    setVisibleColumnsExcel(columnViewExcel && columnViewExcel.length ? columnViewExcel : defaultSelectColumns)
   }, [columnView]);
 
   useEffect(() => {
@@ -331,8 +336,9 @@ export default function QuoteProcess(props) {
   useEffect(() => {
     if (DOAsetup) {
       axiosInstance()
-        .get(`/productbuilder/old/getproduct/` + productBuilderId)
+        .get(`/productbuilder/getproduct/` + productBuilderId)
         .then(({ data: { data } }) => {
+          let tempProductData = data.data
           data = data.data?.product?.map((u, index) => ({
             ...u,
             id: u._id,
@@ -341,7 +347,7 @@ export default function QuoteProcess(props) {
             productCategoryDisplayValue: u.productCategory?.optionLabel,
             priceTemplateDisplayValue: u.priceTemplate?.optionLabel
           }));
-          const { totalSellingPrice } = productCalculationForDoa(data);
+          const { totalSellingPrice } = productCalculationForDoa(tempProductData);
 
           if (DOAsetup && totalSellingPrice > DOAlimit) {
             setDOAneeded(true);
@@ -410,7 +416,7 @@ export default function QuoteProcess(props) {
     let totalMargin = 0;
     let totalProfit = 0;
 
-    BuilderData = BuilderData.map((data) => ({
+    BuilderData = BuilderData.product?.map((data) => ({
       ...data,
       [`profitPercentPerUnit`]:
         data['profitPercentPerUnit'] === null || data['profitPercentPerUnit'] === undefined ? 0 : data['profitPercentPerUnit'],
@@ -418,7 +424,7 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -428,172 +434,172 @@ export default function QuoteProcess(props) {
     let requiredValuesData = [];
 
     const filterKeys = ['priceTemplate', 'productTemplate', 'productCategory', 'productImage'];
-    BuilderData.forEach((quoteRows: { [x: string]: any }, i) => {
-      const quoteRowKeys = Object?.keys(quoteRows);
-      let inventorydata: { fieldName: string; fieldValue: any }[] = [];
-      // if (i === 0) console.log(quoteRows)
-      // Making table columns and data for table
-      quoteRowKeys.forEach((key) => {
-        if (key === 'fields') {
-          const labelsWithVal = {};
-          const requiredValues = {};
-          quoteRows[key].forEach((data, i) => {
-            // console.log(data)
-            if (!filterKeys.includes(data.fieldName)) {
-              const fieldLabel = data.fieldLabel;
-              const fieldName = data.fieldName;
-              const required = data.required;
-              const labels = [];
+    // BuilderData.forEach((quoteRows: { [x: string]: any }, i) => {
+    //   const quoteRowKeys = Object?.keys(quoteRows);
+    //   let inventorydata: { fieldName: string; fieldValue: any }[] = [];
+    //   // if (i === 0) console.log(quoteRows)
+    //   // Making table columns and data for table
+    //   quoteRowKeys.forEach((key) => {
+    //     if (key === 'fields') {
+    //       const labelsWithVal = {};
+    //       const requiredValues = {};
+    //       quoteRows[key].forEach((data, i) => {
+    //         // console.log(data)
+    //         if (!filterKeys.includes(data.fieldName)) {
+    //           const fieldLabel = data.fieldLabel;
+    //           const fieldName = data.fieldName;
+    //           const required = data.required;
+    //           const labels = [];
 
-              if (data.displayCurrency && data.units) {
-                data.displayCurrency.forEach((cur) => {
-                  if (data.units) {
-                    data.units.forEach((unit) => {
-                      const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`;
-                      if (required) {
-                        requiredValues[casedLabel] = quoteRows[casedLabel];
-                      }
-                      if (quoteRows[casedLabel]) {
-                        labels.push(`${fieldLabel} ${unit.toUpperCase()} ${cur}`);
-                        labelsWithVal[`${fieldLabel} ${unit.toUpperCase()} ${cur}`] = quoteRows[casedLabel];
-                      }
-                    });
-                  } else {
-                    const casedLabel = `${fieldName}_${cur.toLowerCase()}`;
-                    if (required) {
-                      requiredValues[casedLabel] = quoteRows[casedLabel];
-                    }
-                    if (quoteRows[casedLabel]) {
-                      labels.push(`${fieldLabel} ${cur}`);
-                      labelsWithVal[`${fieldLabel} ${cur}`] = quoteRows[casedLabel];
-                    }
-                  }
-                });
-              } else if (data.units && !data.displayCurrency) {
-                data.units.forEach((unit) => {
-                  const casedLabel = `${fieldName}_${unit.toLowerCase()}`;
-                  if (required) {
-                    requiredValues[casedLabel] = quoteRows[casedLabel];
-                  }
-                  if (quoteRows[casedLabel]) {
-                    labels.push(`${fieldLabel} ${unit.toUpperCase()}`);
-                    labelsWithVal[`${fieldLabel} ${unit.toUpperCase()}`] = quoteRows[casedLabel];
-                  }
-                });
-              } else if (data.displayCurrency) {
-                data.displayCurrency.forEach((cur) => {
-                  const casedLabel = `${fieldName}_${cur.toLowerCase()}`;
-                  if (required) {
-                    requiredValues[casedLabel] = quoteRows[casedLabel];
-                  }
-                  if (quoteRows[casedLabel]) {
-                    labels.push(`${fieldLabel} ${cur}`);
-                    labelsWithVal[`${fieldLabel} ${cur}`] = quoteRows[casedLabel];
-                  }
-                });
-              } else {
-                if (required) {
-                  requiredValues[fieldName] = quoteRows[fieldName];
-                }
-                if (quoteRows[fieldName]) {
-                  labels.push(fieldLabel);
-                  labelsWithVal[fieldLabel] = quoteRows[fieldName];
-                }
-              }
+    //           if (data.displayCurrency && data.units) {
+    //             data.displayCurrency.forEach((cur) => {
+    //               if (data.units) {
+    //                 data.units.forEach((unit) => {
+    //                   const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`;
+    //                   if (required) {
+    //                     requiredValues[casedLabel] = quoteRows[casedLabel];
+    //                   }
+    //                   if (quoteRows[casedLabel]) {
+    //                     labels.push(`${fieldLabel} ${unit.toUpperCase()} ${cur}`);
+    //                     labelsWithVal[`${fieldLabel} ${unit.toUpperCase()} ${cur}`] = quoteRows[casedLabel];
+    //                   }
+    //                 });
+    //               } else {
+    //                 const casedLabel = `${fieldName}_${cur.toLowerCase()}`;
+    //                 if (required) {
+    //                   requiredValues[casedLabel] = quoteRows[casedLabel];
+    //                 }
+    //                 if (quoteRows[casedLabel]) {
+    //                   labels.push(`${fieldLabel} ${cur}`);
+    //                   labelsWithVal[`${fieldLabel} ${cur}`] = quoteRows[casedLabel];
+    //                 }
+    //               }
+    //             });
+    //           } else if (data.units && !data.displayCurrency) {
+    //             data.units.forEach((unit) => {
+    //               const casedLabel = `${fieldName}_${unit.toLowerCase()}`;
+    //               if (required) {
+    //                 requiredValues[casedLabel] = quoteRows[casedLabel];
+    //               }
+    //               if (quoteRows[casedLabel]) {
+    //                 labels.push(`${fieldLabel} ${unit.toUpperCase()}`);
+    //                 labelsWithVal[`${fieldLabel} ${unit.toUpperCase()}`] = quoteRows[casedLabel];
+    //               }
+    //             });
+    //           } else if (data.displayCurrency) {
+    //             data.displayCurrency.forEach((cur) => {
+    //               const casedLabel = `${fieldName}_${cur.toLowerCase()}`;
+    //               if (required) {
+    //                 requiredValues[casedLabel] = quoteRows[casedLabel];
+    //               }
+    //               if (quoteRows[casedLabel]) {
+    //                 labels.push(`${fieldLabel} ${cur}`);
+    //                 labelsWithVal[`${fieldLabel} ${cur}`] = quoteRows[casedLabel];
+    //               }
+    //             });
+    //           } else {
+    //             if (required) {
+    //               requiredValues[fieldName] = quoteRows[fieldName];
+    //             }
+    //             if (quoteRows[fieldName]) {
+    //               labels.push(fieldLabel);
+    //               labelsWithVal[fieldLabel] = quoteRows[fieldName];
+    //             }
+    //           }
 
-              labels.forEach((d) => {
-                if (!colName.includes(d)) {
-                  colName.push(d);
-                }
-              });
-              // if (data.required) {
-              //     (quoteRows[fieldName] && quoteRows[fieldName] !== "") || ((quoteRows[`${fieldName}_${data.displayCurrency.toLowerCase()}`] && quoteRows[`${fieldName}_${data.displayCurrency.toLowerCase()}`] !== "")) ? requiredFieldArray.push({ "key": quoteRows[fieldName], "value": true }) : requiredFieldArray.push({ "key": quoteRows[fieldName], "value": false }) //next button disable logic
-              // }
-            }
-          });
+    //           labels.forEach((d) => {
+    //             if (!colName.includes(d)) {
+    //               colName.push(d);
+    //             }
+    //           });
+    //           // if (data.required) {
+    //           //     (quoteRows[fieldName] && quoteRows[fieldName] !== "") || ((quoteRows[`${fieldName}_${data.displayCurrency.toLowerCase()}`] && quoteRows[`${fieldName}_${data.displayCurrency.toLowerCase()}`] !== "")) ? requiredFieldArray.push({ "key": quoteRows[fieldName], "value": true }) : requiredFieldArray.push({ "key": quoteRows[fieldName], "value": false }) //next button disable logic
+    //           // }
+    //         }
+    //       });
 
-          dynamicTable.push(labelsWithVal);
-          requiredValuesData.push(requiredValues);
-        }
+    //       dynamicTable.push(labelsWithVal);
+    //       requiredValuesData.push(requiredValues);
+    //     }
 
-        const ungivenValues =
-          requiredValuesData.length > 0 &&
-          requiredValuesData.filter((d) => {
-            const isEmpty = Object.entries(d).filter(([k, v]) => v === undefined || v === null || v === '');
+    //     const ungivenValues =
+    //       requiredValuesData.length > 0 &&
+    //       requiredValuesData.filter((d) => {
+    //         const isEmpty = Object.entries(d).filter(([k, v]) => v === undefined || v === null || v === '');
 
-            return isEmpty.length > 0 ? true : false;
-          });
+    //         return isEmpty.length > 0 ? true : false;
+    //       });
 
-        if (DOASteps.findIndex((d) => d?.key === ProcessStatus) === 1 || ProcessStatus === 'Price Builder') {
-          let hasPrice = false;
-          BuilderData.forEach((data) => {
-            if (
-              data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
-              data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !== 'undefined'
-            ) {
-              hasPrice = true;
-            } else {
-              hasPrice = false;
-            }
-          });
-          const withZeroQty = BuilderData.filter((d) => d.qty === 0);
-          let withZeroAmt = [];
-          if (hasPrice) {
-            withZeroAmt = BuilderData.filter((d) => d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0);
-          }
+    //     if (DOASteps.findIndex((d) => d?.key === ProcessStatus) === 1 || ProcessStatus === 'Price Builder') {
+    //       let hasPrice = false;
+    //       BuilderData.forEach((data) => {
+    //         if (
+    //           data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
+    //           data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !== 'undefined'
+    //         ) {
+    //           hasPrice = true;
+    //         } else {
+    //           hasPrice = false;
+    //         }
+    //       });
+    //       const withZeroQty = BuilderData.filter((d) => d.qty === 0);
+    //       let withZeroAmt = [];
+    //       if (hasPrice) {
+    //         withZeroAmt = BuilderData.filter((d) => d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0);
+    //       }
 
-          // console.log(BuilderData)
-          // console.log(`totalSalesPrice_${quoteData?.currency.toLowerCase()}`)
+    //       // console.log(BuilderData)
+    //       // console.log(`totalSalesPrice_${quoteData?.currency.toLowerCase()}`)
 
-          if ((!ungivenValues && ungivenValues.length === 0) || (!withZeroAmt.length && hasPrice && !withZeroQty.length)) {
-            setNextStep(true);
-          } else {
-            setNextStep(false);
-          }
-        }
+    //       if ((!ungivenValues && ungivenValues.length === 0) || (!withZeroAmt.length && hasPrice && !withZeroQty.length)) {
+    //         setNextStep(true);
+    //       } else {
+    //         setNextStep(false);
+    //       }
+    //     }
 
-        if (ignoredKeys.indexOf(key) === -1) {
-          let indexkey = key;
-          let currency = '';
-          if (key.includes('_')) {
-            let splitKey = key.split('_');
-            key = splitKey[0];
-            currency = splitKey[1].toUpperCase();
-          }
-          // let fields = quoteRows["fields"];
-          // let field = fields.filter(
-          //     (d: { fieldName: string }) => d.fieldName === key
-          // );
+    //     if (ignoredKeys.indexOf(key) === -1) {
+    //       let indexkey = key;
+    //       let currency = '';
+    //       if (key.includes('_')) {
+    //         let splitKey = key.split('_');
+    //         key = splitKey[0];
+    //         currency = splitKey[1].toUpperCase();
+    //       }
+    //       // let fields = quoteRows["fields"];
+    //       // let field = fields.filter(
+    //       //     (d: { fieldName: string }) => d.fieldName === key
+    //       // );
 
-          // if (typeof field[0] !== "undefined") {
-          //     // if (typeof quoteRows[key] === "object") {
-          //     //     inventorydata.push({
-          //     //         fieldName: field[0].fieldLabel,
-          //     //         fieldValue: quoteRows[key] ? quoteRows[key][key] : null,
-          //     //     });
-          //     // } else {
-          //     //     inventorydata.push({
-          //     //         fieldName: field[0].fieldLabel,
-          //     //         fieldValue:
-          //     //             quoteRows[indexkey] === null ? 0 : quoteRows[indexkey],
-          //     //     });
-          //     // }
+    //       // if (typeof field[0] !== "undefined") {
+    //       //     // if (typeof quoteRows[key] === "object") {
+    //       //     //     inventorydata.push({
+    //       //     //         fieldName: field[0].fieldLabel,
+    //       //     //         fieldValue: quoteRows[key] ? quoteRows[key][key] : null,
+    //       //     //     });
+    //       //     // } else {
+    //       //     //     inventorydata.push({
+    //       //     //         fieldName: field[0].fieldLabel,
+    //       //     //         fieldValue:
+    //       //     //             quoteRows[indexkey] === null ? 0 : quoteRows[indexkey],
+    //       //     //     });
+    //       //     // }
 
-          if (currency === quoteData?.currency && key === 'totalCost') {
-            totalCost = totalCost + quoteRows[indexkey];
-          } else if (currency === quoteData?.currency && key === 'totalSalesPrice') {
-            totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
-          } else if (currency === quoteData?.currency && key === 'totalProfit') {
-            totalProfit = totalProfit + quoteRows[indexkey];
-          } else if (currency === quoteData?.currency && key === 'totalMargin') {
-            totalMargin = totalMargin + quoteRows[indexkey];
-          }
-          // }
-        }
-      });
+    //       if (currency === quoteData?.currency && key === 'totalCost') {
+    //         totalCost = totalCost + quoteRows[indexkey];
+    //       } else if (currency === quoteData?.currency && key === 'totalSalesPrice') {
+    //         totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
+    //       } else if (currency === quoteData?.currency && key === 'totalProfit') {
+    //         totalProfit = totalProfit + quoteRows[indexkey];
+    //       } else if (currency === quoteData?.currency && key === 'totalMargin') {
+    //         totalMargin = totalMargin + quoteRows[indexkey];
+    //       }
+    //       // }
+    //     }
+    //   });
 
-      inventory.push(inventorydata);
-    });
+    //   inventory.push(inventorydata);
+    // });
     // requiredFieldArray.every(v => v.value === true) ? setNextStep(true) : setNextStep(false)
     setColName(colName);
     setDynamicTableData(dynamicTable);
@@ -924,7 +930,7 @@ export default function QuoteProcess(props) {
       axiosInstance()
         .post(`/doa-request/create/${quoteData._id}?version=${currentVersion}`)
         .then(({ data }) => {
-          handleVersionUpdate(visibleColumns, 'Sent for DOA', state?.selectedRecords);
+          handleVersionUpdate(visibleColumns, visibleColumnsExcel, 'Sent for DOA', state?.selectedRecords);
           fetchQuoteData(currentVersion);
         })
         .catch((err) => {
@@ -1012,7 +1018,7 @@ export default function QuoteProcess(props) {
 
   const handleVersionUpdateFromAdditionalData = (additionalData) => {
     if (!isEqual(state.selectedRecords, additionalData)) {
-      handleVersionUpdate(visibleColumns, versionStatus, additionalData);
+      handleVersionUpdate(visibleColumns, visibleColumnsExcel, versionStatus, additionalData);
     }
   };
 
@@ -1258,8 +1264,8 @@ export default function QuoteProcess(props) {
               DOAneeded
                 ? DOASteps.findIndex((d) => d?.key === ProcessStatus)
                 : ProcessStatus === 'DOA Process'
-                ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
-                : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
+                  ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
+                  : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
             }
             id={quoteData._id}
             version={currentVersion}
@@ -1271,6 +1277,7 @@ export default function QuoteProcess(props) {
             handleVersionUpdate={() => {
               handleVersionUpdate(
                 visibleColumns,
+                visibleColumnsExcel,
                 versionStatus === 'Sent for DOA' && !DOAneeded ? 'Sent to Customer' : versionStatus,
                 state?.selectedRecords
               );
@@ -1320,7 +1327,7 @@ export default function QuoteProcess(props) {
                 </span>
               ) : null}
               {(ProcessStatus === 'DOA Process' && versionStatus === 'Building Quote' && DOAneeded) ||
-              (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
+                (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
                 <div className={`d-flex align-items-center justify-content-end doaAction ${isMobile ? 'actio-pos-quote' : ''}`}>
                   {!ifQuoteApproved.approved && (
                     <Button
@@ -1437,7 +1444,7 @@ export default function QuoteProcess(props) {
                       startIcon={<AiOutlineFileExcel />}
                       color="primary"
                       onClick={() => {
-                        setShowPDFArrangeColumns(true);
+                        setShowExcelArrangeColumns(true);
                       }}
                     >
                       {isMobile ? '' : 'Excel Columns'}
@@ -1528,6 +1535,21 @@ export default function QuoteProcess(props) {
             setColumns={setVisibleColumns}
             columns={visibleColumns}
             setOpenDialog={setRearrangeColumns}
+            id={quoteData._id}
+            version={currentVersion}
+            refresh={fetchQuoteData}
+            versionStatus={versionStatus}
+            selectedTNC={state?.selectedRecords}
+          />
+        </DndProvider>
+      )}
+
+      {isRearrangeColumnsExcel && (
+        <DndProvider backend={HTML5Backend}>
+          <ColumnsDialog
+            setColumns={setVisibleColumnsExcel}
+            columns={visibleColumns}
+            setOpenDialog={setRearrangeColumnsExcel}
             id={quoteData._id}
             version={currentVersion}
             refresh={fetchQuoteData}
@@ -1658,22 +1680,24 @@ export default function QuoteProcess(props) {
           </CustomDialogContent>
         </Dialog>
       )}
-      {showPDFArrangeColumns && ProcessStatus !== 'New' && (
+      {(showPDFArrangeColumns || showExcelArrangeColumns) && ProcessStatus !== 'New' && (
         <Dialog
-          open={showPDFArrangeColumns}
+          open={showPDFArrangeColumns ? showPDFArrangeColumns : showExcelArrangeColumns}
           aria-labelledby="customized-dialog-title"
           maxWidth="sm"
           onClose={() => {
             setShowPDFArrangeColumns(false);
+            setShowExcelArrangeColumns(false);
           }}
           fullWidth
           fullScreen={fullScreen || isMobile || isTablet}
           TransitionComponent={CustomDialogTransition}
         >
           <CustomDialogHeader
-            title="View Columns"
+            title={showPDFArrangeColumns ? `View Columns PDF` : `View Columns Excel`}
             onClose={() => {
               setShowPDFArrangeColumns(false);
+              setShowExcelArrangeColumns(false);
             }}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
@@ -1691,10 +1715,12 @@ export default function QuoteProcess(props) {
                     fullWidth
                     size="small"
                     multiple
-                    value={visibleColumns}
+                    value={showPDFArrangeColumns ? visibleColumns : visibleColumnsExcel}
                     onChange={(e, val) => {
-                      setVisibleColumns(val);
-                      handleVersionUpdate(val, versionStatus, state?.selectedRecords);
+                      showPDFArrangeColumns ? setVisibleColumns(val) : setVisibleColumnsExcel(val);
+                      showPDFArrangeColumns ?
+                        handleVersionUpdate(val, visibleColumnsExcel, versionStatus, state?.selectedRecords)
+                        : handleVersionUpdate(visibleColumns, val, versionStatus, state?.selectedRecords);
                     }}
                     options={ColumnName}
                     disableCloseOnSelect
@@ -1710,7 +1736,7 @@ export default function QuoteProcess(props) {
                 </FormControl>
               </Grid>
               <Grid item xs={1} md={1} sm={1}>
-                <IconButton disabled={!allowedToEdit} title="Re-arrange columns" color="inherit" onClick={() => setRearrangeColumns(true)}>
+                <IconButton disabled={!allowedToEdit} title="Re-arrange columns" color="inherit" onClick={() => showPDFArrangeColumns ? setRearrangeColumns(true) : setRearrangeColumnsExcel(true)}>
                   <ImportExportIcon />
                 </IconButton>
               </Grid>
