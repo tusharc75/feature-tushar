@@ -8,7 +8,7 @@ import { Box, CircularProgress } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition } from '../../constants/helpers';
+import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData } from '../../constants/helpers';
 import {
     CreatedByRenderer,
     UpdatedByRenderer
@@ -18,6 +18,8 @@ import { useData } from "../../StateProvider/Provider";
 import Dialog from "@material-ui/core/Dialog/Dialog";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+
+const addSerializedAssetsRenderedFrom = "addSerializedAssets";
 
 const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts }) => {
     const toastConfig = useContext(CustomToastContext)
@@ -108,10 +110,16 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
             gridApi.setRowData([]);
         }
 
-        const queryString = getQueryString();
+        let queryString = getQueryString();
+        if (selectedProducts.length > 0) {
+            queryString = `${queryString}&filterById=${JSON.stringify(selectedProducts.map(m => { return { "field": "product", "term": m?._id ?? "" } }))}&filterByIdType=or`
+        }
+
         axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
-            data.data = data.data?.filter(u => (u?.status === "Available" || u?.status === "New")
-                && selectedProducts.some(d => d._id === u?.product?.optionValue || d.products?.some(obj => obj?.productId === u?.product?.optionValue)))
+            data.data = data.data
+                // ?.filter(u => (u?.status === "Available" || u?.status === "New")
+                // && selectedProducts.some(d => d._id === u?.product?.optionValue || d.products?.some(obj => obj?.productId === u?.product?.optionValue))
+                // )
                 .map((u) => ({
                     ...u,
                     id: u._id,
@@ -131,8 +139,6 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
             dispatch({ type: "loading", loading: false });
         });
     };
-
-
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
@@ -228,10 +234,10 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                         color="primary"
                                         onClick={() => addSerializedAsset(selectedRecords)}
                                         variant="contained"
-                                        disabled={selectedRecords.length === 0 || isAdding}
+                                        disabled={getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length === 0 || isAdding}
                                         endIcon={isAdding && <CircularProgress size={20} />}
                                     >
-                                        {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
+                                        {getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length ? "(" + getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length + ")  " : ""}
                                         Add</Button>
                                 </Box>
                             </Grid>
@@ -251,7 +257,9 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                             allowAction={false}
                             loading={loading}
                             customGridOptions={{ getRowStyle: getRowStyleScheduled }}
-                            selectedRecords={selectedRecords}
+                            // selectedRecords={selectedRecords}
+                            renderedFrom={addSerializedAssetsRenderedFrom}
+                            // showOnlyShowFilteredRecordSwitch={true}
                         />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </div>

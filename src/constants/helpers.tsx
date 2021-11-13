@@ -1222,3 +1222,36 @@ export const getLocalStorageArrayData = (key) => {
     return []
   }
 }
+
+export const translateDataToTree = (data, parentProperty, childProperty, childrenPropertyToStore) => {
+  let parents = data.filter(value => value[parentProperty] == 'undefined' || value[parentProperty] == null)
+  let childrens = data.filter(value => value[parentProperty] !== 'undefined' && value[parentProperty] != null)
+
+  let translator = (parents, childrens) => {
+    parents.forEach((parent) => {
+      childrens.forEach((current, index) => {
+        if (current.parent === parent[childProperty]) {
+          let temp = JSON.parse(JSON.stringify(childrens))
+          temp.splice(index, 1)
+          translator([current], temp)
+          typeof parent[childrenPropertyToStore] !== 'undefined' ? parent[childrenPropertyToStore].push(current) : parent[childrenPropertyToStore] = [current]
+        }
+      })
+    })
+  }
+  translator(parents, childrens)
+
+  return parents
+}
+
+export function treeToFlatArray(array, childrenProperty) {
+  var result = [];
+  array.forEach(function (a) {
+    result.push(a);
+    if (a.hasOwnProperty(childrenProperty) && Array.isArray(a[childrenProperty])) {
+      result = result.concat(treeToFlatArray(a[childrenProperty], childrenProperty));
+    }
+  });
+
+  return result;
+}

@@ -334,7 +334,6 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                             <>
                                 <CustomDialogContent>
                                     <Form>
-                                        <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                                         {formsData &&
                                             formsData.map((form, i) => {
                                                 return (
