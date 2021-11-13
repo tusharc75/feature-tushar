@@ -160,45 +160,26 @@ const RentalManagementDetailsPage = () => {
     if (rentalManagementData) {
       const data: any = {}
       data.conditionType = ["Rent"]
-      data.material = arr.map(pkg => ({
-        materialId: pkg?._id,
-        materialType: pkg?.type.includes("roduct") ? "product" : "packages",
-        qty: pkg?.qty,
-        rentType: pkg?.pricingMethod,
-        unit: pkg?.UOM,
+      data.material = arr.map(ele => ({
+        materialId: ele?._id,
+        materialType: ele?.type.includes("roduct") ? "product" : "packages",
+        qty: ele?.qty,
+        rentType: ele?.pricingMethod,
+        unit: ele?.UOM,
         currency: rentalManagementData?.currency
       }))
-      // data.material = [{
-      //   materialId: "617044747098be0594ca47b8",
-      //   materialType: "product",
-      //   qty: 0,
-      //   rentType: "perDay",
-      //   unit: "well",
-      //   currency: "USD"
-      // }, {
-      //   materialId: "617044897098be0594ca47ba",
-      //   materialType: "product",
-      //   qty: 0,
-      //   rentType: "perDay",
-      //   unit: "Two Well Pad",
-      //   currency: "USD"
-      // }]
       data.supplier = [];
       data.customer = [rentalManagementData?.customerAccount.optionValue];
       data.warehouse = [];
-
       return new Promise((resolve, reject) => {
         axiosInstance().post(pricingConditionApi + `/calculatePrice`, data)
           .then(({ data: { data } }) => {
             resolve(data)
           }).catch(err => {
-
             reject(err)
-
           })
       })
     }
-
   };
 
   const handleMainPoints = (data) => {
