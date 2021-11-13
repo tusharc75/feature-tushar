@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import TablePagination from '@material-ui/core/TablePagination';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { AgGridHeaderHeight, AgGridFloatingFiltersHeight, AgGridRowHeight, gridPageSizes } from '../../constants/helpers';
+import { AgGridHeaderHeight, AgGridFloatingFiltersHeight, AgGridRowHeight, gridPageSizes, generateUniqueId } from '../../constants/helpers';
 import CustomGridHeaderOptions from './CustomGridHeaderOptions';
 import { CustomLoadingOverlay, CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter';
@@ -257,6 +257,7 @@ export default function CustomAgGrid({
   const getActionColumn = () => {
     if (allowAction) {
       return <AgGridColumn
+        key={generateUniqueId()}
         width={actionWidth}
         field="actions"
         headerName={actionLabel ? actionLabel : "Actions"}
@@ -275,7 +276,7 @@ export default function CustomAgGrid({
 
   const generateColumns = [...columns, { isAction: true }].map((column: any, index) => {
     return isClientSideGrid ? (
-      <AgGridColumn
+      column.isAction ? getActionColumn() : <AgGridColumn
         key={index}
         field={column.field}
         headerName={column.headerName}
@@ -296,7 +297,7 @@ export default function CustomAgGrid({
       // }}
       ></AgGridColumn>
     ) : column.isAction ? getActionColumn() :
-      < AgGridColumn
+      <AgGridColumn
         lockPosition={column?.lockPosition ? true : false}
         key={index}
         field={column.field}
@@ -427,7 +428,7 @@ export default function CustomAgGrid({
                   try {
                     let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
 
-                    if (event.node.isSelected() === true) {
+                    if (event.node.isSelected() === true && !oldSelectedRecords.some(s => s === event.node.data.id)) {
                       oldSelectedRecords = [...oldSelectedRecords, event.node.data.id];
                       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords));
                     }
