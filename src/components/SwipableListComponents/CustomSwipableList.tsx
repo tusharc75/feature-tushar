@@ -200,7 +200,7 @@ export default function CustomSwipableList({
                                     </div>
 
                                     {
-                                        d[owerCollaboratorInitialsOrImages].length > 0 && <div className="avatars ml-2 mt-2">
+                                        owerCollaboratorInitialsOrImages && d[owerCollaboratorInitialsOrImages]?.length > 0 && <div className="avatars ml-2 mt-2">
                                             {
                                                 [...d[owerCollaboratorInitialsOrImages].slice(0, 5)].map((d, index) => (
                                                     <span className="avatars__item" key={index}>

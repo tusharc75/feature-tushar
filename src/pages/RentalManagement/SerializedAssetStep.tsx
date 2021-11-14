@@ -13,14 +13,18 @@ import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { dateFormat, gridLoadingTimeout, rentalManagement } from "../../constants/helpers";
+import { dateFormat, gridLoadingTimeout, rentalManagement, translateDataToTree, treeToFlatArray } from "../../constants/helpers";
 import { Column } from "material-table";
 import moment from "moment";
 import MaterialTableComponent from "../../components/Shared/MaterialTableComponent";
-import { startCase } from "lodash";
+import { startCase, uniqBy } from "lodash";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import CustomReactTable from "../../components/CustomReactTable/CustomReactTable";
 
 
+const width = 80;
+const minWidth = 80;
+const maxWidth = 80;
 
 const SerializedAssetStep = (props) => {
   const { loading, productInventory, currentStep, serializeAssets, fetchProductsData, rentalManagementId, isTabletScreen,
@@ -51,7 +55,7 @@ const SerializedAssetStep = (props) => {
 
     const products = productInventory.map((p: any) => {
       let currentAssets = []
-      if (p?.type?.includes("roduct")) {
+      if (p?.type?.includes("product")) {
         currentAssets = serializeAssets.filter((asset: any) => asset?.product === p?._id)
 
         if (currentAssets.length !== p.qty) {
@@ -60,11 +64,16 @@ const SerializedAssetStep = (props) => {
           setNextStep(true)
         }
       }
+      if (!p.hasOwnProperty("parent")) {
+        p["parent"] = null;
+      }
 
-      return { ...p, assetCount: currentAssets.length || 0 }
+      const { subRows, ...rest } = p;
+      return { ...rest, assetCount: currentAssets.length || 0 }
     })
 
-    setRows(products)
+    const newDataForReactTable = [...translateDataToTree(products ? [...products] : [], "parent", "treeId", "subRows")];
+    setRows(newDataForReactTable);
 
   }, [productInventory])
 
@@ -157,25 +166,24 @@ const SerializedAssetStep = (props) => {
   //   { field: "discount", headerName: "Discount (%)", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
   //   { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
   // ];
-  const columns: Column<any>[] = [
+  const columns = [
     {
-      field: 'detail',
-      title: 'Detail',
-      cellStyle: { padding: "0px 4px" },
-      render: (rowData) => (
-        <div style={{ width: 200, display: "flex", alignItems: 'center' }}>
+      accessor: 'detail',
+      Header: 'Detail',
+      Cell: ({ row }) => (
+        <div className="d-flex gap-3">
           <p
             className="text-truncate mr-2"
-            title={rowData.detail}
+            title={row.original.detail}
           // to={rowData.type === 'Product' ? `${routes.productDetail.path}/${rowData.id}` : `${routes.packagesDetail.path}/${rowData.id}`}
           >
-            {rowData.detail}
+            {row.original.detail}
           </p>
-          {rowData.hasOwnProperty("assetNumber") &&
+          {row.original.hasOwnProperty("assetNumber") &&
             <span style={{ display: 'flex', alignItems: 'center' }}>
               <IconButton size="small" onClick={() => {
                 setShowConfirmBox(true)
-                setDeleteData([rowData._id])
+                setDeleteData([row.original._id])
               }}>
                 <Delete color="error" />
               </IconButton>
@@ -186,106 +194,70 @@ const SerializedAssetStep = (props) => {
       )
     },
     {
-      field: 'assets',
-      title: 'Assets',
-      cellStyle: { padding: "0px 4px" },
-      render: (rowData) => (
-        <div style={{ width: 80 }}>
-          <p>{rowData?.type?.includes("roduct") ? rowData.assetCount : "- - - - -"}</p>
-        </div>
+      accessor: 'assets',
+      Header: 'Assets',
+      Cell: ({ row }) => (
+        <p>{row.original?.type?.includes("roduct") ? row.original.assetCount : "- - - - -"}</p>
       )
     },
     {
-      field: 'startDate',
-      title: 'Start Date',
-      emptyValue: '- - - - -',
-      cellStyle: { padding: "0px" },
-      render: (rowData) => (
-        <div style={{ width: 80 }}>
-          <h5 className="createBy" title={`${moment(rowData.startDate.slice(0, 10)).format(dateFormat)}`}>
-            <span className="">{moment(rowData.startDate.slice(0, 10)).format(dateFormat)}</span>
-          </h5>
-        </div>
+      accessor: 'startDate',
+      Header: 'Start Date',
+      Cell: ({ row }) => (
+        row.original.startDate ? <h5 className="createBy" title={`${moment(row.original.startDate.slice(0, 10)).format(dateFormat)}`}>
+          <span className="">{moment(row.original.startDate?.slice(0, 10)).format(dateFormat)}</span>
+        </h5> : <NoDataCell />
       )
     },
     {
-      filtering: false,
-      field: 'endDate',
-      title: 'End Date',
-      emptyValue: '- - - - -',
-      cellStyle: { padding: "0px" },
-      render: (rowData) => (
-        <div style={{ width: 80 }}>
-          <h5 className="createBy" title={`${moment(rowData.endDate.slice(0, 10)).format(dateFormat)}`}>
-            <span className="">{moment(rowData.endDate.slice(0, 10)).format(dateFormat)}</span>
-          </h5>
-        </div>
+      accessor: 'endDate',
+      Header: 'End Date',
+      Cell: ({ row }) => (
+        row.original.endDate ? <h5 className="createBy" title={`${moment(row.original.endDate.slice(0, 10)).format(dateFormat)}`}>
+          <span className="">{moment(row.original.endDate.slice(0, 10)).format(dateFormat)}</span>
+        </h5> : <NoDataCell />
       )
     },
     {
-      field: 'qty',
-      title: 'Quantity',
-      emptyValue: '- - - - -',
-      cellStyle: { padding: "0px 4px" },
-      render: (rowData) => (
-        <div style={{ width: 80 }}>
-          <p>{rowData.qty}</p>
-        </div>
+      accessor: 'qty',
+      Header: 'Quantity',
+      Cell: ({ row }) => (
+        row.original.qty ? <p>{row.original.qty}</p> : <NoDataCell />
       )
     },
     {
-      field: 'UOM',
-      title: 'UOM',
-      emptyValue: '- - - - -',
-      cellStyle: { padding: "0px" },
-      render: (rowData) => (
-        <div style={{ width: 80 }}>
-          <p>{startCase(rowData.UOM)}</p>
-        </div>
+      accessor: 'UOM',
+      Header: 'UOM',
+      Cell: ({ row }) => (
+        row.original.UOM ? <p>{startCase(row.original.UOM)}</p> : <NoDataCell />
       )
     },
     {
-      field: 'pricingMethod',
-      title: 'Pricing Method',
-      emptyValue: '- - - - -',
-      cellStyle: { padding: "0px" },
-      render: (rowData) => (
-        <div style={{ width: 100 }}>
-          <p>{startCase(rowData.pricingMethod)}</p>
-        </div>
+      accessor: 'pricingMethod',
+      Header: 'Pricing Method',
+      Cell: ({ row }) => (
+        row.original.pricingMethod ? <p>{startCase(row.original.pricingMethod)}</p> : <NoDataCell />
       )
     },
     {
-      field: 'price',
-      title: `Price (${currencySymbol})`,
-      emptyValue: '- - - - -',
-      cellStyle: { padding: "0px" },
-      render: (rowData) => (
-        <div style={{ width: 100 }}>
-          <p>{rowData.price}</p>
-        </div>
+      accessor: 'price',
+      Header: `Price (${currencySymbol})`,
+      Cell: ({ row }) => (
+        row.original.price ? <p>{row.original.price}</p> : <NoDataCell />
       )
     },
     {
-      field: 'discount',
-      title: 'Discount (%)',
-      emptyValue: '- - - - -',
-      cellStyle: { padding: "0px" },
-      render: (rowData) => (
-        <div style={{ width: 100 }}>
-          <p>{rowData.discount}</p>
-        </div>
+      accessor: 'discount',
+      Header: 'Discount (%)',
+      Cell: ({ row }) => (
+        row.original.discount ? <p>{row.original.discount}</p> : <NoDataCell />
       )
     },
     {
-      field: 'finalPrice',
-      title: `Final Price (${currencySymbol})`,
-      emptyValue: '- - - - -',
-      cellStyle: { padding: "0px" },
-      render: (rowData) => (
-        <div style={{ width: 100 }}>
-          <p>{rowData.finalPrice}</p>
-        </div>
+      accessor: 'finalPrice',
+      Header: `Final Price (${currencySymbol})`,
+      Cell: ({ row }) => (
+        row.original.finalPrice ? <p>{row.original.finalPrice}</p> : <NoDataCell />
       )
     }
   ]
@@ -347,20 +319,35 @@ const SerializedAssetStep = (props) => {
   // }
 
   const handleAddSerializedAsset = (productInventoryArray) => {
-    // console.log()
     let tempProductArray = [];
     productInventoryArray.forEach(d => {
-      selectedProducts.filter(p => p?.type.toLowerCase() !== "package" || !p.hasOwnProperty("assetNumber")).forEach((product) => {
+
+      const getSelectedRecord = selectedProducts.find(f => d.product?.optionValue === f._id);
+
+      if (getSelectedRecord) {
         let obj: any = {};
         obj.inventory = d._id;
-        if (product.type === "productInPackage") {
-          obj.product = product.id
-          obj.package = product.packageId
+
+        if (getSelectedRecord.type === "productInPackage") {
+          obj.product = getSelectedRecord.id
+          obj.package = getSelectedRecord.packageId
         } else {
-          obj.product = product.id
+          obj.product = getSelectedRecord.id
         }
         tempProductArray.push(obj)
-      })
+      }
+      // selectedProducts.filter(p => p?.type.toLowerCase() !== "package" || !p.hasOwnProperty("assetNumber")).forEach((product) => {
+      //   let obj: any = {};
+      //   obj.inventory = d._id;
+
+      //   if (product.type === "productInPackage") {
+      //     obj.product = product.id
+      //     obj.package = product.packageId
+      //   } else {
+      //     obj.product = product.id
+      //   }
+      //   tempProductArray.push(obj)
+      // })
 
     })
     if (tempProductArray.length >= 1) {
@@ -454,7 +441,21 @@ const SerializedAssetStep = (props) => {
                     ? "calc(100vw - 78px)"
                     : showActivity ? "100%" : "calc(100vw - 100px)"
               }>
-              <MaterialTableComponent
+
+              <CustomReactTable
+                columns={columns}
+                data={rows}
+                rowStyle={(rowData) => ({
+                  color: "black",
+                  backgroundColor: rowData?.type?.includes("roduct") && rowData?.assetCount !== rowData?.qty
+                    ? "#EFCCCC" : "white"
+                })}
+                onSelect={setSelectedProducts}
+                childrenProperty="subRows"
+                uniqueKey="_id"
+              />
+
+              {/* <MaterialTableComponent
                 columns={columns}
                 rowData={rows}
                 title={""}
@@ -471,7 +472,7 @@ const SerializedAssetStep = (props) => {
                   color: "primary",
 
                 })}
-              />
+              /> */}
             </Box>
 
           </>
