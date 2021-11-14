@@ -425,8 +425,8 @@ export default function CustomAgGrid({
                   try {
                     let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
 
-                    if (event.node.isSelected() === true && !oldSelectedRecords.some(s => s === event.node.data.id)) {
-                      oldSelectedRecords = [...oldSelectedRecords, event.node.data.id];
+                    if (event.node.isSelected() === true && !oldSelectedRecords.some(s => s === (event.node.data._id ?? event.node.data.id))) {
+                      oldSelectedRecords = [...oldSelectedRecords, event.node.data._id ?? event.node.data.id];
                       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords));
                     }
                     else if (event.node.isSelected() === false) {
