@@ -337,7 +337,7 @@ export default function QuoteProcess(props) {
     if (DOAsetup) {
       axiosInstance()
         .get(`/productbuilder/getproduct/` + productBuilderId)
-        .then(({ data: { data } }) => {
+        .then(({ data }) => {
           let tempProductData = data.data
           data = data.data?.product?.map((u, index) => ({
             ...u,
@@ -416,7 +416,7 @@ export default function QuoteProcess(props) {
     let totalMargin = 0;
     let totalProfit = 0;
 
-    BuilderData = BuilderData.product?.map((data) => ({
+    let tempBuilderData = BuilderData.product?.map((data) => ({
       ...data,
       [`profitPercentPerUnit`]:
         data['profitPercentPerUnit'] === null || data['profitPercentPerUnit'] === undefined ? 0 : data['profitPercentPerUnit'],
@@ -429,181 +429,185 @@ export default function QuoteProcess(props) {
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
 
+    const fieldArray = [];
+    BuilderData.productFields?.map((data) => fieldArray.push(data))
+    BuilderData.priceTemplate?.map((data) => data["fields"].map(d => fieldArray.push(d)))
+    BuilderData.productTemplate?.map((data) => data["fields"].map(d => fieldArray.push(d)))
     let colName = [];
     let dynamicTable = [];
     let requiredValuesData = [];
 
     const filterKeys = ['priceTemplate', 'productTemplate', 'productCategory', 'productImage'];
-    // BuilderData.forEach((quoteRows: { [x: string]: any }, i) => {
-    //   const quoteRowKeys = Object?.keys(quoteRows);
-    //   let inventorydata: { fieldName: string; fieldValue: any }[] = [];
-    //   // if (i === 0) console.log(quoteRows)
-    //   // Making table columns and data for table
-    //   quoteRowKeys.forEach((key) => {
-    //     if (key === 'fields') {
-    //       const labelsWithVal = {};
-    //       const requiredValues = {};
-    //       quoteRows[key].forEach((data, i) => {
-    //         // console.log(data)
-    //         if (!filterKeys.includes(data.fieldName)) {
-    //           const fieldLabel = data.fieldLabel;
-    //           const fieldName = data.fieldName;
-    //           const required = data.required;
-    //           const labels = [];
+    tempBuilderData.forEach((quoteRows: { [x: string]: any }, i) => {
+      const quoteRowKeys = Object?.keys(quoteRows);
+      let inventorydata: { fieldName: string; fieldValue: any }[] = [];
+      // if (i === 0) console.log(quoteRows)
+      // Making table columns and data for table
+      quoteRowKeys.forEach((key) => {
+        if (fieldArray) {
+          const labelsWithVal = {};
+          const requiredValues = {};
+          fieldArray.forEach((data, i) => {
+            // console.log(data)
+            if (!filterKeys.includes(data.fieldName)) {
+              const fieldLabel = data.fieldLabel;
+              const fieldName = data.fieldName;
+              const required = data.required;
+              const labels = [];
 
-    //           if (data.displayCurrency && data.units) {
-    //             data.displayCurrency.forEach((cur) => {
-    //               if (data.units) {
-    //                 data.units.forEach((unit) => {
-    //                   const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`;
-    //                   if (required) {
-    //                     requiredValues[casedLabel] = quoteRows[casedLabel];
-    //                   }
-    //                   if (quoteRows[casedLabel]) {
-    //                     labels.push(`${fieldLabel} ${unit.toUpperCase()} ${cur}`);
-    //                     labelsWithVal[`${fieldLabel} ${unit.toUpperCase()} ${cur}`] = quoteRows[casedLabel];
-    //                   }
-    //                 });
-    //               } else {
-    //                 const casedLabel = `${fieldName}_${cur.toLowerCase()}`;
-    //                 if (required) {
-    //                   requiredValues[casedLabel] = quoteRows[casedLabel];
-    //                 }
-    //                 if (quoteRows[casedLabel]) {
-    //                   labels.push(`${fieldLabel} ${cur}`);
-    //                   labelsWithVal[`${fieldLabel} ${cur}`] = quoteRows[casedLabel];
-    //                 }
-    //               }
-    //             });
-    //           } else if (data.units && !data.displayCurrency) {
-    //             data.units.forEach((unit) => {
-    //               const casedLabel = `${fieldName}_${unit.toLowerCase()}`;
-    //               if (required) {
-    //                 requiredValues[casedLabel] = quoteRows[casedLabel];
-    //               }
-    //               if (quoteRows[casedLabel]) {
-    //                 labels.push(`${fieldLabel} ${unit.toUpperCase()}`);
-    //                 labelsWithVal[`${fieldLabel} ${unit.toUpperCase()}`] = quoteRows[casedLabel];
-    //               }
-    //             });
-    //           } else if (data.displayCurrency) {
-    //             data.displayCurrency.forEach((cur) => {
-    //               const casedLabel = `${fieldName}_${cur.toLowerCase()}`;
-    //               if (required) {
-    //                 requiredValues[casedLabel] = quoteRows[casedLabel];
-    //               }
-    //               if (quoteRows[casedLabel]) {
-    //                 labels.push(`${fieldLabel} ${cur}`);
-    //                 labelsWithVal[`${fieldLabel} ${cur}`] = quoteRows[casedLabel];
-    //               }
-    //             });
-    //           } else {
-    //             if (required) {
-    //               requiredValues[fieldName] = quoteRows[fieldName];
-    //             }
-    //             if (quoteRows[fieldName]) {
-    //               labels.push(fieldLabel);
-    //               labelsWithVal[fieldLabel] = quoteRows[fieldName];
-    //             }
-    //           }
+              if (data.displayCurrency && data.units) {
+                data.displayCurrency.forEach((cur) => {
+                  if (data.units) {
+                    data.units.forEach((unit) => {
+                      const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`;
+                      if (required) {
+                        requiredValues[casedLabel] = quoteRows[casedLabel];
+                      }
+                      if (quoteRows[casedLabel]) {
+                        labels.push(`${fieldLabel} ${unit.toUpperCase()} ${cur}`);
+                        labelsWithVal[`${fieldLabel} ${unit.toUpperCase()} ${cur}`] = quoteRows[casedLabel];
+                      }
+                    });
+                  } else {
+                    const casedLabel = `${fieldName}_${cur.toLowerCase()}`;
+                    if (required) {
+                      requiredValues[casedLabel] = quoteRows[casedLabel];
+                    }
+                    if (quoteRows[casedLabel]) {
+                      labels.push(`${fieldLabel} ${cur}`);
+                      labelsWithVal[`${fieldLabel} ${cur}`] = quoteRows[casedLabel];
+                    }
+                  }
+                });
+              } else if (data.units && !data.displayCurrency) {
+                data.units.forEach((unit) => {
+                  const casedLabel = `${fieldName}_${unit.toLowerCase()}`;
+                  if (required) {
+                    requiredValues[casedLabel] = quoteRows[casedLabel];
+                  }
+                  if (quoteRows[casedLabel]) {
+                    labels.push(`${fieldLabel} ${unit.toUpperCase()}`);
+                    labelsWithVal[`${fieldLabel} ${unit.toUpperCase()}`] = quoteRows[casedLabel];
+                  }
+                });
+              } else if (data.displayCurrency) {
+                data.displayCurrency.forEach((cur) => {
+                  const casedLabel = `${fieldName}_${cur.toLowerCase()}`;
+                  if (required) {
+                    requiredValues[casedLabel] = quoteRows[casedLabel];
+                  }
+                  if (quoteRows[casedLabel]) {
+                    labels.push(`${fieldLabel} ${cur}`);
+                    labelsWithVal[`${fieldLabel} ${cur}`] = quoteRows[casedLabel];
+                  }
+                });
+              } else {
+                if (required) {
+                  requiredValues[fieldName] = quoteRows[fieldName];
+                }
+                if (quoteRows[fieldName]) {
+                  labels.push(fieldLabel);
+                  labelsWithVal[fieldLabel] = quoteRows[fieldName];
+                }
+              }
 
-    //           labels.forEach((d) => {
-    //             if (!colName.includes(d)) {
-    //               colName.push(d);
-    //             }
-    //           });
-    //           // if (data.required) {
-    //           //     (quoteRows[fieldName] && quoteRows[fieldName] !== "") || ((quoteRows[`${fieldName}_${data.displayCurrency.toLowerCase()}`] && quoteRows[`${fieldName}_${data.displayCurrency.toLowerCase()}`] !== "")) ? requiredFieldArray.push({ "key": quoteRows[fieldName], "value": true }) : requiredFieldArray.push({ "key": quoteRows[fieldName], "value": false }) //next button disable logic
-    //           // }
-    //         }
-    //       });
+              labels.forEach((d) => {
+                if (!colName.includes(d)) {
+                  colName.push(d);
+                }
+              });
+              // if (data.required) {
+              //     (quoteRows[fieldName] && quoteRows[fieldName] !== "") || ((quoteRows[`${fieldName}_${data.displayCurrency.toLowerCase()}`] && quoteRows[`${fieldName}_${data.displayCurrency.toLowerCase()}`] !== "")) ? requiredFieldArray.push({ "key": quoteRows[fieldName], "value": true }) : requiredFieldArray.push({ "key": quoteRows[fieldName], "value": false }) //next button disable logic
+              // }
+            }
+          });
 
-    //       dynamicTable.push(labelsWithVal);
-    //       requiredValuesData.push(requiredValues);
-    //     }
+          dynamicTable.push(labelsWithVal);
+          requiredValuesData.push(requiredValues);
+        }
 
-    //     const ungivenValues =
-    //       requiredValuesData.length > 0 &&
-    //       requiredValuesData.filter((d) => {
-    //         const isEmpty = Object.entries(d).filter(([k, v]) => v === undefined || v === null || v === '');
+        const ungivenValues =
+          requiredValuesData.length > 0 &&
+          requiredValuesData.filter((d) => {
+            const isEmpty = Object.entries(d).filter(([k, v]) => v === undefined || v === null || v === '');
 
-    //         return isEmpty.length > 0 ? true : false;
-    //       });
+            return isEmpty.length > 0 ? true : false;
+          });
 
-    //     if (DOASteps.findIndex((d) => d?.key === ProcessStatus) === 1 || ProcessStatus === 'Price Builder') {
-    //       let hasPrice = false;
-    //       BuilderData.forEach((data) => {
-    //         if (
-    //           data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
-    //           data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !== 'undefined'
-    //         ) {
-    //           hasPrice = true;
-    //         } else {
-    //           hasPrice = false;
-    //         }
-    //       });
-    //       const withZeroQty = BuilderData.filter((d) => d.qty === 0);
-    //       let withZeroAmt = [];
-    //       if (hasPrice) {
-    //         withZeroAmt = BuilderData.filter((d) => d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0);
-    //       }
+        if (DOASteps.findIndex((d) => d?.key === ProcessStatus) === 1 || ProcessStatus === 'Price Builder') {
+          let hasPrice = false;
+          BuilderData.forEach((data) => {
+            if (
+              data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
+              data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !== 'undefined'
+            ) {
+              hasPrice = true;
+            } else {
+              hasPrice = false;
+            }
+          });
+          const withZeroQty = BuilderData.filter((d) => d.qty === 0);
+          let withZeroAmt = [];
+          if (hasPrice) {
+            withZeroAmt = BuilderData.filter((d) => d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0);
+          }
 
-    //       // console.log(BuilderData)
-    //       // console.log(`totalSalesPrice_${quoteData?.currency.toLowerCase()}`)
+          // console.log(BuilderData)
+          // console.log(`totalSalesPrice_${quoteData?.currency.toLowerCase()}`)
 
-    //       if ((!ungivenValues && ungivenValues.length === 0) || (!withZeroAmt.length && hasPrice && !withZeroQty.length)) {
-    //         setNextStep(true);
-    //       } else {
-    //         setNextStep(false);
-    //       }
-    //     }
+          if ((!ungivenValues && ungivenValues.length === 0) || (!withZeroAmt.length && hasPrice && !withZeroQty.length)) {
+            setNextStep(true);
+          } else {
+            setNextStep(false);
+          }
+        }
 
-    //     if (ignoredKeys.indexOf(key) === -1) {
-    //       let indexkey = key;
-    //       let currency = '';
-    //       if (key.includes('_')) {
-    //         let splitKey = key.split('_');
-    //         key = splitKey[0];
-    //         currency = splitKey[1].toUpperCase();
-    //       }
-    //       // let fields = quoteRows["fields"];
-    //       // let field = fields.filter(
-    //       //     (d: { fieldName: string }) => d.fieldName === key
-    //       // );
+        if (ignoredKeys.indexOf(key) === -1) {
+          let indexkey = key;
+          let currency = '';
+          if (key.includes('_')) {
+            let splitKey = key.split('_');
+            key = splitKey[0];
+            currency = splitKey[1].toUpperCase();
+          }
+          // let fields = quoteRows["fields"];
+          // let field = fields.filter(
+          //     (d: { fieldName: string }) => d.fieldName === key
+          // );
 
-    //       // if (typeof field[0] !== "undefined") {
-    //       //     // if (typeof quoteRows[key] === "object") {
-    //       //     //     inventorydata.push({
-    //       //     //         fieldName: field[0].fieldLabel,
-    //       //     //         fieldValue: quoteRows[key] ? quoteRows[key][key] : null,
-    //       //     //     });
-    //       //     // } else {
-    //       //     //     inventorydata.push({
-    //       //     //         fieldName: field[0].fieldLabel,
-    //       //     //         fieldValue:
-    //       //     //             quoteRows[indexkey] === null ? 0 : quoteRows[indexkey],
-    //       //     //     });
-    //       //     // }
+          // if (typeof field[0] !== "undefined") {
+          //     if (typeof quoteRows[key] === "object") {
+          //         inventorydata.push({
+          //             fieldName: field[0].fieldLabel,
+          //             fieldValue: quoteRows[key] ? quoteRows[key][key] : null,
+          //         });
+          //     } else {
+          //         inventorydata.push({
+          //             fieldName: field[0].fieldLabel,
+          //             fieldValue:
+          //                 quoteRows[indexkey] === null ? 0 : quoteRows[indexkey],
+          //         });
+          //     }
 
-    //       if (currency === quoteData?.currency && key === 'totalCost') {
-    //         totalCost = totalCost + quoteRows[indexkey];
-    //       } else if (currency === quoteData?.currency && key === 'totalSalesPrice') {
-    //         totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
-    //       } else if (currency === quoteData?.currency && key === 'totalProfit') {
-    //         totalProfit = totalProfit + quoteRows[indexkey];
-    //       } else if (currency === quoteData?.currency && key === 'totalMargin') {
-    //         totalMargin = totalMargin + quoteRows[indexkey];
-    //       }
-    //       // }
-    //     }
-    //   });
+          if (currency === quoteData?.currency && key === 'totalCost') {
+            totalCost = totalCost + quoteRows[indexkey];
+          } else if (currency === quoteData?.currency && key === 'totalSalesPrice') {
+            totalSellingPrice = totalSellingPrice + quoteRows[indexkey];
+          } else if (currency === quoteData?.currency && key === 'totalProfit') {
+            totalProfit = totalProfit + quoteRows[indexkey];
+          } else if (currency === quoteData?.currency && key === 'totalMargin') {
+            totalMargin = totalMargin + quoteRows[indexkey];
+          }
+          // }
+        }
+      });
 
-    //   inventory.push(inventorydata);
-    // });
+      inventory.push(inventorydata);
+    });
     // requiredFieldArray.every(v => v.value === true) ? setNextStep(true) : setNextStep(false)
     setColName(colName);
     setDynamicTableData(dynamicTable);
-    // console.log("*** TABLE ***: ", dynamicTable)
+    console.log("*** TABLE ***: ", dynamicTable)
     return {
       inventory: inventory,
       totalMargin: totalMargin,
@@ -669,7 +673,7 @@ export default function QuoteProcess(props) {
   };
 
   const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
-    if (BuilderData.length) {
+    if (BuilderData && Object.keys(BuilderData).length !== 0) {
       setRedCard(false);
       const { totalMargin, totalSellingPrice, totalCost, totalProfit } = productCalculationForDoa(BuilderData);
       setTotalProfit(formatAmountWithCurrency(quoteData.currency, totalProfit));
