@@ -180,17 +180,12 @@ export default function CustomAgGrid({
     }
   };
 
-  useEffect(() => {
-    if (columnApi && loading === false) {
+  const onFirstDataRendered = (e) => {
+    if (localStorage.getItem(renderedFrom)) {
       const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-
-      if (columnState) {
-        setTimeout(() => {
-          columnApi.setColumnState(columnState);
-        }, 50)
-      }
+      columnApi.setColumnState(columnState);
     }
-  }, [columnApi, loading])
+  }
 
   const onColumnMoved = (params) => {
     if (params?.source === "uiColumnDragged") {
@@ -285,8 +280,8 @@ export default function CustomAgGrid({
         cellRenderer={column.cellRenderer ?? null}
         cellRendererParams={column.cellRendererParams ?? null}
         minWidth={column.width ?? 180}
-        width={getWidth(column.field, column.width) ?? 180}
-        flex={1}
+        // width={getWidth(column.field, column.width) ?? 180}
+        // flex={1}
         rowDrag={column.rowDrag ?? false}
         hide={staticColumns.indexOf(column.field) >= 0 ? checkStaticField(renderedFrom, column.field) :
           (column.hasOwnProperty("show") && !column?.show) ? true : false}
@@ -307,8 +302,8 @@ export default function CustomAgGrid({
         cellRenderer={column.cellRenderer ?? null}
         cellRendererParams={column.cellRendererParams ?? null}
         minWidth={column.width ?? 180}
-        width={getWidth(column.field, column.width) ?? 180}
-        flex={1}
+        // width={getWidth(column.field, column.width) ?? 180}
+        // flex={1}
         filterParams={customFilterParams}
         hide={(column.hasOwnProperty("show") && !column?.show) ? true : false}
         comparator={() => {
@@ -347,6 +342,7 @@ export default function CustomAgGrid({
 
           <div className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
             <AgGridReact
+              onFirstDataRendered={onFirstDataRendered}
               gridOptions={customGridOptions}
               rowData={dataRows}
               onColumnMoved={onColumnMoved}
@@ -378,6 +374,8 @@ export default function CustomAgGrid({
                 floatingFilter: true,
                 sortable: true,
                 suppressMenu: true,
+                suppressSizeToFit: true,
+                suppressAutoSize: true,
                 // headerCheckboxSelection: true,
                 // checkboxSelection: true,
                 floatingFilterComponentParams: { suppressFilterButton: true }
