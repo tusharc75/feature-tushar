@@ -513,7 +513,7 @@ const SerializedAssetStep = (props) => {
         addSerializedAsset={handleAddSerializedAsset}
         handleSerializedAssetClose={() => {
           setAddSerializedAssetDialog(false);
-          setSelectedProducts([])
+          // setSelectedProducts([])
         }}
         isAdding={isAdding}
         selectedProducts={selectedProducts.filter(p => p?.type?.includes("roduct"))}
