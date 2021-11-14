@@ -20,7 +20,7 @@ import EditIcon from "@material-ui/icons/Edit";
 import { useData } from "../../StateProvider/Provider";
 
 
-const Service = ({ fetchPurchaseOrderData, serviceList, currencySymbol, purchaseOrderData }) => {
+const Service = ({ currencySymbol, purchaseOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -32,7 +32,7 @@ const Service = ({ fetchPurchaseOrderData, serviceList, currencySymbol, purchase
   const [showAddServiceDialog, setShowAddServiceDialog] = useState(false)
   const [isSavingBulkEditDialog, setIsSavingBulkEditDialog] = useState(false)
   const [selectedServiceData, setSelectedServiceData] = useState(null)
-  const [serviceListConst, setServiceListConst] = useState([])
+  const [serviceList, setServiceList] = useState<any[]>([]);
   const [columns, setColumns] = useState([
     { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "expectedDelivery", headerName: "Expected Delivery", show: true, disabled: true, cellRenderer: "dateRenderer" },
@@ -52,9 +52,7 @@ const Service = ({ fetchPurchaseOrderData, serviceList, currencySymbol, purchase
         ownerId={user?.user?._id}
         userId={user?.user?._id}
         onDelete={() => {
-          deletePurchaseOrderService([{
-            id: params.data._id,
-          }])
+          deletePurchaseOrderService([params.data._id])
         }
         }
         entity="purchaseOrder"
@@ -83,15 +81,24 @@ const Service = ({ fetchPurchaseOrderData, serviceList, currencySymbol, purchase
   };
 
   useEffect(() => {
-    setServiceListConst(serviceList)
+    fetchService()
+  }, []);
+
+  const fetchService = () => {
     dispatch({ type: "loading", loading: true });
-    dispatch({
-      type: "initialize", data: serviceList, count: serviceList.length
-    });
-    setTimeout(() => {
-      dispatch({ type: "loading", loading: false });
-    }, gridLoadingTimeout);
-  }, [serviceList]);
+
+    axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData._id}/service-details`)
+      .then(({ data }) => {
+        dispatch({
+          type: "initialize", data: data.data, count: data.data.length
+        });
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
+      }).catch((error) => {
+        toastConfig.setToastConfig(error)
+      });
+  }
 
   const handleAddService = (service) => {
 
@@ -108,20 +115,44 @@ const Service = ({ fetchPurchaseOrderData, serviceList, currencySymbol, purchase
       "totalTax": service.totalTax || 0
     }
 
-    axiosInstance().post(`${purchaseOrder.api}/${purchaseOrderData._id}/additonal-cost`, { "additionalCost": [...serviceList, tempService] })
+    axiosInstance().post(`${purchaseOrder.api}/${purchaseOrderData._id}/service-details/add`, { "serviceDetail": [tempService] })
       .then(() => {
-        fetchPurchaseOrderData()
         setShowAddServiceDialog(false)
+        fetchService()
+      }).catch((error) => {
+        toastConfig.setToastConfig(error)
+      });
+  }
+
+  const handleUpdateService = (service) => {
+
+    let tempService = {
+      "_id": service._id,
+      "description": service.description || "",
+      "qty": service.qty || 0,
+      "expectedDelivery": service.expectedDelivery || purchaseOrderData?.deliveryDate,
+      "uom": service.baseUOM || "",
+      "price": service.price || 0,
+      "finalPrice": service.finalPrice || 0,
+      "taxSchedule": service.taxSchedule || "",
+      "tax": service.tax || 0,
+      "taxPerUnit": service.taxPerUnit || 0,
+      "totalTax": service.totalTax || 0
+    }
+
+    axiosInstance().put(`${purchaseOrder.api}/${purchaseOrderData._id}/service-details/update`, tempService)
+      .then(() => {
+        setShowAddServiceDialog(false)
+        fetchService()
       }).catch((error) => {
         toastConfig.setToastConfig(error)
       });
   }
 
   const deletePurchaseOrderService = (ids) => {
-    let xasdasdasd = serviceListConst.filter(d => ids.some(obj => d._id !== obj.id))
-    axiosInstance().post(`${purchaseOrder.api}/${purchaseOrderData._id}/additonal-cost`, { "additionalCost": serviceListConst.filter(d => ids.some(obj => d._id !== obj)) })
+    axiosInstance().post(`${purchaseOrder.api}/${purchaseOrderData._id}/service-details/remove/${ids}`)
       .then(() => {
-        fetchPurchaseOrderData()
+        fetchService()
       }).catch((error) => {
         toastConfig.setToastConfig(error)
       });
@@ -172,7 +203,7 @@ const Service = ({ fetchPurchaseOrderData, serviceList, currencySymbol, purchase
         onClose={() => {
           setShowAddServiceDialog(false)
         }}
-        submitBulkEdit={handleAddService}
+        submitBulkEdit={selectedServiceData ? handleUpdateService : handleAddService}
         currencySymbol={currencySymbol}
         data={selectedServiceData}
         type={"service"}

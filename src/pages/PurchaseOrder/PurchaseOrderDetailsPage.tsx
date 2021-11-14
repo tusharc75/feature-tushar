@@ -57,7 +57,6 @@ const PurchaseOrderDetailsPage = () => {
     const [addProductDialog, setAddProductDialog] = useState(false);
     const [isAddingProducts, setAddingProducts] = useState(false);
     const [product, setProduct] = useState<any[]>([]);
-    const [serviceList, setServiceList] = useState<any[]>([]);
     const [currencySymbol, setCurrencySymbol] = useState(null);
     const [showCreateAssetDialog, setShowCreateAssetDialog] = useState(false)
     const [updateLoading, setUpdateLoading] = useState(false)
@@ -201,7 +200,6 @@ const PurchaseOrderDetailsPage = () => {
             { title: `${data?.purchaseOrderNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
             setPurchaseOrderData(data);
             setCurrentStep(purchaseOrderSteps.indexOf(data?.processStatus) !== -1 ? purchaseOrderSteps.indexOf(data?.processStatus) : 0)
-            setServiceList(data.additionalCost ? data.additionalCost : []);
             setCurrencySymbol(
                 getUniqueCurrencies().find(
                     (d) => d.currencyCode === data["currency"]
@@ -639,8 +637,6 @@ const PurchaseOrderDetailsPage = () => {
                                                 }
                                                 {(currentStep === 1) && (
                                                     <Service
-                                                        fetchPurchaseOrderData={fetchPurchaseOrderData}
-                                                        serviceList={serviceList}
                                                         currencySymbol={currencySymbol}
                                                         purchaseOrderData={purchaseOrderData} />
                                                 )}
