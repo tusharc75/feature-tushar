@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.36.0](https://github.com/vebholic/oms_frontend/compare/v1.35.0...v1.36.0) (2021-11-14)
+
+
+### Features
+
+* - .length issue fixed for mobile screen ([f36ea5a](https://github.com/vebholic/oms_frontend/commit/f36ea5aacdc65b94c21efd5afcc46f78636da76c))
+* - React table added ([132e8f1](https://github.com/vebholic/oms_frontend/commit/132e8f11e9f7d7c32f69c632db3665829a9bc50a))
+
+## [1.35.0](https://github.com/vebholic/oms_frontend/compare/v1.34.0...v1.35.0) (2021-11-13)
+
+
+### Features
+
+* - Import export done for selected records ([e96451b](https://github.com/vebholic/oms_frontend/commit/e96451b690f54babd56a186054b83e00d8f17266))
+* - Keeping checked records done for product selection dialog ([2f5fac8](https://github.com/vebholic/oms_frontend/commit/2f5fac8e3a58a064b0acc47112caa77f7e3b026f))
+* - PO-122 - product coming on clicking packages button issue fixed ([cbf083a](https://github.com/vebholic/oms_frontend/commit/cbf083a1f1cf8c9b460ba782a0c3c15dcb34f035))
+* in dashboard > filters, added country dropdown ([dcf3d1a](https://github.com/vebholic/oms_frontend/commit/dcf3d1a3312d205523ba33a3aeb095ac669f4604))
+
+
+### Bug Fixes
+
+* price condition ([87a9fef](https://github.com/vebholic/oms_frontend/commit/87a9feff1d02d0dee07e3a5e2839f4b8387048e9))
+* quotePdf template ([ee61249](https://github.com/vebholic/oms_frontend/commit/ee612492eff64e89312c0f0d2c9e2efc555ac1cd))
+* rental ([962047b](https://github.com/vebholic/oms_frontend/commit/962047b9411798f39319deddcad195b283024dc2))
+
 ## [1.34.0](https://github.com/vebholic/oms_frontend/compare/v1.33.0...v1.34.0) (2021-11-12)
 
 
