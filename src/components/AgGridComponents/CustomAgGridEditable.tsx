@@ -173,7 +173,9 @@ export default function CustomAgGridEditable({
   const onFirstDataRendered = (e) => {
     if (localStorage.getItem(renderedFrom)) {
       const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-      columnApi.setColumnState(columnState);
+      setTimeout(() => {
+        columnApi.setColumnState(columnState);
+      }, 500)
     }
   }
 

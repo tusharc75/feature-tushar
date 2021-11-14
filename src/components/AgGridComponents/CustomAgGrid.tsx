@@ -183,7 +183,9 @@ export default function CustomAgGrid({
   const onFirstDataRendered = (e) => {
     if (localStorage.getItem(renderedFrom)) {
       const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-      columnApi.setColumnState(columnState);
+      setTimeout(() => {
+        columnApi.setColumnState(columnState);
+      }, 500)
     }
   }
 
@@ -235,19 +237,6 @@ export default function CustomAgGrid({
     // trimInput: true,
     // debounceMs: 1000,
   };
-
-  const getWidth = (field, columnWidth) => {
-    if (localStorage.getItem(renderedFrom)) {
-      const storedColumns = JSON.parse(localStorage.getItem(renderedFrom));
-
-      const indexOfField = storedColumns.findIndex((d) => d.colId === field);
-      if (indexOfField > -1) {
-        return storedColumns[indexOfField].width;
-      }
-      return columnWidth;
-    }
-    return columnWidth;
-  }
 
   const getActionColumn = () => {
     if (allowAction) {

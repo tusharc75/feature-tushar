@@ -141,7 +141,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     };
 
     const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}`;
+        let deepFilter = `?page=${page}&limit=${limit}&availableAssets=true`;
 
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
