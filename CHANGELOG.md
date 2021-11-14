@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.36.0](https://github.com/vebholic/oms_frontend/compare/v1.35.0...v1.36.0) (2021-11-14)
+
+
+### Features
+
+* - .length issue fixed for mobile screen ([f36ea5a](https://github.com/vebholic/oms_frontend/commit/f36ea5aacdc65b94c21efd5afcc46f78636da76c))
+* - React table added ([132e8f1](https://github.com/vebholic/oms_frontend/commit/132e8f11e9f7d7c32f69c632db3665829a9bc50a))
+
 ## [1.35.0](https://github.com/vebholic/oms_frontend/compare/v1.34.0...v1.35.0) (2021-11-13)
 
 
