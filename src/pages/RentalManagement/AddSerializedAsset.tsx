@@ -219,8 +219,19 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                     <Box mb={2}>
                         <Grid container >
                             <Grid item xs={12} sm={6}>
-                                {serializedProducts.length > 0 ? serializedProducts.map(d => <span>{d.name ? `  ${d.name} (${d?.qty})  |` : ""}
-                                </span>) : null}
+                                <div>
+                                    {
+                                        serializedProducts.length > 0 ?
+                                            serializedProducts.map(d =>
+                                                d?.qty < 0 ? <span className="text-error">{d.name ? `  ${d.name} (${d?.qty})  |` : ""}</span>
+                                                    : (d?.qty === 0 ? <span className="text-success">{d.name ? `  ${d.name} (${d?.qty})  |` : ""}</span> : <span>{d.name ? `  ${d.name} (${d?.qty})  |` : ""}</span>)
+                                            ) : null
+                                    }
+                                </div>
+
+                                {
+                                    serializedProducts.length > 0 && serializedProducts.some(s => s.qty < 0) ? <div className="text-error font-weight-bold">You have selected more assets then needed.</div> : ""
+                                }
                             </Grid>
                             <Grid item xs={12} sm={6} container justify="flex-end">
                                 <SearchBox
@@ -234,7 +245,8 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                         color="primary"
                                         onClick={() => addSerializedAsset(selectedRecords)}
                                         variant="contained"
-                                        disabled={getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length === 0 || isAdding}
+                                        disabled={getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length === 0 || isAdding ||
+                                            serializedProducts.some(d => d?.qty < 0)}
                                         endIcon={isAdding && <CircularProgress size={20} />}
                                     >
                                         {getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length ? "(" + getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length + ")  " : ""}
@@ -260,6 +272,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                             // selectedRecords={selectedRecords}
                             renderedFrom={addSerializedAssetsRenderedFrom}
                             // showOnlyShowFilteredRecordSwitch={true}
+                            // allowHeaderSelection={false}
                         />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </div>
