@@ -443,10 +443,12 @@ export default function QuoteProcess(props) {
       let inventorydata: { fieldName: string; fieldValue: any }[] = [];
       // if (i === 0) console.log(quoteRows)
       // Making table columns and data for table
+
+      const labelsWithVal = {};
+      const requiredValues = {};
       quoteRowKeys.forEach((key) => {
+
         if (fieldArray) {
-          const labelsWithVal = {};
-          const requiredValues = {};
           fieldArray.forEach((data, i) => {
             // console.log(data)
             if (!filterKeys.includes(data.fieldName)) {
@@ -521,10 +523,9 @@ export default function QuoteProcess(props) {
               // }
             }
           });
-
-          dynamicTable.push(labelsWithVal);
-          requiredValuesData.push(requiredValues);
         }
+
+
 
         const ungivenValues =
           requiredValuesData.length > 0 &&
@@ -601,7 +602,8 @@ export default function QuoteProcess(props) {
           // }
         }
       });
-
+      dynamicTable.push(labelsWithVal);
+      requiredValuesData.push(requiredValues);
       inventory.push(inventorydata);
     });
     // requiredFieldArray.every(v => v.value === true) ? setNextStep(true) : setNextStep(false)
@@ -778,7 +780,7 @@ export default function QuoteProcess(props) {
       let newTable = [];
       dynamicTableData.forEach((d, i) => {
         let obj = {};
-        visibleColumns.forEach((col) => {
+        visibleColumnsExcel.forEach((col) => {
           obj[col] = d[col] || '';
         });
 
