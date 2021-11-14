@@ -9,6 +9,7 @@ import { CustomLoadingOverlay, CommonRenderer } from '../../components/AgGridCom
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter';
 import { orderBy } from 'lodash';
 import { checkStaticField, staticColumns } from "../../constants/columns"
+import { GridApi } from 'ag-grid-community';
 
 export function reducer(state, action) {
   switch (action.type) {
@@ -153,7 +154,7 @@ export default function CustomAgGrid({
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
 
-  const [currentGridApi, setCurrentGridApi] = useState(null);
+  const [currentGridApi, setCurrentGridApi] = useState<GridApi | any>(null);
   const enableRowDrag = columns.some((d) => d.rowDrag);
 
   //  If you want to do something once grid binding done
@@ -182,11 +183,19 @@ export default function CustomAgGrid({
   };
 
   const onFirstDataRendered = (e) => {
-    if (localStorage.getItem(renderedFrom)) {
-      const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-      setTimeout(() => {
-        columnApi.setColumnState(columnState);
-      }, 500)
+    try {
+      if (localStorage.getItem(renderedFrom)) {
+        const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+        setTimeout(() => {
+          columnApi.setColumnState(columnState);
+        }, 500)
+      }
+    } catch (_) {
+      console.error("Error in configuring columns on onFirstDataRendered method")
+    }
+
+    if (currentGridApi) {
+      currentGridApi.sizeColumnsToFit()
     }
   }
 
@@ -364,8 +373,8 @@ export default function CustomAgGrid({
                 floatingFilter: true,
                 sortable: true,
                 suppressMenu: true,
-                suppressSizeToFit: true,
-                suppressAutoSize: true,
+                // suppressSizeToFit: true,
+                // suppressAutoSize: true,
                 // headerCheckboxSelection: true,
                 // checkboxSelection: true,
                 floatingFilterComponentParams: { suppressFilterButton: true }

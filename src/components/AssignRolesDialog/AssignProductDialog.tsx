@@ -86,7 +86,7 @@ const AssignProductDialog = ({
 
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({
-                    field: replaceFieldName(field),
+                    field: field,
                     term: filters[field].filter
                 })
             });
@@ -328,7 +328,3 @@ const AssignProductDialog = ({
 };
 
 export default AssignProductDialog;
-function replaceFieldName(field: string) {
-    throw new Error("Function not implemented.");
-}
-
