@@ -55,7 +55,7 @@ const SerializedAssetStep = (props) => {
 
     const products = productInventory.map((p: any) => {
       let currentAssets = []
-      if (p?.type?.includes("product")) {
+      if (p?.type?.includes("roduct")) {
         currentAssets = serializeAssets.filter((asset: any) => asset?.product === p?._id)
 
         if (currentAssets.length !== p.qty) {

@@ -147,7 +147,8 @@ export default function CustomAgGrid({
   actionLabel = null,
   actionEditable = false,
   onCellValueChanged = () => { },
-  showOnlyShowFilteredRecordSwitch = false
+  showOnlyShowFilteredRecordSwitch = false,
+  allowHeaderSelection = true
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -471,7 +472,7 @@ export default function CustomAgGrid({
                   filter={false}
                   pinned="left"
                   lockPinned={true}
-                  headerCheckboxSelection={true}
+                  headerCheckboxSelection={allowHeaderSelection}
                   headerCheckboxSelectionFilteredOnly={true}
                   checkboxSelection={true}
                   resizable={false}
