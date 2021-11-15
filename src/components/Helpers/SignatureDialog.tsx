@@ -19,12 +19,12 @@ export default function SignatureDialog(props) {
     const handleClickNext = () => {
         let signedData: any = {};
 
-        if (label === "Start Delivery") {
+        if (label === "Sign-off - Dispatched") {
             signedData = {
                 type: activeStep === 0 ? "supervisor" : "deliveryPerson",
                 sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png")
             }
-        } else if (label === "Sign-Off") {
+        } else if (label === "Sign-off - Received") {
             signedData = {
                 type: activeStep === 0 ? "deliveryPerson" : "receiver",
                 sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png")

@@ -43,7 +43,7 @@ const ViewSignsDialog = ({ close, signatures }) => {
           {signs.map(sign => (
             <Grid item xs={12} sm={6}>
               <Box textAlign="center">
-                <Typography variant='body1' >Signatures of "{sign.status}" time</Typography>
+                <Typography variant='body1' >Signatures of "{sign.status === "Start Delivery" ? "Sign-off - Dispatched" : "Sign-off - Received"}" time</Typography>
               </Box>
               <Box mt={4}>
                 <Grid container spacing={2} justifyContent='center'>
