@@ -15,7 +15,7 @@ import FieldList from '../FieldList';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { object, string } from "yup";
+import { object, string } from 'yup';
 import { Formik, Form } from 'formik';
 import { camelCase } from '../../../constants/helpers';
 import { Vlookup } from '../AddField/vlookup';
@@ -32,7 +32,7 @@ import FormTypes from '../../Helpers/FormTypes';
 import { startCase } from 'lodash';
 import { checkFormula } from '../../../constants/formulaUtility';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import styles from "../Form.module.scss";
+import styles from '../Form.module.scss';
 
 const FieldSchema = object().shape({
   fieldLabel: string().required('please enter field label')
@@ -64,6 +64,11 @@ const LookupResource = [
   { name: 'Rental Management', value: 'Rental Management' },
   { name: 'Loading Ticket', value: 'Loading Ticket' },
   { name: 'Packages', value: 'Packages' },
+  { name: 'Purchase Order', value: 'Purchase Order' },
+  { name: 'Pricing Condition', value: 'Pricing Condition' },
+  { name: 'Receiving Ticket', value: 'Receiving Ticket' },
+  { name: 'Repair Job', value: 'Repair Job' },
+  { name: 'Sales Order', value: 'Sales Order' }
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields }) => {
@@ -75,12 +80,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     selectionEnd: 0
   });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formValues, setFormValues] = useState({})
+  const [formValues, setFormValues] = useState({});
   const [isInitialUpdated, setIsInitialUpdated] = useState({
     MultipleFormula: false,
     Currency: false,
     Converter: false
-  })
+  });
   //const [isChangeFieldName, setIsChangeFieldName] = useState(true);
 
   useEffect(() => {
@@ -208,8 +213,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     setFormValues((prevState) => ({
       ...prevState,
       ...data
-    }))
-  }
+    }));
+  };
 
   const handleSave = (values) => {
     let data = [...section];
@@ -235,7 +240,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.addManualOptionInExcel = values.addManualOptionInExcel;
             ele.addAdditionalOption = values.addAdditionalOption;
             ele.lookup = values.lookup || false;
-            ele.lookupResource = values.lookup ? values.lookupResource : "";
+            ele.lookupResource = values.lookup ? values.lookupResource : '';
             ele.isDropdown = values.isDropdown || false;
 
             if (values.hasOwnProperty('isWarningTooltip')) {
@@ -253,7 +258,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             //   ele.fieldName = camelCase(ele.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''))
             // }
 
-            if (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect' || fieldData.type === 'radio' || fieldData.type === 'process' || ele.isDropdown) {
+            if (
+              fieldData.type === 'dropDown' ||
+              fieldData.type === 'multiSelect' ||
+              fieldData.type === 'radio' ||
+              fieldData.type === 'process' ||
+              ele.isDropdown
+            ) {
               if (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') {
                 ele.isDependentDropdown = values.isDependentDropdown;
                 ele.dropdowDependentOn = values.dropdowDependentOn;
@@ -317,7 +328,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               ele.dropdownOnConverter = values.dropdownOnConverter;
             }
           }
-
         });
       }
     });
@@ -379,11 +389,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     }
 
     if (values.isTooltip && !values.tooltipMessage) {
-      errors["tooltipMessage"] = "Please enter tooltip message."
+      errors['tooltipMessage'] = 'Please enter tooltip message.';
     }
 
     if (values.isWarningTooltip && !values.warningTooltipMessage) {
-      errors["warningTooltipMessage"] = "Please enter warning message."
+      errors['warningTooltipMessage'] = 'Please enter warning message.';
     }
 
     return errors;
@@ -414,9 +424,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`}
         onClose={() => {
           if (Object.keys(formValues).length > 0) {
-            setShowConfirmDialog(true)
-          }
-          else handleClose();
+            setShowConfirmDialog(true);
+          } else handleClose();
         }}
       ></CustomDialogHeader>
       <Formik enableReinitialize={true} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} validate={validate}>
@@ -438,8 +447,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     error={touched['fieldLabel'] && Boolean(errors['fieldLabel'])}
                     helperText={touched['fieldLabel'] && errors['fieldLabel']}
                     onChange={(e) => {
-                      setFieldValue('fieldLabel', e.target.value.trimStart())
-                      handleValuesChange({ fieldLabel: e.target.value.trimStart() })
+                      setFieldValue('fieldLabel', e.target.value.trimStart());
+                      handleValuesChange({ fieldLabel: e.target.value.trimStart() });
                     }}
                   />
                   {(module === 'product-template' || module === 'price-template') && (
@@ -468,56 +477,64 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     </Box>
                   )}
                   {values['type'] === 'currencyAmount' && (
-                    <Currency values={values} setFieldValue={(name, value) => {
-                      if (!isInitialUpdated["Currency"]) {
-                        setIsInitialUpdated((prevState) => ({ ...prevState, Currency: true }))
-                      }
-                      else {
-                        handleValuesChange({ [name]: value })
-                      }
-                      setFieldValue(name, value)
-                    }} refrence="form-builder" touched={touched} errors={errors} />
+                    <Currency
+                      values={values}
+                      setFieldValue={(name, value) => {
+                        if (!isInitialUpdated['Currency']) {
+                          setIsInitialUpdated((prevState) => ({ ...prevState, Currency: true }));
+                        } else {
+                          handleValuesChange({ [name]: value });
+                        }
+                        setFieldValue(name, value);
+                      }}
+                      refrence="form-builder"
+                      touched={touched}
+                      errors={errors}
+                    />
                   )}
                   {(values['type'] === 'decimal' ||
                     values['type'] === 'formula' ||
                     values['type'] === 'converter' ||
                     values['type'] === 'currencyAmount') && (
-                      <Grid spacing={3} container>
-                        {values['type'] === 'formula' && (
-                          <Grid item xs={12} sm={6} md={6}>
-                            <FormControl fullWidth margin="dense" variant="outlined">
-                              <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
-                              <Select
-                                labelId="demo-simple-select-outlined-label"
-                                id="demo-simple-select-outlined"
-                                value={values['returnType']}
-                                onChange={(e) => {
-                                  setFieldValue('returnType', e.target.value)
-                                  handleValuesChange({ returnType: e.target.value })
-                                }}
-                                label="Return Type"
-                                name="returnType"
-                              >
-                                <MenuItem value="decimal">Decimal</MenuItem>
-                                <MenuItem value="string">String</MenuItem>
-                                <MenuItem value="boolean">Boolean</MenuItem>
-                              </Select>
-                            </FormControl>
-                          </Grid>
-                        )}
-                        {(values['type'] === 'decimal' ||
-                          values['type'] === 'converter' ||
-                          values['type'] === 'currencyAmount' ||
-                          values['returnType'] === 'decimal') && (
-                            <Grid item xs={12} sm={6} md={6}>
-                              <DecimalPlaces values={values} setFieldValue={(name, value) => {
-                                handleValuesChange({ [name]: value })
-                                setFieldValue(name, value)
-                              }} />
-                            </Grid>
-                          )}
-                      </Grid>
-                    )}
+                    <Grid spacing={3} container>
+                      {values['type'] === 'formula' && (
+                        <Grid item xs={12} sm={6} md={6}>
+                          <FormControl fullWidth margin="dense" variant="outlined">
+                            <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
+                            <Select
+                              labelId="demo-simple-select-outlined-label"
+                              id="demo-simple-select-outlined"
+                              value={values['returnType']}
+                              onChange={(e) => {
+                                setFieldValue('returnType', e.target.value);
+                                handleValuesChange({ returnType: e.target.value });
+                              }}
+                              label="Return Type"
+                              name="returnType"
+                            >
+                              <MenuItem value="decimal">Decimal</MenuItem>
+                              <MenuItem value="string">String</MenuItem>
+                              <MenuItem value="boolean">Boolean</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                      )}
+                      {(values['type'] === 'decimal' ||
+                        values['type'] === 'converter' ||
+                        values['type'] === 'currencyAmount' ||
+                        values['returnType'] === 'decimal') && (
+                        <Grid item xs={12} sm={6} md={6}>
+                          <DecimalPlaces
+                            values={values}
+                            setFieldValue={(name, value) => {
+                              handleValuesChange({ [name]: value });
+                              setFieldValue(name, value);
+                            }}
+                          />
+                        </Grid>
+                      )}
+                    </Grid>
+                  )}
                   {(values['type'] === 'dropDown' || values['type'] === 'multiSelect') && (
                     <Fragment>
                       <FormControlLabel
@@ -527,7 +544,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                             checked={values['lookup']}
                             onChange={(e) => {
                               const val = e.target.checked;
-                              handleValuesChange({ lookup: val })
+                              handleValuesChange({ lookup: val });
                               setFieldValue('lookup', val);
                               if (val) {
                                 setFieldValue('addAdditionalOption', false);
@@ -535,7 +552,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                                 handleValuesChange({
                                   addAdditionalOption: false,
                                   addManualOptionInExcel: false
-                                })
+                                });
                               }
                             }}
                             color="primary"
@@ -547,14 +564,17 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         <Box pt={1} pb={1}>
                           <Autocomplete
                             id="lookupResource"
-                            options={LookupResource && LookupResource.map((_lookupResource) => {
-                              return _lookupResource.value;
-                            })}
+                            options={
+                              LookupResource &&
+                              LookupResource.map((_lookupResource) => {
+                                return _lookupResource.value;
+                              })
+                            }
                             getOptionLabel={(option) => option}
                             value={values['lookupResource']}
                             onChange={(e: any, value) => {
-                              setFieldValue('lookupResource', value)
-                              handleValuesChange({ lookupResource: value })
+                              setFieldValue('lookupResource', value);
+                              handleValuesChange({ lookupResource: value });
                             }}
                             renderInput={(params) => (
                               <TextField
@@ -595,21 +615,21 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'multiSelect' ||
                     values['type'] === 'radio' ||
                     values['type'] === 'process') &&
-                    !values['lookup'] &&
-                    <Option
-                      values={values}
-                      setFieldValue={(name, value) => {
-                        if (!isInitialUpdated["dropDown"]) {
-                          setIsInitialUpdated((prevState) => ({ ...prevState, dropDown: true }))
-                        }
-                        else {
-                          handleValuesChange({ [name]: value })
-                        }
-                        setFieldValue(name, value)
-                      }}
-                      fields={fields}
-                      _id={fieldData._id} />
-                  }
+                    !values['lookup'] && (
+                      <Option
+                        values={values}
+                        setFieldValue={(name, value) => {
+                          if (!isInitialUpdated['dropDown']) {
+                            setIsInitialUpdated((prevState) => ({ ...prevState, dropDown: true }));
+                          } else {
+                            handleValuesChange({ [name]: value });
+                          }
+                          setFieldValue(name, value);
+                        }}
+                        fields={fields}
+                        _id={fieldData._id}
+                      />
+                    )}
                   {(values['type'] === 'currencyAmount' ||
                     values['type'] === 'decimal' ||
                     values['type'] === 'percent' ||
@@ -630,7 +650,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                                   isFormula: e.target.checked,
                                   inputFields: '',
                                   formula: ''
-                                })
+                                });
                               }}
                               color="primary"
                             />
@@ -644,8 +664,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       fields={fields}
                       values={values}
                       setFieldValue={(name, value) => {
-                        handleValuesChange({ [name]: value })
-                        setFieldValue(name, value)
+                        handleValuesChange({ [name]: value });
+                        setFieldValue(name, value);
                       }}
                       _id={fieldData._id}
                       touched={touched}
@@ -670,7 +690,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                                 units: [],
                                 displayUnits: [],
                                 formulaUnits: []
-                              })
+                              });
                             }}
                             color="primary"
                           />
@@ -684,13 +704,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       fields={fields}
                       values={values}
                       setFieldValue={(name, value) => {
-                        if (!isInitialUpdated["Converter"]) {
-                          setIsInitialUpdated((prevState) => ({ ...prevState, Converter: true }))
+                        if (!isInitialUpdated['Converter']) {
+                          setIsInitialUpdated((prevState) => ({ ...prevState, Converter: true }));
+                        } else {
+                          handleValuesChange({ [name]: value });
                         }
-                        else {
-                          handleValuesChange({ [name]: value })
-                        }
-                        setFieldValue(name, value)
+                        setFieldValue(name, value);
                       }}
                       touched={touched}
                       errors={errors}
@@ -718,7 +737,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                                   formulaFields: [],
                                   formulainputFields: [],
                                   formulaoption: {}
-                                })
+                                });
                               }}
                               color="primary"
                             />
@@ -732,13 +751,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       fields={fields}
                       values={values}
                       setFieldValue={(name, value) => {
-                        if (!isInitialUpdated["MultipleFormula"]) {
-                          setIsInitialUpdated((prevState) => ({ ...prevState, MultipleFormula: true }))
+                        if (!isInitialUpdated['MultipleFormula']) {
+                          setIsInitialUpdated((prevState) => ({ ...prevState, MultipleFormula: true }));
+                        } else {
+                          handleValuesChange({ [name]: value });
                         }
-                        else {
-                          handleValuesChange({ [name]: value })
-                        }
-                        setFieldValue(name, value)
+                        setFieldValue(name, value);
                       }}
                       _id={fieldData._id}
                       touched={touched}
@@ -750,8 +768,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'decimal' ||
                     values['type'] === 'percent' ||
                     values['type'] === 'converter') &&
-                    module !== 'form-builder' &&
-                    (
+                    module !== 'form-builder' && (
                       <>
                         <br></br>
                         <FormControlLabel
@@ -765,7 +782,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                                 handleValuesChange({
                                   isVlookup: e.target.checked,
                                   isDropdown: false
-                                })
+                                });
                               }}
                               color="primary"
                             />
@@ -775,11 +792,17 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       </>
                     )}
                   {(values['isVlookup'] || values['type'] === 'vlookupDropdown') && (
-                    <Vlookup fields={fields} values={values}
+                    <Vlookup
+                      fields={fields}
+                      values={values}
                       setFieldValue={(name, value) => {
-                        handleValuesChange({ [name]: value })
-                        setFieldValue(name, value)
-                      }} touched={touched} errors={errors} _id={fieldData._id} />
+                        handleValuesChange({ [name]: value });
+                        setFieldValue(name, value);
+                      }}
+                      touched={touched}
+                      errors={errors}
+                      _id={fieldData._id}
+                    />
                   )}
                   {values['type'] === 'converter' && module !== 'form-builder' && (
                     <>
@@ -795,7 +818,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                               handleValuesChange({
                                 isDropdown: e.target.checked,
                                 isVlookup: false
-                              })
+                              });
                             }}
                             color="primary"
                           />
@@ -804,16 +827,17 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       />
                     </>
                   )}
-                  {values['isDropdown'] &&
+                  {values['isDropdown'] && (
                     <Option
                       values={values}
                       setFieldValue={(name, value) => {
-                        handleValuesChange({ [name]: value })
-                        setFieldValue(name, value)
+                        handleValuesChange({ [name]: value });
+                        setFieldValue(name, value);
                       }}
                       fields={fields}
-                      _id={fieldData._id} />
-                  }
+                      _id={fieldData._id}
+                    />
+                  )}
                   <Box pt={1} pb={1}>
                     <FormControlLabel
                       control={
@@ -822,8 +846,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           disabled={!values['editAble'] && values['required'] ? true : false}
                           checked={values['required']}
                           onChange={(e) => {
-                            setFieldValue('required', e.target.checked)
-                            handleValuesChange({ required: e.target.checked })
+                            setFieldValue('required', e.target.checked);
+                            handleValuesChange({ required: e.target.checked });
                           }}
                           color="primary"
                         />
@@ -836,10 +860,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           name="isTooltip"
                           checked={values['isTooltip']}
                           onChange={(e) => {
-                            setFieldValue('isTooltip', e.target.checked)
+                            setFieldValue('isTooltip', e.target.checked);
                             handleValuesChange({
                               isTooltip: e.target.checked
-                            })
+                            });
                           }}
                           color="primary"
                         />
@@ -859,8 +883,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         error={touched['isTooltip'] && Boolean(errors['tooltipMessage'])}
                         helperText={touched['isTooltip'] && errors['tooltipMessage']}
                         onChange={(e) => {
-                          setFieldValue('tooltipMessage', e.target.value.trimStart())
-                          handleValuesChange({ tooltipMessage: e.target.value.trimStart() })
+                          setFieldValue('tooltipMessage', e.target.value.trimStart());
+                          handleValuesChange({ tooltipMessage: e.target.value.trimStart() });
                         }}
                       />
                     )}
@@ -870,8 +894,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           name="isWarningTooltip"
                           checked={values['isWarningTooltip']}
                           onChange={(e) => {
-                            setFieldValue('isWarningTooltip', e.target.checked)
-                            handleValuesChange({ isWarningTooltip: e.target.checked })
+                            setFieldValue('isWarningTooltip', e.target.checked);
+                            handleValuesChange({ isWarningTooltip: e.target.checked });
                           }}
                           color="primary"
                         />
@@ -891,8 +915,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         error={touched['warningTooltipMessage'] && Boolean(errors['warningTooltipMessage'])}
                         helperText={touched['warningTooltipMessage'] && errors['warningTooltipMessage']}
                         onChange={(e) => {
-                          setFieldValue('warningTooltipMessage', e.target.value.trimStart())
-                          handleValuesChange({ warningTooltipMessage: e.target.value.trimStart() })
+                          setFieldValue('warningTooltipMessage', e.target.value.trimStart());
+                          handleValuesChange({ warningTooltipMessage: e.target.value.trimStart() });
                         }}
                       />
                     )}
@@ -904,8 +928,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           disabled={values['type'] === 'freeStyleMultiSelect'}
                           checked={values['isDefaultValue']}
                           onChange={(e) => {
-                            setFieldValue('isDefaultValue', e.target.checked)
-                            handleValuesChange({ isDefaultValue: e.target.checked })
+                            setFieldValue('isDefaultValue', e.target.checked);
+                            handleValuesChange({ isDefaultValue: e.target.checked });
                           }}
                           color="primary"
                         />
@@ -920,8 +944,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           disabled={values['type'] === 'freeStyleMultiSelect'}
                           checked={values['isUneditable']}
                           onChange={(e) => {
-                            setFieldValue('isUneditable', e.target.checked)
-                            handleValuesChange({ isUneditable: e.target.checked })
+                            setFieldValue('isUneditable', e.target.checked);
+                            handleValuesChange({ isUneditable: e.target.checked });
                           }}
                           color="primary"
                         />
@@ -936,8 +960,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                             name="disableEdit"
                             checked={values['disableOnEdit']}
                             onChange={(e) => {
-                              setFieldValue('disableOnEdit', e.target.checked)
-                              handleValuesChange({ disableOnEdit: e.target.checked })
+                              setFieldValue('disableOnEdit', e.target.checked);
+                              handleValuesChange({ disableOnEdit: e.target.checked });
                             }}
                             color="primary"
                           />
@@ -953,8 +977,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                             name="isUnique"
                             checked={values['unique']}
                             onChange={(e) => {
-                              setFieldValue('unique', e.target.checked)
-                              handleValuesChange({ unique: e.target.checked })
+                              setFieldValue('unique', e.target.checked);
+                              handleValuesChange({ unique: e.target.checked });
                             }}
                             color="primary"
                           />
@@ -972,23 +996,24 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         name={'defaultValue'}
                         type={fieldData.type}
                         setFieldValue={(name, value) => {
-                          handleValuesChange({ [name]: value })
-                          setFieldValue(name, value)
+                          handleValuesChange({ [name]: value });
+                          setFieldValue(name, value);
                         }}
-
                         isTooltip={false}
                       />
                     ) : fieldData.type === 'colorPicker' && values['isDefaultValue'] ? (
                       <Box>
                         <input
-                          value={values["defaultValue"]}
+                          value={values['defaultValue']}
                           type="color"
                           onChange={(e) => {
-                            setFieldValue("defaultValue", e.target.value)
-                            handleValuesChange({ defaultValue: e.target.value })
+                            setFieldValue('defaultValue', e.target.value);
+                            handleValuesChange({ defaultValue: e.target.value });
                           }}
                         />
-                        <Box component="span" ml={2}>{values["defaultValue"]}</Box>
+                        <Box component="span" ml={2}>
+                          {values['defaultValue']}
+                        </Box>
                       </Box>
                     ) : values['isDefaultValue'] ? (
                       <Box display="block">
@@ -1021,10 +1046,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                                   setFieldValue('defaultValue', defVal);
                                   handleValuesChange({
                                     defaultValue: defVal
-                                  })
+                                  });
                                 }
-                              }
-                              }
+                              }}
                             />
                           ))}
                         <TextField
@@ -1049,16 +1073,15 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                                   setFieldValue('defaultValue', e.target.value.trimStart());
                                   handleValuesChange({
                                     defaultValue: e.target.value.trimStart()
-                                  })
+                                  });
                                   setCursorPosition({ selectionStart, selectionEnd: selectionStart });
                                 }
                               }
                             } else {
                               setFieldValue('defaultValue', e.target.value.trimStart());
-                              handleValuesChange({ defaultValue: e.target.value.trimStart() })
+                              handleValuesChange({ defaultValue: e.target.value.trimStart() });
                             }
-                          }
-                          }
+                          }}
                           onClick={(e) => {
                             if (module === 'pdf-template') {
                               if (typeof inputRef.current === 'object' && inputRef.current !== null) {
@@ -1085,8 +1108,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                             name="ishiddenField"
                             checked={values['required'] ? false : values['hiddenField']}
                             onChange={(e) => {
-                              setFieldValue('hiddenField', e.target.checked)
-                              handleValuesChange({ hiddenField: e.target.checked })
+                              setFieldValue('hiddenField', e.target.checked);
+                              handleValuesChange({ hiddenField: e.target.checked });
                             }}
                             color="primary"
                           />
@@ -1102,10 +1125,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                             name="isAdditionalOption"
                             checked={values['addAdditionalOption']}
                             onChange={(e) => {
-                              setFieldValue('addAdditionalOption', e.target.checked)
+                              setFieldValue('addAdditionalOption', e.target.checked);
                               handleValuesChange({
                                 addAdditionalOption: e.target.checked
-                              })
+                              });
                             }}
                             color="primary"
                           />
@@ -1121,10 +1144,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                             name="isManualOption"
                             checked={values['addManualOptionInExcel']}
                             onChange={(e) => {
-                              setFieldValue('addManualOptionInExcel', e.target.checked)
+                              setFieldValue('addManualOptionInExcel', e.target.checked);
                               handleValuesChange({
                                 addManualOptionInExcel: e.target.checked
-                              })
+                              });
                             }}
                             color="primary"
                           />
@@ -1139,8 +1162,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                             name="showAdditionalInfoPopup"
                             checked={values['showAdditionalInfoPopup']}
                             onChange={(e) => {
-                              setFieldValue('showAdditionalInfoPopup', e.target.checked)
-                              handleValuesChange({ showAdditionalInfoPopup: e.target.checked })
+                              setFieldValue('showAdditionalInfoPopup', e.target.checked);
+                              handleValuesChange({ showAdditionalInfoPopup: e.target.checked });
                             }}
                             color="primary"
                           />
@@ -1156,7 +1179,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         getOptionLabel={(option) => option}
                         onChange={(event: any, newValue: string | null) => {
                           setFieldValue('additionalInfoSection', newValue);
-                          handleValuesChange({ additionalInfoSection: newValue })
+                          handleValuesChange({ additionalInfoSection: newValue });
                         }}
                         renderInput={(params) => (
                           <TextField {...params} label="Additional Info Section" variant="outlined" name="additionalInfoSection" />
@@ -1173,9 +1196,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 size="small"
                 onClick={() => {
                   if (Object.keys(formValues).length > 0) {
-                    setShowConfirmDialog(true)
-                  }
-                  else handleClose();
+                    setShowConfirmDialog(true);
+                  } else handleClose();
                 }}
                 color="primary"
               >
@@ -1202,6 +1224,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
           </>
         )}
       </Formik>
-    </Dialog >
+    </Dialog>
   );
 };
