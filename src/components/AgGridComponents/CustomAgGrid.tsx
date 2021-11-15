@@ -10,6 +10,7 @@ import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGrid
 import { orderBy } from 'lodash';
 import { checkStaticField, staticColumns } from "../../constants/columns"
 import { GridApi } from 'ag-grid-community';
+import { uniqBy } from 'lodash';
 
 export function reducer(state, action) {
   switch (action.type) {
@@ -149,6 +150,7 @@ export default function CustomAgGrid({
   actionEditable = false,
   onCellValueChanged = () => { },
   showOnlyShowFilteredRecordSwitch = false,
+  idProperty = "_id",
   allowHeaderSelection = true
 }) {
   const [, setColumns] = useState(columns);
@@ -172,7 +174,7 @@ export default function CustomAgGrid({
         if (oldSelectedRecords.length > 0) {
           params.api.forEachNode(function (node) {
             node.setSelected(
-              oldSelectedRecords.some((o) => o === node.data._id)
+              oldSelectedRecords.some((o) => o[idProperty] === node.data[idProperty])
             );
           });
         }
@@ -217,7 +219,7 @@ export default function CustomAgGrid({
     if (currentGridApi && selectedRecords.length) {
       currentGridApi.forEachNode(function (node) {
         node.setSelected(
-          selectedRecords.some((o) => o._id === node.data._id)
+          selectedRecords.some((o) => o[idProperty] === node.data[idProperty])
         );
       });
     }
@@ -228,7 +230,7 @@ export default function CustomAgGrid({
         if (oldSelectedRecords.length > 0) {
           currentGridApi.forEachNode(function (node) {
             node.setSelected(
-              oldSelectedRecords.some((o) => o === node.data._id)
+              oldSelectedRecords.some((o) => o[idProperty] === node.data[idProperty])
             );
           });
         }
@@ -425,14 +427,14 @@ export default function CustomAgGrid({
                   try {
                     let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
 
-                    if (event.node.isSelected() === true && !oldSelectedRecords.some(s => s === (event.node.data._id ?? event.node.data.id))) {
-                      oldSelectedRecords = [...oldSelectedRecords, event.node.data._id ?? event.node.data.id];
+                    if (event.node.isSelected() === true && !oldSelectedRecords.some(s => s[idProperty] === event.node.data[idProperty])) {
+                      oldSelectedRecords = [...oldSelectedRecords, event.node.data];
                       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords));
                     }
                     else if (event.node.isSelected() === false) {
 
                       if (oldSelectedRecords.length > 0) {
-                        localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords.filter(f => f !== (event.data._id ?? event.data.id))));
+                        localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords.filter(f => f[idProperty] !== event.data[idProperty])));
                       }
                     }
                   } catch (ex) {
@@ -451,10 +453,10 @@ export default function CustomAgGrid({
                   try {
                     let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
                     if (oldSelectedRecords.length > 0) {
-                      const uniqueRecords = [...new Set([...oldSelectedRecords, ...event.api.getSelectedRows().map(m => m._id)])]
+                      const uniqueRecords = uniqBy([...oldSelectedRecords, ...event.api.getSelectedRows()], idProperty)
                       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(uniqueRecords));
                     } else {
-                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(event.api.getSelectedRows().map(m => m._id)))
+                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(event.api.getSelectedRows()))
                     }
                   } catch (ex) {
                     console.error("Error in getting / storing selected records")
@@ -468,7 +470,7 @@ export default function CustomAgGrid({
               }}
               immutableData={true}
               getRowNodeId={(data) => {
-                return data._id ?? data.id;
+                return data[idProperty];
               }}
               pagination={allowPagination}
               suppressPaginationPanel={true}

@@ -88,22 +88,43 @@ export default function CustomReactTable({
                         </span>
                     ) : null,
             },
+
+            //  Use below selection if pagination is there
+            // {
+            //     id: 'selection',
+            //     minWidth: 50,
+            //     width: 50,
+            //     maxWidth: 50,
+            //     // The header can use the table's getToggleAllRowsSelectedProps method
+            //     // to render a checkbox
+            //     Header: ({ getToggleAllPageRowsSelectedProps }) => (
+            //         <IndeterminateCheckbox {...getToggleAllPageRowsSelectedProps()} />
+            //     ),
+            //     // The cell can use the individual row's getToggleRowSelectedProps method
+            //     // to the render a checkbox
+            //     Cell: ({ row }) => (
+            //         <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+            //     ),
+            // },
+
+            //  Use below selection if pagination is not there
             {
                 id: 'selection',
-                minWidth: 50,
-                width: 50,
-                maxWidth: 50,
                 // The header can use the table's getToggleAllRowsSelectedProps method
                 // to render a checkbox
-                Header: ({ getToggleAllPageRowsSelectedProps }) => (
-                    <IndeterminateCheckbox {...getToggleAllPageRowsSelectedProps()} />
+                Header: ({ getToggleAllRowsSelectedProps }) => (
+                  <div>
+                    <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
+                  </div>
                 ),
                 // The cell can use the individual row's getToggleRowSelectedProps method
                 // to the render a checkbox
                 Cell: ({ row }) => (
+                  <div>
                     <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+                  </div>
                 ),
-            },
+              },
             ...columns
         ],
         []
@@ -117,38 +138,40 @@ export default function CustomReactTable({
         rows,
         headerGroups,
         prepareRow,
-        page,
-        canPreviousPage,
-        canNextPage,
-        // pageOptions,
-        pageCount,
-        gotoPage,
-        nextPage,
-        previousPage,
-        setPageSize,
+        // page,
+        // canPreviousPage,
+        // canNextPage,
+        // // pageOptions,
+        // pageCount,
+        // gotoPage,
+        // nextPage,
+        // previousPage,
+        // setPageSize,
         selectedFlatRows,
-        state: {
-            pageIndex,
-            pageSize,
-            // selectedRowIds
-        },
+        // state: {
+        //     pageIndex,
+        //     pageSize,
+        //     // selectedRowIds
+        // },
     } = useTable(
         {
             columns: newColumns,
             data,
             onSelect,
-            initialState: { pageIndex: 0 },
+            // initialState: { pageIndex: 0 },
             defaultColumn
         },
         useFlexLayout,
         useExpanded, // Use the useExpanded plugin hook
-        usePagination,
+        // usePagination,
         useRowSelect
     )
 
-    useEffect(() => {
-        setPageSize(gridPageSizes[0])
-    }, [setPageSize,])
+    // useEffect(() => {
+    //     console.log(rows)
+    //     setPageSize(gridPageSizes[0])
+    //     // setPageSize(gridPageSizes[0])
+    // }, [setPageSize,])
 
     useEffect(() => {
         const flatData = treeToFlatArray(selectedFlatRows.map(d => d.original), childrenProperty);
@@ -181,10 +204,10 @@ export default function CustomReactTable({
                     <TableBody style={{
                         overflowY: "scroll",
                         overflowX: "hidden",
-                        // height: "250px"
+                        height: "250px"
                     }}>
                         {
-                            page.map((row, index) => {
+                            rows.map((row, index) => {
                                 prepareRow(row)
                                 return (
                                     <TableRow {...row.getRowProps()} style={rowStyle(row.original)} key={row.original._id ?? index}>
@@ -203,7 +226,7 @@ export default function CustomReactTable({
                 </MaUTable>
             </div>
 
-            <TablePagination
+            {/* <TablePagination
                 component="div"
                 count={data.length}
                 page={pageIndex}
@@ -216,7 +239,7 @@ export default function CustomReactTable({
                     setPageSize(event.target.value)
                 }}
                 rowsPerPageOptions={gridPageSizes}
-            />
+            /> */}
 
         </>
     )
