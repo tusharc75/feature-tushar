@@ -47,7 +47,7 @@ import CustomSwipableList from "../../components/SwipableListComponents/CustomSw
 import { isMobile } from 'react-device-detect';
 import { quoteStepColors } from '../../constants/helpers';
 import InfiniteScroll from "react-infinite-scroll-component";
-import { MdAccountCircle } from "react-icons/md";
+import { FaSuitcase } from "react-icons/fa";
 import { AiFillCrown } from "react-icons/all";
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -967,7 +967,7 @@ const QuoteBuilders = () => {
                 loading={loading}
                 additionalDetails={[
                   {
-                    icon: <MdAccountCircle size={18} />,
+                    icon: <FaSuitcase size={18} />,
                     field: "customerAccountName"
                   },
                 ]}

@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { isMobile } from 'react-device-detect';
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz"
 import AddIcon from "@material-ui/icons/Add";
-import { MdAccountCircle, MdDelete, MdEdit, } from "react-icons/md";
+import { MdDelete, MdEdit, } from "react-icons/md";
 import { FaCopy } from "react-icons/all";
 
 //  Swipe functionalities are removed as we are facing overlap issue in mobile quote details screen
