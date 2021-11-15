@@ -21,6 +21,7 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import { startCase } from 'lodash';
+import axiosInstance from "../../axios/axiosInstance";
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -34,11 +35,18 @@ interface EditDialogProps {
 }
 
 const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose, isSaving, submitBulkEdit, currencySymbol, data, startDate, endDate }) => {
-  
+
   const [values, setValues] = useState(null);
   const [isDisabled, setDisabled] = useState(false);
   const [errors, setErrors] = useState(null);
-
+  const [units, setUnits] = useState([
+    { "optionLabel": "Price Per Well", "optionValue": "Price Per Well" },
+    { "optionLabel": "Two Well Pad", "optionValue": "Two Well Pad" },
+    { "optionLabel": "Three Well Pad", "optionValue": "Three Well Pad" },
+    { "optionLabel": "Four Well Pad", "optionValue": "Four Well Pad" },
+    { "optionLabel": "Five Well Pad", "optionValue": "Five Well Pad" },
+    { "optionLabel": "Six Well Pad", "optionValue": "Six Well Pad" },
+  ]);
 
   useEffect(() => {
     if (data) {
@@ -51,11 +59,13 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
         pricingMethod: data?.pricingMethod || 'perDay',
         startDate: data?.startDate || new Date(),
         endDate: data?.endDate || new Date(),
+        tenure: data?.tenure || moment(data?.endDate).diff(moment(data?.startDate), 'days'),
         UOM: data?.UOM || '',
         price: data?.price || 0,
         discount: data?.discount || 0,
         finalPrice: data?.finalPrice || 0
       };
+      newValues["amount"] = data?.amount || newValues.qty * newValues.tenure * newValues.price
       setValues(newValues);
     }
   }, [data]);
@@ -95,7 +105,6 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
         const priceData = await calculatePrice([values]);
         if (priceData && priceData.length) {
           let price: any = priceData[0].mrp;
-          let qty = priceData[0].qty;
           handleChange('price', price);
           handlePriceCalculation(price, 'price');
         }
@@ -103,9 +112,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
     }
   };
 
-  /**
-   * HANDLE CLOSE DIALOG
-   */
+
   const handleClose = () => {
     if (isSaving === false) {
       onClose();
@@ -186,15 +193,34 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
   // };
 
 
-  const handlePriceCalculation = (value: number, type: string) => {
+  const handlePriceCalculation = (value: any, type: string) => {
 
-    const startDate = moment(values?.startDate);
-    const endDate = moment(values?.endDate);
-    const diff = endDate.diff(startDate, 'days') > 0 ? endDate.diff(startDate, 'days') : 1;
+    const pricingMethod = type === "pricingMethod" ? value : values?.pricingMethod;
+
+    let tenureType: any = "days";
+    if (pricingMethod === "perWeek") {
+      tenureType = "weeks"
+    }
+    else if (pricingMethod === "perMonth") {
+      tenureType = "months"
+    }
+
+    const startDate = moment(type === "startDate" ? value : values?.startDate);
+    let endDate = moment(type === "endDate" ? value : values?.endDate);
+
+    if (type === "tenure") {
+      endDate = startDate.add(value, tenureType)
+      handleChange('endDate', endDate);
+    }
+
+    const tenure = type === "tenure" ? value : endDate.diff(startDate, tenureType) > 0 ? endDate.diff(startDate, tenureType) : 1;
+    handleChange('tenure', tenure);
 
     const qty = type === "qty" ? value : values?.qty ? values?.qty : 0
     const price = type === "price" ? value : values?.price ? values?.price : 0
-    let amount = qty * price * diff
+    let amount = qty * price * tenure
+
+    handleChange('amount', amount);
 
     let discount = type === "discount" ? value : values?.discount ? values?.discount : 0
     let discountedPrice = type === "discountedPrice" ? value : values?.discountedPrice ? values?.discountedPrice : 0
@@ -218,6 +244,16 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
 
     handleChange('finalPrice', parseFloat(amount.toFixed(2)));
   }
+
+
+  useEffect(() => {
+    axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
+      const unitField = data.filter((e) => e.fieldData.fieldName.toLowerCase().includes("unit") && e.fieldData.type === "dropDown");
+      if (unitField.length) {
+        setUnits(unitField[0].fieldData.option);
+      }
+    })
+  }, []);
 
   return (
     <Dialog open fullWidth maxWidth="md" onClose={handleClose}>
@@ -259,7 +295,10 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
                     labelId="pricing-method-label"
                     label="Pricing Method"
                     value={values?.pricingMethod || ''}
-                    onChange={(e) => handleChange(e.target.name, e.target.value)}
+                    onChange={(e) => {
+                      handlePriceCalculation(e.target.value, 'pricingMethod');
+                      handleChange(e.target.name, e.target.value)
+                    }}
                   >
                     <MenuItem value="perDay">Per Day</MenuItem>
                     <MenuItem value="perWeek">Per Week</MenuItem>
@@ -281,9 +320,28 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
                   format={dateFormatForInputControl}
                   autoOk
                   value={values?.startDate || new Date(startDate)}
-                  onChange={(date) => handleChange('startDate', date)}
+                  onChange={(date) => {
+                    handlePriceCalculation(date, 'startDate');
+                    handleChange('startDate', date)
+                  }}
                   InputLabelProps={{
                     shrink: true
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label={"Expected No. of " + (values?.pricingMethod ? values.pricingMethod.replace("per", "") : "Tenure")}
+                  name="tenure"
+                  fullWidth
+                  size="small"
+                  type="number"
+                  variant={'outlined'}
+                  value={values?.tenure || 0}
+                  onChange={(e) => {
+                    let tenure = parseInt(e.target.value);
+                    handlePriceCalculation(tenure, 'tenure');
+                    handleChange(e.target.name, tenure <= 0 ? 0 : tenure);
                   }}
                 />
               </Grid>
@@ -300,7 +358,10 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
                   value={values?.endDate || new Date(endDate)}
                   minDate={new Date(startDate)}
                   maxDate={new Date(endDate)}
-                  onChange={(date) => handleChange('endDate', date)}
+                  onChange={(date) => {
+                    handlePriceCalculation(date, 'endDate');
+                    handleChange('endDate', date)
+                  }}
                   InputLabelProps={{
                     shrink: true
                   }}
@@ -322,7 +383,9 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
                     value={values?.UOM || ''}
                     onChange={(e) => handleChange(e.target.name, e.target.value)}
                   >
-                    <MenuItem value="pcs">Pcs</MenuItem>
+                    {units && units.map((_u: any) => {
+                      return <MenuItem value={_u.optionValue}>{_u.optionLabel}</MenuItem>
+                    })}
                   </Select>
                   {/* <FormHelperText id="UOM-label">{Boolean(errors?.UOM) && errors.UOM}</FormHelperText> */}
                 </FormControl>
@@ -350,6 +413,21 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  label="Total Price"
+                  name="amount"
+                  fullWidth
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>,
+                    readOnly: true
+                  }}
+                  size="small"
+                  type="number"
+                  variant={'outlined'}
+                  value={values?.amount || 0}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
                   label="Discount (%)"
                   name="discount"
                   fullWidth
@@ -370,7 +448,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
-                  label="Discounted Price"
+                  label="Discount"
                   name="discountedPrice"
                   fullWidth
                   InputProps={{
@@ -410,7 +488,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
-                  label="Total Tax"
+                  label="Tax"
                   name="totalTax"
                   fullWidth
                   InputProps={{
