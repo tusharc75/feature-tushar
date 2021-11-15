@@ -104,8 +104,8 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         if (gridApi) {
             gridApi.setRowData([]);
         }
-        axiosInstance().get(`${product.api}`).then(({ data: { data: products } }) => {
-            products = products?.filter((u: any) => u?.serializedProduct && !productInventory.some(obj => obj.id === u._id))
+        axiosInstance().get(product.api).then(({ data: { data: products } }) => {
+            products = products?.filter((u: any) => u?.serializedProduct && !productInventory.some(obj => obj.type === "Product" && obj.id === u._id))
                 .map((u) => ({
                     ...u,
                     id: u._id,
@@ -114,7 +114,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                     type: type,
                     quantity: 0,
                 }));
-            console.log(products)
+            
             setProductData(products)
             dispatch({ type: "initialize", data: products, count: products.length });
             setTimeout(() => {
