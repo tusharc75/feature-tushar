@@ -55,7 +55,7 @@ const SerializedAssetStep = (props) => {
 
     const products = productInventory.map((p: any) => {
       let currentAssets = []
-      if (p?.type?.includes("product")) {
+      if (p?.type?.includes("roduct")) {
         currentAssets = serializeAssets.filter((asset: any) => asset?.product === p?._id)
 
         if (currentAssets.length !== p.qty) {
@@ -171,16 +171,16 @@ const SerializedAssetStep = (props) => {
       accessor: 'detail',
       Header: 'Detail',
       Cell: ({ row }) => (
-        <div className="d-flex gap-3">
+        <div className="d-flex gap-2 align-items-center">
           <p
-            className="text-truncate mr-2"
+            className="text-truncate"
             title={row.original.detail}
           // to={rowData.type === 'Product' ? `${routes.productDetail.path}/${rowData.id}` : `${routes.packagesDetail.path}/${rowData.id}`}
           >
             {row.original.detail}
           </p>
           {row.original.hasOwnProperty("assetNumber") &&
-            <span style={{ display: 'flex', alignItems: 'center' }}>
+            <span className="d-flex align-items-center gap-2">
               <IconButton size="small" onClick={() => {
                 setShowConfirmBox(true)
                 setDeleteData([row.original._id])
@@ -513,7 +513,7 @@ const SerializedAssetStep = (props) => {
         addSerializedAsset={handleAddSerializedAsset}
         handleSerializedAssetClose={() => {
           setAddSerializedAssetDialog(false);
-          setSelectedProducts([])
+          // setSelectedProducts([])
         }}
         isAdding={isAdding}
         selectedProducts={selectedProducts.filter(p => p?.type?.includes("roduct"))}

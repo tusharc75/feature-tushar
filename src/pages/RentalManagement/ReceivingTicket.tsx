@@ -27,7 +27,7 @@ const ReceivingTicket = ({productInventory, currentStep, handleReceivingTicketDi
         let tempProductInventory = data.data.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
         dispatch({ type: "loading", loading: true });
         axiosInstance()
-          .get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/delivery-ticket `)
+          .get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/delivery-ticket`)
           .then(({ data }) => {
             data.data.map(obj => {
               tempProductInventory.map((d, index) => {
@@ -38,7 +38,7 @@ const ReceivingTicket = ({productInventory, currentStep, handleReceivingTicketDi
               })
             })
             axiosInstance()
-              .get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/receiving-ticket `)
+              .get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/receiving-ticket`)
               .then(({ data }) => {
                 data.data.map(obj => {
                   tempProductInventory.map((d, index) => {
@@ -48,6 +48,11 @@ const ReceivingTicket = ({productInventory, currentStep, handleReceivingTicketDi
                     }
                   })
                 })
+
+                tempProductInventory.forEach((d) => {
+                  d["hideSelection"] = d.status === "In-Transit";
+                })
+
                 dispatch({
                   type: "initialize", data: tempProductInventory, count: tempProductInventory.length
                 });

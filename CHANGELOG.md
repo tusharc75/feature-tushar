@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.37.0](https://github.com/vebholic/oms_frontend/compare/v1.36.0...v1.37.0) (2021-11-15)
+
+
+### Features
+
+* - Column resize removed on selection issue fixed ([b53e753](https://github.com/vebholic/oms_frontend/commit/b53e753939698779fd49bd06f571898db6983298))
+* - Column width issue fixed, disabled on edit fixed in rental edit dialog ([58fa154](https://github.com/vebholic/oms_frontend/commit/58fa154646bc2dce063e8a4c24d92b987b7d1ca9))
+* - Column width resize issue fixed ([d715f8f](https://github.com/vebholic/oms_frontend/commit/d715f8f15e26d8ac45d48e8653b0577cb17207d4))
+* - Disabled Assign Serialized Assets button disabled issue fixed on dialog closed ([7b086f1](https://github.com/vebholic/oms_frontend/commit/7b086f12b66a5f0cb5d0ee3ebbd93e7bd1b78a5e))
+* - PO-148 issue fixed ([7128ad4](https://github.com/vebholic/oms_frontend/commit/7128ad4eccafef15b4fa99a09c47683a96262211))
+* - PO-149 - Records are not getting selected - fixed ([cbad086](https://github.com/vebholic/oms_frontend/commit/cbad086750eb3f146fdab2f28a333fa78ec0f82b))
+* - Restriction added on serialiazed assets selection ([8e5b71b](https://github.com/vebholic/oms_frontend/commit/8e5b71bd14b82578f7920402d126157951edc50d))
+* - Row style changed in serialized asset step ([34165fb](https://github.com/vebholic/oms_frontend/commit/34165fb3aa15985085d6f0352e311209229fe4fd))
+
 ## [1.36.0](https://github.com/vebholic/oms_frontend/compare/v1.35.0...v1.36.0) (2021-11-14)
 
 
