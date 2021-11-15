@@ -34,8 +34,6 @@ import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCe
 import HtmlTooltip from '../../components/CustomTooltipTitle'
 import BulkEditInventoryDialog from './BulkEditInventoryDialog'
 import SerializedAssetStep from "./SerializedAssetStep";
-import MaterialTableComponent from "../../components/Shared/MaterialTableComponent";
-import { Column } from "material-table";
 import moment from "moment";
 import { camelCase, startCase, orderBy } from "lodash";
 import queryString from "query-string";
