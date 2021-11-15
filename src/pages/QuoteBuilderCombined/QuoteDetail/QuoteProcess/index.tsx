@@ -446,6 +446,7 @@ export default function QuoteProcess(props) {
 
       const labelsWithVal = {};
       const requiredValues = {};
+
       quoteRowKeys.forEach((key) => {
 
         if (fieldArray) {
@@ -524,44 +525,7 @@ export default function QuoteProcess(props) {
             }
           });
         }
-
-
-
-        const ungivenValues =
-          requiredValuesData.length > 0 &&
-          requiredValuesData.filter((d) => {
-            const isEmpty = Object.entries(d).filter(([k, v]) => v === undefined || v === null || v === '');
-
-            return isEmpty.length > 0 ? true : false;
-          });
-
-        if (DOASteps.findIndex((d) => d?.key === ProcessStatus) === 1 || ProcessStatus === 'Price Builder') {
-          let hasPrice = false;
-          BuilderData.forEach((data) => {
-            if (
-              data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
-              data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !== 'undefined'
-            ) {
-              hasPrice = true;
-            } else {
-              hasPrice = false;
-            }
-          });
-          const withZeroQty = BuilderData.filter((d) => d.qty === 0);
-          let withZeroAmt = [];
-          if (hasPrice) {
-            withZeroAmt = BuilderData.filter((d) => d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0);
-          }
-
-          // console.log(BuilderData)
-          // console.log(`totalSalesPrice_${quoteData?.currency.toLowerCase()}`)
-
-          if ((!ungivenValues && ungivenValues.length === 0) || (!withZeroAmt.length && hasPrice && !withZeroQty.length)) {
-            setNextStep(true);
-          } else {
-            setNextStep(false);
-          }
-        }
+        requiredValuesData.push(requiredValues);
 
         if (ignoredKeys.indexOf(key) === -1) {
           let indexkey = key;
@@ -602,8 +566,43 @@ export default function QuoteProcess(props) {
           // }
         }
       });
+
+      const ungivenValues =
+        requiredValuesData.length > 0 &&
+        requiredValuesData.filter((d) => {
+          const isEmpty = Object.entries(d).filter(([k, v]) => v === undefined || v === null || v === '');
+
+          return isEmpty.length > 0 ? true : false;
+        });
+
+      if (DOASteps.findIndex((d) => d?.key === ProcessStatus) === 1 || ProcessStatus === 'Price Builder') {
+        let hasPrice = false;
+        tempBuilderData.forEach((data) => {
+          if (
+            data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] ||
+            data[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] !== 'undefined'
+          ) {
+            hasPrice = true;
+          } else {
+            hasPrice = false;
+          }
+        });
+        const withZeroQty = tempBuilderData.filter((d) => d.qty === 0);
+        let withZeroAmt = [];
+        if (hasPrice) {
+          withZeroAmt = tempBuilderData.filter((d) => d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0);
+        }
+
+        // console.log(BuilderData)
+        // console.log(`totalSalesPrice_${quoteData?.currency.toLowerCase()}`)
+
+        if ((!ungivenValues && ungivenValues.length === 0) || (!withZeroAmt.length && hasPrice && !withZeroQty.length)) {
+          setNextStep(true);
+        } else {
+          setNextStep(false);
+        }
+      }
       dynamicTable.push(labelsWithVal);
-      requiredValuesData.push(requiredValues);
       inventory.push(inventorydata);
     });
     // requiredFieldArray.every(v => v.value === true) ? setNextStep(true) : setNextStep(false)
