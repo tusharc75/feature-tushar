@@ -608,7 +608,6 @@ export default function QuoteProcess(props) {
     // requiredFieldArray.every(v => v.value === true) ? setNextStep(true) : setNextStep(false)
     setColName(colName);
     setDynamicTableData(dynamicTable);
-    console.log("*** TABLE ***: ", dynamicTable)
     return {
       inventory: inventory,
       totalMargin: totalMargin,
@@ -1736,7 +1735,7 @@ export default function QuoteProcess(props) {
                         {option}
                       </React.Fragment>
                     )}
-                    renderInput={(params) => <TextField {...params} variant="outlined" label="Visible Columns in Quote" placeholder="Select " />}
+                    renderInput={(params) => <TextField {...params} variant="outlined" label={showPDFArrangeColumns ? `Visible Columns in Quote PDF` : `Visible Columns in Quote Excel`} placeholder="Select " />}
                   />
                 </FormControl>
               </Grid>
