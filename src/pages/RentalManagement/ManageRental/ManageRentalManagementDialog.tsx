@@ -451,7 +451,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 <FormTypes
                                                                                     rentalManagementId={rentalManagementId}
                                                                                     {...field}
-                                                                                    disabled={(!rentalManagementId && field.disableOnEdit)}
+                                                                                    disabled={(rentalManagementId && field.disableOnEdit)}
                                                                                     values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}

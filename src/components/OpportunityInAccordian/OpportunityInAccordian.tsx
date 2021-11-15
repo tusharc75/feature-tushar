@@ -288,6 +288,8 @@ export default function OpportunityInAccordian({
                       >
                         <Card className="detailCard">
                           <CardContent className="detailListing">
+                            <div className="cardStyle"> </div>
+                            <Grid item xs={12}>
                             <Grid container className="detailCardHeader">
                               <Grid item xs={7} sm={8}>
                                 {hasAccessToEntity(obj.entity) ?
@@ -308,7 +310,7 @@ export default function OpportunityInAccordian({
 
                               </Grid>
                               <Grid item xs={5} sm={4}>
-                                <Typography className="amount" title={formatAmountWithCurrency(obj?.currency, obj?.estimatedAmount)?.fullFormatAmount}>
+                                <Typography className="amount text-truncate" title={formatAmountWithCurrency(obj?.currency, obj?.estimatedAmount)?.fullFormatAmount}>
                                   {formatAmountWithCurrency(obj?.currency, obj?.estimatedAmount)?.fullFormatAmount}
                                 </Typography>
                               </Grid>
@@ -325,7 +327,9 @@ export default function OpportunityInAccordian({
                                 }
                               </Grid>
                             </Grid>
+                            </Grid>
                           </CardContent>
+
                         </Card>
                       </Grid>
                     ))}

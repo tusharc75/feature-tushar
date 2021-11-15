@@ -596,8 +596,8 @@ const QuoteBuilders = () => {
     }
 
     if (showFilteredRecordsOnly) {
-      const savedIds = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedIds)}`;
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
     }
 
     if (accountDetails.accountId) {
@@ -886,7 +886,7 @@ const QuoteBuilders = () => {
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
                     recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords).length}
-                    ids={getLocalStorageArrayData(localStorageSelectedRecords)}
+                    ids={getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id)}
                     onExportToExcelSuccess={() => {
                       if (gridApi) gridApi.deselectAll()
                       else fetchQuoteBuilder()

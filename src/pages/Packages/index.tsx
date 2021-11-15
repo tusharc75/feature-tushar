@@ -196,7 +196,7 @@ const PackageList = () => {
             <HideWhenOffline>
                 <GridDeleteIcon
                     hasDeletePermission={permissions?.packages.isDelete}
-                    ownerId={params.data.ownerId}
+                    ownerId={user?.user?._id}
                     userId={user?.user?._id}
                     onDelete={() =>
                         setSinglePackageDelete({

@@ -7,7 +7,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
-import { prepareDataForGrid } from "../../constants/helpers"
+import { getLocalStorageArrayData, prepareDataForGrid } from "../../constants/helpers"
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FaRegistered } from "react-icons/fa";
 import AddIcon from "@material-ui/icons/Add"
@@ -55,6 +55,9 @@ const RentalManagementType = [
     value: 2,
   },
 ];
+
+const renderedFrom = "rental_management";
+const localStorageSelectedRecords = `${renderedFrom}_selected`
 
 const RentalManagement = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -107,7 +110,8 @@ const RentalManagement = () => {
     filters,
     sorting,
     selectedRecords,
-    appendRows
+    appendRows,
+    showFilteredRecordsOnly
   } = state;
 
   useEffect(() => {
@@ -117,7 +121,7 @@ const RentalManagement = () => {
   const fetchGridColumns = async () => {
     let data
     if (isOffline) {
-      data = offlineFieldsData
+      data = offlineFieldsData["rentalManagement"] ?? []
     }
     else {
       const response = await axiosInstance()
@@ -195,7 +199,8 @@ const RentalManagement = () => {
     sorting,
     accountDetails,
     selectedEntity,
-    isOffline
+    isOffline,
+    showFilteredRecordsOnly
   ]);
 
   const handleSingleDeleteRentalManagement = async () => {
@@ -350,6 +355,11 @@ const RentalManagement = () => {
           },
         ])}`;
       }
+    }
+
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
     }
 
     if (!isObjectEmpty(filters)) {
@@ -523,8 +533,8 @@ const RentalManagement = () => {
                     }}
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
-                    recordsToExport={selectedRecords.length}
-                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords).length}
+                    ids={getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id)}
                     onExportToExcelSuccess={() => {
                       if (gridApi) gridApi.deselectAll()
                       else fetchRentalManagement()
@@ -611,7 +621,7 @@ const RentalManagement = () => {
                   onCreate={clickCreateNew}
                   showClone={false}
                   onClone={() => { }}
-                  renderedFrom={pageTitle}
+                  renderedFrom={renderedFrom}
                 /> :
                 <CustomAgGrid
                   columns={columns}
@@ -625,10 +635,11 @@ const RentalManagement = () => {
                   page={page}
                   actionWidth={100}
                   loading={loading}
-                  renderedFrom={pageTitle}
+                  renderedFrom={renderedFrom}
                   allowSelection={!isOffline}
                   isClientSideGrid={isOffline}
                   refreshGrid={fetchRentalManagement}
+                  showOnlyShowFilteredRecordSwitch={true}
                 /> : null
           }
 
