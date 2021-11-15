@@ -304,6 +304,8 @@ export default function QuotesAccordionInProjectSale({
                       >
                         <Card className="detailCard">
                           <CardContent className="detailListing">
+                            <div className="cardStyle"> </div>
+                            <Grid item xs={12}>
                             <Grid container className="detailCardHeader">
                               <Grid item xs={6}>
                                 {
@@ -387,6 +389,7 @@ export default function QuotesAccordionInProjectSale({
                                   ""
                                 )}
                               </Grid>
+                            </Grid>
                             </Grid>
                           </CardContent>
                         </Card>

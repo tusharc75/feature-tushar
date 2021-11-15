@@ -83,11 +83,13 @@
 .setIconForMobile{
   min-width: 40px !important;
 }
-.MuiSvgIcon-root{
-  font-size: 18px !important;
-}
+
 .MuiStepIcon-root.MuiStepIcon-completed{
   color: var(--secondary) !important;
+  font-size: 18px !important;
+}
+.MuiStepIcon-root{
+  font-size: 18px !important;
 }
 @media (max-width: 760px){
   .MuiStepLabel-label{

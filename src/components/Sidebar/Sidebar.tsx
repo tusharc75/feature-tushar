@@ -23,7 +23,7 @@ import { BsCalendarFill } from "react-icons/bs";
 import { MdDashboard, MdLocalActivity } from "react-icons/md";
 import { RiFolderSettingsFill, RiAccountPinCircleFill } from "react-icons/ri";
 import { SiCivicrm } from "react-icons/si";
-import { AiFillSetting } from "react-icons/ai"
+import {AiFillAccountBook, AiFillSetting} from "react-icons/ai"
 
 
 import { AccountCircle } from "@material-ui/icons";
@@ -296,7 +296,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                         {
                           iconMapping.find((mapping) => {
                             return mapping.key === listItem.section;
-                          })?.icon || <FaRegistered size={17} className="sidebar-icon" /> || <AiFillSetting size={18} className="sidebar-icon" />
+                          })?.icon || <AiFillAccountBook size={17} className="sidebar-icon" /> || <AiFillSetting size={18} className="sidebar-icon" />
                         }
                       </ListItemIcon>
                       <ListItemText primary={listItem.section} />

@@ -71,7 +71,7 @@ const PackageProductsDialog = ({ packageId, onClose, products, onSuccess, rental
     }
     setLoadingProducts(true);
     axiosInstance()
-      .get(`${packages.packageApi}/get-products/${packageId}`)
+      .get(product.api)
       .then(({ data: { data } }) => {
         const newArr =
           data.length > 0

@@ -132,7 +132,7 @@ const AddExistingProduct = (props) => {
         let deepFilter = `?page=${page}&limit=${limit}`;
 
         if (showFilteredRecordsOnly) {
-            deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords))}`;
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id))}`;
         }
 
         if (!isObjectEmpty(filters)) {

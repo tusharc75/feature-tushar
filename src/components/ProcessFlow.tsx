@@ -5,6 +5,7 @@ import {
   IoIosArrowDroprightCircle,
   IoIosArrowDropleftCircle,
 } from "react-icons/io";
+import { isMobile, isTablet } from 'react-device-detect';
 export default function ProcessFlow(props) {
   const {
     steps,
@@ -27,12 +28,12 @@ export default function ProcessFlow(props) {
           </div>
           {disableBackNext ? null : (
             <div className="actionview">
-              <div className="d-flex justify-content-end">
+              <div className="d-flex justify-content-space-between ">
                 {activeStep > 0 &&
                 activeStep <= steps.length &&
                 !hideBackButton ? (
                   <Button
-                    variant="contained"
+                    variant={isMobile ? "text" : "contained"}
                     color="primary"
                     className="mr-1"
                     onClick={() =>
@@ -42,7 +43,7 @@ export default function ProcessFlow(props) {
                     size="small"
                     startIcon={<IoIosArrowDropleftCircle />}
                   >
-                    Back
+                    {isMobile ? "" : "Back"}
                   </Button>
                 ) : null}
                 {activeStep < steps.length - 1 ? (
@@ -57,7 +58,7 @@ export default function ProcessFlow(props) {
                     </Button>
                   ) : (
                     <Button
-                      variant="contained"
+                      variant= {isMobile ? "text" : "contained"}
                       color="primary"
                       size="small"
                       disabled={
@@ -69,7 +70,8 @@ export default function ProcessFlow(props) {
                       onClick={handleMarkAsCompleted}
                       endIcon={<IoIosArrowDroprightCircle />}
                     >
-                      {activeStep === steps.length - 2 ? "Finish" : "Next"}
+
+                      {activeStep === steps.length - 2 ? isMobile ? "" : "Finish" : isMobile ? "" : "Next"}
                     </Button>
                   )
                 ) : (

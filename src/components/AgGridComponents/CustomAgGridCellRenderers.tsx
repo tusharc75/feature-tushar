@@ -62,7 +62,7 @@ const getTitle = data => {
 }
 export const LinkRenderer = params => params.value ? (
     <>
-        <Link className="link" to={params?.isForPopup ? `${params?.pathName}?id=${params?.data[params?.property]}` :
+        <Link className="link text-truncate" to={params?.isForPopup ? `${params?.pathName}?id=${params?.data[params?.property]}` :
             `${params?.pathName}/${params?.data[params?.property]}`} title={params?.value}>{params?.value}</Link>
 
         {

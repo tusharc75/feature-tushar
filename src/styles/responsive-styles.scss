@@ -23,6 +23,17 @@
 .detailHeaderDashboard {
     display: none;
 }
+.mainview {
+    width: 98vw;
+    padding: 20px 50px 45px 50px !important;
+}
+.actionview{
+    padding: 0px 20px 10px 20px !important;
+}
+.all-button{
+    font-size: 0.7rem !important;
+}
+
 
 @media only screen and (max-width: 600px) {
     .stepper-responsive {
@@ -62,6 +73,10 @@
         padding: 4px !important;
         font-size: 0.5rem !important;
     }
+    .all-button{
+        font-size: 0.5rem !important;
+    }
+
     .brandLogo {
         height: auto !important;
     }
@@ -167,6 +182,10 @@
 
         & .mainview {
             width: 98vw;
+            padding: 10px 10px 25px 10px !important;
+        }
+        & .actionview{
+            padding: 12px 20px !important;
         }
     }
     .buttonStyleBigScreen {
@@ -245,6 +264,9 @@
     }
     .actio-pos-quote {
         top: 2px;
+    }
+    .all-button-sub-icon{
+        font-size: 18px !important;
     }
 }
 

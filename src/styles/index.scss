@@ -486,6 +486,7 @@ body::-webkit-scrollbar-thumb {
   background-color: #ffffff !important;
   padding: 8px 10px;
   border-radius: 6px 6px 0 0;
+  row-gap: 5px;
 
   & .MuiButton-outlinedSizeSmall {
     padding: 2px 9px !important;
@@ -525,12 +526,12 @@ body::-webkit-scrollbar-thumb {
 
 .text-error {
   color: var(--error);
-  font-size: 1.5rem;
+  // font-size: 1.5rem;
 }
 
 .text-success {
   color: var(--success);
-  font-size: 1.5rem;
+  // font-size: 1.5rem;
 }
 
 .text-center {
@@ -732,7 +733,21 @@ body::-webkit-scrollbar-thumb {
   border-radius: 5px;
   cursor: pointer;
 }
-
+.detailListing{
+  display: flex;
+  gap: 5px;
+  background-color: #C8E9CE !important;
+}
+.detailName{
+  line-height: 24px;
+}
+.cardStyle{
+  width: 5px;
+  background-color: var(--secondary);
+  margin-bottom: 10px;
+  border-radius: 5px;
+  margin-top: 2px;
+}
 .detailCardHeader {
   align-items: center;
   padding: 0 0 6px 0px;
@@ -743,6 +758,7 @@ body::-webkit-scrollbar-thumb {
   float: right;
   font-size: 1rem !important;
   line-height: 1.5rem !important;
+  white-space: nowrap;
 }
 
 .roles-table {
@@ -825,6 +841,10 @@ body::-webkit-scrollbar-thumb {
   font-weight: bold;
   justify-content: center;
 }
+.search_box_layout{
+  margin-left: 5px ;
+  justify-content: flex-end;
+}
 
 @supports (not (gap: 0.25rem)) and (not (-webkit-gap: 0.25rem)) {
   .quoteHeader > *:not(:nth-child(1)) {
@@ -900,9 +920,25 @@ body::-webkit-scrollbar-thumb {
   font-size: 14px;
   font-weight: normal;
 }
-
+.step-label-layout{
+  color: var(--secondary) !important;
+  .MuiStepLabel-iconContainer{
+    color: var(--secondary) !important;
+    opacity: 1 !important;
+  }
+  .MuiStepLabel-completed{
+    color: var(--secondary) !important;
+  }
+  .MuiStepIcon-active{
+    color: #378280 !important
+  }
+  .MuiStepLabel-active{
+    color: #378280 !important
+  }
+}
+.stepper-box .MuiStepLabel-label.MuiStepLabel-completed
 .noBorder {
-  border: none !important;
+  color: green !important;
 }
 
 .subDetailModule {
@@ -1092,13 +1128,26 @@ body::-webkit-scrollbar-thumb {
     box-shadow: 1px 3px 3px #ab9b9b;
   }
 }
-
 .errorColor {
   color: var(--error) !important;
+}
+@media only screen and (max-height: 1030px){
+  .listingHeader {
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--secondary);
+    margin-left: 2px;
+  }
 }
 @media only screen and (max-height: 700px){
   .product-builder-edit-grid {
     height: calc(100vh - 300px);
+  }
+}
+@media only screen and (max-width: 600px){
+  .search_box_layout{
+    margin-left: 0px ;
+    justify-content: flex-start ;
   }
 }
 @media only screen and (max-width: 560px) {
@@ -1161,6 +1210,10 @@ body::-webkit-scrollbar-thumb {
       padding-top: 1px;
     }
   }
+  .layout-for-mobile{
+    justify-content: space-between;
+  }
+
 }
 @media only screen and (max-width: 830px) {
   .redQuoteBox {

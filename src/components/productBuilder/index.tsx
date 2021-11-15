@@ -142,7 +142,7 @@ const ProductBuilder = (props) => {
       setColumns([...columns])
       dispatch({ type: "initialize", data: rows, count: rows.length });
       setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
-      refreshProducts(data.product);
+      refreshProducts(data);
     })
       .catch((error) => {
         toastConfig.setToastConfig(error);
