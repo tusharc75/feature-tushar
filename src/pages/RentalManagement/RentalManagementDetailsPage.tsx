@@ -335,8 +335,8 @@ const RentalManagementDetailsPage = () => {
       setProductInventory(tempInventory)
       setSerializeAssets(data.data?.inventory || [])
       tempInventory = restructureRowData(tempInventory)
-
-      let zeroPrice = tempInventory.filter(pkg => pkg?.finalPrice === 0);
+      
+      let zeroPrice = tempInventory.filter(pkg => pkg.type !== "productInPackage" && pkg?.finalPrice === 0);
 
       // console.log(zeroPrice)
       if (zeroPrice.length > 0) {
@@ -518,7 +518,7 @@ const RentalManagementDetailsPage = () => {
             {row.original.detail}
           </p>
           {row.original?.type === 'Package' && !row.original.hasOwnProperty("packageId") &&
-            <Box ml={1}>
+            <Box ml={1} className="d-flex align-items-center">
               <span title={`There are ${row.original?.products?.length} product(s) in this package`}>({row.original?.products?.length})</span>
               <HtmlTooltip title="Add Product">
                 <IconButton onClick={() => setPackageForProducts(row.original)} size="small" color="primary">
@@ -603,7 +603,7 @@ const RentalManagementDetailsPage = () => {
       accessor: 'finalPrice',
       Header: `Final Price (${currencySymbol})`,
       Cell: ({ row }) => (
-        row.original.finalPrice ? <p>{row.original.finalPrice}</p> : <NoDataCell />
+        <p>{row.original.finalPrice}</p>
       )
     }
   ]
@@ -920,7 +920,7 @@ const RentalManagementDetailsPage = () => {
                   <Paper>
                     <Steps
                       className={styles.steps_box}
-                      isNextStep={!(productInventory.length > 0 ? (productInventory.some(f => !f?.hasOwnProperty("finalPrice") || isNaN(f?.finalPrice) || f?.finalPrice === 0) ? false : true) : false)}
+                      isNextStep={!(productInventory.length > 0 ? (productInventory.filter(f => f.type !== "productInPackage").some(f => !f?.hasOwnProperty("finalPrice") || isNaN(f?.finalPrice) || f?.finalPrice === 0) ? false : true) : false)}
                       nextStep={nextStep}
                       steps={rentalProcessSteps.slice(0, 5)}
                       currentStep={currentStep}
@@ -1029,6 +1029,7 @@ const RentalManagementDetailsPage = () => {
                                     ? "calc(100vw - 78px)"
                                     : showActivity ? "100%" : "calc(100vw - 100px)"
                               }
+                              height={"calc(100vh - 330px)"}
                             >
                               <CustomReactTable
                                 columns={columns}
