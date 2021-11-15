@@ -24,6 +24,7 @@ import { Link } from 'react-router-dom'
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import ProductHierarchy from "../Product/ProductHierarchy";
+import {FaDiceOne} from "react-icons/fa";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -358,9 +359,13 @@ const ProductInventoryDetailsPage = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
                   <div className="detail-box">
-                    <h3 className="form-label-style" title={"Asset History"}>
-                      {"Asset History"}
-                    </h3>
+                    <div className={"detail-box-content"}>
+                      <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                      <h3 className="form-label-style" title={"Asset History"}>
+                        {"Asset History"}
+                      </h3>
+                    </div>
+
                   </div>
                 </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={12}>

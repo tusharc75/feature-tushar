@@ -914,7 +914,7 @@ const RentalManagementDetailsPage = () => {
                     }}
                     label={
                       <div className="d-flex align-items-center tab-font">
-                        <FaWpforms className="mr-1" fontSize="inherit" /> Details
+                        <FaWpforms className="mr-1" fontSize="inherit" /> Header
                       </div>
                     }
                     {...a11yProps(0)}
@@ -927,7 +927,7 @@ const RentalManagementDetailsPage = () => {
                     }}
                     label={
                       <div className="d-flex align-items-center tab-font">
-                        <BiFoodMenu className="mr-1" fontSize="inherit" /> Product Cost
+                        <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
                       </div>
                     }
                     {...a11yProps(1)}
