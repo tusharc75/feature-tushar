@@ -25,6 +25,10 @@ import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEnt
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
+import { MdAccountCircle } from "react-icons/md";
+import { AiFillCrown } from "react-icons/all";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile } from 'react-device-detect';
 
 
 const LeadTypes = [
@@ -66,12 +70,16 @@ const Leads = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
 
   const columnState = JSON.parse(localStorage.getItem(leadResource));
 
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
+
+  const [isAllChecked, setIsAllChecked] = useState(false);
+  const [clonedData, setClonedData] = useState([])
+  const localStorageSelectedRecords = `${leadResource}_selected`;
 
   if (columnState) {
     columns.map((item) => {
@@ -281,6 +289,25 @@ const Leads = () => {
           const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
 
           let finalObject = prepareDataForGrid(u);
+
+          finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
+          finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+          finalObject["allowedToEdit"] = (
+            [...(u.collaborator ?? []), u.owner].some(
+              (d) => d?.optionValue === user?.user?._id
+            )
+          );
+
+          finalObject["owerCollaboratorInitialsOrImages"] = [];
+          if (finalObject["owner"])
+            finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] });
+
+          finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
+            if (f.initials) {
+              f.initials = f.initials.split(" ").map((i) => i[0]).join("");
+            }
+          })
+
           let res = {
             ...finalObject,
             isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id),
@@ -291,6 +318,34 @@ const Leads = () => {
           };
           return res;
         });
+        setIsAllChecked(false);
+        setClonedData(data)
+        if (appendRows) {
+          dispatch({
+            type: "initialize", data: [...dataRows, ...rows],
+            count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+          });
+        } else {
+          dispatch({
+            type: "initialize", data: rows, count: count,
+            selectedRecords: rows.filter(f => f.isChecked === true)
+          });
+        }
+
+        if (gridApi) {
+          try {
+            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
+            if (oldSelectedRecords.length > 0) {
+              gridApi.forEachNode(function (node) {
+                node.setSelected(
+                  oldSelectedRecords.some((o) => o === node.data._id)
+                );
+              });
+            }
+          } catch (ex) {
+            console.error("Error in getting selected records from local storage")
+          }
+        }
 
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
@@ -523,21 +578,60 @@ const Leads = () => {
 
         {
           Object.keys(frameWorkComponent).length > 0 ?
-            <CustomAgGrid
-              columns={columns}
+            isMobile ? <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={permissions.leadResource}
+              primaryField={columns?.find(d => d.primaryField)}
+              onClick={(data) => {
+                history.push(`${routes.leadDetail.path}/${data._id}`)
+              }}
               dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
+              selectedRecords={selectedRecords}
               dispatch={dispatch}
+              onEdit={(data) => {
+                history.push(`${routes.leadDetail.path}/${data._id}?openEdit=true`)
+              }}
+              extraParamsToCheckDelete={true}
+              onDelete={(data) => {
+                showConfirmBox(data)
+              }}
               rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
               page={page}
-              actionWidth={150}
               loading={loading}
+              additionalDetails={[
+                {
+                  icon: <MdAccountCircle size={18} />,
+                  field: "customerAccountName"
+                },
+              ]}
+              chips={[
+                {
+                  label: "Entity",
+                  field: "relatedLeadEntity",
+                },
+              ]}
+              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+              onCreate={handleCreate}
+              showClone={false}
+              onClone={(data) => {setIsOpen({ open: true, isClone: true, idToClone: data._id }) }}
               renderedFrom={leadResource}
-              refreshGrid={fetchLeads}
-            /> : null
+            /> :
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameWorkComponent}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                actionWidth={150}
+                loading={loading}
+                renderedFrom={leadResource}
+                refreshGrid={fetchLeads}
+              /> : null
         }
 
         {isOpen?.open && (
