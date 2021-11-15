@@ -367,20 +367,11 @@ export default function DeliveryTicketDetail(props) {
                   {
                     dataRows && dataRows.length ?
                       <>
-                        <Grid container>
-                          <Grid item xs={12}>
-                            <Box
-                              component="div"
-                              display="flex"
-                              alignItems="center"
-                              flexGrow={1}
-                            >
-                              <Box padding="5px">
-                                <Typography variant="subtitle1">
-                                  Product Inventory
-                                </Typography>
-                              </Box>
-                            </Box>
+                        <Grid container spacing={1} className="p-2">
+                          <Grid item xs={12} className="mt-2">
+                            <Typography variant="subtitle1" className="font-weight-bold text-primary">
+                              Serialized Assets
+                            </Typography>
                           </Grid>
                           <Grid item xs={12}>
                             <CustomAgGrid
