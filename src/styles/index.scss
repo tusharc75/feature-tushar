@@ -1271,3 +1271,7 @@ body::-webkit-scrollbar-thumb {
     }
   }
 }
+//regarding tiny mce
+.tox-tinymce .tox-statusbar {
+  display: none !important;
+  }
