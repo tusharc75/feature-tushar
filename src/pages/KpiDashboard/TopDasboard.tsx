@@ -58,6 +58,7 @@ const TopDashboard = (props) => {
       productCategory: salesFilter.productCategory ? salesFilter.productCategory['id'] : '',
       salesRep: salesFilter.salesRep ? salesFilter.salesRep['id'] : '',
       customerAccount: salesFilter.customerAccount ? salesFilter.customerAccount['id'] : '',
+      country: salesFilter.country ? salesFilter.country["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]

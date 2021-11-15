@@ -38,25 +38,23 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     }: any = useData();
 
     useEffect(() => {
-        fetchProductInventory();
-        // if (type === "product") fetchProductInventory();
-        // if (type === "package") fetchPackage();
+        // fetchProductInventory();
+        if (type === "product") fetchProductInventory();
+        else if (type === "package") fetchPackage();
     }, []);
 
-    const columns =
-        // type === "product" ?
+    const columns = type === "product" ?
         [
             { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
             { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
             // { field: "entity", headerName: "Entity", show: true, disabled: true, cellRenderer: "commonRenderer" },
             { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
             { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        ]
-    //     : [
-    //     { field: "packageName", headerName: "Package Name", show: true, cellRenderer: "nameRenderer" },
-    //     { field: "packageDescription", headerName: "Package Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    //     { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    // ];
+        ] : [
+            { field: "packageName", headerName: "Package Name", show: true, cellRenderer: "nameRenderer" },
+            { field: "packageDescription", headerName: "Package Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+            { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+        ];
 
     const fetchPackageProduct = (packageId) => {
         if (type === "package") {
@@ -75,30 +73,30 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         }
     };
 
-    // const fetchPackage = () => {
-    //     dispatch({ type: "loading", loading: true });
+    const fetchPackage = () => {
+        dispatch({ type: "loading", loading: true });
 
-    //     if (gridApi) {
-    //         gridApi.setRowData([]);
-    //     }
-    //     axiosInstance().get(`${packages.packageApi}`).then(({ data }) => {
-    //         data.data = data.data?.filter(d => !productInventory.some(obj => obj.id === d._id)).map((u) => ({
-    //             ...u,
-    //             id: u._id,
-    //             type: type,
-    //             quantity: 0,
-    //         }));
-    //         setProductData(data.data)
-    //         dispatch({ type: "initialize", data: data.data, count: data.data.length });
-    //         setTimeout(() => {
-    //             dispatch({ type: "loading", loading: false });
-    //         }, gridLoadingTimeout);
+        if (gridApi) {
+            gridApi.setRowData([]);
+        }
+        axiosInstance().get(`${packages.packageApi}`).then(({ data }) => {
+            data.data = data.data?.filter(d => !productInventory.some(obj => obj.id === d._id)).map((u) => ({
+                ...u,
+                id: u._id,
+                type: type,
+                quantity: 0,
+            }));
+            setProductData(data.data)
+            dispatch({ type: "initialize", data: data.data, count: data.data.length });
+            setTimeout(() => {
+                dispatch({ type: "loading", loading: false });
+            }, gridLoadingTimeout);
 
-    //     }).catch((error) => {
-    //         toastConfig.setToastConfig(error);
-    //         dispatch({ type: "loading", loading: false });
-    //     });
-    // };
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
+            dispatch({ type: "loading", loading: false });
+        });
+    };
 
     const fetchProductInventory = () => {
         dispatch({ type: "loading", loading: true });
@@ -106,8 +104,8 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         if (gridApi) {
             gridApi.setRowData([]);
         }
-        axiosInstance().get(`${product.api}`).then(({ data: { data: products } }) => {
-            products = products?.filter((u: any) => u?.serializedProduct && !productInventory.some(obj => obj.id === u._id))
+        axiosInstance().get(product.api).then(({ data: { data: products } }) => {
+            products = products?.filter((u: any) => u?.serializedProduct && !productInventory.some(obj => obj.type === "Product" && obj.id === u._id))
                 .map((u) => ({
                     ...u,
                     id: u._id,
@@ -116,7 +114,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                     type: type,
                     quantity: 0,
                 }));
-            console.log(products)
+            
             setProductData(products)
             dispatch({ type: "initialize", data: products, count: products.length });
             setTimeout(() => {

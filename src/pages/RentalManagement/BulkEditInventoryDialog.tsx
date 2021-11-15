@@ -16,7 +16,6 @@ import {
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateUtils from '@date-io/date-fns';
 import moment from 'moment';
-
 import { dateFormatForInputControl } from '../../constants/helpers';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -35,19 +34,17 @@ interface EditDialogProps {
 }
 
 const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose, isSaving, submitBulkEdit, currencySymbol, data, startDate, endDate }) => {
-  const [pricing, setPricing] = useState(null);
+  
   const [values, setValues] = useState(null);
   const [isDisabled, setDisabled] = useState(false);
   const [errors, setErrors] = useState(null);
-  const [isPkgInProduct, setPkgInProduct] = useState(false);
-  let timeoutPricing: ReturnType<typeof setTimeout> = null;
+
 
   useEffect(() => {
     if (data) {
       if (data.hasOwnProperty('packageId')) {
         setDisabled(true);
       }
-
       const newValues = {
         ...data,
         qty: data?.qty || 0,
@@ -60,10 +57,6 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
         finalPrice: data?.finalPrice || 0
       };
       setValues(newValues);
-
-      if (data.type === 'productInPackage') {
-        setPkgInProduct(true);
-      }
     }
   }, [data]);
 
@@ -74,10 +67,8 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
   const handleChange = (name: string, value: any) => {
     setValues((prevState) => {
       const newValues = { ...prevState, [name]: value };
-
       return newValues;
     });
-
     let errs = { ...errors };
     if (Boolean(errs?.qty) && name === 'qty' && value) {
       delete errs.qty;
@@ -91,7 +82,6 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
     if (Boolean(errs?.UOM) && name === 'UOM' && value) {
       delete errs.UOM;
     }
-
     if (Object.keys(errs).length === 0) {
       setErrors(null);
     } else {
@@ -104,19 +94,10 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
       if (values?.qty > 0 && values?.pricingMethod !== '' && values?.UOM !== '') {
         const priceData = await calculatePrice([values]);
         if (priceData && priceData.length) {
-          setPricing(priceData[0]);
-          let price = priceData[0].mrp;
+          let price: any = priceData[0].mrp;
           let qty = priceData[0].qty;
-
           handleChange('price', price);
-
-          const startDate = moment(values?.startDate);
-          const endDate = moment(values?.endDate);
-          const diff = endDate.diff(startDate, 'days');
-
-          let finalPrice = qty && price ? (values?.pricingMethod === 'perDay' && diff !== 0 ? qty * price * diff : qty * price) : price;
-
-          handleChange('finalPrice', finalPrice <= 0 ? 0 : finalPrice);
+          handlePriceCalculation(price, 'price');
         }
       }
     }
@@ -171,69 +152,72 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
 
   // const getErrorMsg = (str: string) => `${str} is a required field`;
 
-  const finalPriceCalculation = (data: number, type: string) => {
+  // const finalPriceCalculation = (data: number, type: string) => {
+  //   const startDate = moment(values?.startDate);
+  //   const endDate = moment(values?.endDate);
+  //   const diff = endDate.diff(startDate, 'days');
+  //   let finalPrice = 0;
+  //   let discountPrice = values?.finalPrice !== 0 && (values?.finalPrice / 100) * (type === "discount" ? data : values?.discount);
+  //   let taxPrice = values?.finalPrice !== 0 && (values?.finalPrice / 100) * (type === "tax" ? data : values?.tax);
+
+
+  //   if (type === 'qty') {
+  //     finalPrice = data > 0 && values?.price > 0 ? values?.price * data : values?.price
+  //   }
+  //   if (type === 'price') {
+  //     finalPrice = values?.qty > 0 && data > 0 ? values?.qty * data : values?.price;
+  //   }
+  //   if (type === 'discount') {
+  //     finalPrice = values?.qty > 0 && values?.price > 0 ? values?.qty * values?.price : values?.price
+  //   }
+  //   if (type === 'tax') {
+  //     finalPrice = values?.qty > 0 && values?.price > 0 ? values?.qty * values?.price : values?.price;
+  //   }
+
+  //   finalPrice = values?.pricingMethod === 'perDay' ? finalPrice * 1 : finalPrice;
+  //   finalPrice = diff > 0 ? finalPrice * diff : finalPrice;
+  //   finalPrice = discountPrice && discountPrice > 0 ? finalPrice - Math.round(discountPrice) : finalPrice;
+
+  //   finalPrice = taxPrice && taxPrice > 0 ? finalPrice + Math.round(taxPrice) : finalPrice;
+
+  //   handleChange('totalTax', taxPrice > 0 ? parseFloat(Math.round(taxPrice).toFixed(1)) : 0);
+  //   handleChange('discountedPrice', discountPrice > 0 ? parseFloat(Math.round(discountPrice).toFixed(1)) : 0);
+  //   handleChange('finalPrice', finalPrice > 0 ? parseFloat(Math.round(finalPrice).toFixed(1)) : 0);
+  // };
+
+
+  const handlePriceCalculation = (value: number, type: string) => {
+
     const startDate = moment(values?.startDate);
     const endDate = moment(values?.endDate);
-    const diff = endDate.diff(startDate, 'days');
-    let finalPrice = 0;
-    let discountPrice = values?.finalPrice !== 0 && (values?.finalPrice / 100) * (type === "discount" ? data : values?.discount);
-    let taxPrice = values?.finalPrice !== 0 && (values?.finalPrice / 100) * (type === "tax" ? data : values?.tax);
+    const diff = endDate.diff(startDate, 'days') > 0 ? endDate.diff(startDate, 'days') : 1;
 
+    const qty = type === "qty" ? value : values?.qty ? values?.qty : 0
+    const price = type === "price" ? value : values?.price ? values?.price : 0
+    let amount = qty * price * diff
 
-    if (type === 'qty') {
-      finalPrice =
-        data > 0 && values?.price > 0 && diff > 0
-          ? values?.pricingMethod === 'perDay'
-            ? discountPrice && discountPrice > 0
-              ? diff * data * values?.price * 1 - discountPrice
-              : diff * data * values?.price * 1
-            : data * values?.price * diff
-          : data > 0 && values?.price > 0
-            ? values?.price * data
-            : values?.price;
+    let discount = type === "discount" ? value : values?.discount ? values?.discount : 0
+    let discountedPrice = type === "discountedPrice" ? value : values?.discountedPrice ? values?.discountedPrice : 0
+    if (type === "discountedPrice") {
+      discount = parseFloat((100 * discountedPrice / amount).toFixed(2));
+      handleChange('discount', discount);
     }
+    discountedPrice = parseFloat((amount * discount / 100).toFixed(2));
+    handleChange('discountedPrice', discountedPrice);
+    amount = amount - discountedPrice;
 
-    if (type === 'price') {
-      finalPrice =
-        values?.qty > 0 && data > 0 && diff > 0 ?
-          values?.pricingMethod === 'perDay'
-            ? discountPrice && discountPrice > 0
-              ? values?.qty * data * diff * 1 - discountPrice
-              : values?.qty * data * diff * 1
-            : values?.qty * data * diff
-          : values?.qty > 0 && data > 0
-            ? values?.qty * data
-            : data;
+    let tax = type === "tax" ? value : values?.tax ? values?.tax : 0
+    let totalTax = type === "totalTax" ? value : values?.totalTax ? values?.totalTax : 0
+    if (type === "totalTax") {
+      tax = parseFloat((100 * totalTax / amount).toFixed(2));;
+      handleChange('tax', tax);
     }
+    totalTax = parseFloat((amount * tax / 100).toFixed(2));
+    handleChange('totalTax', totalTax);
+    amount = amount + totalTax;
 
-    if (type === 'discount') {
-      finalPrice =
-        values?.qty > 0 && values?.price > 0 && diff > 0
-          ? values?.pricingMethod === 'perDay'
-            ? discountPrice && discountPrice > 0
-              ? (values?.qty * values?.price * diff * 1) - discountPrice
-              : values?.qty * values?.price * diff
-            : values?.qty * values?.price * diff
-          : values?.qty > 0 && values?.price > 0 ? values?.qty * values?.price : values?.price;
-
-    }
-
-    if (type === 'tax') {
-      finalPrice =
-        values?.qty > 0 && values?.price > 0 && diff > 0
-          ? values?.pricingMethod === 'perDay'
-            ? taxPrice && taxPrice > 0
-              ? (values?.qty * values?.price * diff * 1) + taxPrice
-              : values?.qty * values?.price * diff
-            : values?.qty * values?.price * diff
-          : values?.qty > 0 && values?.price > 0 ? values?.qty * values?.price : values?.price;
-
-    }
-
-    handleChange('totalTax', taxPrice > 0 ? parseInt(Math.round(taxPrice).toFixed(1)) : 0);
-    handleChange('discountedPrice', discountPrice > 0 ? parseInt(Math.round(discountPrice).toFixed(1)) : 0);
-    handleChange('finalPrice', finalPrice > 0 ? parseInt(Math.round(finalPrice).toFixed(1)) : 0);
-  };
+    handleChange('finalPrice', parseFloat(amount.toFixed(2)));
+  }
 
   return (
     <Dialog open fullWidth maxWidth="md" onClose={handleClose}>
@@ -255,8 +239,8 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
                   variant={'outlined'}
                   value={values?.qty || 0}
                   onChange={(e) => {
-                    let qty = parseInt(e.target.value);
-                    finalPriceCalculation(qty, 'qty');
+                    let qty = parseFloat(e.target.value);
+                    handlePriceCalculation(qty, 'qty');
                     handleChange(e.target.name, qty <= 0 ? 1 : qty);
                   }}
                 />
@@ -358,8 +342,8 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
                   variant={'outlined'}
                   value={values?.price || 0}
                   onChange={(e) => {
-                    let price = parseInt(e.target.value);
-                    finalPriceCalculation(price, 'price');
+                    let price = parseFloat(e.target.value);
+                    handlePriceCalculation(price, 'price');
                     handleChange(e.target.name, price <= 0 ? 0 : price);
                   }}
                 />
@@ -378,8 +362,8 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
                   variant={'outlined'}
                   value={values?.discount || 0}
                   onChange={(e) => {
-                    let discount = parseInt(e.target.value) && parseInt(e.target.value) > 0 ? parseInt(e.target.value) : 0;
-                    finalPriceCalculation(discount, 'discount');
+                    let discount = parseFloat(e.target.value) && parseFloat(e.target.value) > 0 ? parseFloat(e.target.value) : 0;
+                    handlePriceCalculation(discount, 'discount');
                     handleChange(e.target.name, discount);
                   }}
                 />
@@ -397,7 +381,11 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
                   type="number"
                   variant={'outlined'}
                   value={values?.discountedPrice || 0}
-                  onChange={(e) => handleChange(e.target.name, parseInt(e.target.value) <= 0 ? 0 : parseInt(e.target.value))}
+                  onChange={(e) => {
+                    let discountedPrice = parseFloat(e.target.value) <= 0 ? 0 : parseFloat(e.target.value);
+                    handlePriceCalculation(discountedPrice, 'discountedPrice');
+                    handleChange(e.target.name, discountedPrice)
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -414,8 +402,8 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
                   variant={'outlined'}
                   value={values?.tax || 0}
                   onChange={(e) => {
-                    const tax = parseInt(e.target.value) && parseInt(e.target.value) > 0 ? parseInt(e.target.value) : 0
-                    finalPriceCalculation(tax, "tax")
+                    const tax = parseFloat(e.target.value) && parseFloat(e.target.value) > 0 ? parseFloat(e.target.value) : 0
+                    handlePriceCalculation(tax, "tax")
                     handleChange(e.target.name, tax)
                   }}
                 />
@@ -433,7 +421,11 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
                   type="number"
                   variant={'outlined'}
                   value={values?.totalTax || 0}
-                  onChange={(e) => handleChange(e.target.name, parseInt(e.target.value) <= 0 ? 0 : parseInt(e.target.value))}
+                  onChange={(e) => {
+                    const totalTax = parseFloat(e.target.value) <= 0 ? 0 : parseFloat(e.target.value)
+                    handlePriceCalculation(totalTax, "totalTax")
+                    handleChange(e.target.name, totalTax)
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -449,7 +441,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
                   type="number"
                   variant={'outlined'}
                   value={values?.finalPrice || 0}
-                  onChange={(e) => handleChange(e.target.name, parseInt(e.target.value) <= 0 ? 0 : parseInt(e.target.value))}
+                  onChange={(e) => handleChange(e.target.name, parseFloat(e.target.value) <= 0 ? 0 : parseFloat(e.target.value))}
                 />
               </Grid>
             </Grid>

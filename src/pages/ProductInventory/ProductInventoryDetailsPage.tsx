@@ -409,7 +409,7 @@ const ProductInventoryDetailsPage = () => {
                 alignItems="center"
               >
                 <Typography variant="subtitle2">
-                  BOM
+                  BOM - Product
                 </Typography>
               </Box>
               {(
