@@ -65,6 +65,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
         discount: data?.discount || 0,
         finalPrice: data?.finalPrice || 0
       };
+      newValues["amount"] = data?.amount || newValues.qty * newValues.tenure * newValues.price
       setValues(newValues);
     }
   }, [data]);
@@ -212,12 +213,14 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
       handleChange('endDate', endDate);
     }
 
-    const tenure = endDate.diff(startDate, tenureType) > 0 ? endDate.diff(startDate, tenureType) : 1;
+    const tenure = type === "tenure" ? value : endDate.diff(startDate, tenureType) > 0 ? endDate.diff(startDate, tenureType) : 1;
     handleChange('tenure', tenure);
 
     const qty = type === "qty" ? value : values?.qty ? values?.qty : 0
     const price = type === "price" ? value : values?.price ? values?.price : 0
     let amount = qty * price * tenure
+
+    handleChange('amount', amount);
 
     let discount = type === "discount" ? value : values?.discount ? values?.discount : 0
     let discountedPrice = type === "discountedPrice" ? value : values?.discountedPrice ? values?.discountedPrice : 0
@@ -328,7 +331,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
-                  label={"Total " + (values?.pricingMethod ? values.pricingMethod.replace("per", "") : "Tenure")}
+                  label={"Expected No. of " + (values?.pricingMethod ? values.pricingMethod.replace("per", "") : "Tenure")}
                   name="tenure"
                   fullWidth
                   size="small"
@@ -406,6 +409,21 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
                     handlePriceCalculation(price, 'price');
                     handleChange(e.target.name, price <= 0 ? 0 : price);
                   }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Total Price"
+                  name="amount"
+                  fullWidth
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>,
+                    readOnly: true
+                  }}
+                  size="small"
+                  type="number"
+                  variant={'outlined'}
+                  value={values?.amount || 0}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
