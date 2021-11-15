@@ -20,7 +20,7 @@ import EditIcon from "@material-ui/icons/Edit";
 import { useData } from "../../StateProvider/Provider";
 
 
-const Service = ({ currencySymbol, purchaseOrderData }) => {
+const Service = ({ currencySymbol, purchaseOrderData ,statusOptions}) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -32,11 +32,10 @@ const Service = ({ currencySymbol, purchaseOrderData }) => {
   const [showAddServiceDialog, setShowAddServiceDialog] = useState(false)
   const [isSavingBulkEditDialog, setIsSavingBulkEditDialog] = useState(false)
   const [selectedServiceData, setSelectedServiceData] = useState(null)
-  const [serviceList, setServiceList] = useState<any[]>([]);
   const [columns, setColumns] = useState([
     { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "expectedDelivery", headerName: "Expected Delivery", show: true, disabled: true, cellRenderer: "dateRenderer" },
-    { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "uom", headerName: "Base UOM", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "tax", headerName: "Tax Percent", show: true, disabled: true, cellRenderer: "commonRenderer" },
@@ -96,6 +95,7 @@ const Service = ({ currencySymbol, purchaseOrderData }) => {
           dispatch({ type: "loading", loading: false });
         }, gridLoadingTimeout);
       }).catch((error) => {
+        dispatch({ type: "loading", loading: false });
         toastConfig.setToastConfig(error)
       });
   }
@@ -150,7 +150,7 @@ const Service = ({ currencySymbol, purchaseOrderData }) => {
   }
 
   const deletePurchaseOrderService = (ids) => {
-    axiosInstance().post(`${purchaseOrder.api}/${purchaseOrderData._id}/service-details/remove/${ids}`)
+    axiosInstance().delete(`${purchaseOrder.api}/${purchaseOrderData._id}/service-details/remove/${ids}`)
       .then(() => {
         fetchService()
       }).catch((error) => {
@@ -207,6 +207,7 @@ const Service = ({ currencySymbol, purchaseOrderData }) => {
         currencySymbol={currencySymbol}
         data={selectedServiceData}
         type={"service"}
+        statusOptions={statusOptions}
       />
     }
   </>

@@ -18,9 +18,10 @@ interface EditDialogProps {
     currencySymbol: string;
     data?: object | any;
     type: string;
+    statusOptions: any;
 }
 
-const BulkEditDialog: FC<EditDialogProps> = ({ onClose, isSaving, submitBulkEdit, currencySymbol, data, type = null }) => {
+const BulkEditDialog: FC<EditDialogProps> = ({ onClose, isSaving, submitBulkEdit, currencySymbol, data, type = null, statusOptions }) => {
     const [pricing, setPricing] = useState(null);
     const [values, setValues] = useState(null)
     const [isDisabled, setDisabled] = useState(false);

@@ -458,10 +458,10 @@ export default function QuoteProcess(props) {
               const required = data.required;
               const labels = [];
 
-              if (data.displayCurrency && data.units) {
+              if (data.displayCurrency && data.displayUnits) {
                 data.displayCurrency.forEach((cur) => {
-                  if (data.units) {
-                    data.units.forEach((unit) => {
+                  if (data.displayUnits) {
+                    data.displayUnits?.forEach((unit) => {
                       const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`;
                       if (required) {
                         requiredValues[casedLabel] = quoteRows[casedLabel];
@@ -482,8 +482,8 @@ export default function QuoteProcess(props) {
                     }
                   }
                 });
-              } else if (data.units && !data.displayCurrency) {
-                data.units.forEach((unit) => {
+              } else if (data.displayUnits && !data.displayCurrency) {
+                data.displayUnits.forEach((unit) => {
                   const casedLabel = `${fieldName}_${unit.toLowerCase()}`;
                   if (required) {
                     requiredValues[casedLabel] = quoteRows[casedLabel];

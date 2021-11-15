@@ -66,6 +66,7 @@ const PurchaseOrderDetailsPage = () => {
     const [purchaseOrderProduct, setPurchaseOrderProduct] = useState([])
     const [showAddServiceDialog, setShowAddServiceDialog] = useState(false)
     const [isSavingBulkEditDialog, setIsSavingBulkEditDialog] = useState(false)
+    const [currentStepDisable, setCurrentStepDisable] = useState(false)
     const [currentStep, setCurrentStep] = useState(0);
     const [downlodingFile, setDownlodingFile] = useState(false)
     const [selectedProductData, setSelectedProductData] = useState(null)
@@ -131,13 +132,26 @@ const PurchaseOrderDetailsPage = () => {
         { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
         { field: "expectedDelivery", headerName: "Expected Delivery", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
         { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        { field: "uom", headerName: "Base UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Hour", "Day", "Week", "Month"] }, editable: true },
+        { field: "baseUOM", headerName: "Base UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Hour", "Day", "Week", "Month"] }, editable: true },
         { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
         { field: "tax", headerName: "Tax Percent", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
         { field: "taxPerUnit", headerName: "Tax Per Unit", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
         { field: "totalTax", headerName: "Total Tax", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
         { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer" },
     ])
+    const columnsReceivingTicet = [
+        { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
+        { field: "expectedDelivery", headerName: "Expected Delivery", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
+        { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+        { field: "actualReceived", headerName: "Actual Received", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+        { field: "baseUOM", headerName: "Base UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Hour", "Day", "Week", "Month"] }, editable: true },
+        { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+        { field: "tax", headerName: "Tax Percent", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+        { field: "taxPerUnit", headerName: "Tax Per Unit", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+        { field: "totalTax", headerName: "Total Tax", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+        { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    ]
 
     useEffect(() => {
         if (id) {
@@ -169,15 +183,24 @@ const PurchaseOrderDetailsPage = () => {
         if (gridApi) {
             gridApi.setRowData([]);
         }
+        setCurrentStepDisable(false)
         axiosInstance().get(`${purchaseOrder.api}/${id}/order-details`).then(({ data: { data } }) => {
-            data = data?.map((u) => ({
-                ...u,
-                productName: u.productId?.productName,
-                productNumber: u.productId?.productNumber,
-                entity: u.productId?.entity,
-                quantity: u.qty
+            data = data?.map((u) => {
 
-            }));
+                if ((!currentStepDisable) && (u.totalTax === 0 || u.totalTax === undefined
+                    || u.qty === 0 || u.qty === undefined
+                    || u.finalPrice === 0 || u.finalPrice === undefined)) setCurrentStepDisable(true)
+                return ({
+                    ...u,
+                    productName: u.productId?.productName,
+                    productNumber: u.productId?.productNumber,
+                    entity: u.productId?.entity,
+                    quantity: u.qty,
+                    description: u.productId?.productName,
+                    type: "product"
+
+                })
+            });
             setPurchaseOrderProduct(data)
             dispatch({ type: "initialize", data: data, count: data.length });
             dispatch({ type: "loading", loading: false });
@@ -255,7 +278,7 @@ const PurchaseOrderDetailsPage = () => {
         // let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
         setAddingProducts(true)
         let tempProductArray = productInventoryArray.map(d => ({
-            "productId": d.id,
+            "productId": d.id || d.productId,
             "qty": parseInt(d.quantity || d.qty) || 0,
             "value": parseInt(d.price) || 0,
             "expectedDelivery": purchaseOrderData?.deliveryDate
@@ -273,32 +296,12 @@ const PurchaseOrderDetailsPage = () => {
             });
     }
 
-    const addProductInPurchaseOrder = (productInventoryArray) => {
-
-        setAddingProducts(true)
-        let tempProductArray = productInventoryArray.map(d => ({
-            "productId": d.productId,
-            "qty": parseInt(d.quantity || d.qty) || 0,
-            "value": parseInt(d.price || d.mrp) || 0,
-        }))
-        axiosInstance().post(`${purchaseOrder.api}/${id}/order-details/add`, { "orderDetails": tempProductArray }).then(() => {
-            setAddProductDialog(false)
-            fetchPurchaseOrderProduct()
-            setAddingProducts(false)
-        })
-            .catch((error) => {
-                setAddProductDialog(false)
-                toastConfig.setToastConfig(error)
-                setAddingProducts(false)
-            });
-    };
-
     const handleUpdateOrderProduct = (row) => {
         let tempProductArray = {
             "qty": parseInt(row.quantity || row.qty) || 0,
-            "value": parseInt(row.price || row.value) || 0,
+            "value": parseInt(row.value) || 0,
             "expectedDelivery": row.expectedDelivery || "",
-            "uom": row.uom || "",
+            "baseUOM": row.baseUOM || "",
             "price": row.price || 0,
             "finalPrice": row.finalPrice || 0,
             "actualReceived": row.actualReceived || 0,
@@ -339,7 +342,7 @@ const PurchaseOrderDetailsPage = () => {
             const fieldsDataForUpdate = purchaseOrderFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             let values = getObjKeysWithValues(purchaseOrderData, fieldsDataForUpdate)
             values["status"] = obj.status
-            if (obj.reason) values["scrapingReason"] = obj.reason
+            // if (obj.reason) values["scrapingReason"] = obj.reason
             values["_id"] = id
             axiosInstance().put(`${purchaseOrder.api}`, values).then(({ data: { data } }) => {
                 getPurchaseOrderFields();
@@ -571,7 +574,7 @@ const PurchaseOrderDetailsPage = () => {
                                             <Paper>
                                                 <Steps
                                                     // className={styles.steps_box}
-                                                    isNextStep={!Boolean(purchaseOrderProduct.length)}
+                                                    isNextStep={!Boolean(purchaseOrderProduct.length) || currentStepDisable}
                                                     steps={purchaseOrderSteps.slice(0, 5)}
                                                     currentStep={currentStep}
                                                     setCurrentStep={setCurrentStep}
@@ -638,11 +641,13 @@ const PurchaseOrderDetailsPage = () => {
                                                 {(currentStep === 1) && (
                                                     <Service
                                                         currencySymbol={currencySymbol}
-                                                        purchaseOrderData={purchaseOrderData} />
+                                                        purchaseOrderData={purchaseOrderData}
+                                                        statusOptions={statusOptions} />
                                                 )}
                                                 {currentStep === 2 &&
                                                     <IssuPO
-                                                        combinedPurchaseOrderList={purchaseOrderProduct}
+                                                        purchaseOrderProduct={purchaseOrderProduct}
+                                                        purchaseOrderData={purchaseOrderData}
                                                         handleViewPdf={handleViewPdf}
                                                         downlodingFile={downlodingFile}
                                                         setCurrentStep={setCurrentStep}
@@ -665,15 +670,9 @@ const PurchaseOrderDetailsPage = () => {
                                                                 </Button>
                                                             </Box>
                                                         </Box>
-                                                        {columns ?
+                                                        {columnsReceivingTicet ?
                                                             <CustomAgGrid
-                                                                columns={
-                                                                    [...columns.map(d => ({
-                                                                        field: d.field, headerName: d.headerName, show: d.show, disabled: d.disabled, cellRenderer: d.cellRenderer
-                                                                    })),
-                                                                    { field: "actualReceived", headerName: "Actual Received", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true }
-                                                                    ]
-                                                                }
+                                                                columns={columnsReceivingTicet}
                                                                 dataRows={dataRows}
                                                                 frameworkComponents={frameworkComponents}
                                                                 setGridApi={setGridApi}
@@ -778,7 +777,7 @@ const PurchaseOrderDetailsPage = () => {
                     productId={null}
                     handleClose={() => setIsAddNewProduct(false)}
                     isAddInBuilder={true}
-                    addProductInBuilder={addProductInPurchaseOrder}
+                    addProductInBuilder={handleAddProduct}
                     openFrom="builder"
                     fromQuote={true}
                 />
@@ -794,6 +793,7 @@ const PurchaseOrderDetailsPage = () => {
                     currencySymbol={currencySymbol}
                     data={selectedProductData}
                     type={"product"}
+                    statusOptions={statusOptions}
                 />
             }
         </>

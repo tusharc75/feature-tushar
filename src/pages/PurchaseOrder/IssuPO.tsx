@@ -9,9 +9,10 @@ import { Button, IconButton } from "@material-ui/core";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { gridLoadingTimeout, purchaseOrder, rentalManagement } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
+import axiosInstance from "../../axios/axiosInstance";
 
 
-const IssuPO = ({ combinedPurchaseOrderList, handleViewPdf, downlodingFile, setCurrentStep, currentStep }) => {
+const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, downlodingFile, setCurrentStep, currentStep }) => {
     const toastConfig = useContext(CustomToastContext);
     const {
         state: { user, permissions }
@@ -39,14 +40,26 @@ const IssuPO = ({ combinedPurchaseOrderList, handleViewPdf, downlodingFile, setC
     };
 
     useEffect(() => {
+        let tempCombinedData = JSON.parse(JSON.stringify(purchaseOrderProduct))
         dispatch({ type: "loading", loading: true });
-        dispatch({
-            type: "initialize", data: combinedPurchaseOrderList, count: combinedPurchaseOrderList.length
-        });
-        setTimeout(() => {
-            dispatch({ type: "loading", loading: false });
-        }, gridLoadingTimeout);
-    }, [combinedPurchaseOrderList]);
+        axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData._id}/service-details`)
+            .then(({ data }) => {
+                data.data = data.data.map((u) => tempCombinedData.push({
+                    ...u,
+                    quantity: u.qty,
+                    type: "service"
+                }));
+                dispatch({
+                    type: "initialize", data: tempCombinedData, count: tempCombinedData.length
+                });
+                setTimeout(() => {
+                    dispatch({ type: "loading", loading: false });
+                }, gridLoadingTimeout);
+            }).catch((error) => {
+                dispatch({ type: "loading", loading: false });
+                toastConfig.setToastConfig(error)
+            });
+    }, []);
 
     return (<>
         <Box display="flex" justifyContent="space-between" m={1}>
@@ -80,18 +93,17 @@ const IssuPO = ({ combinedPurchaseOrderList, handleViewPdf, downlodingFile, setC
                 )}
 
             </Box>
-        </Box>
-
-        <Box display="flex" justifyContent="flex-end" p="4px">
-            <Box mx={1} />
-            <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() => { setCurrentStep(currentStep + 1) }}
-            >
-                {`Issue PO`}
-            </Button>
+            <Box display="flex" justifyContent="flex-end" p="4px">
+                <Box mx={1} />
+                <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={() => { setCurrentStep(currentStep + 1) }}
+                >
+                    {`Issue PO`}
+                </Button>
+            </Box>
         </Box>
 
         <Grid item xs={12} md={12} sm={12} className="mt-3">
