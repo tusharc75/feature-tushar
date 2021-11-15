@@ -95,6 +95,7 @@ const ReceivingTicketDetails = () => {
       .get(`${routes.receivingTicket.path}/${id}`)
       .then(({ data: { data } }) => {
         setReceivingTicketData(data)
+        setSignatures(data?.signatures || []);
         handleMainPoints(data)
         setHeadingLabel(data.receivingJobName);
         setCustomizedRoutes([routes.receivingTicket, { title: data.receivingJobName }]);
