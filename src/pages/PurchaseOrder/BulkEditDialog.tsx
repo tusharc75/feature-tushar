@@ -22,6 +22,7 @@ interface EditDialogProps {
 }
 
 const BulkEditDialog: FC<EditDialogProps> = ({ onClose, isSaving, submitBulkEdit, currencySymbol, data, type = null, statusOptions }) => {
+
     const [pricing, setPricing] = useState(null);
     const [values, setValues] = useState(null)
     const [isDisabled, setDisabled] = useState(false);
@@ -52,13 +53,10 @@ const BulkEditDialog: FC<EditDialogProps> = ({ onClose, isSaving, submitBulkEdit
     }, [data])
 
     const handleChange = (name: string, value: any) => {
-
         setValues((prevState) => {
             const newValues = { ...prevState, [name]: value }
-
             return newValues
         });
-
         let errs = { ...errors }
         if (Boolean(errs?.qty) && name === 'qty' && value) {
             delete errs.qty
@@ -127,6 +125,28 @@ const BulkEditDialog: FC<EditDialogProps> = ({ onClose, isSaving, submitBulkEdit
     const getErrorMsg = (str: string) => `${str} is a required field`
 
 
+    const handlePriceCalculation = (value: any, type: string) => {
+
+        const qty = type === "qty" ? value : values?.qty ? values?.qty : 0
+        const price = type === "price" ? value : values?.price ? values?.price : 0
+        let amount = qty * price
+
+        let tax = type === "tax" ? value : values?.tax ? values?.tax : 0
+        let taxPerUnit = type === "taxPerUnit" ? value : values?.totalTax ? values?.totalTax : 0
+        if (type === "taxPerUnit") {
+            tax = parseFloat((100 * taxPerUnit / price).toFixed(2));;
+            handleChange('tax', tax);
+        }
+        taxPerUnit = parseFloat((price * tax / 100).toFixed(2));
+
+        handleChange('taxPerUnit', taxPerUnit);
+        const totalTax = taxPerUnit * qty;
+        handleChange('totalTax', totalTax);
+        amount = amount + totalTax;
+
+        handleChange('finalPrice', parseFloat(amount.toFixed(2)));
+    }
+
     return (
         <Dialog open fullWidth maxWidth="md" onClose={handleClose}>
             <CustomDialogHeader title={data ? "Edit" : 'Bulk Edit'} onClose={handleClose} />
@@ -152,7 +172,6 @@ const BulkEditDialog: FC<EditDialogProps> = ({ onClose, isSaving, submitBulkEdit
                                     }}
                                 />
                             </Grid>}
-
                             <Grid item xs={12} sm={6}>
                                 <TextField
                                     // disabled={isDisabled}
@@ -167,7 +186,8 @@ const BulkEditDialog: FC<EditDialogProps> = ({ onClose, isSaving, submitBulkEdit
                                     variant={"outlined"}
                                     value={values?.qty || 0}
                                     onChange={(e) => {
-                                        handleChange(e.target.name, parseInt(e.target.value))
+                                        handlePriceCalculation(parseFloat(e.target.value), e.target.name)
+                                        handleChange(e.target.name, parseFloat(e.target.value))
                                     }}
                                 />
                             </Grid>
@@ -190,6 +210,7 @@ const BulkEditDialog: FC<EditDialogProps> = ({ onClose, isSaving, submitBulkEdit
                                         value={values?.baseUOM || ""}
                                         onChange={(e) => handleChange(e.target.name, e.target.value)}
                                     >
+                                        <MenuItem value="Pcs">Pcs</MenuItem>
                                         <MenuItem value="Hour">Hour</MenuItem>
                                         <MenuItem value="Day">Day</MenuItem>
                                         <MenuItem value="Week">Week</MenuItem>
@@ -233,10 +254,13 @@ const BulkEditDialog: FC<EditDialogProps> = ({ onClose, isSaving, submitBulkEdit
                                         value={values?.taxSchedule || ""}
                                         onChange={(e) => handleChange(e.target.name, e.target.value)}
                                     >
-                                        <MenuItem value="pcs">Pcs</MenuItem>
+                                        <MenuItem value="Tax Schedule 1">Tax Schedule 1</MenuItem>
+                                        <MenuItem value="Tax Schedule 2">Tax Schedule 2</MenuItem>
+                                        <MenuItem value="Tax Schedule 3">Tax Schedule 3</MenuItem>
+                                        <MenuItem value="Tax Schedule 4">Tax Schedule 4</MenuItem>
+                                        <MenuItem value="Tax Schedule 5">Tax Schedule 5</MenuItem>
                                     </Select>
                                     <FormHelperText id="taxSchedule-label">{Boolean(errors?.taxSchedule) && errors.taxSchedule}</FormHelperText>
-
                                 </FormControl>
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -259,6 +283,7 @@ const BulkEditDialog: FC<EditDialogProps> = ({ onClose, isSaving, submitBulkEdit
                                     variant={"outlined"}
                                     value={values?.price || 0}
                                     onChange={(e) => {
+                                        handlePriceCalculation(parseFloat(e.target.value), e.target.name)
                                         handleChange(e.target.name, e.target.value)
                                     }}
                                 />
@@ -276,7 +301,11 @@ const BulkEditDialog: FC<EditDialogProps> = ({ onClose, isSaving, submitBulkEdit
                                     type="number"
                                     variant={"outlined"}
                                     value={values?.tax || 0}
-                                    onChange={(e) => handleChange(e.target.name, parseInt(e.target.value) <= 0 ? 0 : parseInt(e.target.value))}
+                                    onChange={(e) => {
+                                        let tax = parseFloat(e.target.value) && parseFloat(e.target.value) > 0 ? parseFloat(e.target.value) : 0;
+                                        handlePriceCalculation(tax, e.target.name);
+                                        handleChange(e.target.name, tax)
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -288,7 +317,11 @@ const BulkEditDialog: FC<EditDialogProps> = ({ onClose, isSaving, submitBulkEdit
                                     type="number"
                                     variant={"outlined"}
                                     value={values?.taxPerUnit || 0}
-                                    onChange={(e) => handleChange("taxPerUnit", parseInt(e.target.value) <= 0 ? 0 : parseInt(e.target.value))}
+                                    onChange={(e) => {
+                                        let taxPerUnit = parseFloat(e.target.value) && parseFloat(e.target.value) > 0 ? parseFloat(e.target.value) : 0;
+                                        handlePriceCalculation(taxPerUnit, e.target.name);
+                                        handleChange("taxPerUnit", taxPerUnit)
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -296,11 +329,14 @@ const BulkEditDialog: FC<EditDialogProps> = ({ onClose, isSaving, submitBulkEdit
                                     label="Total Tax"
                                     name="totalTax"
                                     fullWidth
+                                    InputProps={{
+                                        readOnly: true
+                                      }}
                                     size="small"
                                     type="number"
                                     variant={"outlined"}
                                     value={values?.totalTax || 0}
-                                    onChange={(e) => handleChange("totalTax", parseInt(e.target.value) <= 0 ? 0 : parseInt(e.target.value))}
+                                   // onChange={(e) => handleChange("totalTax", parseInt(e.target.value) <= 0 ? 0 : parseInt(e.target.value))}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={6}>
