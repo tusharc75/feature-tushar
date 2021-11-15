@@ -1029,9 +1029,7 @@ const RentalManagementDetailsPage = () => {
                                     ? "calc(100vw - 78px)"
                                     : showActivity ? "100%" : "calc(100vw - 100px)"
                               }
-
                             >
-
                               <CustomReactTable
                                 columns={columns}
                                 data={dataRows}
