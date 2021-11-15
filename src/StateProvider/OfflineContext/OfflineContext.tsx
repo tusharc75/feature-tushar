@@ -1,15 +1,18 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axiosInstance from "../../axios/axiosInstance";
-import { rentalManagement } from "../../constants/helpers";
+import { rentalManagement, sidebarResource } from "../../constants/helpers";
 import { CustomToastContext } from "../CustomToastContext/CustomToastContext";
 
 export const CustomOfflineContext = createContext(null);
 const limit = 500;
 
-const dataToFetch = [
-    { key: "rentalManagement", value: "Rental Management" },
-    { key: "lead", value: "Lead" },
-];
+let dataToFetch = [];
+Object.keys(sidebarResource).forEach((key) => {
+    dataToFetch.push({
+        key: key,
+        value: sidebarResource[key]
+    })
+})
 
 // This context provider is passed to any component requiring the context
 export const CustomOfflineProvider = ({ children }) => {
