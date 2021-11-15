@@ -64,7 +64,7 @@ const LookupResource = [
   { name: 'Rental Management', value: 'Rental Management' },
   { name: 'Loading Ticket', value: 'Loading Ticket' },
   { name: 'Packages', value: 'Packages' },
-  { name: 'Purchase Order', value: 'Purchase Order' },
+  { name: 'Purchase Orders', value: 'Purchase Orders' },
   { name: 'Pricing Condition', value: 'Pricing Condition' },
   { name: 'Receiving Ticket', value: 'Receiving Ticket' },
   { name: 'Repair Job', value: 'Repair Job' },
