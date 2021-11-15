@@ -180,6 +180,7 @@ export default function CustomAgGrid({
     }
   };
 
+
   useEffect(() => {
     if (columnApi && loading === false) {
       const columnState = JSON.parse(localStorage.getItem(renderedFrom));
@@ -189,6 +190,7 @@ export default function CustomAgGrid({
           columnApi.setColumnState(columnState);
         }, 50)
       }
+      autosizeColumnsIfNeeded()
     }
   }, [columnApi, loading])
 
@@ -196,6 +198,7 @@ export default function CustomAgGrid({
     if (params?.source === "uiColumnDragged") {
       const columnState = JSON.stringify(params.columnApi.getColumnState());
       localStorage.setItem(renderedFrom, columnState);
+      autosizeColumnsIfNeeded()
     }
   };
 
@@ -203,6 +206,7 @@ export default function CustomAgGrid({
     if (params?.source === "uiColumnDragged") {
       const columnState = JSON.stringify(params.columnApi.getColumnState());
       localStorage.setItem(renderedFrom, columnState);
+      autosizeColumnsIfNeeded()
     }
   }
 
@@ -241,6 +245,27 @@ export default function CustomAgGrid({
     // debounceMs: 1000,
   };
 
+  const autosizeColumnsIfNeeded = () => {
+    if (columnApi) {
+
+      let columns = columnApi.getAllDisplayedColumns();
+
+      let availableWidth = document.getElementById("grid-listing").clientWidth
+
+      let usedWidth = 0
+      columns.forEach(o => {
+        usedWidth = usedWidth + (o.actualWidth || o.minWidth)
+      })
+      if (usedWidth < availableWidth) {
+        columnApi.sizeColumnsToFit();
+      }
+      // let usedWidth = columnApi.getWidthOfColsInList(columns);
+      // if (usedWidth < availableWidth) {
+      //   columnApi.sizeColumnsToFit();
+      // }
+    }
+  }
+
   const getWidth = (field, columnWidth) => {
     if (localStorage.getItem(renderedFrom)) {
       const storedColumns = JSON.parse(localStorage.getItem(renderedFrom));
@@ -262,7 +287,7 @@ export default function CustomAgGrid({
         headerName={actionLabel ? actionLabel : "Actions"}
         pinned={isMobile || isTablet ? false : 'right'}
         lockPinned={isMobile || isTablet ? false : true}
-        resizable={false}
+        resizable={true}
         sortable={false}
         editable={actionEditable}
         filter={false}
@@ -344,7 +369,7 @@ export default function CustomAgGrid({
             showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
           />
 
-          <div className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
+          <div id="grid-listing" className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
             <AgGridReact
               gridOptions={customGridOptions}
               rowData={dataRows}

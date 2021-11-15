@@ -30,7 +30,8 @@ export default function ManageAccountDialog(props) {
     marketSegmentId = null,
     subMarketSegmentId = null,
     isClone = false,
-    accountNameForClone = ''
+    accountNameForClone = '',
+    parentId = null
   } = props;
   const {
     state: { user },
@@ -105,12 +106,20 @@ export default function ManageAccountDialog(props) {
               _f = initializeDropdownById(_f, _f.fieldData.fieldName, subMarketSegmentId)
             }
 
+            if (parentId && _f.fieldData.fieldName === formFieldNames.parentAccount) {
+              _f = initializeDropdownById(_f, _f.fieldData.fieldName, parentId)
+            }
+
             newFields.push(_f.fieldData);
           });
 
+        let initialData = getObjKeys("", newFields)
+        // if (parentId) {
+        //   initialData.parentAccount = parentId
+        // }
         setAccountData({
           fields: newFields,
-          initialValues: getObjKeys("", newFields),
+          initialValues: initialData,
         });
         setFormValues(getObjKeys("", newFields))
         setTimeout(() => setLoading(false), 500);
@@ -131,8 +140,9 @@ export default function ManageAccountDialog(props) {
           type: "success",
           message: data.message,
         });
-        if (isRedirectToDetailPage) {
-          history.push(`${accountApi}/detail/${newId}`);
+        if (Boolean(isRedirectToDetailPage)) {
+          console.log('Yess')
+          // history.push(`${accountApi}/detail/${newId}`);
         }
         setLoading(false);
       })
