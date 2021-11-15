@@ -28,7 +28,7 @@ import SignatureDialog from '../../components/Helpers/SignatureDialog';
 import ViewSignsDialog from './ViewSignsDialog'
 
 const mappedStatus = {
-  "Start Delivery": "In-Transit",
+  "Sign-off - Dispatched & Sign-off - Received": "In-Transit",
   "Sign-Off": "Delivered"
 }
 
@@ -235,7 +235,7 @@ export default function DeliveryTicketDetail(props) {
 
 
 
-  let label = deliveryTicketData ? deliveryTicketData?.status === "New" ? "Start Delivery" :
+  let label = deliveryTicketData ? deliveryTicketData?.status === "New" ? "Sign-off - Dispatched & Sign-off - Received" :
     (deliveryTicketData?.status === "In-Transit") ? "Sign-Off" : "" : ""
 
   const handleSignature = (signedData) => {
@@ -317,25 +317,30 @@ export default function DeliveryTicketDetail(props) {
                         Delete
                       </Button>
                     )} */}
-                  {deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id ?
-                    label !== "" ?
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        disabled={loading}
-                        onClick={() => setOpenSignatureDialog(true)}>
-                        {label}
-                      </Button>
-                      : deliveryTicketData?.status === "Delivered" ?
+                  {
+                    deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id ?
+                      label !== "" ?
                         <Button
                           variant="contained"
                           color="primary"
                           size="small"
-                          onClick={() => setOpenSigns(true)}>
-                          View Signatures
-                        </Button> : null
-                    : null
+                          disabled={loading}
+                          onClick={() => setOpenSignatureDialog(true)}>
+                          {label}
+                        </Button>
+                        : null
+                      : null
+                  }
+
+                  {
+                    deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id && (deliveryTicketData?.status === "In-Transit" || deliveryTicketData?.status === "Delivered") ?
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => setOpenSigns(true)}>
+                        View Signatures
+                      </Button> : null
                   }
                 </DetailsPageHeader>
               )}
@@ -469,7 +474,7 @@ export default function DeliveryTicketDetail(props) {
           <SignatureDialog
             submitting={submittingSign}
             label={label}
-            steps={label === "Start Delivery" ? ["Supervisor", "Delivery Person"] : ["Delivery Person", "Receiver"]}
+            steps={label === "Sign-off - Dispatched & Sign-off - Received" ? ["Supervisor", "Delivery Person"] : ["Delivery Person", "Receiver"]}
             forDelivery={true}
             open={true}
             onClose={() => {
