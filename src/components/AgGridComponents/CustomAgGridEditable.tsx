@@ -170,15 +170,14 @@ export default function CustomAgGridEditable({
     if (handleGridReady) handleGridReady(params);
   };
 
-  useEffect(() => {
-    if (columnApi && loading === false) {
+  const onFirstDataRendered = (e) => {
+    if (localStorage.getItem(renderedFrom)) {
       const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-
-      if (columnState) {
+      setTimeout(() => {
         columnApi.setColumnState(columnState);
-      }
+      }, 500)
     }
-  }, [columnApi, loading])
+  }
 
   const onColumnMoved = (params) => {
     const columnState = JSON.stringify(params.columnApi.getColumnState());
@@ -236,19 +235,6 @@ export default function CustomAgGridEditable({
     return [dataObj]
   }
 
-  const getWidth = (field, columnWidth) => {
-    if (localStorage.getItem(renderedFrom)) {
-      const storedColumns = JSON.parse(localStorage.getItem(renderedFrom));
-
-      const indexOfField = storedColumns.findIndex((d) => d.colId === field);
-      if (indexOfField > -1) {
-        return storedColumns[indexOfField].width;
-      }
-      return columnWidth;
-    }
-    return columnWidth;
-  }
-
   const generateColumns = columns.map((column: any, index) => {
     return isClientSideGrid ? (
       <AgGridColumn
@@ -260,8 +246,8 @@ export default function CustomAgGridEditable({
         cellRenderer={column.cellRenderer ?? null}
         cellRendererParams={column.cellRendererParams ?? null}
         minWidth={column.width ?? 250}
-        width={getWidth(column.field, column.width) ?? 250}
-        flex={1}
+        // width={getWidth(column.field, column.width) ?? 250}
+        // flex={1}
         rowDrag={column.rowDrag ?? false}
         editable={column.editable ?? false}
         cellEditor={column.cellEditor}
@@ -282,8 +268,8 @@ export default function CustomAgGridEditable({
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
         minWidth={column.width ?? 250}
-        width={getWidth(column.field, column.width) ?? 250}
-        flex={1}
+        // width={getWidth(column.field, column.width) ?? 250}
+        // flex={1}
         filterParams={customFilterParams}
         comparator={() => {
           return 0;
@@ -327,6 +313,7 @@ export default function CustomAgGridEditable({
             style={{ zIndex: -500, position: "inherit" }}
           >
             <AgGridReact
+              onFirstDataRendered={onFirstDataRendered}
               gridOptions={customGridOptions}
               rowData={dataRows}
               onColumnMoved={onColumnMoved}
@@ -371,6 +358,8 @@ export default function CustomAgGridEditable({
                 floatingFilter: true,
                 sortable: true,
                 suppressMenu: true,
+                suppressSizeToFit: true,
+                suppressAutoSize: true,
                 // headerCheckboxSelection: true,
                 // checkboxSelection: true,
                 floatingFilterComponentParams: { suppressFilterButton: true },

@@ -20,6 +20,7 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 
 const addSerializedAssetsRenderedFrom = "addSerializedAssets";
+const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected`;
 
 const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts }) => {
     const toastConfig = useContext(CustomToastContext)
@@ -37,9 +38,10 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         fetchProductInventory()
     }, [page, limit, filters, sorting, search]);
 
-
     useEffect(() => {
         let tempProducts = serializedProducts
+        const alreadyStoredSelectedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
+
         if (tempProducts.length === 0) {
             selectedProducts.map(d => {
                 if (d.productName) {
@@ -66,29 +68,28 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
             tempProducts = []
             selectedProducts.map(d => {
                 if (d.productName) {
-                    tempProducts.push({ "id": d._id, "name": d.productName, "qty": d?.qty - selectedRecords.filter(obj => obj.product.optionValue === d._id).length })
+                    tempProducts.push({ "id": d._id, "name": d.productName, "qty": d?.qty - alreadyStoredSelectedRecords.filter(obj => obj.product.optionValue === d._id).length })
                 }
                 if (d.packageName && d?.products?.length > 0) {
                     d.products.map(u => {
                         if (tempProducts.find(obj => obj.id === d?.productDetail?._id)) {
-                            tempProducts.find(obj => obj.id === d?.productDetail?._id).qty = u?.qty * d?.qty + tempProducts.find(obj => obj.id === d?.productDetail?._id).qty - selectedRecords.filter(obj => obj.product.optionValue === u?.productDetail?._id).length
+                            tempProducts.find(obj => obj.id === d?.productDetail?._id).qty = u?.qty * d?.qty + tempProducts.find(obj => obj.id === d?.productDetail?._id).qty - alreadyStoredSelectedRecords.filter(obj => obj.product.optionValue === u?.productDetail?._id).length
                         }
                         else {
-                            tempProducts.push({ "id": u?.productDetail?._id, "name": u?.productDetail?.productName || "", "qty": u?.qty * d?.qty - selectedRecords.filter(obj => obj.product.optionValue === u?.productDetail?._id).length })
+                            tempProducts.push({ "id": u?.productDetail?._id, "name": u?.productDetail?.productName || "", "qty": u?.qty * d?.qty - alreadyStoredSelectedRecords.filter(obj => obj.product.optionValue === u?.productDetail?._id).length })
                         }
                     })
                 }
-                if (d?.qty - selectedRecords.filter(obj => obj.product.optionValue === d._id).length <= -1) {
-                    let tempSelectedRecoeds = selectedRecords
-                    var idx = tempSelectedRecoeds.findIndex(obj => obj.product.optionValue === d._id);
-                    var removed = tempSelectedRecoeds.splice(idx, 1);
-                    // dispatch({ type: "loading", loading: true });
-                    // setTimeout(() => {
-                    //     dispatch({ type: "loading", loading: false });
-                    // }, gridLoadingTimeout);
-                    dispatch({ type: "selection", selectedRecords: tempSelectedRecoeds });
-
-                }
+                // if (d?.qty - alreadyStoredSelectedRecords.filter(obj => obj.product.optionValue === d._id).length <= -1) {
+                //     let tempSelectedRecoeds = [...alreadyStoredSelectedRecords]
+                //     var idx = tempSelectedRecoeds.findIndex(obj => obj.product.optionValue === d._id);
+                //     var removed = tempSelectedRecoeds.splice(idx, 1);
+                //     // dispatch({ type: "loading", loading: true });
+                //     // setTimeout(() => {
+                //     //     dispatch({ type: "loading", loading: false });
+                //     // }, gridLoadingTimeout);
+                //     dispatch({ type: "selection", selectedRecords: tempSelectedRecoeds });
+                // }
             })
         }
         setSerializedProducts(tempProducts)
@@ -141,7 +142,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     };
 
     const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}`;
+        let deepFilter = `?page=${page}&limit=${limit}&availableAssets=true`;
 
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
@@ -219,8 +220,19 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                     <Box mb={2}>
                         <Grid container >
                             <Grid item xs={12} sm={6}>
-                                {serializedProducts.length > 0 ? serializedProducts.map(d => <span>{d.name ? `  ${d.name} (${d?.qty})  |` : ""}
-                                </span>) : null}
+                                <div>
+                                    {
+                                        serializedProducts.length > 0 ?
+                                            serializedProducts.map(d =>
+                                                d?.qty < 0 ? <span className="text-error">{d.name ? `  ${d.name} (${d?.qty})  |` : ""}</span>
+                                                    : (d?.qty === 0 ? <span className="text-success">{d.name ? `  ${d.name} (${d?.qty})  |` : ""}</span> : <span>{d.name ? `  ${d.name} (${d?.qty})  |` : ""}</span>)
+                                            ) : null
+                                    }
+                                </div>
+
+                                {
+                                    serializedProducts.length > 0 && serializedProducts.some(s => s.qty < 0) ? <div className="text-error font-weight-bold">You have selected more assets then needed.</div> : ""
+                                }
                             </Grid>
                             <Grid item xs={12} sm={6} container justify="flex-end">
                                 <SearchBox
@@ -232,9 +244,10 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                 <Box ml={1} mt={1} >
                                     <Button size="small"
                                         color="primary"
-                                        onClick={() => addSerializedAsset(selectedRecords)}
+                                        onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
                                         variant="contained"
-                                        disabled={getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length === 0 || isAdding}
+                                        disabled={getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length === 0 || isAdding ||
+                                            serializedProducts.some(d => d?.qty < 0)}
                                         endIcon={isAdding && <CircularProgress size={20} />}
                                     >
                                         {getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length ? "(" + getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length + ")  " : ""}
@@ -260,6 +273,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                             // selectedRecords={selectedRecords}
                             renderedFrom={addSerializedAssetsRenderedFrom}
                             // showOnlyShowFilteredRecordSwitch={true}
+                            // allowHeaderSelection={false}
                         />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </div>

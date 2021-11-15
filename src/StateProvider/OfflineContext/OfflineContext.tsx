@@ -6,7 +6,10 @@ import { CustomToastContext } from "../CustomToastContext/CustomToastContext";
 export const CustomOfflineContext = createContext(null);
 const limit = 500;
 
-const dataToFetch = [{ key: "rentalManagement", value: "Rental Management" }];
+const dataToFetch = [
+    { key: "rentalManagement", value: "Rental Management" },
+    { key: "lead", value: "Lead" },
+];
 
 // This context provider is passed to any component requiring the context
 export const CustomOfflineProvider = ({ children }) => {
@@ -134,25 +137,36 @@ export const CustomOfflineProvider = ({ children }) => {
 
             if (storedLocalStorageOfflineGridData) {
 
-                data.forEach(d => {
-                    const indexOfExistingRecord = storedLocalStorageOfflineGridData[module].findIndex(f => f._id === d._id);
-
-                    if (indexOfExistingRecord === -1) {
-                        storedLocalStorageOfflineGridData[module].push(d);
-                    } else {
-                        storedLocalStorageOfflineGridData[module][indexOfExistingRecord] = d;
+                if (!storedLocalStorageOfflineGridData[module]) {
+                    let initializeOfflineGridData = {
+                        ...storedLocalStorageOfflineGridData,
+                        [module]: data
                     }
-                });
 
-                recordsToDelete.forEach(_id => {
-                    storedLocalStorageOfflineGridData[module] = storedLocalStorageOfflineGridData[module].filter(f => f._id !== _id);
-                });
+                    setOfflineGridData(initializeOfflineGridData);
+                    localStorage.setItem("offlineGridData", JSON.stringify(initializeOfflineGridData));
 
-                setOfflineGridData(storedLocalStorageOfflineGridData);
-                localStorage.setItem("offlineGridData", JSON.stringify(storedLocalStorageOfflineGridData));
+                } else {
+
+                    data.forEach(d => {
+                        const indexOfExistingRecord = storedLocalStorageOfflineGridData[module].findIndex(f => f._id === d._id);
+
+                        if (indexOfExistingRecord === -1) {
+                            storedLocalStorageOfflineGridData[module].push(d);
+                        } else {
+                            storedLocalStorageOfflineGridData[module][indexOfExistingRecord] = d;
+                        }
+                    });
+
+                    recordsToDelete.forEach(_id => {
+                        storedLocalStorageOfflineGridData[module] = storedLocalStorageOfflineGridData[module].filter(f => f._id !== _id);
+                    });
+
+                    setOfflineGridData(storedLocalStorageOfflineGridData);
+                    localStorage.setItem("offlineGridData", JSON.stringify(storedLocalStorageOfflineGridData));
+                }
 
             } else {
-
                 let initializeOfflineGridData = {
                     [module]: data
                 }

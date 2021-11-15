@@ -920,7 +920,7 @@ const RentalManagementDetailsPage = () => {
                   <Paper>
                     <Steps
                       className={styles.steps_box}
-                      isNextStep={!Boolean(productInventory.length)}
+                      isNextStep={!(productInventory.length > 0 ? (productInventory.some(f => !f?.hasOwnProperty("finalPrice") || isNaN(f?.finalPrice) || f?.finalPrice === 0) ? false : true) : false)}
                       nextStep={nextStep}
                       steps={rentalProcessSteps.slice(0, 5)}
                       currentStep={currentStep}
@@ -1037,7 +1037,7 @@ const RentalManagementDetailsPage = () => {
                                 data={dataRows}
                                 rowStyle={(rowData) => ({
                                   color: "black",
-                                  backgroundColor: rowData?.type?.includes("roduct") && rowData?.finalPrice === 0 ? "#EFCCCC" : "white"
+                                  backgroundColor: rowData?.type?.includes("roduct") && (isNaN(rowData?.finalPrice) || rowData?.finalPrice === 0) ? "#EFCCCC" : "white"
                                 })}
                                 onSelect={setSelectedProducts}
                                 childrenProperty="subRows"

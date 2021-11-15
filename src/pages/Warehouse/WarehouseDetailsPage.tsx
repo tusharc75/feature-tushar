@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment } from "react";
-import { Grid, Box, Button, Typography, Paper} from "@material-ui/core";
+import { Grid, Box, Button, Typography, Paper } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
@@ -31,13 +31,13 @@ const WarehouseDetailsPage = () => {
   const [warehouseFields, setWarehouseFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [addressResource,setAddressResource] = useState(null);
+  const [addressResource, setAddressResource] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
 
     routes.warehouse,
   ]);
 
-  
+
 
 
 
@@ -62,7 +62,7 @@ const WarehouseDetailsPage = () => {
       setHeadingLbl(data.warehouseName);
       setWarehouseData(data);
       setAddressResource({ id: data._id });
-      
+
       setCustomizedRoutes([routes.warehouse, { title: data.warehouseName }]);
       setLoading(false);
     } catch (error) {
@@ -144,16 +144,16 @@ const WarehouseDetailsPage = () => {
 
         />
       )}
-       {showConfirmBox && (
-          <ConfirmationDialog
-            open={showConfirmBox}
-            message={`Are you sure you want to delete ${routes.warehouse.title.toLowerCase()} ${headingLbl}?`}
-            onClose={() => {
-              setShowConfirmBox(false)
-            }}
-            onOk={handleDeleteWarehouse}
-          />
-        )}
+      {showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete ${routes.warehouse.title.toLowerCase()} ${headingLbl}?`}
+          onClose={() => {
+            setShowConfirmBox(false)
+          }}
+          onOk={handleDeleteWarehouse}
+        />
+      )}
       <Fragment>
 
         <Grid container className="headerbox">
@@ -205,10 +205,10 @@ const WarehouseDetailsPage = () => {
                           : "Permanently delete this warehouse"
                       }
                     >
-                     <DeleteButton
-                      text="Delete"
-                      onClick={()=>setShowConfirmBox(true)}
-                    />
+                      <DeleteButton
+                        text="Delete"
+                        onClick={() => setShowConfirmBox(true)}
+                      />
                     </span>
                   )}
                 </DetailsPageHeader>
@@ -221,20 +221,7 @@ const WarehouseDetailsPage = () => {
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
                   </Grid>
                 ) : (
-                  <>
-                    <Box
-                      width="100%"
-                      padding={1}
-                      bgcolor="grey.200"
-                      display="flex"
-                      justifyContent="space-between"
-                    >
-                      <Typography variant="subtitle2">
-                        Warehouse Detail
-                      </Typography>
-                    </Box>
-                    <DetailsPage data={warehouseData} fields={warehouseFields} />
-                  </>
+                  <DetailsPage data={warehouseData} fields={warehouseFields} />
                 )}
               </Box>
 
