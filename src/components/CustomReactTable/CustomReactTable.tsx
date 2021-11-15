@@ -204,7 +204,7 @@ export default function CustomReactTable({
                     <TableBody style={{
                         overflowY: "scroll",
                         overflowX: "hidden",
-                        height: "250px"
+                        // height: "250px"
                     }}>
                         {
                             rows.map((row, index) => {
