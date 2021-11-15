@@ -11,6 +11,16 @@
 .Related_Account{
   display:flex;
 }
+.search_box_layout{
+  margin-left: 5px;
+  justify-content: flex-end;
+  max-width: 400px;
+}
+.account_header_search_bar{
+  margin-left: 5px;
+  justify-content: flex-end;
+
+}
 
 @supports (not (gap:0.25rem)) and (not (-webkit-gap: 0.25rem)){
   .filter_side_header > *:not(:nth-child(1)) {
@@ -36,11 +46,14 @@
   }
   .filter_side_header {
     display: block;
-    margin-top: 0.8rem;
+    //margin-top: 0.8rem;
     flex-direction: column;
     gap: 0.75rem;
     -webkit-gap: 0.75rem;
     align-items: center;
+  }
+  .search_box_layout{
+    margin-left: 0px;
   }
   @supports (not (gap:0.75rem)) and (not (-webkit-gap: 0.75rem)){
     .filter_side_header > *:not(:nth-child(1)) {
@@ -58,5 +71,14 @@
   }
   .action_submit_btn {
     margin-left: 1% !important;
+  }
+}
+@media only screen and (max-width: 600px) {
+  .search_box_layout {
+    justify-content: flex-start;
+    max-width: 600px !important;
+  }
+  .search_box_input{
+    max-width: 600px !important;
   }
 }

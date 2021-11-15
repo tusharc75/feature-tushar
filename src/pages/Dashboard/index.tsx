@@ -10,7 +10,7 @@ import { MdNavigateNext, MdLocalActivity } from 'react-icons/md';
 import { RiAccountPinCircleFill, RiFolderSettingsFill } from 'react-icons/ri';
 import { BsCalendarFill } from 'react-icons/bs';
 import { FaRegistered } from 'react-icons/fa';
-import { AiFillSetting } from 'react-icons/ai';
+import {AiFillAccountBook, AiFillSetting, AiOutlineTransaction} from 'react-icons/ai';
 import { TextField, InputAdornment } from '@material-ui/core'
 import { Search } from '@material-ui/icons'
 
@@ -67,7 +67,7 @@ function Dashboard() {
         return sec === u.sectionName && u.isRead
       });
 
-      let icon = <AiFillSetting size={32} />;
+      let icon = <AiFillAccountBook size={32} />;
       let heading = '';
       let text = '';
 

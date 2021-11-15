@@ -39,6 +39,8 @@ import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import { HiBadgeCheck } from "react-icons/hi"
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 
 const AccTypes = [
   {
@@ -60,7 +62,7 @@ export default function Account(props) {
   const {
     account: { accountApi, accountResource, accountRoute }
   } = props;
-
+  const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
   const {
     state: { user, permissions, selectedEntity }, dispatch: entityDispatch
   }: any = useData();
@@ -130,10 +132,21 @@ export default function Account(props) {
 
   const fetchGridColumns = async () => {
 
-    const response = await axiosInstance()
-      .get(`/field?resource=${sidebarResource[accountResource]}`)
+    let data
+    if (isOffline) {
+      data = offlineFieldsData[accountResource] ?? []
+    }
+    else {
+      const response = await axiosInstance()
+        .get(`/field?resource=${sidebarResource[accountResource]}`)
 
-    let data = response?.data?.data
+      data = response?.data?.data
+      try {
+        updateFieldsData(accountResource, data);
+      } catch (ex) {
+        console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`)
+      }
+    }
 
     let columns = []
     let rendererNames = []
@@ -491,38 +504,49 @@ export default function Account(props) {
       gridApi.setRowData([]);
     }
 
-    axiosInstance()
-      .get(`${accountApi}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
+    let data, count;
 
-          let finalObject = prepareDataForGrid(u, user);
-          let res = {
-            ...finalObject,
-            canDelete: u.owner?.optionValue === user?.user._id,
+    if (!isOffline) {
+      const response: any = await axiosInstance().get(`${accountApi}${queryString}`);
 
-            isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
-            lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
-            leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
-            leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
-            approved: u.staticData?.approved,
+      data = response?.data?.data;
+      count = response?.data?.count;
+    }
+    else {
+      data = offlineGridData && offlineGridData[accountResource] || [];
+      count = offlineGridData && offlineGridData[accountResource]?.length || 0;
+    }
 
-            masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
-            masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : '',
+    try {
+      updateOfflineGridData(accountResource, data);
+    } catch (ex) {
+      console.error(`${accountResource}: Error while storing data for Offline context. Error: ${ex.message}`)
+    }
 
-          };
-          return res;
-        });
-        dispatch({ type: 'initialize', data: rows, count: count });
+    let rows = data.map((u) => {
 
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        dispatch({ type: 'loading', loading: false });
-      });
+      let finalObject = prepareDataForGrid(u, user);
+      let res = {
+        ...finalObject,
+        canDelete: u.owner?.optionValue === user?.user._id,
+
+        isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
+        lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
+        leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
+        leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
+        approved: u.staticData?.approved,
+
+        masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
+        masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : '',
+
+      };
+      return res;
+    });
+    dispatch({ type: 'initialize', data: rows, count: count });
+
+    setTimeout(() => {
+      dispatch({ type: 'loading', loading: false });
+    }, gridLoadingTimeout);
   };
 
   const cloneAccount = async (data) => {
@@ -710,81 +734,93 @@ export default function Account(props) {
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
               <div className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
                 <MdAccountCircle className="headerLogo" /> <span id="resourceHeader" className="listingHeader">{routes[accountResource].title}</span>
-                <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
-                  {AccTypes && (
-                    <ToggleButtonGroup
-                      id="resourceTypeSelector"
-                      size="small"
-                      className={`ml-8 ${accountClass.accountActions}`}
-                      value={filter}
-                      exclusive
-                      onChange={handleFilter}
-                    >
-                      {AccTypes.map((k: any, index) => {
-                        return (
-                          <ToggleButton value={k.key} key={index}>
-                            {k.key}
-                          </ToggleButton>
-                        );
-                      })}
-                    </ToggleButtonGroup>
-                  )}
-                  <ButtonGroup
-                    id="approveDisapprove"
-                    size="small"
-                    className={accountClass.accountActions}
-                    variant="outlined"
-                    color="primary"
-                    ref={anchorRef}
-                    aria-label="small outlined button group"
-                  >
-                    <Button>{options[selectedIndex]}</Button>
-                    <Button
-                      color="primary"
-                      size="small"
-                      aria-controls={open ? 'split-button-menu' : undefined}
-                      aria-expanded={open ? 'true' : undefined}
-                      aria-label="select merge strategy"
-                      aria-haspopup="menu"
-                      onClick={handleToggle}
-                    >
-                      <ArrowDropDownIcon />
-                    </Button>
-                  </ButtonGroup>
-                  <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
-                    {({ TransitionProps, placement }) => (
-                      <Grow
-                        {...TransitionProps}
-                        style={{
-                          transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
-                        }}
+
+                {
+                  isOffline
+                    ? <></>
+                    : <div className={`d-flex align-items-center gap-1 layout-for-mobile ${accountClass.account_header_add_btn_action_btn_group}`}>
+
+                      {AccTypes && (
+                        <ToggleButtonGroup
+                          id="resourceTypeSelector"
+                          size="small"
+                          className={`ml-8 ${accountClass.accountActions}`}
+                          value={filter}
+                          exclusive
+                          onChange={handleFilter}
+                        >
+                          {AccTypes.map((k: any, index) => {
+                            return (
+                              <ToggleButton value={k.key} key={index}>
+                                {k.key}
+                              </ToggleButton>
+                            );
+                          })}
+                        </ToggleButtonGroup>
+                      )}
+
+                      <ButtonGroup
+                        id="approveDisapprove"
+                        size="small"
+                        className={accountClass.accountActions}
+                        variant="outlined"
+                        color="primary"
+                        ref={anchorRef}
+                        aria-label="small outlined button group"
                       >
-                        <Paper>
-                          <ClickAwayListener onClickAway={handleClose}>
-                            <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
-                              {options.map((option, index) => (
-                                <MenuItem
-                                  key={option}
-                                  selected={index === selectedIndex}
-                                  onClick={(event) => handleMenuItemClick(event, index)}
-                                  style={{ color: 'black' }}
-                                >
-                                  {option}
-                                </MenuItem>
-                              ))}
-                            </MenuList>
-                          </ClickAwayListener>
-                        </Paper>
-                      </Grow>
-                    )}
-                  </Popper>
-                </div>
+                        <Button
+                          color="primary"
+                          size="small"
+                          aria-controls={open ? 'split-button-menu' : undefined}
+                          aria-expanded={open ? 'true' : undefined}
+                          aria-label="select merge strategy"
+                          aria-haspopup="menu"
+                          onClick={handleToggle}
+                          className="all-button"
+                        >
+                          {options[selectedIndex]}
+                          <ArrowDropDownIcon className="all-button-sub-icon" />
+                        </Button>
+                      </ButtonGroup>
+                      <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
+                        {({ TransitionProps, placement }) => (
+                          <Grow
+                            {...TransitionProps}
+                            style={{
+                              transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
+                            }}
+                          >
+                            <Paper>
+                              <ClickAwayListener onClickAway={handleClose}>
+                                <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
+                                  {options.map((option, index) => (
+                                    <MenuItem
+                                      key={option}
+                                      selected={index === selectedIndex}
+                                      onClick={(event) => handleMenuItemClick(event, index)}
+                                      style={{ color: 'black' }}
+                                    >
+                                      {option}
+                                    </MenuItem>
+                                  ))}
+                                </MenuList>
+                              </ClickAwayListener>
+                            </Paper>
+                          </Grow>
+                        )}
+                      </Popper>
+                    </div>
+                }
               </div>
             </Grid>
-            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1" justify="flex-end">
-              <div id="resourceOperations" className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
-                <SearchBox onSearch={handleSearch} searchbox="account_header_search_bar" width="300px" value={search} />
-                <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
+            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1 " justify="flex-end" >
+              <div id="resourceOperations" className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`} style={{ flexGrow: 1 }}>
+                <Grid sm={12} className={styles.search_box_layout} style={{ display: "flex", flexGrow: 1 }} >
+                  {
+                    !isOffline && <SearchBox onSearch={handleSearch} searchbox="account_header_search_bar" style={{ flexGrow: 1 }} value={search} />
+                  }
+                </Grid>
+                <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`} >
                   {accountPermissions.isCreate && (
                     <Button
                       variant="contained"
@@ -798,7 +834,7 @@ export default function Account(props) {
                     </Button>
                   )}
 
-                  {(accountPermissions.isDelete || accountPermissions.approveAccount) && (
+                  {!isOffline && (accountPermissions.isDelete || accountPermissions.approveAccount) && (
                     <Button
                       disabled={selectedRecords.length === 0}
                       variant="outlined"
@@ -931,6 +967,9 @@ export default function Account(props) {
               loading={loading}
               renderedFrom={accountResource}
               refreshGrid={fetchAccounts}
+              isClientSideGrid={isOffline}
+              allowAction={!isOffline}
+              allowSelection={!isOffline}
             /> : null}
 
 

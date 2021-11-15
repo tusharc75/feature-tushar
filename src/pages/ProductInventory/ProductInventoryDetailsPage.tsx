@@ -24,6 +24,7 @@ import { Link } from 'react-router-dom'
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import ProductHierarchy from "../Product/ProductHierarchy";
+import { FaDiceOne } from "react-icons/fa";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -93,8 +94,9 @@ const ProductInventoryDetailsPage = () => {
   const columns = [
     { field: "reference", headerName: "Reference", show: true, cellRenderer: "nameRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "date", headerName: "Date", show: true, disabled: true, cellRenderer: "dateRenderer" },
+    { field: "date", headerName: "Date & Time", show: true, disabled: true, cellRenderer: "dateRenderer" },
     { field: "comments", headerName: "Comments", show: true, cellRenderer: "commonRenderer" },
+    // { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
   ];
 
   useEffect(() => {
@@ -358,37 +360,42 @@ const ProductInventoryDetailsPage = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
                   <div className="detail-box">
-                    <h3 className="form-label-style" title={"Asset History"}>
-                      {"Asset History"}
-                    </h3>
+                    <div className="detail-box-content">
+                      <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                      <h3 className="form-label-style" title="Asset History">
+                        Asset History
+                      </h3>
+                    </div>
+
+                    <Grid item xs={12} sm={12} md={12} lg={12} className="mt-1">
+                      {columns ?
+                        <CustomAgGrid
+                          columns={columns}
+                          dataRows={dataRows}
+                          frameworkComponents={frameworkComponents}
+                          setGridApi={setGridApi}
+                          dispatch={dispatch}
+                          rowCount={rowCount}
+                          limit={limit}
+                          pageSizes={pageSizes}
+                          page={page}
+                          allowAction={false}
+                          allowSelection={false}
+                          isClientSideGrid={true}
+                          loading={loading}
+                          renderedFrom="rentalManagementDetailsPageInventory"
+                          refreshGrid={fetchProductInventoryHistory}
+                        />
+                        : <Box
+                          p={2}
+                          height={500}
+                          bgcolor="white">
+                          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                        </Box>
+                      }
+                    </Grid>
+
                   </div>
-                </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
-                  {columns ?
-                    <CustomAgGrid
-                      columns={columns}
-                      dataRows={dataRows}
-                      frameworkComponents={frameworkComponents}
-                      setGridApi={setGridApi}
-                      dispatch={dispatch}
-                      rowCount={rowCount}
-                      limit={limit}
-                      pageSizes={pageSizes}
-                      page={page}
-                      allowAction={false}
-                      allowSelection={false}
-                      isClientSideGrid={true}
-                      loading={loading}
-                      renderedFrom="rentalManagementDetailsPageInventory"
-                      refreshGrid={fetchProductInventoryHistory}
-                    />
-                    : <Box
-                      p={2}
-                      height={500}
-                      bgcolor="white">
-                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                    </Box>
-                  }
                 </Grid>
 
               </Grid>
