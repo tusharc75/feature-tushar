@@ -37,7 +37,7 @@ import SerializedAssetStep from "./SerializedAssetStep";
 import MaterialTableComponent from "../../components/Shared/MaterialTableComponent";
 import { Column } from "material-table";
 import moment from "moment";
-import { camelCase, startCase } from "lodash";
+import { camelCase, startCase, orderBy } from "lodash";
 import queryString from "query-string";
 import PackageProductsDialog from './PackageProductsDialog'
 import { FaWpforms } from "react-icons/fa";
@@ -347,7 +347,7 @@ const RentalManagementDetailsPage = () => {
 
       const newDataForReactTable = [...translateDataToTree(tempInventory ? [...tempInventory] : [], "parent", "treeId", "subRows")];
 
-      dispatch({ type: "initialize", data: newDataForReactTable, count: newDataForReactTable.length });
+      dispatch({ type: "initialize", data: orderBy(newDataForReactTable, ["order"], ["asc"]), count: newDataForReactTable.length });
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
       }, gridLoadingTimeout);
