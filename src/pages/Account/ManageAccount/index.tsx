@@ -114,9 +114,7 @@ export default function ManageAccountDialog(props) {
           });
 
         let initialData = getObjKeys("", newFields)
-        // if (parentId) {
-        //   initialData.parentAccount = parentId
-        // }
+
         setAccountData({
           fields: newFields,
           initialValues: initialData,
@@ -141,8 +139,7 @@ export default function ManageAccountDialog(props) {
           message: data.message,
         });
         if (Boolean(isRedirectToDetailPage)) {
-          console.log('Yess')
-          // history.push(`${accountApi}/detail/${newId}`);
+          history.push(`${accountApi}/detail/${newId}`);
         }
         setLoading(false);
       })
