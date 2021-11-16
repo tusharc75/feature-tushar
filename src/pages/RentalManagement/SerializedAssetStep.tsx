@@ -1,11 +1,7 @@
 import Box from "@material-ui/core/Box/Box";
-import { useState, useEffect, useReducer, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer, } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import { Link } from 'react-router-dom'
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import { AiFillFilePdf } from "react-icons/ai";
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button, Chip, IconButton } from "@material-ui/core";
@@ -13,18 +9,11 @@ import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { dateFormat, gridLoadingTimeout, rentalManagement, translateDataToTree, treeToFlatArray } from "../../constants/helpers";
-import { Column } from "material-table";
+import { dateFormat, rentalManagement, translateDataToTree } from "../../constants/helpers";
 import moment from "moment";
-import MaterialTableComponent from "../../components/Shared/MaterialTableComponent";
-import { startCase, uniqBy } from "lodash";
+import { startCase, orderBy } from "lodash";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../components/CustomReactTable/CustomReactTable";
-
-
-const width = 80;
-const minWidth = 80;
-const maxWidth = 80;
 
 const SerializedAssetStep = (props) => {
   const { loading, productInventory, currentStep, serializeAssets, fetchProductsData, rentalManagementId, isTabletScreen,
@@ -73,7 +62,7 @@ const SerializedAssetStep = (props) => {
     })
 
     const newDataForReactTable = [...translateDataToTree(products ? [...products] : [], "parent", "treeId", "subRows")];
-    setRows(newDataForReactTable);
+    setRows(orderBy(newDataForReactTable, ["order"], ["asc"]));
 
   }, [productInventory])
 
@@ -441,9 +430,10 @@ const SerializedAssetStep = (props) => {
                     ? "calc(100vw - 78px)"
                     : showActivity ? "100%" : "calc(100vw - 100px)"
               }
-              height={"calc(100vh - 350px)"}
+              height="calc(100vh - 350px)"
             >
               <CustomReactTable
+                height="calc(100vh - 365px)"
                 columns={columns}
                 data={rows}
                 rowStyle={(rowData) => ({

@@ -458,10 +458,10 @@ export default function QuoteProcess(props) {
               const required = data.required;
               const labels = [];
 
-              if (data.displayCurrency && data.units) {
+              if (data.displayCurrency && data.displayUnits) {
                 data.displayCurrency.forEach((cur) => {
-                  if (data.units) {
-                    data.units.forEach((unit) => {
+                  if (data.displayUnits) {
+                    data.displayUnits?.forEach((unit) => {
                       const casedLabel = `${fieldName}_${quoteCurrency.toLowerCase()}`;
                       if (required) {
                         requiredValues[casedLabel] = quoteRows[casedLabel];
@@ -482,8 +482,8 @@ export default function QuoteProcess(props) {
                     }
                   }
                 });
-              } else if (data.units && !data.displayCurrency) {
-                data.units.forEach((unit) => {
+              } else if (data.displayUnits && !data.displayCurrency) {
+                data.displayUnits.forEach((unit) => {
                   const casedLabel = `${fieldName}_${unit.toLowerCase()}`;
                   if (required) {
                     requiredValues[casedLabel] = quoteRows[casedLabel];
@@ -779,7 +779,20 @@ export default function QuoteProcess(props) {
       dynamicTableData.forEach((d, i) => {
         let obj = {};
         visibleColumnsExcel.forEach((col) => {
-          obj[col] = d[col] || '';
+          if (Array.isArray(d[col]) && d[col].length > 0) {
+            if (d[col][0].hasOwnProperty('optionLabel')) {
+              obj[col] = d[col].map(d => d.optionLabel).join() || "";
+            }
+            else {
+              obj[col] = d[col].join() || "";
+            }
+          }
+          else if (d[col].hasOwnProperty('optionLabel')) {
+            obj[col] = d[col].optionLabel || "";
+          }
+          else {
+            obj[col] = d[col] || "";
+          }
         });
 
         newTable.push(obj);

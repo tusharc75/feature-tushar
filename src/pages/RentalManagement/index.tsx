@@ -133,8 +133,8 @@ const RentalManagement = () => {
       } catch (ex) {
         console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`)
       }
-
     }
+    
     let columns = []
     let rendererNames = []
     data.forEach(o => {

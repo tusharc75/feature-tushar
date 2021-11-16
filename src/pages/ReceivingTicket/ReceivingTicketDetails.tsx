@@ -11,7 +11,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { getObjKeysWithValues, gridLoadingTimeout, productInventory, receivingTicket } from '../../constants/helpers';
+import { defaultActivityShow, getObjKeysWithValues, gridLoadingTimeout, productInventory, receivingTicket } from '../../constants/helpers';
 import ManageReceivingTicket from './ManageReceivingTicket';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import SignatureDialog from '../../components/Helpers/SignatureDialog';
@@ -19,10 +19,14 @@ import CustomAgGrid, { reducer, intialState } from "../../components/AgGridCompo
 import { Link } from "react-router-dom";
 import { CommonRenderer, CreatedByRenderer, DateRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import queryString from "query-string";
+import ViewSignsDialog from '../DeliveryTicket/ViewSignsDialog';
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import Activity from "../../components/Activity";
+import { isMobile, isTablet } from "react-device-detect";
 
 const mappedStatus = {
-  "Start Delivery": "In-Transit",
-  "Sign-Off": "Delivered"
+  "Sign-off - Dispatched": "In-Transit",
+  "Sign-off - Received": "Delivered"
 }
 
 const ReceivingTicketDetails = () => {
@@ -46,6 +50,9 @@ const ReceivingTicketDetails = () => {
   const [openSignatureDialog, setOpenSignatureDialog] = useState(false);
   const [signatures, setSignatures] = useState([]);
   const [submittingSign, setSubmittingSign] = useState(false);
+  const [openSigns, setOpenSigns] = useState(false);
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
+
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, page, limit, pageSizes } = state;
@@ -63,6 +70,10 @@ const ReceivingTicketDetails = () => {
     mainPoint['Status'] = data?.status || '';
     setMainPoints(mainPoint);
   };
+
+  const handleActivityHideShow = () => {
+    setActivityShow(!showActivity)
+  }
 
   const getRessourceFields = () => {
     setLoading(true);
@@ -84,6 +95,7 @@ const ReceivingTicketDetails = () => {
       .get(`${routes.receivingTicket.path}/${id}`)
       .then(({ data: { data } }) => {
         setReceivingTicketData(data)
+        setSignatures(data?.signatures || []);
         handleMainPoints(data)
         setHeadingLabel(data.receivingJobName);
         setCustomizedRoutes([routes.receivingTicket, { title: data.receivingJobName }]);
@@ -92,7 +104,7 @@ const ReceivingTicketDetails = () => {
           let ids = data?.productInventory.map(o => o?.optionValue)
           fetchProductInventory(ids)
         }
-        
+
         if (permissions?.receivingTicket?.isUpdate && openEdit === "true") {
           setOpenUpdateDialog(true)
           const params = new URLSearchParams()
@@ -137,31 +149,20 @@ const ReceivingTicketDetails = () => {
     }
   }
 
-  let label = receivingTicketData ? receivingTicketData?.status === "New" ? "Start Delivery" :
-    (receivingTicketData?.status === "In-Transit") ? "Sign-Off" : "" : ""
+  let label = receivingTicketData ? receivingTicketData?.status === "New" ? "Sign-off - Dispatched" :
+    (receivingTicketData?.status === "In-Transit") ? "Sign-off - Received" : "" : ""
 
   const handleSignature = (signedData) => {
     const { type, sign: newSign } = signedData;
     let stateArr = signatures;
-    const existingData = signatures.find(d => d.type === type)
+    stateArr.push({ type, signature: newSign, status: label === "Sign-off - Dispatched" ? "Start Delivery" : "Sign-Off" });
+    setSignatures(stateArr)
 
-    if (existingData) {
-      stateArr = stateArr.map(d => {
-        if (d.type === type) {
-          d.sign = newSign.split("base64,")[1]
-        }
-        return d
-      })
-    } else {
-      stateArr.push(signedData);
-    }
-
-    if (stateArr.length === 2) {
-      setSignatures(stateArr)
+    if (stateArr.length === 2 || stateArr.length === 4) {
       setSubmittingSign(true)
       axiosInstance().put(`${receivingTicket.receivingTicketApi}/signature`, {
         _id: id,
-        signatures: stateArr.map(d => ({ type: d.type, signature: d.sign, status: label }))
+        signatures: stateArr
       }).then(() => {
         handleChangeStatus(label)
         setOpenSignatureDialog(false)
@@ -267,8 +268,8 @@ const ReceivingTicketDetails = () => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+          <div>
             <Paper>
               {!receivingTicketData ? (
                 <div>
@@ -281,12 +282,12 @@ const ReceivingTicketDetails = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
-                  {permissions?.receivingTicket?.isUpdate && (
+                  {/* {permissions?.receivingTicket?.isUpdate && (
                     <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                       Edit
                     </Button>
                   )}
-                  {permissions?.receivingTicket?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                  {permissions?.receivingTicket?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />} */}
                   {
                     receivingTicketData?.deliveryPerson?.optionValue === user?.user?._id ?
                       label !== "" ?
@@ -299,65 +300,102 @@ const ReceivingTicketDetails = () => {
                           {label}
                         </Button> : null : null
                   }
+                  {
+                    receivingTicketData?.deliveryPerson?.optionValue === user?.user?._id && (receivingTicketData?.status === "In-Transit" || receivingTicketData?.status === "Delivered") ?
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => setOpenSigns(true)}>
+                        View Signatures
+                      </Button> : null
+                  }
                 </DetailsPageHeader>
               )}
 
-              <Box>
-                {loading || !receivingTicketFields.length ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <>
-                    <DetailsPage data={receivingTicketData} fields={receivingTicketFields} />
-                    {
-                      dataRows && dataRows.length ?
-                        <>
-                          <Grid container>
-                            <Grid item xs={12}>
-                              <Box
-                                component="div"
-                                display="flex"
-                                alignItems="center"
-                                flexGrow={1}
-                              >
-                                <Box padding="5px">
-                                  <Typography variant="subtitle1">
-                                    Product Inventory
-                                  </Typography>
-                                </Box>
-                              </Box>
-                            </Grid>
-                            <Grid item xs={12}>
-                              <CustomAgGrid
-                                allowSelection={false}
-                                allowAction={false}
-                                columns={columns}
-                                dataRows={dataRows}
-                                frameworkComponents={frameworkComponents}
-                                setGridApi={setGridApi}
-                                dispatch={dispatch}
-                                rowCount={rowCount}
-                                limit={limit}
-                                pageSizes={pageSizes}
-                                page={page}
-                                actionWidth={150}
-                                loading={false}
-                                renderedFrom="receivingTicketDetailInventoryPage"
-                                refreshGrid={fetchProductInventory}
-                              />
-                            </Grid>
+              {loading || !receivingTicketFields.length ? (
+                <Grid container spacing={2} style={{ padding: '8px' }}>
+                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                </Grid>
+              ) : (
+                <>
+                  <DetailsPage data={receivingTicketData} fields={receivingTicketFields} />
+                  {
+                    dataRows && dataRows.length ?
+                      <>
+                        <Grid container spacing={1} className="p-2">
+                          <Grid item xs={12} className="mt-2">
+                            <Typography variant="subtitle1" className="font-weight-bold text-primary">
+                              Serialized Assets
+                            </Typography>
                           </Grid>
-                        </>
-                        : null
-                    }
-                  </>
-                )}
-              </Box>
+                          <Grid item xs={12}>
+                            <CustomAgGrid
+                              allowSelection={false}
+                              allowAction={false}
+                              columns={columns}
+                              dataRows={dataRows}
+                              frameworkComponents={frameworkComponents}
+                              setGridApi={setGridApi}
+                              dispatch={dispatch}
+                              rowCount={rowCount}
+                              limit={limit}
+                              pageSizes={pageSizes}
+                              page={page}
+                              actionWidth={150}
+                              loading={false}
+                              renderedFrom="receivingTicketDetailInventoryPage"
+                              refreshGrid={fetchProductInventory}
+                            />
+                          </Grid>
+                        </Grid>
+                      </>
+                      : null
+                  }
+                </>
+              )}
             </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}></Grid>
-        </Grid>
+          </div>
+          <div className="position-relative">
+            {showActivity ?
+              <Paper>
+                {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
+                  <IoIosArrowDropright className="icon" />
+                </span>}
+                {!receivingTicketData ? (
+                  <Box>
+                    <Skeleton variant="text" width="100px" height="25px" />
+                    <Box marginY={1} />
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <Skeleton key={i} width="100%" height="50px" />
+                    ))}
+                  </Box>
+                ) : (
+                  <div>
+                    <Activity
+                      resourceId={receivingTicketData?._id}
+                      resource={receivingTicket.receivingTicketResource}
+                      restrictedAddActivities={["Attachment", "Case"]}
+                      relatedTo={[
+                        {
+                          type: receivingTicket.receivingTicketResource,
+                          referenceId: receivingTicketData?._id,
+                          access: true,
+                        },
+                      ]}
+                      handleActivityRefresh={() => { }}
+                      //   emails={contactsEmailsData}
+                      emails={null}
+                    />
+                  </div>
+                )}
+              </Paper> :
+              !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
+                <IoIosArrowDropleft className="icon" />
+              </span>}
+          </div>
+        </div>
+
       </Fragment>
       {showConfirmBox && (
         <ConfirmationDialog
@@ -387,7 +425,7 @@ const ReceivingTicketDetails = () => {
         <SignatureDialog
           submitting={submittingSign}
           label={label}
-          steps={label === "Start Delivery" ? ["Supervisor", "Delivery Person"] : ["Delivery Person", "Receiver"]}
+          steps={label === "Sign-off - Dispatched" ? ["Supervisor", "Delivery Person"] : ["Delivery Person", "Receiver"]}
           forDelivery={true}
           open={true}
           onClose={() => {
@@ -395,6 +433,11 @@ const ReceivingTicketDetails = () => {
             setSignatures([])
           }}
           onSigned={handleSignature}
+        />}
+      {openSigns &&
+        <ViewSignsDialog
+          signatures={receivingTicketData?.signatures}
+          close={() => setOpenSigns(false)}
         />}
     </>
   );

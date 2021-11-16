@@ -7,10 +7,11 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import EditOutlined from "@material-ui/icons/EditOutlined"
 import AddOutlined from "@material-ui/icons/AddOutlined"
 import IconButton from "@material-ui/core/IconButton"
+import DeleteIcon from '@material-ui/icons/Delete';
 import Tooltip from "@material-ui/core/Tooltip"
 
 export default function AccountHierarchy({ data, currentAccountId, accountRoute,
-    handleUpdate = null, canUpdate = false, canCreate = false, onCreateNewAccount = null }) {
+    handleUpdate = null, canUpdate = false, canCreate = false, onCreateNewAccount = null, canDelete = false, handleDelete = null }) {
 
     const commonFieldWidth = 150;
     const options: any = {
@@ -57,6 +58,16 @@ export default function AccountHierarchy({ data, currentAccountId, accountRoute,
                                 onClick={() => onCreateNewAccount(rowData._id)}
                             >
                                 <AddOutlined fontSize="small" color={canCreate ? "primary" : "disabled"} />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={canDelete ? "Delete" : "You don't have permission to delete"}>
+                            <IconButton
+                                size="small"
+                                aria-label="Add Account"
+                                disabled={!canCreate}
+                                onClick={() => handleDelete(rowData)}
+                            >
+                                <DeleteIcon fontSize="small" color={canCreate ? "error" : "disabled"} />
                             </IconButton>
                         </Tooltip>
                     </span>

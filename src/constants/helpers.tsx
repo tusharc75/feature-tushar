@@ -384,9 +384,17 @@ export const profileMenuItems = {
 };
 
 export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
+  let selectedEntity = localStorage.getItem("selectedEntity")
+
+  let isCreate = (val === "") ? true : false
   const obj = {};
   for (const key of arr) {
+    let isEntityField = key?.fieldName === "entity"
+
     let value = key.isDefaultValue ? key.defaultValue : val;
+    if (isEntityField && selectedEntity && isCreate) {
+      value = key?.type === "multiSelect" ? [selectedEntity] : selectedEntity
+    }
     if (key.type === 'dropDown') {
       const option = key.option?.find((data: any) => data.default === true);
       obj[key.fieldName] = value ? value : option ? option.optionValue : '';
@@ -435,8 +443,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
 
   const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data.optionValue : '');
   for (const key of arr) {
-
     let defaultValue
+
     if (key?.isDefaultValue && key?.defaultValue) {
       defaultValue = key.defaultValue
     }
@@ -444,6 +452,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue ? defaultValue : false;
     } else if (key.type === 'multiSelect') {
       const values = dataObj[key.fieldName] && dataObj[key.fieldName].length
+
         ? typeof dataObj[key.fieldName] === 'string'
           ? dataObj[key.fieldName]
           : dataObj[key.fieldName].map((val: any) => filterValues(val))
@@ -529,7 +538,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         : string().min(10, 'Mobile number is too short');
     } else if (input.type === 'multiSelect') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
-    } else if (input.type === 'percent') {
+    } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal') {
       schema[input.fieldName] = input.required
         ? number().required(`${input.fieldLabel} is required`).nullable()
         : number().nullable();
@@ -541,25 +550,23 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'switch' || input.type === 'checkBox') {
       schema[input.fieldName] = input.required ? boolean().required(`${input.fieldLabel} is required`) : boolean();
     } else if (input.type !== 'currencyAmount' && (input.type === 'converter' || input.isConverter === true)) {
-      input.displayUnits &&
-        input.displayUnits.forEach((_unit) => {
-          schema[input.fieldName + '_' + _unit.toLowerCase()] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
-        });
+      input.displayUnits && input.displayUnits.forEach((_unit) => {
+        schema[input.fieldName + '_' + _unit.toLowerCase()] = input.required ? number().required(`${input.fieldLabel} is required`).nullable() : number().nullable();
+      });
     } else if (input.type === 'currencyAmount') {
-      input.displayCurrency &&
-        input.displayCurrency.forEach((_currency) => {
-          if (input.isConverter && input.displayUnits.length) {
-            input.displayUnits.forEach((_unit) => {
-              schema[input.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] = input.required
-                ? string().required(`${input.fieldLabel} is required`)
-                : string();
-            });
-          } else {
-            schema[input.fieldName + '_' + _currency.toLowerCase()] = input.required
-              ? string().required(`${input.fieldLabel} is required`)
-              : string();
-          }
-        });
+      input.displayCurrency && input.displayCurrency.forEach((_currency) => {
+        if (input.isConverter && input.displayUnits.length) {
+          input.displayUnits.forEach((_unit) => {
+            schema[input.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] = input.required
+              ? number().required(`${input.fieldLabel} is required`).nullable()
+              : number().nullable();
+          });
+        } else {
+          schema[input.fieldName + '_' + _currency.toLowerCase()] = input.required
+            ? number().required(`${input.fieldLabel} is required`).nullable()
+            : number().nullable();
+        }
+      });
     } else if (input.type === 'date') {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
     } else if (input.type === 'freeStyleMultiSelect') {
@@ -1235,7 +1242,12 @@ export const translateDataToTree = (data, parentProperty, childProperty, childre
           let temp = JSON.parse(JSON.stringify(childrens))
           temp.splice(index, 1)
           translator([current], temp)
-          typeof parent[childrenPropertyToStore] !== 'undefined' ? parent[childrenPropertyToStore].push(current) : parent[childrenPropertyToStore] = [current]
+
+          if (typeof parent[childrenPropertyToStore] !== 'undefined') {
+            parent[childrenPropertyToStore].push(current)
+          } else {
+            parent[childrenPropertyToStore] = [current]
+          }
         }
       })
     })
