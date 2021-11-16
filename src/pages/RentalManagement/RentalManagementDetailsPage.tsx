@@ -66,7 +66,7 @@ const RentalManagementDetailsPage = () => {
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [isUpdating, setUpdating] = useState(false);
   const [isProductEdit, setProductEdit] = useState(false);
-  const [selectedProductData, setSelectedProductData] = useState(null)
+  const [recordToUpdate, setRecordToUpdate] = useState(null)
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -311,6 +311,7 @@ const RentalManagementDetailsPage = () => {
 
 
   const fetchProductInventory = () => {
+
     let tempInventory = []
     dispatch({ type: "loading", loading: true });
     if (gridApi) {
@@ -333,23 +334,31 @@ const RentalManagementDetailsPage = () => {
       setProductInventory(tempInventory)
       setSerializeAssets(data.data?.inventory || [])
       tempInventory = restructureRowData(tempInventory)
-      
+
       let zeroPrice = tempInventory.filter(pkg => pkg.type !== "productInPackage" && pkg?.finalPrice === 0);
 
-      // console.log(zeroPrice)
       if (zeroPrice.length > 0) {
         setNextStep(false)
       } else {
         setNextStep(true)
       }
 
-      const newDataForReactTable = [...translateDataToTree(tempInventory ? [...tempInventory] : [], "parent", "treeId", "subRows")];
+      const newData = [];
+      tempInventory.forEach(({ _id, ...rest }) => {
+        newData.push(rest)
+      })
 
-      dispatch({ type: "initialize", data: orderBy(newDataForReactTable, ["order"], ["asc"]), count: newDataForReactTable.length });
+      const newDataForReactTable = [...translateDataToTree(newData ? [...newData] : [], "parent", "treeId", "subRows")];
+
+      dispatch({ type: "initialize", data: [], count: 0 })
+      dispatch({ type: "initialize", data: [...orderBy(newDataForReactTable, ["order"], ["asc"])], count: newDataForReactTable.length });
+
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
       }, gridLoadingTimeout);
+
       setSelectedProducts([])
+
     }).catch((error) => {
       toastConfig.setToastConfig(error);
       dispatch({ type: "loading", loading: false });
@@ -374,6 +383,9 @@ const RentalManagementDetailsPage = () => {
     })
 
     extractedProducts = [...products, ...packages, ...modifiedPkgProducts]
+
+    console.log(extractedProducts);
+
     return extractedProducts
   }
 
@@ -499,7 +511,7 @@ const RentalManagementDetailsPage = () => {
 
   const handleClick = (rowData) => {
     setProductEdit(true)
-    setSelectedProductData(rowData)
+    setRecordToUpdate(rowData)
   }
 
   const columns = [
@@ -588,7 +600,16 @@ const RentalManagementDetailsPage = () => {
       Header: `Price (${currencySymbol})`,
       Cell: ({ row }) => (
         <p>{row.original.price ? row.original.price : "0"} </p>
-      )
+      ),
+      Footer: info => {
+        const total = React.useMemo(
+          () =>
+            info.rows.filter(f => f.values.hasOwnProperty("price") && !isNaN(f.values.price)).reduce((sum, row) => row.values.price + sum, 0),
+          [info.rows]
+        )
+
+        return <>{total}</>
+      }
     },
     {
       accessor: 'discount',
@@ -602,7 +623,16 @@ const RentalManagementDetailsPage = () => {
       Header: `Final Price (${currencySymbol})`,
       Cell: ({ row }) => (
         <p>{row.original.finalPrice}</p>
-      )
+      ),
+      Footer: info => {
+        const total = React.useMemo(
+          () =>
+            info.rows.filter(f => f.values.hasOwnProperty("finalPrice") && !isNaN(f.values.finalPrice)).reduce((sum, row) => row.values.finalPrice + sum, 0),
+          [info.rows]
+        )
+
+        return <>{total}</>
+      }
     }
   ]
 
@@ -812,9 +842,8 @@ const RentalManagementDetailsPage = () => {
                         user?.user?._id &&
                         rentalManagementData.owner.optionValue === user.user._id ? (
                         <DeleteButton
-
                           text="Delete"
-                          className={"buttonDeleteBigScreen"}
+                          className="buttonDeleteBigScreen"
                           onClick={() => setShowConfirmBox(true)}
                         />
                       ) : null}
@@ -949,8 +978,6 @@ const RentalManagementDetailsPage = () => {
                             >
                               {`Add ${routes.packages.title}`}
                             </Button>
-                            <Box mx={1} />
-                            {selectedProducts && selectedProducts.length > 0 && <Typography>Selected ({selectedProducts.length})</Typography>}
                           </Box>
                           <Box display="flex">
                             <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
@@ -1039,7 +1066,7 @@ const RentalManagementDetailsPage = () => {
                                 })}
                                 onSelect={setSelectedProducts}
                                 childrenProperty="subRows"
-                                uniqueKey="_id"
+                                uniqueKey="id"
                               />
 
 
@@ -1069,7 +1096,7 @@ const RentalManagementDetailsPage = () => {
                                 }}
                               // onRowClick={(rowData) => {
                               //   setProductEdit(true)
-                              //   setSelectedProductData(rowData)
+                              //   setRecordToUpdate(rowData)
                               // }}
                               /> */}
 
@@ -1351,11 +1378,12 @@ const RentalManagementDetailsPage = () => {
           isSaving={isUpdating}
           onClose={() => {
             setProductEdit(false)
-            setSelectedProductData(null)
+            setRecordToUpdate(null)
           }}
-          submitBulkEdit={selectedProductData ? handleSingleEdit : handleBulkEditData}
+          submitBulkEdit={recordToUpdate ? handleSingleEdit : handleBulkEditData}
           currencySymbol={currencySymbol}
-          data={selectedProductData}
+          data={recordToUpdate}
+          selectedProducts={selectedProducts}
         />}
       {
         showManageAdditionalCostDialog.open && showManageAdditionalCostDialog.record !== null && <ManageAdditionalCostDialog

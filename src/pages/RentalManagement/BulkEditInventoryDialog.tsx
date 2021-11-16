@@ -22,6 +22,7 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import { startCase } from 'lodash';
 import axiosInstance from "../../axios/axiosInstance";
+import { groupBy } from 'lodash';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -32,9 +33,21 @@ interface EditDialogProps {
   calculatePrice?: VoidFunction | any;
   endDate: any;
   startDate: any;
+  selectedProducts: any[]
 }
 
-const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose, isSaving, submitBulkEdit, currencySymbol, data, startDate, endDate }) => {
+const BulkEditInventoryDialog: FC<EditDialogProps> = (
+  {
+    calculatePrice,
+    onClose,
+    isSaving,
+    submitBulkEdit,
+    currencySymbol,
+    data,
+    startDate,
+    endDate,
+    selectedProducts
+  }) => {
 
   const [values, setValues] = useState(null);
   const [isDisabled, setDisabled] = useState(false);
@@ -58,8 +71,8 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
         ...data,
         qty: data?.qty || 0,
         pricingMethod: data?.pricingMethod || 'perDay',
-        startDate: data?.startDate || new Date(),
-        endDate: data?.endDate || new Date(),
+        startDate: new Date(data?.startDate) || new Date(),
+        endDate: new Date(data?.endDate) || new Date(),
         tenure: data?.tenure || moment(data?.endDate).diff(moment(data?.startDate), 'days'),
         UOM: data?.UOM || '',
         price: data?.price || 0,
@@ -70,6 +83,27 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
       setValues(newValues);
     }
   }, [data]);
+
+  const getBulkEditText = () => {
+    let bulkEdit = "Bulk Edit -";
+
+    const groupByProducts = groupBy(selectedProducts, "type");
+
+    const edits = [];
+    if (groupByProducts["Product"]) {
+      edits.push(`${groupByProducts["Product"].length} - Products`)
+    }
+
+    if (groupByProducts["Package"]) {
+      edits.push(`${groupByProducts["Package"].length} - Package`)
+    }
+
+    if (groupByProducts["productInPackage"]) {
+      edits.push(`${groupByProducts["productInPackage"].length} - Product In Package`)
+    }
+
+    return `${bulkEdit} (${edits.join(", ")})`;
+  }
 
   useEffect(() => {
     getPricing(values);
@@ -258,7 +292,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
 
   return (
     <Dialog open fullWidth maxWidth="md" onClose={handleClose}>
-      <CustomDialogHeader title={data ? 'Edit' : 'Bulk Edit'} onClose={handleClose} />
+      <CustomDialogHeader title={data ? `Edit - ${data.detail}` : getBulkEditText()} onClose={handleClose} />
       <CustomDialogContent>
         <MuiPickersUtilsProvider utils={DateUtils}>
           <Box p={2}>
@@ -310,7 +344,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
               </Grid>
               <Grid item xs={12} sm={6}>
                 <KeyboardDatePicker
-                  maxDate={new Date(endDate)}
+                  maxDate={endDate}
                   // minDate={new Date(startDate)}
                   label="Start Date"
                   name="startDate"
@@ -357,7 +391,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
                   format={dateFormatForInputControl}
                   autoOk
                   value={values?.endDate || new Date(endDate)}
-                  minDate={new Date(startDate)}
+                  minDate={startDate}
                   // maxDate={new Date(endDate)}
                   onChange={(date) => {
                     handlePriceCalculation(date, 'endDate');
