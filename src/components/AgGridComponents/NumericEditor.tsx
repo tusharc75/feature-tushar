@@ -13,6 +13,8 @@ const KEY_ENTER = 13;
 const KEY_TAB = 9;
 
 export default forwardRef((props: any, ref) => {
+    console.log(props)
+
     const createInitialState = () => {
         let startValue;
         let highlightAllOnFocus = true;
@@ -133,13 +135,16 @@ export default forwardRef((props: any, ref) => {
         };
     });
 
-    return (
+    return (<React.Fragment>
         <input
             ref={refInput}
             value={value}
+            type="number"
+            onBlur={() => props.stopEditing()}
             onChange={(event) => setValue(event.target.value)}
-            onKeyDown={(event) => onKeyDown(event)}
+            //onKeyDown={(event) => onKeyDown(event)}
             style={{ width: '100%' }}
         />
+    </React.Fragment>
     );
 });

@@ -528,7 +528,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         : string().min(10, 'Mobile number is too short');
     } else if (input.type === 'multiSelect') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
-    } else if (input.type === 'percent') {
+    } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal') {
       schema[input.fieldName] = input.required
         ? number().required(`${input.fieldLabel} is required`).nullable()
         : number().nullable();
@@ -540,25 +540,23 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'switch' || input.type === 'checkBox') {
       schema[input.fieldName] = input.required ? boolean().required(`${input.fieldLabel} is required`) : boolean();
     } else if (input.type !== 'currencyAmount' && (input.type === 'converter' || input.isConverter === true)) {
-      input.displayUnits &&
-        input.displayUnits.forEach((_unit) => {
-          schema[input.fieldName + '_' + _unit.toLowerCase()] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
-        });
+      input.displayUnits && input.displayUnits.forEach((_unit) => {
+        schema[input.fieldName + '_' + _unit.toLowerCase()] = input.required ? number().required(`${input.fieldLabel} is required`).nullable() : number().nullable();
+      });
     } else if (input.type === 'currencyAmount') {
-      input.displayCurrency &&
-        input.displayCurrency.forEach((_currency) => {
-          if (input.isConverter && input.displayUnits.length) {
-            input.displayUnits.forEach((_unit) => {
-              schema[input.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] = input.required
-                ? string().required(`${input.fieldLabel} is required`)
-                : string();
-            });
-          } else {
-            schema[input.fieldName + '_' + _currency.toLowerCase()] = input.required
-              ? string().required(`${input.fieldLabel} is required`)
-              : string();
-          }
-        });
+      input.displayCurrency && input.displayCurrency.forEach((_currency) => {
+        if (input.isConverter && input.displayUnits.length) {
+          input.displayUnits.forEach((_unit) => {
+            schema[input.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] = input.required
+              ? number().required(`${input.fieldLabel} is required`).nullable()
+              : number().nullable();
+          });
+        } else {
+          schema[input.fieldName + '_' + _currency.toLowerCase()] = input.required
+            ? number().required(`${input.fieldLabel} is required`).nullable()
+            : number().nullable();
+        }
+      });
     } else if (input.type === 'date') {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
     } else if (input.type === 'freeStyleMultiSelect') {
