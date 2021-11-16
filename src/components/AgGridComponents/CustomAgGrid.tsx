@@ -205,6 +205,7 @@ export default function CustomAgGrid({
     if (params?.source === "uiColumnDragged") {
       const columnState = JSON.stringify(params.columnApi.getColumnState());
       localStorage.setItem(renderedFrom, columnState);
+      autosizeColumnsIfNeeded()
     }
   };
 
@@ -212,6 +213,7 @@ export default function CustomAgGrid({
     if (params?.source === "uiColumnDragged") {
       const columnState = JSON.stringify(params.columnApi.getColumnState());
       localStorage.setItem(renderedFrom, columnState);
+      autosizeColumnsIfNeeded()
     }
   }
 
@@ -241,6 +243,12 @@ export default function CustomAgGrid({
 
   }, [currentGridApi, selectedRecords])
 
+  useEffect(() => {
+    if (columnApi && loading === false) {
+      autosizeColumnsIfNeeded()
+    }
+  }, [columnApi])
+
   var customFilterParams = {
     filterOptions: ['contains'],
     textCustomComparator: () => {
@@ -249,6 +257,23 @@ export default function CustomAgGrid({
     // trimInput: true,
     // debounceMs: 1000,
   };
+
+  const autosizeColumnsIfNeeded = () => {
+    if (columnApi) {
+
+      let columns = columnApi.getAllDisplayedColumns();
+
+      let availableWidth = document.getElementById("grid-listing").clientWidth
+
+      let usedWidth = 0
+      columns.forEach(o => {
+        usedWidth = usedWidth + (o.actualWidth || o.minWidth)
+      })
+      if (usedWidth < availableWidth) {
+        columnApi.sizeColumnsToFit();
+      }
+    }
+  }
 
   const getActionColumn = () => {
     if (allowAction) {
@@ -259,7 +284,7 @@ export default function CustomAgGrid({
         headerName={actionLabel ? actionLabel : "Actions"}
         pinned={isMobile || isTablet ? false : 'right'}
         lockPinned={isMobile || isTablet ? false : true}
-        resizable={false}
+        resizable={true}
         sortable={false}
         editable={actionEditable}
         filter={false}
@@ -341,7 +366,7 @@ export default function CustomAgGrid({
             showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
           />
 
-          <div className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
+          <div id="grid-listing" className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
             <AgGridReact
               onFirstDataRendered={onFirstDataRendered}
               gridOptions={customGridOptions}

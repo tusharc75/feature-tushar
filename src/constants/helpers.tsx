@@ -98,7 +98,8 @@ export const localStorageKeys = {
 
 export const formFieldNames = {
   marketSegment: 'marketSegment',
-  subMarketSegment: 'subMarketSegment'
+  subMarketSegment: 'subMarketSegment',
+  parentAccount: 'parentAccount'
 };
 
 export const sidebarResource = {
