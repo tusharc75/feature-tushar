@@ -13,7 +13,6 @@ const KEY_ENTER = 13;
 const KEY_TAB = 9;
 
 export default forwardRef((props: any, ref) => {
-    console.log(props)
 
     const createInitialState = () => {
         let startValue;
