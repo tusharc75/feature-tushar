@@ -132,6 +132,7 @@ export default function AccountDetailPage(props) {
   const [sectionFields, setSectionFields] = useState([]);
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [showAtLast, setShowAtLast] = useState(false)
+  const [deleteAccount, setDeleteAccountId] = useState<any>({})
   const [additionalFieldName, setAdditionalFieldName] = useState("")
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [
@@ -159,6 +160,13 @@ export default function AccountDetailPage(props) {
       type: accountResource,
     },
   ];
+
+  useEffect(() => {
+    if (deleteAccount && deleteAccount?._id && !showConfirmBox) {
+      console.log('set show confirm box')
+      setShowConfirmBox(true)
+    }
+  }, [deleteAccount])
 
 
   const [tabValue, setTabValue] = useState(0);
@@ -575,16 +583,25 @@ export default function AccountDetailPage(props) {
   ].filter((d) => d.show);
 
   const handleDeleteAcc = () => {
-    if (accountData?._id) {
+    console.log('deleteAccount', deleteAccount)
+    let deleteId = deleteAccount && deleteAccount?._id ? deleteAccount._id : accountData?._id
+    if (deleteId) {
       axiosInstance()
-        .put(`/${accountApi}/remove`, { ids: [accountData._id] })
+        .put(`/${accountApi}/remove`, { ids: [deleteId] })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: "success",
             message: data.message,
           });
-          goBackToListing();
+          setDeleteAccountId({})
+          let fetchData = deleteAccount && deleteAccount?._id && deleteAccount?._id !== accountData?._id
+          if (fetchData) {
+            fetchAccountData()
+          }
+          else {
+            goBackToListing();
+          }
           setShowConfirmBox(false);
         })
         .catch((error) => {
@@ -936,6 +953,10 @@ export default function AccountDetailPage(props) {
                         onCreateNewAccount={handleCreateNewAccount}
                         canUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate}
                         canCreate={permissions && permissions[accountResource] && permissions[accountResource].isCreate}
+                        canDelete={permissions && permissions[accountResource] && permissions[accountResource].isDelete}
+                        handleDelete={(data) => {
+                          setDeleteAccountId(data);
+                        }}
                       />
                     </Box>
                   </TabPanel>
@@ -1403,9 +1424,12 @@ export default function AccountDetailPage(props) {
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
-            message={`Are you sure you want to delete this Account ${accountData.accountName || ""
+            message={`Are you sure you want to delete this Account ${deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ""
               }`}
-            onClose={() => setShowConfirmBox(false)}
+            onClose={() => {
+              setShowConfirmBox(false)
+              setDeleteAccountId({})
+            }}
             onOk={handleDeleteAcc}
           />
         ) : null}
