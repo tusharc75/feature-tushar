@@ -288,7 +288,7 @@ const AddExistingProduct = (props) => {
     const handleAdd = () => {
         dispatch({ type: "loading", loading: true });
 
-        axiosInstance().get(`${product.api}?limit=0&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords))}`).then(({ data: { data } }) => {
+        axiosInstance().get(`${product.api}?limit=0&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords).map(m => m._id))}`).then(({ data: { data } }) => {
             data.forEach((_d) => {
                 _d.productId = _d._id
                 if (_d.fields) {

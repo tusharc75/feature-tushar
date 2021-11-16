@@ -28,8 +28,8 @@ import SignatureDialog from '../../components/Helpers/SignatureDialog';
 import ViewSignsDialog from './ViewSignsDialog'
 
 const mappedStatus = {
-  "Sign-off - Dispatched & Sign-off - Received": "In-Transit",
-  "Sign-Off": "Delivered"
+  "Sign-off - Dispatched": "In-Transit",
+  "Sign-off - Received": "Delivered"
 }
 
 export default function DeliveryTicketDetail(props) {
@@ -235,14 +235,14 @@ export default function DeliveryTicketDetail(props) {
 
 
 
-  let label = deliveryTicketData ? deliveryTicketData?.status === "New" ? "Sign-off - Dispatched & Sign-off - Received" :
-    (deliveryTicketData?.status === "In-Transit") ? "Sign-Off" : "" : ""
+  let label = deliveryTicketData ? deliveryTicketData?.status === "New" ? "Sign-off - Dispatched" :
+    (deliveryTicketData?.status === "In-Transit") ? "Sign-off - Received" : "" : ""
 
   const handleSignature = (signedData) => {
     console.log(signedData)
     const { type, sign: newSign } = signedData;
     let stateArr = signatures;
-    stateArr.push({ type, signature: newSign, status: label });
+    stateArr.push({ type, signature: newSign, status: label === "Sign-off - Dispatched" ? "Start Delivery" : "Sign-Off" });
     setSignatures(stateArr)
 
     if (stateArr.length === 2 || stateArr.length === 4) {
@@ -367,20 +367,11 @@ export default function DeliveryTicketDetail(props) {
                   {
                     dataRows && dataRows.length ?
                       <>
-                        <Grid container>
-                          <Grid item xs={12}>
-                            <Box
-                              component="div"
-                              display="flex"
-                              alignItems="center"
-                              flexGrow={1}
-                            >
-                              <Box padding="5px">
-                                <Typography variant="subtitle1">
-                                  Product Inventory
-                                </Typography>
-                              </Box>
-                            </Box>
+                        <Grid container spacing={1} className="p-2">
+                          <Grid item xs={12} className="mt-2">
+                            <Typography variant="subtitle1" className="font-weight-bold text-primary">
+                              Serialized Assets
+                            </Typography>
                           </Grid>
                           <Grid item xs={12}>
                             <CustomAgGrid
@@ -474,7 +465,7 @@ export default function DeliveryTicketDetail(props) {
           <SignatureDialog
             submitting={submittingSign}
             label={label}
-            steps={label === "Sign-off - Dispatched & Sign-off - Received" ? ["Supervisor", "Delivery Person"] : ["Delivery Person", "Receiver"]}
+            steps={label === "Sign-off - Dispatched" ? ["Supervisor", "Delivery Person"] : ["Delivery Person", "Receiver"]}
             forDelivery={true}
             open={true}
             onClose={() => {

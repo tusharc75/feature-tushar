@@ -34,10 +34,8 @@ import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCe
 import HtmlTooltip from '../../components/CustomTooltipTitle'
 import BulkEditInventoryDialog from './BulkEditInventoryDialog'
 import SerializedAssetStep from "./SerializedAssetStep";
-import MaterialTableComponent from "../../components/Shared/MaterialTableComponent";
-import { Column } from "material-table";
 import moment from "moment";
-import { camelCase, startCase } from "lodash";
+import { camelCase, startCase, orderBy } from "lodash";
 import queryString from "query-string";
 import PackageProductsDialog from './PackageProductsDialog'
 import { FaWpforms } from "react-icons/fa";
@@ -347,7 +345,7 @@ const RentalManagementDetailsPage = () => {
 
       const newDataForReactTable = [...translateDataToTree(tempInventory ? [...tempInventory] : [], "parent", "treeId", "subRows")];
 
-      dispatch({ type: "initialize", data: newDataForReactTable, count: newDataForReactTable.length });
+      dispatch({ type: "initialize", data: orderBy(newDataForReactTable, ["order"], ["asc"]), count: newDataForReactTable.length });
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
       }, gridLoadingTimeout);
@@ -546,7 +544,7 @@ const RentalManagementDetailsPage = () => {
       Header: 'Start Date',
       Cell: ({ row }) => (
         row.original.startDate ? <h5 className="createBy text-truncate" title={`${moment(row.original.startDate.slice(0, 10)).format(dateFormat)}`}>
-          <span className="">{moment(row.original.startDate.slice(0, 10)).format("MM/DD/YYYY")}</span>
+          <span className="">{moment(row.original.startDate.slice(0, 10)).format(dateFormat)}</span>
         </h5> : <NoDataCell />
       )
     },
@@ -1029,9 +1027,10 @@ const RentalManagementDetailsPage = () => {
                                     ? "calc(100vw - 78px)"
                                     : showActivity ? "100%" : "calc(100vw - 100px)"
                               }
-                              height={"calc(100vh - 330px)"}
+                              height="calc(100vh - 330px)"
                             >
                               <CustomReactTable
+                                height="calc(100vh - 345px)"
                                 columns={columns}
                                 data={dataRows}
                                 rowStyle={(rowData) => ({
