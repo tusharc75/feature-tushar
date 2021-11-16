@@ -31,7 +31,9 @@ export default function ManageContactDialog(props) {
     owners,
     fromProject,
     isClone = false,
-    isAccountFieldDisable = false
+    isAccountFieldDisable = false,
+    isGetContactData = false,
+    onGetAddedContact = null
   } = props;
   const { accountApi, accountResource } = account;
   const {
@@ -141,6 +143,10 @@ export default function ManageContactDialog(props) {
     axiosInstance()
       .post(`/${contactApi}`, values)
       .then(({ data }) => {
+        console.log('isGetContactData', isGetContactData)
+        if (isGetContactData) {
+          onGetAddedContact(data.data)
+        }
         const newId = data.data._id;
         onClose({ fetch: true });
         onSuccess({ fetch: true, id: newId, data: data });
@@ -149,6 +155,7 @@ export default function ManageContactDialog(props) {
           type: "success",
           message: data.message,
         });
+
         if (isRedirectToDetailPage) {
           history.push(`${contactApi}/detail/${newId}`);
         }
@@ -227,6 +234,8 @@ export default function ManageContactDialog(props) {
         handleValuesChange={handleValuesChange}
         isClone={isClone}
         isAccountFieldDisable={isAccountFieldDisable}
+        contactApi={contactApi}
+        account={account}
       />
       {showAccountDialog ? (
         <ManageAccountDialog
