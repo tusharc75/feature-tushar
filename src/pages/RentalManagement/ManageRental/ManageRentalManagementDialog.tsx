@@ -17,7 +17,8 @@ import Skeleton from "@material-ui/lab/Skeleton/Skeleton";
 import { useHistory } from 'react-router-dom'
 import routes from "../../../components/Helpers/Routes";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
-import {FaDiceOne} from "react-icons/fa";
+import { FaDiceOne } from "react-icons/fa";
+import moment from "moment";
 
 const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManagementData = null, onClose, onSuccess, open }) => {
 
@@ -38,7 +39,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     }: any = useData();
     const [formValues, setFormValues] = useState({})
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-    
+
     useEffect(() => {
 
         const ownerCollabOptions = rentalData.fields.filter(
@@ -122,6 +123,11 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             }
             else {
                 let initialData = getObjKeys("", fieldsDataForCreate);
+
+                var today = new Date();
+                var tomorrow = new Date();
+                initialData["rentalEndDate"] = tomorrow.setDate(today.getDate() + 1);
+
                 initialData["currency"] = user.user?.brandCurrency || "";
                 setRentalData({
                     fields: fieldsDataForCreate,
@@ -342,7 +348,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                     form.name && (
                                                         <div key={i}>
                                                             <div className={"detail-box-content"}>
-                                                                <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                                                <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
                                                                 <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
                                                             </div>
                                                             {/*<h2 className="form-label-style">{form.name}</h2>*/}
@@ -446,6 +452,48 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                             values["owner"]
                                                                                         );
                                                                                     }}
+                                                                                />
+                                                                            ) : field.fieldName === "rentalStartDate" ? (
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    maxDate={moment(values["rentalEndDate"]).subtract(1, "day")}
+                                                                                />
+                                                                            ) : field.fieldName === "rentalEndDate" ? (
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    minDate={moment(values["rentalStartDate"]).add(1, "day")}
                                                                                 />
                                                                             ) : (
                                                                                 <FormTypes
