@@ -126,7 +126,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
 
                 var today = new Date();
                 var tomorrow = new Date();
-                initialData["rentalEndDate"] = tomorrow.setDate(today.getDate() + 1);
+                initialData["rentalEndDate"] = new Date(tomorrow.setDate(today.getDate() + 1));
 
                 initialData["currency"] = user.user?.brandCurrency || "";
                 setRentalData({
