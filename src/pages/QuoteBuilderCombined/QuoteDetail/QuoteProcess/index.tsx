@@ -635,13 +635,13 @@ export default function QuoteProcess(props) {
   const refreshProducts = (data) => {
     fetchDoaLimit();
 
-    if (ProcessStatus === 'New' && data.length === 0) {
+    if (ProcessStatus === 'New' && data?.product?.length === 0) {
       setNextStep(false);
     }
-    if (ProcessStatus === 'New' && data.length > 0) {
+    if (ProcessStatus === 'New' && data?.product?.length > 0) {
       setNextStep(true);
     }
-    if (ProcessStatus === 'Price Builder' && data.length === 0) {
+    if (ProcessStatus === 'Price Builder' && data?.product?.length === 0) {
       axiosInstance()
         .post(`quote-builder/updateprocess/${quoteData._id}?version=${currentVersion}`, {
           processStatus: 'New'
