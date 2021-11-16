@@ -39,6 +39,7 @@ import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import { HiBadgeCheck } from "react-icons/hi"
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
+import { isMobile, isTablet } from 'react-device-detect';
 
 const AccTypes = [
   {
@@ -708,7 +709,7 @@ export default function Account(props) {
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
               <div className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
                 <MdAccountCircle className="headerLogo" /> <span id="resourceHeader" className="listingHeader">{routes[accountResource].title}</span>
-                <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
+                <div className={`d-flex align-items-center gap-1 layout-for-mobile ${accountClass.account_header_add_btn_action_btn_group}`}>
                   {AccTypes && (
                     <ToggleButtonGroup
                       id="resourceTypeSelector"
@@ -727,6 +728,9 @@ export default function Account(props) {
                       })}
                     </ToggleButtonGroup>
                   )}
+
+
+
                   <ButtonGroup
                     id="approveDisapprove"
                     size="small"
@@ -736,7 +740,6 @@ export default function Account(props) {
                     ref={anchorRef}
                     aria-label="small outlined button group"
                   >
-                    <Button>{options[selectedIndex]}</Button>
                     <Button
                       color="primary"
                       size="small"
@@ -745,8 +748,10 @@ export default function Account(props) {
                       aria-label="select merge strategy"
                       aria-haspopup="menu"
                       onClick={handleToggle}
+                      className="all-button"
                     >
-                      <ArrowDropDownIcon />
+                      {options[selectedIndex]}
+                      <ArrowDropDownIcon className="all-button-sub-icon"/>
                     </Button>
                   </ButtonGroup>
                   <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
@@ -779,10 +784,12 @@ export default function Account(props) {
                 </div>
               </div>
             </Grid>
-            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1" justify="flex-end">
-              <div id="resourceOperations" className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
-                <SearchBox onSearch={handleSearch} searchbox="account_header_search_bar" width="300px" value={search} />
-                <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
+            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1 " justify="flex-end" >
+              <div id="resourceOperations" className={`${accountClass.account_header} ${accountClass['account_header-mobile']}` } style={{flexGrow:1}}>
+                <Grid sm={12} className={styles.search_box_layout} style={{display:"flex" , flexGrow: 1 }} >
+                <SearchBox onSearch={handleSearch} searchbox="account_header_search_bar" style={{flexGrow:1}} value={search} />
+                </Grid>
+                <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`} >
                   {accountPermissions.isCreate && (
                     <Button
                       variant="contained"

@@ -411,6 +411,7 @@ const LeadDetailsPage = () => {
                 activeStep={activeStep}
                 handleMarkAsCompleted={handleMarkAsCompleted}
                 hideBackButton={isLeadAlreadyConvertedToOpportunity}
+                className="stepper-box-layout"
               />
 
               {loading ? (
