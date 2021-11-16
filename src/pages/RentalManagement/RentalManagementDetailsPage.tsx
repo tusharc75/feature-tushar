@@ -544,7 +544,7 @@ const RentalManagementDetailsPage = () => {
       Header: 'Start Date',
       Cell: ({ row }) => (
         row.original.startDate ? <h5 className="createBy text-truncate" title={`${moment(row.original.startDate.slice(0, 10)).format(dateFormat)}`}>
-          <span className="">{moment(row.original.startDate.slice(0, 10)).format("MM/DD/YYYY")}</span>
+          <span className="">{moment(row.original.startDate.slice(0, 10)).format(dateFormat)}</span>
         </h5> : <NoDataCell />
       )
     },
@@ -1027,9 +1027,10 @@ const RentalManagementDetailsPage = () => {
                                     ? "calc(100vw - 78px)"
                                     : showActivity ? "100%" : "calc(100vw - 100px)"
                               }
-                              height={"calc(100vh - 330px)"}
+                              height="calc(100vh - 330px)"
                             >
                               <CustomReactTable
+                                height="calc(100vh - 345px)"
                                 columns={columns}
                                 data={dataRows}
                                 rowStyle={(rowData) => ({

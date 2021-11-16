@@ -1232,7 +1232,12 @@ export const translateDataToTree = (data, parentProperty, childProperty, childre
           let temp = JSON.parse(JSON.stringify(childrens))
           temp.splice(index, 1)
           translator([current], temp)
-          typeof parent[childrenPropertyToStore] !== 'undefined' ? parent[childrenPropertyToStore].push(current) : parent[childrenPropertyToStore] = [current]
+
+          if (typeof parent[childrenPropertyToStore] !== 'undefined') {
+            parent[childrenPropertyToStore].push(current)
+          } else {
+            parent[childrenPropertyToStore] = [current]
+          }
         }
       })
     })

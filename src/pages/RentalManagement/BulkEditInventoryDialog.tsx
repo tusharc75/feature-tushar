@@ -40,12 +40,13 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
   const [isDisabled, setDisabled] = useState(false);
   const [errors, setErrors] = useState(null);
   const [units, setUnits] = useState([
-    { "optionLabel": "Price Per Well", "optionValue": "Price Per Well" },
+    { "optionLabel": "One Well Pad", "optionValue": "One Well Pad" },
     { "optionLabel": "Two Well Pad", "optionValue": "Two Well Pad" },
     { "optionLabel": "Three Well Pad", "optionValue": "Three Well Pad" },
     { "optionLabel": "Four Well Pad", "optionValue": "Four Well Pad" },
     { "optionLabel": "Five Well Pad", "optionValue": "Five Well Pad" },
     { "optionLabel": "Six Well Pad", "optionValue": "Six Well Pad" },
+    { "optionLabel": "Pieces", "optionValue": "Pieces" },
   ]);
 
   useEffect(() => {
@@ -310,7 +311,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
               <Grid item xs={12} sm={6}>
                 <KeyboardDatePicker
                   maxDate={new Date(endDate)}
-                  minDate={new Date(startDate)}
+                  // minDate={new Date(startDate)}
                   label="Start Date"
                   name="startDate"
                   fullWidth
@@ -357,7 +358,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = ({ calculatePrice, onClose,
                   autoOk
                   value={values?.endDate || new Date(endDate)}
                   minDate={new Date(startDate)}
-                  maxDate={new Date(endDate)}
+                  // maxDate={new Date(endDate)}
                   onChange={(date) => {
                     handlePriceCalculation(date, 'endDate');
                     handleChange('endDate', date)

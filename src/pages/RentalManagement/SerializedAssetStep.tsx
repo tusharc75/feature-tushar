@@ -430,9 +430,10 @@ const SerializedAssetStep = (props) => {
                     ? "calc(100vw - 78px)"
                     : showActivity ? "100%" : "calc(100vw - 100px)"
               }
-              height={"calc(100vh - 350px)"}
+              height="calc(100vh - 350px)"
             >
               <CustomReactTable
+                height="calc(100vh - 365px)"
                 columns={columns}
                 data={rows}
                 rowStyle={(rowData) => ({

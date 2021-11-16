@@ -43,7 +43,8 @@ export default function CustomReactTable({
     onSelect,
     rowStyle,
     childrenProperty,
-    uniqueKey
+    uniqueKey,
+    height = "100%"
     // rowCount,
     // customPageSize = 20,
 }) {
@@ -113,18 +114,18 @@ export default function CustomReactTable({
                 // The header can use the table's getToggleAllRowsSelectedProps method
                 // to render a checkbox
                 Header: ({ getToggleAllRowsSelectedProps }) => (
-                  <div>
-                    <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
-                  </div>
+                    <div>
+                        <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
+                    </div>
                 ),
                 // The cell can use the individual row's getToggleRowSelectedProps method
                 // to the render a checkbox
                 Cell: ({ row }) => (
-                  <div>
-                    <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-                  </div>
+                    <div>
+                        <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+                    </div>
                 ),
-              },
+            },
             ...columns
         ],
         []
@@ -148,17 +149,21 @@ export default function CustomReactTable({
         // previousPage,
         // setPageSize,
         selectedFlatRows,
+        toggleAllRowsExpanded,
         // state: {
-        //     pageIndex,
-        //     pageSize,
-        //     // selectedRowIds
+        //         pageIndex,
+        //         pageSize,
+        //         // selectedRowIds
+        //     expanded
         // },
     } = useTable(
         {
             columns: newColumns,
             data,
             onSelect,
-            // initialState: { pageIndex: 0 },
+            initialState: {
+                autoResetExpanded: false
+            },
             defaultColumn
         },
         useFlexLayout,
@@ -166,6 +171,13 @@ export default function CustomReactTable({
         // usePagination,
         useRowSelect
     )
+
+    useEffect(() => {
+        //  Suggested by aman - 16-Nov-2021 - PO-174
+        if (rows?.length <= 20) {
+            toggleAllRowsExpanded()
+        }
+    }, [])
 
     // useEffect(() => {
     //     console.log(rows)
@@ -183,12 +195,13 @@ export default function CustomReactTable({
         <>
             <div style={{
                 display: "block",
-                overflow: "auto"
+                overflow: "auto",
+                height: height ?? "100%"
                 // maxWidth: "100%",
                 // overflowX: "scroll",
                 // overflowY: "hidden",
                 // borderBottom: "1px solid black"
-            }}>
+            }} className="border">
                 <MaUTable {...getTableProps()} size="small" className="tableWrap">
                     <TableHead style={{ overflowY: "auto", overflowX: "hidden" }}>
                         {headerGroups.map(headerGroup => (
