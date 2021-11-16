@@ -99,7 +99,7 @@ const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOr
             gridApi.setRowData([]);
         }
         axiosInstance().get(`${product.api}`).then(({ data }) => {
-            data.data = data.data?.filter(u => u?.serializedProduct).map((u) => ({
+            data.data = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
                 productCategory: u.productCategory?.optionLabel,

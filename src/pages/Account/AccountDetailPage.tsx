@@ -15,7 +15,7 @@ import { isMobile, isTablet } from "react-device-detect";
 
 import { useHistory, useParams } from "react-router-dom";
 import { reverse as _reverse } from "lodash";
-import { Skeleton } from "@material-ui/lab";
+import { Alert, Skeleton } from "@material-ui/lab";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import { accountPage } from "../../routes/Accounts";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -73,6 +73,7 @@ import ProcessFlow from "../../components/ProcessFlow";
 import AdditionalDialogPopUp from "../../components/AdditionalDialogPopUp";
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 
 function DisplayData({ label, value, icon }) {
   return (
@@ -96,6 +97,7 @@ export default function AccountDetailPage(props) {
     accountBreadcrumb,
     contact: { contactResource, contactRoute, contactApi },
   } = props;
+  const { isOffline, offlineFieldsData, offlineGridData, updateOfflineGridData } = useContext(CustomOfflineContext);
 
   const {
     state: { user, permissions, selectedEntity, tour }, dispatch
@@ -139,6 +141,7 @@ export default function AccountDetailPage(props) {
     showAccountHierarchyInFullScreenDialog,
     setShowAccountHierarchyInFullScreenDialog,
   ] = useState(false);
+  const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false)
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
@@ -330,125 +333,114 @@ export default function AccountDetailPage(props) {
       });
   };
 
-  const fetchAccountData = () => {
+  const fetchAccountData = async () => {
     setLoading(true);
 
-    axiosInstance()
-      .get(`/${accountApi}/${id}`)
-      .then(({ data: { data } }) => {
-        setCustomizedRoutes([accountBreadcrumb, { title: data.accountName }]);
-        setHeadingLbl(data.accountName || "");
-        handleMainPonts(data);
-        setAccountData(data);
-        setCanEdit(
-          [...(data?.collaborator ?? []), data?.owner].some(
-            (obj) => obj.optionValue === user.user._id
-          )
-        );
+    let data;
 
-        let parentHierarchyData = []
-        if (data.parentHierarchy && data.parentHierarchy.length > 0) {
-          data.parentHierarchy.map(o => {
-            if (Object.keys(o).length) {
-              if (typeof o.owner === "string") {
-                o.owner = {
-                  optionValue: o.owner,
-                  optionLabel: o.owner
-                }
-              }
-              o.canEdit = [...(data?.collaborator ?? []), o.owner].some(
-                (obj) => obj.optionValue === user.user._id
-              )
-              parentHierarchyData.push(o)
+    if (!isOffline) {
+      const response: any = await axiosInstance().get(`/${accountApi}/${id}`);
+      data = response?.data?.data;
+    } else {
+      data = offlineGridData ? offlineGridData[accountResource]?.find(d => d._id === id) : null
+    }
+
+    if (localStorage.getItem("offlineDataToSave")) {
+      const offlineDataToSave = JSON.parse(localStorage.getItem("offlineDataToSave"))
+      if (offlineDataToSave[accountResource]) {
+        setIsInOfflineSaveQueue(offlineDataToSave[accountResource]?.some(d => d.values._id === id));
+      }
+    }
+
+    try {
+      updateOfflineGridData(accountResource, [data], []);
+    } catch (ex) {
+      console.error(`${accountResource}: Error while adding/updating data for Offline context. Error: ${ex.message}`)
+    }
+
+    setCustomizedRoutes([accountBreadcrumb, { title: data.accountName }]);
+    setHeadingLbl(data.accountName || "");
+    handleMainPonts(data);
+    setAccountData(data);
+    setCanEdit(
+      [...(data?.collaborator ?? []), data?.owner].some(
+        (obj) => obj.optionValue === user.user._id
+      )
+    );
+
+    if (data.parentHierarchy && data.parentHierarchy.length > 0) {
+      let accounts = [
+        ...data.parentHierarchy,
+        {
+          _id: data._id,
+          accountName: data.accountName,
+          typeOfAccount: data.typeOfAccount,
+          industry: data.industry,
+          typeOfBusiness: data.typeOfBusiness,
+          phone: data.phone,
+          type: "child",
+          current: true,
+          parentAccount: data.parentAccount
+            ? {
+              _id: data.parentAccount.optionValue,
+              accountName: data.parentAccount.optionLabel,
             }
-          })
-        }
-        if (parentHierarchyData && parentHierarchyData.length > 0) {
-          let accounts = [
-            ...data.parentHierarchy,
-            {
-              _id: data._id,
-              accountName: data.accountName,
-              typeOfAccount: data.typeOfAccount,
-              industry: data.industry,
-              typeOfBusiness: data.typeOfBusiness,
-              phone: data.phone,
-              type: "child",
-              current: true,
-              parentAccount: data.parentAccount
-                ? {
-                  _id: data.parentAccount.optionValue,
-                  accountName: data.parentAccount.optionLabel,
-                }
-                : null,
-              canEdit: [...(data?.collaborator ?? []), data?.owner].some(
-                (obj) => obj.optionValue === user.user._id
-              )
-              // parentAccountName: data.parentAccount?.optionLabel,
-              // parentAccount: data.parentAccount?.optionValue
-            },
-          ];
-          let newData = [];
+            : null,
+          // parentAccountName: data.parentAccount?.optionLabel,
+          // parentAccount: data.parentAccount?.optionValue
+        },
+      ];
+      let newData = [];
 
-          accounts.forEach((account) => {
-            if (isObjectEmpty(account)) return true;
+      accounts.forEach((account) => {
+        if (isObjectEmpty(account)) return true;
 
-            const updatedAccount = {
-              _id: account._id,
-              accountName: account.accountName,
-              typeOfAccount: account.typeOfAccount,
-              industry: account.industry,
-              typeOfBusiness: account.typeOfBusiness,
-              phone: account.phone,
-              type: "child",
-              current: account.current,
-              canEdit: account?.canEdit ?? [...(data?.collaborator ?? []), data?.owner].some(
-                (obj) => obj.optionValue === user.user._id
-              )
-            };
+        const updatedAccount = {
+          _id: account._id,
+          accountName: account.accountName,
+          typeOfAccount: account.typeOfAccount,
+          industry: account.industry,
+          typeOfBusiness: account.typeOfBusiness,
+          phone: account.phone,
+          type: "child",
+          current: account.current,
+        };
 
-            if (account.parentAccount) {
-              updatedAccount["parentAccountText"] =
-                account.parentAccount.accountName;
-              updatedAccount["parentAccountId"] = account.parentAccount._id;
-            } else {
-              updatedAccount["type"] = "parent";
-            }
-
-            newData.push(updatedAccount);
-          });
-
-          setAccountHierarchyData([...newData]);
+        if (account.parentAccount) {
+          updatedAccount["parentAccountText"] =
+            account.parentAccount.accountName;
+          updatedAccount["parentAccountId"] = account.parentAccount._id;
         } else {
-          setAccountHierarchyData([
-            {
-              _id: data._id,
-              accountName: data.accountName,
-              typeOfAccount: data.typeOfAccount,
-              industry: data.industry,
-              typeOfBusiness: data.typeOfBusiness,
-              phone: data.phone,
-              current: true,
-              canEdit: [...(data?.collaborator ?? []), data?.owner].some(
-                (obj) => obj.optionValue === user.user._id
-              )
-            },
-          ]);
+          updatedAccount["type"] = "parent";
         }
 
-        // if (accountFields.length === 0) {
-        //   getAccountFields();
-        // } else {
-        //   setLoading(false);
-        // }
-        getAccountFields(data);
-        setLoading(false);
-        initializeGraphData();
-      })
-      .catch((error) => {
-        setLoading(false);
-        toastConfig.setToastConfig(error);
+        newData.push(updatedAccount);
       });
+
+      setAccountHierarchyData([...newData]);
+    } else {
+      setAccountHierarchyData([
+        {
+          _id: data._id,
+          accountName: data.accountName,
+          typeOfAccount: data.typeOfAccount,
+          industry: data.industry,
+          typeOfBusiness: data.typeOfBusiness,
+          phone: data.phone,
+          current: true,
+        },
+      ]);
+    }
+
+    // if (accountFields.length === 0) {
+    //   getAccountFields();
+    // } else {
+    //   setLoading(false);
+    // }
+    getAccountFields(data);
+    setLoading(false);
+    initializeGraphData();
+
   };
 
   const handleMainPonts = (data) => {
@@ -464,52 +456,56 @@ export default function AccountDetailPage(props) {
     setMainPoints(mainPoints);
   };
 
-  const getAccountFields = (accountData = {}) => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource[accountResource]}`)
-      .then(({ data: { data } }) => {
+  const getAccountFields = async (accountData = {}) => {
 
-        setAccountFields(data.filter((d) => d.isUpdate || d.isRead));
-        setFormValues(getObjKeysWithValues(
-          accountData,
-          data.map((f) => {
-            return f.fieldData;
-          })
-        ))
+    let data;
+    if (!isOffline) {
+      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource[accountResource]}`)
+      data = response?.data?.data
+    } else {
+      data = offlineFieldsData[accountResource];
+    }
 
-        setLoading(false);
+    setAccountFields(data.filter((d) => d.isUpdate || d.isRead));
+    setFormValues(getObjKeysWithValues(
+      accountData,
+      data.map((f) => {
+        return f.fieldData;
+      })
+    ))
 
-        const processSteps = data.find(
-          (d) => d.isRead && d.fieldData.type.toLowerCase() === "process"
-        );
+    setLoading(false);
 
-        if (processSteps && processSteps.isRead) {
-          setSteps(
-            processSteps.fieldData.option.map((m) => {
-              return {
-                text: m.optionLabel,
-                canCompleteManually: true,
-              };
-            })
-          );
-          setShowAdditionalField(
-            processSteps.fieldData.showAdditionalInfoPopup
-          );
-        }
+    const processSteps = data.find(
+      (d) => d.isRead && d.fieldData.type.toLowerCase() === "process"
+    );
 
-        data.map((d) => {
-          if (
-            d.fieldData.sectionName ==
-            processSteps?.fieldData.additionalInfoSection &&
-            sectionFields.length == 0
-          ) {
-            setSectionFields((prevItems) => {
-              return [...prevItems, d];
-            });
-            setAdditionalFieldName(d.fieldData.sectionName)
-          }
+    if (processSteps && processSteps.isRead) {
+      setSteps(
+        processSteps.fieldData.option.map((m) => {
+          return {
+            text: m.optionLabel,
+            canCompleteManually: true,
+          };
+        })
+      );
+      setShowAdditionalField(
+        processSteps.fieldData.showAdditionalInfoPopup
+      );
+    }
+
+    data.map((d) => {
+      if (
+        d.fieldData.sectionName ==
+        processSteps?.fieldData.additionalInfoSection &&
+        sectionFields.length == 0
+      ) {
+        setSectionFields((prevItems) => {
+          return [...prevItems, d];
         });
-      });
+        setAdditionalFieldName(d.fieldData.sectionName)
+      }
+    });
   };
 
   const quickLinks: IQuickLinks[] = [
@@ -641,23 +637,51 @@ export default function AccountDetailPage(props) {
       updatedData._id = accountData._id
     }
 
-    axiosInstance()
-      .put(`/${accountApi}`, updatedData)
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
+    if (!isOffline) {
+      axiosInstance()
+        .put(`/${accountApi}`, updatedData)
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+          setLoading(false);
+          setOpenUpdateDialog(false);
+          fetchAccountData();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setLoading(false);
         });
-        setEditAccountData({})
-        setLoading(false);
-        setOpenUpdateDialog(false);
-        fetchAccountData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setLoading(false);
+    } else {
+      let storedData = {};
+
+      if (localStorage.getItem("offlineDataToSave")) {
+        storedData = JSON.parse(localStorage.getItem("offlineDataToSave"));
+      }
+
+      const dataToSave = {
+        api: `/${accountApi}`,
+        method: "put",
+        values: updatedData
+      };
+
+      if (!storedData[accountResource]) {
+        storedData[accountResource] = [];
+      }
+      storedData[accountResource].push(dataToSave)
+
+      localStorage.setItem("offlineDataToSave", JSON.stringify(storedData));
+
+      setLoading(false);
+      toastConfig.setToastConfig({
+        open: true,
+        type: "info",
+        message: "Updates are in offline state, it will be affected once you will be in network",
       });
+      setOpenUpdateDialog(false);
+    }
   };
 
   const goBackToListing = () => {
@@ -806,6 +830,7 @@ export default function AccountDetailPage(props) {
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={customizedRoutes} />
       </Grid>
+
       <div
         className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}
         style={{
@@ -826,7 +851,8 @@ export default function AccountDetailPage(props) {
                 mainPoints={mainPoints}
                 showHeading={true}
               >
-                {permissions &&
+                {
+                  !isOffline && permissions &&
                   permissions[accountResource] &&
                   permissions[accountResource].approveAccount && (
                     <>
@@ -848,9 +874,11 @@ export default function AccountDetailPage(props) {
                           : "Approve"}
                       </Button>
                     </>
-                  )}
+                  )
+                }
 
-                {permissions &&
+                {
+                  permissions &&
                   permissions[accountResource] &&
                   permissions[accountResource].isUpdate &&
                   canEdit && (
@@ -865,20 +893,23 @@ export default function AccountDetailPage(props) {
                         Edit
                       </Button>
                     </>
-                  )}
+                  )
+                }
 
-                {permissions &&
-                  permissions[accountResource] &&
-                  permissions[accountResource].isDelete &&
-                  accountData?.owner?.optionValue &&
-                  user?.user?._id &&
-                  accountData.owner.optionValue === user.user._id ? (
-                  <DeleteButton
-                    id="detailDeleteButton"
-                    text="Delete"
-                    onClick={() => setShowConfirmBox(true)}
-                  />
-                ) : null}
+                {
+                  !isOffline && permissions &&
+                    permissions[accountResource] &&
+                    permissions[accountResource].isDelete &&
+                    accountData?.owner?.optionValue &&
+                    user?.user?._id &&
+                    accountData.owner.optionValue === user.user._id ? (
+                    <DeleteButton
+                      id="detailDeleteButton"
+                      text="Delete"
+                      onClick={() => setShowConfirmBox(true)}
+                    />
+                  ) : null
+                }
               </DetailsPageHeader>
             }
             <ProcessFlow
@@ -930,14 +961,23 @@ export default function AccountDetailPage(props) {
                       aria-controls="a11y-tabpanel-1"
                       id="a11y-tab-1"
                     />
-                    <Tab
-                      label="OM-Neurons"
-                      aria-controls="a11y-tabpanel-2"
-                      id="a11y-tab-2"
-                    />
+
+                    {
+                      !isOffline && <Tab
+                        label="OM-Neurons"
+                        aria-controls="a11y-tabpanel-2"
+                        id="a11y-tab-2"
+                      />
+                    }
                   </Tabs>
                   <TabPanel value={tabValue} index={0}>
                     <Box>
+                      {
+                        isInOfflineSaveQueue && <div className="px-3 mt-2">
+                          <Alert variant="filled" severity="info">Updates are in offline state, it will be affected once you will be in network</Alert>
+                        </div>
+                      }
+
                       {showAtLast ? (<DetailsPage data={accountData} fields={accountFields} />) :
                         <DetailsPage data={accountData} fields={filteredAccountFields} />
                       }
