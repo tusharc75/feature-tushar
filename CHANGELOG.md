@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.38.0](https://github.com/vebholic/oms_frontend/compare/v1.37.0...v1.38.0) (2021-11-16)
+
+
+### Features
+
+* - Add existing products issue fixed in quotes ([ab2d531](https://github.com/vebholic/oms_frontend/commit/ab2d531a30e9baf9ade36285cc2f8c8c6768020e))
+* - Checkbox hide done on last step in rental management ([8a710c4](https://github.com/vebholic/oms_frontend/commit/8a710c468472e8c483666591a053691a7768214f))
+* - Order by fixed in rental management ([c5191eb](https://github.com/vebholic/oms_frontend/commit/c5191eb8769d25b262f03543ff99f3f934425cf4))
+* - PO-163 - BOM changed to BOM - Product in serialized assets ([bf14d3b](https://github.com/vebholic/oms_frontend/commit/bf14d3b9e5d158db2fda4f20c35bfb9f0f874811))
+* - PO-165 - Products not comming on plus click issue fixed ([c157753](https://github.com/vebholic/oms_frontend/commit/c1577534c61ef5a5324c6ee7461db3a7521fbe81))
+* - Product not coming on add product master button click ([27d75ad](https://github.com/vebholic/oms_frontend/commit/27d75ad482e760ed3411c2bba3b7b8dd73c72ade))
+* - Rental Management Changes ([c626eb9](https://github.com/vebholic/oms_frontend/commit/c626eb953b49c95d69e01a8ceda42e5206670028))
+* - Restriction from next button is removed if productInPackage has 0 but packa ([3ce5bea](https://github.com/vebholic/oms_frontend/commit/3ce5beade52afd47c51822e2af08946c0341ebed))
+* - Signature Changes Done ([4a3bf1a](https://github.com/vebholic/oms_frontend/commit/4a3bf1aa4c4417ca80bb40082d4629ba7f2a9bba))
+* - Signature pad is comming when delivery person signed ([c940d91](https://github.com/vebholic/oms_frontend/commit/c940d91bdce4726568a4ec91fba24c3da1ffb30c))
+* - Signature time added ([244e240](https://github.com/vebholic/oms_frontend/commit/244e240a1a66a336a0710acaa46e3687285f13a0))
+* excel columns quote ([80d4df0](https://github.com/vebholic/oms_frontend/commit/80d4df092f84f43dc82b3a1d1e1fb1dd5cc95f5d))
+* po ([03b0919](https://github.com/vebholic/oms_frontend/commit/03b09197a09e1cb42e5207653a30a907cc4c3043))
+* po changes ([1641832](https://github.com/vebholic/oms_frontend/commit/1641832dc07a69f05cdb10492f0fd0d5c8b08d15))
+* pO changes ([3e0ff22](https://github.com/vebholic/oms_frontend/commit/3e0ff22f69ebbe1460077fe4ff272377a509af30))
+* receiving ticket sign changes ([7289e7a](https://github.com/vebholic/oms_frontend/commit/7289e7a8e4387132e03a57591a64d085fcc05b26))
+* receiving ticket signature changes ([17807cd](https://github.com/vebholic/oms_frontend/commit/17807cd2082560ee7e44024447beb78f991a7878))
+* visiable columns changes according to new api ([e27ea9e](https://github.com/vebholic/oms_frontend/commit/e27ea9eb5ca632fd2fd9ae0b29301ed0f30d9ba0))
+
+
+### Bug Fixes
+
+* excel column fix ([94be151](https://github.com/vebholic/oms_frontend/commit/94be15183318fc104f45b451be900730628cea3e))
+* **formbuilder:** added lookup resources ([e4811b4](https://github.com/vebholic/oms_frontend/commit/e4811b44a48bda066fcc21ad91541ee184aa5b5e))
+* **formbuilder:** added lookup resources ([1335169](https://github.com/vebholic/oms_frontend/commit/1335169c338f76f44ee172dde222d97d8a594c2e))
+* **formbuilder:** spelling change in PO lookup ([7c63f7e](https://github.com/vebholic/oms_frontend/commit/7c63f7ecbf91c8e753dcfd2855057927cec9308a))
+* next button disable ([9b04dbc](https://github.com/vebholic/oms_frontend/commit/9b04dbcfbaf36e4987d57d6bedb19d19d10495b6))
+* po changes ([f352458](https://github.com/vebholic/oms_frontend/commit/f352458aeaef669801f53edc05dd9377d3d88912))
+* rental ([f571df9](https://github.com/vebholic/oms_frontend/commit/f571df92331a988c247d140dd8c8eb5353e2d52d))
+* rental ([e8ac758](https://github.com/vebholic/oms_frontend/commit/e8ac758dd0168bb2a85fd8ace51901620657e705))
+* visible columns name ([ffaff0d](https://github.com/vebholic/oms_frontend/commit/ffaff0d4f6753a830b667b49023af437d69586ae))
+
 ## [1.37.0](https://github.com/vebholic/oms_frontend/compare/v1.36.0...v1.37.0) (2021-11-15)
 
 
