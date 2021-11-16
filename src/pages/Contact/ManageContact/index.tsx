@@ -143,7 +143,6 @@ export default function ManageContactDialog(props) {
     axiosInstance()
       .post(`/${contactApi}`, values)
       .then(({ data }) => {
-        console.log('isGetContactData', isGetContactData)
         if (isGetContactData) {
           onGetAddedContact(data.data)
         }

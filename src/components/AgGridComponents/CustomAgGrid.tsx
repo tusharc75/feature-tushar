@@ -205,7 +205,7 @@ export default function CustomAgGrid({
     if (params?.source === "uiColumnDragged") {
       const columnState = JSON.stringify(params.columnApi.getColumnState());
       localStorage.setItem(renderedFrom, columnState);
-      autosizeColumnsIfNeeded()
+      // autosizeColumnsIfNeeded()
     }
   };
 
@@ -213,7 +213,7 @@ export default function CustomAgGrid({
     if (params?.source === "uiColumnDragged") {
       const columnState = JSON.stringify(params.columnApi.getColumnState());
       localStorage.setItem(renderedFrom, columnState);
-      autosizeColumnsIfNeeded()
+      // autosizeColumnsIfNeeded()
     }
   }
 
@@ -243,11 +243,11 @@ export default function CustomAgGrid({
 
   }, [currentGridApi, selectedRecords])
 
-  useEffect(() => {
-    if (columnApi && loading === false) {
-      autosizeColumnsIfNeeded()
-    }
-  }, [columnApi])
+  // useEffect(() => {
+  //   if (columnApi && loading === false) {
+  //     autosizeColumnsIfNeeded()
+  //   }
+  // }, [columnApi])
 
   var customFilterParams = {
     filterOptions: ['contains'],
@@ -258,22 +258,22 @@ export default function CustomAgGrid({
     // debounceMs: 1000,
   };
 
-  const autosizeColumnsIfNeeded = () => {
-    if (columnApi) {
+  // const autosizeColumnsIfNeeded = () => {
+  //   if (columnApi) {
 
-      let columns = columnApi.getAllDisplayedColumns();
+  //     let columns = columnApi.getAllDisplayedColumns();
 
-      let availableWidth = document.getElementById("grid-listing").clientWidth
+  //     let availableWidth = document.getElementById("grid-listing").clientWidth
 
-      let usedWidth = 0
-      columns.forEach(o => {
-        usedWidth = usedWidth + (o.actualWidth || o.minWidth)
-      })
-      if (usedWidth < availableWidth) {
-        columnApi.sizeColumnsToFit();
-      }
-    }
-  }
+  //     let usedWidth = 0
+  //     columns.forEach(o => {
+  //       usedWidth = usedWidth + (o.actualWidth || o.minWidth)
+  //     })
+  //     if (usedWidth < availableWidth) {
+  //       columnApi.sizeColumnsToFit();
+  //     }
+  //   }
+  // }
 
   const getActionColumn = () => {
     if (allowAction) {

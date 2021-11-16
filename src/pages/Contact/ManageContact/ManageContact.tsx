@@ -203,7 +203,6 @@ export default function ManageContact(props) {
   };
 
   const handleGetAddedContact = (data, selectedAccount) => {
-    console.log('data', data, 'selectedAccount', selectedAccount)
     if (data?._id) {
       let tempReportsToMainDataSource = [
         ...reportsToMainDataSource,
