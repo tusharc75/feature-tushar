@@ -368,7 +368,24 @@ export default function AccountDetailPage(props) {
       )
     );
 
+    let parentHierarchyData = []
     if (data.parentHierarchy && data.parentHierarchy.length > 0) {
+      data.parentHierarchy.map(o => {
+        if (Object.keys(o).length) {
+          if (typeof o.owner === "string") {
+            o.owner = {
+              optionValue: o.owner,
+              optionLabel: o.owner
+            }
+          }
+          o.canEdit = [...(data?.collaborator ?? []), o.owner].some(
+            (obj) => obj.optionValue === user.user._id
+          )
+          parentHierarchyData.push(o)
+        }
+      })
+    }
+    if (parentHierarchyData && parentHierarchyData.length > 0) {
       let accounts = [
         ...data.parentHierarchy,
         {
@@ -386,6 +403,9 @@ export default function AccountDetailPage(props) {
               accountName: data.parentAccount.optionLabel,
             }
             : null,
+          canEdit: [...(data?.collaborator ?? []), data?.owner].some(
+            (obj) => obj.optionValue === user.user._id
+          )
           // parentAccountName: data.parentAccount?.optionLabel,
           // parentAccount: data.parentAccount?.optionValue
         },
@@ -404,6 +424,9 @@ export default function AccountDetailPage(props) {
           phone: account.phone,
           type: "child",
           current: account.current,
+          canEdit: account?.canEdit ?? [...(data?.collaborator ?? []), data?.owner].some(
+            (obj) => obj.optionValue === user.user._id
+          )
         };
 
         if (account.parentAccount) {
@@ -428,6 +451,9 @@ export default function AccountDetailPage(props) {
           typeOfBusiness: data.typeOfBusiness,
           phone: data.phone,
           current: true,
+          canEdit: [...(data?.collaborator ?? []), data?.owner].some(
+            (obj) => obj.optionValue === user.user._id
+          )
         },
       ]);
     }
@@ -579,7 +605,6 @@ export default function AccountDetailPage(props) {
   ].filter((d) => d.show);
 
   const handleDeleteAcc = () => {
-    console.log('deleteAccount', deleteAccount)
     let deleteId = deleteAccount && deleteAccount?._id ? deleteAccount._id : accountData?._id
     if (deleteId) {
       axiosInstance()
@@ -646,6 +671,7 @@ export default function AccountDetailPage(props) {
             type: "success",
             message: data.message,
           });
+          setEditAccountData({})
           setLoading(false);
           setOpenUpdateDialog(false);
           fetchAccountData();
