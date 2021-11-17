@@ -1006,7 +1006,7 @@ const FormTypes = (props) => {
                 name={name}
                 label={getLabel(label)}
                 variant="outlined"
-                style={{outline:"1px solid white"}}
+                style={{ outline: "1px solid white" }}
                 error={touched[name] && Boolean(errors[name])}
                 helperText={touched[name] && errors[name]}
                 required={required}
@@ -1088,7 +1088,8 @@ const FormTypes = (props) => {
                   error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
                   helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
                   ref={inputNumberRef}
-                  onChange={onChange ? onChange : (e) => handleConverterChange(name, _unit, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))}
+                  onChange={onChange ? onChange : (e) => handleConverterChange(name, _unit,
+                    e.target.value === "" ? "" : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))}
                   InputProps={{
                     inputProps: { min: 0 },
                     readOnly: fieldData && fieldData.isUneditable ? true : false
@@ -1408,7 +1409,7 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(name, parseFloat(e.target.value));
+              handleChange(name, e.target.value === "" ? "" : parseFloat(e.target.value));
             }
         }
         InputProps={{

@@ -17,7 +17,7 @@ const PackageProductsDialog = ({ packageId, onClose, products, onSuccess, rental
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [isAddingProducts, setAddingProducts] = useState(false);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const columns = [
     {
@@ -56,6 +56,18 @@ const PackageProductsDialog = ({ packageId, onClose, products, onSuccess, rental
     updatedByRenderer: UpdatedByRenderer,
     commonRenderer: CommonRenderer
   };
+
+  useEffect(() => {
+    if (gridApi) {
+      if (showFilteredRecordsOnly) {
+        gridApi.setRowData(gridApi.getSelectedRows())
+        dispatch({ type: "count", count: gridApi.getSelectedRows().length });
+      } else {
+        gridApi.setRowData(dataRows);
+        dispatch({ type: "count", count: dataRows.length });
+      }
+    }
+  }, [showFilteredRecordsOnly])
 
   useEffect(() => {
     if (packageId) {
@@ -161,6 +173,7 @@ const PackageProductsDialog = ({ packageId, onClose, products, onSuccess, rental
           loading={loading}
           isClientSideGrid={true}
           onCellValueChanged={onCellValueChanged}
+          showOnlyShowFilteredRecordSwitch={true}
         />
       </CustomDialogContent>
       <CustomDialogFooter></CustomDialogFooter>

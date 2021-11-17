@@ -11,7 +11,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { productInventory, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL } from "../../constants/helpers";
+import { productInventory, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL, sidebarResource } from "../../constants/helpers";
 import ManageProductInventory from "./ManageProductInventory";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
@@ -118,7 +118,10 @@ const ProductInventoryDetailsPage = () => {
             : params.data.type.toLowerCase() === "rental" ?
               <Link className="link" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`}>
                 {params.value}
-              </Link> : params.value
+              </Link> : params.data.type === sidebarResource.deliveryTicket ?
+                <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.referenceId}`}>
+                  {params.value}
+                </Link> : params.value
       ) : (
         <NoDataCell />
       )
@@ -135,8 +138,8 @@ const ProductInventoryDetailsPage = () => {
     { field: "reference", headerName: "Reference", show: true, cellRenderer: "nameRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "date", headerName: "Date & Time", show: true, disabled: true, cellRenderer: "dateRenderer" },
+    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
     { field: "comments", headerName: "Comments", show: true, cellRenderer: "commonRenderer" },
-    // { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
   ];
 
   useEffect(() => {

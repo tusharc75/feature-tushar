@@ -1,11 +1,7 @@
 import Box from "@material-ui/core/Box/Box";
-import { useState, useEffect, useReducer, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer, } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import { Link } from 'react-router-dom'
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import { AiFillFilePdf } from "react-icons/ai";
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button, Chip, IconButton } from "@material-ui/core";
@@ -13,18 +9,11 @@ import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { dateFormat, gridLoadingTimeout, rentalManagement, translateDataToTree, treeToFlatArray } from "../../constants/helpers";
-import { Column } from "material-table";
+import { dateFormat, rentalManagement, translateDataToTree } from "../../constants/helpers";
 import moment from "moment";
-import MaterialTableComponent from "../../components/Shared/MaterialTableComponent";
-import { startCase, uniqBy } from "lodash";
+import { startCase, orderBy } from "lodash";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../components/CustomReactTable/CustomReactTable";
-
-
-const width = 80;
-const minWidth = 80;
-const maxWidth = 80;
 
 const SerializedAssetStep = (props) => {
   const { loading, productInventory, currentStep, serializeAssets, fetchProductsData, rentalManagementId, isTabletScreen,
@@ -73,7 +62,7 @@ const SerializedAssetStep = (props) => {
     })
 
     const newDataForReactTable = [...translateDataToTree(products ? [...products] : [], "parent", "treeId", "subRows")];
-    setRows(newDataForReactTable);
+    setRows(orderBy(newDataForReactTable, ["order"], ["asc"]));
 
   }, [productInventory])
 
@@ -166,6 +155,19 @@ const SerializedAssetStep = (props) => {
   //   { field: "discount", headerName: "Discount (%)", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
   //   { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
   // ];
+
+
+  const getAssetAssignedValues = (row) => {
+    if (row.original?.type?.includes("roduct")) {
+      if (row.subRows && row.subRows?.length > 0) {
+        return <p>{row.subRows.length} / {row.original.qty}</p>
+      }
+      return <p>{row.original.assetCount} / {row.original.qty}</p>;
+    }
+    return <NoDataCell />
+  }
+
+
   const columns = [
     {
       accessor: 'detail',
@@ -195,9 +197,21 @@ const SerializedAssetStep = (props) => {
     },
     {
       accessor: 'assets',
-      Header: 'Assets',
+      Header: 'Assets Assigned',
       Cell: ({ row }) => (
-        <p>{row.original?.type?.includes("roduct") ? row.original.assetCount : "- - - - -"}</p>
+        // <p>{row.original?.type?.includes("roduct") ? row.original.assetCount : "- - - - -"}</p>
+
+        getAssetAssignedValues(row)
+        // row.original?.type?.includes("roduct") ? row.original.assetCount : (row.original?.type === "Package" ? `${row.subRows?.length ?? 0} / ${row.original.assetCount}` : "- - - - -")
+
+
+      )
+    },
+    {
+      accessor: 'qty',
+      Header: 'Quantity',
+      Cell: ({ row }) => (
+        row.original.qty ? <p>{row.original.qty}</p> : <NoDataCell />
       )
     },
     {
@@ -216,13 +230,6 @@ const SerializedAssetStep = (props) => {
         row.original.endDate ? <h5 className="createBy" title={`${moment(row.original.endDate.slice(0, 10)).format(dateFormat)}`}>
           <span className="">{moment(row.original.endDate.slice(0, 10)).format(dateFormat)}</span>
         </h5> : <NoDataCell />
-      )
-    },
-    {
-      accessor: 'qty',
-      Header: 'Quantity',
-      Cell: ({ row }) => (
-        row.original.qty ? <p>{row.original.qty}</p> : <NoDataCell />
       )
     },
     {
@@ -441,9 +448,10 @@ const SerializedAssetStep = (props) => {
                     ? "calc(100vw - 78px)"
                     : showActivity ? "100%" : "calc(100vw - 100px)"
               }
-              height={"calc(100vh - 350px)"}
+              height="calc(100vh - 350px)"
             >
               <CustomReactTable
+                height="calc(100vh - 365px)"
                 columns={columns}
                 data={rows}
                 rowStyle={(rowData) => ({
@@ -453,7 +461,7 @@ const SerializedAssetStep = (props) => {
                 })}
                 onSelect={setSelectedProducts}
                 childrenProperty="subRows"
-                uniqueKey="_id"
+                uniqueKey="id"
               />
 
               {/* <MaterialTableComponent

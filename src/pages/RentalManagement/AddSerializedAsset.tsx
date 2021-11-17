@@ -28,7 +28,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     const [serializedProducts, setSerializedProducts] = useState([]);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
     const {
         state: { permissions },
@@ -36,7 +36,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
 
     useEffect(() => {
         fetchProductInventory()
-    }, [page, limit, filters, sorting, search]);
+    }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
     useEffect(() => {
         let tempProducts = serializedProducts
@@ -115,7 +115,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         if (selectedProducts.length > 0) {
             queryString = `${queryString}&filterById=${JSON.stringify(selectedProducts.map(m => { return { "field": "product", "term": m?._id ?? "" } }))}&filterByIdType=or`
         }
-
+        
         axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
             data.data = data.data
                 // ?.filter(u => (u?.status === "Available" || u?.status === "New")
@@ -143,6 +143,10 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}&availableAssets=true`;
+        
+        if (showFilteredRecordsOnly) {
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id))}`;
+        }
 
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
@@ -272,7 +276,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                             customGridOptions={{ getRowStyle: getRowStyleScheduled }}
                             // selectedRecords={selectedRecords}
                             renderedFrom={addSerializedAssetsRenderedFrom}
-                            // showOnlyShowFilteredRecordSwitch={true}
+                            showOnlyShowFilteredRecordSwitch={true}
                             // allowHeaderSelection={false}
                         />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
