@@ -68,7 +68,7 @@ const RentalManagementDetailsPage = () => {
   const [headingLbl, setHeadingLbl] = useState("");
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [isUpdating, setUpdating] = useState(false);
-  const [isProductEdit, setProductEdit] = useState(false);
+  const [isProductEdit, setIsProductEdit] = useState(false);
   const [recordToUpdate, setRecordToUpdate] = useState(null)
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
@@ -559,7 +559,7 @@ const RentalManagementDetailsPage = () => {
 
 
   const handleClick = (rowData) => {
-    setProductEdit(true)
+    setIsProductEdit(true)
     setRecordToUpdate(rowData)
   }
 
@@ -809,7 +809,7 @@ const RentalManagementDetailsPage = () => {
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": updatedArr })
       .then(() => {
         setUpdating(false)
-        setProductEdit(false)
+        setIsProductEdit(false)
         fetchProductInventory()
 
       }).catch((error) => {
@@ -827,7 +827,7 @@ const RentalManagementDetailsPage = () => {
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/updateOne`, rest)
       .then(() => {
         setUpdating(false)
-        setProductEdit(false)
+        setIsProductEdit(false)
         fetchProductInventory()
       }).catch((error) => {
         setUpdating(false)
@@ -1089,7 +1089,7 @@ const RentalManagementDetailsPage = () => {
                                   color="primary"
                                   size="small"
                                   disabled={!Boolean(selectedProducts && selectedProducts.length)}
-                                  onClick={() => setProductEdit(true)}
+                                  onClick={() => setIsProductEdit(true)}
                                 >
                                   Bulk Edit
                                 </Button>
@@ -1197,7 +1197,7 @@ const RentalManagementDetailsPage = () => {
                                   }
                                 }}
                               // onRowClick={(rowData) => {
-                              //   setProductEdit(true)
+                              //   setIsProductEdit(true)
                               //   setRecordToUpdate(rowData)
                               // }}
                               /> */}
@@ -1479,7 +1479,7 @@ const RentalManagementDetailsPage = () => {
           endDate={rentalManagementData.rentalEndDate}
           isSaving={isUpdating}
           onClose={() => {
-            setProductEdit(false)
+            setIsProductEdit(false)
             setRecordToUpdate(null)
           }}
           submitBulkEdit={recordToUpdate ? handleSingleEdit : handleBulkEditData}
