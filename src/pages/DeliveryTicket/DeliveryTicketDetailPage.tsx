@@ -239,7 +239,6 @@ export default function DeliveryTicketDetail(props) {
     (deliveryTicketData?.status === "In-Transit") ? "Sign-off - Received" : "" : ""
 
   const handleSignature = (signedData) => {
-    console.log(signedData)
     const { type, sign: newSign } = signedData;
     let stateArr = signatures;
     stateArr.push({ type, signature: newSign, status: label === "Sign-off - Dispatched" ? "Start Delivery" : "Sign-Off" });

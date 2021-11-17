@@ -53,13 +53,8 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = (
   const [isDisabled, setDisabled] = useState(false);
   const [errors, setErrors] = useState(null);
   const [units, setUnits] = useState([
-    { "optionLabel": "One Well Pad", "optionValue": "One Well Pad" },
-    { "optionLabel": "Two Well Pad", "optionValue": "Two Well Pad" },
-    { "optionLabel": "Three Well Pad", "optionValue": "Three Well Pad" },
-    { "optionLabel": "Four Well Pad", "optionValue": "Four Well Pad" },
-    { "optionLabel": "Five Well Pad", "optionValue": "Five Well Pad" },
-    { "optionLabel": "Six Well Pad", "optionValue": "Six Well Pad" },
-    { "optionLabel": "Pieces", "optionValue": "Pieces" },
+    ...["One", "Two", "Three", "Four", "Five", "Six"].map(m => { return { "optionLabel": `${m} Well Pad`, "optionValue": `${m} Well Pad` } }),
+    { "optionLabel": "Piece", "optionValue": "Piece" },
   ]);
 
   useEffect(() => {
