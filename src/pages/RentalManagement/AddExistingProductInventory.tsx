@@ -30,7 +30,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const [selectedProduct, setSelectedProduct] = useState({ name: "", id: "", quantity: 0 });
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
     const [disableSaveButton, setDisableSaveButton] = useState(false);
 
     const {
@@ -42,6 +42,18 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         if (type === "product") fetchProductInventory();
         else if (type === "package") fetchPackage();
     }, []);
+
+    useEffect(() => {
+        if (gridApi) {
+            if (showFilteredRecordsOnly) {
+                gridApi.setRowData(gridApi.getSelectedRows())
+                dispatch({ type: "count", count: gridApi.getSelectedRows().length });
+            } else {
+                gridApi.setRowData(dataRows);
+                dispatch({ type: "count", count: dataRows.length });
+            }
+        }
+    }, [showFilteredRecordsOnly])
 
     const columns = type === "product" ?
         [
@@ -114,7 +126,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                     type: type,
                     quantity: 0,
                 }));
-            
+
             setProductData(products)
             dispatch({ type: "initialize", data: products, count: products.length });
             setTimeout(() => {
@@ -168,6 +180,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const onCellValueChanged = (row) => {
         setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
     }
+
     useEffect(() => {
         setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
     }, [selectedRecords])
@@ -223,6 +236,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                             loading={loading}
                             isClientSideGrid={true}
                             onCellValueChanged={onCellValueChanged}
+                            showOnlyShowFilteredRecordSwitch={true}
                         />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </div>
