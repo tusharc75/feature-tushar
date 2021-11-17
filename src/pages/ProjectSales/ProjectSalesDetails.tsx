@@ -81,6 +81,9 @@ const ProjectSalesDetails = () => {
     nodes: [],
     colorPalette: null,
   });
+
+
+
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
   }
@@ -405,6 +408,7 @@ const ProjectSalesDetails = () => {
                   </Grid>
                 ) : (
                   <>
+
                     <Tabs
                       className="oms-tab"
                       value={currentTabIndex}
@@ -425,7 +429,9 @@ const ProjectSalesDetails = () => {
                         aria-controls="a11y-tabpanel-1"
                         id="a11y-tab-1"
                       />
+                      <div className={'uio'}> </div>
                     </Tabs>
+
                     {currentTabIndex === 0 && (
                       <Box>
                         <DetailsPage

@@ -587,6 +587,27 @@ body::-webkit-scrollbar-thumb {
   border: 1px solid #bbd5e0;
   margin-left: 6px;
 }
+.serchBox{
+  border: 2px solid var(--secondary) !important;
+  //background-color: #C8E9CE ;
+  padding : 0px 14px !important;
+  border-radius : 20px;
+  ::placeholder{
+    font-size: 12px !important;
+  }
+}
+
+.search-input-icon{
+  margin-right: 0px !important;
+  padding: 2px 5px;
+  border-radius: 15px;
+}
+
+.mobile-action-view{
+  border-radius: 20px !important;
+  border: 2px solid var(--secondary) !important;
+}
+
 .export-import-link {
   position: absolute;
   top: 4.2rem;
@@ -638,7 +659,14 @@ body::-webkit-scrollbar-thumb {
 .detail-product-box {
   justify-content: space-between;
 }
+.chip-text{
+  justify-content: flex-start !important;
+  width: 80%;
 
+}
+.all-check-box{
+  padding-left: 0.5rem !important;
+}
 .detailHeader {
   padding: 10px;
   background: #f5f5f5;
@@ -1148,6 +1176,9 @@ body::-webkit-scrollbar-thumb {
   .search_box_layout{
     margin-left: 0px ;
     justify-content: flex-start ;
+  }
+  .all-check-box{
+    padding-left: 21px !important;
   }
 }
 @media only screen and (max-width: 560px) {
