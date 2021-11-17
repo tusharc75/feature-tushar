@@ -11,7 +11,10 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow, dateFormat, pricingCondition, generateUniqueId, translateDataToTree } from "../../constants/helpers";
+import {
+  getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow,
+  dateFormat, pricingCondition, generateUniqueId, treeToFlatArray
+} from "../../constants/helpers";
 import Steps from "./Steps";
 import AddExistingProductInventory from "./AddExistingProductInventory";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
@@ -309,6 +312,50 @@ const RentalManagementDetailsPage = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
+  //  This is copied method from helpers.ts as wee need some modification for this screen only
+  const translateDataToTreeForProducts = (data, parentProperty, childProperty, childrenPropertyToStore) => {
+    let parents = data.filter(value => value[parentProperty] == 'undefined' || value[parentProperty] == null)
+    let childrens = data.filter(value => value[parentProperty] !== 'undefined' && value[parentProperty] != null)
+
+    parents.forEach((current) => {
+      if (current.type === "Product" || current.type === "Package") {
+        current["qtyToDisplay"] = current?.qty ?? 0;
+        current["isValid"] = (!isNaN(current?.finalPrice) && current?.finalPrice !== 0)
+      }
+    })
+
+    let translator = (parents, childrens) => {
+      parents.forEach((parent) => {
+        childrens.forEach((current, index) => {
+          if (current.parent === parent[childProperty]) {
+            let temp = JSON.parse(JSON.stringify(childrens))
+            temp.splice(index, 1)
+            translator([current], temp)
+
+            //  Check validation for products in package - Start
+            current["qtyToDisplay"] = `${current.qty} x ${parent.qty}`
+
+            if (current?.finalPrice !== null && current?.finalPrice !== undefined && typeof current?.finalPrice !== "string" && current?.finalPrice !== 0) {
+              current["isValid"] = true;
+            } else {
+              current["isValid"] = parent["isValid"];
+            }
+            //  Check validation for products in package - End
+
+            if (typeof parent[childrenPropertyToStore] !== 'undefined') {
+              parent[childrenPropertyToStore].push(current)
+            } else {
+              parent[childrenPropertyToStore] = [current]
+            }
+          }
+        })
+      })
+    }
+    translator(parents, childrens)
+
+    return parents
+  }
+
 
   const fetchProductInventory = () => {
 
@@ -323,6 +370,8 @@ const RentalManagementDetailsPage = () => {
         ...u,
         id: u._id,
         productCategory: u.productCategory?.optionLabel,
+        isValidRecord: true,
+        qtyToDisplay: u.qty
         // package: u.hasOwnProperty("package") ? u.package.packageName : "",
         // packageId: u.hasOwnProperty("package") ? u.package._id : ""
       })));
@@ -348,7 +397,9 @@ const RentalManagementDetailsPage = () => {
         newData.push(rest)
       })
 
-      const newDataForReactTable = [...translateDataToTree(newData ? [...newData] : [], "parent", "treeId", "subRows")];
+      const newDataForReactTable = [...translateDataToTreeForProducts(newData ? [...newData] : [], "parent", "treeId", "subRows")];
+
+      // console.log(newDataForReactTable)
 
       dispatch({ type: "initialize", data: [], count: 0 })
       dispatch({ type: "initialize", data: [...orderBy(newDataForReactTable, ["order"], ["asc"])], count: newDataForReactTable.length });
@@ -512,6 +563,7 @@ const RentalManagementDetailsPage = () => {
     setRecordToUpdate(rowData)
   }
 
+
   const columns = [
     {
       accessor: 'detail',
@@ -568,15 +620,24 @@ const RentalManagementDetailsPage = () => {
       )
     },
     {
-      accessor: 'qty',
+      accessor: 'qtyToDisplay',
       Header: 'Quantity',
       Cell: ({ row }) => (
-        row.original.qty ? <p className="text-truncate">
-          {/* {rowData.type === "productInPackage"
-              ? rowData.pkgQty !== 0 ? `${rowData.pkgQty} * ${rowData.qty} = ${rowData.totalQty}` : rowData.qty
-              : rowData.qty} */}
-          {row.original.qty}
-        </p> : <NoDataCell />
+        row.original.qtyToDisplay ? <p>{startCase(row.original.qtyToDisplay)}</p> : <NoDataCell />
+        // <>
+        //   {
+        //     row.original?.type === 'productInPackage' ? (dataRows.some(f => f.treeId === row.original?.parent)
+        //       ? <p>{row.original.qty} * {dataRows.find(f => f.treeId === row.original?.parent)?.qty}</p>
+        //       : <p>{row.original.qty}</p>)
+        //       : <p>{row.original.qty}</p>
+        //   }
+        // </>
+
+
+        // row.original.qty ? <p className="text-truncate">
+
+        //   {row.original.qty}
+        // </p> : <NoDataCell />
       )
     },
     {
@@ -613,14 +674,14 @@ const RentalManagementDetailsPage = () => {
       accessor: 'discount',
       Header: 'Discount (%)',
       Cell: ({ row }) => (
-        <p>{row.original.discount === 0 ? "0" : row.original.discount}</p>
+        row.original.discount === 0 ? <NoDataCell /> : <p>{row.original.discount}</p>
       )
     },
     {
       accessor: 'finalPrice',
       Header: `Final Price (${currencySymbol})`,
       Cell: ({ row }) => (
-        <p>{row.original.finalPrice}</p>
+        row.original.finalPrice === 0 ? <NoDataCell /> : <p>{row.original.finalPrice}</p>
       ),
       Footer: info => {
         const total = React.useMemo(
@@ -760,7 +821,7 @@ const RentalManagementDetailsPage = () => {
 
   const handleSingleEdit = async (values: any) => {
     setUpdating(true)
-    const { subRows, ...rest } = values;
+    const { subRows, isValid, qtyToDisplay, ...rest } = values;
 
     rest.type = camelCase(rest.type)
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/updateOne`, rest)
@@ -774,20 +835,20 @@ const RentalManagementDetailsPage = () => {
       });
   }
 
-  const checkIsValidRecord = (rowData) => {
-    if (rowData?.type === "Product") {
-      return (!isNaN(rowData?.finalPrice) && rowData?.finalPrice !== 0)
-    }
-    else if (rowData?.type === "Package") {
-      return true;
-    }
-    else {
-      const parentRecord = dataRows.find(f => f.treeId === rowData?.parent)
-      if (parentRecord) {
-        return (!isNaN(parentRecord?.finalPrice) && parentRecord?.finalPrice !== 0)
-      }
-    }
-  }
+  // const checkIsValidRecord = (rowData) => {
+  //   if (rowData?.type === "Product") {
+  //     return (!isNaN(rowData?.finalPrice) && rowData?.finalPrice !== 0)
+  //   }
+  //   else if (rowData?.type === "Package") {
+  //     return true;
+  //   }
+  //   else {
+  //     const parentRecord = dataRows.find(f => f.treeId === rowData?.parent)
+  //     if (parentRecord) {
+  //       return (!isNaN(parentRecord?.finalPrice) && parentRecord?.finalPrice !== 0)
+  //     }
+  //   }
+  // }
 
   // const restrictToGoNextStep = () => {
   //   let isValid = false;
@@ -988,7 +1049,7 @@ const RentalManagementDetailsPage = () => {
                   <Paper>
                     <Steps
                       className={styles.steps_box}
-                      isNextStep={!(productInventory.length > 0 ? (productInventory.filter(f => f.type !== "productInPackage").some(f => !f?.hasOwnProperty("finalPrice") || isNaN(f?.finalPrice) || f?.finalPrice === 0) ? false : true) : false)}
+                      isNextStep={treeToFlatArray(dataRows, "subRows").some(f => f.isValid === false)}
                       nextStep={nextStep}
                       steps={rentalProcessSteps.slice(0, 5)}
                       currentStep={currentStep}
@@ -1103,7 +1164,7 @@ const RentalManagementDetailsPage = () => {
                                 data={dataRows}
                                 rowStyle={(rowData) => ({
                                   color: "black",
-                                  backgroundColor: checkIsValidRecord(rowData) ? "white" : "#EFCCCC"
+                                  backgroundColor: rowData.isValid ? "white" : "#EFCCCC"
                                 })}
                                 onSelect={setSelectedProducts}
                                 childrenProperty="subRows"
