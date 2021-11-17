@@ -658,7 +658,7 @@ const RentalManagementDetailsPage = () => {
       accessor: 'price',
       Header: `Price (${currencySymbol})`,
       Cell: ({ row }) => (
-        <p>{row.original.price ? row.original.price : "0"} </p>
+        row.original.price ? <p>{row.original.price}</p> : <NoDataCell />
       ),
       Footer: info => {
         const total = React.useMemo(
