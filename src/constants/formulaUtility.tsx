@@ -82,6 +82,7 @@ export const getFormulaValue = (formula, inputFields, returnType, decimalPlaces)
             // if (isFinite(value)) {
             //     value = 0
             // } 
+            
             //value = parseFloat(value.toFixed(decimalPlaces))
         }
     }
