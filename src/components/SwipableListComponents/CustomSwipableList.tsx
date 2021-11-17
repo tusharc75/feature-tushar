@@ -5,7 +5,7 @@ import { isMobile } from 'react-device-detect';
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz"
 import AddIcon from "@material-ui/icons/Add";
 import { MdAccountCircle, MdDelete, MdEdit, } from "react-icons/md";
-import { FaCopy } from "react-icons/all";
+import { FaCopy , FaSuitcase } from "react-icons/all";
 
 //  Swipe functionalities are removed as we are facing overlap issue in mobile quote details screen
 export default function CustomSwipableList({
@@ -69,7 +69,7 @@ export default function CustomSwipableList({
     return <>
         {
             allowSelection && <Grid container>
-                <Grid item xs={12} sm={12} className="pl-2 border-bottom">
+                <Grid item xs={12} sm={12} className="border-bottom all-check-box">
                     <FormControlLabel
                         control={
                             <Checkbox

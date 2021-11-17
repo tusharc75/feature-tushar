@@ -34,12 +34,15 @@ export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
         relatedTo.map((_element, index) => (
           <Box mr={1} mb={1} key={index}>
             <Chip
+                className="chip-text"
               label={startCase(_element.type) + " - " + _element.name}
               size="small"
               style={{
                 backgroundColor: resActivityColors[_element.type],
                 color: "white",
               }}
+
+
             />
           </Box>
         ))}
