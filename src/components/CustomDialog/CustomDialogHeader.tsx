@@ -35,7 +35,7 @@ function CustomDialogHeader({ title, onClose, showManimizeMaximize = false, isMi
     return (
         <React.Fragment>
             <MuiDialogTitle disableTypography className={classes.root}>
-                <Typography variant="h6" className={`${classes.dialogTitle} title-layout`}>{title}</Typography>
+                <Typography variant="h6" className={`${classes.dialogTitle} title-layout text-truncate`}>{title}</Typography>
                 <div className={`${classes.closeButton} close`}>
                     <span className="form-label-style required-text mr-2" style={{ borderBottom: "none" }}>* Required Fields</span>
                     {
