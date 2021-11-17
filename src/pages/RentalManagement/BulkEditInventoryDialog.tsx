@@ -81,25 +81,37 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = (
     }
   }, [data]);
 
-  const getBulkEditText = () => {
-    let bulkEdit = "Bulk Edit -";
+  const getTitle = () => {
 
-    const groupByProducts = groupBy(selectedProducts, "type");
+    if (data) {
+      let editTitle = `Edit - [${data.detail}]`;
 
-    const edits = [];
-    if (groupByProducts["Product"]) {
-      edits.push(`${groupByProducts["Product"].length} - Products`)
+      if (data.subRows && data.subRows?.length > 0) {
+        editTitle = `Edit - [${data.detail} (${data.subRows.length})]`;
+      }
+
+      return editTitle;
+
+    } else {
+      let bulkEdit = "Bulk Edit -";
+
+      const groupByProducts = groupBy(selectedProducts, "type");
+
+      const edits = [];
+      if (groupByProducts["Product"]) {
+        edits.push(`${groupByProducts["Product"].length} - Products`)
+      }
+
+      if (groupByProducts["Package"]) {
+        edits.push(`${groupByProducts["Package"].length} - Package`)
+      }
+
+      if (groupByProducts["productInPackage"]) {
+        edits.push(`${groupByProducts["productInPackage"].length} - Product In Package`)
+      }
+
+      return `${bulkEdit} (${edits.join(", ")})`;
     }
-
-    if (groupByProducts["Package"]) {
-      edits.push(`${groupByProducts["Package"].length} - Package`)
-    }
-
-    if (groupByProducts["productInPackage"]) {
-      edits.push(`${groupByProducts["productInPackage"].length} - Product In Package`)
-    }
-
-    return `${bulkEdit} (${edits.join(", ")})`;
   }
 
   useEffect(() => {
@@ -303,7 +315,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = (
   return (
     <>
       <Dialog open fullWidth maxWidth="md" onClose={handleClose}>
-        <CustomDialogHeader title={data ? `Edit - ${data.detail}` : getBulkEditText()} onClose={handleClose} />
+        <CustomDialogHeader title={getTitle()} onClose={handleClose} />
         <CustomDialogContent>
           <MuiPickersUtilsProvider utils={DateUtils}>
             <Box p={2}>
