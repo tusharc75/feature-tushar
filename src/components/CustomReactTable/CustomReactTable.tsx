@@ -185,7 +185,6 @@ export default function CustomReactTable({
     }, [])
 
     // useEffect(() => {
-    //     console.log(rows)
     //     setPageSize(gridPageSizes[0])
     //     // setPageSize(gridPageSizes[0])
     // }, [setPageSize,])

@@ -384,8 +384,6 @@ const RentalManagementDetailsPage = () => {
 
     extractedProducts = [...products, ...packages, ...modifiedPkgProducts]
 
-    console.log(extractedProducts);
-
     return extractedProducts
   }
 
@@ -730,8 +728,6 @@ const RentalManagementDetailsPage = () => {
   const handleBulkEditData = (values: any) => {
     let updatedArr = selectedProducts.filter(d => d.type !== "productInPackage")
 
-    console.log(updatedArr)
-
     updatedArr = updatedArr.map(d => ({
       "id": d.id,
       "type": d?.type.toLowerCase(),
@@ -777,6 +773,51 @@ const RentalManagementDetailsPage = () => {
         toastConfig.setToastConfig(error)
       });
   }
+
+  const checkIsValidRecord = (rowData) => {
+    if (rowData?.type === "Product") {
+      return (!isNaN(rowData?.finalPrice) && rowData?.finalPrice !== 0)
+    }
+    else if (rowData?.type === "Package") {
+      return true;
+    }
+    else {
+      const parentRecord = dataRows.find(f => f.treeId === rowData?.parent)
+      if (parentRecord) {
+        return (!isNaN(parentRecord?.finalPrice) && parentRecord?.finalPrice !== 0)
+      }
+    }
+  }
+
+  // const restrictToGoNextStep = () => {
+  //   let isValid = false;
+
+  //   dataRows.forEach(rowData => {
+  //     if (rowData?.type === "Product") {
+  //       if (isNaN(rowData?.finalPrice) || rowData?.finalPrice === 0) {
+  //         isValid = false;
+  //         return;
+  //       }
+  //     }
+  //     else if (rowData?.type === "Package") {
+  //       return true;
+  //     }
+  //     else {
+  //       const parentRecord = dataRows.find(f => f.treeId === rowData?.parent)
+  //       if (parentRecord) {
+  //         return (!isNaN(parentRecord?.finalPrice) && parentRecord?.finalPrice !== 0)
+  //       }
+  //     }
+  //   });
+
+  //   return isValid;
+
+  //   if (productInventory.length > 0) {
+  //     console.log(productInventory);
+  //     // !(productInventory.length > 0 ? (productInventory.filter(f => f.type !== "productInPackage").some(f => !f?.hasOwnProperty("finalPrice") || isNaN(f?.finalPrice) || f?.finalPrice === 0) ? false : true) : false)
+  //   }
+  //   return true;
+  // }
 
   return (
     <>
@@ -1062,7 +1103,7 @@ const RentalManagementDetailsPage = () => {
                                 data={dataRows}
                                 rowStyle={(rowData) => ({
                                   color: "black",
-                                  backgroundColor: rowData?.type?.includes("roduct") && (isNaN(rowData?.finalPrice) || rowData?.finalPrice === 0) ? "#EFCCCC" : "white"
+                                  backgroundColor: checkIsValidRecord(rowData) ? "white" : "#EFCCCC"
                                 })}
                                 onSelect={setSelectedProducts}
                                 childrenProperty="subRows"
@@ -1360,7 +1401,7 @@ const RentalManagementDetailsPage = () => {
       {Boolean(packageForProducts)
         && <PackageProductsDialog
           rentalId={id}
-          packageId={packageForProducts?._id}
+          packageId={packageForProducts?.id}
           products={packageForProducts?.products.map(p => p.id)}
           onClose={() => setPackageForProducts(null)}
           rentalApi={rentalManagement.rentalManagementApi}
