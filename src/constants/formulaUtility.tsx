@@ -79,9 +79,9 @@ export const getFormulaValue = (formula, inputFields, returnType, decimalPlaces)
             if (isNaN(value)) {
                 value = 0
             }
-            if (isFinite(value)) {
-                value = 0
-            } 
+            // if (isFinite(value)) {
+            //     value = 0
+            // } 
             //value = parseFloat(value.toFixed(decimalPlaces))
         }
     }
