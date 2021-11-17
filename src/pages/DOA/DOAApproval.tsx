@@ -9,14 +9,14 @@ import { GiAbstract055, GiVintageRobot } from "react-icons/gi";
 import { AiOutlineEye } from "react-icons/ai";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import Activity from "../../components/Activity";
-import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
 import {
   CustomDialogTransition,
   formatAmountWithCurrency,
   gridLoadingTimeout,
   gridPageSizes,
-  defaultActivityShow
+  defaultActivityShow,
+  quoteBuilder
 } from "../../constants/helpers";
 import { camelCase } from "lodash";
 import { useData } from "../../StateProvider/Provider";
@@ -25,96 +25,8 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import { isMobile, isTablet } from "react-device-detect";
 import DOAReasonDialog from "./DOAReasonDialog"
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
-
-function reducer(state, action) {
-  switch (action.type) {
-    case "loading":
-      return {
-        ...state,
-        loading: action.loading,
-      };
-
-    case "initialize":
-      return {
-        ...state,
-        dataRows: action.data,
-        rowCount: action.count
-      };
-
-    case "selection":
-      return {
-        ...state,
-        selectedRecords: action.selectedRecords,
-      };
-
-    case "update":
-      return {
-        ...state,
-        dataRows: action.data,
-        loading: false,
-      };
-
-    case "filter":
-      return {
-        ...state,
-        loading: true,
-        filters: action.filters,
-        page: 0,
-      };
-
-    case "sort":
-      return {
-        ...state,
-        sorting: action.sorting,
-        loading: true,
-      };
-
-    case "search":
-      return {
-        ...state,
-        search: action.search,
-        loading: true,
-      };
-
-    case "pageChange":
-      return {
-        ...state,
-        page: action.page,
-      };
-
-    case "pageSizeChange":
-      return {
-        ...state,
-        limit: action.limit,
-        page: 0,
-        loading: true,
-      };
-
-    case "complete":
-      return {
-        ...state,
-        loading: false,
-      };
-
-    default:
-      break;
-  }
-
-  return state;
-}
-
-const intialState = {
-  dataRows: [],
-  rowCount: 0,
-  loading: false,
-  page: 0,
-  limit: 25,
-  pageSizes: gridPageSizes,
-  search: "",
-  filters: {},
-  sorting: [],
-  selectedRecords: [],
-};
+import ProductBuilder from "../../components/productBuilder";
+import Loader from "../../components/Loader";
 
 const DOAApproval = () => {
   const {
@@ -124,18 +36,10 @@ const DOAApproval = () => {
   } = useData();
   const { setToastConfig } = useContext(CustomToastContext);
   const history = useHistory();
-  const { id } = useParams();
-  const [columns, setColumns] = useState([]);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
   const {
-    dataRows,
-    rowCount,
-    loading,
-    page,
-    limit,
-    pageSizes,
-  } = state;
+    state: { permissions }
+  }: any = useData();
+  const { id } = useParams();
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [QData, setQData] = useState(null);
   const [needDOA, setneedDOA] = useState(false);
@@ -146,8 +50,15 @@ const DOAApproval = () => {
   const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
   const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
+  const [totalCost, setTotalCost] = useState(0);
+  const [totalSellingPrice, setTotalSellingPrice] = useState(0);
+  const [totalMargin, setTotalMargin] = useState(0);
+  const [totalProfit, setTotalProfit] = useState(0);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
+  const [quoteData, setQuoteData] = useState(null);
+  const [productBuilderId, setProductBuilderId] = useState(null);
+  const [isAddNewProduct, setIsAddNewProduct] = useState(false);
+  const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   var DOALimit = 0;
   var DOAsetup = false;
   const handleActivityHideShow = () => {
@@ -166,49 +77,19 @@ const DOAApproval = () => {
   }, [isSmallScreen]);
 
   const fetchQuote = () => {
-    dispatch({ type: "loading", loading: true });
-
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
 
     axiosInstance()
       .get("/quote-builder/getQuotefromDOAId/" + id)
       .then(({ data }) => {
-        const rows = data.Rows.map((row) => {
-          let newKeys = {};
-          Object.keys(row).forEach((r) => {
-            newKeys[camelCase(r)] = row[r];
-          });
-
-          return newKeys;
-        });
-
-        setColumns(
-          data.Columns.map((col) => ({
-            ...col,
-            field: camelCase(col.field),
-            show: true,
-            disbaled: true,
-          }))
-        );
-        dispatch({
-          type: "initialize",
-          data: rows,
-          count: data.Rows.length,
-        });
-        setTimeout(() => {
-          dispatch({ type: "loading", loading: false });
-        }, gridLoadingTimeout);
         setPDFName(data.PDF);
-
+        setQuoteData(data.quote)
+        setProductBuilderId(data?.version?.productBuilderId)
         setQData(data);
         if (data.Quote_Status !== "Sent for DOA") {
           setQStatus(false);
         }
       })
       .catch((err) => {
-        dispatch({ type: "loading", loading: false });
         setToastConfig(err);
       });
   };
@@ -267,13 +148,69 @@ const DOAApproval = () => {
     }
   };
 
+  const productCalculationForDoa = (BuilderData) => {
+    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string', 'srno'];
+
+    let tempTotalCost = 0;
+    let tempTotalSellingPrice = 0;
+    let tempTotalMargin = 0;
+    let tempTotalProfit = 0;
+
+    let tempBuilderData = BuilderData.product?.map((data) => ({
+      ...data,
+      [`profitPercentPerUnit`]:
+        data['profitPercentPerUnit'] === null || data['profitPercentPerUnit'] === undefined ? 0 : data['profitPercentPerUnit'],
+      [`commissionPercentPerUnit`]:
+        data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
+      [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
+        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+          ? 0
+          : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
+    }));
+
+    const fieldArray = [];
+    BuilderData.productFields?.map((data) => fieldArray.push(data))
+    BuilderData.priceTemplate?.map((data) => data["fields"].map(d => fieldArray.push(d)))
+    BuilderData.productTemplate?.map((data) => data["fields"].map(d => fieldArray.push(d)))
+    tempBuilderData.forEach((quoteRows: { [x: string]: any }, i) => {
+      const quoteRowKeys = Object?.keys(quoteRows);
+      quoteRowKeys.forEach((key) => {
+        if (ignoredKeys.indexOf(key) === -1) {
+          let indexkey = key;
+          let currency = '';
+          if (key.includes('_')) {
+            let splitKey = key.split('_');
+            key = splitKey[0];
+            currency = splitKey[1].toUpperCase();
+          }
+
+          if (currency === quoteData?.currency && key === 'totalCost') {
+            tempTotalCost = tempTotalCost + quoteRows[indexkey];
+          } else if (currency === quoteData?.currency && key === 'totalSalesPrice') {
+            tempTotalSellingPrice = tempTotalSellingPrice + quoteRows[indexkey];
+          } else if (currency === quoteData?.currency && key === 'totalProfit') {
+            tempTotalProfit = tempTotalProfit + quoteRows[indexkey];
+          } else if (currency === quoteData?.currency && key === 'totalMargin') {
+            tempTotalMargin = tempTotalMargin + quoteRows[indexkey];
+          }
+          // }
+        }
+      });
+    });
+    setTotalCost(tempTotalCost);
+    setTotalSellingPrice(tempTotalSellingPrice);
+    setTotalMargin(tempTotalMargin);
+    setTotalProfit(tempTotalProfit);
+  };
+
   return (
     <Fragment>
       <div className="headerbox">
         <CustomBreadCrumbs
           routes={[
             { title: "DOA Requests", path: "/doa-request" },
-            { title: id },
+            { title: QData?.quoteName || id },
           ]}
         />
       </div>
@@ -366,16 +303,16 @@ const DOAApproval = () => {
                         <span
                           title={
                             formatAmountWithCurrency(
-                              QData["TotalProfitcurr"],
-                              QData["TotalProfitamount"]
+                              quoteData?.currency,
+                              totalProfit
                             ).fullFormatAmount
                           }
                         >
                           {
                             formatAmountWithCurrency(
-                              QData["TotalProfitcurr"],
-                              QData["TotalProfitamount"]
-                            ).fullFormatAmount
+                              quoteData?.currency,
+                              totalProfit
+                            ).fullFormatAmount || 0
                           }
                         </span>
                       </div>
@@ -384,16 +321,16 @@ const DOAApproval = () => {
                         <span
                           title={
                             formatAmountWithCurrency(
-                              QData["TotalCostcurr"],
-                              QData["TotalCostamount"]
+                              quoteData?.currency,
+                              totalCost
                             ).fullFormatAmount
                           }
                         >
                           {
                             formatAmountWithCurrency(
-                              QData["TotalCostcurr"],
-                              QData["TotalCostamount"]
-                            ).fullFormatAmount
+                              quoteData?.currency,
+                              totalCost
+                            ).fullFormatAmount || 0
                           }
                         </span>
                       </div>
@@ -403,7 +340,7 @@ const DOAApproval = () => {
                           title={
                             formatAmountWithCurrency(
                               QData["TotalSellingPricecurr"],
-                              QData["TotalSellingPriceamount"]
+                              totalSellingPrice
                             ).fullFormatAmount
                           }
                         >
@@ -411,50 +348,33 @@ const DOAApproval = () => {
                             formatAmountWithCurrency(
                               QData["TotalSellingPricecurr"],
                               QData["TotalSellingPriceamount"]
-                            ).fullFormatAmount
+                            ).fullFormatAmount || 0
                           }
                         </span>
                       </div>
-                      {/* <div className="quoteBox">
-                        <span>Total Margin</span>
-                        <span
-                          title={
-                            formatAmountWithCurrency(
-                              QData["TotalMargincurr"],
-                              QData["TotalMarginamount"]
-                            ).fullFormatAmount
-                          }
-                        >
-                          {
-                            formatAmountWithCurrency(
-                              QData["TotalMargincurr"],
-                              QData["TotalMarginamount"]
-                            ).shortFormatAmount
-                          }
-                        </span>
-                      </div> */}
                     </>
                   )}
                   <div></div>
                 </Grid>
-                <div style={{ height: 500 }}>
-                  <CustomAgGrid
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={{}}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    actionWidth={150}
-                    allowAction={false}
-                    allowSelection={false}
-                    loading={loading}
-                    refreshGrid={fetchQuote}
+                {productBuilderId ? (
+                  <ProductBuilder
+                    fromQuote={true}
+                    permissions={permissions[quoteBuilder.qbResource]}
+                    hasPermission={false}
+                    currency={quoteData?.currency.toLowerCase()}
+                    productBuilderId={productBuilderId}
+                    isAddNewProduct={isAddNewProduct}
+                    setIsAddNewProduct={setIsAddNewProduct}
+                    isAddExistingProduct={isAddExistingProduct}
+                    setIsAddExistingProduct={setIsAddExistingProduct}
+                    refreshProducts={productCalculationForDoa}
+                    stage={'product'}
+                    isPriceBuilder={true}
+                    Editable={false}
                   />
-                </div>
+                ) : (
+                  <Loader style={{ minHeight: 300 }} text="Loading..." />
+                )}
               </Grid>
             </Grid>
           </Paper>
