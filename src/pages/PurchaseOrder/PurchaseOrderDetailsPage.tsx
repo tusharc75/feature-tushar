@@ -184,7 +184,8 @@ const PurchaseOrderDetailsPage = () => {
                     entity: u.productId?.entity,
                     quantity: u.qty,
                     description: u.productId?.productName,
-                    type: "product"
+                    type: "product",
+                    treeId : u?.productId?._id
 
                 })
             });

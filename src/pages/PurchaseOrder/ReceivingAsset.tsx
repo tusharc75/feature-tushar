@@ -3,20 +3,11 @@ import Box from "@material-ui/core/Box/Box";
 import { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer, } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import { Link } from 'react-router-dom'
-import routes from "../../components/Helpers/Routes";
-import Grid from "@material-ui/core/Grid/Grid";
 import { Button, IconButton, useMediaQuery } from "@material-ui/core";
-import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import { dateFormat, defaultActivityShow, gridLoadingTimeout, purchaseOrder, rentalManagement } from "../../constants/helpers";
-import BulkEditDialog from "./BulkEditDialog";
-import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import HtmlTooltip from "../../components/CustomTooltipTitle";
-import EditIcon from "@material-ui/icons/Edit";
+import { dateFormat, defaultActivityShow, gridLoadingTimeout, productInventory, purchaseOrder, rentalManagement, translateDataToTree } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import moment from "moment";
 import { startCase } from "lodash";
@@ -28,6 +19,8 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
     const {
         state: { user, permissions }
     }: any = useData();
+
+    let constPurchaseOrderProduct = purchaseOrderProduct
 
     const [showCreateAssetDialog, setShowCreateAssetDialog] = useState(false)
     const isSmallScreen = useMediaQuery('(max-width:1300px)');
@@ -137,14 +130,28 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
     ]
 
     useEffect(() => {
+        let tempInventory = []
         dispatch({ type: "loading", loading: true });
-        axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData._id}/service-details`)
+        axiosInstance().get(`product-inventory?page=0&limit=100&filterType=and`)
+            // ${productInventory.api}?limit=100&filterType=and&filterById=[{"field": "pONumber", "term": "${purchaseOrderData._id}"}]`)
             .then(({ data }) => {
-                // data.data = data.data.map((u) => tempCombinedData.push({
-                //     ...u,
-                //     quantity: u.qty,
-                //     type: "service"
-                // }));
+                data.data = data.data.map((u) => {
+                    let tempProduct = constPurchaseOrderProduct.find(obj => obj.treeId === u.product.optionValue)
+                    if (tempProduct) {
+                        tempProduct["subRows"] ? tempProduct["subRows"].push({
+                            ...u,
+                            treeId: u._id,
+                            parent: tempProduct.treeId
+                        })
+                            : tempProduct["subRows"] = [{
+                                ...u,
+                                treeId: u._id,
+                                parent: tempProduct.treeId
+                            }]
+                    }
+                }
+                );
+                const newDataForReactTable = [...translateDataToTree(constPurchaseOrderProduct ? [...constPurchaseOrderProduct] : [], "parent", "treeId", "subRows")];
                 dispatch({
                     type: "initialize", data: data.data, count: data.data.length
                 });
