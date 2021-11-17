@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.39.0](https://github.com/vebholic/oms_frontend/compare/v1.38.0...v1.39.0) (2021-11-17)
+
+
+### Features
+
+* - End date will be always 1 day addtional than start date in rental management create dialog ([eab0d28](https://github.com/vebholic/oms_frontend/commit/eab0d2839ebd783a5834d9ad037bdfd2c9556028))
+* - Rental management related fixes ([0120f56](https://github.com/vebholic/oms_frontend/commit/0120f562b5f675484cd635688a24b991a3933847))
+* - Status column is visible, Link also added Reference in Asset History ([cb35dea](https://github.com/vebholic/oms_frontend/commit/cb35dead133a82e3da41f72aa001ed1b6dd5312a))
+
+
+### Bug Fixes
+
+* bug fix ([91534a6](https://github.com/vebholic/oms_frontend/commit/91534a66d2cb42e9ac175674d5491bd8ec26b85e))
+* bug fix ([a5699bb](https://github.com/vebholic/oms_frontend/commit/a5699bba434c59cdcb9af907a21882ae0f335ba5))
+* next button disable in quote 1st step ([d925a81](https://github.com/vebholic/oms_frontend/commit/d925a812e38e4acd64a94f036ad71eaa3e97964e))
+* oAT-335 ([b8e6b17](https://github.com/vebholic/oms_frontend/commit/b8e6b17638b0e1d7a4f7cdb1f49f7bac7ac361d9))
+
 ## [1.38.0](https://github.com/vebholic/oms_frontend/compare/v1.37.0...v1.38.0) (2021-11-16)
 
 
