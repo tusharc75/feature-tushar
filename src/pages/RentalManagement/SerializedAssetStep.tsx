@@ -184,9 +184,23 @@ const SerializedAssetStep = (props) => {
     },
     {
       accessor: 'assets',
-      Header: 'Assets',
+      Header: 'Assets Assigned',
       Cell: ({ row }) => (
         <p>{row.original?.type?.includes("roduct") ? row.original.assetCount : "- - - - -"}</p>
+
+        // <p>
+        //   {
+        //     row.original?.type?.includes("roduct") ? row.original.assetCount : ( row.original?.type === "Package" ? `${row.subRows?.length ?? 0} / ${row.original.assetCount}` : "- - - - -")
+        //   }
+        // </p>
+
+      )
+    },
+    {
+      accessor: 'qty',
+      Header: 'Quantity',
+      Cell: ({ row }) => (
+        row.original.qty ? <p>{row.original.qty}</p> : <NoDataCell />
       )
     },
     {
@@ -205,13 +219,6 @@ const SerializedAssetStep = (props) => {
         row.original.endDate ? <h5 className="createBy" title={`${moment(row.original.endDate.slice(0, 10)).format(dateFormat)}`}>
           <span className="">{moment(row.original.endDate.slice(0, 10)).format(dateFormat)}</span>
         </h5> : <NoDataCell />
-      )
-    },
-    {
-      accessor: 'qty',
-      Header: 'Quantity',
-      Cell: ({ row }) => (
-        row.original.qty ? <p>{row.original.qty}</p> : <NoDataCell />
       )
     },
     {
@@ -443,7 +450,7 @@ const SerializedAssetStep = (props) => {
                 })}
                 onSelect={setSelectedProducts}
                 childrenProperty="subRows"
-                uniqueKey="_id"
+                uniqueKey="id"
               />
 
               {/* <MaterialTableComponent

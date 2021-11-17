@@ -258,7 +258,6 @@ function PricingConditionsDetailsPage() {
 
     const classes = useStyles();
 
-    console.log(initialData?.values)
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>

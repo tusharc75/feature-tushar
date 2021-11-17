@@ -11,7 +11,10 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow, dateFormat, pricingCondition, generateUniqueId, translateDataToTree } from "../../constants/helpers";
+import {
+  getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow,
+  dateFormat, pricingCondition, generateUniqueId, treeToFlatArray
+} from "../../constants/helpers";
 import Steps from "./Steps";
 import AddExistingProductInventory from "./AddExistingProductInventory";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
@@ -66,7 +69,7 @@ const RentalManagementDetailsPage = () => {
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [isUpdating, setUpdating] = useState(false);
   const [isProductEdit, setProductEdit] = useState(false);
-  const [selectedProductData, setSelectedProductData] = useState(null)
+  const [recordToUpdate, setRecordToUpdate] = useState(null)
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -309,8 +312,53 @@ const RentalManagementDetailsPage = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
+  //  This is copied method from helpers.ts as wee need some modification for this screen only
+  const translateDataToTreeForProducts = (data, parentProperty, childProperty, childrenPropertyToStore) => {
+    let parents = data.filter(value => value[parentProperty] == 'undefined' || value[parentProperty] == null)
+    let childrens = data.filter(value => value[parentProperty] !== 'undefined' && value[parentProperty] != null)
+
+    parents.forEach((current) => {
+      if (current.type === "Product" || current.type === "Package") {
+        current["qtyToDisplay"] = current?.qty ?? 0;
+        current["isValid"] = (!isNaN(current?.finalPrice) && current?.finalPrice !== 0)
+      }
+    })
+
+    let translator = (parents, childrens) => {
+      parents.forEach((parent) => {
+        childrens.forEach((current, index) => {
+          if (current.parent === parent[childProperty]) {
+            let temp = JSON.parse(JSON.stringify(childrens))
+            temp.splice(index, 1)
+            translator([current], temp)
+
+            //  Check validation for products in package - Start
+            current["qtyToDisplay"] = `${current.qty} x ${parent.qty}`
+
+            if (current?.finalPrice !== null && current?.finalPrice !== undefined && typeof current?.finalPrice !== "string" && current?.finalPrice !== 0) {
+              current["isValid"] = true;
+            } else {
+              current["isValid"] = parent["isValid"];
+            }
+            //  Check validation for products in package - End
+
+            if (typeof parent[childrenPropertyToStore] !== 'undefined') {
+              parent[childrenPropertyToStore].push(current)
+            } else {
+              parent[childrenPropertyToStore] = [current]
+            }
+          }
+        })
+      })
+    }
+    translator(parents, childrens)
+
+    return parents
+  }
+
 
   const fetchProductInventory = () => {
+
     let tempInventory = []
     dispatch({ type: "loading", loading: true });
     if (gridApi) {
@@ -322,6 +370,8 @@ const RentalManagementDetailsPage = () => {
         ...u,
         id: u._id,
         productCategory: u.productCategory?.optionLabel,
+        isValidRecord: true,
+        qtyToDisplay: u.qty
         // package: u.hasOwnProperty("package") ? u.package.packageName : "",
         // packageId: u.hasOwnProperty("package") ? u.package._id : ""
       })));
@@ -333,23 +383,33 @@ const RentalManagementDetailsPage = () => {
       setProductInventory(tempInventory)
       setSerializeAssets(data.data?.inventory || [])
       tempInventory = restructureRowData(tempInventory)
-      
+
       let zeroPrice = tempInventory.filter(pkg => pkg.type !== "productInPackage" && pkg?.finalPrice === 0);
 
-      // console.log(zeroPrice)
       if (zeroPrice.length > 0) {
         setNextStep(false)
       } else {
         setNextStep(true)
       }
 
-      const newDataForReactTable = [...translateDataToTree(tempInventory ? [...tempInventory] : [], "parent", "treeId", "subRows")];
+      const newData = [];
+      tempInventory.forEach(({ _id, ...rest }) => {
+        newData.push(rest)
+      })
 
-      dispatch({ type: "initialize", data: orderBy(newDataForReactTable, ["order"], ["asc"]), count: newDataForReactTable.length });
+      const newDataForReactTable = [...translateDataToTreeForProducts(newData ? [...newData] : [], "parent", "treeId", "subRows")];
+
+      // console.log(newDataForReactTable)
+
+      dispatch({ type: "initialize", data: [], count: 0 })
+      dispatch({ type: "initialize", data: [...orderBy(newDataForReactTable, ["order"], ["asc"])], count: newDataForReactTable.length });
+
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
       }, gridLoadingTimeout);
+
       setSelectedProducts([])
+
     }).catch((error) => {
       toastConfig.setToastConfig(error);
       dispatch({ type: "loading", loading: false });
@@ -374,6 +434,7 @@ const RentalManagementDetailsPage = () => {
     })
 
     extractedProducts = [...products, ...packages, ...modifiedPkgProducts]
+
     return extractedProducts
   }
 
@@ -499,8 +560,9 @@ const RentalManagementDetailsPage = () => {
 
   const handleClick = (rowData) => {
     setProductEdit(true)
-    setSelectedProductData(rowData)
+    setRecordToUpdate(rowData)
   }
+
 
   const columns = [
     {
@@ -558,15 +620,24 @@ const RentalManagementDetailsPage = () => {
       )
     },
     {
-      accessor: 'qty',
+      accessor: 'qtyToDisplay',
       Header: 'Quantity',
       Cell: ({ row }) => (
-        row.original.qty ? <p className="text-truncate">
-          {/* {rowData.type === "productInPackage"
-              ? rowData.pkgQty !== 0 ? `${rowData.pkgQty} * ${rowData.qty} = ${rowData.totalQty}` : rowData.qty
-              : rowData.qty} */}
-          {row.original.qty}
-        </p> : <NoDataCell />
+        row.original.qtyToDisplay ? <p>{startCase(row.original.qtyToDisplay)}</p> : <NoDataCell />
+        // <>
+        //   {
+        //     row.original?.type === 'productInPackage' ? (dataRows.some(f => f.treeId === row.original?.parent)
+        //       ? <p>{row.original.qty} * {dataRows.find(f => f.treeId === row.original?.parent)?.qty}</p>
+        //       : <p>{row.original.qty}</p>)
+        //       : <p>{row.original.qty}</p>
+        //   }
+        // </>
+
+
+        // row.original.qty ? <p className="text-truncate">
+
+        //   {row.original.qty}
+        // </p> : <NoDataCell />
       )
     },
     {
@@ -587,22 +658,40 @@ const RentalManagementDetailsPage = () => {
       accessor: 'price',
       Header: `Price (${currencySymbol})`,
       Cell: ({ row }) => (
-        <p>{row.original.price ? row.original.price : "0"} </p>
-      )
+        row.original.price ? <p>{row.original.price}</p> : <NoDataCell />
+      ),
+      Footer: info => {
+        const total = React.useMemo(
+          () =>
+            info.rows.filter(f => f.values.hasOwnProperty("price") && !isNaN(f.values.price)).reduce((sum, row) => row.values.price + sum, 0),
+          [info.rows]
+        )
+
+        return <>{total}</>
+      }
     },
     {
       accessor: 'discount',
       Header: 'Discount (%)',
       Cell: ({ row }) => (
-        <p>{row.original.discount === 0 ? "0" : row.original.discount}</p>
+        row.original.discount === 0 ? <NoDataCell /> : <p>{row.original.discount}</p>
       )
     },
     {
       accessor: 'finalPrice',
       Header: `Final Price (${currencySymbol})`,
       Cell: ({ row }) => (
-        <p>{row.original.finalPrice}</p>
-      )
+        row.original.finalPrice === 0 ? <NoDataCell /> : <p>{row.original.finalPrice}</p>
+      ),
+      Footer: info => {
+        const total = React.useMemo(
+          () =>
+            info.rows.filter(f => f.values.hasOwnProperty("finalPrice") && !isNaN(f.values.finalPrice)).reduce((sum, row) => row.values.finalPrice + sum, 0),
+          [info.rows]
+        )
+
+        return <>{total}</>
+      }
     }
   ]
 
@@ -700,8 +789,6 @@ const RentalManagementDetailsPage = () => {
   const handleBulkEditData = (values: any) => {
     let updatedArr = selectedProducts.filter(d => d.type !== "productInPackage")
 
-    console.log(updatedArr)
-
     updatedArr = updatedArr.map(d => ({
       "id": d.id,
       "type": d?.type.toLowerCase(),
@@ -734,7 +821,7 @@ const RentalManagementDetailsPage = () => {
 
   const handleSingleEdit = async (values: any) => {
     setUpdating(true)
-    const { subRows, ...rest } = values;
+    const { subRows, isValid, qtyToDisplay, ...rest } = values;
 
     rest.type = camelCase(rest.type)
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/updateOne`, rest)
@@ -747,6 +834,51 @@ const RentalManagementDetailsPage = () => {
         toastConfig.setToastConfig(error)
       });
   }
+
+  // const checkIsValidRecord = (rowData) => {
+  //   if (rowData?.type === "Product") {
+  //     return (!isNaN(rowData?.finalPrice) && rowData?.finalPrice !== 0)
+  //   }
+  //   else if (rowData?.type === "Package") {
+  //     return true;
+  //   }
+  //   else {
+  //     const parentRecord = dataRows.find(f => f.treeId === rowData?.parent)
+  //     if (parentRecord) {
+  //       return (!isNaN(parentRecord?.finalPrice) && parentRecord?.finalPrice !== 0)
+  //     }
+  //   }
+  // }
+
+  // const restrictToGoNextStep = () => {
+  //   let isValid = false;
+
+  //   dataRows.forEach(rowData => {
+  //     if (rowData?.type === "Product") {
+  //       if (isNaN(rowData?.finalPrice) || rowData?.finalPrice === 0) {
+  //         isValid = false;
+  //         return;
+  //       }
+  //     }
+  //     else if (rowData?.type === "Package") {
+  //       return true;
+  //     }
+  //     else {
+  //       const parentRecord = dataRows.find(f => f.treeId === rowData?.parent)
+  //       if (parentRecord) {
+  //         return (!isNaN(parentRecord?.finalPrice) && parentRecord?.finalPrice !== 0)
+  //       }
+  //     }
+  //   });
+
+  //   return isValid;
+
+  //   if (productInventory.length > 0) {
+  //     console.log(productInventory);
+  //     // !(productInventory.length > 0 ? (productInventory.filter(f => f.type !== "productInPackage").some(f => !f?.hasOwnProperty("finalPrice") || isNaN(f?.finalPrice) || f?.finalPrice === 0) ? false : true) : false)
+  //   }
+  //   return true;
+  // }
 
   return (
     <>
@@ -812,9 +944,8 @@ const RentalManagementDetailsPage = () => {
                         user?.user?._id &&
                         rentalManagementData.owner.optionValue === user.user._id ? (
                         <DeleteButton
-
                           text="Delete"
-                          className={"buttonDeleteBigScreen"}
+                          className="buttonDeleteBigScreen"
                           onClick={() => setShowConfirmBox(true)}
                         />
                       ) : null}
@@ -918,7 +1049,7 @@ const RentalManagementDetailsPage = () => {
                   <Paper>
                     <Steps
                       className={styles.steps_box}
-                      isNextStep={!(productInventory.length > 0 ? (productInventory.filter(f => f.type !== "productInPackage").some(f => !f?.hasOwnProperty("finalPrice") || isNaN(f?.finalPrice) || f?.finalPrice === 0) ? false : true) : false)}
+                      isNextStep={treeToFlatArray(dataRows, "subRows").some(f => f.isValid === false)}
                       nextStep={nextStep}
                       steps={rentalProcessSteps.slice(0, 5)}
                       currentStep={currentStep}
@@ -949,8 +1080,6 @@ const RentalManagementDetailsPage = () => {
                             >
                               {`Add ${routes.packages.title}`}
                             </Button>
-                            <Box mx={1} />
-                            {selectedProducts && selectedProducts.length > 0 && <Typography>Selected ({selectedProducts.length})</Typography>}
                           </Box>
                           <Box display="flex">
                             <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
@@ -1035,11 +1164,11 @@ const RentalManagementDetailsPage = () => {
                                 data={dataRows}
                                 rowStyle={(rowData) => ({
                                   color: "black",
-                                  backgroundColor: rowData?.type?.includes("roduct") && (isNaN(rowData?.finalPrice) || rowData?.finalPrice === 0) ? "#EFCCCC" : "white"
+                                  backgroundColor: rowData.isValid ? "white" : "#EFCCCC"
                                 })}
                                 onSelect={setSelectedProducts}
                                 childrenProperty="subRows"
-                                uniqueKey="_id"
+                                uniqueKey="id"
                               />
 
 
@@ -1069,7 +1198,7 @@ const RentalManagementDetailsPage = () => {
                                 }}
                               // onRowClick={(rowData) => {
                               //   setProductEdit(true)
-                              //   setSelectedProductData(rowData)
+                              //   setRecordToUpdate(rowData)
                               // }}
                               /> */}
 
@@ -1333,7 +1462,7 @@ const RentalManagementDetailsPage = () => {
       {Boolean(packageForProducts)
         && <PackageProductsDialog
           rentalId={id}
-          packageId={packageForProducts?._id}
+          packageId={packageForProducts?.id}
           products={packageForProducts?.products.map(p => p.id)}
           onClose={() => setPackageForProducts(null)}
           rentalApi={rentalManagement.rentalManagementApi}
@@ -1351,11 +1480,12 @@ const RentalManagementDetailsPage = () => {
           isSaving={isUpdating}
           onClose={() => {
             setProductEdit(false)
-            setSelectedProductData(null)
+            setRecordToUpdate(null)
           }}
-          submitBulkEdit={selectedProductData ? handleSingleEdit : handleBulkEditData}
+          submitBulkEdit={recordToUpdate ? handleSingleEdit : handleBulkEditData}
           currencySymbol={currencySymbol}
-          data={selectedProductData}
+          data={recordToUpdate}
+          selectedProducts={selectedProducts}
         />}
       {
         showManageAdditionalCostDialog.open && showManageAdditionalCostDialog.record !== null && <ManageAdditionalCostDialog
