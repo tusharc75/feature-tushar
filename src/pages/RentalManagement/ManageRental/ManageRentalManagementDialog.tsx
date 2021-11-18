@@ -122,13 +122,13 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                 }
             }
             else {
-                let initialData = getObjKeys("", fieldsDataForCreate);
+                let initialData = { ...getObjKeys("", fieldsDataForCreate), rentalEndDate: "", currency: user.user?.brandCurrency || "" };
 
-                var today = new Date();
-                var tomorrow = new Date();
-                initialData["rentalEndDate"] = new Date(tomorrow.setDate(today.getDate() + 1));
+                // var today = new Date();
+                // var tomorrow = new Date();
+                // initialData["rentalEndDate"] = "";  //  new Date(tomorrow.setDate(today.getDate() + 1));
 
-                initialData["currency"] = user.user?.brandCurrency || "";
+                // initialData["currency"] = user.user?.brandCurrency || "";
                 setRentalData({
                     fields: fieldsDataForCreate,
                     initialValues: initialData,
@@ -472,6 +472,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                     isTooltip={field?.isTooltip || false}
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
+                                                                                    minDate={new Date()}
                                                                                     maxDate={moment(values["rentalEndDate"]).subtract(1, "day")}
                                                                                 />
                                                                             ) : field.fieldName === "rentalEndDate" ? (
@@ -485,6 +486,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                     type={field.type}
                                                                                     options={field.option}
                                                                                     setFieldValue={(name, value) => {
+                                                                                        debugger;
                                                                                         handleValuesChange({ [name]: value })
                                                                                         setFieldValue(name, value)
                                                                                     }}

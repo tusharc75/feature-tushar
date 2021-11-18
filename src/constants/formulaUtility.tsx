@@ -82,6 +82,7 @@ export const getFormulaValue = (formula, inputFields, returnType, decimalPlaces)
             // if (isFinite(value)) {
             //     value = 0
             // } 
+            
             //value = parseFloat(value.toFixed(decimalPlaces))
         }
     }
@@ -193,7 +194,7 @@ const handleFormula = (fieldData, fields, values, name, value, resultValues, isO
         fields.filter((_f) => (_f.type === "formula" || _f.isFormula === true) && _f.inputFields.includes(name)).forEach((_data) => {
             if (_data.inputFields.includes(name)) {
                 loop_count++
-                if (loop_count > 100) {
+                if (loop_count > 300) {
                     console.warn("Loop in formula")
                     return resultValues
                 }

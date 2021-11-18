@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.40.0](https://github.com/vebholic/oms_frontend/compare/v1.39.0...v1.40.0) (2021-11-18)
+
+
+### Features
+
+*  account hierachy edit andd add new feature added ([139702d](https://github.com/vebholic/oms_frontend/commit/139702d1f4987e397f4835f3818fa70d0d20ab90))
+* - PO-183 - Fixed ([d2313f3](https://github.com/vebholic/oms_frontend/commit/d2313f3010560744a9ece89257d375f0b23722fd))
+* - PO-186 - Requested Changes Done ([23b28b6](https://github.com/vebholic/oms_frontend/commit/23b28b6453c5bf36e55f783955202f29d0612764))
+* - PO-192 - Fixed ([fe683f1](https://github.com/vebholic/oms_frontend/commit/fe683f1aaf17f6b3758c314e56b94b4ea9322e7e))
+* - PO-195 - Done ([b903fd3](https://github.com/vebholic/oms_frontend/commit/b903fd33f8cc13fa13871cb0028ff00f2edeb279))
+* - PO-198 - Done ([0d56fdf](https://github.com/vebholic/oms_frontend/commit/0d56fdf95c92d617a48fcf1873f5a88057b89b4a))
+* - Rental management Changes ([5f7b069](https://github.com/vebholic/oms_frontend/commit/5f7b0696b59258742020815f93a07946e286aa48))
+* - Switch added on Add product dialog ([2f4bbff](https://github.com/vebholic/oms_frontend/commit/2f4bbffa10c8ef7d89fea6ecd1cd7449c97ade19))
+* add reports to in customer contact and supplier contact ([80e5094](https://github.com/vebholic/oms_frontend/commit/80e5094dddf494b54b0eeeedce8712d268672a32))
+* changes added ([ddfcd71](https://github.com/vebholic/oms_frontend/commit/ddfcd71192dde9f6eb76b08e918676561743e72a))
+* entity should be auto selected in all resources based on the selected entity ([9bd0299](https://github.com/vebholic/oms_frontend/commit/9bd02993365a5b8b081944743f0242816f5545b8))
+* removed console ([300038c](https://github.com/vebholic/oms_frontend/commit/300038cd269fc3b5036224b23573195dcfdb86bf))
+* removed unused code ([78af305](https://github.com/vebholic/oms_frontend/commit/78af305856c88ce482fe931078f50f05ca53a7ec))
+
+
+### Bug Fixes
+
+* bug fix ([554436e](https://github.com/vebholic/oms_frontend/commit/554436ec96473faefba461389063536aef38ed82))
+* bug fix ([b4e79a1](https://github.com/vebholic/oms_frontend/commit/b4e79a1e6b5ff76805645377e4228803998a6669))
+* doa request grid changes ([5b0bc60](https://github.com/vebholic/oms_frontend/commit/5b0bc607e5d13fde4d9b98fc2fb3b13506ca9019))
+
 ## [1.39.0](https://github.com/vebholic/oms_frontend/compare/v1.38.0...v1.39.0) (2021-11-17)
 
 
