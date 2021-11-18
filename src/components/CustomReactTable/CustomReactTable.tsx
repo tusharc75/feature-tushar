@@ -107,6 +107,8 @@ export default function CustomReactTable({
 
             //  Use below selection if pagination is not there
             {
+                //  Check this example to customize checkbox
+                //  https://github.com/tannerlinsley/react-table/issues/2988
                 id: 'selection',
                 width: 100,
                 minWidth: 100,
