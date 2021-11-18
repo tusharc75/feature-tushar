@@ -25,8 +25,8 @@ import Activity from "../../components/Activity";
 import { isMobile, isTablet } from "react-device-detect";
 
 const mappedStatus = {
-  "Sign-off - Dispatched": "In-Transit",
-  "Sign-off - Received": "Delivered"
+  "Sign-off - Dispatch": "In-Transit",
+  "Sign-off - Receive": "Delivered"
 }
 
 const ReceivingTicketDetails = () => {
@@ -149,13 +149,13 @@ const ReceivingTicketDetails = () => {
     }
   }
 
-  let label = receivingTicketData ? receivingTicketData?.status === "New" ? "Sign-off - Dispatched" :
-    (receivingTicketData?.status === "In-Transit") ? "Sign-off - Received" : "" : ""
+  let label = receivingTicketData ? receivingTicketData?.status === "New" ? "Sign-off - Dispatch" :
+    (receivingTicketData?.status === "In-Transit") ? "Sign-off - Receive" : "" : ""
 
   const handleSignature = (signedData) => {
     const { type, sign: newSign } = signedData;
     let stateArr = signatures;
-    stateArr.push({ type, signature: newSign, status: label === "Sign-off - Dispatched" ? "Start Delivery" : "Sign-Off" });
+    stateArr.push({ type, signature: newSign, status: label === "Sign-off - Dispatch" ? "Start Delivery" : "Sign-Off" });
     setSignatures(stateArr)
 
     if (stateArr.length === 2 || stateArr.length === 4) {
@@ -425,7 +425,7 @@ const ReceivingTicketDetails = () => {
         <SignatureDialog
           submitting={submittingSign}
           label={label}
-          steps={label === "Sign-off - Dispatched" ? ["Supervisor", "Delivery Person"] : ["Delivery Person", "Receiver"]}
+          steps={label === "Sign-off - Dispatch" ? ["Supervisor", "Delivery Person"] : ["Delivery Person", "Receiver"]}
           forDelivery={true}
           open={true}
           onClose={() => {

@@ -1240,7 +1240,7 @@ const RentalManagementDetailsPage = () => {
                             { field: "description", headerName: "Description", show: true, disabled: true },
                             { field: "qty", headerName: "Quantity", show: true, disabled: true },
                             { field: "uom", headerName: "Unit of Measure", show: true, disabled: true },
-                            { field: "amount", headerName: `Amount ${currencySymbol}`, show: true, disabled: true },
+                            { field: "amount", headerName: `Amount (${currencySymbol})`, show: true, disabled: true },
                           ]}
                           dataRows={additionalCost}
                           frameworkComponents={rentalJobFrameworkComponents}

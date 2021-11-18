@@ -23,7 +23,7 @@ import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import ManageMarketSegmentDialog from "../../MarketSegment/ManageMarketSegmentDialog";
-import {FaDiceOne} from "react-icons/fa";
+import { FaDiceOne } from "react-icons/fa";
 
 const arr = [...Array(9).keys()];
 
@@ -347,7 +347,7 @@ export default function ManageAccount(props) {
                         formsData.filter((item) => item.name !== additionalFieldName).map((form, i) => (
                           <div key={i}>
                             <div className={"detail-box-content"}>
-                              <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                              <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
                               <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
                             </div>
                             <Box marginY={2}>
