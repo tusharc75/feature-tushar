@@ -293,6 +293,8 @@ const hasAccessToEntity = (id) => {
                         >
                           <Card className={styles.detail_card_view}>
                             <CardContent className="detailListing">
+                              <div style={{width:"5px", backgroundColor:"var(--secondary)" , marginBottom:"10px", borderRadius:"5px", }}> </div>
+                              <Grid item xs={12}>
                               <Grid container className="detailCardHeader">
                                 <Grid item xs={7} sm={8} >
                                   {hasAccessToEntity(obj.entity) ?
@@ -384,6 +386,7 @@ const hasAccessToEntity = (id) => {
                                     ""
                                   )}
                                 </Grid>
+                              </Grid>
                               </Grid>
                             </CardContent>
                           </Card>

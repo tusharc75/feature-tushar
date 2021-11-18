@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Menu, MenuItem } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -201,6 +201,8 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                                         <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
                                             <Card className="detailCard">
                                                 <CardContent className="detailListing">
+                                                    <div className="cardStyle"> </div>
+                                                    <Grid item xs={12}>
                                                     <Grid container className="detailCardHeader">
                                                         <Grid item xs={12} sm={12}>
                                                             {
@@ -227,6 +229,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                                                                 <DisplayData key={2} label='Due Date' value={displayDate(obj.endDate)} icon={< IoCalendarOutline size={15} />} />
                                                             }
                                                         </Grid>
+                                                    </Grid>
                                                     </Grid>
                                                 </CardContent>
                                             </Card>

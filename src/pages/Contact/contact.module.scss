@@ -7,6 +7,12 @@
   display: flex;
   gap: 0.25rem;
 }
+@media only screen and (max-width: 767px) {
+  .search_box_layout{
+    margin-left: 0px;
+    justify-content: flex-end;
+  }
+}
 
 @media only screen and (max-width: 599px) {
   .custom_grid {

@@ -370,14 +370,9 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                       removeDisplayType={removeDisplayType}
                                       setValues={setValues}
                                       handleRemoveField={handleRemoveField}
-                                      disabled={values.isEditable ?
-                                        stage === "product" ?
-                                          ["productCategory", "productTemplate", "entity"].includes(field.fieldName) ? true : false
-                                          : ["productCategory", "productTemplate", "entity", "priceTemplate"].includes(field.fieldName) ? true : false
-                                        :
-                                        stage === "product" ?
-                                          ["product", "product-custom"].includes(field.leval) ? true : false
-                                          : ["product", "product-custom"].includes(field.leval) ? true : false}
+                                      disabled={stage === "product" ?
+                                        ["productCategory", "productTemplate", "entity"].includes(field.fieldName) ? true : false
+                                        : ["productCategory", "productTemplate", "entity", "priceTemplate"].includes(field.fieldName) ? true : false}
                                     />
                                   ) : (
                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
@@ -421,13 +416,9 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                               field.isvlookupReverse
                                             }
                                             size="small"
-                                            disabled={values.isEditable ?
-                                              stage === "product" ?
-                                                ["productCategory", "productTemplate", "entity"].includes(field.fieldName) ? true : false
-                                                : ["productCategory", "productTemplate", "entity", "priceTemplate"].includes(field.fieldName) ? true : false
-                                              : stage === "product" ?
-                                                ["product", "product-custom"].includes(field.leval) && !["priceTemplate"].includes(field.fieldName) ? true : false
-                                                : ["product", "product-custom"].includes(field.leval) ? true : false}
+                                            disabled={stage === "product" ?
+                                              ["productCategory", "productTemplate", "entity"].includes(field.fieldName) ? true : false
+                                              : ["productCategory", "productTemplate", "entity", "priceTemplate"].includes(field.fieldName) ? true : false}
                                             imageOrFileUploadCompletePercentage={
                                               ["imageUpload", "fileUpload"].some((s) => s === field.type)
                                                 ? (completePercentage) => {

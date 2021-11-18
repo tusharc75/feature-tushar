@@ -97,6 +97,13 @@ export function reducer(state, action) {
         loading: false
       };
 
+    case 'showFilteredRecordsOnly':
+      return {
+        ...state,
+        showFilteredRecordsOnly: !state.showFilteredRecordsOnly,
+        page: 0
+      }
+
     default:
       break;
   }
@@ -115,6 +122,7 @@ export const intialState = {
   filters: {},
   sorting: [],
   selectedRecords: [],
+  showFilteredRecordsOnly: false
 };
 
 export default function CustomAgGridEditable({
@@ -144,41 +152,49 @@ export default function CustomAgGridEditable({
   renderedFrom = null,
   customGridOptions = null,
   selectedRecords = [],
+  showOnlyShowFilteredRecordSwitch = false,
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
 
-  const [clientSideGridApi, setClientSideGridApi] = useState(null);
+  const [currentGridApi, setCurrentGridApi] = useState(null);
   const enableRowDrag = columns.some((d) => d.rowDrag);
 
   useEffect(() => {
-    if (clientSideGridApi && selectedRecords.length) {
-      clientSideGridApi.forEachNode(function (node) {
+    if (currentGridApi && selectedRecords.length) {
+      currentGridApi.forEachNode(function (node) {
         node.setSelected(
           selectedRecords.some((o) => o._id === node.data._id)
         );
       });
     }
 
-  }, [clientSideGridApi, selectedRecords])
+  }, [currentGridApi, selectedRecords])
 
   //  If you want to do something once grid binding done
   const onGridReady = (params) => {
     setGridApi(params.api);
     setColumnApi(params.columnApi);
-    setClientSideGridApi(params.api);
+    setCurrentGridApi(params.api);
     if (handleGridReady) handleGridReady(params);
   };
 
-  useEffect(() => {
-    if (columnApi && loading === false) {
-      const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-
-      if (columnState) {
-        columnApi.setColumnState(columnState);
+  const onFirstDataRendered = (e) => {
+    try {
+      if (localStorage.getItem(renderedFrom)) {
+        const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+        setTimeout(() => {
+          columnApi.setColumnState(columnState);
+        }, 500)
       }
+    } catch (_) {
+      console.error("Error in configuring columns on onFirstDataRendered method")
     }
-  }, [columnApi, loading])
+
+    if (currentGridApi) {
+      currentGridApi.sizeColumnsToFit()
+    }
+  }
 
   const onColumnMoved = (params) => {
     const columnState = JSON.stringify(params.columnApi.getColumnState());
@@ -236,19 +252,6 @@ export default function CustomAgGridEditable({
     return [dataObj]
   }
 
-  const getWidth = (field, columnWidth) => {
-    if (localStorage.getItem(renderedFrom)) {
-      const storedColumns = JSON.parse(localStorage.getItem(renderedFrom));
-
-      const indexOfField = storedColumns.findIndex((d) => d.colId === field);
-      if (indexOfField > -1) {
-        return storedColumns[indexOfField].width;
-      }
-      return columnWidth;
-    }
-    return columnWidth;
-  }
-
   const generateColumns = columns.map((column: any, index) => {
     return isClientSideGrid ? (
       <AgGridColumn
@@ -260,8 +263,8 @@ export default function CustomAgGridEditable({
         cellRenderer={column.cellRenderer ?? null}
         cellRendererParams={column.cellRendererParams ?? null}
         minWidth={column.width ?? 250}
-        width={getWidth(column.field, column.width) ?? 250}
-        flex={1}
+        // width={getWidth(column.field, column.width) ?? 250}
+        // flex={1}
         rowDrag={column.rowDrag ?? false}
         editable={column.editable ?? false}
         cellEditor={column.cellEditor}
@@ -282,8 +285,8 @@ export default function CustomAgGridEditable({
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
         minWidth={column.width ?? 250}
-        width={getWidth(column.field, column.width) ?? 250}
-        flex={1}
+        // width={getWidth(column.field, column.width) ?? 250}
+        // flex={1}
         filterParams={customFilterParams}
         comparator={() => {
           return 0;
@@ -320,6 +323,8 @@ export default function CustomAgGridEditable({
             refreshGrid={refreshGrid}
             renderedFrom={renderedFrom}
             isClientSideGrid={isClientSideGrid}
+            dispatch={dispatch}
+            showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
           />
 
           <div
@@ -327,6 +332,7 @@ export default function CustomAgGridEditable({
             style={{ zIndex: -500, position: "inherit" }}
           >
             <AgGridReact
+              onFirstDataRendered={onFirstDataRendered}
               gridOptions={customGridOptions}
               rowData={dataRows}
               onColumnMoved={onColumnMoved}
@@ -371,6 +377,8 @@ export default function CustomAgGridEditable({
                 floatingFilter: true,
                 sortable: true,
                 suppressMenu: true,
+                suppressSizeToFit: true,
+                suppressAutoSize: true,
                 // headerCheckboxSelection: true,
                 // checkboxSelection: true,
                 floatingFilterComponentParams: { suppressFilterButton: true },
@@ -390,11 +398,11 @@ export default function CustomAgGridEditable({
               }}
               onFilterChanged={(e) => {
                 if (isClientSideGrid) {
-                  clientSideGridApi.paginationGoToPage(0);
+                  currentGridApi.paginationGoToPage(0);
                   dispatch({
                     type: "count",
                     count:
-                      clientSideGridApi.getModel().rootNode.allChildrenCount,
+                      currentGridApi.getModel().rootNode.allChildrenCount,
                   });
                   dispatch({ type: "pageChange", page: 0 });
                 } else {
@@ -493,17 +501,17 @@ export default function CustomAgGridEditable({
               onPageChange={(event, newPage) => {
                 dispatch({ type: "pageChange", page: newPage });
 
-                if (clientSideGridApi) {
-                  clientSideGridApi.paginationGoToPage(newPage);
+                if (currentGridApi) {
+                  currentGridApi.paginationGoToPage(newPage);
                 }
               }}
               rowsPerPage={limit}
               onRowsPerPageChange={(event) => {
                 dispatch({ type: "pageSizeChange", limit: event.target.value });
 
-                if (clientSideGridApi) {
-                  clientSideGridApi.paginationGoToPage(0);
-                  clientSideGridApi.paginationSetPageSize(event.target.value);
+                if (currentGridApi) {
+                  currentGridApi.paginationGoToPage(0);
+                  currentGridApi.paginationSetPageSize(event.target.value);
                 }
               }}
               rowsPerPageOptions={pageSizes}

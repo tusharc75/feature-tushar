@@ -50,7 +50,8 @@ import { quoteStepColors } from '../../constants/helpers';
 import InfiniteScroll from "react-infinite-scroll-component";
 import { MdAccountCircle } from "react-icons/md";
 import { AiFillCrown } from "react-icons/all";
-import IconButton from "@material-ui/core/IconButton"
+import { FaSuitcase } from "react-icons/fa";
+import IconButton from "@material-ui/core/IconButton";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 let quoteTimeout;
@@ -114,6 +115,7 @@ const QuoteBuilders = () => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const [columns, setColumns] = useState([])
   const [isAllChecked, setIsAllChecked] = useState(false);
+  const [doa, setDoa] = useState([]);
   const [clonedData, setClonedData] = useState([])
   const [clonedId, setClonedId] = useState(null)
 
@@ -344,6 +346,7 @@ const QuoteBuilders = () => {
   }, [search]);
 
   useEffect(() => {
+    fetchDoa();
     if (renderCount > 0) {
       fetchQuoteBuilder();
     } else setRenderCount((preCount) => preCount + 1);
@@ -359,6 +362,29 @@ const QuoteBuilders = () => {
     opportunityDetails,
     showFilteredRecordsOnly
   ]);
+
+  const fetchDoa = async () => {
+    axiosInstance()
+      .get(`/doa/${selectedEntity}`)
+      .then(({ data: { data } }) => {
+        let doaData = [];
+
+        data.doa.forEach((item) => {
+          if (!isObjectEmpty(item)) {
+            doaData.push({
+              optionValue: item.user?._id,
+              optionLabel: [item.user?.firstName, item.user?.lastName].filter(f => f).join(" "),
+            });
+          }
+        });
+
+        setDoa(doaData);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setDoa([]);
+      });
+  };
 
   const getVersionStatus = (id, currency) => {
     // setAllVersionStatusButtonText(gettingVersionStatusText);
@@ -571,8 +597,8 @@ const QuoteBuilders = () => {
     }
 
     if (showFilteredRecordsOnly) {
-      const savedIds = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedIds)}`;
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
     }
 
     if (accountDetails.accountId) {
@@ -721,6 +747,8 @@ const QuoteBuilders = () => {
 
             return finalObject;
           });
+          
+
           //  Dynamic grid code - end
 
           setIsAllChecked(false);
@@ -861,7 +889,7 @@ const QuoteBuilders = () => {
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
                     recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords).length}
-                    ids={getLocalStorageArrayData(localStorageSelectedRecords)}
+                    ids={getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id)}
                     onExportToExcelSuccess={() => {
                       if (gridApi) gridApi.deselectAll()
                       else fetchQuoteBuilder()
@@ -967,7 +995,7 @@ const QuoteBuilders = () => {
                 loading={loading}
                 additionalDetails={[
                   {
-                    icon: <MdAccountCircle size={18} />,
+                    icon: <FaSuitcase size={18} />,
                     field: "customerAccountName"
                   },
                 ]}
@@ -1068,7 +1096,7 @@ const QuoteBuilders = () => {
           opportunityId={null}
           disableOwnerDropDown={true}
           contacts={null}
-          doaCollaboratorResources={user.user?.doa?.map(obj => obj.user)}
+          doaCollaboratorResources={doa}
           isRenderedFromOpportunity={false}
         />
       )}

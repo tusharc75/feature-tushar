@@ -30,7 +30,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const [selectedProduct, setSelectedProduct] = useState({ name: "", id: "", quantity: 0 });
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
     const [disableSaveButton, setDisableSaveButton] = useState(false);
 
     const {
@@ -38,25 +38,35 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     }: any = useData();
 
     useEffect(() => {
-        fetchProductInventory();
-        // if (type === "product") fetchProductInventory();
-        // if (type === "package") fetchPackage();
+        // fetchProductInventory();
+        if (type === "product") fetchProductInventory();
+        else if (type === "package") fetchPackage();
     }, []);
 
-    const columns =
-        // type === "product" ?
+    useEffect(() => {
+        if (gridApi) {
+            if (showFilteredRecordsOnly) {
+                gridApi.setRowData(gridApi.getSelectedRows())
+                dispatch({ type: "count", count: gridApi.getSelectedRows().length });
+            } else {
+                gridApi.setRowData(dataRows);
+                dispatch({ type: "count", count: dataRows.length });
+            }
+        }
+    }, [showFilteredRecordsOnly])
+
+    const columns = type === "product" ?
         [
             { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
             { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
             // { field: "entity", headerName: "Entity", show: true, disabled: true, cellRenderer: "commonRenderer" },
             { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
             { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        ]
-    //     : [
-    //     { field: "packageName", headerName: "Package Name", show: true, cellRenderer: "nameRenderer" },
-    //     { field: "packageDescription", headerName: "Package Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    //     { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    // ];
+        ] : [
+            { field: "packageName", headerName: "Package Name", show: true, cellRenderer: "nameRenderer" },
+            { field: "packageDescription", headerName: "Package Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+            { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+        ];
 
     const fetchPackageProduct = (packageId) => {
         if (type === "package") {
@@ -75,30 +85,30 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         }
     };
 
-    // const fetchPackage = () => {
-    //     dispatch({ type: "loading", loading: true });
+    const fetchPackage = () => {
+        dispatch({ type: "loading", loading: true });
 
-    //     if (gridApi) {
-    //         gridApi.setRowData([]);
-    //     }
-    //     axiosInstance().get(`${packages.packageApi}`).then(({ data }) => {
-    //         data.data = data.data?.filter(d => !productInventory.some(obj => obj.id === d._id)).map((u) => ({
-    //             ...u,
-    //             id: u._id,
-    //             type: type,
-    //             quantity: 0,
-    //         }));
-    //         setProductData(data.data)
-    //         dispatch({ type: "initialize", data: data.data, count: data.data.length });
-    //         setTimeout(() => {
-    //             dispatch({ type: "loading", loading: false });
-    //         }, gridLoadingTimeout);
+        if (gridApi) {
+            gridApi.setRowData([]);
+        }
+        axiosInstance().get(`${packages.packageApi}`).then(({ data }) => {
+            data.data = data.data?.filter(d => !productInventory.some(obj => obj.id === d._id)).map((u) => ({
+                ...u,
+                id: u._id,
+                type: type,
+                quantity: 0,
+            }));
+            setProductData(data.data)
+            dispatch({ type: "initialize", data: data.data, count: data.data.length });
+            setTimeout(() => {
+                dispatch({ type: "loading", loading: false });
+            }, gridLoadingTimeout);
 
-    //     }).catch((error) => {
-    //         toastConfig.setToastConfig(error);
-    //         dispatch({ type: "loading", loading: false });
-    //     });
-    // };
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
+            dispatch({ type: "loading", loading: false });
+        });
+    };
 
     const fetchProductInventory = () => {
         dispatch({ type: "loading", loading: true });
@@ -106,8 +116,8 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         if (gridApi) {
             gridApi.setRowData([]);
         }
-        axiosInstance().get(`${product.api}`).then(({ data: { data: products } }) => {
-            products = products?.filter((u: any) => u?.serializedProduct && !productInventory.some(obj => obj.id === u._id))
+        axiosInstance().get(product.api).then(({ data: { data: products } }) => {
+            products = products?.filter((u: any) => u?.serializedProduct && !productInventory.some(obj => obj.type === "Product" && obj.id === u._id))
                 .map((u) => ({
                     ...u,
                     id: u._id,
@@ -116,7 +126,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                     type: type,
                     quantity: 0,
                 }));
-            console.log(products)
+
             setProductData(products)
             dispatch({ type: "initialize", data: products, count: products.length });
             setTimeout(() => {
@@ -170,6 +180,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const onCellValueChanged = (row) => {
         setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
     }
+
     useEffect(() => {
         setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
     }, [selectedRecords])
@@ -225,6 +236,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                             loading={loading}
                             isClientSideGrid={true}
                             onCellValueChanged={onCellValueChanged}
+                            showOnlyShowFilteredRecordSwitch={true}
                         />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </div>

@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Dialog, Button, Box, Grid, Typography } from "@material-ui/core"
 import { startCase } from 'lodash'
-
+import moment from "moment";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent"
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter"
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader"
-import { CustomDialogTransition } from "../../constants/helpers"
+import { CustomDialogTransition, dateFormat } from "../../constants/helpers"
 
 
 const ViewSignsDialog = ({ close, signatures }) => {
@@ -30,7 +30,6 @@ const ViewSignsDialog = ({ close, signatures }) => {
         }
       })
 
-
       setSigns(newSigns)
     }
   }, [signatures])
@@ -43,7 +42,8 @@ const ViewSignsDialog = ({ close, signatures }) => {
           {signs.map(sign => (
             <Grid item xs={12} sm={6}>
               <Box textAlign="center">
-                <Typography variant='body1' >Signatures of "{sign.status}" time</Typography>
+                <Typography variant='body1' >Signatures of "{sign.status === "Start Delivery" ? "Sign-off - Dispatched" : "Sign-off - Received"}"&nbsp;
+                {sign?.signs && sign.signs.length > 1 && sign.signs[1].date ? moment(sign.signs[1].date.slice(0, 10)).format(dateFormat) : ""}</Typography>
               </Box>
               <Box mt={4}>
                 <Grid container spacing={2} justifyContent='center'>
