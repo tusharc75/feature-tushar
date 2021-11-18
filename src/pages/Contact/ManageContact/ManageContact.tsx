@@ -21,7 +21,8 @@ import InfoIcon from "@material-ui/icons/Info";
 import { makeStyles } from "@material-ui/core/styles";
 import { isMobile, isTablet } from "react-device-detect";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
-import {FaDiceOne} from "react-icons/fa";
+import { FaDiceOne } from "react-icons/fa";
+import ManageContactDialog from "./index"
 
 const arr = [...Array(9).keys()];
 
@@ -43,6 +44,8 @@ export default function ManageContact(props) {
     fromProject,
     onCreateAccount,
     accountResource,
+    reportsToSource,
+    newAddedReportToId,
     contactResource,
     accountSource,
     contactId = null,
@@ -50,7 +53,9 @@ export default function ManageContact(props) {
     formValues = {},
     handleValuesChange = null,
     isClone = false,
-    isAccountFieldDisable = false
+    isAccountFieldDisable = false,
+    contactApi,
+    account
   } = props;
 
   const classes = useStyles();
@@ -75,7 +80,8 @@ export default function ManageContact(props) {
   const [additionalFieldName, setAdditionalFieldName] = useState("")
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  
+  const [showContactDialog, setShowContactDialog] = useState(false);
+
   useEffect(() => {
 
     if (contactData.fields.length > 0) {
@@ -122,7 +128,6 @@ export default function ManageContact(props) {
           setReportsToMainDataSource(currentContactRemovedDataSource);
         }
       }
-
       setFormsData(setFieldsInAscendingOrder(contactData.fields));
     }
   }, [contactData.fields]);
@@ -197,6 +202,25 @@ export default function ManageContact(props) {
     );
   };
 
+  const handleGetAddedContact = (data, selectedAccount) => {
+    if (data?._id) {
+      let tempReportsToMainDataSource = [
+        ...reportsToMainDataSource,
+        {
+          optionValue: data._id,
+          optionLabel: `${data?.salutation ?? ''} ${data?.firstName ?? ''} ${data?.middleName ?? ''} ${data?.lastName ?? ''}`,
+          parentAccount: data.accountName,
+          email: data?.email,
+          order: reportsToMainDataSource.length,
+          default: false,
+        }
+      ]
+      setReportsToMainDataSource([...tempReportsToMainDataSource])
+      setReportsToDataSource(
+        tempReportsToMainDataSource.filter((d) => d.parentAccount === selectedAccount)
+      );
+    }
+  };
   const onSubmit = (values) => {
     handleSubmit(values, false);
   };
@@ -303,7 +327,7 @@ export default function ManageContact(props) {
                         formsData.filter((item) => item.name !== additionalFieldName).map((form, i) => (
                           <div key={i}>
                             <div className={"detail-box-content"}>
-                              <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                              <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
                               <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
                             </div>
                             <Box marginY={2}>
@@ -510,97 +534,148 @@ export default function ManageContact(props) {
                                           </Grid>
                                         ) : null}
                                       </Grid>
-                                    ) : field.fieldName === "reportsTo" ? (
-                                      <FormTypes
-                                        isNew={isNew}
-                                        {...field}
-                                        disabled={!isNew && field.disableOnEdit}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={reportsToDataSource}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange(name, value)
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onOpen={() =>
-                                          onReportsToDropdownOpen(
-                                            values.accountName
-                                          )
-                                        }
-                                      />
-                                    ) : field.fieldName === "entity" ? (
-                                      <FormTypes
-                                        multiple
-                                        {...field}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-
-                                        options={field.option}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onChange={(e, value) => {
-
-                                          handleValuesChange(field.fieldName, value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [])
-                                          setFieldValue(
-                                            field.fieldName,
-                                            value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
-                                          );
-
-                                          handleValuesChange("owner", "")
-                                          handleValuesChange("collaborator", [])
-                                          setFieldValue("owner", "");
-                                          setFieldValue("collaborator", []);
-                                        }}
-                                      />
-                                    ) : (
-                                      <FormTypes
-                                        isNew={isNew}
-                                        {...field}
-                                        disabled={!isNew && field.disableOnEdit}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange(name, value)
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ["imageUpload", "fileUpload"].some(
-                                            (s) => s === field.type
-                                          )
-                                            ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(
-                                                completePercentage
-                                              );
+                                    ) : field.fieldName === "reportsTo" ?
+                                      <Grid container spacing={1}>
+                                        <Grid
+                                          item
+                                          xs={
+                                            permissions[accountResource]
+                                              .isCreate
+                                              ? 11
+                                              : 11
+                                          }
+                                          sm={
+                                            permissions[accountResource]
+                                              .isCreate
+                                              ? 11
+                                              : 11
+                                          }
+                                          md={
+                                            permissions[accountResource]
+                                              .isCreate
+                                              ? 11
+                                              : 11
+                                          }
+                                        >
+                                          <FormTypes
+                                            isNew={isNew}
+                                            {...field}
+                                            disabled={!isNew && field.disableOnEdit}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={reportsToDataSource}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange(name, value)
+                                              setFieldValue(name, value)
+                                            }}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+                                            onOpen={() =>
+                                              onReportsToDropdownOpen(
+                                                values.accountName
+                                              )
                                             }
-                                            : null
-                                        }
-                                      />
-                                    )}
+                                          />
+                                        </Grid>
+                                        {permissions[accountResource]
+                                          .isCreate && (
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <Tooltip
+                                                title="Create Reports To"
+                                                className={`${classes.createAccountTooltip} mt-1`}
+                                              >
+                                                <IconButton
+                                                  onClick={() => setShowContactDialog(true)}
+                                                  size="small"
+                                                  disabled={(!isNew && field.disableOnEdit)}
+                                                >
+                                                  <AddIcon color={((!isNew && field.disableOnEdit)) ? "disabled" : "primary"} />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </Grid>
+                                          )}
+                                        {field?.tooltipMessage ? (
+                                          <Grid item xs={1} sm={1} md={1}>
+                                            <Tooltip
+                                              title={
+                                                field?.tooltipMessage ?? ""
+                                              }
+                                            >
+                                              <InfoIcon color="disabled" />
+                                            </Tooltip>
+                                          </Grid>
+                                        ) : null}
+                                      </Grid> : field.fieldName === "entity" ? (
+                                        <FormTypes
+                                          multiple
+                                          {...field}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+
+                                          options={field.option}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          onChange={(e, value) => {
+
+                                            handleValuesChange(field.fieldName, value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [])
+                                            setFieldValue(
+                                              field.fieldName,
+                                              value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
+                                            );
+
+                                            handleValuesChange("owner", "")
+                                            handleValuesChange("collaborator", [])
+                                            setFieldValue("owner", "");
+                                            setFieldValue("collaborator", []);
+                                          }}
+                                        />
+                                      ) : (
+                                        <FormTypes
+                                          isNew={isNew}
+                                          {...field}
+                                          disabled={!isNew && field.disableOnEdit}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            handleValuesChange(name, value)
+                                            setFieldValue(name, value)
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          imageOrFileUploadCompletePercentage={
+                                            ["imageUpload", "fileUpload"].some(
+                                              (s) => s === field.type
+                                            )
+                                              ? (completePercentage) => {
+                                                setUploadingImageOrFileProgress(
+                                                  completePercentage
+                                                );
+                                              }
+                                              : null
+                                          }
+                                        />
+                                      )}
                                   </Grid>
                                 ))}
                               </Grid>
@@ -608,7 +683,29 @@ export default function ManageContact(props) {
                           </div>
                         ))}
                     </Form>
+
                   </CustomDialogContent>
+                  {
+                    showContactDialog ?
+                      <ManageContactDialog
+                        open={showContactDialog}
+                        onClose={() => setShowContactDialog(false)}
+                        isGetContactData={true}
+                        onGetAddedContact={(data) => {
+                          setFieldValue("accountName", data?.accountName)
+                          // if (values?.accountName && data?.accountName === values?.accountName) {
+                          // }
+                          setFieldValue("reportsTo", data._id);
+                          handleGetAddedContact(data, data?.accountName)
+                        }}
+                        contactResource={contactResource}
+                        contactApi={contactApi}
+                        account={account}
+                        contactId={null}
+                        isClone={false}
+                      />
+                      : null
+                  }
                   <CustomDialogFooter>
                     <Button
                       onClick={() => {
@@ -657,6 +754,7 @@ export default function ManageContact(props) {
                   }
                 </>
               )}
+
             </Formik>
           </>
         ) : (
@@ -665,6 +763,7 @@ export default function ManageContact(props) {
           </CustomDialogContent>
         )}
       </Dialog>
+
     </>
   );
 }

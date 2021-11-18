@@ -9,8 +9,8 @@ import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import { getLocalStorageArrayData, prepareDataForGrid } from "../../constants/helpers"
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { FaRegistered } from "react-icons/fa";
-import AddIcon from "@material-ui/icons/Add"
+import { FaRegistered , FaSuitcase } from "react-icons/fa";
+import AddIcon from "@material-ui/icons/Add";
 
 import {
   isObjectEmpty,
@@ -419,14 +419,20 @@ const RentalManagement = () => {
       }
 
       let rows = data.map((u) => {
-        let res = {
-          ...prepareDataForGrid(u, user),
-        };
 
-        res["canDelete"] = u.owner?.optionValue === user?.user._id;
-        res["isChecked"] = false;
-        res["allowedToEdit"] = true;
-        return res;
+        let finalObject = prepareDataForGrid(u, user);
+        finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
+        finalObject["isChecked"] = false;
+        finalObject["allowedToEdit"] = true;
+        finalObject["owerCollaboratorInitialsOrImages"] = [];
+        if (finalObject["owner"])
+          finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] }); finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
+          if (f.initials) {
+            f.initials = f.initials.split(" ").map((i) => i[0]).join("");
+          }
+        })
+        return finalObject;
+
       });
 
       if (appendRows) {
@@ -618,6 +624,13 @@ const RentalManagement = () => {
                       field: "status",
                     }
                   ]}
+                  additionalDetails={[
+                    {
+                      icon: <FaSuitcase size={18} />,
+                      field: "customerAccount"
+                    },
+                  ]}
+                  owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                   onCreate={clickCreateNew}
                   showClone={false}
                   onClone={() => { }}

@@ -21,6 +21,9 @@
   justify-content: flex-end;
 
 }
+.rental_header_layout{
+  row-gap: 5px;
+}
 
 @supports (not (gap:0.25rem)) and (not (-webkit-gap: 0.25rem)){
   .filter_side_header > *:not(:nth-child(1)) {
@@ -31,6 +34,7 @@
   display: flex;
   justify-content: flex-end;
 }
+
 
 @media only screen and (max-width: 768px) {
   .search_box_input {
@@ -55,6 +59,7 @@
   .search_box_layout{
     margin-left: 0px;
   }
+
   @supports (not (gap:0.75rem)) and (not (-webkit-gap: 0.75rem)){
     .filter_side_header > *:not(:nth-child(1)) {
         margin-left: 0.75rem !important;
@@ -80,5 +85,10 @@
   }
   .search_box_input{
     max-width: 600px !important;
+  }
+  .filter_side_container {
+    display: flex !important;
+    max-width: 100% !important;
+    row-gap: 5px;
   }
 }
