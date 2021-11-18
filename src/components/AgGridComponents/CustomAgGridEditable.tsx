@@ -152,6 +152,8 @@ export default function CustomAgGridEditable({
   renderedFrom = null,
   customGridOptions = null,
   selectedRecords = [],
+
+  saveColumnOptions = false,
   showOnlyShowFilteredRecordSwitch = false,
 }) {
   const [, setColumns] = useState(columns);
@@ -271,11 +273,12 @@ export default function CustomAgGridEditable({
         singleClickEdit={true}
         cellEditorParams={column.cellEditorParams ?? {}}
         floatingFilterComponent="customFloatingFilter"
+        // floatingFilterComponent={column.floatingFilterComponent ?? null}
+        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        //   suppressFilterButton: true,
+        // }}
+        hide={column?.show === false ? true : false}
         valueGetter={column.valueGetter ?? null}
-      // floatingFilterComponent={column.floatingFilterComponent ?? null}
-      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-      //   suppressFilterButton: true,
-      // }}
       ></AgGridColumn>
     ) : (
       <AgGridColumn
@@ -297,11 +300,12 @@ export default function CustomAgGridEditable({
         singleClickEdit={true}
         cellEditorParams={column.cellEditorParams ?? {}}
         floatingFilterComponent="customFloatingFilter"
+        // floatingFilterComponent={column.floatingFilterComponent ?? null}
+        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        //   suppressFilterButton: true,
+        // }}
+        hide={column?.show === false ? true : false}
         valueGetter={column.valueGetter ?? null}
-      // floatingFilterComponent={column.floatingFilterComponent ?? null}
-      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-      //   suppressFilterButton: true,
-      // }}
       ></AgGridColumn>
     );
   });
@@ -325,6 +329,8 @@ export default function CustomAgGridEditable({
             refreshGrid={refreshGrid}
             renderedFrom={renderedFrom}
             isClientSideGrid={isClientSideGrid}
+
+            saveColumnOptions={saveColumnOptions}
             dispatch={dispatch}
             showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
           />
