@@ -1,7 +1,5 @@
 
 import React, { useEffect } from 'react'
-import { useTable, useExpanded, useRowSelect, usePagination, useFlexLayout } from 'react-table'
-
 import MaUTable from '@material-ui/core/Table'
 import { TableBody, TableCell, TableHead, TableFooter, TableRow } from '@material-ui/core'
 import Checkbox from '@material-ui/core/Checkbox';
@@ -9,6 +7,8 @@ import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
 import { TablePagination } from '@material-ui/core'
 import { gridPageSizes, treeToFlatArray } from '../../constants/helpers'
 import { uniqBy } from 'lodash';
+import { useTable, useExpanded, useRowSelect, usePagination, useFlexLayout } from 'react-table'
+import { useSticky } from "react-table-sticky";
 
 const IndeterminateCheckbox = React.forwardRef(
     ({ indeterminate, ...rest }: any, ref) => {
@@ -65,6 +65,7 @@ export default function CustomReactTable({
                 //         {isAllRowsExpanded ? <FaAngleDown /> : <FaAngleRight />}
                 //     </span>
                 // ),
+                sticky: "left",
                 width: 50,
                 minWidth: 50,
                 maxWidth: 50,
@@ -110,6 +111,7 @@ export default function CustomReactTable({
                 //  Check this example to customize checkbox
                 //  https://github.com/tannerlinsley/react-table/issues/2988
                 id: 'selection',
+                sticky: "left",
                 width: 100,
                 minWidth: 100,
                 maxWidth: 100,
@@ -174,7 +176,8 @@ export default function CustomReactTable({
         useFlexLayout,
         useExpanded, // Use the useExpanded plugin hook
         // usePagination,
-        useRowSelect
+        useRowSelect,
+        useSticky
     )
 
     useEffect(() => {
@@ -207,32 +210,33 @@ export default function CustomReactTable({
                 // overflowX: "scroll",
                 // overflowY: "hidden",
                 // borderBottom: "1px solid black"
-            }} className="border">
-                <MaUTable {...getTableProps()} size="small" className="tableWrap">
-                    <TableHead style={{ overflowY: "auto", overflowX: "hidden" }}>
+            }} className="border custom-react-table">
+                <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
+                    <TableHead style={{ overflowY: "auto", overflowX: "hidden" }} className="header">
                         {headerGroups.map(headerGroup => (
-                            <TableRow {...headerGroup.getHeaderGroupProps()} style={{ background: "#efefef" }}>
+                            <TableRow {...headerGroup.getHeaderGroupProps()} style={{ background: "#efefef" }} className="tr">
                                 {headerGroup.headers.map(column => (
-                                    <TableCell {...column.getHeaderProps()}>
+                                    <TableCell {...column.getHeaderProps()} className="th">
                                         {column.render('Header')}
                                     </TableCell>
                                 ))}
                             </TableRow>
                         ))}
                     </TableHead>
+                    
                     <TableBody style={{
                         overflowY: "scroll",
                         overflowX: "hidden",
                         // height: "250px"
-                    }}>
+                    }} className="body">
                         {
                             rows.map((row, index) => {
                                 prepareRow(row)
                                 return (
-                                    <TableRow {...row.getRowProps()} style={rowStyle(row.original)} key={row.original._id ?? index}>
+                                    <TableRow {...row.getRowProps()} style={rowStyle(row.original)} key={row.original._id ?? index} className="tr">
                                         {row.cells.map(cell => {
                                             return (
-                                                <TableCell {...cell.getCellProps()}>
+                                                <TableCell {...cell.getCellProps()} className="td">
                                                     {cell.render('Cell')}
                                                 </TableCell>
                                             )
@@ -243,7 +247,7 @@ export default function CustomReactTable({
                         }
                     </TableBody>
 
-                    <TableFooter style={{ overflowY: "auto", overflowX: "hidden" }}>
+                    <TableFooter style={{ overflowY: "auto", overflowX: "hidden" }} className="footer">
                         {footerGroups.map(group => (
                             <TableRow {...group.getFooterGroupProps()} style={{ background: "#efefef" }}>
                                 {group.headers.map(column => (
