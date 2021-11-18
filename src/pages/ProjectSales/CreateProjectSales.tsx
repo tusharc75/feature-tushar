@@ -673,7 +673,7 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                                                   label={field.fieldLabel}
                                                   name={field.fieldName}
                                                   type={field.type}
-                                                  options={values["entity"] && values["entity"].length !== 0 ?
+                                                  options={values["entity"] && values["entity"].length ?
                                                     field.option.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d)))
                                                     : field.option}
                                                   fullWidth
