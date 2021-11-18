@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import {Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs} from "@material-ui/core";
+import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
@@ -24,9 +24,10 @@ import { Link } from 'react-router-dom'
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import ProductHierarchy from "../Product/ProductHierarchy";
-import {FaDiceOne, FaWpforms} from "react-icons/fa";
-import {isMobile} from "react-device-detect";
-import {BiFoodMenu} from "react-icons/bi";
+import { FaDiceOne, FaWpforms } from "react-icons/fa";
+import { isMobile } from "react-device-detect";
+import { BiFoodMenu } from "react-icons/bi";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
@@ -41,9 +42,9 @@ function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
   return (
-      <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-        {children}
-      </div>
+    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
+      {children}
+    </div>
   );
 }
 
@@ -384,7 +385,7 @@ const ProductInventoryDetailsPage = () => {
                 </DetailsPageHeader>
               )}
 
-               {/*For Desktop*/}
+              {/*For Desktop*/}
               <Box display={isMobile ? "none" : ""}>
                 {loadingProductInventory || !productInventoryFields.length ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
@@ -400,7 +401,7 @@ const ProductInventoryDetailsPage = () => {
                   </>
                 )}
               </Box>
-              <Grid container spacing={2} style={isMobile ? {display:"none"} : {display: ""}}>
+              <Grid container spacing={2} style={isMobile ? { display: "none" } : { display: "" }}>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
                   <div className="detail-box">
                     <div className="detail-box-content">
@@ -449,16 +450,16 @@ const ProductInventoryDetailsPage = () => {
 
 
               <Tabs
-                  className="quote-tab"
-                  value={tabValue}
-                  style={isMobile ? {display: ""} : {display: "none"}}
-                  onChange={handleMainTabChange}
-                  textColor="primary"
-                  TabIndicatorProps={{
-                    style: {
-                      display: 'none'
-                    }
-                  }}
+                className="quote-tab"
+                value={tabValue}
+                style={isMobile ? { display: "" } : { display: "none" }}
+                onChange={handleMainTabChange}
+                textColor="primary"
+                TabIndicatorProps={{
+                  style: {
+                    display: 'none'
+                  }
+                }}
               >
                 {/* <Tab
                         className={"tabLayout"}
@@ -475,31 +476,31 @@ const ProductInventoryDetailsPage = () => {
                       {...a11yProps(0)}
                     /> */}
                 <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 1 ? 'white' : '',
-                      color: tabValue === 1 ? '#163340' : '#163340'
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <FaWpforms className="mr-1" fontSize="inherit" /> Details
-                      </div>
-                    }
-                    {...a11yProps(0)}
+                  className={'tabLayout'}
+                  style={{
+                    background: tabValue === 1 ? 'white' : '',
+                    color: tabValue === 1 ? '#163340' : '#163340'
+                  }}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      <FaWpforms className="mr-1" fontSize="inherit" /> Details
+                    </div>
+                  }
+                  {...a11yProps(0)}
                 />
                 <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 2 ? 'white' : '',
-                      color: tabValue === 2 ? 'blue' : '#163340',
-                      display: "flex !important"
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <BiFoodMenu className="mr-1" fontSize="inherit" /> Quote Versions
-                      </div>
-                    }
-                    {...a11yProps(1)}
+                  className={'tabLayout'}
+                  style={{
+                    background: tabValue === 2 ? 'white' : '',
+                    color: tabValue === 2 ? 'blue' : '#163340',
+                    display: "flex !important"
+                  }}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Quote Versions
+                    </div>
+                  }
+                  {...a11yProps(1)}
                 />
                 <div className={'uio'}> </div>
               </Tabs>
@@ -509,17 +510,17 @@ const ProductInventoryDetailsPage = () => {
 
                 <Box display={isMobile ? "flex" : "none"}>
                   {loadingProductInventory || !productInventoryFields.length ? (
-                      <Grid container spacing={2} style={{ padding: "8px" }}>
-                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                      </Grid>
+                    <Grid container spacing={2} style={{ padding: "8px" }}>
+                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                    </Grid>
                   ) : (
-                      <>
-                        <DetailsPage data={productInventoryData}
-                                     fields={productInventoryData?.status &&
-                                     productInventoryData?.status === "Scrap" ?
-                                         [...productInventoryFields, customField] :
-                                         productInventoryFields} />
-                      </>
+                    <>
+                      <DetailsPage data={productInventoryData}
+                        fields={productInventoryData?.status &&
+                          productInventoryData?.status === "Scrap" ?
+                          [...productInventoryFields, customField] :
+                          productInventoryFields} />
+                    </>
                   )}
                 </Box>
 
@@ -540,29 +541,53 @@ const ProductInventoryDetailsPage = () => {
 
                       <Grid item xs={12} sm={12} md={12} lg={12} className="mt-1">
                         {columns ?
+
+                          isMobile ? <CustomSwipableList
+                            allowSelection={false}
+                            allowSwipe={false}
+                            permissions={permissions.productInventory}
+                            primaryField={columns?.find((d: any) => d?.field === "reference")}
+                            onClick={(data) => { console.log(data) }}
+                            dataRows={dataRows}
+                            dispatch={dispatch}
+                            onClone={() => { }}
+                            selectedRecords={selectedRecords}
+                            showClone={false}
+                            onEdit={() => { }}
+                            extraParamsToCheckDelete={false}
+                            onDelete={() => { }}
+                            rowCount={rowCount}
+                            page={page}
+                            loading={loading}
+                            additionalDetails={[]}
+                            chips={[]}
+                            owerCollaboratorInitialsOrImages=""
+                            onCreate={() => { }}
+                            renderedFrom={productInventory.route}
+                          /> :
                             <CustomAgGrid
-                                columns={columns}
-                                dataRows={dataRows}
-                                frameworkComponents={frameworkComponents}
-                                setGridApi={setGridApi}
-                                dispatch={dispatch}
-                                rowCount={rowCount}
-                                limit={limit}
-                                pageSizes={pageSizes}
-                                page={page}
-                                allowAction={false}
-                                allowSelection={false}
-                                isClientSideGrid={true}
-                                loading={loading}
-                                renderedFrom="rentalManagementDetailsPageInventory"
-                                refreshGrid={fetchProductInventoryHistory}
+                              columns={columns}
+                              dataRows={dataRows}
+                              frameworkComponents={frameworkComponents}
+                              setGridApi={setGridApi}
+                              dispatch={dispatch}
+                              rowCount={rowCount}
+                              limit={limit}
+                              pageSizes={pageSizes}
+                              page={page}
+                              allowAction={false}
+                              allowSelection={false}
+                              isClientSideGrid={true}
+                              loading={loading}
+                              renderedFrom="rentalManagementDetailsPageInventory"
+                              refreshGrid={fetchProductInventoryHistory}
                             />
-                            : <Box
-                                p={2}
-                                height={500}
-                                bgcolor="white">
-                              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                            </Box>
+                          : <Box
+                            p={2}
+                            height={500}
+                            bgcolor="white">
+                            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                          </Box>
                         }
                       </Grid>
 
