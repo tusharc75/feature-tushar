@@ -41,7 +41,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
 import ManageMarketSegmentDialog from "../../MarketSegment/ManageMarketSegmentDialog";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
-import {FaDiceOne} from "react-icons/fa";
+import { FaDiceOne } from "react-icons/fa";
 
 const arr = [...Array(9).keys()];
 export default function ManageOpportunityDialog({
@@ -380,7 +380,6 @@ export default function ManageOpportunityDialog({
       setAccountData(entityFields[customerAccountNameFieldIndex].option);
     }
   };
-
   const isFieldNotTouched = (entityData, values) => {
     return Object.values(
       simplifyValues(
@@ -480,7 +479,7 @@ export default function ManageOpportunityDialog({
                           <div key={index1}>
                             {/*<h2 className="form-label-style">{form.name}</h2>*/}
                             <div className={"detail-box-content"}>
-                              <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                              <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
                               <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
                             </div>
                             <Box marginY={2}>
@@ -519,9 +518,22 @@ export default function ManageOpportunityDialog({
                                             name={field.fieldName}
                                             type={field.type}
                                             options={accountData}
-                                            setFieldValue={(name, value) => {
-                                              handleValuesChange(name, value)
-                                              setFieldValue(name, value)
+                                            // setFieldValue={(name, value) => {
+                                            //   handleValuesChange(name, value)
+                                            //   setFieldValue(name, value)
+                                            // }}
+                                            onChange={(e, value) => {
+                                              setFormValues((prevState) => ({
+                                                ...prevState,
+                                                [field.fieldName]: value && value.optionValue ? value.optionValue : "",
+                                                marketSegment: value?.marketSegment ?? '',
+                                                subMarketSegment: value?.subMarketSegment ?? ''
+                                              }))
+
+                                              setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "")
+                                              setFieldValue("marketSegment", value?.marketSegment ?? '');
+                                              setFieldValue("subMarketSegment", value?.subMarketSegment ?? '');
+                                              marketSegmentChange(value?.marketSegment ?? '');
                                             }}
                                             required={field.required}
                                             fullWidth

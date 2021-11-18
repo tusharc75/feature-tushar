@@ -33,7 +33,7 @@ import HtmlTooltip from '../../components/CustomTooltipTitle'
 import { RiBillLine } from "react-icons/ri";
 import { Autocomplete } from "@material-ui/lab";
 import TextField from "@material-ui/core/TextField";
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import { getColumnData, getStaticFields, getFrameworkComponents, getColumnHiddenStatus } from "../../constants/columns"
 import { prepareDataForGrid } from "../../constants/helpers";
 import Tooltip from '@material-ui/core/Tooltip'
 
@@ -172,8 +172,9 @@ const Product = () => {
             data.productTemplate?.forEach((ele) => {
                 GenrateColoum(ele.fields, columns, rendererNames)
             })
-            columns.push({ field: "inventoryCount", headerName: "Inventory Count", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" })
-            columns.push({ field: "warehouses", headerName: "Plants", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" })
+
+            columns.push({ field: "inventoryCount", headerName: "Inventory Count", show: getColumnHiddenStatus(routes.product.title, "inventoryCount"), cellRenderer: "commonRenderer", leval: "price-builder-custom" })
+            columns.push({ field: "warehouses", headerName: "Plants", show: getColumnHiddenStatus(routes.product.title, "warehouses"), cellRenderer: "commonRenderer", leval: "price-builder-custom" })
             columns = sortBy(columns, function (item: any) {
                 return levalOrderBy.indexOf(item.leval)
             });
@@ -546,7 +547,7 @@ const Product = () => {
                     page={page}
                     actionWidth={150}
                     loading={loading}
-                    renderedFrom="productPage"
+                    renderedFrom={routes.product.title}
                     refreshGrid={fetchProduct}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}

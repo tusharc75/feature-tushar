@@ -638,7 +638,7 @@ const ProductBuilder = (props) => {
                 setIsClone(true);
               }}
               fullHeight={true}
-              renderedFrom="productBuilderGrid"
+              renderedFrom={routes.productBuilder.title}
             /> : ((columns && frameWorkComponent) ? <CustomAgGridEditable
               currency={currency}
               forProductBuilder={isPriceBuilder}
@@ -659,7 +659,8 @@ const ProductBuilder = (props) => {
               onCellValueChanged={onCellValueChanged}
               loading={loading}
               className="product-builder-edit-grid"
-              renderedFrom="productBuilderGrid"
+              renderedFrom={routes.productBuilder.title}
+              saveColumnOptions={true}
             /> : (
               <Loader style={{ minHeight: 300 }} text="Loading..." />
             ))
