@@ -1472,7 +1472,7 @@ const RentalManagementDetailsPage = () => {
             setIsProductEdit(false)
             setRecordToUpdate(null)
           }}
-          submitBulkEdit={recordToUpdate ? handleSingleEdit : handleBulkEditData}
+          submitBulkEdit={selectedProducts.length === 0 ? handleSingleEdit : handleBulkEditData}
           currencySymbol={currencySymbol}
           data={recordToUpdate}
           selectedProducts={selectedProducts}
