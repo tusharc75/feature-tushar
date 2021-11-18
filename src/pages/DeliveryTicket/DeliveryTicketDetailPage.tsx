@@ -132,6 +132,10 @@ export default function DeliveryTicketDetail(props) {
   };
 
   const fetchProductInventory = (productInventories) => {
+    if (!productInventories) {
+      productInventories = deliveryTicketData?.productInventory?.map(o => o?.optionValue)
+    }
+
     dispatch({ type: "loading", loading: true });
 
     if (gridApi) {
@@ -232,8 +236,6 @@ export default function DeliveryTicketDetail(props) {
       });
     }
   }
-
-
 
   let label = deliveryTicketData ? deliveryTicketData?.status === "New" ? "Sign-off - Dispatch" :
     (deliveryTicketData?.status === "In-Transit") ? "Sign-off - Receive" : "" : ""
