@@ -372,7 +372,8 @@ export const marketSegment = {
 export const purchaseOrder = {
   api: '/purchase-order',
   route: '/purchase-order',
-  permission: 'purchaseOrder'
+  permission: 'purchaseOrder',
+  resource: 'purchaseOrder'
 };
 
 export const profileMenuItems = {
