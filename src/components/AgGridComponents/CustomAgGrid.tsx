@@ -299,7 +299,7 @@ export default function CustomAgGrid({
     return isClientSideGrid ? (
       column.isAction ? getActionColumn() : <AgGridColumn
         key={index}
-        field={column.field}
+        field={column.field ?? null}
         headerName={column.headerName}
         filter={column.filter ?? 'agTextColumnFilter'}
         sortable={column.sortable ?? true}
@@ -312,6 +312,7 @@ export default function CustomAgGrid({
         hide={staticColumns.indexOf(column.field) >= 0 ? checkStaticField(renderedFrom, column.field) :
           (column.hasOwnProperty("show") && !column?.show) ? true : false}
         floatingFilterComponent="customFloatingFilter"
+        valueGetter={column.valueGetter ?? null}
       // floatingFilterComponent={column.floatingFilterComponent ?? null}
       // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
       //   suppressFilterButton: true,
@@ -336,6 +337,7 @@ export default function CustomAgGrid({
           return 0;
         }}
         floatingFilterComponent="customFloatingFilter"
+        valueGetter={column.valueGetter ?? null}
       // floatingFilterComponent={column.floatingFilterComponent ?? null}
       // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
       //   suppressFilterButton: true,

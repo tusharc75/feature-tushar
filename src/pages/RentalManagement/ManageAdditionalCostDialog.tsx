@@ -8,7 +8,7 @@ import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader
 import { isMobile, isTablet } from "react-device-detect";
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter'
 import CustomButton from '../../components/Helpers/CustomButton'
-import { CustomDialogTransition } from '../../constants/helpers'
+import { CustomDialogTransition, generateUniqueId } from '../../constants/helpers'
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog'
 import { object, string, number } from "yup";
 
@@ -52,7 +52,7 @@ export default function ManageAdditionalCostDialog({ open, currencySymbol, isNew
 
                 <Formik
                     validationSchema={AdditionalCostSchema}
-                    initialValues={record}
+                    initialValues={record ? record : { "id": generateUniqueId(), "description": "", "uom": "", "qty": 0, "type": "", "amount": 0 }}
                     enableReinitialize={true}
                     onSubmit={onSubmit}
                 >
@@ -66,136 +66,132 @@ export default function ManageAdditionalCostDialog({ open, currencySymbol, isNew
                         <>
                             <CustomDialogContent>
                                 <Form>
-                                    <Container className="p-0">
-                                        <Grid
-                                            container
-                                            spacing={2}
-                                        >
-                                            <Grid item xs={12} sm={12} md={6}>
-                                                <Autocomplete
-                                                    size="small"
-                                                    style={{ minWidth: 200 }}
-                                                    value={values.type}
-                                                    options={costTypeList}
-                                                    getOptionLabel={(option: any) => option ? option : ""}
-                                                    onChange={(_, newValue) => {
-                                                        setFieldValue(
-                                                            "type",
-                                                            newValue
-                                                        );
-                                                    }}
-                                                    renderInput={(params) => <TextField
-                                                        {...params}
-                                                        variant="outlined"
-                                                        name="nameField"
-                                                        label="Cost Type"
-                                                        required={true}
-                                                        margin="dense"
-                                                        error={touched["type"] && Boolean(errors["type"])}
-                                                        helperText={touched["type"] && errors["type"]}
-                                                    />}
-                                                />
-                                            </Grid>
-
-                                            <Grid item xs={12} sm={12} md={6}>
-                                                <TextField
+                                    <Grid
+                                        container
+                                        spacing={2}
+                                    >
+                                        <Grid item xs={12} sm={12} md={6}>
+                                            <Autocomplete
+                                                size="small"
+                                                style={{ minWidth: 200 }}
+                                                value={values.type}
+                                                options={costTypeList}
+                                                getOptionLabel={(option: any) => option ? option : ""}
+                                                onChange={(_, newValue) => {
+                                                    setFieldValue(
+                                                        "type",
+                                                        newValue
+                                                    );
+                                                }}
+                                                renderInput={(params) => <TextField
+                                                    {...params}
                                                     variant="outlined"
-                                                    type="text"
-                                                    label="Description"
+                                                    name="nameField"
+                                                    label="Cost Type"
                                                     required={true}
-                                                    name="description"
-                                                    fullWidth
                                                     margin="dense"
-                                                    value={values.description}
-                                                    error={touched["description"] && Boolean(errors["description"])}
-                                                    helperText={touched["description"] && errors["description"]}
-                                                    onChange={(e) => {
-                                                        setFieldValue(
-                                                            "description",
-                                                            e.target.value
-                                                        );
-                                                    }}
-                                                />
-                                            </Grid>
+                                                    error={touched["type"] && Boolean(errors["type"])}
+                                                    helperText={touched["type"] && errors["type"]}
+                                                />}
+                                            />
+                                        </Grid>
 
+                                        <Grid item xs={12} sm={12} md={6}>
+                                            <TextField
+                                                variant="outlined"
+                                                type="text"
+                                                label="Description"
+                                                required={true}
+                                                name="description"
+                                                fullWidth
+                                                margin="dense"
+                                                value={values.description}
+                                                error={touched["description"] && Boolean(errors["description"])}
+                                                helperText={touched["description"] && errors["description"]}
+                                                onChange={(e) => {
+                                                    setFieldValue(
+                                                        "description",
+                                                        e.target.value
+                                                    );
+                                                }}
+                                            />
+                                        </Grid>
 
-                                            <Grid item xs={12} sm={12} md={6}>
-                                                <TextField
+                                        <Grid item xs={12} sm={12} md={6}>
+                                            <TextField
+                                                variant="outlined"
+                                                type="number"
+                                                label="Quantity"
+                                                required={true}
+                                                name="quantity"
+                                                fullWidth
+                                                margin="dense"
+                                                value={values.qty}
+                                                error={touched["qty"] && Boolean(errors["qty"])}
+                                                helperText={touched["qty"] && errors["qty"]}
+                                                onChange={(e) => {
+                                                    setFieldValue(
+                                                        "qty",
+                                                        e.target.value.replace(/[^0-9]/g, '')
+                                                    );
+                                                }}
+                                            />
+                                        </Grid>
+
+                                        <Grid item xs={12} sm={12} md={6}>
+                                            <Autocomplete
+                                                size="small"
+                                                style={{ minWidth: 200 }}
+                                                value={values.uom}
+                                                freeSolo
+                                                autoSelect
+                                                options={uomTypeList}
+                                                getOptionLabel={(option: any) => option ? option : ""}
+                                                onChange={(_, newValue) => {
+                                                    setFieldValue(
+                                                        "uom",
+                                                        newValue
+                                                    );
+                                                }}
+                                                renderInput={(params) => <TextField
+                                                    {...params}
                                                     variant="outlined"
-                                                    type="number"
-                                                    label="Quantity"
-                                                    required={true}
-                                                    name="quantity"
-                                                    fullWidth
+                                                    name="nameField"
+                                                    label="UOM"
                                                     margin="dense"
-                                                    value={values.qty}
-                                                    error={touched["qty"] && Boolean(errors["qty"])}
-                                                    helperText={touched["qty"] && errors["qty"]}
-                                                    onChange={(e) => {
-                                                        setFieldValue(
-                                                            "qty",
-                                                            e.target.value.replace(/[^0-9]/g, '')
-                                                        );
-                                                    }}
-                                                />
-                                            </Grid>
+                                                    error={touched["uom"] && Boolean(errors["uom"])}
+                                                    helperText={touched["uom"] && errors["uom"]}
+                                                />}
+                                            />
+                                        </Grid>
 
-                                            <Grid item xs={12} sm={12} md={6}>
-                                                <Autocomplete
-                                                    size="small"
-                                                    style={{ minWidth: 200 }}
-                                                    value={values.uom}
-                                                    freeSolo
-                                                    autoSelect
-                                                    options={uomTypeList}
-                                                    getOptionLabel={(option: any) => option ? option : ""}
-                                                    onChange={(_, newValue) => {
-                                                        setFieldValue(
-                                                            "uom",
-                                                            newValue
-                                                        );
-                                                    }}
-                                                    renderInput={(params) => <TextField
-                                                        {...params}
-                                                        variant="outlined"
-                                                        name="nameField"
-                                                        label="UOM"
-                                                        margin="dense"
-                                                        error={touched["uom"] && Boolean(errors["uom"])}
-                                                        helperText={touched["uom"] && errors["uom"]}
-                                                    />}
-                                                />
-                                            </Grid>
-
-
-                                            <Grid item xs={12} sm={12} md={6}>
-                                                <TextField
-                                                    variant="outlined"
-                                                    id="amount"
-                                                    type="number"
-                                                    label="Amount"
-                                                    required={true}
-                                                    name="amount"
-                                                    fullWidth
-                                                    margin="dense"
-                                                    value={values.amount}
-                                                    error={touched["amount"] && Boolean(errors["amount"])}
-                                                    helperText={touched["amount"] && errors["amount"]}
-                                                    onChange={(e) => {
-                                                        setFieldValue(
-                                                            "amount",
-                                                            e.target.value.replace(/[^0-9]/g, '')
-                                                        );
-                                                    }}
-                                                    InputProps={{
-                                                        startAdornment: <InputAdornment position="start">{currencySymbol}</InputAdornment>
-                                                    }}
-                                                />
-
-                                            </Grid>
+                                        <Grid item xs={12} sm={12} md={6}>
+                                            <TextField
+                                                variant="outlined"
+                                                id="amount"
+                                                type="number"
+                                                label="Amount"
+                                                required={true}
+                                                name="amount"
+                                                fullWidth
+                                                margin="dense"
+                                                value={values.amount}
+                                                error={touched["amount"] && Boolean(errors["amount"])}
+                                                helperText={touched["amount"] && errors["amount"]}
+                                                onChange={(e) => {
+                                                    setFieldValue(
+                                                        "amount",
+                                                        e.target.value.replace(/[^0-9]/g, '')
+                                                    );
+                                                }}
+                                                InputProps={{
+                                                    startAdornment: <InputAdornment position="start">{currencySymbol}</InputAdornment>
+                                                }}
+                                            />
 
                                         </Grid>
-                                    </Container>
+
+                                    </Grid>
                                 </Form>
                             </CustomDialogContent>
 
