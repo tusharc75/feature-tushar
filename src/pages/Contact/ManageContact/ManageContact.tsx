@@ -692,10 +692,11 @@ export default function ManageContact(props) {
                         onClose={() => setShowContactDialog(false)}
                         isGetContactData={true}
                         onGetAddedContact={(data) => {
-                          if (values?.accountName && data?.accountName === values?.accountName) {
-                            setFieldValue("reportsTo", data._id);
-                          }
-                          handleGetAddedContact(data, values?.accountName)
+                          setFieldValue("accountName", data?.accountName)
+                          // if (values?.accountName && data?.accountName === values?.accountName) {
+                          // }
+                          setFieldValue("reportsTo", data._id);
+                          handleGetAddedContact(data, data?.accountName)
                         }}
                         contactResource={contactResource}
                         contactApi={contactApi}
