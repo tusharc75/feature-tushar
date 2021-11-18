@@ -191,14 +191,12 @@ export default function Account(props) {
     })
     setColumns([...columns])
   }
-  //  Grid Variables - End
 
   useEffect(() => {
     if (permissions) {
       setAccountPermissions(permissions[accountResource]);
     }
   }, [permissions]);
-
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
