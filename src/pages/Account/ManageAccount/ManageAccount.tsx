@@ -24,7 +24,7 @@ import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import ManageMarketSegmentDialog from "../../MarketSegment/ManageMarketSegmentDialog";
 import { FaDiceOne } from "react-icons/fa";
-import ManageAccountDialog from "./index"
+import ManageAccountDialog from "./index";
 
 const arr = [...Array(9).keys()];
 

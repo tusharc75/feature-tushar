@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, Typography, IconButton } from "@material-ui/core";
+import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
+import {Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs} from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
@@ -24,9 +24,29 @@ import { Link } from 'react-router-dom'
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import ProductHierarchy from "../Product/ProductHierarchy";
-import { FaDiceOne } from "react-icons/fa";
+import {FaDiceOne, FaWpforms} from "react-icons/fa";
+import {isMobile} from "react-device-detect";
+import {BiFoodMenu} from "react-icons/bi";
+
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: any;
+  value: any;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+      <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
+        {children}
+      </div>
+  );
+}
+
 
 
 const ProductInventoryDetailsPage = () => {
@@ -64,6 +84,26 @@ const ProductInventoryDetailsPage = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+
+
+
+
+  const [tabValue, setTabValue] = useState(0);
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
+  }
+
+
 
   const NameRenderer = (params) => (
     <>{
@@ -344,8 +384,8 @@ const ProductInventoryDetailsPage = () => {
                 </DetailsPageHeader>
               )}
 
-
-              <Box>
+               {/*For Desktop*/}
+              <Box display={isMobile ? "none" : ""}>
                 {loadingProductInventory || !productInventoryFields.length ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
@@ -360,7 +400,7 @@ const ProductInventoryDetailsPage = () => {
                   </>
                 )}
               </Box>
-              <Grid container spacing={2}>
+              <Grid container spacing={2} style={isMobile ? {display:"none"} : {display: ""}}>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
                   <div className="detail-box">
                     <div className="detail-box-content">
@@ -402,6 +442,145 @@ const ProductInventoryDetailsPage = () => {
                 </Grid>
 
               </Grid>
+
+
+              {/*For Mobile*/}
+
+
+
+              <Tabs
+                  className="quote-tab"
+                  value={tabValue}
+                  style={isMobile ? {display: ""} : {display: "none"}}
+                  onChange={handleMainTabChange}
+                  textColor="primary"
+                  TabIndicatorProps={{
+                    style: {
+                      display: 'none'
+                    }
+                  }}
+              >
+                {/* <Tab
+                        className={"tabLayout"}
+                      style={{
+                        background: tabValue === 0 ? "white" : "",
+                        color: tabValue === 0 ? "blue" : "#163340",
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font ">
+                          <InfoIcon className="mr-1" fontSize="inherit" /> All
+                          Version Status
+                        </div>
+                      }
+                      {...a11yProps(0)}
+                    /> */}
+                <Tab
+                    className={'tabLayout'}
+                    style={{
+                      background: tabValue === 1 ? 'white' : '',
+                      color: tabValue === 1 ? '#163340' : '#163340'
+                    }}
+                    label={
+                      <div className="d-flex align-items-center tab-font">
+                        <FaWpforms className="mr-1" fontSize="inherit" /> Details
+                      </div>
+                    }
+                    {...a11yProps(0)}
+                />
+                <Tab
+                    className={'tabLayout'}
+                    style={{
+                      background: tabValue === 2 ? 'white' : '',
+                      color: tabValue === 2 ? 'blue' : '#163340',
+                      display: "flex !important"
+                    }}
+                    label={
+                      <div className="d-flex align-items-center tab-font">
+                        <BiFoodMenu className="mr-1" fontSize="inherit" /> Quote Versions
+                      </div>
+                    }
+                    {...a11yProps(1)}
+                />
+                <div className={'uio'}> </div>
+              </Tabs>
+
+
+              <TabPanel value={tabValue} index={0}>
+
+                <Box display={isMobile ? "flex" : "none"}>
+                  {loadingProductInventory || !productInventoryFields.length ? (
+                      <Grid container spacing={2} style={{ padding: "8px" }}>
+                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                      </Grid>
+                  ) : (
+                      <>
+                        <DetailsPage data={productInventoryData}
+                                     fields={productInventoryData?.status &&
+                                     productInventoryData?.status === "Scrap" ?
+                                         [...productInventoryFields, customField] :
+                                         productInventoryFields} />
+                      </>
+                  )}
+                </Box>
+
+
+              </TabPanel>
+
+
+              <TabPanel value={tabValue} index={1}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={12} md={12} lg={12}>
+                    <div className="detail-box">
+                      <div className="detail-box-content">
+                        <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                        <h3 className="form-label-style" title="Asset History">
+                          Asset History
+                        </h3>
+                      </div>
+
+                      <Grid item xs={12} sm={12} md={12} lg={12} className="mt-1">
+                        {columns ?
+                            <CustomAgGrid
+                                columns={columns}
+                                dataRows={dataRows}
+                                frameworkComponents={frameworkComponents}
+                                setGridApi={setGridApi}
+                                dispatch={dispatch}
+                                rowCount={rowCount}
+                                limit={limit}
+                                pageSizes={pageSizes}
+                                page={page}
+                                allowAction={false}
+                                allowSelection={false}
+                                isClientSideGrid={true}
+                                loading={loading}
+                                renderedFrom="rentalManagementDetailsPageInventory"
+                                refreshGrid={fetchProductInventoryHistory}
+                            />
+                            : <Box
+                                p={2}
+                                height={500}
+                                bgcolor="white">
+                              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                            </Box>
+                        }
+                      </Grid>
+
+                    </div>
+                  </Grid>
+
+                </Grid>
+
+              </TabPanel>
+
+
+
+
+
+
+
+
+
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>

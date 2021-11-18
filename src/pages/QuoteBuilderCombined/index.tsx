@@ -50,7 +50,8 @@ import { quoteStepColors } from '../../constants/helpers';
 import InfiniteScroll from "react-infinite-scroll-component";
 import { MdAccountCircle } from "react-icons/md";
 import { AiFillCrown } from "react-icons/all";
-import IconButton from "@material-ui/core/IconButton"
+import { FaSuitcase } from "react-icons/fa";
+import IconButton from "@material-ui/core/IconButton";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 let quoteTimeout;
@@ -746,6 +747,8 @@ const QuoteBuilders = () => {
 
             return finalObject;
           });
+          
+
           //  Dynamic grid code - end
 
           setIsAllChecked(false);
@@ -992,7 +995,7 @@ const QuoteBuilders = () => {
                 loading={loading}
                 additionalDetails={[
                   {
-                    icon: <MdAccountCircle size={18} />,
+                    icon: <FaSuitcase size={18} />,
                     field: "customerAccountName"
                   },
                 ]}
