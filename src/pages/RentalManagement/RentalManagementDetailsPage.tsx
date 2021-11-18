@@ -333,7 +333,7 @@ const RentalManagementDetailsPage = () => {
             translator([current], temp)
 
             //  Check validation for products in package - Start
-            current["qtyToDisplay"] = `${current.qty} x ${parent.qty}`
+            current["qtyToDisplay"] = `${current.qty} x ${parent.qty} = ${current.qty * parent.qty}`
 
             if (current?.finalPrice !== null && current?.finalPrice !== undefined && typeof current?.finalPrice !== "string" && current?.finalPrice !== 0) {
               current["isValid"] = true;
@@ -623,21 +623,7 @@ const RentalManagementDetailsPage = () => {
       accessor: 'qtyToDisplay',
       Header: 'Quantity',
       Cell: ({ row }) => (
-        row.original.qtyToDisplay ? <p>{startCase(row.original.qtyToDisplay)}</p> : <NoDataCell />
-        // <>
-        //   {
-        //     row.original?.type === 'productInPackage' ? (dataRows.some(f => f.treeId === row.original?.parent)
-        //       ? <p>{row.original.qty} * {dataRows.find(f => f.treeId === row.original?.parent)?.qty}</p>
-        //       : <p>{row.original.qty}</p>)
-        //       : <p>{row.original.qty}</p>
-        //   }
-        // </>
-
-
-        // row.original.qty ? <p className="text-truncate">
-
-        //   {row.original.qty}
-        // </p> : <NoDataCell />
+        row.original.qtyToDisplay ? <p>{row.original.qtyToDisplay}</p> : <NoDataCell />
       )
     },
     {
@@ -1239,7 +1225,7 @@ const RentalManagementDetailsPage = () => {
                             { field: "description", headerName: "Description", show: true, disabled: true },
                             { field: "qty", headerName: "Quantity", show: true, disabled: true },
                             { field: "uom", headerName: "Unit of Measure", show: true, disabled: true },
-                            { field: "amount", headerName: `Amount ${currencySymbol}`, show: true, disabled: true },
+                            { field: "amount", headerName: `Amount (${currencySymbol})`, show: true, disabled: true },
                           ]}
                           dataRows={additionalCost}
                           frameworkComponents={rentalJobFrameworkComponents}
