@@ -3,7 +3,7 @@ import Box from "@material-ui/core/Box/Box";
 import { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { Button, IconButton, useMediaQuery } from "@material-ui/core";
+import { Button, Chip, IconButton, useMediaQuery } from "@material-ui/core";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
@@ -28,26 +28,33 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
     const [showActivity, setActivityShow] = useState(defaultActivityShow);
     const [selectedProducts, setSelectedProducts] = useState([])
 
-    const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
     const columns = [
         {
-            accessor: 'productName',
+            accessor: 'description',
             Header: 'Product Description',
             Cell: ({ row }) => (
-                row.original.productName ? <p className="text-truncate">
-                    {/* {rowData.type === "productInPackage"
-              ? rowData.pkgQty !== 0 ? `${rowData.pkgQty} * ${rowData.qty} = ${rowData.totalQty}` : rowData.qty
-              : rowData.qty} */}
-                    {row.original.productName}
-                </p> : <NoDataCell />
+                <div className="d-flex gap-2 align-items-center">
+                    <p
+                        className="text-truncate"
+                        title={row.original.description}
+                    // to={rowData.type === 'Product' ? `${routes.productDetail.path}/${rowData.id}` : `${routes.packagesDetail.path}/${rowData.id}`}
+                    >
+                        {row.original.description}
+                    </p>
+                    {row.original.hasOwnProperty("assetNumber") &&
+                        <span className="d-flex align-items-center gap-2">
+                            <Chip label="Asset" size="small" color="primary" />
+                        </span>
+                    }
+                </div>
             )
         },
         {
             accessor: 'productNumber',
-            Header: 'Product Description',
+            Header: 'Product Number',
             Cell: ({ row }) => (
                 row.original.productNumber ? <p className="text-truncate">
                     {/* {rowData.type === "productInPackage"
@@ -130,30 +137,28 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
     ]
 
     useEffect(() => {
-        let tempInventory = []
+        fetchSerializedAsset()
+    }, []);
+
+    const fetchSerializedAsset = () => {
         dispatch({ type: "loading", loading: true });
-        axiosInstance().get(`product-inventory?page=0&limit=100&filterType=and`)
-            // ${productInventory.api}?limit=100&filterType=and&filterById=[{"field": "pONumber", "term": "${purchaseOrderData._id}"}]`)
+        axiosInstance().get(`${productInventory.api}?filterById=[{"field": "pONumber", "term": "${purchaseOrderData._id}"}]`)
             .then(({ data }) => {
                 data.data = data.data.map((u) => {
                     let tempProduct = constPurchaseOrderProduct.find(obj => obj.treeId === u.product.optionValue)
                     if (tempProduct) {
-                        tempProduct["subRows"] ? tempProduct["subRows"].push({
+                        constPurchaseOrderProduct.push({
                             ...u,
+                            description: u.assetNumber,
                             treeId: u._id,
                             parent: tempProduct.treeId
                         })
-                            : tempProduct["subRows"] = [{
-                                ...u,
-                                treeId: u._id,
-                                parent: tempProduct.treeId
-                            }]
                     }
                 }
                 );
                 const newDataForReactTable = [...translateDataToTree(constPurchaseOrderProduct ? [...constPurchaseOrderProduct] : [], "parent", "treeId", "subRows")];
                 dispatch({
-                    type: "initialize", data: data.data, count: data.data.length
+                    type: "initialize", data: newDataForReactTable, count: newDataForReactTable.length
                 });
                 setTimeout(() => {
                     dispatch({ type: "loading", loading: false });
@@ -162,9 +167,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                 dispatch({ type: "loading", loading: false });
                 toastConfig.setToastConfig(error)
             });
-    }, []);
-
-
+    }
 
     return (<>
         <Box display="flex" justifyContent="space-between" m={1}>
@@ -174,7 +177,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                     variant="contained"
                     color="primary"
                     size="small"
-                    disabled={selectedRecords.length === 0}
+                    disabled={selectedProducts.length === 0}
                     onClick={() => { setShowCreateAssetDialog(true) }}
                 >
                     {`Create Asset`}
@@ -223,9 +226,10 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                 onSuccess={() => {
                     setShowCreateAssetDialog(false)
                     handleUpdateData({ status: "Received" })
+                    fetchSerializedAsset()
                 }}
                 title="Create Asset"
-                productList={selectedRecords}
+                productList={selectedProducts.filter(d => d.hasOwnProperty("productName"))}
             />
         }
     </>

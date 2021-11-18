@@ -174,8 +174,7 @@ const PurchaseOrderDetailsPage = () => {
         axiosInstance().get(`${purchaseOrder.api}/${id}/order-details`).then(({ data: { data } }) => {
             data = data?.map((u) => {
 
-                if ((!currentStepDisable) && (u.totalTax === 0 || u.totalTax === undefined
-                    || u.qty === 0 || u.qty === undefined
+                if ((!currentStepDisable) && (u.qty === 0 || u.qty === undefined
                     || u.finalPrice === 0 || u.finalPrice === undefined)) setCurrentStepDisable(true)
                 return ({
                     ...u,
@@ -184,8 +183,8 @@ const PurchaseOrderDetailsPage = () => {
                     entity: u.productId?.entity,
                     quantity: u.qty,
                     description: u.productId?.productName,
-                    type: "product",
-                    treeId : u?.productId?._id
+                    type: "Product",
+                    treeId: u?.productId?._id
 
                 })
             });
@@ -352,7 +351,7 @@ const PurchaseOrderDetailsPage = () => {
     }
 
     const handleViewPdf = (download) => {
-        axiosInstance().get(`/${purchaseOrder.api}/${id}/pdf`)
+        axiosInstance().get(`${purchaseOrder.api}/${id}/pdf`)
             .then(({ data }) => {
                 axiosInstance()
                     .get(`user/download?fileName=${data.data.fileName}`, {
@@ -363,7 +362,7 @@ const PurchaseOrderDetailsPage = () => {
                             const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
                             const link = document.createElement('a');
                             link.href = url;
-                            link.setAttribute('download', `PurchaseOrder.pdf`);
+                            link.setAttribute('download', `PurchaseOrder-${purchaseOrderData.purchaseOrderNumber}.pdf`);
                             document.body.appendChild(link);
                             link.click();
                         }
@@ -389,25 +388,25 @@ const PurchaseOrderDetailsPage = () => {
 
     const handleAttachments = () => {
         let request;
-    
+
         request = {
-          name: 'Purchase Order',
-          fileUrl: '',
-          relatedTo: [
-            {
-              type: purchaseOrder.resource,
-              referenceId: purchaseOrderData?._id,
-              access: true
-            },
-            {
-              type: purchaseOrderData?.customerAccountName ? customerAccount?.accountResource : supplierAccount?.accountResource,
-              referenceId: purchaseOrderData?.customerAccountName ? purchaseOrderData?.customerAccountName?.optionValue : purchaseOrderData?.supplierAccountName?.optionValue,
-              access: false
-            },
-          ]
+            name: 'Purchase Order',
+            fileUrl: '',
+            relatedTo: [
+                {
+                    type: purchaseOrder.resource,
+                    referenceId: purchaseOrderData?._id,
+                    access: true
+                },
+                {
+                    type: purchaseOrderData?.customerAccountName ? customerAccount?.accountResource : supplierAccount?.accountResource,
+                    referenceId: purchaseOrderData?.customerAccountName ? purchaseOrderData?.customerAccountName?.optionValue : purchaseOrderData?.supplierAccountName?.optionValue,
+                    access: false
+                },
+            ]
         };
-    
-      };
+
+    };
 
     return (
         <>
@@ -665,11 +664,11 @@ const PurchaseOrderDetailsPage = () => {
                                                     />
                                                 }
                                                 {currentStep === 3 &&
-                                                    <ReceivingAsset 
-                                                    currencySymbol={currencySymbol} 
-                                                    purchaseOrderData={purchaseOrderData} 
-                                                    purchaseOrderProduct={purchaseOrderProduct}
-                                                    handleUpdateData={handleUpdateData} />
+                                                    <ReceivingAsset
+                                                        currencySymbol={currencySymbol}
+                                                        purchaseOrderData={purchaseOrderData}
+                                                        purchaseOrderProduct={purchaseOrderProduct}
+                                                        handleUpdateData={handleUpdateData} />
                                                 }
                                             </Paper>
                                         </>

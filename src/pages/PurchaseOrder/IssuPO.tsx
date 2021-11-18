@@ -12,6 +12,7 @@ import { useData } from "../../StateProvider/Provider";
 import axiosInstance from "../../axios/axiosInstance";
 import { CreateEmail } from "../../components/Activity/Email/CreateEmail";
 import { isMobile, isTablet } from "react-device-detect";
+import { AiFillFilePdf } from "react-icons/ai";
 
 
 const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, downlodingFile, setCurrentStep, currentStep, handleAttachments }) => {
@@ -54,10 +55,10 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, downlo
         dispatch({ type: "loading", loading: true });
         axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData._id}/service-details`)
             .then(({ data }) => {
-                data.data = data.data.map((u) => tempCombinedData.push({
+                data?.data?.map((u) => tempCombinedData.push({
                     ...u,
                     quantity: u.qty,
-                    type: "service"
+                    type: "Service"
                 }));
                 dispatch({
                     type: "initialize", data: tempCombinedData, count: tempCombinedData.length
@@ -80,10 +81,10 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, downlo
             ownerCollaboratorEmails.push(purchaseOrderData.owner.email);
         }
         let toEmails = [];
-        if (purchaseOrderData?.supplier && purchaseOrderData?.supplier.length) {
-            toEmails = purchaseOrderData?.supplier.filter((o) => o?.email).map((o) => o.email);
-            setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
+        if (purchaseOrderData?.supplier?.email) {
+            toEmails.push(purchaseOrderData.supplier.email);
         }
+        setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
         // else {
         //     axiosInstance()
         //         .get(`/${purchaseOrderData.accountApi}/related/${purchaseOrderData?.customerAccountName?.optionValue}`)
@@ -126,9 +127,11 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, downlo
                 {permissions?.purchaseOrder?.isRead && (
                     <>
                         <Button
-                            variant="contained"
+                            variant="outlined"
                             color="primary"
+                            type="button"
                             size="small"
+                            startIcon={<AiFillFilePdf />}
                             disabled={downlodingFile}
                             onClick={() => { handleViewPdf(false) }}
                         >
@@ -140,11 +143,13 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, downlo
                 {permissions?.purchaseOrder?.isRead && (
                     <>
                         <Button
-                            variant="contained"
+                            variant="outlined"
                             color="primary"
+                            type="button"
                             size="small"
+                            startIcon={<AiFillFilePdf />}
                             disabled={downlodingFile}
-                            onClick={() => { handleViewPdf(false) }}
+                            onClick={() => { handleViewPdf(true) }}
                         >
                             {downlodingFile ? "Please wait..." : "Download"}
                         </Button>
@@ -226,6 +231,7 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, downlo
                         setFullScreen((prevState) => !prevState);
                     }}
                     showManimizeMaximize={true}
+                    fromPurchaseOrder={true}
                 />
             </Dialog>
         )}
