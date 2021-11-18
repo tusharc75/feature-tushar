@@ -271,6 +271,7 @@ export default function CustomAgGridEditable({
         singleClickEdit={true}
         cellEditorParams={column.cellEditorParams ?? {}}
         floatingFilterComponent="customFloatingFilter"
+        valueGetter={column.valueGetter ?? null}
       // floatingFilterComponent={column.floatingFilterComponent ?? null}
       // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
       //   suppressFilterButton: true,
@@ -296,6 +297,7 @@ export default function CustomAgGridEditable({
         singleClickEdit={true}
         cellEditorParams={column.cellEditorParams ?? {}}
         floatingFilterComponent="customFloatingFilter"
+        valueGetter={column.valueGetter ?? null}
       // floatingFilterComponent={column.floatingFilterComponent ?? null}
       // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
       //   suppressFilterButton: true,
