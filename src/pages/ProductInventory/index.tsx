@@ -26,6 +26,10 @@ import HtmlTooltip from "../../components/CustomTooltipTitle";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
 import { prepareDataForGrid } from "../../constants/helpers"
+import { MdAccountCircle } from "react-icons/md";
+import { AiFillCrown } from "react-icons/all";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile } from 'react-device-detect';
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -41,7 +45,10 @@ const ProductInventory = () => {
     const [columns, setColumns] = useState([])
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords,appendRows } = state;
+    const [isAllChecked, setIsAllChecked] = useState(false);
+    const [clonedData, setClonedData] = useState([])
+    const localStorageSelectedRecords = "warehouse_selected";
 
     const {
         state: { permissions },
@@ -98,11 +105,31 @@ const ProductInventory = () => {
 
         const queryString = getQueryString();
         axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
-            data.data = data.data?.map((u, i) => ({
-                ...prepareDataForGrid(u),
-            }));
-
-            dispatch({ type: "initialize", data: data.data, count: data.count });
+            let rows = data.data?.map((u,user) => {
+                let finalObject = prepareDataForGrid(u);
+                finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                finalObject["allowedToEdit"] = (
+                  [...(u.collaborator ?? []), u.owner].some(
+                    (d) => d?.optionValue === user?.user?._id
+                  )
+                );
+                return finalObject
+            });
+            setIsAllChecked(false);
+            setClonedData(data);
+            if (appendRows) {
+              dispatch({
+                type: "initialize", data: [...dataRows, ...rows],
+                count: data.count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+              });
+            } else {
+              dispatch({
+                type: "initialize", data: rows, count: data.count,
+                selectedRecords: rows.filter(f => f.isChecked === true)
+              });
+            }
+            dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);

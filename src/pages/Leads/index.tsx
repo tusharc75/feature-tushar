@@ -25,11 +25,9 @@ import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEnt
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
-import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown } from "react-icons/all";
+import { FcProcess } from "react-icons/fc";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
-
 
 const LeadTypes = [
   {
@@ -134,19 +132,32 @@ const Leads = () => {
         let columns = []
         let rendererNames = []
         data.forEach(o => {
+          if (["concatedName"].find(d => d === o?.fieldData?.fieldName)) {
+            columns = [...columns, {
+              disabled: true,
+              field: "concatedName",
+              headerName: "Lead Name",
+              pivotIndex: 0,
+              show: true,
+              cellRenderer: "nameRenderer",
+              primaryField: true
+            }]
+          }
+          else {
+            let currentColumn = getColumnData(leadResource, o?.fieldData, leadDetailPage.path)
 
-          let currentColumn = getColumnData(leadResource, o?.fieldData, leadDetailPage.path)
-
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData]
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName)
+            if (currentColumn !== null) {
+              columns = [...columns, currentColumn?.columnData]
+              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                rendererNames.push(currentColumn?.rendererName)
+              }
             }
           }
         })
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
+          nameRenderer: NameRenderer,
           relatedOpportunityRenderer: RelatedOpportunityRenderer,
           actionsRenderer: ActionsRenderer
         }
@@ -157,6 +168,17 @@ const Leads = () => {
         setColumns([...columns])
       })
   }
+
+
+  const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
+    <Link
+      className="text-truncate link"
+      title={params.value}
+      to={`${routes.leadDetail.path}/${params.data._id}`}
+    >
+      {params.value}
+    </Link>
+  </span>
 
   const RelatedOpportunityRenderer = (params) => (
     <>
@@ -601,20 +623,20 @@ const Leads = () => {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <MdAccountCircle size={18} />,
-                  field: "customerAccountName"
+                  icon: <FcProcess size={18} />,
+                  field: "process"
                 },
               ]}
               chips={[
                 {
-                  label: "Entity",
-                  field: "relatedLeadEntity",
+                  label: "Company: ",
+                  field: "company",
                 },
               ]}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={handleCreate}
               showClone={false}
-              onClone={(data) => {setIsOpen({ open: true, isClone: true, idToClone: data._id }) }}
+              onClone={(data) => { setIsOpen({ open: true, isClone: true, idToClone: data._id }) }}
               renderedFrom={leadResource}
             /> :
               <CustomAgGrid

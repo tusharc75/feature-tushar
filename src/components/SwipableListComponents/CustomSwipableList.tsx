@@ -155,17 +155,17 @@ export default function CustomSwipableList({
                                         }
 
                                         {
-                                            allowSwipe && permissions.isUpdate && d.allowedToEdit && permissions.isDelete && d.canDelete &&
+                                            allowSwipe && permissions?.isUpdate && d.allowedToEdit && permissions?.isDelete && d.canDelete &&
                                             <div className="icon-layout mr-2 d-flex">
                                                 {
                                                     showClone &&
                                                     <FaCopy onClick={() => onClone(d)} size={20} className="ml-1" />
                                                 }
                                                 {
-                                                    permissions.isUpdate && d.allowedToEdit && <MdEdit size={20} onClick={() => onEdit(d)} className="ml-1" style={{ color: "#43AEAA" }} />
+                                                    permissions?.isUpdate && d.allowedToEdit && <MdEdit size={20} onClick={() => onEdit(d)} className="ml-1" style={{ color: "#43AEAA" }} />
                                                 }
                                                 {
-                                                    extraParamsToCheckDelete && permissions.isDelete && d.canDelete &&
+                                                    extraParamsToCheckDelete && permissions?.isDelete && d.canDelete &&
                                                     <MdDelete size={20} onClick={() => onDelete(d)} className="ml-1" style={{ color: "var(--danger-light)" }} />
                                                 }
                                             </div>
@@ -176,6 +176,7 @@ export default function CustomSwipableList({
                                     <div className="swipe-card-additional-details">
                                         {
                                             additionalDetails.map((a, index) => (
+                                                d[a.field] !== null &&  d[a.field] !== "" &&  d[a.field] !== undefined &&
                                                 <div key={index} className="ml-2 my-1">
                                                     <div className="swipe-card-additional-details-inner">
                                                         <span style={{ color: "#337FFB" }} className="d-flex align-items-center">{a.icon}</span>

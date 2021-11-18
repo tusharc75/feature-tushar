@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useReducer } from 'react';
 import { useData } from '../../StateProvider/Provider';
-import { Button, Menu, MenuItem, Tooltip, IconButton, Grid, Chip, MenuList } from '@material-ui/core';
+import { Button, Menu, MenuItem, Tooltip, IconButton, Grid, Chip, MenuList, Box } from '@material-ui/core';
 import ReactGa from 'react-ga';
 import { Link, useHistory } from 'react-router-dom';
 import { ExpandMore, AddOutlined } from '@material-ui/icons';
@@ -39,7 +39,11 @@ import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import { HiBadgeCheck } from "react-icons/hi"
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
-
+import { FcProcess } from "react-icons/fc";
+import { isMobile } from 'react-device-detect';
+import { MdEmail } from 'react-icons/md';
+import { AiFillPhone } from 'react-icons/ai';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 const AccTypes = [
   {
     key: 'All Accounts',
@@ -75,6 +79,9 @@ export default function Account(props) {
   const [selectedType, setselectedType] = useState(1);
   const [accountId, setAccountId] = useState(null)
   const [showEntityDialog, setShowEntityDialog] = useState(false)
+  const [isAllChecked, setIsAllChecked] = useState(false);
+  const [clonedData, setClonedData] = useState([])
+  const localStorageSelectedRecords = `${"accountResource"}_selected`;
 
   const [singleAccountDelete, setSingleAccountDelete] = useState({
     id: null,
@@ -108,7 +115,7 @@ export default function Account(props) {
   const [state, dispatch] = useReducer(reducer, intialState);
   const [columns, setColumns] = useState([])
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem(accountResource));
@@ -142,7 +149,8 @@ export default function Account(props) {
         columns = [...columns, {
           pivotIndex: 0,
           field: 'accountName', headerName: 'Account Name', show: true, disabled: true,
-          cellRenderer: 'accountNameRenderer'
+          cellRenderer: 'accountNameRenderer',
+          primaryField: true
         }]
       }
       else {
@@ -497,6 +505,22 @@ export default function Account(props) {
         let rows = data.map((u) => {
 
           let finalObject = prepareDataForGrid(u, user);
+          finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
+          finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+          finalObject["allowedToEdit"] = (
+            [...(u.collaborator ?? []), u.owner].some(
+              (d) => d?.optionValue === user?.user?._id
+            )
+          );
+          finalObject["owerCollaboratorInitialsOrImages"] = [];
+          if (finalObject["owner"])
+            finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] });
+
+          finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
+            if (f.initials) {
+              f.initials = f.initials.split(" ").map((i) => i[0]).join("");
+            }
+          })
           let res = {
             ...finalObject,
             canDelete: u.owner?.optionValue === user?.user._id,
@@ -513,6 +537,34 @@ export default function Account(props) {
           };
           return res;
         });
+        setIsAllChecked(false);
+        setClonedData(data);
+        if (appendRows) {
+          dispatch({
+            type: "initialize", data: [...dataRows, ...rows],
+            count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+          });
+        } else {
+          dispatch({
+            type: "initialize", data: rows, count: count,
+            selectedRecords: rows.filter(f => f.isChecked === true)
+          });
+        }
+
+        if (gridApi) {
+          try {
+            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
+            if (oldSelectedRecords.length > 0) {
+              gridApi.forEachNode(function (node) {
+                node.setSelected(
+                  oldSelectedRecords.some((o) => o === node.data._id)
+                );
+              });
+            }
+          } catch (ex) {
+            console.error("Error in getting selected records from local storage")
+          }
+        }
         dispatch({ type: 'initialize', data: rows, count: count });
 
         setTimeout(() => {
@@ -782,125 +834,126 @@ export default function Account(props) {
               </div>
             </Grid>
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1" justify="flex-end">
-              <div id="resourceOperations" className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
-                <SearchBox onSearch={handleSearch} searchbox="account_header_search_bar" width="300px" value={search} />
-                <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
-                  {accountPermissions.isCreate && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      className={styles.add_submit_btn}
-                      onClick={clickCreateNew}
-                      startIcon={<AddOutlined />}
-                    >
-                      Add
-                    </Button>
-                  )}
-
-                  {(accountPermissions.isDelete || accountPermissions.approveAccount) && (
-                    <Button
-                      disabled={selectedRecords.length === 0}
-                      variant="outlined"
-                      color="default"
-                      size="small"
-                      className={styles.add_submit_btn}
-                      onClick={openActions}
-                      aria-controls="action-menu"
-                    >
-                      Actions <ExpandMore />
-                    </Button>
-                  )}
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    {accountPermissions.isUpdate && accountPermissions.approveAccount && (
-                      <MenuItem
-                        disabled={selectedRecords.filter((d) => !d.approved).length === 0}
-                        onClick={() => {
-                          closeActions();
-                          setMultipleApproveDisapproveAccount({
-                            show: true,
-                            approved: true,
-                            selectedRecords: selectedRecords.filter((d) => !d.approved).length
-                          });
+              <Grid id="resourceOperations" className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
+                <Box className={styles.filter_side_header} component="div" >
+                  <div className="d-flex gap-2">
+                    <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="100%" value={search} />
+                    <div className="d-flex gap-2">
+                      {accountPermissions.isCreate && !isMobile && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={clickCreateNew}
+                          startIcon={<AddOutlined />}
+                        >
+                          Add
+                        </Button>
+                      )}
+                      {(accountPermissions.isDelete || accountPermissions.approveAccount) && (
+                        <Button
+                          disabled={selectedRecords.length === 0}
+                          variant="outlined"
+                          color="default"
+                          size="small"
+                          onClick={openActions}
+                          aria-controls="action-menu"
+                        >
+                          Actions <ExpandMore />
+                        </Button>
+                      )}
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
                         }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
                       >
-                        Approve Accounts &nbsp; <Chip size="small" label={selectedRecords.filter((d) => !d.approved).length} />
-                      </MenuItem>
-                    )}
-                    {accountPermissions.isUpdate && accountPermissions.approveAccount && (
-                      <MenuItem
-                        disabled={selectedRecords.filter((d) => d.approved).length === 0}
-                        onClick={() => {
-                          closeActions();
-                          setMultipleApproveDisapproveAccount({
-                            show: true,
-                            approved: false,
-                            selectedRecords: selectedRecords.filter((d) => d.approved).length
-                          });
-                        }}
-                      >
-                        Disapprove Accounts &nbsp; <Chip size="small" label={selectedRecords.filter((d) => d.approved).length} />
-                      </MenuItem>
-                    )}
-                    {accountPermissions.isDelete && (
-                      <MenuItem
-                        disabled={selectedRecords.length === 0}
-                        onClick={() => {
-                          if (selectedRecords.some((d) => d.canDelete === false)) {
-                            closeActions();
-                            setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
-                          } else {
-                            closeActions();
-                            setShowDeleteConfirmBox(true);
-                          }
-                        }}
-                      >
-                        Delete
-                      </MenuItem>
-                    )}
-                    {accountPermissions.isUpdate && (
-                      <MenuItem
-                        disabled={selectedRecords.length === 0}
-                        onClick={() => {
-                          if (selectedRecords.some((d) => d?.isAllowedToUpdate === false)) {
-                            closeActions();
-                            setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
-                          } else {
-                            closeActions();
-                            if (selectedRecords.length) {
-                              let entities = []
-                              selectedRecords.map(current => {
-                                if (current?.entityId) {
-                                  entities = [...entities, current?.entityId]
+                        {accountPermissions.isUpdate && accountPermissions.approveAccount && (
+                          <MenuItem
+                            disabled={selectedRecords.filter((d) => !d.approved).length === 0}
+                            onClick={() => {
+                              closeActions();
+                              setMultipleApproveDisapproveAccount({
+                                show: true,
+                                approved: true,
+                                selectedRecords: selectedRecords.filter((d) => !d.approved).length
+                              });
+                            }}
+                          >
+                            Approve Accounts &nbsp; <Chip size="small" label={selectedRecords.filter((d) => !d.approved).length} />
+                          </MenuItem>
+                        )}
+                        {accountPermissions.isUpdate && accountPermissions.approveAccount && (
+                          <MenuItem
+                            disabled={selectedRecords.filter((d) => d.approved).length === 0}
+                            onClick={() => {
+                              closeActions();
+                              setMultipleApproveDisapproveAccount({
+                                show: true,
+                                approved: false,
+                                selectedRecords: selectedRecords.filter((d) => d.approved).length
+                              });
+                            }}
+                          >
+                            Disapprove Accounts &nbsp; <Chip size="small" label={selectedRecords.filter((d) => d.approved).length} />
+                          </MenuItem>
+                        )}
+                        {accountPermissions.isDelete && (
+                          <MenuItem
+                            disabled={selectedRecords.length === 0}
+                            onClick={() => {
+                              if (selectedRecords.some((d) => d.canDelete === false)) {
+                                closeActions();
+                                setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
+                              } else {
+                                closeActions();
+                                setShowDeleteConfirmBox(true);
+                              }
+                            }}
+                          >
+                            Delete
+                          </MenuItem>
+                        )}
+                        {accountPermissions.isUpdate && (
+                          <MenuItem
+                            disabled={selectedRecords.length === 0}
+                            onClick={() => {
+                              if (selectedRecords.some((d) => d?.isAllowedToUpdate === false)) {
+                                closeActions();
+                                setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+                              } else {
+                                closeActions();
+                                if (selectedRecords.length) {
+                                  let entities = []
+                                  selectedRecords.map(current => {
+                                    if (current?.entityId) {
+                                      entities = [...entities, current?.entityId]
+                                    }
+                                    if (current?.restentity) {
+                                      let restEntities = current?.restentity.map(o => o.optionValue)
+                                      entities = [...entities, ...restEntities]
+                                    }
+                                  })
+                                  setEntities([...entities])
                                 }
-                                if (current?.restentity) {
-                                  let restEntities = current?.restentity.map(o => o.optionValue)
-                                  entities = [...entities, ...restEntities]
-                                }
-                              })
-                              setEntities([...entities])
-                            }
-                            setShowEntityDialog(true)
-                          }
-                        }}
-                      >
-                        Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
-                      </MenuItem>
-                    )}
-                  </Menu>
-                </div>
-              </div>
+                                setShowEntityDialog(true)
+                              }
+                            }}
+                          >
+                            Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
+                          </MenuItem>
+                        )}
+                      </Menu>
+                    </div>
+                  </div>
+                </Box>
+              </Grid>
             </Grid>
           </Grid>
 
@@ -918,20 +971,64 @@ export default function Account(props) {
 
         {
           Object.keys(frameWorkComponent).length > 0 ?
-            <CustomAgGrid
-              columns={columns}
+            isMobile ? <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={permissions.accountResource}
+              primaryField={columns?.find(d => d.primaryField)}
+              onClick={(data) => {
+                history.push(`${routes.customerAccountDetail.path}/${data._id}`)
+              }}
               dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
+              selectedRecords={selectedRecords}
               dispatch={dispatch}
+              onEdit={(data) => {
+                history.push(`${routes.customerAccountDetail.path}/${data._id}?openEdit=true`)
+              }}
+              extraParamsToCheckDelete={true}
+              onDelete={(data) => {
+                setSingleAccountDelete({
+                  show: true,
+                  id: data._id,
+                  accountName: data.accountName
+                })
+              }}
               rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
               page={page}
               loading={loading}
+              additionalDetails={[
+                {
+                  icon: <MdEmail size={18} />,
+                  field: "email1"
+                },
+                {
+                  icon: <AiFillPhone size={18} />,
+                  field: "contactNumber1"
+                },
+              ]}
+              chips={[
+
+              ]}
+              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+              onCreate={clickCreateNew}
+              showClone={true}
+              onClone={(data) => { cloneAccount(data); }}
               renderedFrom={accountResource}
-              refreshGrid={fetchAccounts}
-            /> : null}
+            /> :
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameWorkComponent}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                loading={loading}
+                renderedFrom={accountResource}
+                refreshGrid={fetchAccounts}
+              /> : null}
 
 
         {showDeleteWarningConfirmBox?.show ? (

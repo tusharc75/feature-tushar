@@ -36,6 +36,11 @@ import TextField from "@material-ui/core/TextField";
 import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
 import { prepareDataForGrid } from "../../constants/helpers";
 import Tooltip from '@material-ui/core/Tooltip'
+import { MdAccountCircle } from "react-icons/md";
+import { AiFillCrown } from "react-icons/all";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile } from 'react-device-detect';
+import { IoPricetagsSharp } from 'react-icons/io5';
 
 const ignoreField = ["qty", "priceTemplate"]
 
@@ -67,14 +72,16 @@ const Product = () => {
 
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
 
     const [productCategoryList, setProductCategoryList] = useState([]);
     const [productTemplateList, setProductTemplateList] = useState([]);
     const [productCategory, setProductCategory] = useState(null);
     const [productTemplate, setProductTemplate] = useState(null);
     const [isProductTemplate, setIsProductTemplate] = useState(true);
-
+    const [isAllChecked, setIsAllChecked] = useState(false);
+    const [clonedData, setClonedData] = useState([])
+    const localStorageSelectedRecords = `${"productPage"}_selected`;
     const { state: { permissions, user, selectedEntity } }: any = useData();
     const [productPermissions, setProductPermissions] = useState({
         isCreate: false,
@@ -132,7 +139,8 @@ const Product = () => {
                             headerName: o?.fieldData?.fieldLabel,
                             show: true,
                             disabled: true,
-                            cellRenderer: 'productNameRenderer'
+                            cellRenderer: 'productNameRenderer',
+                            primaryField: true
                         }]
                     }
                     else {
@@ -161,12 +169,55 @@ const Product = () => {
         }
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
-            let rows = data.data.map((item) => {
-                let res = {
-                    ...prepareDataForGrid(item),
+            let rows = data.data.map((u) => {
+                let finalObject = prepareDataForGrid(u);
+                finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                finalObject["allowedToEdit"] = (
+                    [...(u.collaborator ?? []), u.owner].some(
+                        (d) => d?.optionValue === user?.user?._id
+                    )
+                );
+
+                return {
+                    ...finalObject,
+
+                    canDelete: u.owner?.optionValue === user?.user._id,
+                    relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
+                    relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
+                    relatedLeadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
+
                 };
-                return res;
             });
+            setIsAllChecked(false);
+            setClonedData(data);
+            if (appendRows) {
+                dispatch({
+                    type: "initialize", data: [...dataRows, ...rows],
+                    count: data.count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+                });
+            } else {
+                dispatch({
+                    type: "initialize", data: rows, count: data.count,
+                    selectedRecords: rows.filter(f => f.isChecked === true)
+                });
+            }
+
+            if (gridApi) {
+                try {
+                    let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
+                    if (oldSelectedRecords.length > 0) {
+                        gridApi.forEachNode(function (node) {
+                            node.setSelected(
+                                oldSelectedRecords.some((o) => o === node.data._id)
+                            );
+                        });
+                    }
+                } catch (ex) {
+                    console.error("Error in getting selected records from local storage")
+                }
+            }
+
             let columns = [...productColoums]
             let rendererNames = [...productRendererNames]
             data.productTemplate?.forEach((ele) => {
@@ -435,7 +486,7 @@ const Product = () => {
         <div className="main-container">
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={6} className="d-flex align-items-center gap-1">
+                    <Grid item xs={12} className="d-flex align-items-center gap-1">
                         <RiShoppingBag3Fill size={22} style={{ paddingBottom: "3px" }} className="headerLogo" /> <span className="listingHeader">{routes.product.title} </span>
                         <Autocomplete
                             style={{ width: "250px" }}
@@ -489,66 +540,113 @@ const Product = () => {
                                 )}
                             />}
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={12} md={6} sm={6}>
                         <Grid container className={styles.filter_side} >
                             <Box className={styles.filter_side_header} component="div" >
-                                <SearchBox
-                                    onSearch={handleSearch}
-                                    searchbox={styles.search_box_input}
-                                    width="242px"
-                                    size="small"
-                                    value={search}
-                                />
-                                {productPermissions.isCreate &&
-                                    <Button className={styles.add_submit_btn} onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                                }
-                                {productPermissions.isDelete &&
-                                    <Button
-                                        className={styles.action_submit_btn}
-                                        variant="outlined"
-                                        color="default"
+                                <div className="d-flex gap-2">
+                                    <SearchBox
+                                        onSearch={handleSearch}
+                                        searchbox={styles.search_box_input}
+                                        width="242px"
                                         size="small"
-                                        onClick={openActions}
-                                        disabled={selectedRecords.length ? false : true}
-                                        aria-controls="action-menu"
-                                    >Actions <ExpandMore />
-                                    </Button>
-                                }
-                                <Menu
-                                    anchorEl={anchorEl}
-                                    keepMounted
-                                    getContentAnchorEl={null}
-                                    anchorOrigin={{
-                                        vertical: "bottom",
-                                        horizontal: "left",
-                                    }}
-                                    id="action-menu"
-                                    open={Boolean(anchorEl)}
-                                    onClose={closeActions}
-                                >
-                                    <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                                </Menu>
+                                        value={search}
+                                    />
+                                    <div className="d-flex gap-2">
+                                        {productPermissions.isCreate && !isMobile &&
+                                            <Button onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                        }
+                                        {productPermissions.isDelete &&
+                                            <Button
+                                                variant="outlined"
+                                                color="default"
+                                                size="small"
+                                                onClick={openActions}
+                                                disabled={selectedRecords.length ? false : true}
+                                                aria-controls="action-menu"
+                                            >Actions <ExpandMore />
+                                            </Button>
+                                        }
+                                        <Menu
+                                            anchorEl={anchorEl}
+                                            keepMounted
+                                            getContentAnchorEl={null}
+                                            anchorOrigin={{
+                                                vertical: "bottom",
+                                                horizontal: "left",
+                                            }}
+                                            id="action-menu"
+                                            open={Boolean(anchorEl)}
+                                            onClose={closeActions}
+                                        >
+                                            <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                                        </Menu>
+                                    </div>
+                                </div>
                             </Box>
                         </Grid>
                     </Grid>
                 </Grid>
             </div>
             {columns && frameWorkComponent ?
-                <CustomAgGrid
-                    columns={columns}
+                isMobile ? <CustomSwipableList
+                    allowSelection={true}
+                    allowSwipe={true}
+                    permissions={permissions.product}
+                    primaryField={columns?.find(d => d.primaryField)}
+                    onClick={(data) => {
+                        history.push(`${routes.productDetail.path}/${data._id}`)
+                    }}
                     dataRows={dataRows}
-                    frameworkComponents={frameWorkComponent}
-                    setGridApi={setGridApi}
+                    selectedRecords={selectedRecords}
                     dispatch={dispatch}
+                    onEdit={(data) => {
+                        history.push(`${routes.productDetail.path}/${data._id}?openEdit=true`)
+                    }}
+                    extraParamsToCheckDelete={true}
+                    onDelete={(data) => {
+                        setDeleteRecord(data);
+                        setShowDeleteConfirmBox(true)
+                    }}
                     rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
                     page={page}
-                    actionWidth={150}
                     loading={loading}
-                    renderedFrom="productPage"
-                    refreshGrid={fetchProduct}
-                />
+                    additionalDetails={[
+                        {
+                            icon: <IoPricetagsSharp size={18} />,
+                            field: "mrp"
+                        },
+                    ]}
+                    chips={[
+                        {
+                            label: "Quantity",
+                            field: "qty",
+                        },
+                    ]}
+                    owerCollaboratorInitialsOrImages=""
+                    onCreate={() => {
+                        OpenProduct(null);
+                    }}
+                    showClone={true}
+                    onClone={(data) => {
+                        OpenProduct(data._id); setIsClone(true)
+                     }}
+                    renderedFrom={"productPage"}
+                /> :
+                    <CustomAgGrid
+                        columns={columns}
+                        dataRows={dataRows}
+                        frameworkComponents={frameWorkComponent}
+                        setGridApi={setGridApi}
+                        dispatch={dispatch}
+                        rowCount={rowCount}
+                        limit={limit}
+                        pageSizes={pageSizes}
+                        page={page}
+                        actionWidth={150}
+                        loading={loading}
+                        renderedFrom="productPage"
+                        refreshGrid={fetchProduct}
+                    />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
         {open &&
