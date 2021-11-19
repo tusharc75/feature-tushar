@@ -13,6 +13,7 @@ import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import Skeleton from "@material-ui/lab/Skeleton/Skeleton";
 import FormTypes from "../../components/Helpers/FormTypes";
 import { FaDiceOne } from "react-icons/fa";
+import moment from "moment";
 
 const ManageDeliveryTicket = (props) => {
 
@@ -58,6 +59,7 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
                     tempInitialData["shippingAddress"] = rentalData.shippingAddress
                     tempInitialData["deliveryJobName"] = `${rentalData?.rentalJobName}-${generateUniqueIdOnly()}`
+                    tempInitialData["deliveryDate"] = "";
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
                         values: tempInitialData,
@@ -223,6 +225,49 @@ const ManageDeliveryTicket = (props) => {
                                                                         tooltipMessage={field?.tooltipMessage}
                                                                         size="small"
                                                                         imageOrFileUploadCompletePercentage={null}
+                                                                    />
+                                                                ) : field.fieldName === "pick-UpDate" ? (
+                                                                    <FormTypes
+                                                                        {...field}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={(name, value) => {
+                                                                            handleValuesChange({ [name]: value })
+                                                                            setFieldValue(name, value)
+                                                                        }}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
+                                                                        minDate={new Date()}
+                                                                        maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
+                                                                    />
+                                                                ) : field.fieldName === "deliveryDate" ? (
+                                                                    <FormTypes
+                                                                        {...field}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={(name, value) => {
+                                                                            handleValuesChange({ [name]: value })
+                                                                            setFieldValue(name, value)
+                                                                        }}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
+                                                                        minDate={moment(values["pick-UpDate"])}
                                                                     />
                                                                 ) : <FormTypes
                                                                     {...field}
