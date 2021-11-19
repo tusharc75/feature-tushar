@@ -24,6 +24,7 @@ import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import ManageMarketSegmentDialog from "../../MarketSegment/ManageMarketSegmentDialog";
 import { FaDiceOne } from "react-icons/fa";
+import ManageAccountDialog from "./index";
 
 const arr = [...Array(9).keys()];
 
@@ -43,7 +44,9 @@ export default function ManageAccount(props) {
     handleValuesChange = null,
     marketSegmentId = null,
     isClone,
-    accountNameForClone
+    accountNameForClone,
+    accountResource,
+    accountApi
   } = props;
 
   const {
@@ -74,6 +77,7 @@ export default function ManageAccount(props) {
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [isAccDialogVisible, setIsAccDialogVisible] = useState(false)
 
   useEffect(() => {
     if (isNew) {
@@ -618,115 +622,71 @@ export default function ManageAccount(props) {
                                           );
                                         }}
                                       />
-                                    ) : field.fieldName === "parentAccount" ? (
-                                      <FormTypes
-                                        isNew={isNew}
-                                        {...field}
-                                        disabled={!isNew && field.disableOnEdit}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={parentAccountDataSource}
-                                        setFieldValue={(name, value) => {
-                                          // handleValuesChange(name, value);
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    ) : field.fieldName === formFieldNames.marketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={
-                                            permissions.marketSegment?.isCreate ? 10
-                                              : 11
+                                    ) : field.fieldName === "parentAccount" ?
+                                      <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                        <Grid container spacing={1}>
+                                          <Grid
+                                            item
+                                            xs={permissions[accountResource]?.isCreate ? 10 : 11}
+                                            sm={permissions[accountResource]?.isCreate ? 10 : 11}
+                                            md={permissions[accountResource]?.isCreate ? 10 : 11}
+                                          >
+                                            <FormTypes
+                                              isNew={isNew}
+                                              {...field}
+                                              disabled={!isNew && field.disableOnEdit}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={parentAccountDataSource}
+                                              setFieldValue={(name, value) => {
+                                                // handleValuesChange(name, value);
+                                                setFieldValue(name, value)
+
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              size="small"
+                                            />
+                                          </Grid>
+                                          {
+                                            permissions[accountResource]?.isCreate && (
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip
+                                                  title="Add Parent Account"
+                                                  className="mt-1"
+                                                >
+                                                  <IconButton
+                                                    onClick={() => {
+                                                      setIsAccDialogVisible(true)
+                                                    }}
+                                                    disabled={!isNew && field.disableOnEdit}
+                                                    size="small"
+                                                  >
+                                                    <AddIcon color={!isNew && field.disableOnEdit ? "disabled" : "primary"} />
+                                                  </IconButton>
+                                                </Tooltip>
+                                              </Grid>
+                                            )
                                           }
-                                          sm={
-                                            permissions.marketSegment?.isCreate ? 10
-                                              : 11
-                                          }
-                                          md={
-                                            permissions.marketSegment?.isCreate ? 10
-                                              : 11
-                                          }
-                                        >
-                                          <FormTypes
-                                            {...field}
-                                            isNew={isNew}
-                                            disabled={!isNew && field.disableOnEdit}
-                                            fieldData={field}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            setFieldValue={(name, value) => {
-                                              // handleValuesChange({ [name]: value })
-                                              setFieldValue(name, value)
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field.isTooltip}
-                                            tooltipMessage={field.tooltipMessage}
-                                            onChange={(e, val) => {
-                                              setNewMarketSegmentId(null);
-                                              setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                              setNewSubMarketSegmentId(null);
-                                              setFieldValue(formFieldNames.subMarketSegment, "")
-                                              marketSegmentChange(val && val.optionValue ? val.optionValue : "");
-                                            }}
-                                            size="small"
-                                            values={
-                                              newMarketSegmentId
-                                                ? initializeMarketSegmentDropdown(
-                                                  values,
-                                                  marketSegmentDataSource
-                                                )
-                                                : values
-                                            }
-                                            options={marketSegmentDataSource}
-                                            doNotShowInfoTooltip={true}
-                                          />
-                                        </Grid>
-                                        {
-                                          permissions.marketSegment?.isCreate && (
+                                          {field?.tooltipMessage ? (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip
-                                                title="Add Market Segment"
-                                                className="mt-1"
+                                                title={
+                                                  field?.tooltipMessage ?? ""
+                                                }
                                               >
-                                                <IconButton
-                                                  onClick={() => { setShowAddMarketSegmentDialog(true); }}
-                                                  disabled={!isNew && field.disableOnEdit}
-                                                  size="small"
-                                                >
-                                                  <AddIcon color={!isNew && field.disableOnEdit ? "disabled" : "primary"} />
-                                                </IconButton>
+                                                <InfoIcon color="disabled" />
                                               </Tooltip>
                                             </Grid>
-                                          )
-                                        }
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip
-                                              title={
-                                                field?.tooltipMessage ?? ""
-                                              }
-                                            >
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
-                                    </Grid>
-                                      : field.fieldName === formFieldNames.subMarketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                          ) : null}
+                                        </Grid>
+                                      </Grid> : field.fieldName === formFieldNames.marketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                         <Grid container spacing={1}>
                                           <Grid
                                             item
@@ -762,19 +722,22 @@ export default function ManageAccount(props) {
                                               isTooltip={field.isTooltip}
                                               tooltipMessage={field.tooltipMessage}
                                               onChange={(e, val) => {
-                                                setNewSubMarketSegmentId(null);
+                                                setNewMarketSegmentId(null);
                                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                setNewSubMarketSegmentId(null);
+                                                setFieldValue(formFieldNames.subMarketSegment, "")
+                                                marketSegmentChange(val && val.optionValue ? val.optionValue : "");
                                               }}
                                               size="small"
                                               values={
-                                                newSubMarketSegmentId
-                                                  ? initializeSubMarketSegmentDropdown(
+                                                newMarketSegmentId
+                                                  ? initializeMarketSegmentDropdown(
                                                     values,
-                                                    subMarketSegmentDataSource
+                                                    marketSegmentDataSource
                                                   )
                                                   : values
                                               }
-                                              options={subMarketSegmentDataSource}
+                                              options={marketSegmentDataSource}
                                               doNotShowInfoTooltip={true}
                                             />
                                           </Grid>
@@ -782,13 +745,11 @@ export default function ManageAccount(props) {
                                             permissions.marketSegment?.isCreate && (
                                               <Grid item xs={1} sm={1} md={1}>
                                                 <Tooltip
-                                                  title="Add Sub Market Segment"
+                                                  title="Add Market Segment"
                                                   className="mt-1"
                                                 >
                                                   <IconButton
-                                                    onClick={() => {
-                                                      setShowAddMarketSegmentDialog(true);
-                                                    }}
+                                                    onClick={() => { setShowAddMarketSegmentDialog(true); }}
                                                     disabled={!isNew && field.disableOnEdit}
                                                     size="small"
                                                   >
@@ -810,41 +771,126 @@ export default function ManageAccount(props) {
                                             </Grid>
                                           ) : null}
                                         </Grid>
-                                      </Grid> : (
-                                        <FormTypes
-                                          isNew={isNew}
-                                          {...field}
-                                          // {...rest}
-                                          disabled={!isNew && field.disableOnEdit}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            // handleValuesChange(name, value);
-                                            setFieldValue(name, value)
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ["imageUpload", "fileUpload"].some(
-                                              (s) => s === field.type
-                                            )
-                                              ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(
-                                                  completePercentage
-                                                );
+                                      </Grid>
+                                        : field.fieldName === formFieldNames.subMarketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                          <Grid container spacing={1}>
+                                            <Grid
+                                              item
+                                              xs={
+                                                permissions.marketSegment?.isCreate ? 10
+                                                  : 11
                                               }
-                                              : null
-                                          }
-                                        />
-                                      )}
+                                              sm={
+                                                permissions.marketSegment?.isCreate ? 10
+                                                  : 11
+                                              }
+                                              md={
+                                                permissions.marketSegment?.isCreate ? 10
+                                                  : 11
+                                              }
+                                            >
+                                              <FormTypes
+                                                {...field}
+                                                isNew={isNew}
+                                                disabled={!isNew && field.disableOnEdit}
+                                                fieldData={field}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                setFieldValue={(name, value) => {
+                                                  // handleValuesChange({ [name]: value })
+                                                  setFieldValue(name, value)
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field.isTooltip}
+                                                tooltipMessage={field.tooltipMessage}
+                                                onChange={(e, val) => {
+                                                  setNewSubMarketSegmentId(null);
+                                                  setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                }}
+                                                size="small"
+                                                values={
+                                                  newSubMarketSegmentId
+                                                    ? initializeSubMarketSegmentDropdown(
+                                                      values,
+                                                      subMarketSegmentDataSource
+                                                    )
+                                                    : values
+                                                }
+                                                options={subMarketSegmentDataSource}
+                                                doNotShowInfoTooltip={true}
+                                              />
+                                            </Grid>
+                                            {
+                                              permissions.marketSegment?.isCreate && (
+                                                <Grid item xs={1} sm={1} md={1}>
+                                                  <Tooltip
+                                                    title="Add Sub Market Segment"
+                                                    className="mt-1"
+                                                  >
+                                                    <IconButton
+                                                      onClick={() => {
+                                                        setShowAddMarketSegmentDialog(true);
+                                                      }}
+                                                      disabled={!isNew && field.disableOnEdit}
+                                                      size="small"
+                                                    >
+                                                      <AddIcon color={!isNew && field.disableOnEdit ? "disabled" : "primary"} />
+                                                    </IconButton>
+                                                  </Tooltip>
+                                                </Grid>
+                                              )
+                                            }
+                                            {field?.tooltipMessage ? (
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip
+                                                  title={
+                                                    field?.tooltipMessage ?? ""
+                                                  }
+                                                >
+                                                  <InfoIcon color="disabled" />
+                                                </Tooltip>
+                                              </Grid>
+                                            ) : null}
+                                          </Grid>
+                                        </Grid> : (
+                                          <FormTypes
+                                            isNew={isNew}
+                                            {...field}
+                                            // {...rest}
+                                            disabled={!isNew && field.disableOnEdit}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={field.option}
+                                            setFieldValue={(name, value) => {
+                                              // handleValuesChange(name, value);
+                                              setFieldValue(name, value)
+                                            }}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+                                            imageOrFileUploadCompletePercentage={
+                                              ["imageUpload", "fileUpload"].some(
+                                                (s) => s === field.type
+                                              )
+                                                ? (completePercentage) => {
+                                                  setUploadingImageOrFileProgress(
+                                                    completePercentage
+                                                  );
+                                                }
+                                                : null
+                                            }
+                                          />
+                                        )}
                                   </Grid>
                                 ))}
                               </Grid>
@@ -852,6 +898,30 @@ export default function ManageAccount(props) {
                           </div>
                         ))}
                     </Form>
+                    {isAccDialogVisible ? (
+                      <ManageAccountDialog
+                        open={isAccDialogVisible}
+                        onClose={() => {
+                          setIsAccDialogVisible(false)
+                        }}
+                        id={null}
+                        isRedirectToDetailPage={false}
+                        isGetAccountData={true}
+                        onGetAddedAccount={({ data }) => {
+                          if (data?._id) {
+                            setFieldValue("parentAccount", data?._id)
+                            setParentAccountDataSource([...parentAccountDataSource, {
+                              optionLabel: data?.accountName,
+                              optionValue: data?._id
+                            }])
+                          }
+                        }}
+                        accountResource={accountResource}
+                        accountApi={accountApi}
+                        isClone={false}
+                        accountNameForClone={''}
+                      />
+                    ) : null}
                   </CustomDialogContent>
                   <CustomDialogFooter>
                     <Button

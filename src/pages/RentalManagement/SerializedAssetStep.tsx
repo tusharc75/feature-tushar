@@ -396,7 +396,7 @@ const SerializedAssetStep = (props) => {
               color="primary"
               type="button"
               size="small"
-              disabled={(selectedProducts.length === 0)}
+              disabled={(selectedProducts.filter(p => !p.hasOwnProperty("assetNumber")).length === 0)}
               onClick={() => {
                 setAddSerializedAssetDialog(true)
               }}
@@ -439,7 +439,7 @@ const SerializedAssetStep = (props) => {
             loading={loading}
             renderedFrom="rentalManagementDetailsPageSerializedAssetsProductAndPackage"
             /> */}
-            <Box p="6px"
+            <Box
               zIndex={5}
               width={
                 isTabletScreen

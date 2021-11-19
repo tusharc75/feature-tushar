@@ -965,6 +965,9 @@ export default function ManageQuoteDialog({
                                                 "projectSales",
                                                 ""
                                               );
+                                              setFieldValue("marketSegment", value?.marketSegment ?? '');
+                                              setFieldValue("subMarketSegment", value?.subMarketSegment ?? '');
+                                              marketSegmentChange(value?.marketSegment ?? '');
                                               setFieldValue("opportunity", "");
                                               handleValuesChange({
                                                 [field.fieldName]: value && value.optionValue ? value.optionValue : "",

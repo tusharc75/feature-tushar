@@ -26,6 +26,8 @@ const Header = (props) => {
     unAssignUsersFromEntity,
     openUserSetupDialog,
     userSetupDisabled,
+    selectedRecordsLength = 0,
+    manageDeleteUser
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -100,11 +102,11 @@ const Header = (props) => {
                 open={Boolean(anchorEl)}
                 onClose={closeActions}
               >
-                {userPermissions.isDelete && (
+                {userPermissions.isDelete && selectedRecordsLength && (
                   <MenuItem
                     disabled={Boolean(canDelete)}
                     onClick={() => {
-                      showConfirmBox(null);
+                      manageDeleteUser()
                       closeActions();
                     }}
                   >

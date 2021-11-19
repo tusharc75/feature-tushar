@@ -213,6 +213,8 @@ export default function ManageAccountDialog(props) {
       subMarketSegmentId={subMarketSegmentId}
       isClone={isClone}
       accountNameForClone={accountNameForClone}
+      accountResource={accountResource}
+      accountApi={accountApi}
     />
   );
 }
