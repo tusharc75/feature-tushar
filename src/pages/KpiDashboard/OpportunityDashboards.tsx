@@ -1,12 +1,15 @@
 import { useState, useCallback, useEffect } from 'react';
 import Chart from 'react-chartjs-2';
-import { Grid, Box, Paper, Typography, CircularProgress } from '@material-ui/core';
+import { Grid, Box, Paper, Typography, CircularProgress, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
 
 import axiosInstance from '../../axios/axiosInstance';
 import OpportunityTable from './OpportunityDashboardTable';
 
 const OpportunityDashboards = (props) => {
-  const { currency, status, filterCurrency, salesFilter, getExchangeRates, moment } = props;
+  const { currency, filterCurrency, selectedEntity, salesFilter, getExchangeRates, moment } = props;
+  const [quoteStatus, setQuoteStatus] = useState('open');
+  const [opp1Status, setOpp1Status] = useState('open');
+  const [opp2Status, setOpp2Status] = useState('open');
 
   const [openQuoteData, setOpenQuoteData] = useState({
     all: 0,
@@ -24,8 +27,8 @@ const OpportunityDashboards = (props) => {
 
   const fetchOpportunitySalesRep = useCallback(() => {
     let params = {
-      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
-      status,
+      entity: selectedEntity || '',
+      status: opp2Status,
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -82,16 +85,16 @@ const OpportunityDashboards = (props) => {
         });
       })
       .catch((err) => { });
-  }, [salesFilter.entity, salesFilter.between, status]);
+  }, [selectedEntity, salesFilter.between, opp2Status]);
 
   useEffect(() => {
     fetchOpportunitySalesRep();
   }, [fetchOpportunitySalesRep]);
 
-  const fetchOpportunityContact = useCallback(() => {
+  const fetchOpportunityAccount = useCallback(() => {
     let params = {
-      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
-      status,
+      entity: selectedEntity || '',
+      status: opp1Status,
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -148,16 +151,16 @@ const OpportunityDashboards = (props) => {
         });
       })
       .catch((err) => { });
-  }, [salesFilter.entity, salesFilter.between, status]);
+  }, [selectedEntity, salesFilter.between, opp1Status]);
 
   useEffect(() => {
-    fetchOpportunityContact();
-  }, [fetchOpportunityContact]);
+    fetchOpportunityAccount();
+  }, [fetchOpportunityAccount]);
 
   const fetchOpenQuote = useCallback(() => {
     let params = {
-      status: status === 'open' || status === 'lost' ? 'open' : 'won',
-      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
+      status: quoteStatus,
+      entity: selectedEntity ? selectedEntity : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -186,7 +189,7 @@ const OpportunityDashboards = (props) => {
         });
       })
       .catch((err) => { });
-  }, [salesFilter.entity, salesFilter.between, status]);
+  }, [selectedEntity, salesFilter.between, quoteStatus]);
 
   useEffect(() => {
     fetchOpenQuote();
@@ -215,8 +218,17 @@ const OpportunityDashboards = (props) => {
               </Box>
             </Box>
           </Paper>
-          <Paper>
-            <Box mb={2} p={2} display="flex" >
+          <Paper style={{ padding: '10px', marginBottom: '16px' }}>
+            <Box>
+              <FormControl size="small" variant="outlined">
+                <InputLabel id="status">Status</InputLabel>
+                <Select labelId="status" id="status" value={quoteStatus} onChange={(e) => setQuoteStatus(e.target.value.toString())}>
+                  <MenuItem value={'won'}>Won</MenuItem>
+                  <MenuItem value={'open'}>Open</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            <Box my={2} display="flex" >
               <Box flex={0.5}>
                 <Box position="relative" display="inline-flex">
                   <CircularProgress style={{ width: 100, height: 100 }} variant="determinate" value={openQuoteData.percent} />
@@ -228,10 +240,10 @@ const OpportunityDashboards = (props) => {
                 </Box>{' '}
               </Box>
 
-              <Box flex={statusText[status] === 'Won' ? 0.7 : 0.5} >
+              <Box flex={statusText[quoteStatus] === 'Won' ? 0.7 : 0.5} >
                 <Typography variant="h6" color="secondary">
-                  {statusText[status] === 'Won' ? "Success Rate in" :
-                    statusText[status] !== 'Lost' ? statusText[status] : 'Open'} Quotes
+                  {statusText[quoteStatus] === 'Won' ? "Success Rate in" :
+                    statusText[quoteStatus] !== 'Lost' ? statusText[quoteStatus] : 'Open'} Quotes
                 </Typography>
                 <Box display="flex" alignItems="center">
                   {openQuoteData.open &&
@@ -249,8 +261,16 @@ const OpportunityDashboards = (props) => {
             </Box>
           </Paper>
           <Paper elevation={2}>
-            <Box p={2} textAlign="center">
-              <Typography variant="h6">{statusText[status]} Opportunities by Customer Account</Typography>
+            <Box p={2} >
+              <FormControl size="small" variant="outlined">
+                <InputLabel id="status">Status</InputLabel>
+                <Select labelId="status" id="status" value={opp1Status} onChange={(e) => setOpp1Status(e.target.value.toString())}>
+                  <MenuItem value={'lost'}>Lost</MenuItem>
+                  <MenuItem value={'won'}>Won</MenuItem>
+                  <MenuItem value={'open'}>Open</MenuItem>
+                </Select>
+              </FormControl>
+              <Typography variant="h6">{statusText[opp1Status]} Opportunities by Customer Account</Typography>
               <Chart
                 type="bar"
                 options={{
@@ -287,14 +307,29 @@ const OpportunityDashboards = (props) => {
         </Grid>
         <Grid item xs={12} sm={4}>
           <Paper elevation={2}>
-            <Box p={2} textAlign="center">
-              <Typography variant="h6">{statusText[status]} Opportunities by Sales Rep</Typography>
-              <Chart type="pie" data={oppSalesRep} />
+            <Box p={2}>
+              <FormControl size="small" variant="outlined">
+                <InputLabel id="status">Status</InputLabel>
+                <Select labelId="status" id="status" value={opp2Status} onChange={(e) => setOpp2Status(e.target.value.toString())}>
+                  <MenuItem value={'lost'}>Lost</MenuItem>
+                  <MenuItem value={'won'}>Won</MenuItem>
+                  <MenuItem value={'open'}>Open</MenuItem>
+                </Select>
+              </FormControl>
+              <Box textAlign="center">
+                <Typography variant="h6">{statusText[opp2Status]} Opportunities by Sales Rep</Typography>
+                {oppSalesRep.labels.length > 0
+                  ? <Chart type="pie" data={oppSalesRep} />
+                  : <Box minHeight={515}>
+                    <Typography>No Data</Typography>
+                  </Box>}
+              </Box>
             </Box>
           </Paper>
         </Grid>
         <Grid item xs={12} sm={4}>
           <OpportunityTable
+            selectedEntity={selectedEntity}
             moment={moment}
             salesFilter={salesFilter}
             filterCurrency={filterCurrency}

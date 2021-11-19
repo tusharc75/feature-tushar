@@ -155,6 +155,19 @@ const SerializedAssetStep = (props) => {
   //   { field: "discount", headerName: "Discount (%)", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
   //   { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
   // ];
+
+
+  const getAssetAssignedValues = (row) => {
+    if (row.original?.type?.includes("roduct")) {
+      if (row.subRows && row.subRows?.length > 0) {
+        return <p>{row.subRows.length} / {row.original.qty}</p>
+      }
+      return <p>{row.original.assetCount} / {row.original.qty}</p>;
+    }
+    return <NoDataCell />
+  }
+
+
   const columns = [
     {
       accessor: 'detail',
@@ -186,13 +199,11 @@ const SerializedAssetStep = (props) => {
       accessor: 'assets',
       Header: 'Assets Assigned',
       Cell: ({ row }) => (
-        <p>{row.original?.type?.includes("roduct") ? row.original.assetCount : "- - - - -"}</p>
+        // <p>{row.original?.type?.includes("roduct") ? row.original.assetCount : "- - - - -"}</p>
 
-        // <p>
-        //   {
-        //     row.original?.type?.includes("roduct") ? row.original.assetCount : ( row.original?.type === "Package" ? `${row.subRows?.length ?? 0} / ${row.original.assetCount}` : "- - - - -")
-        //   }
-        // </p>
+        getAssetAssignedValues(row)
+        // row.original?.type?.includes("roduct") ? row.original.assetCount : (row.original?.type === "Package" ? `${row.subRows?.length ?? 0} / ${row.original.assetCount}` : "- - - - -")
+
 
       )
     },
@@ -385,7 +396,7 @@ const SerializedAssetStep = (props) => {
               color="primary"
               type="button"
               size="small"
-              disabled={(selectedProducts.length === 0)}
+              disabled={(selectedProducts.filter(p => !p.hasOwnProperty("assetNumber")).length === 0)}
               onClick={() => {
                 setAddSerializedAssetDialog(true)
               }}
@@ -428,7 +439,7 @@ const SerializedAssetStep = (props) => {
             loading={loading}
             renderedFrom="rentalManagementDetailsPageSerializedAssetsProductAndPackage"
             /> */}
-            <Box p="6px"
+            <Box
               zIndex={5}
               width={
                 isTabletScreen

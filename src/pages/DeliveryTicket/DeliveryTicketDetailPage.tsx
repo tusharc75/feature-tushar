@@ -28,8 +28,8 @@ import SignatureDialog from '../../components/Helpers/SignatureDialog';
 import ViewSignsDialog from './ViewSignsDialog'
 
 const mappedStatus = {
-  "Sign-off - Dispatched": "In-Transit",
-  "Sign-off - Received": "Delivered"
+  "Sign-off - Dispatch": "In-Transit",
+  "Sign-off - Receive": "Delivered"
 }
 
 export default function DeliveryTicketDetail(props) {
@@ -63,12 +63,12 @@ export default function DeliveryTicketDetail(props) {
   }, [id]);
 
   const columns = [
-    { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "nameRenderer" },
+    { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
     { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
     { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "bornOnDate", headerName: "Born on Date", show: true, cellRenderer: "dateRenderer" },
     { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "dateRenderer" },
@@ -132,6 +132,10 @@ export default function DeliveryTicketDetail(props) {
   };
 
   const fetchProductInventory = (productInventories) => {
+    if (!productInventories) {
+      productInventories = deliveryTicketData?.productInventory?.map(o => o?.optionValue)
+    }
+
     dispatch({ type: "loading", loading: true });
 
     if (gridApi) {
@@ -233,16 +237,13 @@ export default function DeliveryTicketDetail(props) {
     }
   }
 
-
-
-  let label = deliveryTicketData ? deliveryTicketData?.status === "New" ? "Sign-off - Dispatched" :
-    (deliveryTicketData?.status === "In-Transit") ? "Sign-off - Received" : "" : ""
+  let label = deliveryTicketData ? deliveryTicketData?.status === "New" ? "Sign-off - Dispatch" :
+    (deliveryTicketData?.status === "In-Transit") ? "Sign-off - Receive" : "" : ""
 
   const handleSignature = (signedData) => {
-    console.log(signedData)
     const { type, sign: newSign } = signedData;
     let stateArr = signatures;
-    stateArr.push({ type, signature: newSign, status: label === "Sign-off - Dispatched" ? "Start Delivery" : "Sign-Off" });
+    stateArr.push({ type, signature: newSign, status: label === "Sign-off - Dispatch" ? "Start Delivery" : "Sign-Off" });
     setSignatures(stateArr)
 
     if (stateArr.length === 2 || stateArr.length === 4) {
@@ -465,7 +466,7 @@ export default function DeliveryTicketDetail(props) {
           <SignatureDialog
             submitting={submittingSign}
             label={label}
-            steps={label === "Sign-off - Dispatched" ? ["Supervisor", "Delivery Person"] : ["Delivery Person", "Receiver"]}
+            steps={label === "Sign-off - Dispatch" ? ["Supervisor", "Delivery Person"] : ["Delivery Person", "Receiver"]}
             forDelivery={true}
             open={true}
             onClose={() => {

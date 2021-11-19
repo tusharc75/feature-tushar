@@ -97,6 +97,13 @@ export function reducer(state, action) {
         loading: false
       };
 
+    case 'showFilteredRecordsOnly':
+      return {
+        ...state,
+        showFilteredRecordsOnly: !state.showFilteredRecordsOnly,
+        page: 0
+      }
+
     default:
       break;
   }
@@ -115,6 +122,7 @@ export const intialState = {
   filters: {},
   sorting: [],
   selectedRecords: [],
+  showFilteredRecordsOnly: false
 };
 
 export default function CustomAgGridEditable({
@@ -144,6 +152,9 @@ export default function CustomAgGridEditable({
   renderedFrom = null,
   customGridOptions = null,
   selectedRecords = [],
+
+  saveColumnOptions = false,
+  showOnlyShowFilteredRecordSwitch = false,
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -262,10 +273,12 @@ export default function CustomAgGridEditable({
         singleClickEdit={true}
         cellEditorParams={column.cellEditorParams ?? {}}
         floatingFilterComponent="customFloatingFilter"
-      // floatingFilterComponent={column.floatingFilterComponent ?? null}
-      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-      //   suppressFilterButton: true,
-      // }}
+        // floatingFilterComponent={column.floatingFilterComponent ?? null}
+        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        //   suppressFilterButton: true,
+        // }}
+        hide={column?.show === false ? true : false}
+        valueGetter={column.valueGetter ?? null}
       ></AgGridColumn>
     ) : (
       <AgGridColumn
@@ -287,10 +300,12 @@ export default function CustomAgGridEditable({
         singleClickEdit={true}
         cellEditorParams={column.cellEditorParams ?? {}}
         floatingFilterComponent="customFloatingFilter"
-      // floatingFilterComponent={column.floatingFilterComponent ?? null}
-      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-      //   suppressFilterButton: true,
-      // }}
+        // floatingFilterComponent={column.floatingFilterComponent ?? null}
+        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        //   suppressFilterButton: true,
+        // }}
+        hide={column?.show === false ? true : false}
+        valueGetter={column.valueGetter ?? null}
       ></AgGridColumn>
     );
   });
@@ -314,6 +329,10 @@ export default function CustomAgGridEditable({
             refreshGrid={refreshGrid}
             renderedFrom={renderedFrom}
             isClientSideGrid={isClientSideGrid}
+
+            saveColumnOptions={saveColumnOptions}
+            dispatch={dispatch}
+            showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
           />
 
           <div

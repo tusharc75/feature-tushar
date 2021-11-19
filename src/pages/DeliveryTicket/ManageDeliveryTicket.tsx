@@ -12,6 +12,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema, deliveryTicket, isFieldNot
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import Skeleton from "@material-ui/lab/Skeleton/Skeleton";
 import FormTypes from "../../components/Helpers/FormTypes";
+import {FaDiceOne} from "react-icons/fa";
 
 const ManageDeliveryTicket = (props) => {
 
@@ -186,17 +187,21 @@ const ManageDeliveryTicket = (props) => {
                     <>
                         <CustomDialogContent>
                             <Form noValidate>
-                                <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                                {/* <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2> */}
                                 {formsData &&
                                     formsData.map((form, index1) => {
                                         return form.name ? (
                                             <div key={index1}>
-                                                <h2 className="form-label-style">{form.name}</h2>
+                                                <div className="detail-box-content">
+                                                    <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                                                    <h2 className="form-label-style form-label-quotes">{form.name}</h2>
+                                                </div>
+
                                                 <Box marginY={2}>
                                                     <Grid spacing={3} container>
                                                         {form.sectionFields.map((field, index2) => (
                                                             <Grid key={index2} item xs={12} sm={6} md={6}>
-                                                                {field.fieldName === "customerAccount" || field.fieldName === "shippingAddress" || field.fieldName === "deliveryType" ? (
+                                                                {field.fieldName === "customerAccount" || field.fieldName === "deliveryType" ? (
                                                                     <FormTypes
                                                                         {...field}
                                                                         disabled={true}

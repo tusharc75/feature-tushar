@@ -108,6 +108,14 @@ export const getStaticFields = () => {
         { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
         { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }]
 }
+export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
+    let data = localStorage.getItem("gridMetaData")
+    let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
+    if (gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom].hide.length) {
+        return gridMetaData[renderedFrom].hide.indexOf(fieldName) >= 0 ? false : true
+    }
+    return true
+}
 
 export const checkStaticField = (renderedFrom, fieldData) => {
     let data = localStorage.getItem("gridMetaData")
@@ -126,12 +134,13 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
     let data = localStorage.getItem("gridMetaData")
 
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
+
     if (!gridMetaData) {
         gridMetaData = {}
     }
 
     let updatedTitle = camelCase(title)
-    if (gridMetaData[updatedTitle]?.hidden && gridMetaData[updatedTitle]?.hidden.indexOf(field?.fieldName) >= 0) {
+    if (gridMetaData[title]?.hidden && gridMetaData[title]?.hidden.indexOf(field?.fieldName) >= 0) {
         return null
     }
     else if (hideColumns.indexOf(field?.fieldName) >= 0) {
@@ -142,8 +151,8 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
         let commonFieldData = {
             field: field?.fieldName,
             headerName: fieldHeaderName,
-            show: gridMetaData[updatedTitle]?.hide && gridMetaData[updatedTitle]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
-            disabled: gridMetaData[updatedTitle]?.disabled && gridMetaData[updatedTitle]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
+            show: gridMetaData[title]?.hide && gridMetaData[title]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
+            disabled: gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
             primaryField: field?.primaryField ?? false
         }
         if (field?.fieldName === "firstName" && field?.primaryField === false) {

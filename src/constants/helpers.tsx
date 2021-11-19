@@ -98,7 +98,8 @@ export const localStorageKeys = {
 
 export const formFieldNames = {
   marketSegment: 'marketSegment',
-  subMarketSegment: 'subMarketSegment'
+  subMarketSegment: 'subMarketSegment',
+  parentAccount: 'parentAccount'
 };
 
 export const sidebarResource = {
@@ -347,7 +348,8 @@ export const productInventory = {
 export const budget = {
   budgetApi: '/budget',
   budgetRoute: '/budget',
-  budgetPermission: 'budget'
+  budgetPermission: 'budget',
+  resource: 'budget'
 };
 
 export const pricingCondition = {
@@ -371,7 +373,8 @@ export const marketSegment = {
 export const purchaseOrder = {
   api: '/purchase-order',
   route: '/purchase-order',
-  permission: 'purchaseOrder'
+  permission: 'purchaseOrder',
+  resource: 'purchaseOrder'
 };
 
 export const profileMenuItems = {
@@ -383,9 +386,17 @@ export const profileMenuItems = {
 };
 
 export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
+  let selectedEntity = localStorage.getItem("selectedEntity")
+
+  let isCreate = (val === "") ? true : false
   const obj = {};
   for (const key of arr) {
+    let isEntityField = key?.fieldName === "entity"
+
     let value = key.isDefaultValue ? key.defaultValue : val;
+    if (isEntityField && selectedEntity && isCreate) {
+      value = key?.type === "multiSelect" ? [selectedEntity] : selectedEntity
+    }
     if (key.type === 'dropDown') {
       const option = key.option?.find((data: any) => data.default === true);
       obj[key.fieldName] = value ? value : option ? option.optionValue : '';
@@ -434,8 +445,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
 
   const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data.optionValue : '');
   for (const key of arr) {
-
     let defaultValue
+
     if (key?.isDefaultValue && key?.defaultValue) {
       defaultValue = key.defaultValue
     }
@@ -443,6 +454,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue ? defaultValue : false;
     } else if (key.type === 'multiSelect') {
       const values = dataObj[key.fieldName] && dataObj[key.fieldName].length
+
         ? typeof dataObj[key.fieldName] === 'string'
           ? dataObj[key.fieldName]
           : dataObj[key.fieldName].map((val: any) => filterValues(val))

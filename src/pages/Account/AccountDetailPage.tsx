@@ -43,6 +43,7 @@ import {
   defaultActivityShow,
 } from "../../constants/helpers";
 import ManageAccount from "./ManageAccount/ManageAccount";
+import ManageAccountDialog from "./ManageAccount/index"
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
 import QuickLinks, {
@@ -104,6 +105,8 @@ export default function AccountDetailPage(props) {
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [headingLbl, setHeadingLbl] = useState("");
   // const [isUpdating, setIsUpdating] = useState(false);
+  const [showCreateAccountDialog, setShowCreateAccountDialog] = useState(false)
+  const [parentId, setParentId] = useState(undefined)
   const [accountData, setAccountData] = useState<any>({});
   const [relatedContacts, setRelatedContacts] = useState([]);
   const [opportunities, setOpportunities] = useState([]);
@@ -126,10 +129,12 @@ export default function AccountDetailPage(props) {
   const [canEdit, setCanEdit] = useState(false);
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
+  const [editAccountData, setEditAccountData] = useState<any>({});
   const [showAdditionalField, setShowAdditionalField] = useState(false);
   const [sectionFields, setSectionFields] = useState([]);
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [showAtLast, setShowAtLast] = useState(false)
+  const [deleteAccount, setDeleteAccountId] = useState<any>({})
   const [additionalFieldName, setAdditionalFieldName] = useState("")
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [
@@ -149,6 +154,7 @@ export default function AccountDetailPage(props) {
   });
   const [formValues, setFormValues] = useState({})
 
+  let filteredAccountFields = accountFields.filter(item => item.fieldData.sectionName != additionalFieldName)
   let { id } = useParams();
 
   const typeCreateProjectSalesDialog = [
@@ -157,7 +163,21 @@ export default function AccountDetailPage(props) {
       type: accountResource,
     },
   ];
-  let filteredAccountFields = accountFields.filter(item => item.fieldData.sectionName != additionalFieldName)
+
+  useEffect(() => {
+    if (deleteAccount && deleteAccount?._id && !showConfirmBox) {
+      console.log('set show confirm box')
+      setShowConfirmBox(true)
+    }
+  }, [deleteAccount])
+
+
+  useEffect(() => {
+    if (deleteAccount && deleteAccount?._id && !showConfirmBox) {
+      setShowConfirmBox(true)
+    }
+  }, [deleteAccount])
+
 
   const [tabValue, setTabValue] = useState(0);
   const handleMainTabChange = (
@@ -355,7 +375,24 @@ export default function AccountDetailPage(props) {
       )
     );
 
+    let parentHierarchyData = []
     if (data.parentHierarchy && data.parentHierarchy.length > 0) {
+      data.parentHierarchy.map(o => {
+        if (Object.keys(o).length) {
+          if (typeof o.owner === "string") {
+            o.owner = {
+              optionValue: o.owner,
+              optionLabel: o.owner
+            }
+          }
+          o.canEdit = [...(data?.collaborator ?? []), o.owner].some(
+            (obj) => obj.optionValue === user.user._id
+          )
+          parentHierarchyData.push(o)
+        }
+      })
+    }
+    if (parentHierarchyData && parentHierarchyData.length > 0) {
       let accounts = [
         ...data.parentHierarchy,
         {
@@ -373,6 +410,9 @@ export default function AccountDetailPage(props) {
               accountName: data.parentAccount.optionLabel,
             }
             : null,
+          canEdit: [...(data?.collaborator ?? []), data?.owner].some(
+            (obj) => obj.optionValue === user.user._id
+          )
           // parentAccountName: data.parentAccount?.optionLabel,
           // parentAccount: data.parentAccount?.optionValue
         },
@@ -391,6 +431,9 @@ export default function AccountDetailPage(props) {
           phone: account.phone,
           type: "child",
           current: account.current,
+          canEdit: account?.canEdit ?? [...(data?.collaborator ?? []), data?.owner].some(
+            (obj) => obj.optionValue === user.user._id
+          )
         };
 
         if (account.parentAccount) {
@@ -415,6 +458,9 @@ export default function AccountDetailPage(props) {
           typeOfBusiness: data.typeOfBusiness,
           phone: data.phone,
           current: true,
+          canEdit: [...(data?.collaborator ?? []), data?.owner].some(
+            (obj) => obj.optionValue === user.user._id
+          )
         },
       ]);
     }
@@ -566,16 +612,24 @@ export default function AccountDetailPage(props) {
   ].filter((d) => d.show);
 
   const handleDeleteAcc = () => {
-    if (accountData?._id) {
+    let deleteId = deleteAccount && deleteAccount?._id ? deleteAccount._id : accountData?._id
+    if (deleteId) {
       axiosInstance()
-        .put(`/${accountApi}/remove`, { ids: [accountData._id] })
+        .put(`/${accountApi}/remove`, { ids: [deleteId] })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: "success",
             message: data.message,
           });
-          goBackToListing();
+          setDeleteAccountId({})
+          let fetchData = deleteAccount && deleteAccount?._id && deleteAccount?._id !== accountData?._id
+          if (fetchData) {
+            fetchAccountData()
+          }
+          else {
+            goBackToListing();
+          }
           setShowConfirmBox(false);
         })
         .catch((error) => {
@@ -605,10 +659,15 @@ export default function AccountDetailPage(props) {
   const onUpdateAccount = (values) => {
     setLoading(true);
 
-    const updatedData = {
-      ...values,
-      _id: accountData._id,
-    };
+    let updatedData = {
+      ...values
+    }
+    if (editAccountData["_id"]) {
+      updatedData._id = editAccountData._id
+    }
+    else {
+      updatedData._id = accountData._id
+    }
 
     if (!isOffline) {
       axiosInstance()
@@ -619,6 +678,7 @@ export default function AccountDetailPage(props) {
             type: "success",
             message: data.message,
           });
+          setEditAccountData({})
           setLoading(false);
           setOpenUpdateDialog(false);
           fetchAccountData();
@@ -673,6 +733,7 @@ export default function AccountDetailPage(props) {
 
   const closeUpdateDIalog = () => {
     setOpenUpdateDialog(false);
+    setEditAccountData({})
   };
 
   const handleCreateContact = () => {
@@ -779,6 +840,20 @@ export default function AccountDetailPage(props) {
       ...prevState,
       [name]: value
     }))
+  }
+  const handleUpdate = (account) => {
+    if (account._id) {
+      axiosInstance()
+        .get(`/${accountApi}/${account._id}`)
+        .then(({ data: { data } }) => {
+          setEditAccountData(data);
+          setOpenUpdateDialog(true);
+        })
+    }
+  }
+  const handleCreateNewAccount = id => {
+    setParentId(id)
+    setShowCreateAccountDialog(true)
   }
 
   const tourPaths = ["/customer-account/detail", "/supplier-account/detail"]
@@ -947,6 +1022,14 @@ export default function AccountDetailPage(props) {
                         data={accountHierarchyData}
                         currentAccountId={accountData._id}
                         accountRoute={accountRoute}
+                        handleUpdate={handleUpdate}
+                        onCreateNewAccount={handleCreateNewAccount}
+                        canUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate}
+                        canCreate={permissions && permissions[accountResource] && permissions[accountResource].isCreate}
+                        canDelete={permissions && permissions[accountResource] && permissions[accountResource].isDelete}
+                        handleDelete={(data) => {
+                          setDeleteAccountId(data);
+                        }}
                       />
                     </Box>
                   </TabPanel>
@@ -1414,9 +1497,12 @@ export default function AccountDetailPage(props) {
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
-            message={`Are you sure you want to delete this Account ${accountData.accountName || ""
+            message={`Are you sure you want to delete this Account ${deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ""
               }`}
-            onClose={() => setShowConfirmBox(false)}
+            onClose={() => {
+              setShowConfirmBox(false)
+              setDeleteAccountId({})
+            }}
             onOk={handleDeleteAcc}
           />
         ) : null}
@@ -1461,7 +1547,7 @@ export default function AccountDetailPage(props) {
                 return f.fieldData;
               }),
               initialValues: getObjKeysWithValues(
-                accountData,
+                Object.keys(editAccountData).length ? editAccountData : accountData,
                 filteredAccountFields.map((f) => {
                   return f.fieldData;
                 })
@@ -1469,7 +1555,7 @@ export default function AccountDetailPage(props) {
             }}
             loading={loading}
             handleSubmit={onUpdateAccount}
-            accountId={accountData?._id}
+            accountId={editAccountData._id ? editAccountData._id : accountData?._id}
             formValues={formValues}
             handleValuesChange={handleValuesChange}
           />
@@ -1516,6 +1602,23 @@ export default function AccountDetailPage(props) {
             />
           </FullScreenDialog>
         )}
+        {showCreateAccountDialog ? (
+          <ManageAccountDialog
+            open={showCreateAccountDialog}
+            onClose={() => {
+              setShowCreateAccountDialog(false)
+              setParentId(undefined)
+              fetchAccountData()
+            }}
+            parentId={parentId}
+            id={null}
+            accountResource={accountResource}
+            accountApi={accountApi}
+            isClone={false}
+            accountNameForClone={''}
+            isRedirectToDetailPage={false}
+          />
+        ) : null}
         {openAdditionalDialog && (
           // <Dialog
           //   disableBackdropClick={true}

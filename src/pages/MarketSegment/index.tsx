@@ -30,12 +30,14 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import queryString from "query-string";
 import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
 import { prepareDataForGrid } from "../../constants/helpers"
-import { useLocation } from "react-router-dom";
+import { useLocation, useHistory } from "react-router-dom";
+import { isMobile } from 'react-device-detect';
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 const MarketSegment = () => {
 
     const location = useLocation()
-
+    const history = useHistory()
     const toastConfig = useContext(CustomToastContext)
     const {
         state: { permissions },
@@ -329,7 +331,39 @@ const MarketSegment = () => {
                 </Grid>
             </div>
 
-            {
+            {isMobile ?
+                <CustomSwipableList
+                    allowSelection={true}
+                    allowSwipe={true}
+                    permissions={permissions.marketSegment}
+                    primaryField={columns?.find(d => d.field === "name")}
+                    onClick={(d) => {
+                        setOpen({ open: true, isClone: false, idToClone: d.id });
+                    }}
+                    dataRows={dataRows}
+                    selectedRecords={selectedRecords}
+                    dispatch={dispatch}
+                    onEdit={(d) => {
+
+                    }}
+                    extraParamsToCheckDelete={true}
+                    onDelete={(d) => {
+                        setDeleteRecord(d)
+                        setShowDeleteConfirmBox(true)
+                    }}
+                    rowCount={rowCount}
+                    page={page}
+                    loading={loading}
+                    additionalDetails={[]}
+                    chips={[]}
+                    owerCollaboratorInitialsOrImages=""
+                    onCreate={() => setOpen({ open: true, idToClone: null, isClone: null })}
+                    showClone={false}
+                    onClone={() => { }}
+                    renderedFrom={marketSegment.marketSegmentResource}
+
+                />
+                :
                 Object.keys(frameWorkComponent).length > 0 ?
                     <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameWorkComponent} setGridApi={setGridApi}
                         dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}

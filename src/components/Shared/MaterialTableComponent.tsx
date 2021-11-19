@@ -25,6 +25,7 @@ const MaterialTableComponent: FC<TableProps> = (props) => {
   return (
     <div>
       <MaterialTable
+        style={{ boxShadow: "none" }}
         isLoading={loading}
         data={rowData}
         onSelectionChange={onSelection}
@@ -38,8 +39,8 @@ const MaterialTableComponent: FC<TableProps> = (props) => {
           sorting: false,
           search: false,
           padding: 'default',
-          maxBodyHeight: 400,
-          minBodyHeight: 400,
+          maxBodyHeight: 500,
+          minBodyHeight: 500,
           paging: false,
           toolbar: false,
           editCellStyle: {
