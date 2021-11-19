@@ -297,7 +297,7 @@ export default function DeliveryTicketDetail(props) {
                   mainPoints={deliveryTicketData ? getMainPoints : ""}
                   showHeading={true}
                 >
-                  {permissions?.deliveryTicket?.isUpdate && (
+                  {permissions?.deliveryTicket?.isUpdate && deliveryTicketData.status === "New" && (
                     <Button
                       variant="contained"
                       color="primary"

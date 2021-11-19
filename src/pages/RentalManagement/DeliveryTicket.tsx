@@ -61,7 +61,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
 
   const TicketRenderer = (params) => (
     params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
+      <Link className="link text-truncate" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
         {params.value}
       </Link>
     ) : (
@@ -69,12 +69,12 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
     )
   );
   const InventoryRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+    <Link className="link text-truncate" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
       {params.value}
     </Link>
   );
   const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.product.optionValue}`}>
+    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data.product.optionValue}`}>
       {params.value}
     </Link>
   );
