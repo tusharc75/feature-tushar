@@ -31,6 +31,8 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import { ExpandMore } from "@material-ui/icons";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import { isMobile } from 'react-device-detect';
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 let quotePdfTemplateTimeout;
 
@@ -353,11 +355,39 @@ const QuotePdfTemplate: FC = () => {
                     </Grid>
                 </div>
 
-                <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={200}
-                    loading={loading} renderedFrom="quotePdfPage"
-                    refreshGrid={fetchQuotePdfTemplate}
-                />
+                {isMobile ? <CustomSwipableList
+                    allowSelection={true}
+                    allowSwipe={true}
+                    permissions={permissions.quotePdfTemplate}
+                    primaryField={columns?.find(d => d.field === "name")}
+                    onClick={(d) => {
+                        history.push(`${routes.quotePdfTemplateDetail.path}/${d._id}`)
+                    }}
+                    dataRows={dataRows}
+                    selectedRecords={selectedRecords}
+                    dispatch={dispatch}
+                    onEdit={(d) => {
+                        history.push(`${routes.quotePdfTemplateDetail.path}/${d._id}`)
+                    }}
+                    extraParamsToCheckDelete={false}
+                    onDelete={(d) => {
+                        setDeleteRecord(d);
+                        setShowDeleteConfirmBox(true)
+                    }}
+                    rowCount={rowCount}
+                    page={page}
+                    loading={loading}
+                    additionalDetails={[]}
+                    chips={[]}
+                    owerCollaboratorInitialsOrImages=""
+                    onCreate={() => { }}
+                    showClone={false}
+                    onClone={() => { }}
+                    renderedFrom={"quotePdfTmeplate"} /> : <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+                        dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={200}
+                        loading={loading} renderedFrom="quotePdfPage"
+                        refreshGrid={fetchQuotePdfTemplate}
+                />}
 
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog
