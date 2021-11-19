@@ -36,6 +36,7 @@ import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import HtmlTooltip from '../../components/CustomTooltipTitle'
 import BulkEditInventoryDialog from './BulkEditInventoryDialog'
+import RentalJobQtyDialog from './RentalJobQtyDialog'
 import SerializedAssetStep from "./SerializedAssetStep";
 import moment from "moment";
 import { camelCase, startCase, orderBy } from "lodash";
@@ -89,6 +90,7 @@ const RentalManagementDetailsPage = () => {
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [currency, setCurrency] = useState("USD");
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [allowedToEdit, setAllowedToEdit] = useState(false)
   const [productInventoryForReceivingTicket, setProductInventoryForReceivingTicket] = useState<any[]>([]);
@@ -251,6 +253,7 @@ const RentalManagementDetailsPage = () => {
           (d) => d.currencyCode === data["currency"]
         )?.symbolNative
       );
+      setCurrency(data?.currency);
 
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
 
@@ -823,6 +826,23 @@ const RentalManagementDetailsPage = () => {
         toastConfig.setToastConfig(error)
       });
   }
+
+  const handleSingleUpdate = async (values: any) => {
+    setUpdating(true)
+    const { subRows, isValid, qtyToDisplay, ...rest } = values;
+    rest.type = camelCase(rest.type)
+    console.log(rest)
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/updateOne`, rest)
+      .then(() => {
+        setUpdating(false)
+        setIsProductEdit(false)
+        fetchProductInventory()
+      }).catch((error) => {
+        setUpdating(false)
+        toastConfig.setToastConfig(error)
+      });
+  }
+
 
   // const checkIsValidRecord = (rowData) => {
   //   if (rowData?.type === "Product") {
@@ -1476,7 +1496,23 @@ const RentalManagementDetailsPage = () => {
           currencySymbol={currencySymbol}
           data={recordToUpdate}
           selectedProducts={selectedProducts}
-        />}
+        />
+        //New Form through Form Builder 
+        // <RentalJobQtyDialog
+        //   calculatePrice={calculatePricing}
+        //   startDate={rentalManagementData.rentalStartDate}
+        //   endDate={rentalManagementData.rentalEndDate}
+        //   isSaving={isUpdating}
+        //   onClose={() => {
+        //     setIsProductEdit(false)
+        //     setRecordToUpdate(null)
+        //   }}
+        //   submitBulkEdit={selectedProducts.length === 0 ? handleSingleUpdate : handleBulkEditData}
+        //   currency={currency}
+        //   data={recordToUpdate}
+        //   selectedProducts={selectedProducts}
+        // />
+      }
       {
         showManageAdditionalCostDialog.open && <ManageAdditionalCostDialog
           open={showManageAdditionalCostDialog.open}
