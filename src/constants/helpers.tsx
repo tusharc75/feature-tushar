@@ -348,7 +348,8 @@ export const productInventory = {
 export const budget = {
   budgetApi: '/budget',
   budgetRoute: '/budget',
-  budgetPermission: 'budget'
+  budgetPermission: 'budget',
+  resource: 'budget'
 };
 
 export const pricingCondition = {
@@ -1155,6 +1156,10 @@ export const setFieldsInAscendingOrder = (fieldsToOrder) => {
 
 export const generateUniqueId = () => {
   return `id-${new Date().getTime()}`;
+};
+
+export const generateUniqueIdOnly = () => {
+  return new Date().getTime();
 };
 
 export const prepareDataForGrid = (data, user = {}) => {

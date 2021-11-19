@@ -1484,7 +1484,8 @@ const FormTypes = (props) => {
             disableCloseOnSelect={true}
             options={fieldData && fieldData.isDependentDropdown ?
               option.filter((_f) => _f[fieldData.dropdowDependentOn] === values[fieldData.dropdowDependentOn]) :
-              option}
+              //  Some times for resource dropdown we are not getting optionLabel, and multi-select breaks
+              option.filter(f => f.optionLabel)}
             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
             value={values[name] ? option.filter((data: any) => values[name].includes(data.optionValue)) : []}
             getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
