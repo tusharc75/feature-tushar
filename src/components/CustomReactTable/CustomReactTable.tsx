@@ -169,7 +169,7 @@ export default function CustomReactTable({
             data,
             onSelect,
             initialState: {
-                autoResetExpanded: false
+                autoResetExpanded: true
             },
             defaultColumn
         },
