@@ -486,7 +486,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                     type={field.type}
                                                                                     options={field.option}
                                                                                     setFieldValue={(name, value) => {
-                                                                                        debugger;
                                                                                         handleValuesChange({ [name]: value })
                                                                                         setFieldValue(name, value)
                                                                                     }}
