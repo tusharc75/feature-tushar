@@ -296,6 +296,10 @@ const routes = {
   purchaseOrder:{
     title: storedRoutes ? storedRoutes.purchaseOrder?.title : RESOURCE_LABEL.purchaseOrder,
     path: "/purchase-order",
+  },
+  purchaseOrderDetail:{
+    title: storedRoutes ? storedRoutes.purchaseOrder?.title : RESOURCE_LABEL.purchaseOrder,
+    path: "/purchase-order/detail",
   }
 };
 

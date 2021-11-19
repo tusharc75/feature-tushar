@@ -204,6 +204,20 @@ const OpportunityDashboards = (props) => {
           <Paper>
             <Box mb={2} p={2} display="flex" alignItems="center">
               <Box flex={0.5}>
+                <Typography variant="h6" color="secondary">
+                  Number Of Quotes
+                </Typography>
+                <Box display="flex" alignItems="center">
+                  <Typography variant="h6" color="textSecondary">
+                    {openQuoteData.all ?? 0}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Paper>
+          <Paper>
+            <Box mb={2} p={2} display="flex" >
+              <Box flex={0.5}>
                 <Box position="relative" display="inline-flex">
                   <CircularProgress style={{ width: 100, height: 100 }} variant="determinate" value={openQuoteData.percent} />
                   <Box top={0} left={0} bottom={0} right={0} position="absolute" display="flex" alignItems="center" justifyContent="center">
@@ -214,9 +228,10 @@ const OpportunityDashboards = (props) => {
                 </Box>{' '}
               </Box>
 
-              <Box flex={0.5}>
+              <Box flex={statusText[status] === 'Won' ? 0.7 : 0.5} >
                 <Typography variant="h6" color="secondary">
-                  {statusText[status] !== 'Lost' ? statusText[status] : 'Open'} Quotes
+                  {statusText[status] === 'Won' ? "Success Rate in" :
+                    statusText[status] !== 'Lost' ? statusText[status] : 'Open'} Quotes
                 </Typography>
                 <Box display="flex" alignItems="center">
                   {openQuoteData.open &&

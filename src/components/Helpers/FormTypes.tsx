@@ -20,7 +20,7 @@ import {
   Dialog,
   ImageList,
   ImageListItem,
-  ImageListItemBar,
+  ImageListItemBar, makeStyles,
 } from '@material-ui/core';
 import { result, find, throttle } from 'lodash';
 import DateUtils from '@date-io/date-fns';
@@ -122,6 +122,11 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
 
 const autocompleteService = { current: null };
 
+const useStyles = makeStyles(() => ({
+  noBorder: {
+    border: "none",
+  },
+}));
 const RedSwitch = withStyles({
   switchBase: {
     color: red[500],
@@ -1001,9 +1006,13 @@ const FormTypes = (props) => {
                 name={name}
                 label={getLabel(label)}
                 variant="outlined"
+                style={{ outline: "1px solid white" }}
                 error={touched[name] && Boolean(errors[name])}
                 helperText={touched[name] && errors[name]}
                 required={required}
+
+
+
               />
             )}
           />
@@ -1079,7 +1088,8 @@ const FormTypes = (props) => {
                   error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
                   helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
                   ref={inputNumberRef}
-                  onChange={onChange ? onChange : (e) => handleConverterChange(name, _unit, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))}
+                  onChange={onChange ? onChange : (e) => handleConverterChange(name, _unit,
+                    e.target.value === "" ? "" : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))}
                   InputProps={{
                     inputProps: { min: 0 },
                     readOnly: fieldData && fieldData.isUneditable ? true : false
@@ -1399,7 +1409,7 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(name, parseFloat(e.target.value));
+              handleChange(name, e.target.value === "" ? "" : parseFloat(e.target.value));
             }
         }
         InputProps={{

@@ -7,10 +7,10 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
-import { prepareDataForGrid } from "../../constants/helpers"
+import { getLocalStorageArrayData, prepareDataForGrid } from "../../constants/helpers"
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { FaRegistered } from "react-icons/fa";
-import AddIcon from "@material-ui/icons/Add"
+import { FaRegistered , FaSuitcase } from "react-icons/fa";
+import AddIcon from "@material-ui/icons/Add";
 
 import {
   isObjectEmpty,
@@ -55,6 +55,9 @@ const RentalManagementType = [
     value: 2,
   },
 ];
+
+const renderedFrom = "rental_management";
+const localStorageSelectedRecords = `${renderedFrom}_selected`
 
 const RentalManagement = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -107,7 +110,8 @@ const RentalManagement = () => {
     filters,
     sorting,
     selectedRecords,
-    appendRows
+    appendRows,
+    showFilteredRecordsOnly
   } = state;
 
   useEffect(() => {
@@ -117,7 +121,7 @@ const RentalManagement = () => {
   const fetchGridColumns = async () => {
     let data
     if (isOffline) {
-      data = offlineFieldsData
+      data = offlineFieldsData["rentalManagement"] ?? []
     }
     else {
       const response = await axiosInstance()
@@ -129,8 +133,8 @@ const RentalManagement = () => {
       } catch (ex) {
         console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`)
       }
-
     }
+    
     let columns = []
     let rendererNames = []
     data.forEach(o => {
@@ -195,7 +199,8 @@ const RentalManagement = () => {
     sorting,
     accountDetails,
     selectedEntity,
-    isOffline
+    isOffline,
+    showFilteredRecordsOnly
   ]);
 
   const handleSingleDeleteRentalManagement = async () => {
@@ -352,6 +357,11 @@ const RentalManagement = () => {
       }
     }
 
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+    }
+
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
@@ -409,14 +419,20 @@ const RentalManagement = () => {
       }
 
       let rows = data.map((u) => {
-        let res = {
-          ...prepareDataForGrid(u, user),
-        };
 
-        res["canDelete"] = u.owner?.optionValue === user?.user._id;
-        res["isChecked"] = false;
-        res["allowedToEdit"] = true;
-        return res;
+        let finalObject = prepareDataForGrid(u, user);
+        finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
+        finalObject["isChecked"] = false;
+        finalObject["allowedToEdit"] = true;
+        finalObject["owerCollaboratorInitialsOrImages"] = [];
+        if (finalObject["owner"])
+          finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] }); finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
+          if (f.initials) {
+            f.initials = f.initials.split(" ").map((i) => i[0]).join("");
+          }
+        })
+        return finalObject;
+
       });
 
       if (appendRows) {
@@ -523,8 +539,8 @@ const RentalManagement = () => {
                     }}
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
-                    recordsToExport={selectedRecords.length}
-                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords).length}
+                    ids={getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id)}
                     onExportToExcelSuccess={() => {
                       if (gridApi) gridApi.deselectAll()
                       else fetchRentalManagement()
@@ -608,9 +624,17 @@ const RentalManagement = () => {
                       field: "status",
                     }
                   ]}
+                  additionalDetails={[
+                    {
+                      icon: <FaSuitcase size={18} />,
+                      field: "customerAccount"
+                    },
+                  ]}
+                  owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                   onCreate={clickCreateNew}
                   showClone={false}
                   onClone={() => { }}
+                  renderedFrom={renderedFrom}
                 /> :
                 <CustomAgGrid
                   columns={columns}
@@ -624,10 +648,11 @@ const RentalManagement = () => {
                   page={page}
                   actionWidth={100}
                   loading={loading}
-                  renderedFrom={pageTitle}
+                  renderedFrom={renderedFrom}
                   allowSelection={!isOffline}
                   isClientSideGrid={isOffline}
                   refreshGrid={fetchRentalManagement}
+                  showOnlyShowFilteredRecordSwitch={true}
                 /> : null
           }
 

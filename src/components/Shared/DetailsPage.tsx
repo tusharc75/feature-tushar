@@ -376,7 +376,7 @@ const Details = (props: DetailProps) => {
                 <div className={"detail-box-content"}>
                 <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
                 <h3 className="form-label-style" title={form.name}>
-                   {form.name}
+                   {"Asset Information"}
                 </h3>
                 </div>
                 <Grid container style={{paddingTop:"6px"}}>
@@ -395,7 +395,7 @@ const Details = (props: DetailProps) => {
                           sm={dynamicSize(5, field.fieldData.type)}
                           md={dynamicSize(5, field.fieldData.type)}
                         >
-                          <div className="d-flex align-items-center justify-content-end pr-1" style={{backgroundColor:"#F5F5F5", padding:"3px 0"}}>
+                          <div className="d-flex align-items-center pr-1" style={{backgroundColor:"#F5F5F5", padding:"3px 0"}}>
                             <h4
                               title={field.fieldData.fieldLabel}
                               className={`text-truncate ${classes.detailLabel}`}

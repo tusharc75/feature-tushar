@@ -36,6 +36,7 @@ import CreateProductCategory from "../ProductCategory/CreateProductCategory";
 import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialog";
 import { useData } from "../../StateProvider/Provider";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
+import {FaDiceOne} from "react-icons/fa";
 
 const budgetMonths = ["januaryBudget", "februaryBudget", "marchBudget", "aprilBudget", "mayBudget", "juneBudget",
     "julyBudget", "augustBudget", "septemberBudget", "octoberBudget", "novemberBudget", "decemberBudget"]
@@ -367,12 +368,15 @@ export default function ManageBudgetDialog({
                             <>
                                 <CustomDialogContent>
                                     <Form>
-                                        <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                                        {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                                         {formsData &&
                                             formsData.map((form, index1) => {
                                                 return form.name ? (
                                                     <div key={index1}>
-                                                        <h2 className="form-label-style">{form.name}</h2>
+                                                        <div className={"detail-box-content"}>
+                                                            <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                                            <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                                                        </div>
                                                         <Box marginY={2}>
                                                             <Grid spacing={3} container>
                                                                 {form.sectionFields.map((field, index2) => (
@@ -477,15 +481,15 @@ export default function ManageBudgetDialog({
                                                                                         item
                                                                                         xs={
                                                                                             //  TODO: Product category is not added in role, once implementation is done, please uncomment below lines
-                                                                                            permissions.productCategory.isCreate ? 10
+                                                                                            permissions.productCategory.isCreate ? 11
                                                                                                 : 11
                                                                                         }
                                                                                         sm={
-                                                                                            permissions.productCategory.isCreate ? 10
+                                                                                            permissions.productCategory.isCreate ? 11
                                                                                                 : 11
                                                                                         }
                                                                                         md={
-                                                                                            permissions.productCategory.isCreate ? 10
+                                                                                            permissions.productCategory.isCreate ? 11
                                                                                                 : 11
                                                                                         }
                                                                                     >
@@ -562,15 +566,15 @@ export default function ManageBudgetDialog({
                                                                                         <Grid
                                                                                             item
                                                                                             xs={
-                                                                                                permissions.marketSegment.isCreate ? 10
+                                                                                                permissions.marketSegment.isCreate ? 11
                                                                                                     : 11
                                                                                             }
                                                                                             sm={
-                                                                                                permissions.marketSegment.isCreate ? 10
+                                                                                                permissions.marketSegment.isCreate ? 11
                                                                                                     : 11
                                                                                             }
                                                                                             md={
-                                                                                                permissions.marketSegment.isCreate ? 10
+                                                                                                permissions.marketSegment.isCreate ? 11
                                                                                                     : 11
                                                                                             }
                                                                                         >
@@ -652,15 +656,15 @@ export default function ManageBudgetDialog({
                                                                                         <Grid
                                                                                             item
                                                                                             xs={
-                                                                                                permissions.marketSegment.isCreate ? 10
+                                                                                                permissions.marketSegment.isCreate ? 11
                                                                                                     : 11
                                                                                             }
                                                                                             sm={
-                                                                                                permissions.marketSegment.isCreate ? 10
+                                                                                                permissions.marketSegment.isCreate ? 11
                                                                                                     : 11
                                                                                             }
                                                                                             md={
-                                                                                                permissions.marketSegment.isCreate ? 10
+                                                                                                permissions.marketSegment.isCreate ? 11
                                                                                                     : 11
                                                                                             }
                                                                                         >

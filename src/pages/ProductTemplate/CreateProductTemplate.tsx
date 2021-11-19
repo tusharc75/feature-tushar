@@ -58,7 +58,7 @@ const ProductTemplate = () => {
     const ref = useRef(null);
 
     const {
-        state: { user, permissions },
+        state: { user, permissions, selectedEntity },
     }: any = useData();
     const [productTemplatePermissions, setProductTemplatePermissions] = useState({
         isCreate: false,
@@ -112,7 +112,7 @@ const ProductTemplate = () => {
 
     const fetchOneProductTemplate = () => {
         if (id === "0") {
-            let initialData = { name: "", productCategory: [], entity: [], owner: user.user._id, collaborator: [], isStandard: false }
+            let initialData = { name: "", productCategory: [], entity: selectedEntity ? [selectedEntity] : [], owner: user.user._id, collaborator: [], isStandard: false }
             setInitialValues(initialData);
             axiosInstance().get(`/product-template/default-field`).then(({ data: { data } }) => {
                 const _data = []

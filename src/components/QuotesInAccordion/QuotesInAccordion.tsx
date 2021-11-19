@@ -280,6 +280,8 @@ export default function QuotesInAccordion({
                                             <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
                                                 <Card className="detailCard">
                                                     <CardContent className="detailListing">
+                                                        <div style={{width:"5px", backgroundColor:"var(--secondary)" , marginBottom:"10px", borderRadius:"5px", }}> </div>
+                                                        <Grid item xs={12}>
                                                         <Grid container className="detailCardHeader">
                                                             <Grid item xs={7} sm={8}>
                                                                 {
@@ -301,7 +303,7 @@ export default function QuotesInAccordion({
                                                                 }
                                                             </Grid>
                                                             <Grid item xs={5} sm={4}>
-                                                                <Typography className="amount" title={formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).fullFormatAmount}>
+                                                                <Typography className="amount text-truncate" title={formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).fullFormatAmount}>
                                                                     {formatAmountWithCurrency(obj["currency"], obj?.estimatedAmount).fullFormatAmount}
                                                                 </Typography>
                                                             </Grid>
@@ -324,6 +326,7 @@ export default function QuotesInAccordion({
                                                                 }
                                                             </Grid>
 
+                                                        </Grid>
                                                         </Grid>
                                                     </CardContent>
                                                 </Card>

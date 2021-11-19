@@ -23,6 +23,8 @@ import { FaHourglassHalf } from "react-icons/fa";
 import styles from "./Retal.module.scss";
 
 import { isMobile } from "react-device-detect";
+import { RiShareForwardFill } from "react-icons/ri";
+import { TiArrowBack } from "react-icons/ti";
 
 const useStyles = makeStyles((theme) => ({
 
@@ -49,14 +51,14 @@ const useStyles = makeStyles((theme) => ({
     step: {
         paddingLeft: "8px",
         paddingRight: "8px",
-        padding: "5px 8px",
+        padding: "10px 8px",
         width: "20%",
         textAlign: "center",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         margin: "2px",
-        borderRadius: "4px",
+        borderRadius: "12px 40px 40px 50px",
         border: "1px solid #d6d5d5",
         [theme.breakpoints.down("xs")]: {
             width: "50%",
@@ -66,15 +68,21 @@ const useStyles = makeStyles((theme) => ({
     inActive: {
         flex: "1",
         background: "#ebebeb",
+        borderLeft: "6px solid var(--grey)",
     },
     currentStep: {
         flex: "1",
         background: "#ffffff",
+        borderLeft: "6px solid #378280",
+        color: "#378280 !important",
 
     },
     active: {
         flex: "1",
-        background: "#53ac65",
+        background: "#c8e9ce",
+        borderBottom: "0px solid var(--warning)",
+        color: "#378280 !important",
+        borderLeft: "6px solid var(--secondary)",
     },
     sent: {
         color: "#00acc1",
@@ -114,6 +122,7 @@ const useColorlibStepIconStyles = makeStyles((theme) => ({
 
 const Steps = (props) => {
     const {
+        nextStep,
         isNextStep,
         steps,
         currentStep,
@@ -177,7 +186,7 @@ const Steps = (props) => {
                             </Typography>
                         </div>
                     )} */}
-                <Grid container className={styles.main_step_box} xs={10}>
+                <Grid container className={styles.main_step_box} xs={12}>
                     <Grid
                         item
                         xs={12}
@@ -190,15 +199,17 @@ const Steps = (props) => {
                                 <div>
                                     {(
                                         <div>
-                                            <Button
+                                            <IconButton
                                                 disabled={currentStep === 5 || currentStep === 0}
+                                                className={"stepperButton"}
                                                 onClick={() => {
                                                     setCurrentStep(currentStep - 1)
                                                 }}
-                                                size="large"
-                                                startIcon={<IoIosArrowDropleftCircle />}
+                                            // size="large"
+                                            // startIcon={<IoIosArrowDropleftCircle />}
                                             >
-                                            </Button>
+                                                <TiArrowBack size={30} />
+                                            </IconButton>
                                         </div>
                                     )}
                                 </div>
@@ -251,7 +262,7 @@ const Steps = (props) => {
                                                                     setCurrentStep(currentStep + 1)
                                                                 }}
                                                                 size="small"
-                                                                disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
+                                                                disabled={currentStep >= 5 || (currentStep === 0 && isNextStep) || nextStep}
 
                                                             >
                                                                 Next
@@ -278,7 +289,7 @@ const Steps = (props) => {
                                     >
                                         <StepLabel
                                             style={{ color: "#555" }}
-                                            StepIconComponent={ColorlibStepIcon}
+                                            // StepIconComponent={ColorlibStepIcon}
                                             className={"currentStepColor"}
                                         >
                                             {label}
@@ -301,16 +312,17 @@ const Steps = (props) => {
                                     {(
                                         <div>
                                             {(
-                                                <Button
+                                                <IconButton
 
                                                     onClick={() => {
                                                         setCurrentStep(currentStep + 1)
                                                     }}
-                                                    size="large"
-                                                    disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
-                                                    endIcon={<IoIosArrowDroprightCircle />}
+                                                    disabled={currentStep >= 5 || (currentStep === 0 && isNextStep) || !nextStep}
+                                                    // endIcon={<IoIosArrowDroprightCircle />}
+                                                    className={"stepperButtonNext"}
                                                 >
-                                                </Button>
+                                                    <RiShareForwardFill />
+                                                </IconButton>
                                             )}
                                         </div>
                                     )}

@@ -86,11 +86,11 @@ const AssignProductDialog = ({
 
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({
-                    field: replaceFieldName(field),
+                    field: field,
                     term: filters[field].filter
                 })
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
         }
 
         if (sorting.length > 0) {
@@ -328,7 +328,3 @@ const AssignProductDialog = ({
 };
 
 export default AssignProductDialog;
-function replaceFieldName(field: string) {
-    throw new Error("Function not implemented.");
-}
-

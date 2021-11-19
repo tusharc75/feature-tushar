@@ -320,7 +320,7 @@ const RepairJob = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -549,6 +549,7 @@ const RepairJob = () => {
             onCreate={clickCreateNew}
             showClone={false}
             onClone={() => { }}
+            renderedFrom='repairJobPage'
           /> :
           <CustomAgGrid
             columns={columns}
@@ -562,7 +563,7 @@ const RepairJob = () => {
             page={page}
             actionWidth={100}
             loading={loading}
-            renderedFrom={'repairJobPage'}
+            renderedFrom='repairJobPage'
             refreshGrid={fetchRepairJobs}
           />
         }

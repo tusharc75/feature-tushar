@@ -40,6 +40,7 @@ import { result, find, startCase, isEqual, camelCase } from 'lodash';
 import { Delete } from "@material-ui/icons";
 import Badge from '@material-ui/core/Badge';
 import { makeStyles } from '@material-ui/core/styles';
+import { FaDiceOne } from "react-icons/fa";
 
 const rentType = ["perHour", "perDay", "perWeek", "perFortnight", "perMonth", "perYear"]
 
@@ -82,6 +83,7 @@ function PricingConditionsDetailsPage() {
         getPricingConditionsFields();
     }, [])
 
+
     useEffect(() => {
         axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
             const unitField = data.filter((e) => e.fieldData.fieldName.toLowerCase().includes("unit") && e.fieldData.type === "dropDown");
@@ -101,18 +103,18 @@ function PricingConditionsDetailsPage() {
     //     //materialType can be =["product","packages","productCategory"]
     //     //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
     //     const data: any = {}
-    //     data.conditionType = ["Rent"]
+    //     data.conditionType = ["Rent", "Discount", "Tax", "Charge"]
     //     data.material = [{
-    //         materialId: "617044747098be0594ca47b8",
+    //         materialId: "6189410150203b247444ff55",
     //         materialType: "product",
-    //         qty: 0,
-    //         rentType: "perDay",
+    //         qty: 5,
+    //         rentType: "perHour",
     //         unit: "well",
     //         currency: "USD"
     //     }, {
-    //         materialId: "617044897098be0594ca47ba",
+    //         materialId: "6189410150203b247444ff55",
     //         materialType: "product",
-    //         qty: 0,
+    //         qty: 50,
     //         rentType: "perDay",
     //         unit: "Two Well Pad",
     //         currency: "USD"
@@ -158,19 +160,19 @@ function PricingConditionsDetailsPage() {
 
     const onSubmit = (values) => {
         setLoading(true);
-        if (values.conditionType === "Discount") {
+        if (values.conditionType.includes("Discount")) {
             values.discount = discount;
         }
         else {
             delete values.discount;
         }
-        if (values.conditionType === "Charge") {
+        if (values.conditionType.includes("Charge")) {
             values.charge = charge;
         }
         else {
             delete values.charge;
         }
-        if (values.conditionType === "Tax") {
+        if (values.conditionType.includes("Tax")) {
             values.tax = tax;
         }
         else {
@@ -255,6 +257,7 @@ function PricingConditionsDetailsPage() {
     }
 
     const classes = useStyles();
+
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
@@ -305,7 +308,7 @@ function PricingConditionsDetailsPage() {
                         <Form>
                             <Grid container>
                                 <Grid item md={6} sm={6} xs={6}>
-                                    <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                                    <h2 className="form-label-style" style={{ borderBottom: "none", paddingLeft: "12px" }}>* Required Fields</h2>
                                 </Grid>
                                 <Grid container justify="flex-end" item md={6} sm={6} xs={6}>
                                     <Box ml={1}>
@@ -314,7 +317,7 @@ function PricingConditionsDetailsPage() {
                                             variant="contained"
                                             color="primary"
                                             size="small"
-                                            disabled={loading || isEqual(ref?.current?.values, initialData?.values)}
+                                            //disabled={loading || isEqual(ref?.current?.values, initialData?.values)}
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 submitForm();
@@ -346,7 +349,10 @@ function PricingConditionsDetailsPage() {
                             <Box className={classes.screenHeightAuto}>
                                 {formsData && formsData.map((form, index) => {
                                     return <div key={index}>
-                                        <h2 className="form-label-style">{form.name}</h2>
+                                        <div className={"detail-box-content"}>
+                                            <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                                            <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                                        </div>
                                         <Box marginY={2}>
                                             <Grid spacing={3} container>
                                                 {form.sectionFields.map((field, index2) => (
@@ -459,122 +465,138 @@ function PricingConditionsDetailsPage() {
                                 <Box>
 
 
-                                    {values.conditionType === "Price" &&
-                                        <Grid spacing={3} container>
-                                            {values["currency"] && values["currency"].map((_currency, i) =>
-                                                values["units"] && values["units"].map((_unit, j) => (
-                                                    <Grid item xs={12} sm={3} md={3}>
-                                                        <TextField
-                                                            id="mrp"
-                                                            name="mrp"
-                                                            variant="outlined"
-                                                            margin="dense"
-                                                            fullWidth
-                                                            label={"Rate " + _unit + " " + _currency}
-                                                            type="number"
-                                                            value={values['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())]}
-                                                            onChange={(e) => setFieldValue('mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase()), parseFloat(e.target.value))}
-                                                            InputProps={{
-                                                                startAdornment: (
-                                                                    <InputAdornment position="start">
-                                                                        {result(
-                                                                            find(getUniqueCurrencies(), function (obj) {
-                                                                                return obj.currencyCode === _currency;
-                                                                            }),
-                                                                            'symbolNative'
-                                                                        )}
-                                                                    </InputAdornment>
-                                                                ),
-                                                                inputProps: { min: 0, max: 9999999999 },
+                                    {values.conditionType.includes("Price") &&
+                                        <Fragment>
+                                            <div className={"detail-box-content"}>
+                                                <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                                                <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>Price</h2>
+                                            </div>
+                                            <Box marginTop={1} marginBottom={1}>
+                                                <Grid spacing={3} container>
+                                                    {values["currency"] && values["currency"].map((_currency, i) =>
+                                                        values["units"] && values["units"].map((_unit, j) => (
+                                                            <Grid item xs={12} sm={3} md={3}>
+                                                                <TextField
+                                                                    id="mrp"
+                                                                    name="mrp"
+                                                                    variant="outlined"
+                                                                    margin="dense"
+                                                                    fullWidth
+                                                                    label={"Rate " + _unit + " " + _currency}
+                                                                    type="number"
+                                                                    value={values['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())]}
+                                                                    onChange={(e) => setFieldValue('mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase()), parseFloat(e.target.value))}
+                                                                    InputProps={{
+                                                                        startAdornment: (
+                                                                            <InputAdornment position="start">
+                                                                                {result(
+                                                                                    find(getUniqueCurrencies(), function (obj) {
+                                                                                        return obj.currencyCode === _currency;
+                                                                                    }),
+                                                                                    'symbolNative'
+                                                                                )}
+                                                                            </InputAdornment>
+                                                                        ),
+                                                                        inputProps: { min: 0, max: 9999999999 },
+                                                                    }}
+                                                                />
+                                                            </Grid>
+                                                        )))
+                                                    }
+                                                </Grid>
+                                            </Box>
+                                        </Fragment>}
+
+                                    {values.conditionType.includes("Rent") &&
+                                        <Fragment>
+                                            <div className={"detail-box-content"}>
+                                                <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                                                <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>Rent</h2>
+                                            </div>
+                                            <Box marginTop={1} marginBottom={1}>
+                                                <Grid spacing={3} container>
+                                                    <Grid item xs={12} sm={4} md={4}>
+                                                        <Autocomplete
+                                                            multiple
+                                                            id="tags-filled"
+                                                            disableCloseOnSelect={true}
+                                                            options={rentType}
+                                                            getOptionLabel={(option: any) => (startCase(option))}
+                                                            renderTags={(value: string[], getTagProps) =>
+                                                                value.map((option: string, index: number) => (
+                                                                    <Chip variant="outlined" label={startCase(option)} {...getTagProps({ index })} />
+                                                                ))
+                                                            }
+                                                            value={values["rentType"]}
+                                                            onChange={(e, value) => {
+                                                                setFieldValue("rentType", value)
                                                             }}
+                                                            renderInput={(params) => (
+                                                                <TextField
+                                                                    {...params}
+                                                                    margin="dense"
+                                                                    variant="outlined"
+                                                                    name="rentType"
+                                                                    label="Rent Type"
+                                                                    placeholder="Rent Type"
+                                                                    error={touched['rentType'] && Boolean(errors['rentType'])}
+                                                                    helperText={touched['rentType'] && errors['rentType']}
+                                                                />
+                                                            )}
                                                         />
                                                     </Grid>
-                                                )))
-                                            }
-                                        </Grid>
-                                    }
-
-                                    {values.conditionType === "Rent" &&
-                                        <Fragment>
-                                            <Grid spacing={3} container>
-                                                <Grid item xs={12} sm={4} md={4}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        id="tags-filled"
-                                                        disableCloseOnSelect={true}
-                                                        options={rentType}
-                                                        getOptionLabel={(option: any) => (startCase(option))}
-                                                        renderTags={(value: string[], getTagProps) =>
-                                                            value.map((option: string, index: number) => (
-                                                                <Chip variant="outlined" label={startCase(option)} {...getTagProps({ index })} />
-                                                            ))
-                                                        }
-                                                        value={values["rentType"]}
-                                                        onChange={(e, value) => {
-                                                            setFieldValue("rentType", value)
-                                                        }}
-                                                        renderInput={(params) => (
-                                                            <TextField
-                                                                {...params}
-                                                                margin="dense"
-                                                                variant="outlined"
-                                                                name="rentType"
-                                                                label="Rent Type"
-                                                                placeholder="Rent Type"
-                                                                error={touched['rentType'] && Boolean(errors['rentType'])}
-                                                                helperText={touched['rentType'] && errors['rentType']}
-                                                            />
-                                                        )}
-                                                    />
                                                 </Grid>
-                                            </Grid>
-                                            <Box marginTop={1} border={1} p={1} borderColor="grey.300" >
-                                                <table>
-                                                    <thead>
-                                                        <tr>
-                                                            <th></th>
-                                                            {values["currency"] && values["currency"].map((_currency, i) =>
-                                                                values['units'] && values['units'].map((_unit, j) => (
-                                                                    <th key={j}  >
-                                                                        {_unit + " " + _currency}
-                                                                    </th>
-                                                                )))}
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {values['rentType'] && values['rentType'].map((_rentType, i) => (
-                                                            <tr key={i}>
-                                                                <th style={{ paddingRight: 10, minWidth: 50 }}>
-                                                                    {startCase(_rentType)}
-                                                                </th>
-                                                                {values["currency"] && values["currency"].map((_currency, j) =>
-                                                                    values['units'] && values['units'].map((_unit, k) => (
-                                                                        <td key={j}>
-                                                                            <TextField
-                                                                                name={"rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + camelCase(_unit.toLowerCase())}
-                                                                                variant="outlined"
-                                                                                margin="dense"
-                                                                                fullWidth
-                                                                                type="number"
-                                                                                style={{ margin: 0 }}
-                                                                                value={values["rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + camelCase(_unit.toLowerCase())]}
-                                                                                onChange={(e) => setFieldValue("rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + camelCase(_unit.toLowerCase()), parseFloat(e.target.value))}
-                                                                            />
-                                                                        </td>
+                                                <Box marginTop={1} border={1} p={1} borderColor="grey.300" >
+                                                    <table>
+                                                        <thead>
+                                                            <tr>
+                                                                <th></th>
+                                                                {values["currency"] && values["currency"].map((_currency, i) =>
+                                                                    values['units'] && values['units'].map((_unit, j) => (
+                                                                        <th key={j}  >
+                                                                            {_unit + " " + _currency}
+                                                                        </th>
                                                                     )))}
                                                             </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
+                                                        </thead>
+                                                        <tbody>
+                                                            {values['rentType'] && values['rentType'].map((_rentType, i) => (
+                                                                <tr key={i}>
+                                                                    <th style={{ paddingRight: 10, minWidth: 50 }}>
+                                                                        {startCase(_rentType)}
+                                                                    </th>
+                                                                    {values["currency"] && values["currency"].map((_currency, j) =>
+                                                                        values['units'] && values['units'].map((_unit, k) => (
+                                                                            <td key={j}>
+                                                                                <TextField
+                                                                                    name={"rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + camelCase(_unit.toLowerCase())}
+                                                                                    variant="outlined"
+                                                                                    margin="dense"
+                                                                                    fullWidth
+                                                                                    type="number"
+                                                                                    style={{ margin: 0 }}
+                                                                                    value={values["rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + camelCase(_unit.toLowerCase())]}
+                                                                                    onChange={(e) => setFieldValue("rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + camelCase(_unit.toLowerCase()), parseFloat(e.target.value))}
+                                                                                />
+                                                                            </td>
+                                                                        )))}
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </Box>
                                             </Box>
-                                        </Fragment>
-                                    }
+                                        </Fragment>}
 
-                                    {values.conditionType === "Discount" &&
+                                    {values.conditionType.includes("Discount") &&
                                         <Fragment>
-                                            <Box mt={3}>
+                                            <div className={"detail-box-content"}>
+                                                <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                                                <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>Discount</h2>
+                                            </div>
+                                            <Box marginTop={2} marginBottom={1}>
                                                 <Button
-                                                    variant="contained"
+                                                    variant="outlined"
                                                     color="primary"
                                                     size="small"
                                                     onClick={() => {
@@ -591,7 +613,7 @@ function PricingConditionsDetailsPage() {
                                                 </Button>
                                             </Box>
                                             {discount.map((val, index) => (
-                                                <Box key={index} mt={1}>
+                                                <Box key={index} mb={2}>
                                                     <Badge badgeContent={index + 1} color="primary">
                                                     </Badge>
                                                     <Box p={2} border={1} borderColor="grey.300">
@@ -694,11 +716,15 @@ function PricingConditionsDetailsPage() {
                                         </Fragment>
                                     }
 
-                                    {(values.conditionType === "Charge") &&
+                                    {values.conditionType.includes("Charge") &&
                                         <Fragment>
-                                            <Box mt={3}>
+                                            <div className={"detail-box-content"}>
+                                                <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                                                <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>Charge</h2>
+                                            </div>
+                                            <Box marginTop={2} marginBottom={1}>
                                                 <Button
-                                                    variant="contained"
+                                                    variant="outlined"
                                                     color="primary"
                                                     size="small"
                                                     onClick={() => {
@@ -713,7 +739,7 @@ function PricingConditionsDetailsPage() {
                                                 </Button>
                                             </Box>
                                             {charge.map((val, index) => (
-                                                <Box key={index} mt={1}>
+                                                <Box key={index} mb={2}>
                                                     <Badge badgeContent={index + 1} color="primary">
                                                     </Badge>
                                                     <Box p={2} border={1} borderColor="grey.300">
@@ -779,11 +805,15 @@ function PricingConditionsDetailsPage() {
                                         </Fragment>
                                     }
 
-                                    {(values.conditionType === "Tax") &&
+                                    {values.conditionType.includes("Tax") &&
                                         <Fragment>
-                                            <Box mt={3}>
+                                            <div className={"detail-box-content"}>
+                                                <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                                                <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>Tax</h2>
+                                            </div>
+                                            <Box marginTop={2} marginBottom={1}>
                                                 <Button
-                                                    variant="contained"
+                                                    variant="outlined"
                                                     color="primary"
                                                     size="small"
                                                     onClick={() => {
@@ -798,7 +828,7 @@ function PricingConditionsDetailsPage() {
                                                 </Button>
                                             </Box>
                                             {tax.map((val, index) => (
-                                                <Box key={index} mt={1}>
+                                                <Box key={index} mb={2}>
                                                     <Badge badgeContent={index + 1} color="primary">
                                                     </Badge>
                                                     <Box p={2} border={1} borderColor="grey.300">

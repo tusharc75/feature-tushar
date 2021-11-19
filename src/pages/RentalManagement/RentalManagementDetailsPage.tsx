@@ -1,8 +1,7 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, CircularProgress } from "@material-ui/core";
-import { Skeleton, Autocomplete, Alert } from "@material-ui/lab";
+import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
+import { Grid, Box, Button, Paper, CircularProgress, useMediaQuery, Typography, Tab, Tabs } from "@material-ui/core";
+import { Skeleton, Alert } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
-import { isMobile, isTablet } from "react-device-detect";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "../../components/Helpers/Routes";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -12,19 +11,15 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow } from "../../constants/helpers";
+import {
+  getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow,
+  dateFormat, pricingCondition, generateUniqueId, treeToFlatArray
+} from "../../constants/helpers";
 import Steps from "./Steps";
 import AddExistingProductInventory from "./AddExistingProductInventory";
-import { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { Link } from 'react-router-dom'
-import InputAdornment from "@material-ui/core/InputAdornment/InputAdornment";
-import TextField from "@material-ui/core/TextField/TextField";
-import { Field, FieldArray, Form, Formik } from "formik";
-import Container from "@material-ui/core/Container/Container";
+import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import IconButton from "@material-ui/core/IconButton/IconButton";
-import ButtonGroup from "@material-ui/core/ButtonGroup/ButtonGroup";
 import Add from "@material-ui/icons/Add";
-import Delete from "@material-ui/icons/Delete";
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { MdEdit, MdDelete } from 'react-icons/md';
 import DeliveryTicket from "./DeliveryTicket";
@@ -38,14 +33,21 @@ import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import HideWhenOffline from "../../components/HideWhenOffline";
 import DeleteButton from "../../components/Helpers/DeleteButton";
-import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import NoDataCell from "../../components/Helpers/NoDataCell";
-import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
-import { GiMineExplosion } from 'react-icons/gi'
+import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import HtmlTooltip from '../../components/CustomTooltipTitle'
 import BulkEditInventoryDialog from './BulkEditInventoryDialog'
 import SerializedAssetStep from "./SerializedAssetStep";
+import moment from "moment";
+import { camelCase, startCase, orderBy } from "lodash";
 import queryString from "query-string";
+import PackageProductsDialog from './PackageProductsDialog'
+import { FaWpforms } from "react-icons/fa";
+import { BiFoodMenu } from "react-icons/bi";
+import TabPanel from "../../components/TabPanel";
+import { AddOutlined } from '@material-ui/icons';
+import ManageAdditionalCostDialog from "./ManageAdditionalCostDialog";
+import CustomReactTable from "../../components/CustomReactTable/CustomReactTable";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 const rentalProcessSteps = ["New", "Additional Cost", "Serialized Asset", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
@@ -61,18 +63,20 @@ const RentalManagementDetailsPage = () => {
   const {
     state: { user, permissions }
   }: any = useData();
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
+  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [headingLbl, setHeadingLbl] = useState("");
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [isUpdating, setUpdating] = useState(false);
-  const [isBulkEdit, setBulkEdit] = useState(false);
+  const [isProductEdit, setIsProductEdit] = useState(false);
+  const [recordToUpdate, setRecordToUpdate] = useState(null)
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [isDeleting, setDeleting] = useState(false);
   const [isAddingProducts, setAddingProducts] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [addExistingProductDialog, setAddExistingProductDialog] = useState(false);
-  const [inventoryType, setInventoryType] = useState(null);
+  const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: "" });
   const [rentalManagementFields, setRentalManagementFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
@@ -80,6 +84,7 @@ const RentalManagementDetailsPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [additionalCost, setAdditionalCost] = useState<any[]>([]);
   const [productInventory, setProductInventory] = useState<any[]>([]);
+  const [serializeAssets, setSerializeAssets] = useState<any[]>([]);
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
@@ -87,12 +92,34 @@ const RentalManagementDetailsPage = () => {
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [allowedToEdit, setAllowedToEdit] = useState(false)
   const [productInventoryForReceivingTicket, setProductInventoryForReceivingTicket] = useState<any[]>([]);
-  const [warehouseForReceivingTicket, setWarehouseForReceivingTicket] = useState<any[]>([]);
   const [showReceivingTicketDialog, setShowReceivingTicketDialog] = useState(false);
   const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false)
+  const [selectedProducts, setSelectedProducts] = useState([])
+  const [packageForProducts, setPackageForProducts] = useState(null)
+  const [nextStep, setNextStep] = useState(true)
+  const [tabValue, setTabValue] = useState(0);
+  const [showManageAdditionalCostDialog, setShowManageAdditionalCostDialog] = useState({
+    open: false,
+    isNew: false,
+    record: null,
+  })
+
+  const { pricingConditionApi } = pricingCondition
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
+  }
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
   }
 
   useEffect(() => {
@@ -105,11 +132,15 @@ const RentalManagementDetailsPage = () => {
   }, [id]);
 
   useEffect(() => {
+    if (currentStep === 0) {
+      fetchProductInventory()
+    }
+
     if (currentStep === 2 && additionalCost.length > 0) {
       handleSaveAdditionalCost(additionalCost)
     }
 
-    if (currentStep > 0) {
+    if (currentStep >= 0 && currentStep <= 4) {
       axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/process-status`, { "processStatus": rentalProcessSteps[currentStep] }).then(({ data }) => {
       }).catch((error) => {
         toastConfig.setToastConfig(error);
@@ -119,64 +150,57 @@ const RentalManagementDetailsPage = () => {
   }, [currentStep]);
 
   useEffect(() => {
-    updateStatus()
-  }, [currentStep, productInventory])
-
-  const updateStatus = () => {
-    if (productInventory.length > 0 && rentalManagementData) {
-      const leftItems = [];
-      for (const product of productInventory) {
-        if (!product.deliveryTicket) {
-          leftItems.push(product.id)
-        }
-      }
-
-      if (currentStep === 4 && leftItems.length === 0 && rentalManagementData) {
-        if (rentalManagementData.status === "New") {
-          const tempUpdateData = {
-            "_id": rentalManagementData._id,
-            "rentalJobName": rentalManagementData.rentalJobName,
-            "rentalJobID": rentalManagementData.rentalJobID,
-            "customerAccount": rentalManagementData.customerAccount?.optionValue,
-            "customerContact": rentalManagementData.customerContact?.optionValue,
-            "shippingAddress": rentalManagementData.shippingAddress,
-            "currency": rentalManagementData.currency,
-            "rentalStartDate": rentalManagementData.rentalStartDate,
-            "rentalEndDate": rentalManagementData.rentalEndDate,
-            "jobDescription": rentalManagementData.jobDescription,
-            "status": "Ready to Ship",
-            "owner": rentalManagementData.owner.optionValue,
-            // "collaborator": rentalManagementData.collaborator,
-
-          }
-          axiosInstance().put(`${rentalManagement.rentalManagementApi}`, tempUpdateData)
-            .then(() => {
-              fetchRentalManagementData()
-            }).catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        }
-      }
+    if (isSmallScreen) {
+      setActivityShow(true)
     }
-  }
+  }, [isSmallScreen])
+
+  const calculatePricing = (arr: any[]) => {
+    //materialType can be =["product","packages","productCategory"]
+    //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
+    if (rentalManagementData) {
+      const data: any = {}
+      data.conditionType = ["Rent"]
+      data.material = arr.map(ele => ({
+        materialId: ele?._id,
+        materialType: ele?.type.includes("roduct") ? "product" : "packages",
+        qty: ele?.qty,
+        rentType: ele?.pricingMethod,
+        unit: ele?.UOM,
+        currency: rentalManagementData?.currency
+      }))
+      data.supplier = [];
+      data.customer = [rentalManagementData?.customerAccount.optionValue];
+      data.warehouse = [];
+      return new Promise((resolve, reject) => {
+        axiosInstance().post(pricingConditionApi + `/calculatePrice`, data)
+          .then(({ data: { data } }) => {
+            resolve(data)
+          }).catch(err => {
+            reject(err)
+          })
+      })
+    }
+  };
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
-    // mainPoint['Account Name'] = data?.accountName?.optionLabel || '';
     setMainPoints(mainPoint);
   };
 
   const handleSaveAdditionalCost = (values) => {
-    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/additional-cost`, { "additionalCost": values.map(d => { return { "type": d.type, "value": d.amount ? Number(d.amount) : 0, "description": d?.description, "uom": d.uom, "qty": d.qty ? Number(d.qty) : 0 } }) })
-      .then(({ data }) => {
-        setAddExistingProductDialog(false)
-        // fetchProductInventory()
-        // fetchRentalManagementData()
-        // toastConfig.setToastConfig({
-        //   open: true,
-        //   type: "success",
-        //   message: data.message,
-        // });
+    axiosInstance()
+      .post(`${rentalManagement.rentalManagementApi}/${id}/additional-cost`, {
+        "additionalCost": values.map(d => ({
+          "type": d.type,
+          "value": d.amount ? Number(d.amount) : 0,
+          "description": d?.description,
+          "uom": d.uom,
+          "qty": d.qty ? Number(d.qty) : 0
+        }))
+      })
+      .then(() => {
+        setAddExistingProductDialog({ open: false, type: "" })
       }).catch((error) => {
         toastConfig.setToastConfig(error)
       });
@@ -210,7 +234,7 @@ const RentalManagementDetailsPage = () => {
       setHeadingLbl(data.rentalJobName);
       setCustomizedRoutes([routes.rentalManagement, { title: `${data.rentalJobName}` }]);
       setRentalManagementData(data);
-      setAdditionalCost(data?.additionalCost?.map(d => { return { "id": d?._id, "type": d.type, "amount": d?.value, "description": d?.description, "uom": d.uom, "qty": d.qty, } }))
+      setAdditionalCost(data?.additionalCost?.map((d, index) => { return { "id": d?._id, "type": d.type, "amount": d?.value, "description": d?.description, "uom": d.uom, "qty": d.qty } }) ?? [])
       setCurrentStep(rentalProcessSteps.indexOf(data?.processStatus) !== -1 ? rentalProcessSteps.indexOf(data?.processStatus) : 0)
       setLoadingDetails(false);
       setCurrencySymbol(
@@ -288,8 +312,53 @@ const RentalManagementDetailsPage = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
+  //  This is copied method from helpers.ts as wee need some modification for this screen only
+  const translateDataToTreeForProducts = (data, parentProperty, childProperty, childrenPropertyToStore) => {
+    let parents = data.filter(value => value[parentProperty] == 'undefined' || value[parentProperty] == null)
+    let childrens = data.filter(value => value[parentProperty] !== 'undefined' && value[parentProperty] != null)
+
+    parents.forEach((current) => {
+      if (current.type === "Product" || current.type === "Package") {
+        current["qtyToDisplay"] = current?.qty ?? 0;
+        current["isValid"] = (!isNaN(current?.finalPrice) && current?.finalPrice !== 0)
+      }
+    })
+
+    let translator = (parents, childrens) => {
+      parents.forEach((parent) => {
+        childrens.forEach((current, index) => {
+          if (current.parent === parent[childProperty]) {
+            let temp = JSON.parse(JSON.stringify(childrens))
+            temp.splice(index, 1)
+            translator([current], temp)
+
+            //  Check validation for products in package - Start
+            current["qtyToDisplay"] = `${current.qty} x ${parent.qty} = ${current.qty * parent.qty}`
+
+            if (current?.finalPrice !== null && current?.finalPrice !== undefined && typeof current?.finalPrice !== "string" && current?.finalPrice !== 0) {
+              current["isValid"] = true;
+            } else {
+              current["isValid"] = parent["isValid"];
+            }
+            //  Check validation for products in package - End
+
+            if (typeof parent[childrenPropertyToStore] !== 'undefined') {
+              parent[childrenPropertyToStore].push(current)
+            } else {
+              parent[childrenPropertyToStore] = [current]
+            }
+          }
+        })
+      })
+    }
+    translator(parents, childrens)
+
+    return parents
+  }
+
 
   const fetchProductInventory = () => {
+
     let tempInventory = []
     dispatch({ type: "loading", loading: true });
     if (gridApi) {
@@ -297,140 +366,320 @@ const RentalManagementDetailsPage = () => {
     }
 
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/products-packages`).then(({ data }) => {
-      data.data?.products.map((u: any) => (tempInventory.push({
+      data.data?.products.map((u: any, index) => (tempInventory.push({
         ...u,
         id: u._id,
-        detail: u.productName,
         productCategory: u.productCategory?.optionLabel,
-        package: u.hasOwnProperty("package") ? u.package.packageName : "",
-        packageId: u.hasOwnProperty("package") ? u.package._id : ""
+        isValidRecord: true,
+        qtyToDisplay: u.qty
+        // package: u.hasOwnProperty("package") ? u.package.packageName : "",
+        // packageId: u.hasOwnProperty("package") ? u.package._id : ""
       })));
       data.data?.packages.map((u) => (tempInventory.push({
         ...u,
         id: u._id,
-        detail: u.packageName,
         description: u.packageDescription,
       })));
-      tempInventory = tempInventory.map(u => {
-        let qty = parseInt(u?.quantity || u?.qty) || 0
-        let price = qty > 0 ? (parseInt(u?.price) * qty) || (parseInt(u?.mrp) * qty) || 0 : (parseInt(u.price) || 0)
-        let discount = parseInt(u?.discount) || 0
-        let finalPrice = parseInt(u?.finalPrice) || 0
+      setProductInventory(tempInventory)
+      setSerializeAssets(data.data?.inventory || [])
+      tempInventory = restructureRowData(tempInventory)
 
-        finalPrice = (discount > 0 && price > 0) ? price - ((price * discount) / 100) : price
-        return {
-          ...u,
-          qty: qty,
-          finalPrice: finalPrice
-        }
+      let zeroPrice = tempInventory.filter(pkg => pkg.type !== "productInPackage" && pkg?.finalPrice === 0);
+
+      if (zeroPrice.length > 0) {
+        setNextStep(false)
+      } else {
+        setNextStep(true)
+      }
+
+      const newData = [];
+      tempInventory.forEach(({ _id, ...rest }) => {
+        newData.push(rest)
       })
 
-      setProductInventory(tempInventory)
+      const newDataForReactTable = [...translateDataToTreeForProducts(newData ? [...newData] : [], "parent", "treeId", "subRows")];
 
-      // let tempWareHouse = []
-      // data.data.map(d => {
-      //   if (!tempWareHouse.some(t => t.optionValue === d.inventory.warehouse.optionValue)) {
-      //     tempWareHouse.push(d.inventory.warehouse)
-      //   }
-      // })
-      // if (data.data > 0 && data.data.every(d => d.inventory?.warehouse?.optionLabel !== null && d.inventory?.warehouse?.optionLabel !== undefined)) {
-      //   setCurrentStep(4)
-      //   axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/status `, { "status": "Ready To Ship" }).then(({ data }) => {
-      //   }).catch((error) => {
-      //     toastConfig.setToastConfig(error);
-      //   });
-      // }
-      // setWarehouseList(tempWareHouse)
-      dispatch({ type: "initialize", data: tempInventory, count: tempInventory.length });
+      // console.log(newDataForReactTable)
+
+      dispatch({ type: "initialize", data: [], count: 0 })
+      dispatch({ type: "initialize", data: [...orderBy(newDataForReactTable, ["order"], ["asc"])], count: newDataForReactTable.length });
+
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
       }, gridLoadingTimeout);
+
+      setSelectedProducts([])
+
     }).catch((error) => {
       toastConfig.setToastConfig(error);
       dispatch({ type: "loading", loading: false });
     });
   };
 
+  const restructureRowData = (rowData: any) => {
+    let extractedProducts = []
+    let newDataOfRow = [...rowData]
 
-  const NameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data.id}`}>
-      {params.value}
-    </Link>
-  );
+    let packageProducts = newDataOfRow.filter(rd => rd.type === "productInPackage")
+    let packages = newDataOfRow.filter(rd => rd.type === "Package")
+    let products = newDataOfRow.filter(rd => rd.type === "Product")
+    let modifiedPkgProducts = [];
 
-  const ProductRenderer = (params) => (
-    <Link className="link" title={params.value} to={params.data.type === "Product" ? `${routes.productDetail.path}/${params.data.id}` : `${routes.packagesDetail.path}/${params.data.id}`}>
-      {params.value}
-    </Link>
-  );
+    packages.forEach((pkg: any) => {
+      let currentPkgProducts = packageProducts.filter((p: any) => p.packageId === pkg.id);
+      currentPkgProducts.forEach((p: any) => {
+        let product = { ...p, pkgQty: pkg.qty, totalQty: pkg.qty * p.qty };
+        modifiedPkgProducts.push(product)
+      })
+    })
 
-  const PackageNameRenderer = (params) => (
-    params.value ? <Link className="link" title={params.value} to={`${routes.packagesDetail.path}/${params.data.packageId}`}>
-      {params.value}
-    </Link> : <NoDataCell />
-  );
+    extractedProducts = [...products, ...packages, ...modifiedPkgProducts]
 
-  const ActionsRenderer = (params) => (
-    <>
-      <GridDeleteIcon
-        hasDeletePermission={permissions?.rentalManagement?.isDelete}
-        ownerId={user?.user?._id}
-        userId={user?.user?._id}
-        onDelete={() => {
-          deleteInventories([{
-            id: params.data.id,
-            type: params.data?.type.toLowerCase()
-          }])
-        }
-        }
-        entity="rentalManagement"
-      />
-      {params.data.type === "Package" &&
-        <HtmlTooltip title="Explode package">
-          <IconButton
-            onClick={() => explodePackage(params.data.id)}
-            size="small"
-            color='primary'
-          >
-            <GiMineExplosion />
-          </IconButton>
-        </HtmlTooltip>
-      }
-    </>
-  );
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    productRenderer: ProductRenderer,
-    packageNameRenderer: PackageNameRenderer,
-    commonRenderer: CommonRenderer,
-    actionsRenderer: ActionsRenderer,
-    dateRenderer: DateRenderer,
-  };
-  const columns = [
-    { field: "detail", headerName: "Product Description / Package", show: true, disabled: true, cellRenderer: "productRenderer" },
-    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "package", headerName: "Parent Package", show: true, disabled: true, cellRenderer: "packageNameRenderer" },
-    { field: "startDate", headerName: "Start Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
-    { field: "endDate", headerName: "End Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
-    { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    { field: "UOM", headerName: "UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Pcs"] }, editable: true },
-    { field: "pricingMethod", headerName: "Pricing Method", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Per Day", "Per Week", "Per Month"] }, editable: true },
-    { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    { field: "discount", headerName: "Discount (%)", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: false },
-  ];
-
-  const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageInventory"));
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
+    return extractedProducts
   }
+
+
+
+
+
+
+  // const NameRenderer = (params) => (
+  //   <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data.id}`}>
+  //     {params.value}
+  //   </Link>
+  // );
+
+  // const ProductRenderer = (params) => (
+  //   <Link className="link" title={params.value} to={params.data.type === "Product" ? `${routes.productDetail.path}/${params.data.id}` : `${routes.packagesDetail.path}/${params.data.id}`}>
+  //     {params.value}
+  //   </Link>
+  // );
+
+  // // const PackageNameRenderer = (params) => (
+  // //   params.value ? <Link className="link" title={params.value} to={`${routes.packagesDetail.path}/${params.data.packageId}`}>
+  // //     {params.value}
+  // //   </Link> : <NoDataCell />
+  // // );
+
+  // const ActionsRenderer = (params) => (
+  //   <>
+  //     <GridDeleteIcon
+  //       hasDeletePermission={permissions?.rentalManagement?.isDelete}
+  //       ownerId={user?.user?._id}
+  //       userId={user?.user?._id}
+  //       onDelete={() => {
+  //         deleteInventories([{
+  //           id: params.data.id,
+  //           type: params.data?.type.toLowerCase()
+  //         }])
+  //       }
+  //       }
+  //       entity="rentalManagement"
+  //     />
+  //     {params.data.type === "Package" &&
+  //       <HtmlTooltip title="Explode package">
+  //         <IconButton
+  //           onClick={() => explodePackage(params.data.id)}
+  //           size="small"
+  //           color='primary'
+  //         >
+  //           <GiMineExplosion />
+  //         </IconButton>
+  //       </HtmlTooltip>
+  //     }
+  //   </>
+  // );
+
+  // const frameworkComponents = {
+  //   nameRenderer: NameRenderer,
+  //   productRenderer: ProductRenderer,
+  //   // packageNameRenderer: PackageNameRenderer,
+  //   commonRenderer: CommonRenderer,
+  //   actionsRenderer: ActionsRenderer,
+  //   dateRenderer: DateRenderer,
+  // };
+  // const columns = [
+  //   { field: "detail", headerName: "Detail", show: true, disabled: true, cellRenderer: "productRenderer" },
+  //   { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
+  //   // { field: "package", headerName: "Package", show: true, disabled: true, cellRenderer: "packageNameRenderer" },
+  //   { field: "startDate", headerName: "Start Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
+  //   { field: "endDate", headerName: "End Date", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
+  //   { field: "qty", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+  //   { field: "UOM", headerName: "UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Pcs"] }, editable: true },
+  //   { field: "pricingMethod", headerName: "Pricing Method", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Per Day", "Per Week", "Per Month"] }, editable: true },
+  //   { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+  //   { field: "discount", headerName: "Discount (%)", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+  //   { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+  // ];
+
+  // const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageInventory"));
+  // if (columnState) {
+  //   columns.forEach((item) => {
+  //     columnState.forEach((d) => {
+  //       if (d.colId === item.field) {
+  //         item.show = !d.hide;
+  //       }
+  //     });
+  //   });
+  // }
+
+
+  const RentalJobTypeRenderer = (params) => (
+    <span className="link" onClick={() => {
+      setShowManageAdditionalCostDialog({
+        open: true,
+        isNew: false,
+        record: params.data
+      })
+    }}>
+      {params.value}
+    </span>
+    // <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data.id}`}>
+    //   {params.value}
+    // </Link>
+  );
+
+  const RentalJobActionsRenderer = (params) => (
+    <GridDeleteIcon
+      hasDeletePermission={true}
+      ownerId={user?.user?._id}
+      userId={user?.user?._id}
+      onDelete={() => {
+        setAdditionalCost(prevState => [...prevState].filter(f => f.id !== params.data.id))
+      }}
+      entity=""
+    />
+  );
+
+  const rentalJobFrameworkComponents = {
+    typeRenderer: RentalJobTypeRenderer,
+    commonRenderer: CommonRenderer,
+    actionsRenderer: RentalJobActionsRenderer
+  };
+
+
+  const handleClick = (rowData) => {
+    setIsProductEdit(true)
+    setRecordToUpdate(rowData)
+  }
+
+
+  const columns = [
+    {
+      accessor: 'detail',
+      Header: 'Detail',
+      Cell: ({ row }) => (
+        <div style={{ width: 250, display: "flex", alignItems: 'center' }}>
+          <p
+            onClick={() => handleClick(row.original)}
+            className="link text-truncate"
+            title={row.original.detail}
+          >
+            {row.original.detail}
+          </p>
+          {row.original?.type === 'Package' && !row.original.hasOwnProperty("packageId") &&
+            <Box ml={1} className="d-flex align-items-center">
+              <span title={`There are ${row.original?.products?.length} product(s) in this package`}>({row.original?.products?.length})</span>
+              <HtmlTooltip title="Add Product">
+                <IconButton onClick={() => setPackageForProducts(row.original)} size="small" color="primary">
+                  <Add color='disabled' />
+                </IconButton>
+              </HtmlTooltip>
+            </Box>
+          }
+        </div>
+      )
+    },
+    // {
+    //   accessor: 'type',
+    //   Header: 'Type',
+    //   cellStyle: { padding: "0px" },
+    //   render: (rowData) => (
+    //     <div style={{ width: 80 }}>
+    //       <p>{rowData.type}</p>
+    //     </div>
+    //   )
+
+    // },
+    {
+      accessor: 'startDate',
+      Header: 'Start Date',
+      Cell: ({ row }) => (
+        row.original.startDate ? <h5 className="createBy text-truncate" title={`${moment(row.original.startDate.slice(0, 10)).format(dateFormat)}`}>
+          <span className="">{moment(row.original.startDate.slice(0, 10)).format(dateFormat)}</span>
+        </h5> : <NoDataCell />
+      )
+    },
+    {
+      accessor: 'endDate',
+      Header: 'End Date',
+      Cell: ({ row }) => (
+        row.original.endDate ? <h5 className="createBy text-truncate" title={`${moment(row.original.endDate.slice(0, 10)).format(dateFormat)}`}>
+          <span className="">{moment(row.original.endDate.slice(0, 10)).format(dateFormat)}</span>
+        </h5> : <NoDataCell />
+      )
+    },
+    {
+      accessor: 'qtyToDisplay',
+      Header: 'Quantity',
+      Cell: ({ row }) => (
+        row.original.qtyToDisplay ? <p>{row.original.qtyToDisplay}</p> : <NoDataCell />
+      )
+    },
+    {
+      accessor: 'UOM',
+      Header: 'UOM',
+      Cell: ({ row }) => (
+        row.original.UOM ? <p>{startCase(row.original.UOM)}</p> : <NoDataCell />
+      )
+    },
+    {
+      accessor: 'pricingMethod',
+      Header: 'Pricing Method',
+      Cell: ({ row }) => (
+        row.original.pricingMethod ? <p>{startCase(row.original.pricingMethod)}</p> : <NoDataCell />
+      )
+    },
+    {
+      accessor: 'price',
+      Header: `Price (${currencySymbol})`,
+      Cell: ({ row }) => (
+        row.original.price ? <p>{row.original.price}</p> : <NoDataCell />
+      ),
+      Footer: info => {
+        const total = React.useMemo(
+          () =>
+            info.rows.filter(f => f.values.hasOwnProperty("price") && !isNaN(f.values.price)).reduce((sum, row) => row.values.price + sum, 0),
+          [info.rows]
+        )
+
+        return <>{total}</>
+      }
+    },
+    {
+      accessor: 'discount',
+      Header: 'Discount (%)',
+      Cell: ({ row }) => (
+        row.original.discount === 0 ? <NoDataCell /> : <p>{row.original.discount}</p>
+      )
+    },
+    {
+      accessor: 'finalPrice',
+      Header: `Final Price (${currencySymbol})`,
+      Cell: ({ row }) => (
+        row.original.finalPrice === 0 ? <NoDataCell /> : <p>{row.original.finalPrice}</p>
+      ),
+      Footer: info => {
+        const total = React.useMemo(
+          () =>
+            info.rows.filter(f => f.values.hasOwnProperty("finalPrice") && !isNaN(f.values.finalPrice)).reduce((sum, row) => row.values.finalPrice + sum, 0),
+          [info.rows]
+        )
+
+        return <>{total}</>
+      }
+    }
+  ]
 
 
 
@@ -439,24 +688,24 @@ const RentalManagementDetailsPage = () => {
     setAddingProducts(true)
     let tempProductArray = productInventoryArray.map(d => ({
       "id": d.id,
-      "qty": parseInt(d.quantity || d.qty) || 0,
+      "qty": 1,
       "type": d.type.toLowerCase(),
       "detail": d.detail || "",
       "pricingMethod": d.pricingMethod || "",
       "UOM": d.UOM || "",
-      "finalPrice": parseInt(d.finalPrice) || 0,
-      "price": parseInt(d.mrp) || parseInt(d.price) || 0,
-      "discount": parseInt(d.discount) || 0,
+      "finalPrice": 0,
+      "price": 0,
+      "discount": 0,
       "startDate": rentalManagementData ? rentalManagementData?.rentalStartDate : new Date(),
       "endDate": rentalManagementData ? rentalManagementData?.rentalEndDate : new Date(),
     }))
     axiosInstance().post(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": tempProductArray })
       .then(() => {
-        setAddExistingProductDialog(false)
+        setAddExistingProductDialog({ open: false, type: "" })
         fetchProductInventory()
         setAddingProducts(false)
       }).catch((error) => {
-        setAddExistingProductDialog(false)
+        setAddExistingProductDialog({ open: false, type: "" })
         toastConfig.setToastConfig(error)
         setAddingProducts(false)
       });
@@ -483,49 +732,37 @@ const RentalManagementDetailsPage = () => {
       });
   }
 
-  const explodePackage = (packageId) => {
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/products-packages/explode/${packageId}`)
-      .then(() => {
-        fetchProductInventory()
-      }).catch((error) => {
-        toastConfig.setToastConfig(error)
-      });
-  }
+  // const explodePackage = (packageId) => {
+  //   axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/products-packages/explode/${packageId}`)
+  //     .then(() => {
+  //       fetchProductInventory()
+  //     }).catch((error) => {
+  //       toastConfig.setToastConfig(error)
+  //     });
+  // }
 
   const updateProductData = (data) => {
 
     let updatedArr = dataRows.map(d => {
       if (d.id === data.id) {
-        if (data.endData || data.startDate) {
-          data["endDate"] = new Date(data.endDate)
-          data["startDate"] = new Date(data.startDate)
-        }
         return data
       } else {
         return d
       }
-    }).map(d => {
+    }).map(d => ({
+      "id": d.id,
+      "qty": parseInt(d.quantity || d.qty) || 0,
+      "type": d?.type ? camelCase(d.type) : "",
+      "detail": d.detail,
+      "pricingMethod": d?.pricingMethod || "",
+      "UOM": d?.UOM || "",
+      "finalPrice": parseInt(d.finalPrice) || 0,
+      "price": parseInt(d.price) || 0,
+      "discount": parseInt(d.discount) || 0,
+      "startDate": d?.startDate || "",
+      "endDate": d?.endDate || "",
+    }))
 
-      let qty = parseInt(d.quantity || d.qty) || 0
-      let price = qty > 0 ? (parseInt(d.price) * qty || 0) : (parseInt(d.price) || 0)
-      let discount = parseInt(d.discount) || 0
-      let finalPrice = parseInt(d.finalPrice) || 0
-
-      finalPrice = (discount > 0 && price > 0) ? price - ((price * discount) / 100) : price
-      return {
-        "id": d.id,
-        "qty": qty,
-        "type": d.type.toLowerCase(),
-        "detail": d.detail,
-        "pricingMethod": d.pricingMethod,
-        "UOM": d.UOM,
-        "finalPrice": finalPrice,
-        "price": parseInt(d.price) || 0,
-        "discount": discount,
-        "startDate": d.startDate,
-        "endDate": d.endDate,
-      }
-    })
 
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": updatedArr })
       .then(() => {
@@ -535,10 +772,12 @@ const RentalManagementDetailsPage = () => {
       });
   }
 
-  const bulkEditData = (values: any) => {
-    let updatedArr = dataRows.map(d => ({
+  const handleBulkEditData = (values: any) => {
+    let updatedArr = selectedProducts.filter(d => d.type !== "productInPackage")
+
+    updatedArr = updatedArr.map(d => ({
       "id": d.id,
-      "type": d.type.toLowerCase(),
+      "type": d?.type.toLowerCase(),
       "detail": d.detail,
       "pricingMethod": values.pricingMethod ? values.pricingMethod : d.pricingMethod,
       "UOM": values.UOM ? values.UOM : d.UOM,
@@ -549,13 +788,32 @@ const RentalManagementDetailsPage = () => {
       "qty": values.qty ? values.qty : d.qty,
       "price": values.price ? values.price : d.price
     })
+
     )
 
     setUpdating(true)
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": updatedArr })
       .then(() => {
         setUpdating(false)
-        setBulkEdit(false)
+        setIsProductEdit(false)
+        fetchProductInventory()
+
+      }).catch((error) => {
+        setUpdating(false)
+        toastConfig.setToastConfig(error)
+      });
+  }
+
+
+  const handleSingleEdit = async (values: any) => {
+    setUpdating(true)
+    const { subRows, isValid, qtyToDisplay, ...rest } = values;
+
+    rest.type = camelCase(rest.type)
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/updateOne`, rest)
+      .then(() => {
+        setUpdating(false)
+        setIsProductEdit(false)
         fetchProductInventory()
       }).catch((error) => {
         setUpdating(false)
@@ -563,6 +821,50 @@ const RentalManagementDetailsPage = () => {
       });
   }
 
+  // const checkIsValidRecord = (rowData) => {
+  //   if (rowData?.type === "Product") {
+  //     return (!isNaN(rowData?.finalPrice) && rowData?.finalPrice !== 0)
+  //   }
+  //   else if (rowData?.type === "Package") {
+  //     return true;
+  //   }
+  //   else {
+  //     const parentRecord = dataRows.find(f => f.treeId === rowData?.parent)
+  //     if (parentRecord) {
+  //       return (!isNaN(parentRecord?.finalPrice) && parentRecord?.finalPrice !== 0)
+  //     }
+  //   }
+  // }
+
+  // const restrictToGoNextStep = () => {
+  //   let isValid = false;
+
+  //   dataRows.forEach(rowData => {
+  //     if (rowData?.type === "Product") {
+  //       if (isNaN(rowData?.finalPrice) || rowData?.finalPrice === 0) {
+  //         isValid = false;
+  //         return;
+  //       }
+  //     }
+  //     else if (rowData?.type === "Package") {
+  //       return true;
+  //     }
+  //     else {
+  //       const parentRecord = dataRows.find(f => f.treeId === rowData?.parent)
+  //       if (parentRecord) {
+  //         return (!isNaN(parentRecord?.finalPrice) && parentRecord?.finalPrice !== 0)
+  //       }
+  //     }
+  //   });
+
+  //   return isValid;
+
+  //   if (productInventory.length > 0) {
+  //     console.log(productInventory);
+  //     // !(productInventory.length > 0 ? (productInventory.filter(f => f.type !== "productInPackage").some(f => !f?.hasOwnProperty("finalPrice") || isNaN(f?.finalPrice) || f?.finalPrice === 0) ? false : true) : false)
+  //   }
+  //   return true;
+  // }
 
   return (
     <>
@@ -600,419 +902,402 @@ const RentalManagementDetailsPage = () => {
                   >
 
                     {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
-                        <Button
-                            className="buttonStyleBigScreen"
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={handleOpenUpdateDialog}
-                        >
-                          Edit
-                        </Button>
+                      <Button
+                        className="buttonStyleBigScreen"
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={handleOpenUpdateDialog}
+                      >
+                        Edit
+                      </Button>
                     )}
                     {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
-                        <Button
-                            className="buttonStyleSmallScreen"
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={handleOpenUpdateDialog}
-                        >
-                          <MdEdit size={24} />
-                        </Button>
+                      <Button
+                        className="buttonStyleSmallScreen"
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={handleOpenUpdateDialog}
+                      >
+                        <MdEdit size={24} />
+                      </Button>
                     )}
 
                     <HideWhenOffline>
                       {permissions?.rentalManagement?.isDelete &&
-                      rentalManagementData?.owner?.optionValue &&
-                      user?.user?._id &&
-                      rentalManagementData.owner.optionValue === user.user._id ? (
-                          <DeleteButton
-
-                              text="Delete"
-                              className={"buttonDeleteBigScreen"}
-                              onClick={() => setShowConfirmBox(true)}
-                          />
+                        rentalManagementData?.owner?.optionValue &&
+                        user?.user?._id &&
+                        rentalManagementData.owner.optionValue === user.user._id ? (
+                        <DeleteButton
+                          text="Delete"
+                          className="buttonDeleteBigScreen"
+                          onClick={() => setShowConfirmBox(true)}
+                        />
                       ) : null}
                     </HideWhenOffline>
                     <HideWhenOffline>
                       {permissions?.rentalManagement?.isDelete &&
-                      rentalManagementData?.owner?.optionValue &&
-                      user?.user?._id &&
-                      rentalManagementData.owner.optionValue === user.user._id ? (
-                          <Button
-                              className="buttonDeleteSmallScreen"
-                              onClick={() => setShowConfirmBox(true)}
-                          >
-                            <MdDelete size={24}/>
-                          </Button>
+                        rentalManagementData?.owner?.optionValue &&
+                        user?.user?._id &&
+                        rentalManagementData.owner.optionValue === user.user._id ? (
+                        <Button
+                          className="buttonDeleteSmallScreen"
+                          onClick={() => setShowConfirmBox(true)}
+                        >
+                          <MdDelete size={24} />
+                        </Button>
                       ) : null}
                     </HideWhenOffline>
                   </DetailsPageHeader>
                 )}
 
-                <Box>
-                  {loadingDetails || !rentalManagementFields.length ? (
-                    <Grid container spacing={2} style={{ padding: "8px" }}>
-                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                    </Grid>
-                  ) : (
-                    <>
-                      {
-                        isInOfflineSaveQueue && <div className="px-3">
-                          <Alert variant="filled" severity="info">Updates are in offline state, it will be affected once you will be in network</Alert>
+
+
+
+
+                <Tabs
+                  className="quote-tab"
+                  value={tabValue}
+                  onChange={handleMainTabChange}
+                  textColor="primary"
+                  TabIndicatorProps={{
+                    style: {
+                      display: 'none'
+                    }
+                  }}
+                >
+                  {/* <Tab
+                        className={"tabLayout"}
+                      style={{
+                        background: tabValue === 0 ? "white" : "",
+                        color: tabValue === 0 ? "blue" : "#163340",
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font ">
+                          <InfoIcon className="mr-1" fontSize="inherit" /> All
+                          Version Status
                         </div>
                       }
+                      {...a11yProps(0)}
+                    /> */}
+                  <Tab
+                    className={'tabLayout'}
+                    style={{
+                      background: tabValue === 1 ? 'white' : '',
+                      color: tabValue === 1 ? '#163340' : '#163340'
+                    }}
+                    label={
+                      <div className="d-flex align-items-center tab-font">
+                        <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                      </div>
+                    }
+                    {...a11yProps(0)}
+                  />
+                  <Tab
+                    className={'tabLayout'}
+                    style={{
+                      background: tabValue === 2 ? 'white' : '',
+                      color: tabValue === 2 ? 'blue' : '#163340'
+                    }}
+                    label={
+                      <div className="d-flex align-items-center tab-font">
+                        <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                      </div>
+                    }
+                    {...a11yProps(1)}
+                  />
+                  <div className={'uio'}> </div>
+                </Tabs>
 
-                      <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
-                    </>
-                  )}
-                </Box>
+
+                <TabPanel value={tabValue} index={0}>
+                  <Box>
+                    {loadingDetails || !rentalManagementFields.length ? (
+                      <Grid container spacing={2} style={{ padding: "8px" }}>
+                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                      </Grid>
+                    ) : (
+                      <>
+                        {
+                          isInOfflineSaveQueue && <div className="px-3">
+                            <Alert variant="filled" severity="info">Updates are in offline state, it will be affected once you will be in network</Alert>
+                          </div>
+                        }
+
+                        <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
+                      </>
+                    )}
+                  </Box>
+                </TabPanel>
+
+                <TabPanel value={tabValue} index={1}>
+                  <Paper>
+                    <Steps
+                      className={styles.steps_box}
+                      isNextStep={treeToFlatArray(dataRows, "subRows").some(f => f.isValid === false)}
+                      nextStep={nextStep}
+                      steps={rentalProcessSteps.slice(0, 5)}
+                      currentStep={currentStep}
+                      setCurrentStep={setCurrentStep}
+                    />
+                    {(currentStep === 0) && (
+                      <>
+                        <Box display="flex" justifyContent="space-between" m={1}>
+                          <Box display="flex" alignItems="center">
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              size="small"
+                              onClick={() => {
+                                setAddExistingProductDialog({ open: true, type: "product" });
+                              }}
+                            >
+                              {`Add ${routes.product.title}`}
+                            </Button>
+                            <Box mx={1} />
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              size="small"
+                              onClick={() => {
+                                setAddExistingProductDialog({ open: true, type: "package" });
+                              }}
+                            >
+                              {`Add ${routes.packages.title}`}
+                            </Button>
+                          </Box>
+                          <Box display="flex">
+                            <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
+                              <span>
+                                <Button
+                                  variant="contained"
+                                  color="primary"
+                                  size="small"
+                                  disabled={!Boolean(selectedProducts && selectedProducts.length)}
+                                  onClick={() => setIsProductEdit(true)}
+                                >
+                                  Bulk Edit
+                                </Button>
+                              </span>
+                            </HtmlTooltip>
+                            <Box mx={1} />
+                            <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Delete selected records" : "Select records to delete"}>
+                              <span>
+
+                                <Button
+                                  variant="contained"
+                                  color="primary"
+                                  size="small"
+                                  disabled={!Boolean(selectedProducts && selectedProducts.length) || isDeleting}
+                                  onClick={() => {
+                                    const dataToDelete = selectedProducts && selectedProducts.map((rec: any) => {
+                                      const obj: any = {};
+
+                                      obj.id = rec._id ?? rec.id;
+                                      obj.type = rec?.type.toLowerCase();
+                                      if (rec?.type === "productInPackage") {
+                                        obj.packageId = rec.packageId
+                                      }
+
+                                      return obj
+                                    })
+                                    setDeleteData(dataToDelete)
+                                  }}
+
+                                  endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
+                                >
+                                  Delete
+                                </Button>
+                              </span>
+                            </HtmlTooltip>
+                          </Box>
+                        </Box>
+                        {columns ?
+                          <>
+                            {/* <CustomAgGridEditable
+                        columns={columns}
+                        dataRows={dataRows}
+                        frameworkComponents={frameworkComponents}
+                        setGridApi={setGridApi}
+                        dispatch={dispatch}
+                        rowCount={rowCount}
+                        limit={limit}
+                        pageSizes={pageSizes}
+                        page={page}
+                        actionWidth={150}
+                        allowAction={true}
+                        loading={loading}
+                        onCellValueChanged={(row) => { updateProductData(row.data) }}
+                        renderedFrom="rentalManagementDetailsPageInventory"
+                        refreshGrid={fetchProductInventory}
+                      /> */}
+                            <Box
+                              p="6px"
+                              zIndex={5}
+                              width={
+                                isTabletScreen
+                                  ? "calc(100vw - 20px)"
+                                  : isSmallScreen
+                                    ? "calc(100vw - 78px)"
+                                    : showActivity ? "100%" : "calc(100vw - 100px)"
+                              }
+                              height="calc(100vh - 330px)"
+                            >
+                              <CustomReactTable
+                                height="calc(100vh - 345px)"
+                                columns={columns}
+                                data={dataRows}
+                                rowStyle={(rowData) => ({
+                                  color: "black",
+                                  backgroundColor: rowData.isValid ? "white" : "#EFCCCC"
+                                })}
+                                onSelect={setSelectedProducts}
+                                childrenProperty="subRows"
+                                uniqueKey="id"
+                              />
+
+
+                              {/* <MaterialTableComponent
+                                // calculatePricing={calculatePricing}
+                                columns={columns}
+                                rowData={dataRows}
+                                title={""}
+                                rowStyle={(rowData) => ({
+                                  color: "black",
+                                  backgroundColor: rowData?.type?.includes("roduct") && rowData?.finalPrice === 0 ? "#EFCCCC" : "white"
+                                })}
+                                loading={loading || isUpdating}
+                                onSelection={(d) => setSelectedProducts(d)}
+                                // parentChildData={(row, rows) => {
+                                //   return rows.find((a) => a.id === row.packageId)
+                                // }}
+                                cellEditable={{
+                                  onCellEditApproved: (newValue, oldValue, rowData, columnDef) => {
+                                    return new Promise((resolve, reject) => {
+                                      rowData[columnDef.field] = parseInt(newValue)
+                                      handleSingleEdit(rowData)
+
+                                      setTimeout(resolve, 100)
+                                    });
+                                  }
+                                }}
+                              // onRowClick={(rowData) => {
+                              //   setIsProductEdit(true)
+                              //   setRecordToUpdate(rowData)
+                              // }}
+                              /> */}
+
+                            </Box>
+
+                          </>
+                          : <Box
+                            p={2}
+                            height={500}
+                            bgcolor="white">
+                            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                          </Box>
+                        }
+                      </>
+                    )}
+                    {(currentStep === 1) && (
+                      <div className="mx-2">
+                        <div className="d-flex justify-content-end mb-2">
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            className={styles.add_submit_btn}
+                            onClick={() => {
+                              setShowManageAdditionalCostDialog({
+                                open: true,
+                                isNew: true,
+                                record: { "id": "", "description": "", "uom": "", "qty": 0, "type": "", "amount": 0 },
+                              })
+                            }}
+                            startIcon={<AddOutlined />}
+                          >
+                            Add
+                          </Button>
+                        </div>
+                        <CustomAgGrid
+                          columns={[
+                            { field: "type", headerName: "Cost Type", show: true, disabled: true, cellRenderer: "typeRenderer" },
+                            { field: "description", headerName: "Description", show: true, disabled: true },
+                            { field: "qty", headerName: "Quantity", show: true, disabled: true },
+                            { field: "uom", headerName: "Unit of Measure", show: true, disabled: true },
+                            { field: "amount", headerName: `Amount (${currencySymbol})`, show: true, disabled: true },
+                          ]}
+                          dataRows={additionalCost}
+                          frameworkComponents={rentalJobFrameworkComponents}
+                          setGridApi={setGridApi}
+                          dispatch={dispatch}
+                          rowCount={rowCount}
+                          limit={limit}
+                          pageSizes={pageSizes}
+                          page={page}
+                          actionWidth={150}
+                          allowSelection={false}
+                          allowAction={true}
+                          loading={loading}
+                          isClientSideGrid={true}
+                          // onCellValueChanged={(row) => { updateProductData(row.data) }}
+                          renderedFrom="rental_job_additional_cost"
+                          refreshGrid={() => { }}
+                        />
+                      </div>
+
+                    )}
+                    {(currentStep === 2) && (
+                      <SerializedAssetStep
+                        rentalManagementId={id}
+                        productInventory={[
+                          ...productInventory,
+                          ...serializeAssets
+                        ]}
+                        fetchProductsData={fetchProductInventory}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        currentStep={currentStep}
+                        currencySymbol={currencySymbol}
+                        loading={loading}
+                        serializeAssets={serializeAssets}
+                        setNextStep={setNextStep}
+                      />
+                    )}
+                    {(currentStep === 3) && (
+                      <DeliveryTicket
+                        fetchRentalData={fetchRentalManagementData}
+                        rentalManagementData={rentalManagementData}
+                        rentalManagementId={id}
+                        warehouselist={warehouseList}
+                        productInventory={serializeAssets}
+                        currentStep={currentStep}
+                        handleDeliveryTicketDialog={handleDeliveryTicketDialog}
+                      />
+                    )}
+                    {(currentStep === 4 || currentStep === 5) && (
+                      <ReceivingTicket
+                        rentalManagementId={id}
+                        productInventory={productInventory}
+                        currentStep={currentStep}
+                        handleReceivingTicketDialog={handleReceivingTicketDialog}
+                      />
+                    )}
+                  </Paper>
+                </TabPanel>
+
+
+
               </Paper>
             </div>
             <Box my={1} />
-            <Paper>
-              <Steps
-                className={styles.steps_box}
-                isNextStep={!Boolean(productInventory.length)}
-                steps={rentalProcessSteps.slice(0, 5)}
-                currentStep={currentStep}
-                setCurrentStep={setCurrentStep}
-              />
-              {(currentStep === 0) && (
-                <>
-                  <Box display="flex" justifyContent="space-between" m={1}>
-                    <Box display="flex">
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          setAddExistingProductDialog(true);
-                          setInventoryType("product")
-                        }}
-                      >
-                        {`Add ${routes.product.title}`}
-                      </Button>
-                      <Box mx={1} />
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          setAddExistingProductDialog(true);
-                          setInventoryType("package")
-                        }}
-                      >
-                        {`Add ${routes.packages.title}`}
-                      </Button>
-                    </Box>
-                    <Box display="flex">
-                      <HtmlTooltip title={Boolean(selectedRecords.length) ? "Buld edit selected records" : "Select records to edit"}>
-                        <span>
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            disabled={!Boolean(selectedRecords.length)}
-                            onClick={() => setBulkEdit(true)}
-                          >
-                            Bulk Edit
-                          </Button>
-                        </span>
-                      </HtmlTooltip>
-                      <Box mx={1} />
-                      <HtmlTooltip title={Boolean(selectedRecords.length) ? "Delete selected records" : "Select records to delete"}>
-                        <span>
 
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            disabled={!Boolean(selectedRecords.length) || isDeleting}
-                            onClick={() => {
-                              const dataToDelete = selectedRecords.map(rec => ({
-                                id: rec._id ?? rec.id,
-                                type: rec.type.toLowerCase()
-                              }))
-                              setDeleteData(dataToDelete)
-                            }}
-
-                            endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
-                          >
-                            Delete
-                          </Button>
-                        </span>
-                      </HtmlTooltip>
-                    </Box>
-                  </Box>
-                  {columns ?
-                    <CustomAgGridEditable
-                      columns={columns}
-                      dataRows={dataRows}
-                      frameworkComponents={frameworkComponents}
-                      setGridApi={setGridApi}
-                      dispatch={dispatch}
-                      rowCount={rowCount}
-                      limit={limit}
-                      pageSizes={pageSizes}
-                      page={page}
-                      actionWidth={150}
-                      allowAction={true}
-                      loading={loading}
-                      onCellValueChanged={(row) => { updateProductData(row.data) }}
-                      renderedFrom="rentalManagementDetailsPageInventory"
-                      refreshGrid={fetchProductInventory}
-                    />
-                    : <Box
-                      p={2}
-                      height={500}
-                      bgcolor="white">
-                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                    </Box>
-                  }
-                </>
-              )}
-              {(currentStep === 1) && (
-                <Formik
-                  initialValues={{ additionalCost: additionalCost || [{ "id": "", "description": "", "uom": "", "qty": 0, "type": "", "amount": 0 }] }}
-                  enableReinitialize={true}
-                  onSubmit={() => { }}>
-                  {({ values }) => (
-                    <>
-                      <Form>
-                        {setAdditionalCost(values.additionalCost)}
-                        <Container className="p-0">
-                          <Grid
-                            container
-                            direction="row"
-                            justify="space-evenly"
-                            alignItems="center"
-                          >
-                            <Grid item md={12}>
-                              {values.additionalCost && values.additionalCost.length > 0 && (
-
-                                <Box className={""}>
-                                  <Grid
-                                    container
-                                    spacing={2}
-                                    direction="row"
-                                    justify="flex-start"
-                                    alignItems="center"
-                                  >
-                                    <Grid item md={1}> # </Grid>
-                                    <Grid item md={2}> Cost Type </Grid>
-                                    <Grid item md={2}> Description </Grid>
-                                    <Grid item md={2}> Quantity </Grid>
-                                    <Grid item md={2}> Unit of Measure </Grid>
-                                    <Grid item md={2}> Amount </Grid>
-                                    <Grid item md={1}></Grid>
-
-                                  </Grid>
-                                </Box>
-                              )}
-                              <Box className="p-1">
-                                <FieldArray
-                                  name="additionalCost"
-                                  render={arrayHelpers => (
-                                    <div>
-                                      {values.additionalCost && values.additionalCost.length > 0 ? (
-                                        values.additionalCost.map((userVal, index) => (
-                                          <Grid
-                                            container
-                                            spacing={2}
-                                            direction="row"
-                                            justify="flex-start"
-                                            alignItems="center"
-                                            key={index}
-                                          >
-                                            <Grid item md={1}>{index + 1}</Grid>
-                                            <Grid item md={2}>
-                                              <Autocomplete
-                                                size="small"
-                                                style={{ minWidth: 200 }}
-                                                value={userVal.type}
-                                                options={costTypeList}
-                                                getOptionLabel={(option: any) => option ? option : ""}
-                                                onChange={(_, newValue) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.additionalCost[index],
-                                                    ["type"]: newValue,
-                                                  });
-                                                }}
-
-                                                renderInput={(params) => <TextField
-                                                  {...params}
-                                                  variant="outlined"
-                                                  name="nameField"
-                                                  label="Cost Type"
-                                                />}
-                                              />
-                                            </Grid>
-                                            <Grid item md={2}>
-                                              <Field
-                                                fullWidth
-                                                variant="outlined"
-                                                type="text"
-                                                size="small"
-                                                component={TextField}
-                                                name="description"
-                                                placeholder="Description"
-                                                value={userVal.description}
-                                                onChange={(e) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.additionalCost[index],
-                                                    ["description"]: e.target.value
-                                                  })
-                                                }}
-                                              />
-                                            </Grid>
-                                            <Grid item md={2}>
-                                              <Field
-                                                fullWidth
-                                                variant="outlined"
-                                                type="text"
-                                                size="small"
-                                                component={TextField}
-                                                name="Quantity"
-                                                placeholder="Quantity"
-                                                value={userVal.qty}
-                                                onChange={(e) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.additionalCost[index],
-                                                    ["qty"]: e.target.value.replace(/[^0-9]/g, '')
-                                                  })
-                                                }}
-                                              />
-                                            </Grid>
-                                            <Grid item md={2}>
-                                              <Autocomplete
-                                                size="small"
-                                                style={{ minWidth: 200 }}
-                                                value={userVal.uom}
-                                                freeSolo
-                                                autoSelect
-                                                options={uomTypeList}
-                                                getOptionLabel={(option: any) => option ? option : ""}
-                                                onChange={(_, newValue) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.additionalCost[index],
-                                                    ["uom"]: newValue,
-                                                  });
-                                                }}
-
-                                                renderInput={(params) => <TextField
-                                                  {...params}
-                                                  variant="outlined"
-                                                  name="nameField"
-                                                  label="UOM"
-                                                />}
-                                              />
-                                            </Grid>
-                                            {
-                                              <Grid item md={2}>
-                                                <Field
-                                                  fullWidth
-                                                  InputProps={{
-                                                    startAdornment: (
-                                                      <InputAdornment position="start">
-                                                        {currencySymbol ? currencySymbol : ""}
-                                                      </InputAdornment>
-                                                    ),
-                                                  }}
-                                                  startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ""}
-                                                  variant="outlined"
-                                                  type="text"
-                                                  size="small"
-                                                  component={TextField}
-                                                  name="amount"
-                                                  placeholder="Enter Amount"
-                                                  value={userVal.amount}
-                                                  onChange={(e) => {
-                                                    arrayHelpers.replace(index, {
-                                                      ...values.additionalCost[index],
-                                                      ["amount"]: e.target.value.replace(/[^0-9]/g, '')
-                                                    })
-                                                  }}
-                                                />
-                                              </Grid>
-                                            }
-                                            <Grid item md={1}>
-                                              <ButtonGroup size="small" aria-label="small outlined button group">
-                                                <IconButton
-                                                  size="small"
-                                                  aria-label="add"
-                                                  onClick={() => {
-                                                    arrayHelpers.push({
-                                                      "id": "", "description": "", "uom": "", "qty": "", "type": "", "amount": 0
-                                                    })
-                                                  }
-                                                  } >
-                                                  <Add />
-                                                </IconButton>
-                                                <IconButton size="small" aria-label="delete" style={{ color: "#f44336" }} onClick={() => arrayHelpers.remove(index)} >
-                                                  <Delete />
-                                                </IconButton>
-                                              </ButtonGroup>
-                                            </Grid>
-                                          </Grid>
-                                        ))
-                                      ) : (
-                                        <Grid item md={12} className="d-flex  align-items-center justify-content-center">
-                                          <Button
-                                            variant="contained"
-                                            color="primary"
-                                            size="large"
-                                            onClick={() => {
-                                              arrayHelpers.push({ "id": "", "description": "", "uom": "", "qty": "", "type": "", "amount": 0 })
-                                            }}
-                                          >
-                                            Add Cost Type
-                                          </Button>
-                                        </Grid>
-                                      )}
-                                    </div>
-                                  )}
-                                />
-                              </Box>
-                            </Grid>
-                          </Grid>
-                        </Container>
-                      </Form>
-                    </>
-                  )}
-                </Formik>
-
-              )}
-              {(currentStep === 2) && (
-                <SerializedAssetStep
-                  rentalManagementId={id}
-                  productInventory={productInventory}
-                  currentStep={currentStep}
-                />
-              )}
-              {(currentStep === 3) && (
-                <DeliveryTicket
-                  rentalManagementId={id}
-                  warehouselist={warehouseList}
-                  productInventory={productInventory}
-                  currentStep={currentStep}
-                  handleDeliveryTicketDialog={handleDeliveryTicketDialog}
-                />
-              )}
-              {(currentStep === 4 || currentStep === 5) && (
-                <ReceivingTicket
-                  rentalManagementId={id}
-                  productInventory={productInventory}
-                  currentStep={currentStep}
-                  handleReceivingTicketDialog={handleReceivingTicketDialog}
-                />
-              )}
-            </Paper>
           </div>
           <div className="position-relative">
             <HideWhenOffline>
-              {showActivity ?
+              {/* {showActivity ?
                 <Paper>
                   {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                     <IoIosArrowDropright className="icon" />
@@ -1048,7 +1333,44 @@ const RentalManagementDetailsPage = () => {
                 </Paper> :
                 !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
                   <IoIosArrowDropleft className="icon" />
+                </span>} */}
+
+              <Paper>
+                {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
+                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
                 </span>}
+                <div style={{ display: showActivity ? "block" : "none" }}>
+
+                  <Grid container>
+                    <Grid item xs={12}>
+                      {rentalManagementData && (
+                        <div>
+                          <Activity
+                            resourceId={rentalManagementData._id}
+                            resource={rentalManagement.resource}
+                            restrictedAddActivities={
+                              permissions &&
+                                permissions["rentalManagement"] &&
+                                permissions["rentalManagement"].isUpdate
+                                ? []
+                                : ["Attachment", "Case"]
+                            }
+                            relatedTo={[
+                              {
+                                type: rentalManagement,
+                                referenceId: rentalManagementData._id,
+                                access: true,
+                              },
+                            ]}
+                            handleActivityRefresh={() => { }}
+                            emails={[]}
+                          />
+                        </div>
+                      )}
+                    </Grid>
+                  </Grid>
+                </div>
+              </Paper>
             </HideWhenOffline>
           </div>
         </div>
@@ -1065,13 +1387,13 @@ const RentalManagementDetailsPage = () => {
           onOk={handleDelete}
         />
       )}
-      {addExistingProductDialog &&
+      {addExistingProductDialog.open &&
         <AddExistingProductInventory
           isAddingProducts={isAddingProducts}
           addProductInventory={handleAddProductInventory}
-          handleProductInventoryClose={() => { setAddExistingProductDialog(false) }}
+          handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "" }) }}
           productInventory={productInventory}
-          type={inventoryType}
+          type={addExistingProductDialog.type}
         />
       }
       {
@@ -1123,13 +1445,69 @@ const RentalManagementDetailsPage = () => {
         onOk={() => handleRemoveProductInventory(deleteData)}
         okBtnLoading={isDeleting}
       />}
-      {isBulkEdit &&
+      {Boolean(packageForProducts)
+        && <PackageProductsDialog
+          rentalId={id}
+          packageId={packageForProducts?.id}
+          products={packageForProducts?.products.map(p => p.id)}
+          onClose={() => setPackageForProducts(null)}
+          rentalApi={rentalManagement.rentalManagementApi}
+          onSuccess={() => {
+            setPackageForProducts(null)
+            fetchProductInventory()
+          }}
+        />
+      }
+      {isProductEdit &&
         <BulkEditInventoryDialog
+          calculatePrice={calculatePricing}
+          startDate={rentalManagementData.rentalStartDate}
+          endDate={rentalManagementData.rentalEndDate}
           isSaving={isUpdating}
-          onClose={() => setBulkEdit(false)}
-          submitBulkEdit={bulkEditData}
+          onClose={() => {
+            setIsProductEdit(false)
+            setRecordToUpdate(null)
+          }}
+          submitBulkEdit={recordToUpdate ? handleSingleEdit : handleBulkEditData}
           currencySymbol={currencySymbol}
+          data={recordToUpdate}
+          selectedProducts={selectedProducts}
         />}
+      {
+        showManageAdditionalCostDialog.open && showManageAdditionalCostDialog.record !== null && <ManageAdditionalCostDialog
+          open={showManageAdditionalCostDialog.open}
+          isNew={showManageAdditionalCostDialog.isNew}
+          record={showManageAdditionalCostDialog.record}
+          onClose={() => {
+            setShowManageAdditionalCostDialog({
+              open: false,
+              isNew: false,
+              record: null
+            })
+          }}
+          onSubmit={(values) => {
+            if (showManageAdditionalCostDialog.isNew) {
+              if (additionalCost) {
+                setAdditionalCost(prevState => [...prevState, { ...values, id: generateUniqueId() }])
+              } else {
+                setAdditionalCost([{ ...values, id: generateUniqueId() }]);
+              }
+            }
+            else {
+              setAdditionalCost(prevState => prevState.map(item => item.id === values.id ? { ...item, ...values } : item))
+            }
+
+            setShowManageAdditionalCostDialog({
+              open: false,
+              isNew: false,
+              record: null
+            })
+          }}
+          currencySymbol={currencySymbol}
+          costTypeList={costTypeList}
+          uomTypeList={uomTypeList}
+        />
+      }
     </>
   );
 };

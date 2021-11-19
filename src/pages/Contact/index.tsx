@@ -11,6 +11,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import CustomContainer from '../../components/CustomContainer';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import styles from '../Leads/Header.module.scss';
+import style from "./contact.module.scss"
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
@@ -454,7 +455,7 @@ export default function Contact(props) {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -605,12 +606,12 @@ export default function Contact(props) {
         <div className={`${contactClass['contact_header_inner_container']}`}>
           <Grid container className="header-panel" justify="space-between" alignContent="center">
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-              <Grid container>
-                <Grid item md={4} sm={4} xs={12} className="d-flex align-items-center gap-1" >
+              <Grid container className="gap-1">
+                <Grid  className="d-flex align-items-center gap-1" >
                   <MdContacts className="headerLogo" />
                   <span id="resourceHeader" className="listingHeader">{routes[contactResource].title}</span>
                 </Grid>
-                <Grid item md={4} sm={4} xs={12}>
+                <Grid >
                   {ContactTypes && (
                     <ToggleButtonGroup id="resourceTypeSelector" size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
                       {ContactTypes.map((k, index) => {
@@ -642,8 +643,10 @@ export default function Contact(props) {
               </Grid>
             </Grid>
             <Grid item md={6} sm={6} xs={12} className={styles.filter_side}>
-              <Box id="resourceOperations" className={styles.filter_side_header} component="div">
-                <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} value={search} size="small" />
+              <Box id="resourceOperations" className={styles.filter_side_header} component="div" style={{flexGrow:1}}>
+                <Grid sm={12} className={styles.search_box_layout} style={{display:"flex" , flexGrow: 1  }} >
+                <SearchBox  style={{flexGrow:1, maxWidth:"400px" }} onSearch={handleSearch} searchbox={styles.search_box_input} value={search} size="small" />
+                </Grid>
                 {contactPermissions.isCreate && (
                   <>
                     <Button

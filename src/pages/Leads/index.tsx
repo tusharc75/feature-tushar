@@ -61,7 +61,7 @@ const Leads = () => {
   });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
-  const { isOffline, offlineGridData, updateOfflineGridData } = useContext(CustomOfflineContext);
+  const { isOffline, offlineGridData, offlineFieldsData, updateOfflineGridData, updateFieldsData } = useContext(CustomOfflineContext);
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -119,35 +119,52 @@ const Leads = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=Lead&entity=${selectedEntity}`)
-      .then(({ data: { data } }) => {
-        let columns = []
-        let rendererNames = []
-        data.forEach(o => {
+  const fetchGridColumns = async () => {
+    let data
+    if (isOffline) {
+      data = offlineFieldsData["lead"] ?? []
+    }
+    else {
+      if (selectedEntity) {
+        const response = await axiosInstance()
+          .get(`/field?resource=Lead&entity=${selectedEntity}`)
 
-          let currentColumn = getColumnData(leadResource, o?.fieldData, leadDetailPage.path)
+        data = response?.data?.data
+      } else {
+        data = [];
+      }
 
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData]
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName)
-            }
-          }
-        })
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          relatedOpportunityRenderer: RelatedOpportunityRenderer,
-          actionsRenderer: ActionsRenderer
+      try {
+        updateFieldsData("lead", data);
+      } catch (ex) {
+        console.error(`Lead: Error while storing data for Offline context. Error: ${ex.message}`)
+      }
+    }
+
+    let columns = []
+    let rendererNames = []
+    data.forEach(o => {
+
+      let currentColumn = getColumnData(leadResource, o?.fieldData, leadDetailPage.path)
+
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData]
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName)
         }
-        setFrameWorkComponent({ ...tempFrameworkComponent })
-        columns = [...columns,
-        { field: 'relatedOpportunity', headerName: 'Related Opportunity', show: true, cellRenderer: 'relatedOpportunityRenderer' },
-        ...getStaticFields()]
-        setColumns([...columns])
-      })
+      }
+    })
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      relatedOpportunityRenderer: RelatedOpportunityRenderer,
+      actionsRenderer: ActionsRenderer
+    }
+    setFrameWorkComponent({ ...tempFrameworkComponent })
+    columns = [...columns,
+    { field: 'relatedOpportunity', headerName: 'Related Opportunity', show: true, cellRenderer: 'relatedOpportunityRenderer' },
+    ...getStaticFields()]
+    setColumns([...columns])
   }
 
   const RelatedOpportunityRenderer = (params) => (
@@ -234,7 +251,7 @@ const Leads = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {

@@ -3,8 +3,7 @@ import { Toolbar, Box, makeStyles, withWidth } from "@material-ui/core";
 import { motion } from "framer-motion";
 import { useLocation, useHistory } from "react-router-dom";
 import Joyride, { CallBackProps, STATUS, StoreHelpers, EVENTS, ACTIONS, LIFECYCLE } from 'react-joyride';
-
-
+import { isMobile } from 'react-device-detect'
 import Sidebar from "./Sidebar/Sidebar";
 import GlobalUserChat from "./GlobalUserChat";
 import { useData } from "../StateProvider/Provider";
@@ -30,14 +29,28 @@ const useStyles = makeStyles(() => ({
 
 const Layout = ({ children, width }) => {
   const contentRef = useRef(null);
+  const bodyRef = useRef(null);
   const { key, pathname } = useLocation();
   const classes = useStyles();
   const [toggleDrawer, setToggleDrawer] = useState<Boolean>(false);
   const { state: { tour }, dispatch } = useData()
 
+  const [showChat, setShowChat] = useState({ show: true, oldScrollPosition: 0 });
+
   const mobileWidths = ["xs", "sm"];
 
   const handleToggleState = () => toggleDrawer && setToggleDrawer(false);
+
+  const onScroll = (e) => {
+    if (isMobile) {
+      const currentPosition = e.target?.scrollTop ?? 0
+      if ((currentPosition - showChat.oldScrollPosition) > 10) {
+        setShowChat({ show: false, oldScrollPosition: currentPosition })
+      } else if (currentPosition <= showChat.oldScrollPosition) {
+        setShowChat({ show: true, oldScrollPosition: currentPosition })
+      }
+    }
+  }
 
   useEffect(() => {
     contentRef.current.scrollIntoView({
@@ -201,12 +214,15 @@ const Layout = ({ children, width }) => {
           className={classes.content}
           onClick={handleToggleState}
         >
-          <div className={classes.layout}>
+          <div className={classes.layout} ref={bodyRef} onScroll={onScroll}>
             {children}
           </div>
         </motion.div>
       </Box>
-      <GlobalUserChat />
+      {
+        showChat.show && <GlobalUserChat />
+      }
+
     </div>
   );
 };

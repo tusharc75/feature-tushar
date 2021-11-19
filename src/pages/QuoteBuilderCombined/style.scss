@@ -25,6 +25,12 @@
     color: #378280 !important;
     opacity: 1;
     font-Size: 12px;
+    .MuiStepIcon-root.MuiStepIcon-active{
+      font-size: 18px !important;
+      color: #378280 !important
+    }
+
+
       active{
         color: #378280 !important;
       }
@@ -34,6 +40,10 @@
     font-weight: 600 !important;
     font-Size: 12px
   }
+
+}
+.MuiStepLabel-label.MuiStepLabel-completed{
+  color: var(--secondary) !important;
 }
 
 .MuiTab-textColorPrimary.Mui-selected {
@@ -72,6 +82,14 @@
 }
 .setIconForMobile{
   min-width: 40px !important;
+}
+
+.MuiStepIcon-root.MuiStepIcon-completed{
+  color: var(--secondary) !important;
+  font-size: 18px !important;
+}
+.MuiStepIcon-root{
+  font-size: 18px !important;
 }
 @media (max-width: 760px){
   .MuiStepLabel-label{

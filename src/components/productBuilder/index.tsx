@@ -9,7 +9,6 @@ import ProductDialog from "./ProductDialog";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
-import { Link } from "react-router-dom";
 import { ExpandMore } from "@material-ui/icons";
 import { Menu, MenuItem, Dialog, TextField } from "@material-ui/core";
 import { AddField } from "../FormBuilder/AddField";
@@ -142,7 +141,7 @@ const ProductBuilder = (props) => {
       setColumns([...columns])
       dispatch({ type: "initialize", data: rows, count: rows.length });
       setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
-      refreshProducts(data.product);
+      refreshProducts(data);
     })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -201,14 +200,14 @@ const ProductBuilder = (props) => {
   const ProductNameRenderer = (params) => (
     <>
       {Editable ? (
-        <Link
+        <a
           className="link"
           onClick={() => {
             openProductModel(params.data._id);
           }}
         >
           {params.data.srno}
-        </Link>
+        </a>
       ) : (
         <>{params.data.srno}</>
       )}
@@ -233,7 +232,7 @@ const ProductBuilder = (props) => {
               col.width = 180
               col.show = true
               col.leval = ele.leval
-              if (!ele.isFormula && !ele.isUneditable && Editable && ele.leval !== 'product' && ele.leval !== 'product-custom') {
+              if (!ele.isFormula && !ele.isUneditable && Editable) {
                 col.cellRenderer = "commonRenderer";
                 col.cellEditor = "numericCellEditor";
                 col.editable = true;
@@ -256,7 +255,7 @@ const ProductBuilder = (props) => {
                 col.width = 180
                 col.show = true
                 col.leval = ele.leval
-                if (!ele.isFormula && !ele.isUneditable && Editable && ele.leval !== 'product' && ele.leval !== 'product-custom') {
+                if (!ele.isFormula && !ele.isUneditable && Editable) {
                   col.cellRenderer = "commonRenderer";
                   col.cellEditor = "numericCellEditor";
                   col.editable = true;
@@ -279,7 +278,7 @@ const ProductBuilder = (props) => {
               col.width = 180
               col.show = true
               col.leval = ele.leval
-              if (!ele.isFormula && !ele.isUneditable && Editable && ele.leval !== 'product' && ele.leval !== 'product-custom') {
+              if (!ele.isFormula && !ele.isUneditable && Editable) {
                 col.cellRenderer = "commonRenderer";
                 col.cellEditor = "numericCellEditor";
                 col.editable = true;
@@ -295,7 +294,7 @@ const ProductBuilder = (props) => {
         if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
           let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path, true)
           if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
-            if (!ele.isFormula && !ele.isUneditable && Editable && ele.leval !== 'product' && ele.leval !== 'product-custom') {
+            if (!ele.isFormula && !ele.isUneditable && Editable) {
               if (ele.type === "decimal" || ele.type === "percent") {
                 currentColumn.columnData.cellEditor = "numericCellEditor";
               }
@@ -580,16 +579,18 @@ const ProductBuilder = (props) => {
           </Menu>
         </div>
       )}
-      <Box mt={1}>
+      <Box mt={1} >
         {
           isMobile ?
             <CustomSwipableList
+
               allowSelection={Editable}
               allowSwipe={Editable}
               permissions={permissions}
               primaryField={columns?.find(d => d.primaryField)}
               onClick={(data) => {
                 openProductModel(data._id)
+
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
@@ -605,6 +606,14 @@ const ProductBuilder = (props) => {
               rowCount={rowCount}
               page={page}
               loading={loading}
+              checkError={(data) => {
+                if (isPriceBuilder) {
+                  const tsp = data[`totalSalesPrice_${currency}`] || 0;
+                  const qty = data.qty;
+                  return qty === 0 || tsp === 0;
+                }
+                return false;
+              }}
               chips={
                 dataToShowForMobile ? dataToShowForMobile.some(f => f.editable === true) ? [...dataToShowForMobile.filter(f => f.editable === true).map(m => {
                   return {
@@ -628,6 +637,8 @@ const ProductBuilder = (props) => {
                 openProductModel(data._id)
                 setIsClone(true);
               }}
+              fullHeight={true}
+              renderedFrom="productBuilderGrid"
             /> : ((columns && frameWorkComponent) ? <CustomAgGridEditable
               currency={currency}
               forProductBuilder={isPriceBuilder}

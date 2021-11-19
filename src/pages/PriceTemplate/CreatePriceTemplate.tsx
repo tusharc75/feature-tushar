@@ -54,7 +54,7 @@ const PriceTemplate = () => {
   const ref = useRef(null);
 
   const {
-    state: { user, permissions },
+    state: { user, permissions, selectedEntity },
   }: any = useData();
   const [priceTemplatePermissions, setpriceTemplatePermissions] = useState({
     isCreate: false,
@@ -118,7 +118,8 @@ const PriceTemplate = () => {
 
   const fetchOnePriceTemplate = () => {
     if (id === "0") {
-      setInitialValues({ name: "", productTemplate: "", entity: [], owner: user.user._id, collaborator: [] });
+      let entities = selectedEntity ? [selectedEntity] : []
+      setInitialValues({ name: "", productTemplate: "", entity: entities, owner: user.user._id, collaborator: [] });
       setHasPermissionToUpdate(true)
       axiosInstance()
         .get(`/price-template/default-field`)

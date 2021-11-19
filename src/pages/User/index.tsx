@@ -281,7 +281,7 @@ const User: FC = () => {
           term: filters[field].filter
         })
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
     }
 
     if (sorting.length > 0) {
@@ -568,7 +568,7 @@ const User: FC = () => {
           />
         </Dialog>
       )}
-      
+
       <Fragment>
         <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>

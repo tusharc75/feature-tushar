@@ -27,13 +27,15 @@ import InfoIcon from "@material-ui/icons/Info";
 import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialog";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { simplifyValues } from "../../constants/helpers"
-import { isMobile , isTablet } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaDiceOne } from "react-icons/fa";
 interface InitialData {
   fields: any[];
   values: object;
 }
 
-const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = null, projectSalesId = null, fields = null }) => {
+const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = null, projectSalesId = null, fields = null,
+  onSuccess = null, accountId = null, resource = null }) => {
   const {
     state: {
       user: { user }, permissions
@@ -64,7 +66,7 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [formValues, setFormValues] = useState({})
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  
+
   useEffect(() => {
     if (initialData.fields.length > 0) {
       setFormsData(setFieldsInAscendingOrder(initialData.fields));
@@ -85,7 +87,15 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
 
         const filterData = projectSalesId
           ? data.filter((d) => d.isUpdate)
-          : data.filter((d) => d.isCreate);
+          : data.filter((d) => {
+            if (accountId && ["customerAccountName", "supplierAccountName"].some(
+              (_f) => _f === d.fieldData.fieldName
+            )
+            ) {
+              d = initializeDropdownById(d, d.fieldData.fieldName, accountId);
+            }
+            return d.isCreate
+          });
 
 
         // const fieldsData = projectSalesId ?
@@ -203,6 +213,17 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
       axiosInstance()
         .post("/project-Sales", values)
         .then(({ data }) => {
+          if (accountId) {
+            axiosInstance()
+              .put("/project-sales/add-customer-account", {
+                _id: data?.data._id,
+                customerAccount: [accountId]
+              })
+          }
+          if (onSuccess) {
+            onSuccess(data)
+          }
+
           const newId = data.data?._id;
           setSubmitting(false);
           fetchData();
@@ -345,12 +366,17 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
             <>
               <CustomDialogContent>
                 <Form noValidate>
-                  <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                  {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
+
                   {formsData &&
                     formsData.map((form, index1) => {
                       return form.name ? (
                         <div key={index1}>
-                          <h2 className="form-label-style">{form.name}</h2>
+                          <div className={"detail-box-content"}>
+                            <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                            <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                          </div>
+
                           <Box marginY={2}>
                             <Grid spacing={3} container>
                               {form.sectionFields.map((field, index2) => (
@@ -362,15 +388,15 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                                           <Grid
                                             item
                                             xs={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketSegment.isCreate ? 11
                                                 : 11
                                             }
                                             sm={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketSegment.isCreate ? 11
                                                 : 11
                                             }
                                             md={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketSegment.isCreate ? 11
                                                 : 11
                                             }
                                           >
@@ -454,15 +480,15 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                                             <Grid
                                               item
                                               xs={
-                                                permissions.marketSegment.isCreate ? 10
+                                                permissions.marketSegment.isCreate ? 11
                                                   : 11
                                               }
                                               sm={
-                                                permissions.marketSegment.isCreate ? 10
+                                                permissions.marketSegment.isCreate ? 11
                                                   : 11
                                               }
                                               md={
-                                                permissions.marketSegment.isCreate ? 10
+                                                permissions.marketSegment.isCreate ? 11
                                                   : 11
                                               }
                                             >
@@ -647,7 +673,7 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                                                   label={field.fieldLabel}
                                                   name={field.fieldName}
                                                   type={field.type}
-                                                  options={values["entity"] && values["entity"].length !== 0 ?
+                                                  options={values["entity"] && values["entity"].length ?
                                                     field.option.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d)))
                                                     : field.option}
                                                   fullWidth

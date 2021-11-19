@@ -277,7 +277,7 @@ const AddressResource = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -471,7 +471,8 @@ const AddressResource = () => {
         {open?.open && (
           <ManageWarehouse
             addressResource={addressResource}
-            onClose={() => setOpen({ open: false, isClone: false })}
+            open={open?.open}
+            close={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });
               fetchWarehouses();
