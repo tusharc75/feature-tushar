@@ -1158,6 +1158,10 @@ export const generateUniqueId = () => {
   return `id-${new Date().getTime()}`;
 };
 
+export const generateUniqueIdOnly = () => {
+  return new Date().getTime();
+};
+
 export const prepareDataForGrid = (data, user = {}) => {
   let objectValues = {};
   let restProperties = {};

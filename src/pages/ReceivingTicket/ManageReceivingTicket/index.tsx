@@ -10,6 +10,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
+  generateUniqueIdOnly,
   getObjKeys,
   getObjKeysWithValues,
   isFieldNotTouched,
@@ -83,7 +84,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
             tempInitialData["rentalJob"] = rentalData._id
             tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
             tempInitialData["pickupAddress"] = rentalData.shippingAddress
-            tempInitialData["receivingJobName"] = rentalData?.rentalJobName
+            tempInitialData["receivingJobName"] = `${rentalData?.rentalJobName}-${generateUniqueIdOnly()}`
             setReceivingTicketData({
               fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rentalJob"),
               initialValues: tempInitialData,
