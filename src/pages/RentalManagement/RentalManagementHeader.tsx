@@ -56,7 +56,7 @@ function RentalManagementHeader(props) {
 
   } = props;
   return (
-    <Grid className={styles.filter_side_container} container>
+    <Grid container className={styles.rental_header_layout}>
       <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
         {icon} <span className="listingHeader">{heading}</span>
         <HideWhenOffline>
@@ -114,14 +114,15 @@ function RentalManagementHeader(props) {
                     <>
                       <Button
                         disabled={canDelete}
-                        variant="outlined"
+                        variant={isMobile ? "text" : "outlined"}
                         color="default"
                         size="small"
+                        className={isMobile ? "mobile-action-view" : "Des-action"}
                         onClick={openActions}
                         // className={styles.action_submit_btn}
                         aria-controls="action-menu"
                       >
-                        Actions <ExpandMore />
+                        {isMobile ? "" : "Actions"} <ExpandMore />
                       </Button>
                       <Menu
                         anchorEl={anchorEl}

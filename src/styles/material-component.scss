@@ -214,14 +214,14 @@ Button.MuiButtonBase-root:not(.MuiFab-root) {
   }
 
   .MuiStepLabel-label {
-    color: #bab9b9 !important;
+    color: #bab9b9 ;
     font-weight: 500 !important;
     &.MuiStepLabel-completed {
-      color: white !important;
+      color: white ;
     }
 
     &.MuiStepLabel-active {
-      color: var(--primary) !important;
+      color: var(--primary) ;
     }
   }
 

@@ -23,12 +23,17 @@ import { prepareDataForGrid } from "../../constants/helpers"
 import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ResourceTransferDialog from "../../components/ResourceTransferDialog"
+import { isMobile } from 'react-device-detect';
+import { useHistory } from 'react-router-dom'
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 let entityTimeout;
 
 const Entity: FC = () => {
 
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory()
+
   const {
     state: { permissions, user },
   }: any = useData();
@@ -333,7 +338,37 @@ const Entity: FC = () => {
             anyEntitySelected={selectedRecords.length > 0} //single select entity can assign user
           />
         </div>
-        {
+
+        {isMobile ?
+          <CustomSwipableList
+            allowSelection={true}
+            allowSwipe={true}
+            permissions={permissions.entity}
+            primaryField={columns?.find(d => d.field === "entityName")}
+            onClick={(d) => {
+              history.push(`${routes.entityDetail.path}/${d._id}`)
+            }}
+            dataRows={dataRows}
+            selectedRecords={selectedRecords}
+            dispatch={dispatch}
+            onEdit={(d) => {
+              history.push(`${routes.entityDetail.path}/${d._id}`)
+            }}
+            extraParamsToCheckDelete={false}
+            onDelete={(d) => {
+
+            }}
+            rowCount={rowCount}
+            page={page}
+            loading={loading}
+            additionalDetails={[]}
+            chips={[]}
+            owerCollaboratorInitialsOrImages=""
+            onCreate={() => { }}
+            showClone={false}
+            onClone={() => { }}
+            renderedFrom={"entity"} />
+          :
           Object.keys(frameWorkComponent).length > 0 ?
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameWorkComponent} setGridApi={setGridApi}
               dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
@@ -342,38 +377,42 @@ const Entity: FC = () => {
             /> : null
         }
 
-        {isOpen?.open && (
-          <ManageEntity
-            open={isOpen}
-            close={handleClose}
-            fetchData={fetchEntity}
-            isNew={true}
-            entityId={isOpen?.entityId}
-            isClone={isOpen?.isClone}
-          />
-        )}
-        {usersDialogOpen && !usersDialogLoding && (
-          <Dialog
-            fullWidth
-            maxWidth="sm"
-            open={usersDialogOpen}
-            onClose={handleCloseDialog}
-            aria-labelledby="assign-roles-dialog"
-          >
-            <AssignUsersDialog
-              entitiesDialogOpen={usersDialogOpen}
-              handleCloseDialog={handleCloseDialog}
-              type="user"
-              ids={selectedEntity ? [selectedEntity] : selectedRecords.map(rec => rec._id)}
-              assignedEntity={users}
-              regionalRole={false}
-              onSuccess={() => {
-                setSelectedEntity(null)
-                handleCloseDialog();
-              }}
+        {
+          isOpen?.open && (
+            <ManageEntity
+              open={isOpen}
+              close={handleClose}
+              fetchData={fetchEntity}
+              isNew={true}
+              entityId={isOpen?.entityId}
+              isClone={isOpen?.isClone}
             />
-          </Dialog>
-        )}
+          )
+        }
+        {
+          usersDialogOpen && !usersDialogLoding && (
+            <Dialog
+              fullWidth
+              maxWidth="sm"
+              open={usersDialogOpen}
+              onClose={handleCloseDialog}
+              aria-labelledby="assign-roles-dialog"
+            >
+              <AssignUsersDialog
+                entitiesDialogOpen={usersDialogOpen}
+                handleCloseDialog={handleCloseDialog}
+                type="user"
+                ids={selectedEntity ? [selectedEntity] : selectedRecords.map(rec => rec._id)}
+                assignedEntity={users}
+                regionalRole={false}
+                onSuccess={() => {
+                  setSelectedEntity(null)
+                  handleCloseDialog();
+                }}
+              />
+            </Dialog>
+          )
+        }
         {
           showDeleteDialog ?
             <ResourceTransferDialog

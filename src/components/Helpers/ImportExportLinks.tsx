@@ -139,6 +139,7 @@ export default function ImportExportLinks({ ids = [], permissions, module, api,
         exportSelectedRecords()
         return
       }
+
       exportApi = exportApi + `&ids=${JSON.stringify(ids)}`
     }
     axiosInstance()
@@ -229,7 +230,7 @@ export default function ImportExportLinks({ ids = [], permissions, module, api,
           className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}
         >
           Export to Excel {
-            isExportAllOrSomeFeature ? ((recordsToExport === 0 || recordsToExport === total) ? "(All)" : `(${recordsToExport})`)
+            isExportAllOrSomeFeature ? ((recordsToExport === 0 || recordsToExport === total) ? "(All)" : "(Selected)")
               : null
           }
         </label>
@@ -275,7 +276,7 @@ export default function ImportExportLinks({ ids = [], permissions, module, api,
             handleClose();
           }}
         >
-          Export to Excel ({recordsToExport === 0 ? "All" : recordsToExport})
+          Export to Excel ({recordsToExport === 0 ? "All" : "Selected"})
         </MenuItem>
         <MenuItem
           onClick={() => {

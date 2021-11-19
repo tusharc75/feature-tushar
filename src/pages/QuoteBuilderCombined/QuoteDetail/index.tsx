@@ -184,6 +184,7 @@ export default function QuoteDetail() {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [isQuoteClone, setIsQuoteClone] = useState(false);
   const [columnView, setColumnView] = useState([]);
+  const [columnViewExcel, setColumnViewExcel] = useState([]);
   const [steps, setSteps] = useState([]);
   const [productBuilderId, setProductBuilderId] = useState('');
   const [versionStatus, setVersionStatus] = useState('Building Quote');
@@ -241,8 +242,9 @@ export default function QuoteDetail() {
   }, [id]);
 
   useEffect(() => {
-    if (quoteData && quoteData.versions[currentVersion]?.acceptedColumns) {
-      setColumnView(quoteData.versions[currentVersion].acceptedColumns);
+    if (quoteData && (quoteData.versions[currentVersion]?.acceptedColumns || quoteData.versions[currentVersion]?.excelColumns)) {
+      setColumnView(quoteData.versions[currentVersion]?.acceptedColumns);
+      setColumnViewExcel(quoteData.versions[currentVersion]?.excelColumns);
     }
   }, [currentVersion]);
 
@@ -379,6 +381,7 @@ export default function QuoteDetail() {
               setProductBuilderId(data.versions[keys[keys.length - 1]].productBuilderId);
               setVersionStatus(data.versions[keys[keys.length - 1]].status);
               setColumnView(data.versions[keys[keys.length - 1]].acceptedColumns || []);
+              setColumnViewExcel(data.versions[keys[keys.length - 1]].excelColumns || []);
               dispatch({ type: 'selection', selectedRecords: data.versions[keys[keys.length - 1]].TNC });
             } else {
               tempCurrentVersion = version
@@ -387,10 +390,11 @@ export default function QuoteDetail() {
               setProductBuilderId(data.versions[version].productBuilderId);
               setVersionStatus(data.versions[version].status);
               setColumnView(data.versions[version].acceptedColumns || []);
+              setColumnViewExcel(data.versions[version].excelColumns || []);
               dispatch({ type: 'selection', selectedRecords: data.versions[version].TNC });
             }
             setCustomizedRoutes([{ title: routes.quoteBuilder.title, path: routes.quoteBuilder.path },
-            { title: `${data?.quoteName} (${tempCurrentVersion})`, hasOnClick: true }]);
+            { title: `${data?.quoteName} (V-${tempCurrentVersion})`, hasOnClick: true }]);
 
             if (isAllowedToEdit && openEdit === 'true') {
               setOpenUpdateDialog(true);
@@ -464,7 +468,7 @@ export default function QuoteDetail() {
         });
 
         if (updateVersionStatus) {
-          handleVersionUpdate(columnView, versionStatus, selectedRows);
+          handleVersionUpdate(columnView, columnViewExcel, versionStatus, selectedRows);
         }
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -556,9 +560,10 @@ export default function QuoteDetail() {
     }
   };
 
-  const handleVersionUpdate = (Columns, versionStatus, selectedTermsAndConditions) => {
+  const handleVersionUpdate = (Columns, columnViewExcel, versionStatus, selectedTermsAndConditions) => {
     let body = {
       acceptedColumns: Columns,
+      excelColumns: columnViewExcel,
       status: versionStatus,
       TNC: selectedTermsAndConditions
     };
@@ -657,10 +662,9 @@ export default function QuoteDetail() {
 
   const getHeading = (<span>{quoteData ? `${quoteData.quoteName}  ` : ''}
     <span className="cursor-pointer underlined"
-      onClick={() => { setShowAllVersionStatus(true) }}>({currentVersion})</span>
+      onClick={() => { setShowAllVersionStatus(true) }}>(V-{currentVersion})</span>
   </span>);
 
-  console.log('customizedRoutes', customizedRoutes)
   return (
     <>
       <Fragment>
@@ -856,6 +860,19 @@ export default function QuoteDetail() {
                             </Button>
                           </MenuItem>
                         )}
+                        {allowedToEdit && (
+                          <MenuItem>
+                            <Button
+                              variant="text"
+                              color="primary"
+                              size="small"
+                              startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
+                              onClick={() => { setOpenUpdateDialog(true) }}
+                            >
+                              Edit Quote
+                            </Button>
+                          </MenuItem>
+                        )}
                       </Menu>
                     </>
                   </Grid>
@@ -987,6 +1004,7 @@ export default function QuoteDetail() {
                         versionStatus={versionStatus}
                         fetchQuoteData={fetchQuoteData}
                         columnView={columnView}
+                        columnViewExcel={columnViewExcel}
                         fetchTNC={fetchTermsAndConditions}
                         globalLoading={loading}
                         DOASteps={DOASteps}

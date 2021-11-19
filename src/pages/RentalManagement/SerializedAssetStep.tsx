@@ -1,41 +1,70 @@
 import Box from "@material-ui/core/Box/Box";
-import { useState, useEffect, useReducer, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer, } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import { Link } from 'react-router-dom'
+import NoDataCell from "../../components/Helpers/NoDataCell";
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Chip } from "@material-ui/core";
-import { AiFillFilePdf } from "react-icons/ai";
+import { Button, Chip, IconButton } from "@material-ui/core";
+import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import NoDataCell from "../../components/Helpers/NoDataCell";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { dateFormat, gridLoadingTimeout, rentalManagement } from "../../constants/helpers";
-import { Column } from "material-table";
+import { dateFormat, rentalManagement, translateDataToTree } from "../../constants/helpers";
 import moment from "moment";
-import MaterialTableComponent from "../../components/Shared/MaterialTableComponent";
-import { startCase } from "lodash";
+import { startCase, orderBy } from "lodash";
+import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import CustomReactTable from "../../components/CustomReactTable/CustomReactTable";
 
-
-const SerializedAssetStep = ({ loading, productInventory, currentStep, fetchProductsData, rentalManagementId, isTabletScreen,
-  isSmallScreen,
-  showActivity, currencySymbol }) => {
+const SerializedAssetStep = (props) => {
+  const { loading, productInventory, currentStep, serializeAssets, fetchProductsData, rentalManagementId, isTabletScreen,
+    isSmallScreen, setNextStep,
+    showActivity, currencySymbol } = props
   const toastConfig = useContext(CustomToastContext);
 
-  const [gridApi, setGridApi] = useState(null);
-  const [assignedSerializedAsset, setAssignedSerializedAsset] = useState([]);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const [stateSerializedAssets, dispatchSerializedAssets] = useReducer(reducer, intialState);
+  // const [gridApi, setGridApi] = useState(null);
+  // const [assignedSerializedAsset, setAssignedSerializedAsset] = useState([]);
+  // const [state, dispatch] = useReducer(reducer, intialState);
+  // const [stateSerializedAssets, dispatchSerializedAssets] = useReducer(reducer, intialState);
   // const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   // const { dataRows: dataRowsSerializedAssets, rowCount: rowCountSerializedAssets,
   //   loading: loadingSerializedAssets, page: pageSerializedAssets,
   //   limit: limitSerializedAssets, pageSizes: pageSizesSerializedAssets,
   //   selectedRecords: selectedRecordsSerializedAssets } = stateSerializedAssets;
-  const [downlodingFile, setDownlodingFile] = useState(false)
+  // const [downlodingFile, setDownlodingFile] = useState(false)
+  const [rows, setRows] = useState([])
+  const [deleting, setDeleting] = useState(false)
+  const [isAdding, setAdding] = useState(false)
+  const [showConfirmBox, setShowConfirmBox] = useState(false)
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState([])
+  const [deleteData, setDeleteData] = useState([])
+
+  useEffect(() => {
+    // const products = productInventory.filter(p => p?.type?.includes("roduct"))
+
+    const products = productInventory.map((p: any) => {
+      let currentAssets = []
+      if (p?.type?.includes("roduct")) {
+        currentAssets = serializeAssets.filter((asset: any) => asset?.product === p?._id)
+
+        if (currentAssets.length !== p.qty) {
+          setNextStep(false)
+        } else {
+          setNextStep(true)
+        }
+      }
+      if (!p.hasOwnProperty("parent")) {
+        p["parent"] = null;
+      }
+
+      const { subRows, ...rest } = p;
+      return { ...rest, assetCount: currentAssets.length || 0 }
+    })
+
+    const newDataForReactTable = [...translateDataToTree(products ? [...products] : [], "parent", "treeId", "subRows")];
+    setRows(orderBy(newDataForReactTable, ["order"], ["asc"]));
+
+  }, [productInventory])
 
   // useEffect(() => {
 
@@ -126,118 +155,142 @@ const SerializedAssetStep = ({ loading, productInventory, currentStep, fetchProd
   //   { field: "discount", headerName: "Discount (%)", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
   //   { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
   // ];
-  const columns: Column<any>[] = [
+
+
+  const getAssetAssignedValues = (row) => {
+    if (row.original?.type?.includes("roduct")) {
+      if (row.subRows && row.subRows?.length > 0) {
+        return <p>{row.subRows.length} / {row.original.qty}</p>
+      }
+      return <p>{row.original.assetCount} / {row.original.qty}</p>;
+    }
+    return <NoDataCell />
+  }
+
+
+  const columns = [
     {
-      field: 'detail',
-      title: 'Detail',
-      cellStyle: { padding: "0px 4px" },
-      render: (rowData) => (
-        <div style={{ width: 200, display: "flex", alignItems: 'center' }}>
+      accessor: 'detail',
+      Header: 'Detail',
+      Cell: ({ row }) => (
+        <div className="d-flex gap-2 align-items-center">
           <p
-            className="text-truncate mr-2"
-            title={rowData.detail}
+            className="text-truncate"
+            title={row.original.detail}
           // to={rowData.type === 'Product' ? `${routes.productDetail.path}/${rowData.id}` : `${routes.packagesDetail.path}/${rowData.id}`}
           >
-            {rowData.detail}
+            {row.original.detail}
           </p>
-          {rowData.hasOwnProperty("assetNumber") && <Chip label="Asset" size="small" color="primary" />}
+          {row.original.hasOwnProperty("assetNumber") &&
+            <span className="d-flex align-items-center gap-2">
+              <IconButton size="small" onClick={() => {
+                setShowConfirmBox(true)
+                setDeleteData([row.original._id])
+              }}>
+                <Delete color="error" />
+              </IconButton>
+              <Chip label="Asset" size="small" color="primary" />
+            </span>
+          }
         </div>
       )
     },
     {
-      field: 'startDate',
-      title: 'Start Date',
-      emptyValue: '- - - - -',
-      cellStyle: { padding: "0px" },
-      render: (rowData) => (
-        <div style={{ width: 80 }}>
-          <h5 className="createBy" title={`${moment(rowData.startDate.slice(0, 10)).format(dateFormat)}`}>
-            <span className="">{moment(rowData.startDate.slice(0, 10)).format(dateFormat)}</span>
-          </h5>
-        </div>
+      accessor: 'assets',
+      Header: 'Assets Assigned',
+      Cell: ({ row }) => (
+        // <p>{row.original?.type?.includes("roduct") ? row.original.assetCount : "- - - - -"}</p>
+
+        getAssetAssignedValues(row)
+        // row.original?.type?.includes("roduct") ? row.original.assetCount : (row.original?.type === "Package" ? `${row.subRows?.length ?? 0} / ${row.original.assetCount}` : "- - - - -")
+
+
       )
     },
     {
-      filtering: false,
-      field: 'endDate',
-      title: 'End Date',
-      emptyValue: '- - - - -',
-      cellStyle: { padding: "0px" },
-      render: (rowData) => (
-        <div style={{ width: 80 }}>
-          <h5 className="createBy" title={`${moment(rowData.endDate.slice(0, 10)).format(dateFormat)}`}>
-            <span className="">{moment(rowData.endDate.slice(0, 10)).format(dateFormat)}</span>
-          </h5>
-        </div>
+      accessor: 'qty',
+      Header: 'Quantity',
+      Cell: ({ row }) => (
+        row.original.qty ? <p>{row.original.qty}</p> : <NoDataCell />
       )
     },
     {
-      field: 'qty',
-      title: 'Quantity',
-      emptyValue: '- - - - -',
-      cellStyle: { padding: "0px 4px" },
-      render: (rowData) => (
-        <div style={{ width: 80 }}>
-          <p>{rowData.qty}</p>
-        </div>
+      accessor: 'startDate',
+      Header: 'Start Date',
+      Cell: ({ row }) => (
+        row.original.startDate ? <h5 className="createBy" title={`${moment(row.original.startDate.slice(0, 10)).format(dateFormat)}`}>
+          <span className="">{moment(row.original.startDate?.slice(0, 10)).format(dateFormat)}</span>
+        </h5> : <NoDataCell />
       )
     },
     {
-      field: 'UOM',
-      title: 'UOM',
-      emptyValue: '- - - - -',
-      cellStyle: { padding: "0px" },
-      render: (rowData) => (
-        <div style={{ width: 80 }}>
-          <p>{startCase(rowData.UOM)}</p>
-        </div>
+      accessor: 'endDate',
+      Header: 'End Date',
+      Cell: ({ row }) => (
+        row.original.endDate ? <h5 className="createBy" title={`${moment(row.original.endDate.slice(0, 10)).format(dateFormat)}`}>
+          <span className="">{moment(row.original.endDate.slice(0, 10)).format(dateFormat)}</span>
+        </h5> : <NoDataCell />
       )
     },
     {
-      field: 'pricingMethod',
-      title: 'Pricing Method',
-      emptyValue: '- - - - -',
-      cellStyle: { padding: "0px" },
-      render: (rowData) => (
-        <div style={{ width: 100 }}>
-          <p>{startCase(rowData.pricingMethod)}</p>
-        </div>
+      accessor: 'UOM',
+      Header: 'UOM',
+      Cell: ({ row }) => (
+        row.original.UOM ? <p>{startCase(row.original.UOM)}</p> : <NoDataCell />
       )
     },
     {
-      field: 'price',
-      title: `Price (${currencySymbol})`,
-      emptyValue: '- - - - -',
-      cellStyle: { padding: "0px" },
-      render: (rowData) => (
-        <div style={{ width: 100 }}>
-          <p>{rowData.price}</p>
-        </div>
+      accessor: 'pricingMethod',
+      Header: 'Pricing Method',
+      Cell: ({ row }) => (
+        row.original.pricingMethod ? <p>{startCase(row.original.pricingMethod)}</p> : <NoDataCell />
       )
     },
     {
-      field: 'discount',
-      title: 'Discount (%)',
-      emptyValue: '- - - - -',
-      cellStyle: { padding: "0px" },
-      render: (rowData) => (
-        <div style={{ width: 100 }}>
-          <p>{rowData.discount}</p>
-        </div>
+      accessor: 'price',
+      Header: `Price (${currencySymbol})`,
+      Cell: ({ row }) => (
+        row.original.price ? <p>{row.original.price}</p> : <NoDataCell />
       )
     },
     {
-      field: 'finalPrice',
-      title: `Final Price (${currencySymbol})`,
-      emptyValue: '- - - - -',
-      cellStyle: { padding: "0px" },
-      render: (rowData) => (
-        <div style={{ width: 100 }}>
-          <p>{rowData.finalPrice}</p>
-        </div>
+      accessor: 'discount',
+      Header: 'Discount (%)',
+      Cell: ({ row }) => (
+        row.original.discount ? <p>{row.original.discount}</p> : <NoDataCell />
+      )
+    },
+    {
+      accessor: 'finalPrice',
+      Header: `Final Price (${currencySymbol})`,
+      Cell: ({ row }) => (
+        row.original.finalPrice ? <p>{row.original.finalPrice}</p> : <NoDataCell />
       )
     }
   ]
+
+  const removeInventory = () => {
+    if (deleteData.length >= 1) {
+
+      setDeleting(true)
+      axiosInstance().put(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory/remove`, {
+        products: deleteData
+      })
+        .then(() => {
+          setDeleting(false)
+          fetchProductsData()
+          setDeleteData(null)
+          setShowConfirmBox(false);
+
+        }).catch((error) => {
+          setDeleting(false)
+          toastConfig.setToastConfig(error)
+          setDeleteData(null)
+        });
+    }
+
+
+  }
 
 
   // const columnsSerializedAssets = [
@@ -273,63 +326,103 @@ const SerializedAssetStep = ({ loading, productInventory, currentStep, fetchProd
   // }
 
   const handleAddSerializedAsset = (productInventoryArray) => {
-    console.log(productInventoryArray)
     let tempProductArray = [];
-    let product = selectedProducts[0]
     productInventoryArray.forEach(d => {
-      let obj: any = {};
-      obj.inventory = d._id;
-      if (product.type === "productInPackage") {
-        obj.product = product.id
-        obj.package = product.packageId
-      } else {
-        obj.product = product.id
-      }
 
-      tempProductArray.push(obj)
+      const getSelectedRecord = selectedProducts.find(f => d.product?.optionValue === f._id);
+
+      if (getSelectedRecord) {
+        let obj: any = {};
+        obj.inventory = d._id;
+
+        if (getSelectedRecord.type === "productInPackage") {
+          obj.product = getSelectedRecord.id
+          obj.package = getSelectedRecord.packageId
+        } else {
+          obj.product = getSelectedRecord.id
+        }
+        tempProductArray.push(obj)
+      }
+      // selectedProducts.filter(p => p?.type.toLowerCase() !== "package" || !p.hasOwnProperty("assetNumber")).forEach((product) => {
+      //   let obj: any = {};
+      //   obj.inventory = d._id;
+
+      //   if (product.type === "productInPackage") {
+      //     obj.product = product.id
+      //     obj.package = product.packageId
+      //   } else {
+      //     obj.product = product.id
+      //   }
+      //   tempProductArray.push(obj)
+      // })
+
     })
-    axiosInstance().post(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`, { "products": tempProductArray })
-      .then(({ data }) => {
-        setAddSerializedAssetDialog(false)
-        fetchProductsData()
-        setSelectedProducts([])
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
+    if (tempProductArray.length >= 1) {
+
+      setAdding(true)
+      axiosInstance().post(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`, { "products": tempProductArray })
+        .then(({ data }) => {
+          setAddSerializedAssetDialog(false)
+          fetchProductsData()
+          setSelectedProducts([])
+          setAdding(false)
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+        }).catch((error) => {
+          setAddSerializedAssetDialog(false)
+          setAdding(false)
+          toastConfig.setToastConfig(error)
         });
-      }).catch((error) => {
-        setAddSerializedAssetDialog(false)
-        toastConfig.setToastConfig(error)
-      });
+    }
   };
 
   return (<>
 
-    <Box display="flex" justifyContent="flex-end">
-      <Box mx={1} />
-      <Button
-        variant="contained"
-        color="primary"
-        type="button"
-        size="small"
-        disabled={(selectedProducts.length !== 1)}
-        onClick={() => {
-          setAddSerializedAssetDialog(true)
-        }}
-      >
-        {`Assign ${routes.productInventory.title}`}
-      </Button>
-    </Box>
+
     <Grid container spacing={2}>
       <Grid item xs={12} sm={12} md={12} lg={12}>
-        <div className="detail-box">
+        <Box display="flex" mt={2} justifyContent="space-between" alignItems="center" padding={"4px"}>
           <h3 className="form-label-style" title={"Products and Packages"}>
             {"Products and Packages"}
           </h3>
-        </div>
+
+          <div>
+
+            <Button
+              variant="contained"
+              color="primary"
+              type="button"
+              size="small"
+              disabled={(selectedProducts.filter(p => !p.hasOwnProperty("assetNumber")).length === 0)}
+              onClick={() => {
+                setAddSerializedAssetDialog(true)
+              }}
+            >
+              {`Assign ${routes.productInventory.title}`}
+
+            </Button>
+            <Box mx={1} component="span" />
+            <Button
+              variant="contained"
+              color="primary"
+              type="button"
+              size="small"
+              disabled={(selectedProducts.filter(d => d.hasOwnProperty("assetNumber")).length === 0)}
+              onClick={() => {
+                setDeleteData(selectedProducts.filter(d => d.hasOwnProperty("assetNumber")).map(d => d?._id))
+                setShowConfirmBox(true)
+              }}
+            >
+              Delete Assets
+            </Button>
+          </div>
+        </Box>
+
       </Grid>
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid item xs={12} md={12} sm={12} >
         {columns ?
           <>
             {/* <CustomAgGrid
@@ -346,7 +439,7 @@ const SerializedAssetStep = ({ loading, productInventory, currentStep, fetchProd
             loading={loading}
             renderedFrom="rentalManagementDetailsPageSerializedAssetsProductAndPackage"
             /> */}
-            <Box p="6px"
+            <Box
               zIndex={5}
               width={
                 isTabletScreen
@@ -354,20 +447,41 @@ const SerializedAssetStep = ({ loading, productInventory, currentStep, fetchProd
                   : isSmallScreen
                     ? "calc(100vw - 78px)"
                     : showActivity ? "100%" : "calc(100vw - 100px)"
-              }>
-              <MaterialTableComponent
+              }
+              height="calc(100vh - 350px)"
+            >
+              <CustomReactTable
+                height="calc(100vh - 365px)"
                 columns={columns}
-                rowData={productInventory}
+                data={rows}
+                rowStyle={(rowData) => ({
+                  color: "black",
+                  backgroundColor: rowData?.type?.includes("roduct") && rowData?.assetCount !== rowData?.qty
+                    ? "#EFCCCC" : "white"
+                })}
+                onSelect={setSelectedProducts}
+                childrenProperty="subRows"
+                uniqueKey="id"
+              />
+
+              {/* <MaterialTableComponent
+                columns={columns}
+                rowData={rows}
                 title={""}
                 loading={loading}
-                onSelection={(d) => setSelectedProducts(d.filter(r => !r.hasOwnProperty("assetNumber")))}
+                rowStyle={(rowData) => ({
+                  color: "black",
+                  backgroundColor: rowData?.type?.includes("roduct") && rowData?.assetCount !== rowData?.qty
+                    ? "#EFCCCC" : "white"
+                })}
+                onSelection={(d) => setSelectedProducts(d)}
                 parentChildData={(row, rows) => rows.find((a) => a.treeId === row.parent)}
                 selectionProps={rowData => ({
-                  disabled: rowData.hasOwnProperty("assetNumber"),
+                  disabled: rowData?.type === "Package",
                   color: "primary",
 
                 })}
-              />
+              /> */}
             </Box>
 
           </>
@@ -408,12 +522,25 @@ const SerializedAssetStep = ({ loading, productInventory, currentStep, fetchProd
         addSerializedAsset={handleAddSerializedAsset}
         handleSerializedAssetClose={() => {
           setAddSerializedAssetDialog(false);
-          setSelectedProducts([])
+          // setSelectedProducts([])
         }}
-        selectedProducts={selectedProducts}
+        isAdding={isAdding}
+        selectedProducts={selectedProducts.filter(p => p?.type?.includes("roduct"))}
       // type={inventoryType}
       />
     }
+    {showConfirmBox && (
+      <ConfirmationDialog
+        open={showConfirmBox}
+        message={`Are you sure you want to remove?`}
+        onClose={() => {
+          setShowConfirmBox(false);
+          setDeleteData([])
+        }}
+        okBtnLoading={deleting}
+        onOk={removeInventory}
+      />
+    )}
   </>
   );
 }

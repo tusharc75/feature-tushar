@@ -76,7 +76,7 @@ export default function NewCreateQuotePdfTemplate() {
     const [quoteData] = useState(history.location.state?.quoteData);
     const [version] = useState(history.location.state?.version);
     const {
-        state: { user },
+        state: { user, selectedEntity },
     }: any = useData();
     const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
     const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
@@ -127,7 +127,10 @@ export default function NewCreateQuotePdfTemplate() {
                     aboveTable: tempPdfTemplate.aboveTable,
                     belowTable: tempPdfTemplate.belowTable
                 })
-                if (tempPdfTemplate.owner && tempPdfTemplate.owner !== undefined && user.user._id !== tempPdfTemplate.owner && !tempPdfTemplate.collaborator?.some(d => d === user.user._id)) {
+                if (quoteData?._id) {
+                    setHasPermissionToUpdate(true)
+                }
+                else if (tempPdfTemplate.owner && tempPdfTemplate.owner !== undefined && user.user._id !== tempPdfTemplate.owner && !tempPdfTemplate.collaborator?.some(d => d === user.user._id)) {
                     setHasPermissionToUpdate(false)
                 }
             }
@@ -158,7 +161,10 @@ export default function NewCreateQuotePdfTemplate() {
                             aboveTable: data?.aboveTable,
                             belowTable: data?.belowTable
                         })
-                        if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator?.some(d => d === user.user._id)) {
+                        if (quoteData?._id) {
+                            setHasPermissionToUpdate(true)
+                        }
+                        else if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator?.some(d => d === user.user._id)) {
                             setHasPermissionToUpdate(false)
                         }
                     } catch (e) {
@@ -166,6 +172,7 @@ export default function NewCreateQuotePdfTemplate() {
                     }
                 })();
             }
+
         }
         else {
             setInitialValues({
@@ -177,7 +184,7 @@ export default function NewCreateQuotePdfTemplate() {
                 footer: "",
                 aboveTable: "",
                 belowTable: "",
-                entity: [],
+                entity: selectedEntity ? [selectedEntity] : [],
                 owner: user.user._id,
                 collaborator: [],
             })
@@ -341,7 +348,7 @@ export default function NewCreateQuotePdfTemplate() {
                                 <Grid container>
                                     <Grid item xs={12} md={6}>
                                         <TextField
-                                            disabled={!hasPermissionToUpdate}
+                                            disabled={!hasPermissionToUpdate || Boolean(quoteData?._id)}
                                             variant="outlined"
                                             type="text"
                                             label="Quote PDF Template Name"
@@ -413,7 +420,7 @@ export default function NewCreateQuotePdfTemplate() {
                                             /> : null
                                     }
                                 </Grid>
-                                <Grid container spacing={1}>
+                                {!Boolean(quoteData?._id) && <Grid container spacing={1}>
                                     <Grid item xs={12} sm={3}>
                                         {<Autocomplete
                                             disabled={!hasPermissionToUpdate}
@@ -505,7 +512,7 @@ export default function NewCreateQuotePdfTemplate() {
                                             )}
                                         />}
                                     </Grid>
-                                </Grid>
+                                </Grid>}
 
                                 <Grid container spacing={1}>
                                     <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>

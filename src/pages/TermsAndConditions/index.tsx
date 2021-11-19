@@ -26,9 +26,13 @@ import { IoDocumentTextOutline } from 'react-icons/io5';
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import routes from '../../components/Helpers/Routes';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { isMobile } from 'react-device-detect';
+import { useHistory } from 'react-router-dom'
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 let termsTimeout
 export default function TermsAndCondition(props) {
+    const history = useHistory()
     const { termsAndConditionBreadcrumb } = props
     const toastConfig = useContext(CustomToastContext);
     const { state: { permissions, user, selectedEntity } }: any = useData();
@@ -275,20 +279,54 @@ export default function TermsAndCondition(props) {
                         </Grid>
                     </Grid>
                 </div>
-                <CustomAgGrid
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameworkComponents}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    actionWidth={150}
-                    loading={loading}
-                    refreshGrid={fetchTermsAndConditions}
-                />
+                {isMobile ?
+
+                    <CustomSwipableList
+                        allowSelection={true}
+                        allowSwipe={true}
+                        permissions={permissions.termsAndConditions}
+                        primaryField={columns?.find(d => d.field === "TACName")}
+                        onClick={(d) => {
+                            setShowCreateDialog({ open: true, isClone: false });
+                            setEditRecord(cloneDeep(d))
+                        }}
+                        dataRows={dataRows}
+                        selectedRecords={selectedRecords}
+                        dispatch={dispatch}
+                        onEdit={(d) => {
+                            setShowCreateDialog({ open: true, isClone: false });
+                            setEditRecord(cloneDeep(d))
+                        }}
+                        extraParamsToCheckDelete={false}
+                        onDelete={(d) => {
+
+                        }}
+                        rowCount={rowCount}
+                        page={page}
+                        loading={loading}
+                        additionalDetails={[]}
+                        chips={[]}
+                        owerCollaboratorInitialsOrImages=""
+                        onCreate={() => { }}
+                        showClone={false}
+                        onClone={() => { }}
+                        renderedFrom={"termsAndConditions"} />
+
+                    : <CustomAgGrid
+                        columns={columns}
+                        dataRows={dataRows}
+                        frameworkComponents={frameworkComponents}
+                        setGridApi={setGridApi}
+                        dispatch={dispatch}
+                        rowCount={rowCount}
+                        limit={limit}
+                        pageSizes={pageSizes}
+                        page={page}
+                        actionWidth={150}
+                        loading={loading}
+                        refreshGrid={fetchTermsAndConditions}
+                        renderedFrom={routes.termsAndConditions.title}
+                    />}
 
                 {
                     showDeleteConfirmBox ?

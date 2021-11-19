@@ -471,7 +471,8 @@ const AddressResource = () => {
         {open?.open && (
           <ManageWarehouse
             addressResource={addressResource}
-            onClose={() => setOpen({ open: false, isClone: false })}
+            open={open?.open}
+            close={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });
               fetchWarehouses();

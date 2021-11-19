@@ -32,6 +32,9 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import UserSetupDialog from "./UserSetupDialog";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ResourceTransferDialog from "../../components/ResourceTransferDialog"
+import { isMobile } from 'react-device-detect';
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+
 
 let userTimeout: ReturnType<typeof setTimeout>;
 
@@ -652,7 +655,34 @@ const User: FC = () => {
             />
           </div>
 
-          <CustomAgGrid
+          {isMobile ? <CustomSwipableList
+            allowSelection={true}
+            allowSwipe={true}
+            permissions={permissions.user}
+            primaryField={columns?.find(d => d.field === "concatedName")}
+            onClick={(d) => {
+              history.push(`${routes.userDetail.path}/${d._id}`)
+            }}
+            dataRows={dataRows}
+            selectedRecords={selectedRecords}
+            dispatch={dispatch}
+            onEdit={(d) => {
+              history.push(`${routes.userDetail.path}/${d._id}`)
+            }}
+            extraParamsToCheckDelete={false}
+            onDelete={(d) => {
+
+            }}
+            rowCount={rowCount}
+            page={page}
+            loading={loading}
+            additionalDetails={[]}
+            chips={[]}
+            owerCollaboratorInitialsOrImages=""
+            onCreate={() => { }}
+            showClone={false}
+            onClone={() => { }}
+            renderedFrom={"user"} /> : <CustomAgGrid
             columns={columns}
             dataRows={dataRows}
             frameworkComponents={frameworkComponents}
@@ -666,7 +696,7 @@ const User: FC = () => {
             loading={loading}
             renderedFrom="userPage"
             refreshGrid={fetchUsers}
-          />
+          />}
 
         </CustomContainer>
         {showDeleteWarningConfirmBox ? (

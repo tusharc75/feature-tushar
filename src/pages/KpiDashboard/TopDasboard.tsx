@@ -58,6 +58,7 @@ const TopDashboard = (props) => {
       productCategory: salesFilter.productCategory ? salesFilter.productCategory['id'] : '',
       salesRep: salesFilter.salesRep ? salesFilter.salesRep['id'] : '',
       customerAccount: salesFilter.customerAccount ? salesFilter.customerAccount['id'] : '',
+      country: salesFilter.country ? salesFilter.country["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -248,7 +249,7 @@ const TopDashboard = (props) => {
                     <Grid item xs={9} sm={9} md={10} className="pull-left">
                       {!loadingChart ? (
                         <Typography variant="h5" className={styles.price}>
-                          {salesRevenue.revenue ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.revenue).fullFormatAmount : 0}({salesRevenue.profit}%)
+                          {salesRevenue.revenue ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.revenue).fullFormatAmount : 0}
                         </Typography>
                       ) : (
                         <Skeleton variant="text" width={200} height={40} />

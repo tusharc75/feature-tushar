@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useReducer } from 'react';
 import { useData } from '../../StateProvider/Provider';
 import { Button, Menu, MenuItem, Tooltip, IconButton, Grid, Chip, MenuList } from '@material-ui/core';
 import ReactGa from 'react-ga';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import { ExpandMore, AddOutlined } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
@@ -39,6 +39,10 @@ import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import { HiBadgeCheck } from "react-icons/hi"
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
+import { useLocation } from 'react-router-dom';
+import queryString from 'query-string';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 
 const AccTypes = [
   {
@@ -55,24 +59,35 @@ const options = ['All', 'Approved', 'Disapproved'];
 
 let accountTimeout;
 export default function Account(props) {
+  const location = useLocation();
+  let queryParams = queryString.parse(location.search);
+  let queryType: string = queryParams.type as string;
+  let queryApproval: string = queryParams.approval as string;
+  let querySearch: string = queryParams.search as string;
+  let queryPage: string = queryParams.page as string;
+  let queryColFilter: string = queryParams.colFilter as string;
+
   const toastConfig = useContext(CustomToastContext);
 
   const {
     account: { accountApi, accountResource, accountRoute }
   } = props;
-
+  const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
   const {
     state: { user, permissions, selectedEntity }, dispatch: entityDispatch
   }: any = useData();
   const history = useHistory();
   const [cloneId, setCloneId] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
-  const [type, setType] = useState(options[0]);
+  const [type, setType] = useState(options[queryApproval === 'Approved' ? 1 : queryApproval === 'Disapproved' ? 2 : 0]);
   const [renderCount, setRenderCount] = useState(0);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
   const [isAccDialogVisible, setIsAccDialogVisible] = useState(false);
   const [selectedType, setselectedType] = useState(1);
+  const [count, setCount] = useState(0);
+  const [checkColName, setCheckColName] = useState('');
+  const [checkColValue, setCheckColValue] = useState('');
   const [accountId, setAccountId] = useState(null)
   const [showEntityDialog, setShowEntityDialog] = useState(false)
 
@@ -99,9 +114,10 @@ export default function Account(props) {
   const [open, setOpen] = React.useState(false);
   const [entities, setEntities] = useState([])
   const anchorRef = React.useRef<HTMLDivElement>(null);
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
-  const [filter, setFilter] = useState('All Accounts');
+  const [selectedIndex, setSelectedIndex] = React.useState(queryApproval === 'Approved' ? 1 : queryApproval === 'Disapproved' ? 2 : 0);
+  const [filter, setFilter] = useState(queryType ? queryType : 'All Accounts');
   const [accountNameForClone, setAccountNameForClone] = useState('');
+  
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -110,7 +126,7 @@ export default function Account(props) {
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
+
   const columnState = JSON.parse(localStorage.getItem(accountResource));
 
 
@@ -125,15 +141,32 @@ export default function Account(props) {
   }
 
   useEffect(() => {
+    if (queryPage === undefined) {
+      history.push(`?page=${page}`)
+    }
+  }, [page, queryPage]);
+
+  useEffect(() => {
     fetchGridColumns()
   }, [])
 
   const fetchGridColumns = async () => {
 
-    const response = await axiosInstance()
-      .get(`/field?resource=${sidebarResource[accountResource]}`)
+    let data
+    if (isOffline) {
+      data = offlineFieldsData[accountResource] ?? []
+    }
+    else {
+      const response = await axiosInstance()
+        .get(`/field?resource=${sidebarResource[accountResource]}`)
 
-    let data = response?.data?.data
+      data = response?.data?.data
+      try {
+        updateFieldsData(accountResource, data);
+      } catch (ex) {
+        console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`)
+      }
+    }
 
     let columns = []
     let rendererNames = []
@@ -177,15 +210,19 @@ export default function Account(props) {
       columns.push(checkStaticField(routes.projectSales.title, field))
     })
     setColumns([...columns])
+
+    if (queryColFilter !== undefined && (Object.keys(filters).length === 0)) {
+      let savedFilter = JSON.parse(sessionStorage.getItem("filters"));
+      dispatch({ type: 'filter', filters: savedFilter });
+      setCount(1);
+    }
   }
-  //  Grid Variables - End
 
   useEffect(() => {
     if (permissions) {
       setAccountPermissions(permissions[accountResource]);
     }
   }, [permissions]);
-
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -203,7 +240,88 @@ export default function Account(props) {
     if (renderCount > 0) {
       fetchAccounts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, type, filters, sorting, selectedEntity]);
+  }, [page, limit, selectedType, type, filters, sorting, selectedEntity, location]);
+
+
+
+  useEffect(() => {
+    if (querySearch) {
+      dispatch({ type: 'search', search: querySearch });
+
+    }
+  }, [querySearch])
+
+
+  useEffect(() => {
+    if (Object.keys(filters).length > 0 && count === 0) {
+
+      sessionStorage.setItem("filters", JSON.stringify(filters))
+
+      {
+        Object.keys(filters).map(function (key) {
+          let colName = key;
+          let colValue = filters[key].filter
+          let query = queryColFilter !== undefined ? queryColFilter.substring(1, queryColFilter.length - 1) : `[{colName=${colName},colValue=${colValue}}]`;
+
+          if (queryColFilter === undefined) {
+            history.push(queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${query}` : queryType ? `?page=${page}&type=${queryType}&colFilter=${query}` : queryApproval ? `?page=${page}&approval=${queryApproval}&colFilter=${query}` : `?page=${page}&colFilter=${query}`);
+            setCheckColName(colName);
+            setCheckColValue(colValue);
+
+          }
+          if (queryColFilter !== undefined && checkColName === colName) {
+            if (queryColFilter.length > 45) {
+              let reducedqueryColFilter = queryColFilter.substring(50)
+              let leftqueryColFilter = queryColFilter.substring(0, 50);
+              let replacedQuery = reducedqueryColFilter.replace(checkColValue, colValue);
+              let combineQuery = leftqueryColFilter + replacedQuery;
+              history.push(queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${combineQuery}` : queryType ? `?page=${page}&type=${queryType}&colFilter=${combineQuery}` : queryApproval ? `?page=${page}&approval=${queryApproval}&colFilter=${combineQuery}` : `?page=${page}&colFilter=${combineQuery}`);
+              setCheckColName(colName);
+              setCheckColValue(colValue);
+            }
+
+            else {
+
+              history.push(queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=[{colName=${colName},colValue=${colValue}}]` : queryType ? `?page=${page}&type=${queryType}&colFilter=[{colName=${colName},colValue=${colValue}}]` : queryApproval ? `?page=${page}&approval=${queryApproval}&colFilter=[{colName=${colName},colValue=${colValue}}]` : `?page=${page}&colFilter=[{colName=${colName},colValue=${colValue}}]`);
+            }
+          }
+          if (queryColFilter !== undefined && checkColName !== colName) {
+
+            if (queryColFilter.length > 42 && Object.keys(filters).length === 1) {
+              history.push(queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}` : queryType ? `?page=${page}&type=${queryType}` : queryApproval ? `?page=${page}&approval=${queryApproval}` : `?page=${page}`)
+
+            }
+            else if (queryColFilter.length > 42 && queryColFilter.length < 84 && queryColFilter.includes(colName) === true) {
+              let newqueryColFilter = queryColFilter.substring(42, 83);
+              history.push(`?page=${page}&colFilter=[{colName=${colName},colValue=${colValue}}${newqueryColFilter}]`);
+            }
+
+
+
+            else {
+
+              let updatedQuery = `[${query}` + `,{colName=${colName},colValue=${colValue}}]`
+
+              history.push(queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${updatedQuery}` : queryType ? `?page=${page}&type=${queryType}&colFilter=${updatedQuery}` : queryApproval ? `?page=${page}&approval=${queryApproval}&colFilter=${updatedQuery}` : `?page=${page}&colFilter=${updatedQuery}`);
+              setCheckColName(colName)
+              setCheckColValue(colValue)
+            }
+          }
+        })
+      }
+    }
+  }, [filters])
+
+
+  useEffect(() => {
+    if (queryColFilter === undefined) {
+      sessionStorage.removeItem("filters");
+
+    }
+  }, [queryColFilter])
+
+
+
 
   const AccountNameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
@@ -428,7 +546,8 @@ export default function Account(props) {
   };
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterAccounts=${selectedType}`;
+
+    let deepFilter = `?page=${page}&limit=${limit}&filterAccounts=${queryType === "My Accounts" ? 2 : selectedType}`;
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -491,38 +610,49 @@ export default function Account(props) {
       gridApi.setRowData([]);
     }
 
-    axiosInstance()
-      .get(`${accountApi}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
+    let data, count;
 
-          let finalObject = prepareDataForGrid(u, user);
-          let res = {
-            ...finalObject,
-            canDelete: u.owner?.optionValue === user?.user._id,
+    if (!isOffline) {
+      const response: any = await axiosInstance().get(`${accountApi}${queryString}`);
 
-            isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
-            lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
-            leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
-            leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
-            approved: u.staticData?.approved,
+      data = response?.data?.data;
+      count = response?.data?.count;
+    }
+    else {
+      data = offlineGridData && offlineGridData[accountResource] || [];
+      count = offlineGridData && offlineGridData[accountResource]?.length || 0;
+    }
 
-            masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
-            masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : '',
+    try {
+      updateOfflineGridData(accountResource, data);
+    } catch (ex) {
+      console.error(`${accountResource}: Error while storing data for Offline context. Error: ${ex.message}`)
+    }
 
-          };
-          return res;
-        });
-        dispatch({ type: 'initialize', data: rows, count: count });
+    let rows = data.map((u) => {
 
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        dispatch({ type: 'loading', loading: false });
-      });
+      let finalObject = prepareDataForGrid(u, user);
+      let res = {
+        ...finalObject,
+        canDelete: u.owner?.optionValue === user?.user._id,
+
+        isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
+        lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
+        leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
+        leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
+        approved: u.staticData?.approved,
+
+        masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
+        masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : '',
+
+      };
+      return res;
+    });
+    dispatch({ type: 'initialize', data: rows, count: count });
+
+    setTimeout(() => {
+      dispatch({ type: 'loading', loading: false });
+    }, gridLoadingTimeout);
   };
 
   const cloneAccount = async (data) => {
@@ -533,6 +663,7 @@ export default function Account(props) {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
+    history.push(`?page=${page}&search=${search}`)
   };
 
   // ****** ACTIONS BUTTON STUFF *********
@@ -723,7 +854,10 @@ export default function Account(props) {
                       {AccTypes.map((k: any, index) => {
                         return (
                           <ToggleButton value={k.key} key={index}>
-                            {k.key}
+                            <Link to={`/${accountRoute}?page=${page}&type=${encodeURIComponent(k.key)}`} >
+                              {k.key}
+                            </Link>
+
                           </ToggleButton>
                         );
                       })}
@@ -738,7 +872,7 @@ export default function Account(props) {
                     ref={anchorRef}
                     aria-label="small outlined button group"
                   >
-                    <Button>{options[selectedIndex]}</Button>
+                    <Button>{queryApproval ? queryApproval : options[selectedIndex]}</Button>
                     <Button
                       color="primary"
                       size="small"
@@ -769,7 +903,10 @@ export default function Account(props) {
                                   onClick={(event) => handleMenuItemClick(event, index)}
                                   style={{ color: 'black' }}
                                 >
-                                  {option}
+                                  <Link to={queryType ? `/${accountRoute}?page=${page}&type=${queryType}&approval=${encodeURIComponent(option)}` : `/${accountRoute}?page=${page}&approval=${encodeURIComponent(option)}`}>
+                                    {option}
+                                  </Link>
+
                                 </MenuItem>
                               ))}
                             </MenuList>
@@ -779,12 +916,93 @@ export default function Account(props) {
                     )}
                   </Popper>
                 </div>
+
+                {
+                  isOffline
+                    ? <></>
+                    : <div className={`d-flex align-items-center gap-1 layout-for-mobile ${accountClass.account_header_add_btn_action_btn_group}`}>
+
+                      {AccTypes && (
+                        <ToggleButtonGroup
+                          id="resourceTypeSelector"
+                          size="small"
+                          className={`ml-8 ${accountClass.accountActions}`}
+                          value={filter}
+                          exclusive
+                          onChange={handleFilter}
+                        >
+                          {AccTypes.map((k: any, index) => {
+                            return (
+                              <ToggleButton value={k.key} key={index}>
+                                {k.key}
+                              </ToggleButton>
+                            );
+                          })}
+                        </ToggleButtonGroup>
+                      )}
+
+                      <ButtonGroup
+                        id="approveDisapprove"
+                        size="small"
+                        className={accountClass.accountActions}
+                        variant="outlined"
+                        color="primary"
+                        ref={anchorRef}
+                        aria-label="small outlined button group"
+                      >
+                        <Button
+                          color="primary"
+                          size="small"
+                          aria-controls={open ? 'split-button-menu' : undefined}
+                          aria-expanded={open ? 'true' : undefined}
+                          aria-label="select merge strategy"
+                          aria-haspopup="menu"
+                          onClick={handleToggle}
+                          className="all-button"
+                        >
+                          {options[selectedIndex]}
+                          <ArrowDropDownIcon className="all-button-sub-icon" />
+                        </Button>
+                      </ButtonGroup>
+                      <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
+                        {({ TransitionProps, placement }) => (
+                          <Grow
+                            {...TransitionProps}
+                            style={{
+                              transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
+                            }}
+                          >
+                            <Paper>
+                              <ClickAwayListener onClickAway={handleClose}>
+                                <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
+                                  {options.map((option, index) => (
+                                    <MenuItem
+                                      key={option}
+                                      selected={index === selectedIndex}
+                                      onClick={(event) => handleMenuItemClick(event, index)}
+                                      style={{ color: 'black' }}
+                                    >
+                                      {option}
+                                    </MenuItem>
+                                  ))}
+                                </MenuList>
+                              </ClickAwayListener>
+                            </Paper>
+                          </Grow>
+                        )}
+                      </Popper>
+                    </div>
+                }
               </div>
             </Grid>
-            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1" justify="flex-end">
-              <div id="resourceOperations" className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
-                <SearchBox onSearch={handleSearch} searchbox="account_header_search_bar" width="300px" value={search} />
-                <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
+            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1 " justify="flex-end" >
+              <div id="resourceOperations" className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`} style={{ flexGrow: 1 }}>
+                <Grid sm={12} className={styles.search_box_layout} style={{ display: "flex", flexGrow: 1 }} >
+                  {
+                    !isOffline && <SearchBox onSearch={handleSearch} searchbox="account_header_search_bar" style={{ flexGrow: 1 }} value={search} />
+                  }
+                </Grid>
+                <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`} >
                   {accountPermissions.isCreate && (
                     <Button
                       variant="contained"
@@ -798,7 +1016,7 @@ export default function Account(props) {
                     </Button>
                   )}
 
-                  {(accountPermissions.isDelete || accountPermissions.approveAccount) && (
+                  {!isOffline && (accountPermissions.isDelete || accountPermissions.approveAccount) && (
                     <Button
                       disabled={selectedRecords.length === 0}
                       variant="outlined"
@@ -931,6 +1149,9 @@ export default function Account(props) {
               loading={loading}
               renderedFrom={accountResource}
               refreshGrid={fetchAccounts}
+              isClientSideGrid={isOffline}
+              allowAction={!isOffline}
+              allowSelection={!isOffline}
             /> : null}
 
 
