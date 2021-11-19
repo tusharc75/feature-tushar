@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/vebholic/oms_frontend/compare/v1.40.0...v2.0.0) (2021-11-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* NO
+
+### Features
+
+* - Bulk update issue fixed in rental management ([96d0888](https://github.com/vebholic/oms_frontend/commit/96d08883e93f534f023ab739417fc18e965dc65d))
+* - PO-204 - Done ([787420a](https://github.com/vebholic/oms_frontend/commit/787420aebf409d6008012f48bc3f275f10c195e2))
+* - PO-205 - Done ([d170fa5](https://github.com/vebholic/oms_frontend/commit/d170fa5b9a7f36e6b266873474ec0787b138a7b9))
+* - React Table Header Footer Sticky Done ([fef56cb](https://github.com/vebholic/oms_frontend/commit/fef56cbefec8b41ab14a2eb6a270c60613b910a8))
+* - Refresh issue fixed in loading ticket details screen ([c288fa8](https://github.com/vebholic/oms_frontend/commit/c288fa809782ef119501879e2e74b82bf933813a))
+* - Rental management updates ([2d57bf2](https://github.com/vebholic/oms_frontend/commit/2d57bf27a0bc21a145be096c7e3a4dfc5f26e76a))
+* accessibility implementation with query params PO-118 ([bdf2313](https://github.com/vebholic/oms_frontend/commit/bdf23138e9e4af19758f396f21f8003bc7dcae1c))
+* add "+" icon in Parent Account field in customer account and Supplier Account ([2f81a8c](https://github.com/vebholic/oms_frontend/commit/2f81a8c8210d50f48f74db18cc7a3f6c5be291f4))
+* add reports should set account also in add contact ([4e3a5ec](https://github.com/vebholic/oms_frontend/commit/4e3a5ec0f44f91844e0cbdf5e0d0083ebc6c60b3))
+* in quotes and opprtunity when user change customer account populate market segment ([89b7415](https://github.com/vebholic/oms_frontend/commit/89b74156ef98343a832af37b5d911c1d512b6c42))
+* issue in Product columns selection in product listing and quotes details page ([b449983](https://github.com/vebholic/oms_frontend/commit/b449983fb2f3e4cf74a33e634189991cba7c5b52))
+* mat table PO ([8ac36b2](https://github.com/vebholic/oms_frontend/commit/8ac36b21232b39a3b5652b6331379a15c4a07eca))
+* pO material table changes ([1543a27](https://github.com/vebholic/oms_frontend/commit/1543a276a5540582f641cfaead068334d9d61331))
+* purchase order ([5c525a0](https://github.com/vebholic/oms_frontend/commit/5c525a0af50c1ac3d1b347aa3fb18bdb8233b31b))
+
+
+### Bug Fixes
+
+* formula dix ([5c26ac0](https://github.com/vebholic/oms_frontend/commit/5c26ac016bafb1d1e6e210d8ebb3605cc38f46aa))
+* next button disable quote ([eeea46e](https://github.com/vebholic/oms_frontend/commit/eeea46ef8a697bf902a797b0fd246321a61eb33c))
+
 ## [1.40.0](https://github.com/vebholic/oms_frontend/compare/v1.39.0...v1.40.0) (2021-11-18)
 
 
