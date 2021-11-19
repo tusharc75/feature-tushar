@@ -166,7 +166,6 @@ export default function AccountDetailPage(props) {
 
   useEffect(() => {
     if (deleteAccount && deleteAccount?._id && !showConfirmBox) {
-      console.log('set show confirm box')
       setShowConfirmBox(true)
     }
   }, [deleteAccount])
