@@ -65,6 +65,7 @@ import moment from "moment";
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
 import { Line } from 'react-chartjs-2';
+import ResourceTransferDialog from "../../components/ResourceTransferDialog"
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -140,6 +141,7 @@ const UserDetailsPage = () => {
     datasets: []
   })
   const [userTrackingDataLoading, setUserTrackingDataLoading] = useState(true);
+  const [allUsers, setAllUsers] = useState([])
 
   useEffect(() => {
     if (id) {
@@ -160,6 +162,10 @@ const UserDetailsPage = () => {
       setActivityShow(true)
     }
   }, [isSmallScreen])
+
+  useEffect(() => {
+    fetchAllUsers()
+  }, [])
 
   useEffect(() => {
     switch (timeFrame) {
@@ -206,6 +212,15 @@ const UserDetailsPage = () => {
   useEffect(() => {
     userTimeTracker()
   }, [trackingTime])
+
+  const fetchAllUsers = () => {
+    axiosInstance()
+      .get(`/user`)
+      .then(({ data: { data, count } }) => {
+        let tempAllUsers = data.map(o => ({ optionValue: o?._id, optionLabel: o?.concatedName }))
+        setAllUsers(tempAllUsers)
+      })
+  }
 
   const quickLinks: IQuickLinks[] = [
     {
@@ -322,7 +337,7 @@ const UserDetailsPage = () => {
       })
   }
 
-  
+
   const fetchUsers = () => {
     axiosInstance()
       .get("/user")
@@ -653,7 +668,7 @@ const UserDetailsPage = () => {
                     <DeleteButton
                       text="Delete"
                       disabled={user?.user?._id === id || userData?.userType === userType.brandAdmin}
-                      onClick={() => handleDeleteUser(id)}
+                      onClick={() => setShowConfirmBox(true)}
                     />
                   ) : null}
                 </DetailsPageHeader>
@@ -860,7 +875,7 @@ const UserDetailsPage = () => {
                   </Grid>
                 </Grid>
               </Box>
-              
+
               <Box>
                 <Box
                   width="100%"
@@ -1251,7 +1266,7 @@ const UserDetailsPage = () => {
           }
         />
       ) : null}
-      
+
       {
         orgChartInFullScreenDialog && <FullScreenDialog
           heading="Org Chart"
@@ -1291,6 +1306,21 @@ const UserDetailsPage = () => {
           userList={userList}
           selectedRecords={[{ ...userData }]}
         />
+      }
+      {
+        showConfirmBox ?
+          <ResourceTransferDialog
+            open={showConfirmBox}
+            resource="User"
+            fromResource={{ ...userData, name: `${userData.firstName} ${userData.lastName}` }}
+            allResourceData={allUsers}
+            onClose={() => setShowConfirmBox(false)}
+            handleDelete={() => {
+              setShowConfirmBox(false);
+              history.push(routes.user.path)
+            }}
+          />
+          : null
       }
     </>
   );

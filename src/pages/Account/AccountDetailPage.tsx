@@ -172,6 +172,13 @@ export default function AccountDetailPage(props) {
   }, [deleteAccount])
 
 
+  useEffect(() => {
+    if (deleteAccount && deleteAccount?._id && !showConfirmBox) {
+      setShowConfirmBox(true)
+    }
+  }, [deleteAccount])
+
+
   const [tabValue, setTabValue] = useState(0);
   const handleMainTabChange = (
     event: React.ChangeEvent<{}>,
