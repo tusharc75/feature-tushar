@@ -123,7 +123,7 @@ export const CreateEmail = ({
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
   const [toogle, setToogle] = useState({
-    "E-Sign": isESign,
+    "e-Sign": isESign,
   });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [quoteBuilderOtherAttachments, setQuoteBuilderOtherAttachments] = useState([])
@@ -265,7 +265,7 @@ export const CreateEmail = ({
       cc: values.cc,
       id: id,
       attachments: [...stateQuoteBuilderAttachments, ...quoteBuilderOtherAttachments],
-      eSign: toogle["E-Sign"],
+      eSign: toogle["e-Sign"],
     };
     const api = fromPurchaseOrder ? `${purchaseOrder.api}/${id}/send-email` : `/quote-builder/sendQuoteEmail`
     axiosInstance()
@@ -646,12 +646,12 @@ export const CreateEmail = ({
                                   key={1}
                                   control={
                                     <Switch
-                                      checked={toogle["E-Sign"]}
-                                      name="E-Sign"
+                                      checked={toogle["e-Sign"]}
+                                      name="e-Sign"
                                       onChange={handleChangePermissions}
                                     />
                                   }
-                                  label="E-Sign"
+                                  label="e-Sign"
                                 />
                               </Grid>
                             )}

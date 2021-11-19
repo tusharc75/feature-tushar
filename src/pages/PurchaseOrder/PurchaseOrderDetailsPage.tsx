@@ -69,6 +69,7 @@ const PurchaseOrderDetailsPage = () => {
     const [currentStep, setCurrentStep] = useState(0);
     const [downlodingFile, setDownlodingFile] = useState(false)
     const [selectedProductData, setSelectedProductData] = useState(null)
+    const [pdfFileBase64, setPdfFileBase64] = useState(null);
 
     const [tabValue, setTabValue] = useState(0);
 
@@ -156,6 +157,32 @@ const PurchaseOrderDetailsPage = () => {
                 toastConfig.setToastConfig(error);
             });
         }
+        if (currentStep === 2) {
+            axiosInstance().get(`${purchaseOrder.api}/${id}/pdf`)
+                .then(({ data }) => {
+                    axiosInstance()
+                        .get(`user/download?fileName=${data.data.fileName}`, {
+                            responseType: "blob",
+                        })
+                        .then(({ data }) => {
+                            const file = new Blob([data], { type: 'application/pdf' });
+                            generateBase64forFile(file, 'pdf');
+                        })
+                        .catch((err) => {
+                            toastConfig.setToastConfig({
+                                open: true,
+                                type: 'error',
+                                message: 'PDF generating error'
+                            });
+                        });
+                }).catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    setDownlodingFile(false);
+                })
+        }
+        if (currentStep === 1 && purchaseOrderData?.status !== "In Process") { handleUpdateData({ "status": "In Process" }) }
+        if (currentStep === 3 && purchaseOrderData?.status !== "Issued") { handleUpdateData({ "status": "Issued" }) }
+
         // eslint-disable-next-line
     }, [currentStep]);
 
@@ -335,6 +362,11 @@ const PurchaseOrderDetailsPage = () => {
                 getPurchaseOrderFields();
                 fetchPurchaseOrderData();
                 fetchPurchaseOrderProduct();
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: 'success',
+                    message: `Status changed to ${obj.status}`
+                });
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
             });
@@ -386,6 +418,16 @@ const PurchaseOrderDetailsPage = () => {
             })
     }
 
+    const generateBase64forFile = (blobData, type) => {
+        let reader = new FileReader();
+        reader.readAsDataURL(blobData);
+        reader.onloadend = function () {
+            let base64data = reader.result;
+            if (type === 'pdf') {
+                setPdfFileBase64(base64data);
+            }
+        };
+    };
     const handleAttachments = () => {
         let request;
 
@@ -477,7 +519,7 @@ const PurchaseOrderDetailsPage = () => {
                                                                 handleStatusChange(o)
                                                             }}
                                                             value={o}
-                                                            disabled={o.optionValue === "Received"}
+                                                            disabled={o.optionValue !== "Issued"}
                                                         >{o?.optionLabel}</MenuItem>
                                                     })
                                                 }
@@ -657,10 +699,12 @@ const PurchaseOrderDetailsPage = () => {
                                                         purchaseOrderProduct={purchaseOrderProduct}
                                                         purchaseOrderData={purchaseOrderData}
                                                         handleViewPdf={handleViewPdf}
+                                                        handleUpdateData={handleUpdateData}
                                                         downlodingFile={downlodingFile}
                                                         setCurrentStep={setCurrentStep}
                                                         currentStep={currentStep}
                                                         handleAttachments={handleAttachments}
+                                                        pdfFileBase64={pdfFileBase64}
                                                     />
                                                 }
                                                 {currentStep === 3 &&
