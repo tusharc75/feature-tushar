@@ -155,6 +155,8 @@ const RentalManagementDetailsPage = () => {
         toastConfig.setToastConfig(error);
       });
     }
+
+    console.log(dataForNewTabData)
     // eslint-disable-next-line
   }, [currentStep]);
 

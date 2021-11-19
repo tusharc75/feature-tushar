@@ -45,7 +45,7 @@ const SerializedAssetStep = (props) => {
     const products = productInventory.map((p: any) => {
       let currentAssets = []
       if (p?.type?.includes("roduct")) {
-        currentAssets = serializeAssets.filter((asset: any) => asset?.product === p?._id)
+        currentAssets = serializeAssets.filter((asset: any) => asset?.product === p?.id)
 
         if (currentAssets.length !== p.qty) {
           setNextStep(false)
@@ -57,8 +57,8 @@ const SerializedAssetStep = (props) => {
         p["parent"] = null;
       }
 
-      const { subRows, ...rest } = p;
-      return { ...rest, assetCount: currentAssets.length || 0 }
+      const { subRows, _id, ...rest } = p;
+      return { ...rest, id: _id, assetCount: currentAssets.length || 0 }
     })
 
     const newDataForReactTable = [...translateDataToTree(products ? [...products] : [], "parent", "treeId", "subRows")];
@@ -185,7 +185,7 @@ const SerializedAssetStep = (props) => {
             <span className="d-flex align-items-center gap-2">
               <IconButton size="small" onClick={() => {
                 setShowConfirmBox(true)
-                setDeleteData([row.original._id])
+                setDeleteData([row.original._id ?? row.original.id])
               }}>
                 <Delete color="error" />
               </IconButton>
@@ -199,12 +199,7 @@ const SerializedAssetStep = (props) => {
       accessor: 'assets',
       Header: 'Assets Assigned',
       Cell: ({ row }) => (
-        // <p>{row.original?.type?.includes("roduct") ? row.original.assetCount : "- - - - -"}</p>
-
         getAssetAssignedValues(row)
-        // row.original?.type?.includes("roduct") ? row.original.assetCount : (row.original?.type === "Package" ? `${row.subRows?.length ?? 0} / ${row.original.assetCount}` : "- - - - -")
-
-
       )
     },
     {
@@ -329,11 +324,11 @@ const SerializedAssetStep = (props) => {
     let tempProductArray = [];
     productInventoryArray.forEach(d => {
 
-      const getSelectedRecord = selectedProducts.find(f => d.product?.optionValue === f._id);
+      const getSelectedRecord = selectedProducts.find(f => d.product?.optionValue === f.id);
 
       if (getSelectedRecord) {
         let obj: any = {};
-        obj.inventory = d._id;
+        obj.inventory = d.id;
 
         if (getSelectedRecord.type === "productInPackage") {
           obj.product = getSelectedRecord.id
@@ -345,7 +340,7 @@ const SerializedAssetStep = (props) => {
       }
       // selectedProducts.filter(p => p?.type.toLowerCase() !== "package" || !p.hasOwnProperty("assetNumber")).forEach((product) => {
       //   let obj: any = {};
-      //   obj.inventory = d._id;
+      //   obj.inventory = d.id;
 
       //   if (product.type === "productInPackage") {
       //     obj.product = product.id
@@ -379,6 +374,22 @@ const SerializedAssetStep = (props) => {
     }
   };
 
+  const disableAssignSerializedAssets = () => {
+
+    if (selectedProducts.length === 0 || selectedProducts.some(s => s.hasOwnProperty("assetNumber")))
+      return true;
+
+    let disableAssignSerializedAssetsButton = false;
+    selectedProducts.forEach((d) => {
+      if (d.subRows && d.subRows?.length > 0) {
+        disableAssignSerializedAssetsButton = d.subRows.length === d.qty;
+        return;
+      }
+    })
+
+    return disableAssignSerializedAssetsButton;
+  }
+
   return (<>
 
 
@@ -396,7 +407,7 @@ const SerializedAssetStep = (props) => {
               color="primary"
               type="button"
               size="small"
-              disabled={(selectedProducts.filter(p => !p.hasOwnProperty("assetNumber")).length === 0)}
+              disabled={disableAssignSerializedAssets()}
               onClick={() => {
                 setAddSerializedAssetDialog(true)
               }}
@@ -412,7 +423,7 @@ const SerializedAssetStep = (props) => {
               size="small"
               disabled={(selectedProducts.filter(d => d.hasOwnProperty("assetNumber")).length === 0)}
               onClick={() => {
-                setDeleteData(selectedProducts.filter(d => d.hasOwnProperty("assetNumber")).map(d => d?._id))
+                setDeleteData(selectedProducts.filter(d => d.hasOwnProperty("assetNumber")).map(d => d?.id))
                 setShowConfirmBox(true)
               }}
             >
@@ -525,7 +536,7 @@ const SerializedAssetStep = (props) => {
           // setSelectedProducts([])
         }}
         isAdding={isAdding}
-        selectedProducts={selectedProducts.filter(p => p?.type?.includes("roduct"))}
+        selectedProducts={[...selectedProducts.filter(p => p?.type?.includes("roduct")).map(m => { return { ...m, _id: m.id } })]}
       // type={inventoryType}
       />
     }
