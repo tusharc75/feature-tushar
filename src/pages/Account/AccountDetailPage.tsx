@@ -156,6 +156,13 @@ export default function AccountDetailPage(props) {
   ];
   let filteredAccountFields = accountFields.filter(item => item.fieldData.sectionName != additionalFieldName)
 
+  useEffect(() => {
+    if (deleteAccount && deleteAccount?._id && !showConfirmBox) {
+      setShowConfirmBox(true)
+    }
+  }, [deleteAccount])
+
+
   const [tabValue, setTabValue] = useState(0);
   const handleMainTabChange = (
     event: React.ChangeEvent<{}>,

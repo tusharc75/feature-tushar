@@ -31,7 +31,7 @@ import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityD
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import UserSetupDialog from "./UserSetupDialog";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-
+import ResourceTransferDialog from "../../components/ResourceTransferDialog"
 
 let userTimeout: ReturnType<typeof setTimeout>;
 
@@ -66,6 +66,9 @@ const User: FC = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const columnState = JSON.parse(localStorage.getItem("userPage"));
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [deleteUser, setDeleteUser] = useState<any>({})
+  const [allUsers, setAllUsers] = useState([])
   const columns = [
     {
       field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer",
@@ -196,7 +199,10 @@ const User: FC = () => {
             >
               <IconButton
                 aria-label="Delete"
-                onClick={() => showConfirmBox(params.data)}
+                onClick={() => {
+                  setDeleteUser(params?.data)
+                  setShowDeleteDialog(true)
+                }}
               >
                 <DeleteIcon fontSize="small" color='error' />
               </IconButton>
@@ -312,6 +318,18 @@ const User: FC = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, filters, sorting, entityRoleRedirectDetails]);
 
+  useEffect(() => {
+    fetchAllUsers()
+  }, [])
+
+  const fetchAllUsers = () => {
+    axiosInstance()
+      .get(`/user`)
+      .then(({ data: { data, count } }) => {
+        let tempAllUsers = data.map(o => ({ optionValue: o?._id, optionLabel: o?.concatedName }))
+        setAllUsers(tempAllUsers)
+      })
+  }
   const fetchUsers = () => {
     const queryString = getQueryString();
     dispatch({ type: "loading", loading: true });
@@ -611,7 +629,8 @@ const User: FC = () => {
               openRegionalRolesDialog={handleRegionalRolesOpenDialog}
               rolesActionDisabled={selectedRecords.length === 0}
               approvalProcessActionDisabled={selectedRecords.length === 0 || !(user?.user?.userType === userType.brandAdmin)}
-              canDelete={selectedRecords.length === 0}
+              canDelete={selectedRecords.length > 1}
+              selectedRecordsLength={selectedRecords.length}
               entityRoleRedirectDetails={entityRoleRedirectDetails}
               onEntityRoleRedirectDetailRemove={() => {
                 setEntityRoleRedirectDetails({ id: null, name: null, type: null, text: null });
@@ -624,6 +643,12 @@ const User: FC = () => {
                 setOpenUserSetupDialog(true);
               }}
               userSetupDisabled={selectedRecords.length === 0 || !(user?.user?.userType === userType.brandAdmin)}
+              manageDeleteUser={() => {
+                if (selectedRecords[0] && selectedRecords[0]?._id) {
+                  setDeleteUser(selectedRecords[0])
+                  setShowDeleteDialog(true)
+                }
+              }}
             />
           </div>
 
@@ -669,6 +694,26 @@ const User: FC = () => {
                 : handleDeleteUser}
           />
         ) : null}
+        {
+          showDeleteDialog ?
+            <ResourceTransferDialog
+              open={true}
+              fromResource={{ ...deleteUser, name: deleteUser?.concatedName ?? '' }}
+              allResourceData={allUsers}
+              onClose={() => {
+                setDeleteUser({})
+                setShowDeleteDialog(false)
+              }}
+              handleDelete={() => {
+                setDeleteUser({})
+                setShowDeleteDialog(false)
+                fetchUsers()
+              }}
+              resource="User"
+              selectedRecords={selectedRecords}
+            />
+            : null
+        }
       </Fragment>
     </>
   );
