@@ -37,7 +37,7 @@ export default function DeliveryTicketDetail(props) {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, permissions }
   }: any = useData();
   const [deliveryTicketData, setDeliveryTicketData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -199,9 +199,9 @@ export default function DeliveryTicketDetail(props) {
     }
   };
 
-  // const handleOpenUpdateDialog = () => {
-  //   setOpenUpdateDialog(true);
-  // };
+  const handleOpenUpdateDialog = () => {
+    setOpenUpdateDialog(true);
+  };
 
   const NameRenderer = (params) => (
     <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
@@ -297,7 +297,7 @@ export default function DeliveryTicketDetail(props) {
                   mainPoints={deliveryTicketData ? getMainPoints : ""}
                   showHeading={true}
                 >
-                  {/* {permissions?.deliveryTicket?.isUpdate && (
+                  {permissions?.deliveryTicket?.isUpdate && (
                     <Button
                       variant="contained"
                       color="primary"
@@ -307,6 +307,7 @@ export default function DeliveryTicketDetail(props) {
                       Edit
                     </Button>
                   )}
+                  {/* 
                   {(permissions?.deliveryTicket?.isDelete &&
                     deliveryTicketData?.createdBy?.user?._id === user?.user._id) && (
                       <Button
