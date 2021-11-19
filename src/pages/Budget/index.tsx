@@ -30,13 +30,16 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
-import { useLocation } from "react-router-dom";
+import { useLocation, useHistory } from "react-router-dom";
 import queryString from "query-string";
+import { isMobile } from 'react-device-detect';
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 let timeout;
 function Budget() {
 
   const location = useLocation()
+  const history = useHistory();
   const {
     state: { permissions, user },
   }: any = useData();
@@ -409,7 +412,37 @@ function Budget() {
             </Grid>
           </div>
           <Box component="div">
-            {
+            {isMobile ? <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={permissions.budget}
+              primaryField={columns?.find(d => d.primaryField)}
+              onClick={(d) => {
+                history.push(`${routes.budget.path}?id=${d._id}`)
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(d) => {
+                history.push(`${routes.budget.path}?id=${d._id}`)
+              }}
+              extraParamsToCheckDelete={true}
+              onDelete={(d) => {
+                setDeleteRecord(d)
+                setShowDeleteConfirmBox(true)
+              }}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              additionalDetails={[]}
+              chips={[]}
+              owerCollaboratorInitialsOrImages=""
+              onCreate={() => setShowManageBudgetDialog({ show: true, id: null, isClone: null })}
+              showClone={false}
+              onClone={() => { }}
+              renderedFrom={budget.resource}
+
+            /> :
               Object.keys(frameWorkComponent).length > 0 ?
                 <CustomAgGrid
                   columns={columns}

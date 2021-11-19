@@ -348,7 +348,8 @@ export const productInventory = {
 export const budget = {
   budgetApi: '/budget',
   budgetRoute: '/budget',
-  budgetPermission: 'budget'
+  budgetPermission: 'budget',
+  resource: 'budget'
 };
 
 export const pricingCondition = {

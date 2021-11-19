@@ -21,12 +21,16 @@ import { FaUser } from "react-icons/fa";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { prepareDataForGrid } from "../../constants/helpers"
 import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import { isMobile } from 'react-device-detect';
+import { useHistory } from 'react-router-dom'
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 let entityTimeout;
 
 const Entity: FC = () => {
 
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory()
 
   const {
     state: { permissions },
@@ -312,7 +316,36 @@ const Entity: FC = () => {
           />
         </div>
 
-        {
+        {isMobile ?
+          <CustomSwipableList
+            allowSelection={true}
+            allowSwipe={true}
+            permissions={permissions.entity}
+            primaryField={columns?.find(d => d.field === "entityName")}
+            onClick={(d) => {
+              history.push(`${routes.entityDetail.path}/${d._id}`)
+            }}
+            dataRows={dataRows}
+            selectedRecords={selectedRecords}
+            dispatch={dispatch}
+            onEdit={(d) => {
+              history.push(`${routes.entityDetail.path}/${d._id}`)
+            }}
+            extraParamsToCheckDelete={false}
+            onDelete={(d) => {
+
+            }}
+            rowCount={rowCount}
+            page={page}
+            loading={loading}
+            additionalDetails={[]}
+            chips={[]}
+            owerCollaboratorInitialsOrImages=""
+            onCreate={() => { }}
+            showClone={false}
+            onClone={() => { }}
+            renderedFrom={"entity"} />
+          :
           Object.keys(frameWorkComponent).length > 0 ?
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameWorkComponent} setGridApi={setGridApi}
               dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}

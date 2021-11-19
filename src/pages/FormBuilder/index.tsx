@@ -9,10 +9,14 @@ import CustomContainer from "../../components/CustomContainer";
 import { FaWpforms } from 'react-icons/fa';
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { gridLoadingTimeout } from "../../constants/helpers";
+import { useHistory } from 'react-router-dom'
+import { isMobile } from 'react-device-detect';
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 const FormBuilder = () => {
 
   const toastConfig = useContext(CustomToastContext)
+  const history = useHistory()
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -74,12 +78,39 @@ const FormBuilder = () => {
           </Grid>
         </Grid>
 
-        <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-          dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={false} allowSelection={false}
-          isClientSideGrid={true} loading={loading}
-          refreshGrid={fetchGetBrandResource}
-          renderedFrom={routes.formBuilder.title}
-        />
+        {isMobile ? <CustomSwipableList
+          allowSelection={false}
+          allowSwipe={false}
+          permissions={null}
+          primaryField={columns?.find(d => d.field === "resource")}
+          onClick={(d) => {
+            history.push(`${routes.formBuilder.path}/${d.resource}`)
+          }}
+          dataRows={dataRows}
+          selectedRecords={[]}
+          dispatch={dispatch}
+          onEdit={(d) => {
+
+          }}
+          extraParamsToCheckDelete={true}
+          onDelete={(d) => {
+
+          }}
+          rowCount={rowCount}
+          page={page}
+          loading={loading}
+          additionalDetails={[]}
+          chips={[]}
+          owerCollaboratorInitialsOrImages=""
+          onCreate={() => { }}
+          showClone={false}
+          onClone={() => { }}
+          renderedFrom={"form-builder"} /> : <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={false} allowSelection={false}
+            isClientSideGrid={true} loading={loading}
+            refreshGrid={fetchGetBrandResource}
+            renderedFrom={routes.formBuilder.title}
+        />}
 
       </CustomContainer>
     </Fragment>
