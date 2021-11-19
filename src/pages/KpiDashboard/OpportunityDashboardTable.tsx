@@ -10,7 +10,7 @@ import { utils, write } from 'xlsx';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 
-const OpportunityTable = ({ filterCurrency, currency, salesFilter, getExchangeRates, moment }) => {
+const OpportunityTable = ({ filterCurrency, currency, salesFilter, selectedEntity, getExchangeRates, moment }) => {
   const [toggleButtonValue, setToggleButtonValue] = useState('totalSell');
   const [topProducts, setTopProducts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,7 @@ const OpportunityTable = ({ filterCurrency, currency, salesFilter, getExchangeRa
 
   const fetchTopProducts = useCallback(() => {
     let params = {
-      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
+      entity: selectedEntity ? selectedEntity : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -67,7 +67,7 @@ const OpportunityTable = ({ filterCurrency, currency, salesFilter, getExchangeRa
       .catch((err) => {
         setLoading(false);
       });
-  }, [salesFilter.entity, salesFilter.between, filterCurrency]);
+  }, [selectedEntity, salesFilter.between, filterCurrency]);
 
   useEffect(() => {
     fetchTopProducts();
@@ -187,7 +187,7 @@ const OpportunityTable = ({ filterCurrency, currency, salesFilter, getExchangeRa
           </ToggleButtonGroup>
         </Box>
 
-        <List style={{ overflow: 'auto', maxHeight: 450 }}>
+        <List style={{ overflow: 'auto', height: "100%" }}>
           {topProducts.length && !loading ? (
             topProducts.map((product, i) => (
               <ListItem divider key={i}>
