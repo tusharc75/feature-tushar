@@ -265,7 +265,7 @@ const Steps = (props) => {
                                                                 disabled={currentStep >= 5 || (currentStep === 0 && isNextStep) || nextStep}
 
                                                             >
-                                                                Next
+                                                                <IoIosArrowDroprightCircle />
                                                             </IconButton>
                                                         )}
                                                     </div>

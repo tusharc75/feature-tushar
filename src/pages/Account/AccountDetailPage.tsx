@@ -1009,8 +1009,8 @@ export default function AccountDetailPage(props) {
                       }
                     </Box>
                   </TabPanel>
-                  <TabPanel value={tabValue} index={1}>
-                    <Box>
+                  <TabPanel value={tabValue} index={1} >
+                    <Box  style={{overflow: 'auto'}}>
                       <AccountHierarchy
                         data={accountHierarchyData}
                         currentAccountId={accountData._id}

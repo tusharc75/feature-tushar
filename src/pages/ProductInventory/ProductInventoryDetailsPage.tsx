@@ -28,6 +28,9 @@ import { FaDiceOne, FaWpforms } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
 import { BiFoodMenu } from "react-icons/bi";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import CustomTimeline from "../../components/CustomTimeline";
+
+
 
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
@@ -483,7 +486,7 @@ const ProductInventoryDetailsPage = () => {
                   }}
                   label={
                     <div className="d-flex align-items-center tab-font">
-                      <FaWpforms className="mr-1" fontSize="inherit" /> Details
+                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
                     </div>
                   }
                   {...a11yProps(0)}
@@ -497,7 +500,7 @@ const ProductInventoryDetailsPage = () => {
                   }}
                   label={
                     <div className="d-flex align-items-center tab-font">
-                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Quote Versions
+                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
                     </div>
                   }
                   {...a11yProps(1)}
@@ -538,9 +541,14 @@ const ProductInventoryDetailsPage = () => {
                           Asset History
                         </h3>
                       </div>
+                      <div>
+                        <CustomTimeline />
+                      </div>
 
                       <Grid item xs={12} sm={12} md={12} lg={12} className="mt-1">
                         {columns ?
+
+
 
                           isMobile ? <CustomSwipableList
                             allowSelection={false}

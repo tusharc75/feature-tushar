@@ -96,9 +96,9 @@ export default function AccountHierarchy({ data, currentAccountId, accountRoute,
             title: 'Parent Account', field: 'parentAccountText',
             render: rowData => <div style={{ width: commonFieldWidth }}>
                 {
-                    rowData.parentAccountId === currentAccountId ? <span>{rowData.parentAccountText}</span> :
+                    rowData.parentAccountId === currentAccountId ? <span className="text-truncate ">{rowData.parentAccountText}</span> :
                         <Link className="link" to={`/${accountRoute}/detail/${rowData.parentAccountId}`}>
-                            <CustomRenderCell value={rowData.parentAccountText} />
+                            <CustomRenderCell value={rowData.parentAccountText}  />
                         </Link>
                 }
             </div>
@@ -119,14 +119,16 @@ export default function AccountHierarchy({ data, currentAccountId, accountRoute,
                     data={data}
                     columns={columns}
                     options={options}
+                    style={{}}
                 /> :
-                    <Box margin={1}>
+                     <Box margin={1} >
                         <MaterialTable
                             icons={materialTableIcons}
                             data={data}
                             columns={columns}
                             parentChildData={(row, rows) => rows.find(a => a._id === row.parentAccountId)}
                             options={options}
+                            style={{width:"calc(100vw -92px)"}}
                         />
                     </Box>
             }
