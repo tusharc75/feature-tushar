@@ -1349,17 +1349,19 @@ const FormTypes = (props) => {
             </Box>
             {i === 0 && (
               <Box>
-                <HtmlTooltip title="Add Currency" className="formActionButton">
-                  <IconButton
-                    onClick={() => {
-                      setIsExtraDispayType(true);
-                    }}
-                    color="primary"
-                    size="small"
-                  >
-                    <CreditCardIcon />
-                  </IconButton>
-                </HtmlTooltip>
+                {fieldData.hideConverter ? null :
+                  <HtmlTooltip title="Add Currency" className="formActionButton">
+                    <IconButton
+                      onClick={() => {
+                        setIsExtraDispayType(true);
+                      }}
+                      color="primary"
+                      size="small"
+                    >
+                      <CreditCardIcon />
+                    </IconButton>
+                  </HtmlTooltip>
+                }
                 {(fieldData.leval === 'product-custom' ||
                   fieldData.leval === 'product-builder-custom' ||
                   fieldData.leval === 'price-builder-custom') && (
@@ -1885,7 +1887,7 @@ const FormTypes = (props) => {
           value={values[name]}
           name={name}
           label={getLabel(label)}
-          onChange={onChange ? onChange : (date) => setFieldValue(name, date ? date : '')}
+          onChange={onChange ? onChange : (date) => handleChange(name, date ? date : '')}
           // onChange={(date) => setFieldValue(name, date ? date : "")}
           error={customError[name] || (touched[name] && Boolean(errors[name]))}
           helperText={customError[name] || (touched[name] && errors[name])}
