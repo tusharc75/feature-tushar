@@ -7,51 +7,55 @@ import {
     TimelineItem,
     TimelineSeparator
 } from "@material-ui/lab";
-import {CssBaseline, Grid} from "@material-ui/core";
+import { CssBaseline, Grid } from "@material-ui/core";
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
-import {FaCopy, GiMilkCarton, IoCart , RiSpaceShipLine} from "react-icons/all";
+import { FaCopy, GiMilkCarton, IoCart, RiSpaceShipLine } from "react-icons/all";
 
-import {MdDelete, MdEdit} from "react-icons/md";
+import { MdDelete, MdEdit } from "react-icons/md";
+import { displayDate } from '../constants/helpers';
 // import styles from './CustomTimeline.scss';
 
 
 
 const useStyles = makeStyles(() => ({
-        MuiTimelineItem: {
-            missingOppositeContent: {
-                "&:before": {
-                    display: "none !important"
-                }
+    MuiTimelineItem: {
+        missingOppositeContent: {
+            "&:before": {
+                display: "none !important"
             }
         }
+    }
 }));
 
 
 
 export default function BasicTimeline(
-    allowSelection,
-    allowSwipe,
-    primaryField,
-    onClick,
-    dataRows,
-    selectedRecords,
-    dispatch,
-    onEdit,
-    onDelete,
-    extraParamsToCheckDelete,
-    rowCount,
-    page,
-    loading,
-    checkError = null,
-    chips,
-    permissions,
-    onCreate,
-    showClone,
-    onClone,
-    fullHeight = false,
-    renderedFrom,
-    additionalDetails = [],
-    owerCollaboratorInitialsOrImages = null
+    {
+        // allowSelection,
+        // allowSwipe,
+        // primaryField,
+        // onClick,
+        // dataRows,
+        // selectedRecords,
+        // dispatch,
+        // onEdit,
+        // onDelete,
+        // extraParamsToCheckDelete,
+        // rowCount,
+        // page,
+        // loading,
+        // checkError = null,
+        // chips,
+        // permissions,
+        // onCreate,
+        // showClone,
+        // onClone,
+        // fullHeight = false,
+        // renderedFrom,
+        // additionalDetails = [],
+        // owerCollaboratorInitialsOrImages = null
+        dataRows
+    }
 ) {
 
 
@@ -60,47 +64,56 @@ export default function BasicTimeline(
 
 
     return (
-        <Timeline style={{justifyContent:"flex-start"}}>
-            <TimelineItem className="timelineItemLayout">
-                <TimelineSeparator>
-                    <TimelineDot style={{backgroundColor:"#8BC646"}}/>
-                    <TimelineConnector style={{border: "1px dashed #8BC646"}}/>
-                </TimelineSeparator>
-                <TimelineContent>
-                    <div className="timeline-content-layout">
+        <>
+            <Timeline style={{ justifyContent: "flex-start" }}>
+                {
+                    dataRows && dataRows.map((object) => (
+                        <>
+                            <TimelineItem className="timelineItemLayout">
+                                <TimelineSeparator>
+                                    <TimelineDot style={{ backgroundColor: "#8BC646" }} />
+                                    <TimelineConnector style={{ border: "1px dashed #8BC646" }} />
+                                </TimelineSeparator>
+                                <TimelineContent>
+                                    <div className="timeline-content-layout">
 
-                    <div className="d-flex align-items-center">
-                        <RiSpaceShipLine  size={32} style={{paddingRight:"3px" , color:"#8BC646" , rotate:"90deg"}}/>
-                        <div>
-                        <h3>Ready to deliver</h3>
-                        <h5>Rental/New Rental</h5>
-                        </div>
+                                        <div className="d-flex align-items-center">
+                                            <RiSpaceShipLine size={32} style={{ paddingRight: "3px", color: "#8BC646", rotate: "90deg" }} />
+                                            <div>
+                                                <h3>{object?.status}</h3>
+                                                <h5>{`${object?.type}/${object?.reference?.optionLabel}`}</h5>
+                                            </div>
 
-                    </div>
+                                        </div>
 
-                    <div>
-                        <h4>Dec/11/21</h4>
+                                        <div>
+                                            <h4>{displayDate(object?.date)}</h4>
 
-                    </div>
+                                        </div>
 
-                    </div>
+                                    </div>
 
 
-                </TimelineContent>
-            </TimelineItem>
-            <TimelineItem>
-                <TimelineSeparator>
-                    <TimelineDot />
-                    <TimelineConnector />
-                </TimelineSeparator>
-                <TimelineContent>Code</TimelineContent>
-            </TimelineItem>
-            <TimelineItem>
-                <TimelineSeparator>
-                    <TimelineDot />
-                </TimelineSeparator>
-                <TimelineContent>Sleep</TimelineContent>
-            </TimelineItem>
-        </Timeline>
+
+                                </TimelineContent>
+                            </TimelineItem>
+                            <TimelineItem>
+                                <TimelineSeparator>
+                                    <TimelineDot />
+                                    <TimelineConnector />
+                                </TimelineSeparator>
+                                <TimelineContent>Available</TimelineContent>
+                            </TimelineItem>
+                            <TimelineItem>
+                                <TimelineSeparator>
+                                    <TimelineDot />
+                                </TimelineSeparator>
+                                <TimelineContent>Ready To Ship</TimelineContent>
+
+                            </TimelineItem>
+                        </>
+                    ))}
+            </Timeline>
+        </>
     );
 }
