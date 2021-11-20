@@ -12,7 +12,8 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { gridLoadingTimeout, rentalManagement } from "../../constants/helpers";
+import { deliveryTicket, gridLoadingTimeout, rentalManagement } from "../../constants/helpers";
+import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 
 const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDeliveryTicketDialog, rentalManagementId, rentalManagementData, fetchRentalData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -23,6 +24,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const [downlodingFile, setDownlodingFile] = useState(false)
+  const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false)
 
   useEffect(() => {
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`)
@@ -38,9 +40,8 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
                 if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
                   tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
                   tempProductInventory[index]["deliveryTicketId"] = obj?._id
-                  tempProductInventory[index]["hideSelection"] = true
+                  tempProductInventory[index]["isLoadingTicketGenerated"] = true
                 }
-
               })
             })
             dispatch({
@@ -194,12 +195,25 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
         color="primary"
         type="button"
         size="small"
-        disabled={(selectedRecords.length === 0) || currentStep === 4}
+        disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => f.isLoadingTicketGenerated === true))}
         onClick={() => {
           handleDeliveryTicketDialog(selectedRecords, warehouse)
         }}
       >
         Create Loading Ticket
+      </Button>
+      <Box mx={1} />
+      <Button
+        variant="contained"
+        color="primary"
+        type="button"
+        size="small"
+        disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => f.isLoadingTicketGenerated !== true))}
+        onClick={() => {
+          setShowRemoveAssetFromLoadingTicketDialog(true)
+        }}
+      >
+        Remove From Assigned Loading Tickets
       </Button>
     </Box>
 
@@ -225,6 +239,21 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
 
       }
     </Grid>
+
+    {showRemoveAssetFromLoadingTicketDialog && (
+      <ConfirmationDialog
+        open={showRemoveAssetFromLoadingTicketDialog}
+        message="Are you sure you want to remove selected records from Loading Ticket(s) ?"
+        onClose={() => {
+          setShowRemoveAssetFromLoadingTicketDialog(false);
+        }}
+        onOk={() => {
+          setShowRemoveAssetFromLoadingTicketDialog(false);
+
+          axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/`)
+        }}
+      />
+    )}
 
   </>
   );
