@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/vebholic/oms_frontend/compare/v2.0.0...v2.1.0) (2021-11-20)
+
+
+### Features
+
+* - grid expanded not working issue fixed ([ad24bab](https://github.com/vebholic/oms_frontend/commit/ad24babfceb52fbbfa3487634392ddfd55be031c))
+* - PO-214 - auto generate id added in loading and receiving ticket ([9732af0](https://github.com/vebholic/oms_frontend/commit/9732af09dff1d1c771d8fb4104b040a4b6d6f596))
+* - PO-220 - no 4 is completed ([0aebfb4](https://github.com/vebholic/oms_frontend/commit/0aebfb4cfbf9d463a9b5e92742a78b2e92e0d35e))
+* - PO-220 - Working on it - Too many things as to do in that jira ([343fc6b](https://github.com/vebholic/oms_frontend/commit/343fc6b005a9f645618fb6b97ca457a47e1c6d08))
+* - PO-229 - Loading ticket editable given ([07c081b](https://github.com/vebholic/oms_frontend/commit/07c081b0fb89bdae443992e9f165b78d39611d00))
+* - Serialized asset selection issue fixed ([a5e8af9](https://github.com/vebholic/oms_frontend/commit/a5e8af976773ad0317e289ac5f874744de0f51cf))
+* **dashboard:** dahboard changes ([20ebfb0](https://github.com/vebholic/oms_frontend/commit/20ebfb02a4eb21cea871494e42c0e121366cd6e9))
+* **pages:** change table for mobile ([03059a1](https://github.com/vebholic/oms_frontend/commit/03059a1a15d22fd191cf806ce93ac38e49d519ec))
+* pO changes (Aman) ([deb1a70](https://github.com/vebholic/oms_frontend/commit/deb1a70e3c49331231b6359b3b93f40acbed0780))
+* transfer all the resouces before deleting enity or user ([3edc820](https://github.com/vebholic/oms_frontend/commit/3edc82001fffecf4a108e2bea9790265e5491b1b))
+
+
+### Bug Fixes
+
+* rental job ([fc69e51](https://github.com/vebholic/oms_frontend/commit/fc69e51358f4034e01e5d3a4c93b273fa24216ce))
+* **rentalscreen:** conflict fix ([248763e](https://github.com/vebholic/oms_frontend/commit/248763e0072851a2e04248849eff8dcf6f32c31a))
+* **rentalscreen:** fix conflict ([c6ec1fa](https://github.com/vebholic/oms_frontend/commit/c6ec1fa6505fc5a9390c441d7eed3bef5291788f))
+* **rental:** style fix ([e0fad32](https://github.com/vebholic/oms_frontend/commit/e0fad3236994772ef7dc0528e1346856a8367b42))
+* **rental:** style fix ([b13de14](https://github.com/vebholic/oms_frontend/commit/b13de14e39b38b4681326b7d4e8d53417f8e8b29))
+
 ## [2.0.0](https://github.com/vebholic/oms_frontend/compare/v1.40.0...v2.0.0) (2021-11-19)
 
 
