@@ -9,7 +9,7 @@ import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { dateFormat, rentalManagement, translateDataToTree } from "../../constants/helpers";
+import { dateFormat, rentalManagement, treeToFlatArray } from "../../constants/helpers";
 import moment from "moment";
 import { startCase, orderBy } from "lodash";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -39,30 +39,104 @@ const SerializedAssetStep = (props) => {
   const [selectedProducts, setSelectedProducts] = useState([])
   const [deleteData, setDeleteData] = useState([])
 
+  //  This is copied method from helpers.ts as wee need some modification for this screen only
+  const translateDataToTreeForProducts = (data, parentProperty, childProperty, childrenPropertyToStore) => {
+    let parents = data.filter(value => value[parentProperty] == 'undefined' || value[parentProperty] == null)
+    let childrens = data.filter(value => value[parentProperty] !== 'undefined' && value[parentProperty] != null)
+
+    parents.forEach((current) => {
+      if (current.type === "Package") {
+        current["qty"] = 0;
+        current["isValid"] = true;
+      }
+    })
+
+    let translator = (parents, childrens) => {
+      parents.forEach((parent) => {
+        childrens.forEach((current, index) => {
+          if (current.parent === parent[childProperty]) {
+            let temp = JSON.parse(JSON.stringify(childrens))
+            temp.splice(index, 1)
+            translator([current], temp)
+
+            if (typeof parent[childrenPropertyToStore] !== 'undefined') {
+              if (current.hasOwnProperty("assetNumber")) {
+                current["isValid"] = true;
+              } else {
+                current.qty = current.qty * parent.oldQty;
+                parent.qty = parent.qty + current.qty;
+              }
+              parent[childrenPropertyToStore].push(current)
+
+              if (!current.hasOwnProperty("assetNumber") && parent.qty === parent[childrenPropertyToStore].length) {
+                parent["isValid"] = true;
+              }
+
+            } else {
+              if (current.hasOwnProperty("assetNumber")) {
+                current["isValid"] = true;
+              } else {
+                current.qty = current.qty * parent.oldQty;
+                parent.qty = parent.qty + current.qty;
+              }
+
+              parent[childrenPropertyToStore] = [current]
+
+              if (!current.hasOwnProperty("assetNumber") && parent.qty === parent[childrenPropertyToStore].length) {
+                parent["isValid"] = true;
+              }
+            }
+
+            //  Check validation for products in package - Start
+            if (parent?.type?.includes("roduct")) {
+              if (parent.qty === parent[childrenPropertyToStore].length) {
+                parent["isValid"] = true;
+              }
+            } else if (parent.type === "Package") {
+              const flatData = treeToFlatArray([{ ...parent }], "subRows");
+              const assetsCount = flatData.filter(f => f.hasOwnProperty("assetNumber"))?.length ?? 0;
+
+              parent["isValid"] = parent.qty === assetsCount
+            }
+
+            //  Check validation for products in package - End
+
+          }
+        })
+      })
+    }
+    translator(parents, childrens)
+
+    return parents
+  }
+
+
   useEffect(() => {
     // const products = productInventory.filter(p => p?.type?.includes("roduct"))
-
     const products = productInventory.map((p: any) => {
-      let currentAssets = []
-      if (p?.type?.includes("roduct")) {
-        currentAssets = serializeAssets.filter((asset: any) => asset?.product === p?.id)
+      // let currentAssets = []
+      // if (p?.type === "Product" || p?.type === "productInPackage") {
+      //   currentAssets = serializeAssets.filter((asset: any) => asset?.product === p?.id)
 
-        if (currentAssets.length !== p.qty) {
-          setNextStep(false)
-        } else {
-          setNextStep(true)
-        }
-      }
+      //   if (currentAssets.length !== p.qty) {
+      //     setNextStep(false)
+      //   } else {
+      //     setNextStep(true)
+      //   }
+      // }
       if (!p.hasOwnProperty("parent")) {
         p["parent"] = null;
       }
 
       const { subRows, _id, ...rest } = p;
-      return { ...rest, id: _id, assetCount: currentAssets.length || 0 }
+      return { ...rest, isValid: false, oldQty: rest.qty, id: _id }
     })
 
-    const newDataForReactTable = [...translateDataToTree(products ? [...products] : [], "parent", "treeId", "subRows")];
+    const newDataForReactTable = [...translateDataToTreeForProducts(products ? [...products] : [], "parent", "treeId", "subRows")];
     setRows(orderBy(newDataForReactTable, ["order"], ["asc"]));
+
+    const flatDataToCheckNextStep = treeToFlatArray(newDataForReactTable, "subRows");
+    setNextStep(!(flatDataToCheckNextStep.some(f => f.isValid === false)))
 
   }, [productInventory])
 
@@ -162,9 +236,14 @@ const SerializedAssetStep = (props) => {
       if (row.subRows && row.subRows?.length > 0) {
         return <p>{row.subRows.length} / {row.original.qty}</p>
       }
-      return <p>{row.original.assetCount} / {row.original.qty}</p>;
+      return <p>0 / {row.original.qty}</p>;
+    } else if (row.original?.type === "Package") {
+      const flatData = treeToFlatArray([{ ...row.original }], "subRows")
+      const getAssetsOnly = flatData.filter(f => f.hasOwnProperty("assetNumber"));
+
+      return <p>{getAssetsOnly.length} / {row.original.qty}</p>;
     }
-    return <NoDataCell />
+    return "" //  <NoDataCell />
   }
 
 
@@ -467,7 +546,7 @@ const SerializedAssetStep = (props) => {
                 data={rows}
                 rowStyle={(rowData) => ({
                   color: "black",
-                  backgroundColor: rowData?.type?.includes("roduct") && rowData?.assetCount !== rowData?.qty
+                  backgroundColor: rowData?.type?.includes("roduct") && rowData?.subRows?.length !== rowData?.qty
                     ? "#EFCCCC" : "white"
                 })}
                 onSelect={setSelectedProducts}
