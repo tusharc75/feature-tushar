@@ -36,6 +36,12 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
   }, [productInventory]);
 
   const fetchRecords = () => {
+    if (gridApi) {
+      gridApi.deselectAll();
+    }
+
+    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`)
       .then(({ data }) => {
         setAssignedSerializedAsset(data.data)
@@ -265,8 +271,6 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
           })
 
           Promise.all(apiCalls).then(() => {
-            localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
-            gridApi.deselectAll();
             toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged ${sidebarResource.deliveryTicket}(s)` });
             fetchRecords();
           }).catch((error) => {
