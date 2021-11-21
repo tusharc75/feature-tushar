@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/vebholic/oms_frontend/compare/v2.1.0...v2.2.0) (2021-11-21)
+
+
+### Features
+
+* - PO-219 - Fixed ([9f75205](https://github.com/vebholic/oms_frontend/commit/9f75205bed3d0a811a2bba5a193b7ab7a16cd235))
+* - PO-227 - Partially Done ([e761314](https://github.com/vebholic/oms_frontend/commit/e7613147403d8387d1d54937d9b5f419c632f2fa))
+* - PO-230 - Done ([160b030](https://github.com/vebholic/oms_frontend/commit/160b0308d6778f59075b3218896bd1fd2c75923b))
+* - PO-230 - Remove asset added in rental management ([06c5b4f](https://github.com/vebholic/oms_frontend/commit/06c5b4fef41db778b757433c9651cc37b493daeb))
+
 ## [2.1.0](https://github.com/vebholic/oms_frontend/compare/v2.0.0...v2.1.0) (2021-11-20)
 
 
