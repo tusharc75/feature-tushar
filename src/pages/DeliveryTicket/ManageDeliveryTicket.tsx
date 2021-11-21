@@ -58,7 +58,7 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["rental"] = rentalData?._id
                     tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
                     tempInitialData["shippingAddress"] = rentalData.shippingAddress
-                    tempInitialData["deliveryJobName"] = `${rentalData?.rentalJobName}-${generateUniqueIdOnly()}`
+                    tempInitialData["deliveryJobName"] = `${rentalData?.rentalJobName}_${generateUniqueIdOnly()}`
                     tempInitialData["deliveryDate"] = "";
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
@@ -268,6 +268,27 @@ const ManageDeliveryTicket = (props) => {
                                                                         tooltipMessage={field?.tooltipMessage}
                                                                         size="small"
                                                                         minDate={moment(values["pick-UpDate"])}
+                                                                    />
+                                                                ) : field.fieldName === "deliveryJobName" ? (
+                                                                    <FormTypes
+                                                                        {...field}
+                                                                        disabled={true}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={(name, value) => {
+                                                                            handleValuesChange({ [name]: value })
+                                                                            setFieldValue(name, value)
+                                                                        }}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
                                                                     />
                                                                 ) : <FormTypes
                                                                     {...field}
