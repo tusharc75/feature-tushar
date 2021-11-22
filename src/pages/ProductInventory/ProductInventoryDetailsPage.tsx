@@ -86,6 +86,7 @@ const ProductInventoryDetailsPage = () => {
       sectionName: "Product Inventory"
     }
   })
+  const [productInventoryHistoryData, setProductInventoryHistoryData] = useState(null)
   const [BOMData, setBOMData] = useState([])
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -178,6 +179,7 @@ const ProductInventoryDetailsPage = () => {
       gridApi.setRowData([]);
     }
     axiosInstance().get(`/history/inventory/${id}`).then(({ data: { data } }) => {
+      setProductInventoryHistoryData(data)
       data = data?.map((u) => ({
         ...u,
         id: u.inventory?._id,
@@ -302,7 +304,6 @@ const ProductInventoryDetailsPage = () => {
   return (
     <>
       <Fragment>
-
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
@@ -545,7 +546,7 @@ const ProductInventoryDetailsPage = () => {
                         </h3>
                       </div>
                       <div>
-                        <CustomTimeline />
+                        <CustomTimeline dataRows= {productInventoryHistoryData}/>
                       </div>
 
                       <Grid item xs={12} sm={12} md={12} lg={12} className="mt-1">
