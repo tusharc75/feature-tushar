@@ -94,11 +94,11 @@ export default function AccountHierarchy({ data, currentAccountId, accountRoute,
         },
         {
             title: 'Parent Account', field: 'parentAccountText',
-            render: rowData => <div style={{ width: commonFieldWidth }}>
+            render: rowData => <div style={{ width: "auto" }}>
                 {
                     rowData.parentAccountId === currentAccountId ? <span className="text-truncate ">{rowData.parentAccountText}</span> :
-                        <Link className="link" to={`/${accountRoute}/detail/${rowData.parentAccountId}`}>
-                            <CustomRenderCell value={rowData.parentAccountText}  />
+                        <Link className="link text-truncate" to={`/${accountRoute}/detail/${rowData.parentAccountId}`}>
+                            <CustomRenderCell value={rowData.parentAccountText} />
                         </Link>
                 }
             </div>

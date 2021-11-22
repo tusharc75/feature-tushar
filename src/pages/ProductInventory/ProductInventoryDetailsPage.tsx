@@ -29,6 +29,8 @@ import { isMobile } from "react-device-detect";
 import { BiFoodMenu } from "react-icons/bi";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import CustomTimeline from "../../components/CustomTimeline";
+import {GiAutoRepair, GrStatusInfo} from "react-icons/all";
+import {MdEdit} from "react-icons/md";
 
 
 
@@ -339,7 +341,8 @@ const ProductInventoryDetailsPage = () => {
                         size="small"
                         onClick={() => setShowRepairJobDialog(true)}
                       >
-                        Create Repair Job
+                        {isMobile ? <GiAutoRepair size={20}/> : "Create Repair Job"}
+
                       </Button>
                       <Button
                         variant="outlined"
@@ -348,9 +351,9 @@ const ProductInventoryDetailsPage = () => {
                         onClick={openActions}
                         disabled={updateLoading}
                         aria-controls="action-menu"
-                        endIcon={<ExpandMore />}
+                        endIcon={isMobile ? <ExpandMore style={{width: "12px" , height:"12px"}}/> : <ExpandMore />}
                       >
-                        Change Status
+                        {isMobile ? <GrStatusInfo size={20}/> : "Change Status"}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -375,12 +378,12 @@ const ProductInventoryDetailsPage = () => {
                         }
                       </Menu>
                       <Button
-                        variant="contained"
+                        variant= {isMobile ? "text" : "outlined"}
                         color="primary"
                         size="small"
                         onClick={handleOpenUpdateDialog}
                       >
-                        Edit
+                        {isMobile ? <MdEdit size={22}/> : "Edit"}
                       </Button>
                     </>
                   )}

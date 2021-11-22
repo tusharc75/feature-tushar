@@ -41,7 +41,7 @@ const CustomBreadCrumbs = ({
             if (route?.hasOnClick) {
               onRouteClick()
             }
-          }} key={index} className={`${"cursor-pointer"} ${"setLink"}`}>
+          }} key={index} className={`${"cursor-pointer"} ${"setLink"} ${'text-truncate'}`} style={{maxWidth:"105px"}}>
           {route.title}
         </Typography>
 
