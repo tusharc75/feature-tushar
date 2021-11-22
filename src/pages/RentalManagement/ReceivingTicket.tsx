@@ -2,11 +2,11 @@ import Box from "@material-ui/core/Box/Box";
 import { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer, } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import { Link } from 'react-router-dom'
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button } from "@material-ui/core";
+import { Button, Tooltip, IconButton } from "@material-ui/core";
 import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -14,6 +14,8 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import { gridLoadingTimeout, receivingTicket, rentalManagement, sidebarResource } from "../../constants/helpers";
 import { groupBy } from "lodash";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
+import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 
 const renderedFrom = "rentalManagementDetailsPageReceivingTicket"
 
@@ -188,31 +190,38 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
         {downlodingFile ? "Please wait..." : "Preview"}
       </Button>
       <Box mx={1} />
-      <Button
-        variant="contained"
-        color="primary"
-        type="button"
-        size="small"
+
+      <IconButton
         disabled={(selectedRecords.length === 0) || currentStep === 5 || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId")))}
         onClick={() => {
           handleReceivingTicketDialog(selectedRecords)
         }}
-      >
-        Create Receiving Ticket
-      </Button>
-      <Box mx={1} />
-      <Button
-        variant="contained"
-        color="primary"
-        type="button"
+        color='primary'
         size="small"
+      >
+        <Tooltip
+          title="Create Receiving Ticket">
+          <AddBoxRoundedIcon />
+        </Tooltip>
+      </IconButton>
+
+      <Box mx={1} />
+
+      <IconButton
         disabled={(selectedRecords.length === 0) || currentStep === 5 || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId")))}
         onClick={() => {
           setShowRemoveAssetFromReceivingTicketDialog(true)
         }}
+        color='primary'
+        size="small"
       >
-        Remove From Assigned Receiving Tickets
-      </Button>
+        <Tooltip
+          title="Remove Assets From Receiving Ticket(s)">
+          <RemoveCircleRoundedIcon />
+        </Tooltip>
+      </IconButton>
+
+      <Box mx={1} />
     </Box>
 
     <Grid item xs={12} md={12} sm={12} className="mt-3">
