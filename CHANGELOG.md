@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/vebholic/oms_frontend/compare/v2.2.0...v2.3.0) (2021-11-22)
+
+
+### Features
+
+* - Bulk update issue fixed ([553e2e0](https://github.com/vebholic/oms_frontend/commit/553e2e0cf65f390d7626ad29a66ca29881a8173f))
+* - Rental management, receiving ticket, loading ticket changes done ([0505142](https://github.com/vebholic/oms_frontend/commit/050514247a82534c6633cc255b49244d854194a0))
+
 ## [2.2.0](https://github.com/vebholic/oms_frontend/compare/v2.1.0...v2.2.0) (2021-11-21)
 
 
