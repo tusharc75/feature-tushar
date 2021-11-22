@@ -71,6 +71,11 @@
                 position: sticky;
                 z-index: 1;
                 width: fit-content;
+
+                td {
+                    padding-left: 7px;
+                    padding-right: 7px;
+                }
             }
 
             .header {
