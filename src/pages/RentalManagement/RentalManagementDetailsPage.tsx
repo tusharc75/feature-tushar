@@ -808,12 +808,12 @@ const RentalManagementDetailsPage = () => {
         "package": d.packageId ? d.packageId : null,
         "pricingMethod": values.pricingMethod ? values.pricingMethod : d.pricingMethod,
         "UOM": values.UOM ? values.UOM : d.UOM,
-        "finalPrice": values.finalPrice ? values.finalPrice : d.finalPrice,
-        "discount": values.discount ? values.discount : d.discount,
+        "finalPrice": (values.finalPrice ? values.finalPrice : d.finalPrice) ?? 0,
+        "discount": (values.discount ? values.discount : d.discount) ?? 0,
         "startDate": values.startDate ? values.startDate : d.startDate,
         "endDate": values.endDate ? values.endDate : d.endDate,
         "qty": values.qty ? values.qty : d.qty,
-        "price": values.price ? values.price : d.price
+        "price": (values.price ? values.price : d.price) ?? 0
       }
     }
 
