@@ -1349,17 +1349,19 @@ const FormTypes = (props) => {
             </Box>
             {i === 0 && (
               <Box>
-                <HtmlTooltip title="Add Currency" className="formActionButton">
-                  <IconButton
-                    onClick={() => {
-                      setIsExtraDispayType(true);
-                    }}
-                    color="primary"
-                    size="small"
-                  >
-                    <CreditCardIcon />
-                  </IconButton>
-                </HtmlTooltip>
+                {fieldData.hideConverter ? null :
+                  <HtmlTooltip title="Add Currency" className="formActionButton">
+                    <IconButton
+                      onClick={() => {
+                        setIsExtraDispayType(true);
+                      }}
+                      color="primary"
+                      size="small"
+                    >
+                      <CreditCardIcon />
+                    </IconButton>
+                  </HtmlTooltip>
+                }
                 {(fieldData.leval === 'product-custom' ||
                   fieldData.leval === 'product-builder-custom' ||
                   fieldData.leval === 'price-builder-custom') && (
@@ -1482,7 +1484,8 @@ const FormTypes = (props) => {
             disableCloseOnSelect={true}
             options={fieldData && fieldData.isDependentDropdown ?
               option.filter((_f) => _f[fieldData.dropdowDependentOn] === values[fieldData.dropdowDependentOn]) :
-              option}
+              //  Some times for resource dropdown we are not getting optionLabel, and multi-select breaks
+              option.filter(f => f.optionLabel)}
             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
             value={values[name] ? option.filter((data: any) => values[name].includes(data.optionValue)) : []}
             getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
@@ -1884,7 +1887,7 @@ const FormTypes = (props) => {
           value={values[name]}
           name={name}
           label={getLabel(label)}
-          onChange={onChange ? onChange : (date) => setFieldValue(name, date ? date : '')}
+          onChange={onChange ? onChange : (date) => handleChange(name, date ? date : '')}
           // onChange={(date) => setFieldValue(name, date ? date : "")}
           error={customError[name] || (touched[name] && Boolean(errors[name]))}
           helperText={customError[name] || (touched[name] && errors[name])}

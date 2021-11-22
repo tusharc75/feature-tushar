@@ -10,6 +10,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
+  generateUniqueIdOnly,
   getObjKeys,
   getObjKeysWithValues,
   isFieldNotTouched,
@@ -24,7 +25,7 @@ import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../../StateProvider/Provider';
 import routes from '../../../components/Helpers/Routes';
-import {FaDiceOne} from "react-icons/fa";
+import { FaDiceOne } from "react-icons/fa";
 
 const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryForReceivingTicket = null, rentalData = null, isRedirectToDetailPage = true, onClose, onSuccess, open }) => {
   const history = useHistory();
@@ -37,13 +38,23 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
   const [formsData, setFormsData] = useState([]);
   const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [title, setTitle] = useState("")
+  const [disableReceivingJobName, setDisableReceivingJobName] = useState(false)
 
   useEffect(() => {
+    if (!receivingTicketId) {
+      setTitle("Create Receiving Ticket");
+    }
+
     setFormsData(setFieldsInAscendingOrder(receivingTicketData.fields));
   }, [receivingTicketData.fields]);
 
 
   useEffect(() => {
+    if (receivingTicketId) {
+      setTitle(`${isClone ? "Clone" : "Editing - "}`);
+    }
+
     setLoading(true);
     axiosInstance()
       .get('/field?resource=Receiving Ticket')
@@ -65,6 +76,9 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
                 setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
                 setLoading(false);
               } else {
+                setTitle(prevState => `${prevState} ${data.receivingJobName}`);
+                setDisableReceivingJobName(true);
+                
                 setReceivingTicketData({
                   fields: fieldsDataForUpdate,
                   initialValues: getObjKeysWithValues(data, fieldsDataForUpdate)
@@ -78,12 +92,13 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
             });
         } else {
           if (productInventoryForReceivingTicket && rentalData) {
+            setDisableReceivingJobName(true);
             const tempInitialData = getObjKeys("", fieldsDataForCreate)
             tempInitialData["productInventory"] = productInventoryForReceivingTicket.map(d => d._id)
             tempInitialData["rentalJob"] = rentalData._id
             tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
             tempInitialData["pickupAddress"] = rentalData.shippingAddress
-            tempInitialData["receivingJobName"] = rentalData?.rentalJobName
+            tempInitialData["receivingJobName"] = `${rentalData?.rentalJobName}_${generateUniqueIdOnly()}`
             setReceivingTicketData({
               fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rentalJob"),
               initialValues: tempInitialData,
@@ -195,7 +210,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
         open={open}
       >
         <CustomDialogHeader
-          title={!receivingTicketId ? 'Create Receiving Ticket' : `${isClone ? 'Clone' : 'Editing'}`}
+          title={title}
           onClose={(e, reason) => {
             if (isFieldNotTouched(receivingTicketData, formValues)) onClose();
             else setShowConfirmDialog(true);
@@ -242,7 +257,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
                           form.name && (
                             <div key={i}>
                               <div className={"detail-box-content"}>
-                                <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
                                 <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
                               </div>
 
@@ -272,6 +287,27 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
                                           imageOrFileUploadCompletePercentage={null}
+                                        />
+                                      ) : field.fieldName === "receivingJobName" ? (
+                                        <FormTypes
+                                          {...field}
+                                          disabled={disableReceivingJobName}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            handleValuesChange({ [name]: value })
+                                            setFieldValue(name, value)
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
                                         />
                                       ) : <FormTypes
                                         receivingTicketId={receivingTicketId}

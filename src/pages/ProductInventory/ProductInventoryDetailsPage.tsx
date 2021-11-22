@@ -18,7 +18,7 @@ import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
 import ReasonDialog from "./ReasonDialog"
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer, DateRenderer, DateTimeRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import ManageRepairJob from '../RepairJob/ManageRepairJob'
 import { Link } from 'react-router-dom'
 import NoDataCell from "../../components/Helpers/NoDataCell";
@@ -139,12 +139,12 @@ const ProductInventoryDetailsPage = () => {
   const frameworkComponents = {
     nameRenderer: NameRenderer,
     commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer,
+    dateTimeRenderer: DateTimeRenderer,
   };
   const columns = [
     { field: "reference", headerName: "Reference", show: true, cellRenderer: "nameRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "date", headerName: "Date & Time", show: true, disabled: true, cellRenderer: "dateRenderer" },
+    { field: "date", headerName: "Date & Time", show: true, disabled: true, cellRenderer: "dateTimeRenderer" },
     { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
     { field: "comments", headerName: "Comments", show: true, cellRenderer: "commonRenderer" },
   ];

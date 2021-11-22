@@ -7,12 +7,13 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, setFieldsInAscendingOrder } from "./../../constants/helpers";
+import { CustomDialogTransition, setFieldsInAscendingOrder, generateUniqueIdOnly } from "./../../constants/helpers";
 import { getObjKeysWithValues, getObjKeys, yupSchema, deliveryTicket, isFieldNotTouched, sidebarResource } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import Skeleton from "@material-ui/lab/Skeleton/Skeleton";
 import FormTypes from "../../components/Helpers/FormTypes";
-import {FaDiceOne} from "react-icons/fa";
+import { FaDiceOne } from "react-icons/fa";
+import moment from "moment";
 
 const ManageDeliveryTicket = (props) => {
 
@@ -57,7 +58,8 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["rental"] = rentalData?._id
                     tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
                     tempInitialData["shippingAddress"] = rentalData.shippingAddress
-                    tempInitialData["deliveryJobName"] = rentalData?.rentalJobName
+                    tempInitialData["deliveryJobName"] = `${rentalData?.rentalJobName}_${generateUniqueIdOnly()}`
+                    tempInitialData["deliveryDate"] = "";
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
                         values: tempInitialData,
@@ -223,6 +225,70 @@ const ManageDeliveryTicket = (props) => {
                                                                         tooltipMessage={field?.tooltipMessage}
                                                                         size="small"
                                                                         imageOrFileUploadCompletePercentage={null}
+                                                                    />
+                                                                ) : field.fieldName === "pick-UpDate" ? (
+                                                                    <FormTypes
+                                                                        {...field}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={(name, value) => {
+                                                                            handleValuesChange({ [name]: value })
+                                                                            setFieldValue(name, value)
+                                                                        }}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
+                                                                        minDate={new Date()}
+                                                                        maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
+                                                                    />
+                                                                ) : field.fieldName === "deliveryDate" ? (
+                                                                    <FormTypes
+                                                                        {...field}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={(name, value) => {
+                                                                            handleValuesChange({ [name]: value })
+                                                                            setFieldValue(name, value)
+                                                                        }}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
+                                                                        minDate={moment(values["pick-UpDate"])}
+                                                                    />
+                                                                ) : field.fieldName === "deliveryJobName" ? (
+                                                                    <FormTypes
+                                                                        {...field}
+                                                                        disabled={true}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={(name, value) => {
+                                                                            handleValuesChange({ [name]: value })
+                                                                            setFieldValue(name, value)
+                                                                        }}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
                                                                     />
                                                                 ) : <FormTypes
                                                                     {...field}

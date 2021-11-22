@@ -36,6 +36,7 @@ import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import HtmlTooltip from '../../components/CustomTooltipTitle'
 import BulkEditInventoryDialog from './BulkEditInventoryDialog'
+import RentalJobQtyDialog from './RentalJobQtyDialog'
 import SerializedAssetStep from "./SerializedAssetStep";
 import moment from "moment";
 import { camelCase, startCase, orderBy } from "lodash";
@@ -68,7 +69,7 @@ const RentalManagementDetailsPage = () => {
   const [headingLbl, setHeadingLbl] = useState("");
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [isUpdating, setUpdating] = useState(false);
-  const [isProductEdit, setIsProductEdit] = useState(false);
+  const [isProductEdit, setIsProductEdit] = useState({ open: false, editType: null });
   const [recordToUpdate, setRecordToUpdate] = useState(null)
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
@@ -89,6 +90,7 @@ const RentalManagementDetailsPage = () => {
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [currency, setCurrency] = useState("USD");
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [allowedToEdit, setAllowedToEdit] = useState(false)
   const [productInventoryForReceivingTicket, setProductInventoryForReceivingTicket] = useState<any[]>([]);
@@ -251,6 +253,7 @@ const RentalManagementDetailsPage = () => {
           (d) => d.currencyCode === data["currency"]
         )?.symbolNative
       );
+      setCurrency(data?.currency);
 
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
 
@@ -562,7 +565,7 @@ const RentalManagementDetailsPage = () => {
 
 
   const handleClick = (rowData) => {
-    setIsProductEdit(true)
+    setIsProductEdit({ open: true, editType: "single" })
     setRecordToUpdate(rowData)
   }
 
@@ -776,9 +779,9 @@ const RentalManagementDetailsPage = () => {
   }
 
   const handleBulkEditData = (values: any) => {
-    let updatedArr = selectedProducts.filter(d => d.type !== "productInPackage")
+    let updatedArr = selectedProducts.filter(d => d.type !== "productInPackage");
 
-    updatedArr = updatedArr.map(d => ({
+    updatedArr = selectedProducts.map(d => ({
       "id": d.id,
       "type": d?.type.toLowerCase(),
       "detail": d.detail,
@@ -790,15 +793,13 @@ const RentalManagementDetailsPage = () => {
       "endDate": values.endDate ? values.endDate : d.endDate,
       "qty": values.qty ? values.qty : d.qty,
       "price": values.price ? values.price : d.price
-    })
-
-    )
+    }))
 
     setUpdating(true)
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": updatedArr })
       .then(() => {
         setUpdating(false)
-        setIsProductEdit(false)
+        setIsProductEdit({ open: false, editType: null })
         fetchProductInventory()
 
       }).catch((error) => {
@@ -816,13 +817,30 @@ const RentalManagementDetailsPage = () => {
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/updateOne`, rest)
       .then(() => {
         setUpdating(false)
-        setIsProductEdit(false)
+        setIsProductEdit({ open: false, editType: null })
         fetchProductInventory()
       }).catch((error) => {
         setUpdating(false)
         toastConfig.setToastConfig(error)
       });
   }
+
+  const handleSingleUpdate = async (values: any) => {
+    setUpdating(true)
+    const { subRows, isValid, qtyToDisplay, ...rest } = values;
+    rest.type = camelCase(rest.type)
+    console.log(rest)
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/updateOne`, rest)
+      .then(() => {
+        setUpdating(false)
+        setIsProductEdit({ open: false, editType: null })
+        fetchProductInventory()
+      }).catch((error) => {
+        setUpdating(false)
+        toastConfig.setToastConfig(error)
+      });
+  }
+
 
   // const checkIsValidRecord = (rowData) => {
   //   if (rowData?.type === "Product") {
@@ -1077,7 +1095,7 @@ const RentalManagementDetailsPage = () => {
                                 color="primary"
                                 size="small"
                                 disabled={!Boolean(selectedProducts && selectedProducts.length)}
-                                onClick={() => setIsProductEdit(true)}
+                                onClick={() => setIsProductEdit({ open: true, editType: "bulk" })}
                               >
                                 Bulk Edit
                               </Button>
@@ -1462,21 +1480,37 @@ const RentalManagementDetailsPage = () => {
           }}
         />
       }
-      {isProductEdit &&
+      {isProductEdit.open &&
         <BulkEditInventoryDialog
           calculatePrice={calculatePricing}
           startDate={rentalManagementData.rentalStartDate}
           endDate={rentalManagementData.rentalEndDate}
           isSaving={isUpdating}
           onClose={() => {
-            setIsProductEdit(false)
+            setIsProductEdit({ open: false, editType: null })
             setRecordToUpdate(null)
           }}
-          submitBulkEdit={selectedProducts.length === 0 ? handleSingleEdit : handleBulkEditData}
+          submitBulkEdit={isProductEdit.editType === "single" ? handleSingleEdit : handleBulkEditData}
           currencySymbol={currencySymbol}
           data={recordToUpdate}
           selectedProducts={selectedProducts}
-        />}
+        />
+        //New Form through Form Builder 
+        // <RentalJobQtyDialog
+        //   calculatePrice={calculatePricing}
+        //   startDate={rentalManagementData.rentalStartDate}
+        //   endDate={rentalManagementData.rentalEndDate}
+        //   isSaving={isUpdating}
+        //   onClose={() => {
+        //     setIsProductEdit(false)
+        //     setRecordToUpdate(null)
+        //   }}
+        //   submitBulkEdit={selectedProducts.length === 0 ? handleSingleUpdate : handleBulkEditData}
+        //   currency={currency}
+        //   data={recordToUpdate}
+        //   selectedProducts={selectedProducts}
+        // />
+      }
       {
         showManageAdditionalCostDialog.open && <ManageAdditionalCostDialog
           open={showManageAdditionalCostDialog.open}

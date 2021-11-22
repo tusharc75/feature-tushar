@@ -12,7 +12,11 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { gridLoadingTimeout, rentalManagement } from "../../constants/helpers";
+import { deliveryTicket, gridLoadingTimeout, rentalManagement, sidebarResource } from "../../constants/helpers";
+import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import { groupBy } from 'lodash';
+
+const renderedFrom = "rentalManagementDetailsPageDeliveryTicket"
 
 const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDeliveryTicketDialog, rentalManagementId, rentalManagementData, fetchRentalData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -23,8 +27,21 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const [downlodingFile, setDownlodingFile] = useState(false)
+  const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false)
+  const [okBtnLoading, setOkBtnLoading] = useState(false)
 
   useEffect(() => {
+    fetchRecords();
+    // eslint-disable-next-line
+  }, [productInventory]);
+
+  const fetchRecords = () => {
+    if (gridApi) {
+      gridApi.deselectAll();
+    }
+
+    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`)
       .then(({ data }) => {
         setAssignedSerializedAsset(data.data)
@@ -38,9 +55,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
                 if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
                   tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
                   tempProductInventory[index]["deliveryTicketId"] = obj?._id
-                  tempProductInventory[index]["hideSelection"] = true
                 }
-
               })
             })
             dispatch({
@@ -56,12 +71,11 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
       }).catch((error) => {
         toastConfig.setToastConfig(error)
       });
-    // eslint-disable-next-line
-  }, [productInventory]);
+  }
 
   const TicketRenderer = (params) => (
     params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
+      <Link className="link text-truncate" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
         {params.value}
       </Link>
     ) : (
@@ -69,12 +83,12 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
     )
   );
   const InventoryRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+    <Link className="link text-truncate" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
       {params.value}
     </Link>
   );
   const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.product.optionValue}`}>
+    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data.product.optionValue}`}>
       {params.value}
     </Link>
   );
@@ -194,12 +208,25 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
         color="primary"
         type="button"
         size="small"
-        disabled={(selectedRecords.length === 0) || currentStep === 4}
+        disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")))}
         onClick={() => {
           handleDeliveryTicketDialog(selectedRecords, warehouse)
         }}
       >
         Create Loading Ticket
+      </Button>
+      <Box mx={1} />
+      <Button
+        variant="contained"
+        color="primary"
+        type="button"
+        size="small"
+        disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
+        onClick={() => {
+          setShowRemoveAssetFromLoadingTicketDialog(true)
+        }}
+      >
+        Remove From Assigned Loading Tickets
       </Button>
     </Box>
 
@@ -219,12 +246,44 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
           allowAction={false}
           loading={loading}
           allowSelection={true}
-          renderedFrom="rentalManagementDetailsPageDeliveryTicket"
+          renderedFrom={renderedFrom}
         />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
 
       }
     </Grid>
+
+    {showRemoveAssetFromLoadingTicketDialog && (
+      <ConfirmationDialog
+        open={showRemoveAssetFromLoadingTicketDialog}
+        message={`Are you sure you want to remove selected records from ${sidebarResource.deliveryTicket}(s) ?`}
+        onClose={() => {
+          setShowRemoveAssetFromLoadingTicketDialog(false);
+        }}
+        onOk={() => {
+          setOkBtnLoading(true);
+
+          const groupByCalls = groupBy(selectedRecords, "deliveryTicketId");
+          let apiCalls = [];
+
+          Object.keys(groupByCalls).forEach((key) => {
+            apiCalls.push(axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
+          })
+
+          Promise.all(apiCalls).then(() => {
+            toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged ${sidebarResource.deliveryTicket}(s)` });
+            fetchRecords();
+          }).catch((error) => {
+            toastConfig.setToastConfig(error);
+          }).finally(() => {
+            setOkBtnLoading(false);
+            setShowRemoveAssetFromLoadingTicketDialog(false);
+          });
+
+        }}
+        okBtnLoading={okBtnLoading}
+      />
+    )}
 
   </>
   );
