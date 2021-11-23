@@ -130,9 +130,7 @@ export const checkStaticField = (renderedFrom, fieldData) => {
 }
 
 export const getSortedColumns = (columns = []) => {
-    let primaryColumn = columns.find(o => o?.primaryField)
-
-    return [primaryColumn, ...columns.filter(a => !(a.primaryField && a.disabled)).sort(function (a, b) {
+    return columns.sort(function (a, b) {
         let columnNameA = a.headerName.toUpperCase(); // ignore upper and lowercase
         let columnNameB = b.headerName.toUpperCase(); // ignore upper and lowercase
         if (columnNameA < columnNameB) {
@@ -142,7 +140,7 @@ export const getSortedColumns = (columns = []) => {
             return 1;
         }
         return 0;
-    })]
+    })
 }
 export const staticColumns = ["createdBy", "updatedBy"]
 export const getColumnData = (title, field, detailScreenRoute = null, hasPopup = false) => {

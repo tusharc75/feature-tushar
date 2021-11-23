@@ -199,10 +199,11 @@ const ContactDetailsPage = (props) => {
         setLoading(false);
       });
   };
+
   const getContacts = (excludeContacts = []) => {
     axiosInstance()
-      .get(`${contactApi}`)
-      .then(({ data: { data, count } }) => {
+      .get(`${contactApi}?entity=${selectedEntity}`)
+      .then(({ data: { data } }) => {
 
         let rows = data.map(u => {
           if (excludeContacts.indexOf(u._id) >= 0) {

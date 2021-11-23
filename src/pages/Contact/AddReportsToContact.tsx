@@ -130,7 +130,7 @@ export default function AddReportsToContact({ open, isSubmitting, onClose,
                         </CustomDialogFooter>
                     </>
                 )}
-            </Formik>)
+            </Formik>
         </Dialog >
     );
 };

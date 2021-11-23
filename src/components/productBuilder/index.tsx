@@ -138,7 +138,6 @@ const ProductBuilder = (props) => {
         ...tempFrameworkComponent,
       }
       setFrameWorkComponent({ ...tempFrameworkComponent })
-      columns = getSortedColumns(columns)
       setColumns([...columns])
       dispatch({ type: "initialize", data: rows, count: rows.length });
       setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
