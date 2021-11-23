@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom'
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button, IconButton } from "@material-ui/core";
-import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
@@ -168,7 +167,6 @@ const Service = ({ currencySymbol, purchaseOrderData ,statusOptions}) => {
         color="primary"
         type="button"
         size="small"
-        startIcon={<AiFillFilePdf />}
       >
         {"Add Service"}
       </Button>

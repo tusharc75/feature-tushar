@@ -21,15 +21,21 @@ import { FaUser } from "react-icons/fa";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { prepareDataForGrid } from "../../constants/helpers"
 import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ResourceTransferDialog from "../../components/ResourceTransferDialog"
+import { isMobile } from 'react-device-detect';
+import { useHistory } from 'react-router-dom'
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 let entityTimeout;
 
 const Entity: FC = () => {
 
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory()
 
   const {
-    state: { permissions },
+    state: { permissions, user },
   }: any = useData();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, entityId: null });
   const [renderCount, setRenderCount] = useState(0);
@@ -39,6 +45,8 @@ const Entity: FC = () => {
   const [selectedEntity, setSelectedEntity] = useState(null);
   const [columns, setColumns] = useState([])
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [deleteEntity, setDeleteEntity] = useState<any>({})
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -133,6 +141,7 @@ const Entity: FC = () => {
       });
   };
 
+
   const ActionsRenderer = params => <>
     <Tooltip
       className={permissions[entityResource]?.isCreate ? "" : "cursor-stop"}
@@ -169,6 +178,16 @@ const Entity: FC = () => {
         </IconButton>
       </Tooltip>
     }
+    <GridDeleteIcon
+      hasDeletePermission={permissions[entityResource]?.isDelete}
+      ownerId={params.data.createdById}
+      userId={user?.user?._id}
+      onDelete={() => {
+        setDeleteEntity(params?.data)
+        setShowDeleteDialog(true)
+      }}
+      entity="entity"
+    />
   </>
 
   const replaceFieldName = (field) => {
@@ -307,12 +326,49 @@ const Entity: FC = () => {
             searchVal={search}
             entityPermissions={permissions[entityResource]}
             onCreate={handleCreate}
+            selectedRecords={selectedRecords}
+            canDelete={selectedRecords[0] && selectedRecords[0].createdById === user?.user?._id}
+            manageDeleteEntity={() => {
+              if (selectedRecords[0] && selectedRecords[0]?._id) {
+                setDeleteEntity(selectedRecords[0])
+                setShowDeleteDialog(true)
+              }
+            }}
             openUserDialog={handleOpenDialog}
             anyEntitySelected={selectedRecords.length > 0} //single select entity can assign user
           />
         </div>
 
-        {
+        {isMobile ?
+          <CustomSwipableList
+            allowSelection={true}
+            allowSwipe={true}
+            permissions={permissions.entity}
+            primaryField={columns?.find(d => d.field === "entityName")}
+            onClick={(d) => {
+              history.push(`${routes.entityDetail.path}/${d._id}`)
+            }}
+            dataRows={dataRows}
+            selectedRecords={selectedRecords}
+            dispatch={dispatch}
+            onEdit={(d) => {
+              history.push(`${routes.entityDetail.path}/${d._id}`)
+            }}
+            extraParamsToCheckDelete={false}
+            onDelete={(d) => {
+
+            }}
+            rowCount={rowCount}
+            page={page}
+            loading={loading}
+            additionalDetails={[]}
+            chips={[]}
+            owerCollaboratorInitialsOrImages=""
+            onCreate={() => { }}
+            showClone={false}
+            onClone={() => { }}
+            renderedFrom={"entity"} />
+          :
           Object.keys(frameWorkComponent).length > 0 ?
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameWorkComponent} setGridApi={setGridApi}
               dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
@@ -321,42 +377,65 @@ const Entity: FC = () => {
             /> : null
         }
 
-        {isOpen?.open && (
-          <ManageEntity
-            open={isOpen}
-            close={handleClose}
-            fetchData={fetchEntity}
-            isNew={true}
-            entityId={isOpen?.entityId}
-            isClone={isOpen?.isClone}
-          />
-        )}
-        {usersDialogOpen && !usersDialogLoding && (
-          <Dialog
-            fullWidth
-            maxWidth="sm"
-            open={usersDialogOpen}
-            onClose={handleCloseDialog}
-            aria-labelledby="assign-roles-dialog"
-          >
-            <AssignUsersDialog
-              entitiesDialogOpen={usersDialogOpen}
-              handleCloseDialog={handleCloseDialog}
-              type="user"
-              ids={selectedEntity ? [selectedEntity] : selectedRecords.map(rec => rec._id)}
-              assignedEntity={users}
-              regionalRole={false}
-              onSuccess={() => {
-                setSelectedEntity(null)
-                handleCloseDialog();
-              }}
+        {
+          isOpen?.open && (
+            <ManageEntity
+              open={isOpen}
+              close={handleClose}
+              fetchData={fetchEntity}
+              isNew={true}
+              entityId={isOpen?.entityId}
+              isClone={isOpen?.isClone}
             />
-          </Dialog>
-        )}
+          )
+        }
+        {
+          usersDialogOpen && !usersDialogLoding && (
+            <Dialog
+              fullWidth
+              maxWidth="sm"
+              open={usersDialogOpen}
+              onClose={handleCloseDialog}
+              aria-labelledby="assign-roles-dialog"
+            >
+              <AssignUsersDialog
+                entitiesDialogOpen={usersDialogOpen}
+                handleCloseDialog={handleCloseDialog}
+                type="user"
+                ids={selectedEntity ? [selectedEntity] : selectedRecords.map(rec => rec._id)}
+                assignedEntity={users}
+                regionalRole={false}
+                onSuccess={() => {
+                  setSelectedEntity(null)
+                  handleCloseDialog();
+                }}
+              />
+            </Dialog>
+          )
+        }
+        {
+          showDeleteDialog ?
+            <ResourceTransferDialog
+              open={true}
+              fromResource={{ ...deleteEntity, name: deleteEntity.entityName ?? '' }}
+              allResourceData={JSON.parse(localStorage.getItem("mappedEntities"))}
+              onClose={() => {
+                setDeleteEntity({})
+                setShowDeleteDialog(false)
+              }}
+              handleDelete={() => {
+                setDeleteEntity({})
+                setShowDeleteDialog(false)
+                fetchEntity()
+              }}
+              resource="Entity"
+              selectedRecords={selectedRecords}
+            />
+            : null
+        }
       </CustomContainer >
     </Fragment >
   );
-
 };
 
 export default Entity;

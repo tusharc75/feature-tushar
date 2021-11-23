@@ -6,7 +6,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import { Box, CircularProgress, IconButton, TextField, Tooltip } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { gridLoadingTimeout, CustomDialogTransition, product, packages } from '../../constants/helpers';
+import { gridLoadingTimeout, CustomDialogTransition, product, packages, isObjectEmpty } from '../../constants/helpers';
 import {
     CommonRenderer,
     CreatedByRenderer,
@@ -35,8 +35,7 @@ const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOr
 
     useEffect(() => {
         if (type === "product") fetchProductInPurchaseOrder();
-        if (type === "package") fetchPackage();
-    }, []);
+    }, [page, limit, filters, sorting, search]);
 
     const columns = type === "product" ? [
         { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
@@ -67,21 +66,24 @@ const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOr
         }
     };
 
-    const fetchPackage = () => {
-        dispatch({ type: "loading", loading: true });
 
+    const fetchProductInPurchaseOrder = () => {
+        dispatch({ type: "loading", loading: true });
         if (gridApi) {
             gridApi.setRowData([]);
         }
-        axiosInstance().get(`${packages.packageApi}`).then(({ data }) => {
-            data.data = data.data?.filter(d => !productInPurchaseOrder.some(obj => obj.id === d._id)).map((u) => ({
+        const queryString = getQueryString();
+        axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
+            data.data = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
+                productCategory: u.productCategory?.optionLabel,
+                priceTemplate: u.priceTemplate?.optionLabel,
                 type: type,
                 quantity: 0,
             }));
             setProductData(data.data)
-            dispatch({ type: "initialize", data: data.data, count: data.data.length });
+            dispatch({ type: "initialize", data: data.data, count: data.count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
@@ -92,31 +94,42 @@ const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOr
         });
     };
 
-    const fetchProductInPurchaseOrder = () => {
-        dispatch({ type: "loading", loading: true });
-
-        if (gridApi) {
-            gridApi.setRowData([]);
+    const getQueryString = () => {
+        let deepFilter = `?page=${page}&limit=${limit}`;
+        const updatedFilters = [{ "field": "serializedProduct", "term": "yes" }];
+        if (!isObjectEmpty(filters)) {
+            Object.keys(filters).forEach(field => {
+                updatedFilters.push({
+                    field: replaceFieldName(field),
+                    term: filters[field].filter
+                })
+            });
         }
-        axiosInstance().get(`${product.api}`).then(({ data }) => {
-            data.data = data.data?.map((u) => ({
-                ...u,
-                id: u._id,
-                productCategory: u.productCategory?.optionLabel,
-                priceTemplate: u.priceTemplate?.optionLabel,
-                type: type,
-                quantity: 0,
-            }));
-            setProductData(data.data)
-            dispatch({ type: "initialize", data: data.data, count: data.data.length });
-            setTimeout(() => {
-                dispatch({ type: "loading", loading: false });
-            }, gridLoadingTimeout);
+        deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
+        if (sorting.length > 0) {
+            deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
+        }
+        if (search) {
+            deepFilter = `${deepFilter}&search=${search}`;
+        }
+        const filterById = []
+        if (filterById.length) {
+            deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + "&filterType=and"
+        }
+        return deepFilter;
+    };
 
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-            dispatch({ type: "loading", loading: false });
-        });
+    const replaceFieldName = (field) => {
+        switch (field) {
+            case "createdBy":
+                return "createdBy.user.concatedName";
+
+            case "updatedBy":
+                return "updatedBy.user.concatedName";
+
+            default:
+                return field;
+        }
     };
 
     const NameRenderer = (params) => (
@@ -214,7 +227,7 @@ const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOr
                                 page={page}
                                 allowAction={false}
                                 loading={loading}
-                                isClientSideGrid={true}
+                                isClientSideGrid={false}
                                 onCellValueChanged={onCellValueChanged}
                             />
                             : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}

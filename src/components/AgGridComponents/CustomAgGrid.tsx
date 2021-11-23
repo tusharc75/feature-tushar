@@ -151,7 +151,8 @@ export default function CustomAgGrid({
   onCellValueChanged = () => { },
   showOnlyShowFilteredRecordSwitch = false,
   idProperty = "_id",
-  allowHeaderSelection = true
+  allowHeaderSelection = true,
+  pinnedBottomRowData = null
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -290,6 +291,9 @@ export default function CustomAgGrid({
         filter={false}
         onCellValueChanged={onCellValueChanged}
         cellRenderer="actionsRenderer"
+        pinnedRowCellRendererFramework={pinnedBottomRowData ? () => (
+          <></>
+        ) : null}
       ></AgGridColumn>
     }
     else return null
@@ -299,7 +303,7 @@ export default function CustomAgGrid({
     return isClientSideGrid ? (
       column.isAction ? getActionColumn() : <AgGridColumn
         key={index}
-        field={column.field}
+        field={column.field ?? null}
         headerName={column.headerName}
         filter={column.filter ?? 'agTextColumnFilter'}
         sortable={column.sortable ?? true}
@@ -312,6 +316,7 @@ export default function CustomAgGrid({
         hide={staticColumns.indexOf(column.field) >= 0 ? checkStaticField(renderedFrom, column.field) :
           (column.hasOwnProperty("show") && !column?.show) ? true : false}
         floatingFilterComponent="customFloatingFilter"
+        valueGetter={column.valueGetter ?? null}
       // floatingFilterComponent={column.floatingFilterComponent ?? null}
       // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
       //   suppressFilterButton: true,
@@ -336,6 +341,7 @@ export default function CustomAgGrid({
           return 0;
         }}
         floatingFilterComponent="customFloatingFilter"
+        valueGetter={column.valueGetter ?? null}
       // floatingFilterComponent={column.floatingFilterComponent ?? null}
       // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
       //   suppressFilterButton: true,
@@ -443,7 +449,7 @@ export default function CustomAgGrid({
               // loadingCellRendererParams={{
               //   loadingMessage: 'One moment please...',
               // }}
-
+              pinnedBottomRowData={pinnedBottomRowData ?? null}
               suppressRowClickSelection={true}
               rowSelection={'multiple'}
               onRowSelected={(event) => {
@@ -513,6 +519,9 @@ export default function CustomAgGrid({
                   checkboxSelection={true}
                   resizable={false}
                   sortable={false}
+                  pinnedRowCellRendererFramework={pinnedBottomRowData ? () => (
+                    <></>
+                  ) : null}
                 ></AgGridColumn>
               )}
 

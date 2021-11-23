@@ -10,6 +10,7 @@ import { init } from '@sentry/react';
 import 'ag-grid-community/dist/styles/ag-grid.min.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './styles/index.scss';
+import './styles/custom-react-table.scss';
 import './styles/common-styles.scss';
 import './styles/material-component.scss';
 import './styles/responsive-styles.scss';

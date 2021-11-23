@@ -27,9 +27,11 @@ import { isMobile, isTablet } from "react-device-detect";
 import SignatureDialog from '../../components/Helpers/SignatureDialog';
 import ViewSignsDialog from './ViewSignsDialog'
 
+const renderedFrom = "deliveryTicketDetailInventoryPage"
+
 const mappedStatus = {
-  "Sign-off - Dispatched": "In-Transit",
-  "Sign-off - Received": "Delivered"
+  "Sign-off - Dispatch": "In-Transit",
+  "Sign-off - Receive": "Delivered"
 }
 
 export default function DeliveryTicketDetail(props) {
@@ -37,7 +39,7 @@ export default function DeliveryTicketDetail(props) {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, permissions }
   }: any = useData();
   const [deliveryTicketData, setDeliveryTicketData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -52,7 +54,10 @@ export default function DeliveryTicketDetail(props) {
   const [gridApi, setGridApi] = useState(null);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, page, limit, pageSizes } = state;
+  const [okBtnLoading, setOkBtnLoading] = useState(false)
+  const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false)
+  const { dataRows, rowCount, page, limit, pageSizes, selectedRecords } = state;
+  const [canEdit, setCanEdit] = useState(false)
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
@@ -63,12 +68,12 @@ export default function DeliveryTicketDetail(props) {
   }, [id]);
 
   const columns = [
-    { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "nameRenderer" },
+    { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
     { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
     { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "bornOnDate", headerName: "Born on Date", show: true, cellRenderer: "dateRenderer" },
     { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "dateRenderer" },
@@ -111,12 +116,24 @@ export default function DeliveryTicketDetail(props) {
   }, [deliveryTicketData?.deliveryJobName, deliveryTicketData?.deliveryPerson, deliveryTicketData?.deliveryDate]);
 
   const fetchDeliveryTicketData = () => {
+    if (gridApi) {
+      gridApi.deselectAll();
+    }
+    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+
     if (selectedEntity) {
       setLoading(true);
       axiosInstance()
         .get(`${deliveryTicketApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
           setDeliveryTicketData(data)
+          
+          setCanEdit(
+            [...(data?.collaborator ?? []), data?.owner ?? {}].some(
+              (obj) => obj.optionValue === user.user._id
+            )
+          );
+
           setSignatures(data?.signatures || []);
           if (data?.productInventory && data?.productInventory.length) {
             let ids = data?.productInventory.map(o => o?.optionValue)
@@ -132,6 +149,10 @@ export default function DeliveryTicketDetail(props) {
   };
 
   const fetchProductInventory = (productInventories) => {
+    if (!productInventories) {
+      productInventories = deliveryTicketData?.productInventory?.map(o => o?.optionValue)
+    }
+
     dispatch({ type: "loading", loading: true });
 
     if (gridApi) {
@@ -195,9 +216,9 @@ export default function DeliveryTicketDetail(props) {
     }
   };
 
-  // const handleOpenUpdateDialog = () => {
-  //   setOpenUpdateDialog(true);
-  // };
+  const handleOpenUpdateDialog = () => {
+    setOpenUpdateDialog(true);
+  };
 
   const NameRenderer = (params) => (
     <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
@@ -233,15 +254,13 @@ export default function DeliveryTicketDetail(props) {
     }
   }
 
-
-
-  let label = deliveryTicketData ? deliveryTicketData?.status === "New" ? "Sign-off - Dispatched" :
-    (deliveryTicketData?.status === "In-Transit") ? "Sign-off - Received" : "" : ""
+  let label = deliveryTicketData ? deliveryTicketData?.status === "New" ? "Sign-off - Dispatch" :
+    (deliveryTicketData?.status === "In-Transit") ? "Sign-off - Receive" : "" : ""
 
   const handleSignature = (signedData) => {
     const { type, sign: newSign } = signedData;
     let stateArr = signatures;
-    stateArr.push({ type, signature: newSign, status: label === "Sign-off - Dispatched" ? "Start Delivery" : "Sign-Off" });
+    stateArr.push({ type, signature: newSign, status: label === "Sign-off - Dispatch" ? "Start Delivery" : "Sign-Off" });
     setSignatures(stateArr)
 
     if (stateArr.length === 2 || stateArr.length === 4) {
@@ -295,7 +314,7 @@ export default function DeliveryTicketDetail(props) {
                   mainPoints={deliveryTicketData ? getMainPoints : ""}
                   showHeading={true}
                 >
-                  {/* {permissions?.deliveryTicket?.isUpdate && (
+                  {permissions?.deliveryTicket?.isUpdate && canEdit && (
                     <Button
                       variant="contained"
                       color="primary"
@@ -305,6 +324,7 @@ export default function DeliveryTicketDetail(props) {
                       Edit
                     </Button>
                   )}
+                  {/* 
                   {(permissions?.deliveryTicket?.isDelete &&
                     deliveryTicketData?.createdBy?.user?._id === user?.user._id) && (
                       <Button
@@ -317,7 +337,7 @@ export default function DeliveryTicketDetail(props) {
                       </Button>
                     )} */}
                   {
-                    deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id ?
+                    deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id || canEdit ?
                       label !== "" ?
                         <Button
                           variant="contained"
@@ -367,14 +387,28 @@ export default function DeliveryTicketDetail(props) {
                     dataRows && dataRows.length ?
                       <>
                         <Grid container spacing={1} className="p-2">
-                          <Grid item xs={12} className="mt-2">
+                          <Grid item xs={12} className="mt-2 d-flex gap-2">
                             <Typography variant="subtitle1" className="font-weight-bold text-primary">
                               Serialized Assets
                             </Typography>
+
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              type="button"
+                              size="small"
+                              disabled={selectedRecords.length === 0}
+                              onClick={() => {
+                                setShowRemoveAssetFromLoadingTicketDialog(true)
+                              }}
+                            >
+                              Remove Serialized Assets
+                            </Button>
+
                           </Grid>
                           <Grid item xs={12}>
                             <CustomAgGrid
-                              allowSelection={false}
+                              allowSelection={true}
                               allowAction={false}
                               columns={columns}
                               dataRows={dataRows}
@@ -387,7 +421,7 @@ export default function DeliveryTicketDetail(props) {
                               page={page}
                               actionWidth={150}
                               loading={false}
-                              renderedFrom="deliveryTicketDetailInventoryPage"
+                              renderedFrom={renderedFrom}
                               refreshGrid={fetchProductInventory}
                             />
                           </Grid>
@@ -464,7 +498,7 @@ export default function DeliveryTicketDetail(props) {
           <SignatureDialog
             submitting={submittingSign}
             label={label}
-            steps={label === "Sign-off - Dispatched" ? ["Supervisor", "Delivery Person"] : ["Delivery Person", "Receiver"]}
+            steps={label === "Sign-off - Dispatch" ? ["Supervisor", "Delivery Person"] : ["Delivery Person", "Receiver"]}
             forDelivery={true}
             open={true}
             onClose={() => {
@@ -478,6 +512,36 @@ export default function DeliveryTicketDetail(props) {
             signatures={deliveryTicketData?.signatures}
             close={() => setOpenSigns(false)}
           />}
+
+        {showRemoveAssetFromLoadingTicketDialog && (
+          <ConfirmationDialog
+            open={showRemoveAssetFromLoadingTicketDialog}
+            message={`Are you sure you want to remove selected serialized asset(s) ?`}
+            onClose={() => {
+              setShowRemoveAssetFromLoadingTicketDialog(false);
+            }}
+            onOk={() => {
+              setOkBtnLoading(true);
+
+              axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${id}/remove-assets`, { ids: selectedRecords.map(m => m._id) })
+                .then(() => {
+                  toastConfig.setToastConfig({ open: true, type: "success", message: `Selected serialized asset(s) removed` });
+                  dispatch({
+                    type: 'selection',
+                    selectedRecords: []
+                  });
+                  fetchDeliveryTicketData();
+                }).catch((error) => {
+                  toastConfig.setToastConfig(error);
+                }).finally(() => {
+                  setOkBtnLoading(false);
+                  setShowRemoveAssetFromLoadingTicketDialog(false);
+                });
+
+            }}
+            okBtnLoading={okBtnLoading}
+          />
+        )}
       </Fragment>
     </>
   );

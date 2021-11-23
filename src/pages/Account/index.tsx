@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useReducer } from 'react';
 import { useData } from '../../StateProvider/Provider';
 import { Button, Menu, MenuItem, Tooltip, IconButton, Grid, Chip, MenuList } from '@material-ui/core';
 import ReactGa from 'react-ga';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import { ExpandMore, AddOutlined } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
@@ -39,6 +39,8 @@ import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import { HiBadgeCheck } from "react-icons/hi"
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
+import { useLocation } from 'react-router-dom';
+import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 
@@ -57,6 +59,14 @@ const options = ['All', 'Approved', 'Disapproved'];
 
 let accountTimeout;
 export default function Account(props) {
+  const location = useLocation();
+  let queryParams = queryString.parse(location.search);
+  let queryType: string = queryParams.type as string;
+  let queryApproval: string = queryParams.approval as string;
+  let querySearch: string = queryParams.search as string;
+  let queryPage: string = queryParams.page as string;
+  let queryColFilter: string = queryParams.colFilter as string;
+
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -69,12 +79,15 @@ export default function Account(props) {
   const history = useHistory();
   const [cloneId, setCloneId] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
-  const [type, setType] = useState(options[0]);
+  const [type, setType] = useState(options[queryApproval === 'Approved' ? 1 : queryApproval === 'Disapproved' ? 2 : 0]);
   const [renderCount, setRenderCount] = useState(0);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
   const [isAccDialogVisible, setIsAccDialogVisible] = useState(false);
   const [selectedType, setselectedType] = useState(1);
+  const [count, setCount] = useState(0);
+  const [checkColName, setCheckColName] = useState('');
+  const [checkColValue, setCheckColValue] = useState('');
   const [accountId, setAccountId] = useState(null)
   const [showEntityDialog, setShowEntityDialog] = useState(false)
 
@@ -101,9 +114,10 @@ export default function Account(props) {
   const [open, setOpen] = React.useState(false);
   const [entities, setEntities] = useState([])
   const anchorRef = React.useRef<HTMLDivElement>(null);
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
-  const [filter, setFilter] = useState('All Accounts');
+  const [selectedIndex, setSelectedIndex] = React.useState(queryApproval === 'Approved' ? 1 : queryApproval === 'Disapproved' ? 2 : 0);
+  const [filter, setFilter] = useState(queryType ? queryType : 'All Accounts');
   const [accountNameForClone, setAccountNameForClone] = useState('');
+  
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -112,7 +126,7 @@ export default function Account(props) {
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
+
   const columnState = JSON.parse(localStorage.getItem(accountResource));
 
 
@@ -125,6 +139,12 @@ export default function Account(props) {
       });
     });
   }
+
+  useEffect(() => {
+    if (queryPage === undefined) {
+      history.push(`?page=${page}`)
+    }
+  }, [page, queryPage]);
 
   useEffect(() => {
     fetchGridColumns()
@@ -190,6 +210,12 @@ export default function Account(props) {
       columns.push(checkStaticField(routes.projectSales.title, field))
     })
     setColumns([...columns])
+
+    if (queryColFilter !== undefined && (Object.keys(filters).length === 0)) {
+      let savedFilter = JSON.parse(sessionStorage.getItem("filters"));
+      dispatch({ type: 'filter', filters: savedFilter });
+      setCount(1);
+    }
   }
 
   useEffect(() => {
@@ -214,7 +240,88 @@ export default function Account(props) {
     if (renderCount > 0) {
       fetchAccounts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, type, filters, sorting, selectedEntity]);
+  }, [page, limit, selectedType, type, filters, sorting, selectedEntity, location]);
+
+
+
+  useEffect(() => {
+    if (querySearch) {
+      dispatch({ type: 'search', search: querySearch });
+
+    }
+  }, [querySearch])
+
+
+  useEffect(() => {
+    if (Object.keys(filters).length > 0 && count === 0) {
+
+      sessionStorage.setItem("filters", JSON.stringify(filters))
+
+      {
+        Object.keys(filters).map(function (key) {
+          let colName = key;
+          let colValue = filters[key].filter
+          let query = queryColFilter !== undefined ? queryColFilter.substring(1, queryColFilter.length - 1) : `[{colName=${colName},colValue=${colValue}}]`;
+
+          if (queryColFilter === undefined) {
+            history.push(queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${query}` : queryType ? `?page=${page}&type=${queryType}&colFilter=${query}` : queryApproval ? `?page=${page}&approval=${queryApproval}&colFilter=${query}` : `?page=${page}&colFilter=${query}`);
+            setCheckColName(colName);
+            setCheckColValue(colValue);
+
+          }
+          if (queryColFilter !== undefined && checkColName === colName) {
+            if (queryColFilter.length > 45) {
+              let reducedqueryColFilter = queryColFilter.substring(50)
+              let leftqueryColFilter = queryColFilter.substring(0, 50);
+              let replacedQuery = reducedqueryColFilter.replace(checkColValue, colValue);
+              let combineQuery = leftqueryColFilter + replacedQuery;
+              history.push(queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${combineQuery}` : queryType ? `?page=${page}&type=${queryType}&colFilter=${combineQuery}` : queryApproval ? `?page=${page}&approval=${queryApproval}&colFilter=${combineQuery}` : `?page=${page}&colFilter=${combineQuery}`);
+              setCheckColName(colName);
+              setCheckColValue(colValue);
+            }
+
+            else {
+
+              history.push(queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=[{colName=${colName},colValue=${colValue}}]` : queryType ? `?page=${page}&type=${queryType}&colFilter=[{colName=${colName},colValue=${colValue}}]` : queryApproval ? `?page=${page}&approval=${queryApproval}&colFilter=[{colName=${colName},colValue=${colValue}}]` : `?page=${page}&colFilter=[{colName=${colName},colValue=${colValue}}]`);
+            }
+          }
+          if (queryColFilter !== undefined && checkColName !== colName) {
+
+            if (queryColFilter.length > 42 && Object.keys(filters).length === 1) {
+              history.push(queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}` : queryType ? `?page=${page}&type=${queryType}` : queryApproval ? `?page=${page}&approval=${queryApproval}` : `?page=${page}`)
+
+            }
+            else if (queryColFilter.length > 42 && queryColFilter.length < 84 && queryColFilter.includes(colName) === true) {
+              let newqueryColFilter = queryColFilter.substring(42, 83);
+              history.push(`?page=${page}&colFilter=[{colName=${colName},colValue=${colValue}}${newqueryColFilter}]`);
+            }
+
+
+
+            else {
+
+              let updatedQuery = `[${query}` + `,{colName=${colName},colValue=${colValue}}]`
+
+              history.push(queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${updatedQuery}` : queryType ? `?page=${page}&type=${queryType}&colFilter=${updatedQuery}` : queryApproval ? `?page=${page}&approval=${queryApproval}&colFilter=${updatedQuery}` : `?page=${page}&colFilter=${updatedQuery}`);
+              setCheckColName(colName)
+              setCheckColValue(colValue)
+            }
+          }
+        })
+      }
+    }
+  }, [filters])
+
+
+  useEffect(() => {
+    if (queryColFilter === undefined) {
+      sessionStorage.removeItem("filters");
+
+    }
+  }, [queryColFilter])
+
+
+
 
   const AccountNameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
@@ -439,7 +546,8 @@ export default function Account(props) {
   };
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterAccounts=${selectedType}`;
+
+    let deepFilter = `?page=${page}&limit=${limit}&filterAccounts=${queryType === "My Accounts" ? 2 : selectedType}`;
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -555,6 +663,7 @@ export default function Account(props) {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
+    history.push(`?page=${page}&search=${search}`)
   };
 
   // ****** ACTIONS BUTTON STUFF *********
@@ -732,6 +841,81 @@ export default function Account(props) {
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
               <div className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
                 <MdAccountCircle className="headerLogo" /> <span id="resourceHeader" className="listingHeader">{routes[accountResource].title}</span>
+                <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
+                  {AccTypes && (
+                    <ToggleButtonGroup
+                      id="resourceTypeSelector"
+                      size="small"
+                      className={`ml-8 ${accountClass.accountActions}`}
+                      value={filter}
+                      exclusive
+                      onChange={handleFilter}
+                    >
+                      {AccTypes.map((k: any, index) => {
+                        return (
+                          <ToggleButton value={k.key} key={index}>
+                            <Link to={`/${accountRoute}?page=${page}&type=${encodeURIComponent(k.key)}`} >
+                              {k.key}
+                            </Link>
+
+                          </ToggleButton>
+                        );
+                      })}
+                    </ToggleButtonGroup>
+                  )}
+                  <ButtonGroup
+                    id="approveDisapprove"
+                    size="small"
+                    className={accountClass.accountActions}
+                    variant="outlined"
+                    color="primary"
+                    ref={anchorRef}
+                    aria-label="small outlined button group"
+                  >
+                    <Button>{queryApproval ? queryApproval : options[selectedIndex]}</Button>
+                    <Button
+                      color="primary"
+                      size="small"
+                      aria-controls={open ? 'split-button-menu' : undefined}
+                      aria-expanded={open ? 'true' : undefined}
+                      aria-label="select merge strategy"
+                      aria-haspopup="menu"
+                      onClick={handleToggle}
+                    >
+                      <ArrowDropDownIcon />
+                    </Button>
+                  </ButtonGroup>
+                  <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
+                    {({ TransitionProps, placement }) => (
+                      <Grow
+                        {...TransitionProps}
+                        style={{
+                          transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
+                        }}
+                      >
+                        <Paper>
+                          <ClickAwayListener onClickAway={handleClose}>
+                            <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
+                              {options.map((option, index) => (
+                                <MenuItem
+                                  key={option}
+                                  selected={index === selectedIndex}
+                                  onClick={(event) => handleMenuItemClick(event, index)}
+                                  style={{ color: 'black' }}
+                                >
+                                  <Link to={queryType ? `/${accountRoute}?page=${page}&type=${queryType}&approval=${encodeURIComponent(option)}` : `/${accountRoute}?page=${page}&approval=${encodeURIComponent(option)}`}>
+                                    {option}
+                                  </Link>
+
+                                </MenuItem>
+                              ))}
+                            </MenuList>
+                          </ClickAwayListener>
+                        </Paper>
+                      </Grow>
+                    )}
+                  </Popper>
+                </div>
 
                 {
                   isOffline

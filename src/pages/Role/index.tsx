@@ -19,6 +19,9 @@ import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from "../../comp
 import AssignUserDialog from "../../components/AssignRolesDialog/AssignUserDialog";
 import AssignRegionalRolesUserDialog from "../../components/AssignRolesDialog/AssignRegionalRolesUserDialog";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { useHistory } from 'react-router-dom'
+import { isMobile } from 'react-device-detect';
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -115,6 +118,7 @@ let roleTimeout;
 
 const Roles: FC = () => {
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory()
   const {
     state: { permissions, selectedEntity },
   }: any = useData();
@@ -443,12 +447,39 @@ const Roles: FC = () => {
             />
           </div>
 
-          <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
+          {isMobile ? <CustomSwipableList
+            allowSelection={true}
+            allowSwipe={true}
+            permissions={permissions.role}
+            primaryField={columns?.find(d => d.field === "name")}
+            onClick={(d) => {
+              history.push(`${routes.roleDetail.path}/${d._id}`)
+            }}
+            dataRows={dataRows}
+            selectedRecords={selectedRecords}
+            dispatch={dispatch}
+            onEdit={(d) => {
+              history.push(`${routes.roleDetail.path}/${d._id}`)
+            }}
+            extraParamsToCheckDelete={false}
+            onDelete={(d) => {
+
+            }}
+            rowCount={rowCount}
+            page={page}
             loading={loading}
-            refreshGrid={fetchRoles}
-            renderedFrom={routes.role.title}
-          />
+            additionalDetails={[]}
+            chips={[]}
+            owerCollaboratorInitialsOrImages=""
+            onCreate={() => { }}
+            showClone={false}
+            onClone={() => { }}
+            renderedFrom={"role"} /> : <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+              dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
+              loading={loading}
+              refreshGrid={fetchRoles}
+              renderedFrom={routes.role.title}
+          />}
 
         </CustomContainer>
         {showDeleteWarningConfirmBox ? (
