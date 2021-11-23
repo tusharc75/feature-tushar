@@ -9,12 +9,16 @@ import {
   Grid,
   Typography,
   Paper,
+  Chip,
+  Box
 } from "@material-ui/core";
 import { Check } from "@material-ui/icons";
 import { getUniqueCurrencies } from "../../constants/helpers";
 import { FcCancel } from "react-icons/fc";
 import { FaHourglassHalf } from "react-icons/fa";
 import { Link } from "react-router-dom";
+
+import HtmlTooltip from '../../components/CustomTooltipTitle'
 import routes from "./Routes";
 
 const useStyles = makeStyles((theme) => ({
@@ -202,8 +206,8 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
           >
             {
               quoteDOA ?
-                (quoteDOA.map((label) => (
-                  <Step key={label.users}>
+                (quoteDOA.map((label,index) => (
+                  <Step key={index}>
                     <StepLabel StepIconComponent={label?.status === "approve" ?
                       QontoStepIconForApprove
                       : label?.status === "pending" ?
@@ -241,20 +245,28 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
                         }
                         {/* <div style={{ color: "#09445A" }}>
                         <Link
-                          title={label?.name}
+                          title={`${doa.users[0]?.firstName} ${doa.users[0]?.lastName}`}
                           className="link"
-                          to={`${routes.userDetail.path}/${label?.id}`}
+                          to={`${routes.userDetail.path}/${doa.users[0]?.id}`}
                         >
-                          {`${label?.firstName} ${label?.lastName}`}
+                          {`${doa.users[0]?.firstName} ${doa.users[0]?.lastName}`}
                         </Link>
+                        {doa?.users.length - 1 > 0
+                          && <Box component="span" ml={1}>
+                            <HtmlTooltip title={doa?.users.slice(1).map((u, i) => (
+                              <p key={i}>{`${u.firstName} ${u.lastName}`}</p>
+                            ))}>
+                              <Chip size="small" color='primary' variant="outlined" label={`+ ${doa?.users.length - 1} More`} />
+                            </HtmlTooltip>
+                          </Box>}
                       </div>
-                      {label?.proxyBy && <div style={{ color: "#09445A" }}>
+                      {doa?.proxyBy && <div style={{ color: "#09445A" }}>
                         <Link
-                          title={label?.proxyBy?.firstName}
+                          title={doa?.users[0]?.proxyBy?.firstName}
                           className="link"
-                          to={`${routes.userDetail.path}/${label?.id}`}
+                          to={`${routes.userDetail.path}/${doa?.users[0]?.id}`}
                         >
-                          {`(${label?.proxyBy?.firstName} ${label?.proxyBy?.lastName})`}
+                          {`(${doa?.users[0]?.proxyBy?.firstName} ${doa?.users[0]?.proxyBy?.lastName})`}
                         </Link>
                       </div>
                       } */}

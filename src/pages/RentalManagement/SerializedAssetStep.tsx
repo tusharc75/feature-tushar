@@ -1,5 +1,5 @@
+import { useState, useEffect, useContext, useMemo } from "react";
 import Box from "@material-ui/core/Box/Box";
-import { useState, useEffect, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import routes from "../../components/Helpers/Routes";
@@ -281,13 +281,13 @@ const SerializedAssetStep = (props) => {
         getAssetAssignedValues(row)
       )
     },
-    {
-      accessor: 'qty',
-      Header: 'Quantity',
-      Cell: ({ row }) => (
-        row.original.qty ? <p>{row.original.qty}</p> : <NoDataCell />
-      )
-    },
+    // {
+    //   accessor: 'qty',
+    //   Header: 'Quantity',
+    //   Cell: ({ row }) => (
+    //     row.original.qty ? <p>{row.original.qty}</p> : <NoDataCell />
+    //   )
+    // },
     {
       accessor: 'startDate',
       Header: 'Start Date',
@@ -325,7 +325,16 @@ const SerializedAssetStep = (props) => {
       Header: `Price (${currencySymbol})`,
       Cell: ({ row }) => (
         row.original.price ? <p>{row.original.price}</p> : <NoDataCell />
-      )
+      ),
+      Footer: info => {
+        const total = useMemo(
+          () =>
+            info.rows.filter(f => f.values.hasOwnProperty("price") && !isNaN(f.values.price)).reduce((sum, row) => row.values.price + sum, 0),
+          [info.rows]
+        )
+
+        return <>{currencySymbol} {total}</>
+      }
     },
     {
       accessor: 'discount',
@@ -339,7 +348,16 @@ const SerializedAssetStep = (props) => {
       Header: `Final Price (${currencySymbol})`,
       Cell: ({ row }) => (
         row.original.finalPrice ? <p>{row.original.finalPrice}</p> : <NoDataCell />
-      )
+      ),
+      Footer: info => {
+        const total = useMemo(
+          () =>
+            info.rows.filter(f => f.values.hasOwnProperty("finalPrice") && !isNaN(f.values.finalPrice)).reduce((sum, row) => row.values.finalPrice + sum, 0),
+          [info.rows]
+        )
+
+        return <>{currencySymbol} {total}</>
+      }
     }
   ]
 
