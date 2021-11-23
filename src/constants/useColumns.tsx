@@ -133,7 +133,19 @@ export const checkStaticField = (renderedFrom, fieldData) => {
     }
     return fieldData
 }
-
+export const getSortedColumns = (columns = []) => {
+    return columns.sort(function (a, b) {
+        let columnNameA = a.headerName.toUpperCase(); // ignore upper and lowercase
+        let columnNameB = b.headerName.toUpperCase(); // ignore upper and lowercase
+        if (columnNameA < columnNameB) {
+            return -1;
+        }
+        if (columnNameA > columnNameB) {
+            return 1;
+        }
+        return 0;
+    })
+}
 export const staticColumns = ["createdBy", "updatedBy"]
 export default function useColumns(){
     const {
