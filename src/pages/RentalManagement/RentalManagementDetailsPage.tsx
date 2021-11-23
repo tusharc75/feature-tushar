@@ -36,9 +36,10 @@ import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import HtmlTooltip from '../../components/CustomTooltipTitle'
 import BulkEditInventoryDialog from './BulkEditInventoryDialog'
+import RentalJobQtyDialog from './RentalJobQtyDialog'
 import SerializedAssetStep from "./SerializedAssetStep";
 import moment from "moment";
-import { camelCase, startCase, orderBy } from "lodash";
+import { camelCase, startCase, orderBy, sum } from "lodash";
 import queryString from "query-string";
 import PackageProductsDialog from './PackageProductsDialog'
 import { FaWpforms } from "react-icons/fa";
@@ -68,7 +69,7 @@ const RentalManagementDetailsPage = () => {
   const [headingLbl, setHeadingLbl] = useState("");
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [isUpdating, setUpdating] = useState(false);
-  const [isProductEdit, setIsProductEdit] = useState(false);
+  const [isProductEdit, setIsProductEdit] = useState({ open: false, editType: null });
   const [recordToUpdate, setRecordToUpdate] = useState(null)
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
@@ -89,6 +90,7 @@ const RentalManagementDetailsPage = () => {
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [currency, setCurrency] = useState("USD");
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [allowedToEdit, setAllowedToEdit] = useState(false)
   const [productInventoryForReceivingTicket, setProductInventoryForReceivingTicket] = useState<any[]>([]);
@@ -104,7 +106,18 @@ const RentalManagementDetailsPage = () => {
     record: null,
   })
 
+  const [dataForNewTabData, setDataForNewTabData] = useState([]);
+
   const { pricingConditionApi } = pricingCondition
+
+  const [additionalCostDeleteConfirmation, setAdditionalCostDeleteConfirmation] = useState({ open: false, id: null })
+  const costTypeList = ["Repair", "Delivery", "Assembly"]
+  const uomTypeList = ["Pcs"]
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+  const [pinnedBottomRowData, setPinnedBottomRowData] = useState([]);
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
@@ -130,6 +143,23 @@ const RentalManagementDetailsPage = () => {
     }
     // eslint-disable-next-line
   }, [id]);
+
+  useEffect(() => {
+    // const currencyCode = getUniqueCurrencies().find(
+    //   (d) => d.currencyCode === rentalManagementData["currency"]
+    // )?.symbolNative ?? "";
+
+    if (additionalCost && additionalCost.length > 0) {
+      setPinnedBottomRowData([{
+        amount: `${currencySymbol} ${sum(additionalCost.map(s => s.amount))}`
+      }])
+    } else {
+      setPinnedBottomRowData([{
+        amount: `${currencySymbol} 0`
+      }])
+    }
+
+  }, [currencySymbol, additionalCost])
 
   useEffect(() => {
     if (currentStep === 0) {
@@ -234,7 +264,7 @@ const RentalManagementDetailsPage = () => {
       setHeadingLbl(data.rentalJobName);
       setCustomizedRoutes([routes.rentalManagement, { title: `${data.rentalJobName}` }]);
       setRentalManagementData(data);
-      setAdditionalCost(data?.additionalCost?.map((d, index) => { return { "id": d?._id, "type": d.type, "amount": d?.value, "description": d?.description, "uom": d.uom, "qty": d.qty } }) ?? [])
+      setAdditionalCost(data?.additionalCost?.map((d, index) => { return { "id": d?._id, rowIndex: index + 1, "type": d.type, "amount": d?.value, "description": d?.description, "uom": d.uom, "qty": d.qty } }) ?? [])
       setCurrentStep(rentalProcessSteps.indexOf(data?.processStatus) !== -1 ? rentalProcessSteps.indexOf(data?.processStatus) : 0)
       setLoadingDetails(false);
       setCurrencySymbol(
@@ -242,6 +272,7 @@ const RentalManagementDetailsPage = () => {
           (d) => d.currencyCode === data["currency"]
         )?.symbolNative
       );
+      setCurrency(data?.currency);
 
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
 
@@ -306,12 +337,6 @@ const RentalManagementDetailsPage = () => {
     setShowReceivingTicketDialog(true)
   }
 
-  const costTypeList = ["Repair", "Delivery", "Assembly"]
-  const uomTypeList = ["Pcs"]
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
   //  This is copied method from helpers.ts as wee need some modification for this screen only
   const translateDataToTreeForProducts = (data, parentProperty, childProperty, childrenPropertyToStore) => {
     let parents = data.filter(value => value[parentProperty] == 'undefined' || value[parentProperty] == null)
@@ -333,7 +358,7 @@ const RentalManagementDetailsPage = () => {
             translator([current], temp)
 
             //  Check validation for products in package - Start
-            current["qtyToDisplay"] = `${current.qty} x ${parent.qty} = ${current.qty * parent.qty}`
+            current["qtyToDisplay"] = `${parent.qty} x ${current.qty} = ${current.qty * parent.qty}`
 
             if (current?.finalPrice !== null && current?.finalPrice !== undefined && typeof current?.finalPrice !== "string" && current?.finalPrice !== 0) {
               current["isValid"] = true;
@@ -360,17 +385,17 @@ const RentalManagementDetailsPage = () => {
   const fetchProductInventory = () => {
 
     let tempInventory = []
-    dispatch({ type: "loading", loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+    // dispatch({ type: "loading", loading: true });
+    // if (gridApi) {
+    //   gridApi.setRowData([]);
+    // }
 
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/products-packages`).then(({ data }) => {
       data.data?.products.map((u: any, index) => (tempInventory.push({
         ...u,
         id: u._id,
         productCategory: u.productCategory?.optionLabel,
-        isValidRecord: true,
+        isValid: true,
         qtyToDisplay: u.qty
         // package: u.hasOwnProperty("package") ? u.package.packageName : "",
         // packageId: u.hasOwnProperty("package") ? u.package._id : ""
@@ -399,20 +424,20 @@ const RentalManagementDetailsPage = () => {
 
       const newDataForReactTable = [...translateDataToTreeForProducts(newData ? [...newData] : [], "parent", "treeId", "subRows")];
 
-      // console.log(newDataForReactTable)
+      setDataForNewTabData([...orderBy(newDataForReactTable, ["order"], ["asc"])]);
 
-      dispatch({ type: "initialize", data: [], count: 0 })
-      dispatch({ type: "initialize", data: [...orderBy(newDataForReactTable, ["order"], ["asc"])], count: newDataForReactTable.length });
+      // dispatch({ type: "initialize", data: [], count: 0 })
+      // dispatch({ type: "initialize", data: [...orderBy(newDataForReactTable, ["order"], ["asc"])], count: newDataForReactTable.length });
 
-      setTimeout(() => {
-        dispatch({ type: "loading", loading: false });
-      }, gridLoadingTimeout);
+      // setTimeout(() => {
+      //   dispatch({ type: "loading", loading: false });
+      // }, gridLoadingTimeout);
 
       setSelectedProducts([])
 
     }).catch((error) => {
       toastConfig.setToastConfig(error);
-      dispatch({ type: "loading", loading: false });
+      // dispatch({ type: "loading", loading: false });
     });
   };
 
@@ -545,7 +570,7 @@ const RentalManagementDetailsPage = () => {
       ownerId={user?.user?._id}
       userId={user?.user?._id}
       onDelete={() => {
-        setAdditionalCost(prevState => [...prevState].filter(f => f.id !== params.data.id))
+        setAdditionalCostDeleteConfirmation({ open: true, id: params.data.id })
       }}
       entity=""
     />
@@ -559,7 +584,7 @@ const RentalManagementDetailsPage = () => {
 
 
   const handleClick = (rowData) => {
-    setIsProductEdit(true)
+    setIsProductEdit({ open: true, editType: "single" })
     setRecordToUpdate(rowData)
   }
 
@@ -653,21 +678,21 @@ const RentalManagementDetailsPage = () => {
           [info.rows]
         )
 
-        return <>{total}</>
+        return <>{currencySymbol} {total}</>
       }
     },
     {
       accessor: 'discount',
       Header: 'Discount (%)',
       Cell: ({ row }) => (
-        row.original.discount === 0 ? <NoDataCell /> : <p>{row.original.discount}</p>
+        row.original.discount ? <p>{row.original.discount}</p> : <NoDataCell />
       )
     },
     {
       accessor: 'finalPrice',
       Header: `Final Price (${currencySymbol})`,
       Cell: ({ row }) => (
-        row.original.finalPrice === 0 ? <NoDataCell /> : <p>{row.original.finalPrice}</p>
+        row.original.finalPrice ? <p>{row.original.finalPrice}</p> : <NoDataCell />
       ),
       Footer: info => {
         const total = React.useMemo(
@@ -676,7 +701,7 @@ const RentalManagementDetailsPage = () => {
           [info.rows]
         )
 
-        return <>{total}</>
+        return <>{currencySymbol} {total}</>
       }
     }
   ]
@@ -773,29 +798,40 @@ const RentalManagementDetailsPage = () => {
   }
 
   const handleBulkEditData = (values: any) => {
-    let updatedArr = selectedProducts.filter(d => d.type !== "productInPackage")
+    const dataToSend = [];
 
-    updatedArr = updatedArr.map(d => ({
-      "id": d.id,
-      "type": d?.type.toLowerCase(),
-      "detail": d.detail,
-      "pricingMethod": values.pricingMethod ? values.pricingMethod : d.pricingMethod,
-      "UOM": values.UOM ? values.UOM : d.UOM,
-      "finalPrice": values.finalPrice ? values.finalPrice : d.finalPrice,
-      "discount": values.discount ? values.discount : d.discount,
-      "startDate": values.startDate ? values.startDate : d.startDate,
-      "endDate": values.endDate ? values.endDate : d.endDate,
-      "qty": values.qty ? values.qty : d.qty,
-      "price": values.price ? values.price : d.price
+    const addData = (d) => {
+      return {
+        "id": d.id,
+        "type": d?.type.toLowerCase(),
+        "detail": d.detail,
+        "package": d.packageId ? d.packageId : null,
+        "pricingMethod": values.pricingMethod ? values.pricingMethod : d.pricingMethod,
+        "UOM": values.UOM ? values.UOM : d.UOM,
+        "finalPrice": (values.finalPrice ? values.finalPrice : d.finalPrice) ?? 0,
+        "discount": (values.discount ? values.discount : d.discount) ?? 0,
+        "startDate": values.startDate ? values.startDate : d.startDate,
+        "endDate": values.endDate ? values.endDate : d.endDate,
+        "qty": values.qty ? values.qty : d.qty,
+        "price": (values.price ? values.price : d.price) ?? 0
+      }
+    }
+
+    selectedProducts.filter(f => f.type !== "Package").forEach(d => {
+      dataToSend.push(addData(d))
+    });
+
+    selectedProducts.filter(f => f.type === "Package").forEach(d => {
+      if (!dataToSend.some(s => s.package === d.id)) {
+        dataToSend.push({ ...addData(d), package: d.id })
+      }
     })
 
-    )
-
     setUpdating(true)
-    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": updatedArr })
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": dataToSend })
       .then(() => {
         setUpdating(false)
-        setIsProductEdit(false)
+        setIsProductEdit({ open: false, editType: null })
         fetchProductInventory()
 
       }).catch((error) => {
@@ -813,13 +849,30 @@ const RentalManagementDetailsPage = () => {
     axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/updateOne`, rest)
       .then(() => {
         setUpdating(false)
-        setIsProductEdit(false)
+        setIsProductEdit({ open: false, editType: null })
         fetchProductInventory()
       }).catch((error) => {
         setUpdating(false)
         toastConfig.setToastConfig(error)
       });
   }
+
+  const handleSingleUpdate = async (values: any) => {
+    setUpdating(true)
+    const { subRows, isValid, qtyToDisplay, ...rest } = values;
+    rest.type = camelCase(rest.type)
+    console.log(rest)
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages/updateOne`, rest)
+      .then(() => {
+        setUpdating(false)
+        setIsProductEdit({ open: false, editType: null })
+        fetchProductInventory()
+      }).catch((error) => {
+        setUpdating(false)
+        toastConfig.setToastConfig(error)
+      });
+  }
+
 
   // const checkIsValidRecord = (rowData) => {
   //   if (rowData?.type === "Product") {
@@ -868,106 +921,105 @@ const RentalManagementDetailsPage = () => {
 
   return (
     <>
-      <Fragment>
 
-        <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={customizedRoutes} />
-        </Grid>
-        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+      <Grid container className="headerbox">
+        <CustomBreadCrumbs routes={customizedRoutes} />
+      </Grid>
+      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+        <div>
           <div>
-            <div>
-              <Paper>
-                {!rentalManagementData ? (
-                  <div>
-                    <Skeleton variant="text" width="150px" height="40px" />
-                    <Box display="flex">
-                      <Skeleton
-                        style={{ borderRadius: 6 }}
-                        width="120px"
-                        height="80px"
-                      />
-                      <Box marginX={1} />
-                      <Skeleton
-                        style={{ borderRadius: 6 }}
-                        width="120px"
-                        height="80px"
-                      />
-                    </Box>
-                  </div>
-                ) : (
-                  <DetailsPageHeader
-                    heading={headingLbl}
-                    mainPoints={mainPoints}
-                    showHeading={true}
-                  >
-
-                    {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
-                      <Button
-                        className="buttonStyleBigScreen"
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={handleOpenUpdateDialog}
-                      >
-                        Edit
-                      </Button>
-                    )}
-                    {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
-                      <Button
-                        className="buttonStyleSmallScreen"
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={handleOpenUpdateDialog}
-                      >
-                        <MdEdit size={24} />
-                      </Button>
-                    )}
-
-                    <HideWhenOffline>
-                      {permissions?.rentalManagement?.isDelete &&
-                        rentalManagementData?.owner?.optionValue &&
-                        user?.user?._id &&
-                        rentalManagementData.owner.optionValue === user.user._id ? (
-                        <DeleteButton
-                          text="Delete"
-                          className="buttonDeleteBigScreen"
-                          onClick={() => setShowConfirmBox(true)}
-                        />
-                      ) : null}
-                    </HideWhenOffline>
-                    <HideWhenOffline>
-                      {permissions?.rentalManagement?.isDelete &&
-                        rentalManagementData?.owner?.optionValue &&
-                        user?.user?._id &&
-                        rentalManagementData.owner.optionValue === user.user._id ? (
-                        <Button
-                          className="buttonDeleteSmallScreen"
-                          onClick={() => setShowConfirmBox(true)}
-                        >
-                          <MdDelete size={24} />
-                        </Button>
-                      ) : null}
-                    </HideWhenOffline>
-                  </DetailsPageHeader>
-                )}
-
-
-
-
-
-                <Tabs
-                  className="quote-tab"
-                  value={tabValue}
-                  onChange={handleMainTabChange}
-                  textColor="primary"
-                  TabIndicatorProps={{
-                    style: {
-                      display: 'none'
-                    }
-                  }}
+            <Paper>
+              {!rentalManagementData ? (
+                <div>
+                  <Skeleton variant="text" width="150px" height="40px" />
+                  <Box display="flex">
+                    <Skeleton
+                      style={{ borderRadius: 6 }}
+                      width="120px"
+                      height="80px"
+                    />
+                    <Box marginX={1} />
+                    <Skeleton
+                      style={{ borderRadius: 6 }}
+                      width="120px"
+                      height="80px"
+                    />
+                  </Box>
+                </div>
+              ) : (
+                <DetailsPageHeader
+                  heading={headingLbl}
+                  mainPoints={mainPoints}
+                  showHeading={true}
                 >
-                  {/* <Tab
+
+                  {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
+                    <Button
+                      className="buttonStyleBigScreen"
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={handleOpenUpdateDialog}
+                    >
+                      Edit
+                    </Button>
+                  )}
+                  {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
+                    <Button
+                      className="buttonStyleSmallScreen"
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={handleOpenUpdateDialog}
+                    >
+                      <MdEdit size={24} />
+                    </Button>
+                  )}
+
+                  <HideWhenOffline>
+                    {permissions?.rentalManagement?.isDelete &&
+                      rentalManagementData?.owner?.optionValue &&
+                      user?.user?._id &&
+                      rentalManagementData.owner.optionValue === user.user._id ? (
+                      <DeleteButton
+                        text="Delete"
+                        className="buttonDeleteBigScreen"
+                        onClick={() => setShowConfirmBox(true)}
+                      />
+                    ) : null}
+                  </HideWhenOffline>
+                  <HideWhenOffline>
+                    {permissions?.rentalManagement?.isDelete &&
+                      rentalManagementData?.owner?.optionValue &&
+                      user?.user?._id &&
+                      rentalManagementData.owner.optionValue === user.user._id ? (
+                      <Button
+                        className="buttonDeleteSmallScreen"
+                        onClick={() => setShowConfirmBox(true)}
+                      >
+                        <MdDelete size={24} />
+                      </Button>
+                    ) : null}
+                  </HideWhenOffline>
+                </DetailsPageHeader>
+              )}
+
+
+
+
+
+              <Tabs
+                className="quote-tab"
+                value={tabValue}
+                onChange={handleMainTabChange}
+                textColor="primary"
+                TabIndicatorProps={{
+                  style: {
+                    display: 'none'
+                  }
+                }}
+              >
+                {/* <Tab
                         className={"tabLayout"}
                       style={{
                         background: tabValue === 0 ? "white" : "",
@@ -981,141 +1033,141 @@ const RentalManagementDetailsPage = () => {
                       }
                       {...a11yProps(0)}
                     /> */}
-                  <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 1 ? 'white' : '',
-                      color: tabValue === 1 ? '#163340' : '#163340'
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                      </div>
-                    }
-                    {...a11yProps(0)}
+                <Tab
+                  className={'tabLayout'}
+                  style={{
+                    background: tabValue === 1 ? 'white' : '',
+                    color: tabValue === 1 ? '#163340' : '#163340'
+                  }}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                    </div>
+                  }
+                  {...a11yProps(0)}
+                />
+                <Tab
+                  className={'tabLayout'}
+                  style={{
+                    background: tabValue === 2 ? 'white' : '',
+                    color: tabValue === 2 ? 'blue' : '#163340'
+                  }}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                    </div>
+                  }
+                  {...a11yProps(1)}
+                />
+                <div className={'uio'}> </div>
+              </Tabs>
+
+
+              <TabPanel value={tabValue} index={0}>
+                <Box>
+                  {loadingDetails || !rentalManagementFields.length ? (
+                    <Grid container spacing={2} style={{ padding: "8px" }}>
+                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                    </Grid>
+                  ) : (
+                    <>
+                      {
+                        isInOfflineSaveQueue && <div className="px-3">
+                          <Alert variant="filled" severity="info">Updates are in offline state, it will be affected once you will be in network</Alert>
+                        </div>
+                      }
+
+                      <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
+                    </>
+                  )}
+                </Box>
+              </TabPanel>
+
+              <TabPanel value={tabValue} index={1}>
+                <Paper>
+                  <Steps
+                    className={styles.steps_box}
+                    isNextStep={treeToFlatArray(dataForNewTabData, "subRows").some(f => f.isValid === false)}
+                    nextStep={nextStep}
+                    steps={rentalProcessSteps.slice(0, 5)}
+                    currentStep={currentStep}
+                    setCurrentStep={setCurrentStep}
                   />
-                  <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 2 ? 'white' : '',
-                      color: tabValue === 2 ? 'blue' : '#163340'
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                      </div>
-                    }
-                    {...a11yProps(1)}
-                  />
-                  <div className={'uio'}> </div>
-                </Tabs>
-
-
-                <TabPanel value={tabValue} index={0}>
-                  <Box>
-                    {loadingDetails || !rentalManagementFields.length ? (
-                      <Grid container spacing={2} style={{ padding: "8px" }}>
-                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                      </Grid>
-                    ) : (
-                      <>
-                        {
-                          isInOfflineSaveQueue && <div className="px-3">
-                            <Alert variant="filled" severity="info">Updates are in offline state, it will be affected once you will be in network</Alert>
-                          </div>
-                        }
-
-                        <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
-                      </>
-                    )}
-                  </Box>
-                </TabPanel>
-
-                <TabPanel value={tabValue} index={1}>
-                  <Paper>
-                    <Steps
-                      className={styles.steps_box}
-                      isNextStep={treeToFlatArray(dataRows, "subRows").some(f => f.isValid === false)}
-                      nextStep={nextStep}
-                      steps={rentalProcessSteps.slice(0, 5)}
-                      currentStep={currentStep}
-                      setCurrentStep={setCurrentStep}
-                    />
-                    {(currentStep === 0) && (
-                      <>
-                        <Box display="flex" justifyContent="space-between" m={1}>
-                          <Box display="flex" alignItems="center">
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              size="small"
-                              onClick={() => {
-                                setAddExistingProductDialog({ open: true, type: "product" });
-                              }}
-                            >
-                              {`Add ${routes.product.title}`}
-                            </Button>
-                            <Box mx={1} />
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              size="small"
-                              onClick={() => {
-                                setAddExistingProductDialog({ open: true, type: "package" });
-                              }}
-                            >
-                              {`Add ${routes.packages.title}`}
-                            </Button>
-                          </Box>
-                          <Box display="flex">
-                            <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
-                              <span>
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  size="small"
-                                  disabled={!Boolean(selectedProducts && selectedProducts.length)}
-                                  onClick={() => setIsProductEdit(true)}
-                                >
-                                  Bulk Edit
-                                </Button>
-                              </span>
-                            </HtmlTooltip>
-                            <Box mx={1} />
-                            <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Delete selected records" : "Select records to delete"}>
-                              <span>
-
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  size="small"
-                                  disabled={!Boolean(selectedProducts && selectedProducts.length) || isDeleting}
-                                  onClick={() => {
-                                    const dataToDelete = selectedProducts && selectedProducts.map((rec: any) => {
-                                      const obj: any = {};
-
-                                      obj.id = rec._id ?? rec.id;
-                                      obj.type = rec?.type.toLowerCase();
-                                      if (rec?.type === "productInPackage") {
-                                        obj.packageId = rec.packageId
-                                      }
-
-                                      return obj
-                                    })
-                                    setDeleteData(dataToDelete)
-                                  }}
-
-                                  endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
-                                >
-                                  Delete
-                                </Button>
-                              </span>
-                            </HtmlTooltip>
-                          </Box>
+                  {(currentStep === 0) && (
+                    <>
+                      <Box display="flex" justifyContent="space-between" m={1}>
+                        <Box display="flex" alignItems="center">
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={() => {
+                              setAddExistingProductDialog({ open: true, type: "product" });
+                            }}
+                          >
+                            {`Add ${routes.product.title}`}
+                          </Button>
+                          <Box mx={1} />
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={() => {
+                              setAddExistingProductDialog({ open: true, type: "package" });
+                            }}
+                          >
+                            {`Add ${routes.packages.title}`}
+                          </Button>
                         </Box>
-                        {columns ?
-                          <>
-                            {/* <CustomAgGridEditable
+                        <Box display="flex">
+                          <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
+                            <span>
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                disabled={!Boolean(selectedProducts && selectedProducts.length)}
+                                onClick={() => setIsProductEdit({ open: true, editType: "bulk" })}
+                              >
+                                Bulk Edit
+                              </Button>
+                            </span>
+                          </HtmlTooltip>
+                          <Box mx={1} />
+                          <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Delete selected records" : "Select records to delete"}>
+                            <span>
+
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                disabled={!Boolean(selectedProducts && selectedProducts.length) || isDeleting}
+                                onClick={() => {
+                                  const dataToDelete = selectedProducts && selectedProducts.map((rec: any) => {
+                                    const obj: any = {};
+
+                                    obj.id = rec._id ?? rec.id;
+                                    obj.type = rec?.type.toLowerCase();
+                                    if (rec?.type === "productInPackage") {
+                                      obj.packageId = rec.packageId
+                                    }
+
+                                    return obj
+                                  })
+                                  setDeleteData(dataToDelete)
+                                }}
+
+                                endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
+                              >
+                                Delete
+                              </Button>
+                            </span>
+                          </HtmlTooltip>
+                        </Box>
+                      </Box>
+                      {columns ?
+                        <>
+                          {/* <CustomAgGridEditable
                         columns={columns}
                         dataRows={dataRows}
                         frameworkComponents={frameworkComponents}
@@ -1132,33 +1184,33 @@ const RentalManagementDetailsPage = () => {
                         renderedFrom="rentalManagementDetailsPageInventory"
                         refreshGrid={fetchProductInventory}
                       /> */}
-                            <Box
-                              p="6px"
-                              zIndex={5}
-                              width={
-                                isTabletScreen
-                                  ? "calc(100vw - 20px)"
-                                  : isSmallScreen
-                                    ? "calc(100vw - 78px)"
-                                    : showActivity ? "100%" : "calc(100vw - 100px)"
-                              }
-                              height="calc(100vh - 330px)"
-                            >
-                              <CustomReactTable
-                                height="calc(100vh - 345px)"
-                                columns={columns}
-                                data={dataRows}
-                                rowStyle={(rowData) => ({
-                                  color: "black",
-                                  backgroundColor: rowData.isValid ? "white" : "#EFCCCC"
-                                })}
-                                onSelect={setSelectedProducts}
-                                childrenProperty="subRows"
-                                uniqueKey="id"
-                              />
+                          <Box
+                            p="6px"
+                            zIndex={5}
+                            width={
+                              isTabletScreen
+                                ? "calc(100vw - 20px)"
+                                : isSmallScreen
+                                  ? "calc(100vw - 78px)"
+                                  : showActivity ? "100%" : "calc(100vw - 100px)"
+                            }
+                            height="calc(100vh - 330px)"
+                          >
+                            <CustomReactTable
+                              height="calc(100vh - 345px)"
+                              columns={columns}
+                              data={dataForNewTabData}
+                              rowStyle={(rowData) => ({
+                                color: "black",
+                                backgroundColor: rowData.isValid ? "white" : "#EFCCCC"
+                              })}
+                              onSelect={setSelectedProducts}
+                              childrenProperty="subRows"
+                              uniqueKey="id"
+                            />
 
 
-                              {/* <MaterialTableComponent
+                            {/* <MaterialTableComponent
                                 // calculatePricing={calculatePricing}
                                 columns={columns}
                                 rowData={dataRows}
@@ -1188,116 +1240,120 @@ const RentalManagementDetailsPage = () => {
                               // }}
                               /> */}
 
-                            </Box>
-
-                          </>
-                          : <Box
-                            p={2}
-                            height={500}
-                            bgcolor="white">
-                            <CommonSkeleton lenArray={[...Array(10).keys()]} />
                           </Box>
-                        }
-                      </>
-                    )}
-                    {(currentStep === 1) && (
-                      <div className="mx-2">
-                        <div className="d-flex justify-content-end mb-2">
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            className={styles.add_submit_btn}
-                            onClick={() => {
-                              setShowManageAdditionalCostDialog({
-                                open: true,
-                                isNew: true,
-                                record: { "id": "", "description": "", "uom": "", "qty": 0, "type": "", "amount": 0 },
-                              })
-                            }}
-                            startIcon={<AddOutlined />}
-                          >
-                            Add
-                          </Button>
-                        </div>
-                        <CustomAgGrid
-                          columns={[
-                            { field: "type", headerName: "Cost Type", show: true, disabled: true, cellRenderer: "typeRenderer" },
-                            { field: "description", headerName: "Description", show: true, disabled: true },
-                            { field: "qty", headerName: "Quantity", show: true, disabled: true },
-                            { field: "uom", headerName: "Unit of Measure", show: true, disabled: true },
-                            { field: "amount", headerName: `Amount (${currencySymbol})`, show: true, disabled: true },
-                          ]}
-                          dataRows={additionalCost}
-                          frameworkComponents={rentalJobFrameworkComponents}
-                          setGridApi={setGridApi}
-                          dispatch={dispatch}
-                          rowCount={rowCount}
-                          limit={limit}
-                          pageSizes={pageSizes}
-                          page={page}
-                          actionWidth={150}
-                          allowSelection={false}
-                          allowAction={true}
-                          loading={loading}
-                          isClientSideGrid={true}
-                          // onCellValueChanged={(row) => { updateProductData(row.data) }}
-                          renderedFrom="rental_job_additional_cost"
-                          refreshGrid={() => { }}
-                        />
+
+                        </>
+                        : <Box
+                          p={2}
+                          height={500}
+                          bgcolor="white">
+                          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                        </Box>
+                      }
+                    </>
+                  )}
+                  {(currentStep === 1) && (
+                    <div className="mx-2">
+                      <div className="d-flex justify-content-end mb-2">
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          className={styles.add_submit_btn}
+                          onClick={() => {
+                            setShowManageAdditionalCostDialog({
+                              open: true,
+                              isNew: true,
+                              record: null,
+                            })
+                          }}
+                          startIcon={<AddOutlined />}
+                        >
+                          Add
+                        </Button>
                       </div>
-
-                    )}
-                    {(currentStep === 2) && (
-                      <SerializedAssetStep
-                        rentalManagementId={id}
-                        productInventory={[
-                          ...productInventory,
-                          ...serializeAssets
+                      <CustomAgGrid
+                        columns={[
+                          { field: "rowIndex", headerName: "#" },
+                          // { field: "sequence", headerName: "#", show: true, disabled: true },
+                          { field: "type", headerName: "Cost Type", show: true, disabled: true, cellRenderer: "typeRenderer" },
+                          { field: "description", headerName: "Description", show: true, disabled: true },
+                          { field: "qty", headerName: "Quantity", show: true, disabled: true },
+                          { field: "uom", headerName: "Unit of Measure", show: true, disabled: true },
+                          { field: "amount", headerName: `Amount (${currencySymbol})`, show: true, disabled: true },
                         ]}
-                        fetchProductsData={fetchProductInventory}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
-                        showActivity={showActivity}
-                        currentStep={currentStep}
-                        currencySymbol={currencySymbol}
+                        dataRows={additionalCost}
+                        frameworkComponents={rentalJobFrameworkComponents}
+                        setGridApi={setGridApi}
+                        dispatch={dispatch}
+                        rowCount={rowCount}
+                        limit={limit}
+                        pageSizes={pageSizes}
+                        page={page}
+                        actionWidth={150}
+                        allowSelection={false}
+                        allowAction={true}
                         loading={loading}
-                        serializeAssets={serializeAssets}
-                        setNextStep={setNextStep}
+                        isClientSideGrid={true}
+                        // onCellValueChanged={(row) => { updateProductData(row.data) }}
+                        renderedFrom="rental_job_additional_cost"
+                        refreshGrid={() => { }}
+                        idProperty="id"
+                        pinnedBottomRowData={pinnedBottomRowData}
                       />
-                    )}
-                    {(currentStep === 3) && (
-                      <DeliveryTicket
-                        fetchRentalData={fetchRentalManagementData}
-                        rentalManagementData={rentalManagementData}
-                        rentalManagementId={id}
-                        warehouselist={warehouseList}
-                        productInventory={serializeAssets}
-                        currentStep={currentStep}
-                        handleDeliveryTicketDialog={handleDeliveryTicketDialog}
-                      />
-                    )}
-                    {(currentStep === 4 || currentStep === 5) && (
-                      <ReceivingTicket
-                        rentalManagementId={id}
-                        productInventory={productInventory}
-                        currentStep={currentStep}
-                        handleReceivingTicketDialog={handleReceivingTicketDialog}
-                      />
-                    )}
-                  </Paper>
-                </TabPanel>
+                    </div>
+
+                  )}
+                  {(currentStep === 2) && (
+                    <SerializedAssetStep
+                      rentalManagementId={id}
+                      productInventory={[
+                        ...productInventory,
+                        ...serializeAssets
+                      ]}
+                      fetchProductsData={fetchProductInventory}
+                      isSmallScreen={isSmallScreen}
+                      isTabletScreen={isTabletScreen}
+                      showActivity={showActivity}
+                      currentStep={currentStep}
+                      currencySymbol={currencySymbol}
+                      loading={loading}
+                      serializeAssets={serializeAssets}
+                      setNextStep={setNextStep}
+                    />
+                  )}
+                  {(currentStep === 3) && (
+                    <DeliveryTicket
+                      fetchRentalData={fetchRentalManagementData}
+                      rentalManagementData={rentalManagementData}
+                      rentalManagementId={id}
+                      warehouselist={warehouseList}
+                      productInventory={serializeAssets}
+                      currentStep={currentStep}
+                      handleDeliveryTicketDialog={handleDeliveryTicketDialog}
+                    />
+                  )}
+                  {(currentStep === 4 || currentStep === 5) && (
+                    <ReceivingTicket
+                      rentalManagementId={id}
+                      productInventory={productInventory}
+                      currentStep={currentStep}
+                      handleReceivingTicketDialog={handleReceivingTicketDialog}
+                    />
+                  )}
+                </Paper>
+              </TabPanel>
 
 
 
-              </Paper>
-            </div>
-            <Box my={1} />
-
+            </Paper>
           </div>
-          <div className="position-relative">
-            <HideWhenOffline>
-              {/* {showActivity ?
+          <Box my={1} />
+
+        </div>
+        <div className="position-relative">
+          <HideWhenOffline>
+            {/* {showActivity ?
                 <Paper>
                   {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                     <IoIosArrowDropright className="icon" />
@@ -1335,47 +1391,46 @@ const RentalManagementDetailsPage = () => {
                   <IoIosArrowDropleft className="icon" />
                 </span>} */}
 
-              <Paper>
-                {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
-                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                </span>}
-                <div style={{ display: showActivity ? "block" : "none" }}>
+            <Paper>
+              {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
+                {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+              </span>}
+              <div style={{ display: showActivity ? "block" : "none" }}>
 
-                  <Grid container>
-                    <Grid item xs={12}>
-                      {rentalManagementData && (
-                        <div>
-                          <Activity
-                            resourceId={rentalManagementData._id}
-                            resource={rentalManagement.resource}
-                            restrictedAddActivities={
-                              permissions &&
-                                permissions["rentalManagement"] &&
-                                permissions["rentalManagement"].isUpdate
-                                ? []
-                                : ["Attachment", "Case"]
-                            }
-                            relatedTo={[
-                              {
-                                type: rentalManagement,
-                                referenceId: rentalManagementData._id,
-                                access: true,
-                              },
-                            ]}
-                            handleActivityRefresh={() => { }}
-                            emails={[]}
-                          />
-                        </div>
-                      )}
-                    </Grid>
+                <Grid container>
+                  <Grid item xs={12}>
+                    {rentalManagementData && (
+                      <div>
+                        <Activity
+                          resourceId={rentalManagementData._id}
+                          resource={rentalManagement.resource}
+                          restrictedAddActivities={
+                            permissions &&
+                              permissions["rentalManagement"] &&
+                              permissions["rentalManagement"].isUpdate
+                              ? []
+                              : ["Attachment", "Case"]
+                          }
+                          relatedTo={[
+                            {
+                              type: rentalManagement,
+                              referenceId: rentalManagementData._id,
+                              access: true,
+                            },
+                          ]}
+                          handleActivityRefresh={() => { }}
+                          emails={[]}
+                        />
+                      </div>
+                    )}
                   </Grid>
-                </div>
-              </Paper>
-            </HideWhenOffline>
-          </div>
+                </Grid>
+              </div>
+            </Paper>
+          </HideWhenOffline>
         </div>
+      </div>
 
-      </Fragment>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -1458,23 +1513,39 @@ const RentalManagementDetailsPage = () => {
           }}
         />
       }
-      {isProductEdit &&
+      {isProductEdit.open &&
         <BulkEditInventoryDialog
           calculatePrice={calculatePricing}
           startDate={rentalManagementData.rentalStartDate}
           endDate={rentalManagementData.rentalEndDate}
           isSaving={isUpdating}
           onClose={() => {
-            setIsProductEdit(false)
+            setIsProductEdit({ open: false, editType: null })
             setRecordToUpdate(null)
           }}
-          submitBulkEdit={recordToUpdate ? handleSingleEdit : handleBulkEditData}
+          submitBulkEdit={isProductEdit.editType === "single" ? handleSingleEdit : handleBulkEditData}
           currencySymbol={currencySymbol}
           data={recordToUpdate}
           selectedProducts={selectedProducts}
-        />}
+        />
+        //New Form through Form Builder 
+        // <RentalJobQtyDialog
+        //   calculatePrice={calculatePricing}
+        //   startDate={rentalManagementData.rentalStartDate}
+        //   endDate={rentalManagementData.rentalEndDate}
+        //   isSaving={isUpdating}
+        //   onClose={() => {
+        //     setIsProductEdit(false)
+        //     setRecordToUpdate(null)
+        //   }}
+        //   submitBulkEdit={selectedProducts.length === 0 ? handleSingleUpdate : handleBulkEditData}
+        //   currency={currency}
+        //   data={recordToUpdate}
+        //   selectedProducts={selectedProducts}
+        // />
+      }
       {
-        showManageAdditionalCostDialog.open && showManageAdditionalCostDialog.record !== null && <ManageAdditionalCostDialog
+        showManageAdditionalCostDialog.open && <ManageAdditionalCostDialog
           open={showManageAdditionalCostDialog.open}
           isNew={showManageAdditionalCostDialog.isNew}
           record={showManageAdditionalCostDialog.record}
@@ -1488,9 +1559,9 @@ const RentalManagementDetailsPage = () => {
           onSubmit={(values) => {
             if (showManageAdditionalCostDialog.isNew) {
               if (additionalCost) {
-                setAdditionalCost(prevState => [...prevState, { ...values, id: generateUniqueId() }])
+                setAdditionalCost(prevState => [...prevState, { ...values, rowIndex: prevState.length + 1 }])
               } else {
-                setAdditionalCost([{ ...values, id: generateUniqueId() }]);
+                setAdditionalCost([{ ...values, rowIndex: 1 }]);
               }
             }
             else {
@@ -1506,6 +1577,19 @@ const RentalManagementDetailsPage = () => {
           currencySymbol={currencySymbol}
           costTypeList={costTypeList}
           uomTypeList={uomTypeList}
+        />
+      }
+      {
+        additionalCostDeleteConfirmation.open && <ConfirmationDialog
+          open={additionalCostDeleteConfirmation.open}
+          message="Are you sure you want to delete additional cost ?"
+          onClose={() => setAdditionalCostDeleteConfirmation({ open: false, id: null })}
+          onOk={() => {
+            setAdditionalCostDeleteConfirmation({ open: false, id: null });
+
+            const recordsExpectDeleted = additionalCost.filter(f => f.id !== additionalCostDeleteConfirmation.id);
+            setAdditionalCost([...recordsExpectDeleted.map((m, index) => ({ ...m, rowIndex: index + 1 }))]);
+          }}
         />
       }
     </>

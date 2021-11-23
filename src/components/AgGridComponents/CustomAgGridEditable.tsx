@@ -153,7 +153,7 @@ export default function CustomAgGridEditable({
   customGridOptions = null,
   selectedRecords = [],
 
-  saveColumnOptions = false
+  saveColumnOptions = false,
   showOnlyShowFilteredRecordSwitch = false,
 }) {
   const [, setColumns] = useState(columns);
@@ -278,6 +278,7 @@ export default function CustomAgGridEditable({
         //   suppressFilterButton: true,
         // }}
         hide={column?.show === false ? true : false}
+        valueGetter={column.valueGetter ?? null}
       ></AgGridColumn>
     ) : (
       <AgGridColumn
@@ -304,6 +305,7 @@ export default function CustomAgGridEditable({
         //   suppressFilterButton: true,
         // }}
         hide={column?.show === false ? true : false}
+        valueGetter={column.valueGetter ?? null}
       ></AgGridColumn>
     );
   });

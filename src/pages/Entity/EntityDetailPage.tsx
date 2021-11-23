@@ -25,6 +25,8 @@ import ManageEntity from "./ManageEntity";
 import NewStepper from "../../components/Helpers/NewStepper";
 import { isObjectEmpty } from "../../constants/helpers";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
+import DeleteButton from "../../components/Helpers/DeleteButton";
+import ResourceTransferDialog from "../../components/ResourceTransferDialog"
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -57,6 +59,7 @@ const EntityDetailsPage = () => {
   const [doaType, setDoaType] = useState(null);
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
   const [userList, setUserList] = useState<any[]>([]);
+  const [showDeleteEntityDialog, setShowDeleteEntityDialog] = useState(false)
   useEffect(() => {
     if (id) {
       getEntityFields();
@@ -361,26 +364,16 @@ const EntityDetailsPage = () => {
                       Edit
                     </Button>
                   )}
-                  {/* <Box component="span" marginX={1} />
+                  {/* <Box component="span" marginX={1} /> */}
                   {permissions?.entity?.isDelete && (
-                    <span
-                      title={
-                        selectedEntity === id
-                          ? "Primarily selected entity can't be deleted"
-                          : "Permanently delete this entity"
-                      }
-                    >
-                      <DeleteButton
-                        disabled={selectedEntity === id}
-                        text="Delete"
-                        onClick={() => setShowConfirmBox(true)}
-                      />
-                    </span>
-                  )} */}
+                    <DeleteButton
+                      disabled={entityData?.createdBy?.user?._id !== user?.user?._id}
+                      text="Delete"
+                      onClick={() => setShowDeleteEntityDialog(true)}
+                    />
+                  )}
                 </DetailsPageHeader>
               )}
-
-
               <Box>
                 {loading || !entityFields.length ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
@@ -564,6 +557,18 @@ const EntityDetailsPage = () => {
           }
         />
       ) : null}
+      {
+        showDeleteEntityDialog ?
+          <ResourceTransferDialog
+            open={true}
+            resource="Entity"
+            fromResource={{ ...entityData, name: entityData.entityName }}
+            allResourceData={JSON.parse(localStorage.getItem("mappedEntities")).map(o => ({ ...o, name: o?.entityName }))}
+            onClose={() => setShowDeleteEntityDialog(false)}
+            handleDelete={handleDeleteEntity}
+          />
+          : null
+      }
       {doaDialogOpen && (
         <Dialog
           open={doaDialogOpen}
@@ -590,6 +595,7 @@ const EntityDetailsPage = () => {
             doaType={doaType}
           />
         </Dialog>
+
       )}
     </>
   );

@@ -30,7 +30,7 @@ import {
   useMsal,
 } from "@azure/msal-react";
 import getAzureAcessToken from "../../Azure/getAzureAccessToken";
-import { validations } from "../../../constants/helpers";
+import { purchaseOrder, validations } from "../../../constants/helpers";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { GoArrowDown } from "react-icons/go";
 import emailStyles from "../../../pages/Activity/Email/email.module.scss";
@@ -101,7 +101,8 @@ export const CreateEmail = ({
   fromQuote = false,
   isMinimized,
   onMinimizeMaximize,
-  showManimizeMaximize
+  showManimizeMaximize,
+  fromPurchaseOrder = false
 }) => {
   const {
     state: { user },
@@ -122,7 +123,7 @@ export const CreateEmail = ({
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
   const [toogle, setToogle] = useState({
-    "E-Sign": isESign,
+    "e-Sign": isESign,
   });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [quoteBuilderOtherAttachments, setQuoteBuilderOtherAttachments] = useState([])
@@ -264,10 +265,11 @@ export const CreateEmail = ({
       cc: values.cc,
       id: id,
       attachments: [...stateQuoteBuilderAttachments, ...quoteBuilderOtherAttachments],
-      eSign: toogle["E-Sign"],
+      eSign: toogle["e-Sign"],
     };
+    const api = fromPurchaseOrder ? `${purchaseOrder.api}/${id}/send-email` : `/quote-builder/sendQuoteEmail`
     axiosInstance()
-      .post(`/quote-builder/sendQuoteEmail`, body)
+      .post(api, body)
       .then(() => {
         setSending(false);
         if (fetchData) fetchData();
@@ -644,12 +646,12 @@ export const CreateEmail = ({
                                   key={1}
                                   control={
                                     <Switch
-                                      checked={toogle["E-Sign"]}
-                                      name="E-Sign"
+                                      checked={toogle["e-Sign"]}
+                                      name="e-Sign"
                                       onChange={handleChangePermissions}
                                     />
                                   }
-                                  label="E-Sign"
+                                  label="e-Sign"
                                 />
                               </Grid>
                             )}

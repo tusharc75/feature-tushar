@@ -348,7 +348,8 @@ export const productInventory = {
 export const budget = {
   budgetApi: '/budget',
   budgetRoute: '/budget',
-  budgetPermission: 'budget'
+  budgetPermission: 'budget',
+  resource: 'budget'
 };
 
 export const pricingCondition = {
@@ -372,7 +373,8 @@ export const marketSegment = {
 export const purchaseOrder = {
   api: '/purchase-order',
   route: '/purchase-order',
-  permission: 'purchaseOrder'
+  permission: 'purchaseOrder',
+  resource: 'purchaseOrder'
 };
 
 export const profileMenuItems = {
@@ -1156,6 +1158,10 @@ export const generateUniqueId = () => {
   return `id-${new Date().getTime()}`;
 };
 
+export const generateUniqueIdOnly = () => {
+  return new Date().getTime();
+};
+
 export const prepareDataForGrid = (data, user = {}) => {
   let objectValues = {};
   let restProperties = {};
@@ -1197,7 +1203,7 @@ export const prepareDataForGrid = (data, user = {}) => {
   });
 
   if (data?.collaborator) {
-    finalObject["isAllowedToUpdate"] = [...(data?.collaborator ?? []), data?.owner].some(
+    finalObject["isAllowedToUpdate"] = [...(data?.collaborator ?? []), data?.owner ?? {}].some(
       (obj) => obj.optionValue === user["user"]?._id
     )
   }

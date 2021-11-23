@@ -41,7 +41,7 @@
             padding: 5px;
             border-bottom: 1px solid #ddd;
             border-right: 1px solid #ddd;
-            background-color: #fff;
+            // background-color: #fff;
             overflow: hidden;
 
             :last-child {
@@ -71,6 +71,11 @@
                 position: sticky;
                 z-index: 1;
                 width: fit-content;
+
+                td {
+                    padding-left: 7px;
+                    padding-right: 7px;
+                }
             }
 
             .header {

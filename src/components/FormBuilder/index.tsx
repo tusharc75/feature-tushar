@@ -26,8 +26,8 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, isCustomField, module, extraFields
-  , onAddRemoveField = null
+export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, isCustomField, module, extraFields, resource
+  , onAddRemoveField = null,
 }) => {
   const addSection = (sectionHoverIndex) => {
     let data = [...section];
@@ -69,9 +69,12 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
   if (module === 'form-builder') {
     filterFieldType = ['DECIMAL', 'CURRENCYAMOUNT', 'FORMULA', 'VLOOKUPDROPDOWN', 'CONVERTER'];
   }
-
   if (module === 'pdf-template') {
     filterFieldType = ['SINGLELINE', 'MULTILINE', 'IMAGEUPLOAD'];
+  }
+  if (["Rental Management Product", "Rental Management Cost"].includes(resource)) {
+    filterFieldType = []
+    module = "form-builder-extra"
   }
 
   const classes = useStyles();

@@ -310,6 +310,7 @@ const CreateQuotePdfTemplate = () => {
                     isCustomField={true}
                     extraFields={[]}
                     module="pdf-template"
+                    resource=""
                   />
                 </Box>
               </Form>
