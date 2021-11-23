@@ -780,15 +780,15 @@ export default function QuoteProcess(props) {
         let obj = {};
         visibleColumnsExcel.forEach((col) => {
           if (Array.isArray(d[col]) && d[col].length > 0) {
-            if (d[col][0].hasOwnProperty('optionLabel')) {
-              obj[col] = d[col].map(d => d.optionLabel).join() || "";
+            if (d[col][0]?.hasOwnProperty('optionLabel')) {
+              obj[col] = d[col]?.map(d => d.optionLabel).join() || "";
             }
             else {
-              obj[col] = d[col].join() || "";
+              obj[col] = d[col]?.join() || "";
             }
           }
-          else if (d[col].hasOwnProperty('optionLabel')) {
-            obj[col] = d[col].optionLabel || "";
+          else if (d[col]?.hasOwnProperty('optionLabel')) {
+            obj[col] = d[col]?.optionLabel || "";
           }
           else {
             obj[col] = d[col] || "";
