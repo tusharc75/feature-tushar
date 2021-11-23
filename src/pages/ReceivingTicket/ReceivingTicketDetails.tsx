@@ -57,6 +57,8 @@ const ReceivingTicketDetails = () => {
   const [okBtnLoading, setOkBtnLoading] = useState(false)
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false)
 
+  const [canEdit, setCanEdit] = useState(false)
+
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, page, limit, pageSizes, selectedRecords } = state;
@@ -104,6 +106,12 @@ const ReceivingTicketDetails = () => {
       .get(`${routes.receivingTicket.path}/${id}`)
       .then(({ data: { data } }) => {
         setReceivingTicketData(data)
+        setCanEdit(
+          [...(data?.collaborator ?? []), data?.owner ?? {}].some(
+            (obj) => obj.optionValue === user.user._id
+          )
+        );
+
         setSignatures(data?.signatures || []);
         handleMainPoints(data)
         setHeadingLabel(data.receivingJobName);
@@ -187,12 +195,12 @@ const ReceivingTicketDetails = () => {
   }
 
   const columns = [
-    { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "nameRenderer" },
+    { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
     { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
     { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "bornOnDate", headerName: "Born on Date", show: true, cellRenderer: "dateRenderer" },
     { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "dateRenderer" },
@@ -291,14 +299,14 @@ const ReceivingTicketDetails = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
-                  {permissions?.receivingTicket?.isUpdate && receivingTicketData?.status === "New" && (
+                  {permissions?.receivingTicket?.isUpdate && canEdit && (
                     <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                       Edit
                     </Button>
                   )}
                   {/* {permissions?.receivingTicket?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />} */}
                   {
-                    receivingTicketData?.deliveryPerson?.optionValue === user?.user?._id ?
+                    receivingTicketData?.deliveryPerson?.optionValue === user?.user?._id || canEdit ?
                       label !== "" ?
                         <Button
                           variant="contained"

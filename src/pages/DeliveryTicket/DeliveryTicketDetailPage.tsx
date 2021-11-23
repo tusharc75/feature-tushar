@@ -57,6 +57,7 @@ export default function DeliveryTicketDetail(props) {
   const [okBtnLoading, setOkBtnLoading] = useState(false)
   const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false)
   const { dataRows, rowCount, page, limit, pageSizes, selectedRecords } = state;
+  const [canEdit, setCanEdit] = useState(false)
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
@@ -126,6 +127,13 @@ export default function DeliveryTicketDetail(props) {
         .get(`${deliveryTicketApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
           setDeliveryTicketData(data)
+          
+          setCanEdit(
+            [...(data?.collaborator ?? []), data?.owner ?? {}].some(
+              (obj) => obj.optionValue === user.user._id
+            )
+          );
+
           setSignatures(data?.signatures || []);
           if (data?.productInventory && data?.productInventory.length) {
             let ids = data?.productInventory.map(o => o?.optionValue)
@@ -306,7 +314,7 @@ export default function DeliveryTicketDetail(props) {
                   mainPoints={deliveryTicketData ? getMainPoints : ""}
                   showHeading={true}
                 >
-                  {permissions?.deliveryTicket?.isUpdate && deliveryTicketData.status === "New" && (
+                  {permissions?.deliveryTicket?.isUpdate && canEdit && (
                     <Button
                       variant="contained"
                       color="primary"
@@ -329,7 +337,7 @@ export default function DeliveryTicketDetail(props) {
                       </Button>
                     )} */}
                   {
-                    deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id ?
+                    deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id || canEdit ?
                       label !== "" ?
                         <Button
                           variant="contained"

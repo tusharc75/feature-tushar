@@ -39,7 +39,7 @@ import BulkEditInventoryDialog from './BulkEditInventoryDialog'
 import RentalJobQtyDialog from './RentalJobQtyDialog'
 import SerializedAssetStep from "./SerializedAssetStep";
 import moment from "moment";
-import { camelCase, startCase, orderBy } from "lodash";
+import { camelCase, startCase, orderBy, sum } from "lodash";
 import queryString from "query-string";
 import PackageProductsDialog from './PackageProductsDialog'
 import { FaWpforms } from "react-icons/fa";
@@ -117,6 +117,8 @@ const RentalManagementDetailsPage = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
+  const [pinnedBottomRowData, setPinnedBottomRowData] = useState([]);
+
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
   }
@@ -141,6 +143,23 @@ const RentalManagementDetailsPage = () => {
     }
     // eslint-disable-next-line
   }, [id]);
+
+  useEffect(() => {
+    // const currencyCode = getUniqueCurrencies().find(
+    //   (d) => d.currencyCode === rentalManagementData["currency"]
+    // )?.symbolNative ?? "";
+
+    if (additionalCost && additionalCost.length > 0) {
+      setPinnedBottomRowData([{
+        amount: `${currencySymbol} ${sum(additionalCost.map(s => s.amount))}`
+      }])
+    } else {
+      setPinnedBottomRowData([{
+        amount: `${currencySymbol} 0`
+      }])
+    }
+
+  }, [currencySymbol, additionalCost])
 
   useEffect(() => {
     if (currentStep === 0) {
@@ -339,7 +358,7 @@ const RentalManagementDetailsPage = () => {
             translator([current], temp)
 
             //  Check validation for products in package - Start
-            current["qtyToDisplay"] = `${current.qty} x ${parent.qty} = ${current.qty * parent.qty}`
+            current["qtyToDisplay"] = `${parent.qty} x ${current.qty} = ${current.qty * parent.qty}`
 
             if (current?.finalPrice !== null && current?.finalPrice !== undefined && typeof current?.finalPrice !== "string" && current?.finalPrice !== 0) {
               current["isValid"] = true;
@@ -659,7 +678,7 @@ const RentalManagementDetailsPage = () => {
           [info.rows]
         )
 
-        return <>{total}</>
+        return <>{currencySymbol} {total}</>
       }
     },
     {
@@ -779,24 +798,37 @@ const RentalManagementDetailsPage = () => {
   }
 
   const handleBulkEditData = (values: any) => {
-    let updatedArr = selectedProducts.filter(d => d.type !== "productInPackage");
+    const dataToSend = [];
 
-    updatedArr = selectedProducts.map(d => ({
-      "id": d.id,
-      "type": d?.type.toLowerCase(),
-      "detail": d.detail,
-      "pricingMethod": values.pricingMethod ? values.pricingMethod : d.pricingMethod,
-      "UOM": values.UOM ? values.UOM : d.UOM,
-      "finalPrice": values.finalPrice ? values.finalPrice : d.finalPrice,
-      "discount": values.discount ? values.discount : d.discount,
-      "startDate": values.startDate ? values.startDate : d.startDate,
-      "endDate": values.endDate ? values.endDate : d.endDate,
-      "qty": values.qty ? values.qty : d.qty,
-      "price": values.price ? values.price : d.price
-    }))
+    const addData = (d) => {
+      return {
+        "id": d.id,
+        "type": d?.type.toLowerCase(),
+        "detail": d.detail,
+        "package": d.packageId ? d.packageId : null,
+        "pricingMethod": values.pricingMethod ? values.pricingMethod : d.pricingMethod,
+        "UOM": values.UOM ? values.UOM : d.UOM,
+        "finalPrice": (values.finalPrice ? values.finalPrice : d.finalPrice) ?? 0,
+        "discount": (values.discount ? values.discount : d.discount) ?? 0,
+        "startDate": values.startDate ? values.startDate : d.startDate,
+        "endDate": values.endDate ? values.endDate : d.endDate,
+        "qty": values.qty ? values.qty : d.qty,
+        "price": (values.price ? values.price : d.price) ?? 0
+      }
+    }
+
+    selectedProducts.filter(f => f.type !== "Package").forEach(d => {
+      dataToSend.push(addData(d))
+    });
+
+    selectedProducts.filter(f => f.type === "Package").forEach(d => {
+      if (!dataToSend.some(s => s.package === d.id)) {
+        dataToSend.push({ ...addData(d), package: d.id })
+      }
+    })
 
     setUpdating(true)
-    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": updatedArr })
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/products-packages`, { "productsPackages": dataToSend })
       .then(() => {
         setUpdating(false)
         setIsProductEdit({ open: false, editType: null })
@@ -1267,6 +1299,7 @@ const RentalManagementDetailsPage = () => {
                         renderedFrom="rental_job_additional_cost"
                         refreshGrid={() => { }}
                         idProperty="id"
+                        pinnedBottomRowData={pinnedBottomRowData}
                       />
                     </div>
 
