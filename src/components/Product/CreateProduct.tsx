@@ -450,7 +450,6 @@ const CreateProduct = (props) => {
     };
 
     const handleScroll = (errors) => {
-        console.log(errors)
         const err = Object.keys(errors);
         if (err.length) {
             const input = document.querySelector(

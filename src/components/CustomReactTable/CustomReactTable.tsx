@@ -195,8 +195,23 @@ export default function CustomReactTable({
     // }, [setPageSize,])
 
     useEffect(() => {
-        const flatData = treeToFlatArray(selectedFlatRows.map(d => d.original), childrenProperty);
-        onSelect([...uniqBy(flatData, uniqueKey)]);
+
+        const flatData = treeToFlatArray(selectedFlatRows, childrenProperty);
+
+        const flatSelectedData = [];
+        flatData.filter(f => f.isSelected).forEach(({ original }) => {
+            // const { subRows, ...d } = original;
+            flatSelectedData.push(original)
+        });
+
+        if (flatSelectedData.every(s => s.hasOwnProperty(uniqueKey))) {
+            onSelect([...uniqBy(flatSelectedData, uniqueKey)]);
+        } else if (flatSelectedData.every(s => s.hasOwnProperty("_id"))) {
+            onSelect([...uniqBy(flatSelectedData, "_id")]);
+        } else {
+            onSelect([...uniqBy(flatSelectedData, "id")]);
+        }
+
     }, [selectedFlatRows]);
 
     // Render the UI for your table
@@ -223,7 +238,7 @@ export default function CustomReactTable({
                             </TableRow>
                         ))}
                     </TableHead>
-                    
+
                     <TableBody style={{
                         overflowY: "scroll",
                         overflowX: "hidden",

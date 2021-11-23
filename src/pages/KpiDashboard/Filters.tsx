@@ -42,7 +42,6 @@ const useStyles = makeStyles((theme) => ({
 const Filters = (props) => {
   const classes = useStyles();
   const {
-    entities,
     marketSegments,
     subMarketSegments,
     productCategory,
@@ -52,8 +51,6 @@ const Filters = (props) => {
     moment,
     salesReps,
     customerAccounts,
-    status,
-    setStatus,
     currency,
     setCurrency
   } = props;
@@ -130,7 +127,7 @@ const Filters = (props) => {
       >
         <Box p={2}>
           <Box width="250px">
-            <Autocomplete
+            {/* <Autocomplete
               fullWidth
               size="small"
               disabled={salesFilter.allEntity}
@@ -143,7 +140,7 @@ const Filters = (props) => {
                 setSalesFilter({ ...salesFilter, entity: val });
               }}
               renderInput={(params) => <TextField {...params} label="Entity" variant="outlined" />}
-            />
+            /> */}
             <Box mt={1} />
             <Autocomplete
               size="small"
@@ -247,7 +244,7 @@ const Filters = (props) => {
                   Filters
                 </Button>
               </Grid>
-              <Grid item xs={6} sm={4} md={3}>
+              {/* <Grid item xs={6} sm={4} md={3}>
                 <FormControl className={classes.status} size="small" variant="outlined">
                   <InputLabel id="status">Status</InputLabel>
                   <Select labelId="status" id="status" value={status} onChange={(e) => setStatus(e.target.value)}>
@@ -256,7 +253,7 @@ const Filters = (props) => {
                     <MenuItem value={'open'}>Open</MenuItem>
                   </Select>
                 </FormControl>
-              </Grid>
+              </Grid> */}
               <Grid item xs={6} sm={4} md={3}>
                 <FormTypes
                   fullWidth={false}

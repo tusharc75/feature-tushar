@@ -193,7 +193,7 @@ const Top2Dashboard = (props) => {
     setAnchorEl(null);
   };
 
-  return (
+  return allEntitySalesData.labels.length > 0 && (
     <Paper elevation={2}>
       <Box my={2} p={2}>
         <Box display="flex" justifyContent="space-between">
@@ -216,7 +216,7 @@ const Top2Dashboard = (props) => {
           </Menu>
         </Box>
         <Box textAlign="center">
-          <Typography variant="h5">Total offered value in {filterCurrency || currency}</Typography>
+          <Typography variant="h5">Total offered value in {filterCurrency || currency} vs Entities</Typography>
         </Box>
 
         {!loading ? (

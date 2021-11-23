@@ -24,6 +24,8 @@ import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from "../../components/Activity";
 import { isMobile, isTablet } from "react-device-detect";
 
+const renderedFrom = "receivingTicketDetailInventoryPage";
+
 const mappedStatus = {
   "Sign-off - Dispatch": "In-Transit",
   "Sign-off - Receive": "Delivered"
@@ -52,10 +54,14 @@ const ReceivingTicketDetails = () => {
   const [submittingSign, setSubmittingSign] = useState(false);
   const [openSigns, setOpenSigns] = useState(false);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
+  const [okBtnLoading, setOkBtnLoading] = useState(false)
+  const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false)
+
+  const [canEdit, setCanEdit] = useState(false)
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, page, limit, pageSizes } = state;
+  const { dataRows, rowCount, page, limit, pageSizes, selectedRecords } = state;
   useEffect(() => {
     if (id) {
       fetchReceivingTicketData()
@@ -90,11 +96,22 @@ const ReceivingTicketDetails = () => {
   };
 
   const fetchReceivingTicketData = () => {
+    if (gridApi) {
+      gridApi.deselectAll();
+    }
+    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+
     setLoading(true);
     axiosInstance()
       .get(`${routes.receivingTicket.path}/${id}`)
       .then(({ data: { data } }) => {
         setReceivingTicketData(data)
+        setCanEdit(
+          [...(data?.collaborator ?? []), data?.owner ?? {}].some(
+            (obj) => obj.optionValue === user.user._id
+          )
+        );
+
         setSignatures(data?.signatures || []);
         handleMainPoints(data)
         setHeadingLabel(data.receivingJobName);
@@ -178,12 +195,12 @@ const ReceivingTicketDetails = () => {
   }
 
   const columns = [
-    { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "nameRenderer" },
+    { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
     { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
     { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "bornOnDate", headerName: "Born on Date", show: true, cellRenderer: "dateRenderer" },
     { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "dateRenderer" },
@@ -282,14 +299,14 @@ const ReceivingTicketDetails = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
-                  {/* {permissions?.receivingTicket?.isUpdate && (
+                  {permissions?.receivingTicket?.isUpdate && canEdit && (
                     <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                       Edit
                     </Button>
                   )}
-                  {permissions?.receivingTicket?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />} */}
+                  {/* {permissions?.receivingTicket?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />} */}
                   {
-                    receivingTicketData?.deliveryPerson?.optionValue === user?.user?._id ?
+                    receivingTicketData?.deliveryPerson?.optionValue === user?.user?._id || canEdit ?
                       label !== "" ?
                         <Button
                           variant="contained"
@@ -324,14 +341,28 @@ const ReceivingTicketDetails = () => {
                     dataRows && dataRows.length ?
                       <>
                         <Grid container spacing={1} className="p-2">
-                          <Grid item xs={12} className="mt-2">
+                          <Grid item xs={12} className="mt-2 d-flex gap-2">
                             <Typography variant="subtitle1" className="font-weight-bold text-primary">
                               Serialized Assets
                             </Typography>
+
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              type="button"
+                              size="small"
+                              disabled={selectedRecords.length === 0}
+                              onClick={() => {
+                                setShowRemoveAssetFromReceivingTicketDialog(true)
+                              }}
+                            >
+                              Remove Serialized Assets
+                            </Button>
+
                           </Grid>
                           <Grid item xs={12}>
                             <CustomAgGrid
-                              allowSelection={false}
+                              allowSelection={true}
                               allowAction={false}
                               columns={columns}
                               dataRows={dataRows}
@@ -344,7 +375,7 @@ const ReceivingTicketDetails = () => {
                               page={page}
                               actionWidth={150}
                               loading={false}
-                              renderedFrom="receivingTicketDetailInventoryPage"
+                              renderedFrom={renderedFrom}
                               refreshGrid={fetchProductInventory}
                             />
                           </Grid>
@@ -416,7 +447,8 @@ const ReceivingTicketDetails = () => {
             setOpenUpdateDialog(false);
           }}
           onSuccess={() => {
-            getRessourceFields();
+            // getRessourceFields();
+            fetchReceivingTicketData();
             setOpenUpdateDialog(false);
           }}
         />
@@ -439,6 +471,35 @@ const ReceivingTicketDetails = () => {
           signatures={receivingTicketData?.signatures}
           close={() => setOpenSigns(false)}
         />}
+      {showRemoveAssetFromReceivingTicketDialog && (
+        <ConfirmationDialog
+          open={showRemoveAssetFromReceivingTicketDialog}
+          message={`Are you sure you want to remove selected serialized asset(s) ?`}
+          onClose={() => {
+            setShowRemoveAssetFromReceivingTicketDialog(false);
+          }}
+          onOk={() => {
+            setOkBtnLoading(true);
+
+            axiosInstance().put(`${receivingTicket.receivingTicketApi}/${id}/remove-assets`, { ids: selectedRecords.map(m => m._id) })
+              .then(() => {
+                toastConfig.setToastConfig({ open: true, type: "success", message: `Selected serialized asset(s) removed` });
+                dispatch({
+                  type: 'selection',
+                  selectedRecords: []
+                });
+                fetchReceivingTicketData();
+              }).catch((error) => {
+                toastConfig.setToastConfig(error);
+              }).finally(() => {
+                setOkBtnLoading(false);
+                setShowRemoveAssetFromReceivingTicketDialog(false);
+              });
+
+          }}
+          okBtnLoading={okBtnLoading}
+        />
+      )}
     </>
   );
 };

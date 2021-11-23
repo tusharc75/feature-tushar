@@ -521,6 +521,7 @@ const ProductTemplate = () => {
                                     isCustomField={true}
                                     extraFields={productField}
                                     module="product-template"
+                                    resource=""
                                 />
                             </Box>
                             {

@@ -2,26 +2,45 @@ import Box from "@material-ui/core/Box/Box";
 import { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer, } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import { Link } from 'react-router-dom'
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button } from "@material-ui/core";
+import { Button, Tooltip, IconButton } from "@material-ui/core";
 import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import { gridLoadingTimeout, rentalManagement } from "../../constants/helpers";
+import { gridLoadingTimeout, receivingTicket, rentalManagement, sidebarResource } from "../../constants/helpers";
+import { groupBy } from "lodash";
+import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
+import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 
-const ReceivingTicket = ({productInventory, currentStep, handleReceivingTicketDialog, rentalManagementId }) => {
+const renderedFrom = "rentalManagementDetailsPageReceivingTicket"
+
+const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketDialog, rentalManagementId }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const [downlodingFile, setDownlodingFile] = useState(false)
+  const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false)
+  const [okBtnLoading, setOkBtnLoading] = useState(false)
 
   useEffect(() => {
+    fetchRecords();
+    // eslint-disable-next-line
+  }, [productInventory]);
+
+  const fetchRecords = () => {
+    if (gridApi) {
+      gridApi.deselectAll();
+    }
+
+    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`)
       .then(({ data }) => {
         let tempProductInventory = data.data.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
@@ -70,8 +89,7 @@ const ReceivingTicket = ({productInventory, currentStep, handleReceivingTicketDi
       }).catch((error) => {
         toastConfig.setToastConfig(error)
       });
-    // eslint-disable-next-line
-  }, [productInventory]);
+  }
 
 
   const InventoryRenderer = (params) => (
@@ -107,13 +125,13 @@ const ReceivingTicket = ({productInventory, currentStep, handleReceivingTicketDi
     receivingTicketRenderer: ReceivingTicketRenderer,
     deliveryTicketRenderer: DeliveryTicketRenderer,
     inventoryRenderer: InventoryRenderer,
-    productNameRenderer:ProductNameRenderer,
+    productNameRenderer: ProductNameRenderer,
     commonRenderer: CommonRenderer,
     dateRenderer: DateRenderer,
   };
   const columns = [
-    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "inventoryRenderer" },
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "inventoryRenderer" },
+    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "deliveryTicketRenderer" },
     { field: "receivingTicket", headerName: "Receiving Ticket", show: true, cellRenderer: "receivingTicketRenderer" },
@@ -172,18 +190,38 @@ const ReceivingTicket = ({productInventory, currentStep, handleReceivingTicketDi
         {downlodingFile ? "Please wait..." : "Preview"}
       </Button>
       <Box mx={1} />
-      <Button
-        variant="contained"
-        color="primary"
-        type="button"
-        size="small"
-        disabled={(selectedRecords.length === 0) || currentStep === 5}
+
+      <IconButton
+        disabled={(selectedRecords.length === 0) || currentStep === 5 || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId")))}
         onClick={() => {
           handleReceivingTicketDialog(selectedRecords)
         }}
+        color='primary'
+        size="small"
       >
-        Create Reciving Ticket
-      </Button>
+        <Tooltip
+          title="Create Receiving Ticket">
+          <AddBoxRoundedIcon />
+        </Tooltip>
+      </IconButton>
+
+      <Box mx={1} />
+
+      <IconButton
+        disabled={(selectedRecords.length === 0) || currentStep === 5 || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId")))}
+        onClick={() => {
+          setShowRemoveAssetFromReceivingTicketDialog(true)
+        }}
+        color='primary'
+        size="small"
+      >
+        <Tooltip
+          title="Remove Assets From Receiving Ticket(s)">
+          <RemoveCircleRoundedIcon />
+        </Tooltip>
+      </IconButton>
+
+      <Box mx={1} />
     </Box>
 
     <Grid item xs={12} md={12} sm={12} className="mt-3">
@@ -201,12 +239,44 @@ const ReceivingTicket = ({productInventory, currentStep, handleReceivingTicketDi
           page={page}
           allowAction={false}
           loading={loading}
-          renderedFrom="rentalManagementDetailsPageReceivingTicket"
+          renderedFrom={renderedFrom}
         />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
 
       }
     </Grid>
+
+    {showRemoveAssetFromReceivingTicketDialog && (
+      <ConfirmationDialog
+        open={showRemoveAssetFromReceivingTicketDialog}
+        message={`Are you sure you want to remove selected records from ${sidebarResource.receivingTicket}(s) ?`}
+        onClose={() => {
+          setShowRemoveAssetFromReceivingTicketDialog(false);
+        }}
+        onOk={() => {
+          setOkBtnLoading(true);
+
+          const groupByCalls = groupBy(selectedRecords, "receivingTicketId");
+          let apiCalls = [];
+
+          Object.keys(groupByCalls).forEach((key) => {
+            apiCalls.push(axiosInstance().put(`${receivingTicket.receivingTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
+          })
+
+          Promise.all(apiCalls).then(() => {
+            toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged ${sidebarResource.receivingTicket}(s)` });
+            fetchRecords();
+          }).catch((error) => {
+            toastConfig.setToastConfig(error);
+          }).finally(() => {
+            setOkBtnLoading(false);
+            setShowRemoveAssetFromReceivingTicketDialog(false);
+          });
+
+        }}
+        okBtnLoading={okBtnLoading}
+      />
+    )}
   </>
   );
 }

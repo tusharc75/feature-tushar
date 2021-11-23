@@ -331,7 +331,7 @@ const Opportunities = () => {
               ...finalObject,
               canDelete: u.owner?.optionValue === user?.user._id,
               stage: u.stage,
-              closeDate: u?.closeDate ? displayDate(u.closeDate) : '',
+              closeDate: u?.closeDate,
             };
             return res;
           });
