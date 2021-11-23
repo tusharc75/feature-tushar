@@ -68,9 +68,9 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
                   })
                 })
 
-                tempProductInventory.forEach((d) => {
-                  d["hideSelection"] = d.status === "In-Transit";
-                })
+                // tempProductInventory.forEach((d) => {
+                //   d["hideSelection"] = d.status === "In-Transit";
+                // })
 
                 dispatch({
                   type: "initialize", data: tempProductInventory, count: tempProductInventory.length
