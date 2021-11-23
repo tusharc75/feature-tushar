@@ -9,7 +9,7 @@ import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { dateFormat, rentalManagement, treeToFlatArray } from "../../constants/helpers";
+import { dateFormat, formatAmountWithCurrency, rentalManagement, treeToFlatArray } from "../../constants/helpers";
 import moment from "moment";
 import { startCase, orderBy } from "lodash";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -18,7 +18,7 @@ import CustomReactTable from "../../components/CustomReactTable/CustomReactTable
 const SerializedAssetStep = (props) => {
   const { loading, productInventory, currentStep, serializeAssets, fetchProductsData, rentalManagementId, isTabletScreen,
     isSmallScreen, setNextStep,
-    showActivity, currencySymbol } = props
+    showActivity, currencySymbol, currencyCode } = props
   const toastConfig = useContext(CustomToastContext);
 
   // const [gridApi, setGridApi] = useState(null);
@@ -251,6 +251,7 @@ const SerializedAssetStep = (props) => {
     {
       accessor: 'detail',
       Header: 'Detail',
+      width: 300,
       Cell: ({ row }) => (
         <div className="d-flex gap-2 align-items-center">
           <p
@@ -333,7 +334,23 @@ const SerializedAssetStep = (props) => {
           [info.rows]
         )
 
-        return <>{currencySymbol} {total}</>
+        return <>{currencySymbol} {formatAmountWithCurrency(currencyCode, total)?.amountWithouCurrencyCode ?? total}</>
+      }
+    },
+    {
+      accessor: 'amount',
+      Header: `Total Quantity Price (${currencySymbol})`,
+      Cell: ({ row }) => (
+        row.original.amount ? <p>{row.original.amount}</p> : <NoDataCell />
+      ),
+      Footer: info => {
+        const total = useMemo(
+          () =>
+            info.rows.filter(f => f.values.hasOwnProperty("amount") && !isNaN(f.values.amount)).reduce((sum, row) => row.values.amount + sum, 0),
+          [info.rows]
+        )
+
+        return <>{currencySymbol} {formatAmountWithCurrency(currencyCode, total)?.amountWithouCurrencyCode ?? total}</>
       }
     },
     {
@@ -356,7 +373,7 @@ const SerializedAssetStep = (props) => {
           [info.rows]
         )
 
-        return <>{currencySymbol} {total}</>
+        return <>{currencySymbol} {formatAmountWithCurrency(currencyCode, total)?.amountWithouCurrencyCode ?? total}</>
       }
     }
   ]
@@ -562,11 +579,7 @@ const SerializedAssetStep = (props) => {
                 height="calc(100vh - 365px)"
                 columns={columns}
                 data={rows}
-                rowStyle={(rowData) => ({
-                  color: "black",
-                  backgroundColor: rowData?.type?.includes("roduct") && rowData?.subRows?.length !== rowData?.qty
-                    ? "#EFCCCC" : "white"
-                })}
+                isInValidCheck={(rowData) => rowData?.type?.includes("roduct") && rowData?.subRows?.length !== rowData?.qty}
                 onSelect={setSelectedProducts}
                 childrenProperty="subRows"
                 uniqueKey="id"
