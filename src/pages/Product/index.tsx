@@ -13,7 +13,7 @@ import { RiShoppingBag3Fill } from 'react-icons/ri';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { ExpandMore } from "@material-ui/icons";
-import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
+import { Box, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
@@ -21,19 +21,19 @@ import ImportExportLinks from "../../components/Product/ImportExportLinks";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { product, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
 import {
-    CommonRenderer,
-    CreatedByRenderer,
-    UpdatedByRenderer
+    CommonRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useData } from "../../StateProvider/Provider";
 import { sortBy } from 'lodash';
-import HtmlTooltip from '../../components/CustomTooltipTitle'
 import { RiBillLine } from "react-icons/ri";
 import { Autocomplete } from "@material-ui/lab";
 import TextField from "@material-ui/core/TextField";
-import { getColumnData, getStaticFields, getFrameworkComponents, getColumnHiddenStatus } from "../../constants/columns"
+import {
+    getColumnData, getStaticFields, getFrameworkComponents,
+    getColumnHiddenStatus, getSortedColumns
+} from "../../constants/columns"
 import { prepareDataForGrid } from "../../constants/helpers";
 import Tooltip from '@material-ui/core/Tooltip'
 
@@ -132,6 +132,7 @@ const Product = () => {
                             headerName: o?.fieldData?.fieldLabel,
                             show: true,
                             disabled: true,
+                            primaryField: true,
                             cellRenderer: 'productNameRenderer'
                         }]
                     }
@@ -187,6 +188,7 @@ const Product = () => {
             }
             setFrameWorkComponent({ ...tempFrameworkComponent })
             columns = [...columns, ...getStaticFields()]
+            columns = getSortedColumns(columns)
             setColumns([...columns])
             dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);

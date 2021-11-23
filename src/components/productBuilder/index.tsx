@@ -31,7 +31,7 @@ import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
 import CustomButton from "../Helpers/CustomButton";
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns } from "../../constants/columns"
 import { prepareDataForGrid } from "../../constants/helpers";
 
 let levalOrderBy = [
@@ -138,6 +138,7 @@ const ProductBuilder = (props) => {
         ...tempFrameworkComponent,
       }
       setFrameWorkComponent({ ...tempFrameworkComponent })
+      columns = getSortedColumns(columns)
       setColumns([...columns])
       dispatch({ type: "initialize", data: rows, count: rows.length });
       setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
