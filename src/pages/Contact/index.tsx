@@ -33,7 +33,7 @@ import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import queryString from 'query-string';
 
@@ -101,7 +101,7 @@ export default function Contact(props) {
   const [entities, setEntities] = useState([])
   const [columns, setColumns] = useState([])
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
-
+  const {getColumnData} = useColumns();
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);

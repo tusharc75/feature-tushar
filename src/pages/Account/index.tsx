@@ -38,7 +38,7 @@ import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes"
 import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import { HiBadgeCheck } from "react-icons/hi"
-import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -70,6 +70,7 @@ export default function Account(props) {
   let queryColFilter: string = queryParams.colFilter as string;
 
   const toastConfig = useContext(CustomToastContext);
+  const {getColumnData} = useColumns();
 
   const {
     account: { accountApi, accountResource, accountRoute }
