@@ -28,7 +28,7 @@ import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import queryString from "query-string";
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers"
 import { useLocation, useHistory } from "react-router-dom";
 import { isMobile } from 'react-device-detect';
@@ -42,6 +42,7 @@ const MarketSegment = () => {
     const {
         state: { permissions },
     }: any = useData();
+    const {getColumnData} = useColumns();
 
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)

@@ -1,6 +1,8 @@
 import React, { useState, Fragment } from 'react';
 import { generateUniqueId } from '../../constants/helpers';
 import OrgChart from './OrgChart';
+import { Autocomplete } from '@material-ui/lab';
+import { Grid, TextField, FormControl, InputLabel, Select, Button, Popover, Box, MenuItem, AppBar } from '@material-ui/core';
 // import chartService from '../services/ChartService';
 // import shortid from 'shortid';
 // import Modal from './Modal';
@@ -10,7 +12,7 @@ import OrgChart from './OrgChart';
 
 import './OrgChartContainer.scss';
 
-export default function OrgChartContainer({ data, onClick }) {
+export default function OrgChartContainer({ data, onClick, updateChart = null, setShowAddContact = null }) {
 
     const chartId = `chart-${generateUniqueId()}`;
     const google = window.google;
@@ -76,8 +78,6 @@ export default function OrgChartContainer({ data, onClick }) {
     //     toggleModal();
     // }
 
-
-
     // const toggleModal = () => {
     //     setShowModal(!showModal);
     // };
@@ -128,13 +128,24 @@ export default function OrgChartContainer({ data, onClick }) {
     return (
         <Fragment>
             <div className="custom-orgchart">
+
+                <div style={{ float: "right" }}>
+                    <Box p={2}>
+                        <Button
+                            onClick={setShowAddContact} color="primary" endIcon={null}>
+                            Add Contacts
+                        </Button>
+                    </Box>
+                </div>
+
                 <OrgChart
                     positions={positions}
                     getOrgChart={getOrgChart}
                     chartId={chartId}
-                    // update={update}
+                    updateChart={updateChart}
                     onClickNode={onClickNode}
                     google={google}
+                // edit={edit}
                 />
             </div>
 
@@ -183,6 +194,6 @@ export default function OrgChartContainer({ data, onClick }) {
                 ) : null
             } */}
 
-        </Fragment>
+        </Fragment >
     );
 };

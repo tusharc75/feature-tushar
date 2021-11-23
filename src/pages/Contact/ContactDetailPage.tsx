@@ -35,6 +35,7 @@ import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import routes from '../../components/Helpers/Routes';
+import AddReportsToContact from './AddReportsToContact';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -78,6 +79,10 @@ const ContactDetailsPage = (props) => {
   const [opportunities, setOpportunities] = useState([]);
   const [projectSales, setProjectSales] = useState([]);
   const [quotes, setQuotes] = useState([]);
+  const [contactsList, setContactsList] = useState([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const [showAddContact, setShowAddContact] = useState(false)
 
   let { id } = useParams();
 
@@ -160,8 +165,10 @@ const ContactDetailsPage = (props) => {
 
         let orgChartData = [];
 
+        let excludeContacts = []
         if (data.parentHierarchy && data.parentHierarchy.length > 0) {
           data.parentHierarchy.map((d) => {
+            excludeContacts.push(d._id)
             orgChartData.push({
               id: d._id,
               name: [d.firstName, d.middleName, d.lastName].filter((d) => d).join(' '),
@@ -173,6 +180,8 @@ const ContactDetailsPage = (props) => {
             });
           });
         }
+        excludeContacts.push(data._id)
+        getContacts(excludeContacts)
 
         orgChartData.push({
           id: data._id,
@@ -190,6 +199,76 @@ const ContactDetailsPage = (props) => {
         setLoading(false);
       });
   };
+
+  const getContacts = (excludeContacts = []) => {
+    axiosInstance()
+      .get(`${contactApi}?entity=${selectedEntity}`)
+      .then(({ data: { data } }) => {
+
+        let rows = data.map(u => {
+          if (excludeContacts.indexOf(u._id) >= 0) {
+            u.isExclude = true
+          }
+          else {
+            u.isExclude = false
+          }
+          return u
+        })
+        let name = [contactData.firstName, contactData.middleName, contactData.lastName].filter((d) => d).join(' ');
+
+        if (contactData?.salutation?.optionLabel) {
+          name = contactData.salutation.optionLabel + name;
+        }
+        let currentContact = {
+          ...contactData, isExclude: true,
+          concatedName: name
+        }
+        setContactsList([currentContact, ...rows])
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const handleUpdateOrgData = ({ addContact, reportsToContact }) => {
+
+    if (addContact?._id && reportsToContact?._id) {
+      const contactFieldData = contactFields.map((f) => {
+        return f.fieldData;
+      });
+      const updatedData = {
+        ...getObjKeysWithValues(addContact, contactFieldData),
+        reportsTo: reportsToContact?._id,
+        _id: addContact?._id
+      };
+      handleUpdateContact(updatedData, true)
+    }
+  }
+
+  const handleUpdateChart = (draggedNode, dropNode) => {
+    let draggedNodeData = {}
+    contactsList.forEach(o => {
+      if (draggedNode.id === o._id) {
+        draggedNodeData = {
+          ...o,
+          reportsTo: dropNode.id
+        }
+      }
+    })
+
+    const contactFieldData = contactFields.map((f) => {
+      return f.fieldData;
+    });
+
+    const updatedData = {
+      ...getObjKeysWithValues(draggedNodeData, contactFieldData),
+      _id: draggedNodeData["_id"]
+    };
+    if (updatedData && updatedData["reportsTo"] && updatedData["reportsTo"] === "0") {
+      delete updatedData["reportsTo"]
+    }
+    handleUpdateContact(updatedData, true)
+  }
 
   const fetchRelatedData = () => {
     axiosInstance()
@@ -445,27 +524,34 @@ const ContactDetailsPage = (props) => {
     }
   };
 
-  const handleUpdateContact = (values) => {
+  const handleUpdateContact = (values, isUpdateReportsTo = false, isFetch = true) => {
     if (values.employees) {
       values.employees = parseInt(values.employees);
     }
-    const updatedData = {
-      ...values,
-      _id: contactData._id
-    };
+    let updatedData = { ...values, };
 
+    if (!isUpdateReportsTo) {
+      updatedData = {
+        ...updatedData,
+        _id: contactData._id
+      };
+    }
+    setIsSubmitting(true)
     axiosInstance()
       .put(`/${contactApi}`, updatedData)
       .then(({ data }) => {
-        fetchContactData();
+        if (isFetch) fetchContactData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
+        if (showAddContact) setShowAddContact(false)
         setOpenUpdateDialog(false);
+        setIsSubmitting(false)
       })
       .catch((error) => {
+        setIsSubmitting(false)
         toastConfig.setToastConfig(error);
       });
   };
@@ -486,6 +572,17 @@ const ContactDetailsPage = (props) => {
 
   return (
     <>
+      {
+        showAddContact ?
+          <AddReportsToContact
+            onClose={() => { setShowAddContact(false) }}
+            open={showAddContact}
+            contactsList={contactsList}
+            isSubmitting={isSubmitting}
+            onSubmit={handleUpdateOrgData}
+          />
+          : null
+      }
       {openUpdateDialog && showAtLast ? (
         // <UpdateDetailsDialog
         //     title={`Editing  ${contactData.firstName}`}
@@ -622,11 +719,14 @@ const ContactDetailsPage = (props) => {
                     {/* <DetailsPage data={contactData} fields={contactFields} /> */}
                   </Box>
                   <Box hidden={currentTabIndex !== 1}>
+
                     <OrgChartContainer
                       data={orgChartData}
                       onClick={(id) => {
                         history.push(`/${contactApi}/detail/${id}`);
                       }}
+                      updateChart={handleUpdateChart}
+                      setShowAddContact={setShowAddContact}
                     />
                   </Box>
                 </>
@@ -910,6 +1010,7 @@ const ContactDetailsPage = (props) => {
           </Paper>
         </div>
       </div>
+
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -927,15 +1028,18 @@ const ContactDetailsPage = (props) => {
             setOrgChartInFullScreenDialog(false);
           }}
         >
+
           <OrgChartContainer
             data={orgChartData}
             onClick={(id) => {
-              setOrgChartInFullScreenDialog(false);
               history.push(`/${contactApi}/detail/${id}`);
             }}
+            setShowAddContact={setShowAddContact}
+            updateChart={handleUpdateChart}
           />
         </FullScreenDialog>
       )}
+
       {openAdditionalDialog && (
         // <Dialog
         //   disableBackdropClick={true}
@@ -974,6 +1078,7 @@ const ContactDetailsPage = (props) => {
           title="Additional Information"
           fieldData={sectionFields}
         />
+
       )}
     </>
   );
