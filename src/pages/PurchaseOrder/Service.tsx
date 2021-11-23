@@ -1,6 +1,6 @@
 
 import Box from "@material-ui/core/Box/Box";
-import { useState, useEffect, useReducer, useContext } from "react";
+import React, { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer, } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -17,6 +17,8 @@ import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import EditIcon from "@material-ui/icons/Edit";
 import { useData } from "../../StateProvider/Provider";
+import {isMobile} from "react-device-detect";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 
 const Service = ({ currencySymbol, purchaseOrderData ,statusOptions}) => {
@@ -176,6 +178,31 @@ const Service = ({ currencySymbol, purchaseOrderData ,statusOptions}) => {
     <Grid item xs={12} md={12} sm={12} className="mt-3">
 
       {columns ?
+          isMobile ? <CustomSwipableList
+                  allowSelection={true}
+                  allowSwipe={true}
+                  primaryField={true}
+                  onClick={true}
+                  dataRows={true}
+                  selectedRecords={true}
+                  dispatch={true}
+                  onEdit={true}
+                  onDelete={true}
+                  extraParamsToCheckDelete={true}
+                  rowCount={true}
+                  page={true}
+                  loading={true}
+                  // checkError = {null}
+                  chips={true}
+                  permissions={true}
+                  onCreate={true}
+                  showClone={true}
+                  onClone={true}
+                  renderedFrom={true}
+                  additionalDetails ={[]}
+                  owerCollaboratorInitialsOrImages ={null}
+
+              /> :
         <CustomAgGrid
           columns={columns}
           dataRows={dataRows}

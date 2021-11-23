@@ -24,6 +24,9 @@ import { FaHourglassHalf } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
 import {TiArrowBack} from "react-icons/ti";
 import {RiShareForwardFill} from "react-icons/ri";
+import MobileStepper from "@material-ui/core/MobileStepper";
+import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
+import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
 
 const useStyles = makeStyles((theme) => ({
 
@@ -172,150 +175,184 @@ const Steps = (props) => {
 
     return (
         <div>
-            <div className="position-relative">
-                <Grid container xs={12}>
-                    <Grid
-                        item
-                        xs={12}
-                        sm={2}
-                        md={1}
-                        className="d-flex align-items-center justify-content-center mt-2"
-                    >
-                        {!isMobile && (
-                            <>
-                                <div>
-                                    {(
+            {
+                isMobile ? <div>
+                        <MobileStepper
+                            style={{background: "#dee2e6"}}
+                            variant="dots"
+                            steps={steps.length}
+                            position="bottom"
+                            activeStep={currentStep}
+                            nextButton={
+                                    <Button size="small"
+                                            disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
+                                            onClick={() => {
+                                                setCurrentStep(currentStep + 1)
+                                            }} >
+                                        {steps[currentStep + 1] ?? ""}
+                                    </Button>
+
+                                    // : <Button size="small" disabled={loading} color="primary" onClick={handleNext}
+                                    //           variant="contained" endIcon={<KeyboardArrowRight/>}>
+                                    //     {steps[activeStep + 1]?.label ?? ""}
+                                    // </Button>
+                            }
+                            backButton={
+
+                                    <Button size="small" variant="contained" startIcon={<KeyboardArrowLeft/>} disabled={currentStep === 5 || currentStep === 0} onClick={() => {
+                                        setCurrentStep(currentStep - 1)
+                                    }} >
+                                        {steps[currentStep - 1] ?? ""}
+                                    </Button>
+
+                            }
+                        />
+                    </div> :
+                    <div className="position-relative">
+                        <Grid container xs={12}>
+                            <Grid
+                                item
+                                xs={12}
+                                sm={2}
+                                md={1}
+                                className="d-flex align-items-center justify-content-center mt-2"
+                            >
+                                {!isMobile && (
+                                    <>
                                         <div>
-                                            <IconButton
-                                                disabled={currentStep === 5 || currentStep === 0}
-                                                onClick={() => {
-                                                    setCurrentStep(currentStep - 1)
-                                                }}
-                                                className="stepperButton"
-                                            >
-                                                <TiArrowBack size={30} />
-                                            </IconButton>
+                                            {(
+                                                <div>
+                                                    <IconButton
+                                                        disabled={currentStep === 5 || currentStep === 0}
+                                                        onClick={() => {
+                                                            setCurrentStep(currentStep - 1)
+                                                        }}
+                                                        className="stepperButton"
+                                                    >
+                                                        <TiArrowBack size={30}/>
+                                                    </IconButton>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                            </>
-                        )}
-                    </Grid>
-                    <Grid item xs={12} sm={8} md={10}>
-                        <div className={classes.pStepper}>
-                            <Grid container>
-                                <Grid
-                                    item
-                                    xs={6}
-                                >
-                                    {isMobile && (
-                                        <>
-                                            <div>
-                                                {(
+                                    </>
+                                )}
+                            </Grid>
+                            <Grid item xs={12} sm={8} md={10}>
+                                <div className={classes.pStepper}>
+                                    <Grid container>
+                                        <Grid
+                                            item
+                                            xs={6}
+                                        >
+                                            {isMobile && (
+                                                <>
                                                     <div>
+                                                        {(
+                                                            <div>
+                                                                <IconButton
+                                                                    color="primary"
+                                                                    disabled={currentStep === 5 || currentStep === 0}
+                                                                    onClick={() => {
+                                                                        setCurrentStep(currentStep + 1)
+                                                                    }}
+                                                                    size="small"
+                                                                >
+                                                                    <IoIosArrowDropleftCircle/>
+                                                                </IconButton>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </Grid>
+                                        <Grid
+                                            item
+                                            xs={6}
+                                            className="d-flex align-items-center justify-content-end mt-1 mb-1"
+                                        >
+                                            {isMobile && (
+                                                <>
+                                                    <div>
+                                                        {(
+                                                            <div>
+                                                                {(
+                                                                    <IconButton
+                                                                        color="primary"
+                                                                        onClick={() => {
+                                                                            setCurrentStep(currentStep + 1)
+                                                                        }}
+                                                                        size="small"
+                                                                        disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
+
+                                                                    >
+                                                                        Next
+                                                                    </IconButton>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </Grid>
+                                    </Grid>
+                                    <Stepper className={`${classes.pbStepper} stepper-responsive`}
+                                             activeStep={activeStep} >
+                                        {steps.map((label, i) => (
+                                            <Step
+                                                key={label}
+                                                className={clsx(classes.step, {
+                                                    [classes.active]:
+                                                    currentStep > i ||
+                                                    steps[currentStep] === "End",
+                                                    [classes.currentStep]: currentStep === i,
+                                                    [classes.inActive]: currentStep !== i,
+                                                })}
+                                            >
+                                                <StepLabel
+                                                    style={{color: "#555"}}
+                                                    // StepIconComponent={ColorlibStepIcon}
+                                                    className="currentStepColor"
+                                                >
+                                                    {label}
+                                                </StepLabel>
+                                            </Step>
+                                        ))}
+                                    </Stepper>
+                                </div>
+                            </Grid>
+                            <Grid
+                                item
+                                xs={12}
+                                sm={2}
+                                md={1}
+                                className="d-flex align-items-center justify-content-center mt-2 "
+                            >
+                                {!isMobile && (
+                                    <>
+                                        <div>
+                                            {(
+                                                <div>
+                                                    {(
                                                         <IconButton
-                                                            color="primary"
-                                                            disabled={currentStep === 5 || currentStep === 0}
+
                                                             onClick={() => {
                                                                 setCurrentStep(currentStep + 1)
                                                             }}
-                                                            size="small"
+                                                            disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
+                                                            className="stepperButtonNext"
                                                         >
-                                                            <IoIosArrowDropleftCircle />
+                                                            <RiShareForwardFill/>
                                                         </IconButton>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </>
-                                    )}
-                                </Grid>
-                                <Grid
-                                    item
-                                    xs={6}
-                                    className="d-flex align-items-center justify-content-end mt-1 mb-1"
-                                >
-                                    {isMobile && (
-                                        <>
-                                            <div>
-                                                {(
-                                                    <div>
-                                                        {(
-                                                            <IconButton
-                                                                color="primary"
-                                                                onClick={() => {
-                                                                    setCurrentStep(currentStep + 1)
-                                                                }}
-                                                                size="small"
-                                                                disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
-
-                                                            >
-                                                                Next
-                                                            </IconButton>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </>
-                                    )}
-                                </Grid>
-                            </Grid>
-                            <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={activeStep}>
-                                {steps.map((label, i) => (
-                                    <Step
-                                        key={label}
-                                        className={clsx(classes.step, {
-                                            [classes.active]:
-                                                currentStep > i ||
-                                                steps[currentStep] === "End",
-                                            [classes.currentStep]: currentStep === i,
-                                            [classes.inActive]: currentStep !== i,
-                                        })}
-                                    >
-                                        <StepLabel
-                                            style={{ color: "#555" }}
-                                            // StepIconComponent={ColorlibStepIcon}
-                                            className="currentStepColor"
-                                        >
-                                            {label}
-                                        </StepLabel>
-                                    </Step>
-                                ))}
-                            </Stepper>
-                        </div>
-                    </Grid>
-                    <Grid
-                        item
-                        xs={12}
-                        sm={2}
-                        md={1}
-                        className="d-flex align-items-center justify-content-center mt-2 "
-                    >
-                        {!isMobile && (
-                            <>
-                                <div>
-                                    {(
-                                        <div>
-                                            {(
-                                                <IconButton
-
-                                                    onClick={() => {
-                                                        setCurrentStep(currentStep + 1)
-                                                    }}
-                                                    disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
-                                                    className="stepperButtonNext"
-                                                >
-                                                    <RiShareForwardFill />
-                                                </IconButton>
+                                                    )}
+                                                </div>
                                             )}
                                         </div>
-                                    )}
-                                </div>
-                            </>
-                        )}
-                    </Grid>
-                </Grid>
-            </div>
-
+                                    </>
+                                )}
+                            </Grid>
+                        </Grid>
+                    </div>
+            }
         </div>
     );
 };

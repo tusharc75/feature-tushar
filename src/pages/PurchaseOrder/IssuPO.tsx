@@ -1,6 +1,6 @@
 
 import Box from "@material-ui/core/Box/Box";
-import { useState, useEffect, useReducer, useContext } from "react";
+import React, { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer, } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -13,6 +13,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CreateEmail } from "../../components/Activity/Email/CreateEmail";
 import { isMobile, isTablet } from "react-device-detect";
 import { AiFillFilePdf } from "react-icons/ai";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 
 const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBase64, downlodingFile, setCurrentStep, currentStep, handleAttachments }) => {
@@ -168,6 +169,31 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handle
         <Grid item xs={12} md={12} sm={12} className="mt-3">
 
             {columns ?
+                isMobile ? <CustomSwipableList
+                        allowSelection={true}
+                        allowSwipe={true}
+                        primaryField={true}
+                        onClick={true}
+                        dataRows={true}
+                        selectedRecords={true}
+                        dispatch={true}
+                        onEdit={true}
+                        onDelete={true}
+                        extraParamsToCheckDelete={true}
+                        rowCount={true}
+                        page={true}
+                        loading={true}
+                        // checkError = {null}
+                        chips={true}
+                        permissions={true}
+                        onCreate={true}
+                        showClone={true}
+                        onClone={true}
+                        renderedFrom={true}
+                        additionalDetails ={[]}
+                        owerCollaboratorInitialsOrImages ={null}
+
+                    /> :
                 <CustomAgGrid
                     columns={columns}
                     dataRows={dataRows}
@@ -183,6 +209,7 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handle
                     allowSelection={false}
                     renderedFrom="purchaseOrderDetailsPageService"
                 />
+
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
 
             }

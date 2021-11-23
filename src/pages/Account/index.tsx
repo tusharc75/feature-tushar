@@ -841,81 +841,81 @@ export default function Account(props) {
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
               <div className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
                 <MdAccountCircle className="headerLogo" /> <span id="resourceHeader" className="listingHeader">{routes[accountResource].title}</span>
-                <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
-                  {AccTypes && (
-                    <ToggleButtonGroup
-                      id="resourceTypeSelector"
-                      size="small"
-                      className={`ml-8 ${accountClass.accountActions}`}
-                      value={filter}
-                      exclusive
-                      onChange={handleFilter}
-                    >
-                      {AccTypes.map((k: any, index) => {
-                        return (
-                          <ToggleButton value={k.key} key={index}>
-                            <Link to={`/${accountRoute}?page=${page}&type=${encodeURIComponent(k.key)}`} >
-                              {k.key}
-                            </Link>
+                {/*<div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>*/}
+                {/*  /!*{AccTypes && (*!/*/}
+                {/*  /!*  <ToggleButtonGroup*!/*/}
+                {/*  /!*    id="resourceTypeSelector"*!/*/}
+                {/*  /!*    size="small"*!/*/}
+                {/*  /!*    className={`ml-8 ${accountClass.accountActions}`}*!/*/}
+                {/*  /!*    value={filter}*!/*/}
+                {/*  /!*    exclusive*!/*/}
+                {/*  /!*    onChange={handleFilter}*!/*/}
+                {/*  /!*  >*!/*/}
+                {/*  /!*    {AccTypes.map((k: any, index) => {*!/*/}
+                {/*  /!*      return (*!/*/}
+                {/*  /!*        <ToggleButton value={k.key} key={index}>*!/*/}
+                {/*  /!*          <Link to={`/${accountRoute}?page=${page}&type=${encodeURIComponent(k.key)}`} >*!/*/}
+                {/*  /!*            {k.key}*!/*/}
+                {/*  /!*          </Link>*!/*/}
 
-                          </ToggleButton>
-                        );
-                      })}
-                    </ToggleButtonGroup>
-                  )}
-                  <ButtonGroup
-                    id="approveDisapprove"
-                    size="small"
-                    className={accountClass.accountActions}
-                    variant="outlined"
-                    color="primary"
-                    ref={anchorRef}
-                    aria-label="small outlined button group"
-                  >
-                    <Button>{queryApproval ? queryApproval : options[selectedIndex]}</Button>
-                    <Button
-                      color="primary"
-                      size="small"
-                      aria-controls={open ? 'split-button-menu' : undefined}
-                      aria-expanded={open ? 'true' : undefined}
-                      aria-label="select merge strategy"
-                      aria-haspopup="menu"
-                      onClick={handleToggle}
-                    >
-                      <ArrowDropDownIcon />
-                    </Button>
-                  </ButtonGroup>
-                  <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
-                    {({ TransitionProps, placement }) => (
-                      <Grow
-                        {...TransitionProps}
-                        style={{
-                          transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
-                        }}
-                      >
-                        <Paper>
-                          <ClickAwayListener onClickAway={handleClose}>
-                            <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
-                              {options.map((option, index) => (
-                                <MenuItem
-                                  key={option}
-                                  selected={index === selectedIndex}
-                                  onClick={(event) => handleMenuItemClick(event, index)}
-                                  style={{ color: 'black' }}
-                                >
-                                  <Link to={queryType ? `/${accountRoute}?page=${page}&type=${queryType}&approval=${encodeURIComponent(option)}` : `/${accountRoute}?page=${page}&approval=${encodeURIComponent(option)}`}>
-                                    {option}
-                                  </Link>
+                {/*  /!*        </ToggleButton>*!/*/}
+                {/*  /!*      );*!/*/}
+                {/*  /!*    })}*!/*/}
+                {/*  /!*  </ToggleButtonGroup>*!/*/}
+                {/*  /!*)}*!/*/}
+                {/*  /!*<ButtonGroup*!/*/}
+                {/*  /!*  id="approveDisapprove"*!/*/}
+                {/*  /!*  size="small"*!/*/}
+                {/*  /!*  className={accountClass.accountActions}*!/*/}
+                {/*  /!*  variant="outlined"*!/*/}
+                {/*  /!*  color="primary"*!/*/}
+                {/*  /!*  ref={anchorRef}*!/*/}
+                {/*  /!*  aria-label="small outlined button group"*!/*/}
+                {/*  /!*>*!/*/}
+                {/*  /!*  <Button>{queryApproval ? queryApproval : options[selectedIndex]}</Button>*!/*/}
+                {/*  /!*  <Button*!/*/}
+                {/*  /!*    color="primary"*!/*/}
+                {/*  /!*    size="small"*!/*/}
+                {/*  /!*    aria-controls={open ? 'split-button-menu' : undefined}*!/*/}
+                {/*  /!*    aria-expanded={open ? 'true' : undefined}*!/*/}
+                {/*  /!*    aria-label="select merge strategy"*!/*/}
+                {/*  /!*    aria-haspopup="menu"*!/*/}
+                {/*  /!*    onClick={handleToggle}*!/*/}
+                {/*  /!*  >*!/*/}
+                {/*  /!*    <ArrowDropDownIcon />*!/*/}
+                {/*  /!*  </Button>*!/*/}
+                {/*  /!*</ButtonGroup>*!/*/}
+                {/*  <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>*/}
+                {/*    {({ TransitionProps, placement }) => (*/}
+                {/*      <Grow*/}
+                {/*        {...TransitionProps}*/}
+                {/*        style={{*/}
+                {/*          transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'*/}
+                {/*        }}*/}
+                {/*      >*/}
+                {/*        <Paper>*/}
+                {/*          <ClickAwayListener onClickAway={handleClose}>*/}
+                {/*            <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>*/}
+                {/*              {options.map((option, index) => (*/}
+                {/*                <MenuItem*/}
+                {/*                  key={option}*/}
+                {/*                  selected={index === selectedIndex}*/}
+                {/*                  onClick={(event) => handleMenuItemClick(event, index)}*/}
+                {/*                  style={{ color: 'black' }}*/}
+                {/*                >*/}
+                {/*                  <Link to={queryType ? `/${accountRoute}?page=${page}&type=${queryType}&approval=${encodeURIComponent(option)}` : `/${accountRoute}?page=${page}&approval=${encodeURIComponent(option)}`}>*/}
+                {/*                    {option}*/}
+                {/*                  </Link>*/}
 
-                                </MenuItem>
-                              ))}
-                            </MenuList>
-                          </ClickAwayListener>
-                        </Paper>
-                      </Grow>
-                    )}
-                  </Popper>
-                </div>
+                {/*                </MenuItem>*/}
+                {/*              ))}*/}
+                {/*            </MenuList>*/}
+                {/*          </ClickAwayListener>*/}
+                {/*        </Paper>*/}
+                {/*      </Grow>*/}
+                {/*    )}*/}
+                {/*  </Popper>*/}
+                {/*</div>*/}
 
                 {
                   isOffline

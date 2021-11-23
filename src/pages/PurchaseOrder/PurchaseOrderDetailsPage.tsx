@@ -11,7 +11,18 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { purchaseOrder, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL, getUniqueCurrencies, supplierAccount, customerAccount, dateFormat } from "../../constants/helpers";
+import {
+    purchaseOrder,
+    getObjKeysWithValues,
+    gridLoadingTimeout,
+    product,
+    RESOURCE_LABEL,
+    getUniqueCurrencies,
+    supplierAccount,
+    customerAccount,
+    dateFormat,
+    quoteStepColors
+} from "../../constants/helpers";
 import ManagePurchaseOrder from "./ManagePurchaseOrder";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
@@ -28,10 +39,12 @@ import Service from "./Service";
 import BulkEditDialog from "./BulkEditDialog";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import IssuPO from "./IssuPO";
-import { FaWpforms } from "react-icons/fa";
+import {FaSuitcase, FaWpforms} from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
 import ReceivingAsset from "./ReceivingAsset";
+import {isMobile} from "react-device-detect";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -657,6 +670,42 @@ const PurchaseOrderDetailsPage = () => {
                                                             </Box>
                                                         </Box>
                                                         {columns ?
+                                                              isMobile ?
+                                                                  <CustomSwipableList
+                                                                  allowSelection={true}
+                                                            allowSwipe={true}
+                                                            primaryField={columns?.find(d => d.field === "purchaseOrderNumber")}
+                                                            onClick={(d) => {
+                                                                history.push(`${routes.purchaseOrderDetail.path}/${d._id}`)
+                                                            }}
+                                                            dataRows={dataRows}
+                                                            selectedRecords={selectedRecords}
+                                                            dispatch={dispatch}
+                                                            onEdit={(d) => {
+                                                                history.push(`${routes.purchaseOrderDetail.path}/${d._id}`)
+                                                            }}
+                                                            onDelete={true}
+                                                            extraParamsToCheckDelete={false}
+                                                            rowCount={rowCount}
+                                                            page={page}
+                                                            loading={loading}
+                                                            chips={[
+                                                            ]}
+                                                            permissions={permissions.purchaseOrder}
+                                                            onCreate={() => { }}
+                                                            showClone={false}
+                                                            onClone={() => { }}
+                                                            renderedFrom={"purchaseOrderDetailsPageInventory"}
+                                                            additionalDetails ={[
+                                                                {
+                                                                    icon: <FaSuitcase size={18} />,
+                                                                    field: "customerAccountName"
+                                                                },
+                                                            ]}
+                                                            owerCollaboratorInitialsOrImages ={"owerCollaboratorInitialsOrImages"}
+
+                                                            /> :
+
                                                             <CustomAgGridEditable
                                                                 columns={columns}
                                                                 dataRows={dataRows}
