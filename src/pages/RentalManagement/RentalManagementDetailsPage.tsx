@@ -593,8 +593,10 @@ const RentalManagementDetailsPage = () => {
     {
       accessor: 'detail',
       Header: 'Detail',
+      minWidth: 300,
+      width: 300,
       Cell: ({ row }) => (
-        <div style={{ width: 250, display: "flex", alignItems: 'center' }}>
+        <div style={{ display: "flex", alignItems: 'center' }}>
           <p
             onClick={() => handleClick(row.original)}
             className="link text-truncate"
