@@ -15,7 +15,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { AiFillFilePdf } from "react-icons/ai";
 
 
-const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, downlodingFile, setCurrentStep, currentStep, handleAttachments }) => {
+const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBase64, downlodingFile, setCurrentStep, currentStep, handleAttachments }) => {
     const toastConfig = useContext(CustomToastContext);
     const {
         state: { user, permissions }
@@ -23,7 +23,6 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, downlo
     const [sendEmail, setSendEmail] = useState(false);
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
-    const [pdfFileBase64, setPdfFileBase64] = useState(null);
     const [generatingPdfFile, setGeneratingFile] = useState(false);
 
 
@@ -85,26 +84,6 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, downlo
             toEmails.push(purchaseOrderData.supplier.email);
         }
         setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
-        // else {
-        //     axiosInstance()
-        //         .get(`/${purchaseOrderData.accountApi}/related/${purchaseOrderData?.customerAccountName?.optionValue}`)
-        //         .then(({ data: { data } }) => {
-        //             let relatedContacts =
-        //                 data[sidebarResource[customerContact.contactResource]] && data[sidebarResource[customerContact.contactResource]]['Account_Name']
-        //                     ? data[sidebarResource[customerContact.contactResource]]['Account_Name']
-        //                     : [];
-        //             if (relatedContacts.length) {
-        //                 toEmails = relatedContacts.map((o) => o?.email);
-        //             }
-        //             setUserEmails({
-        //                 cc: [...ownerCollaboratorEmails],
-        //                 to: [...toEmails]
-        //             });
-        //         })
-        //         .catch((err) => {
-        //             toastConfig.setToastConfig(err);
-        //         });
-        // }
     }
 
     let attachments = [];
@@ -112,7 +91,7 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, downlo
         attachments.push({
             base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(',') + 1)),
             contentType: pdfFileBase64.split(';')[0].split(':')[1],
-            name: `Purchase Order-${purchaseOrderData.purchaseOrderId}`
+            name: `Purchase Order-${purchaseOrderData.purchaseOrderNumber}`
         });
     }
 
@@ -155,7 +134,19 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, downlo
                         </Button>
                     </>
                 )}
-
+                <Box mx={1} />
+                {permissions?.purchaseOrder?.isRead && <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={() => {
+                        setSendEmail(true)
+                    }
+                    }
+                >
+                    {`Send Email`}
+                </Button>
+                }
             </Box>
             <Box display="flex" justifyContent="flex-end" p="4px">
                 <Box mx={1} />
@@ -164,8 +155,8 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, downlo
                     color="primary"
                     size="small"
                     onClick={() => {
-                        setSendEmail(true)
-                        // setCurrentStep(currentStep + 1) 
+                        setCurrentStep(currentStep + 1)
+                        handleUpdateData({ "status": "Issued" })
                     }
                     }
                 >

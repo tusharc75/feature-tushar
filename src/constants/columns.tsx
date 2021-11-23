@@ -125,7 +125,7 @@ export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
 export const checkStaticField = (renderedFrom, fieldData) => {
     let data = localStorage.getItem("gridMetaData")
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
-    if (gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom].hide.length) {
+    if (gridMetaData && gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom].hide.length) {
         return {
             ...fieldData,
             show: gridMetaData[renderedFrom].hide.indexOf(fieldData?.field) >= 0 ? false : true
@@ -134,6 +134,19 @@ export const checkStaticField = (renderedFrom, fieldData) => {
     return fieldData
 }
 
+export const getSortedColumns = (columns = []) => {
+    return columns.sort(function (a, b) {
+        let columnNameA = a.headerName.toUpperCase(); // ignore upper and lowercase
+        let columnNameB = b.headerName.toUpperCase(); // ignore upper and lowercase
+        if (columnNameA < columnNameB) {
+            return -1;
+        }
+        if (columnNameA > columnNameB) {
+            return 1;
+        }
+        return 0;
+    })
+}
 export const staticColumns = ["createdBy", "updatedBy"]
 export const getColumnData = (title, field, detailScreenRoute = null, hasPopup = false) => {
     let data = localStorage.getItem("gridMetaData")

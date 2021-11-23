@@ -126,17 +126,70 @@ const CreateFormBuilder = () => {
         });
     };
 
+    const handleExportFields = () => {
+        var dataStr =
+            "data:text/json;charset=utf-8," +
+            encodeURIComponent(JSON.stringify(section));
+        var dlAnchorElem = document.getElementById("downloadAnchorElem");
+        dlAnchorElem.setAttribute("href", dataStr);
+        dlAnchorElem.setAttribute("download", "template_field.json");
+        dlAnchorElem.click();
+    };
+
+    const handleImportFields = (e) => {
+        e.preventDefault();
+        var files = e.target.files,
+            f = files[0];
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var data: any = e.target.result;
+            setSection(JSON.parse(data));
+        };
+        reader.readAsBinaryString(f);
+    };
+
     return (<Fragment>
         <Grid container className="headerbox">
-            <CustomBreadCrumbs routes={[routes.formBuilder, { title: resource }]}
-                isConfirmBeforeClick={true}
-                onBreadCrumbClick={(path) => {
-                    if ((!isEqual(orisection, section)) && formBuilderPermissions.isUpdate) {
-                        setShowConfirmDialog(true)
-                    }
-                    else history.push({ pathname: routes.formBuilder.path })
-                }}
-            />
+            <Grid item md={4} sm={11} xs={10}>
+                <CustomBreadCrumbs routes={[routes.formBuilder, { title: resource }]}
+                    isConfirmBeforeClick={true}
+                    onBreadCrumbClick={(path) => {
+                        if ((!isEqual(orisection, section)) && formBuilderPermissions.isUpdate) {
+                            setShowConfirmDialog(true)
+                        }
+                        else history.push({ pathname: routes.formBuilder.path })
+                    }}
+                />
+            </Grid>
+            <Grid container justify="flex-end" item md={8} sm={1} xs={2}>
+                <label
+                    htmlFor="importField"
+                    style={{ color: "white" }}
+                    className="cursor-pointer mr-3"
+                >
+                    Import Fields
+                    <input
+                        onClick={(e: any) => (e.target.value = null)}
+                        id="importField"
+                        name="importField"
+                        onChange={handleImportFields}
+                        style={{
+                            opacity: "0",
+                            position: "absolute",
+                            zIndex: -1,
+                        }}
+                        type="file"
+                    />
+                </label>
+                <label
+                    style={{ color: "white" }}
+                    className="cursor-pointer"
+                    onClick={handleExportFields}
+                >
+                    Export Fields
+                </label>
+                <a id="downloadAnchorElem" style={{ display: "none" }}></a>
+            </Grid>
         </Grid>
         <CustomContainer>
             {section ?
@@ -183,6 +236,7 @@ const CreateFormBuilder = () => {
                             isCustomField={false}
                             extraFields={[]}
                             module="form-builder"
+                            resource={resource}
                         />
                     </Box>
                     {

@@ -245,11 +245,13 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
   const replaceUnit = (label, unit, sUnit = null) => {
     if (label !== "Secondary Unit") {
       if (label.includes("Secondary Unit") && sUnit) {
-        label = `${label.split(" Secondary Unit")[0]} ${sUnit}`;
+        label = `${label.split(" Secondary Unit")[0]} Secondary Unit (${sUnit})`;
       }
 
       if (!label.includes("Secondary Unit") && label.includes("Unit") && unit) {
-        label = `${label.split(" Unit")[0]} ${unit}`;
+        if (label !== "Unit") {
+          label = `${label.split(" Unit")[0]} Unit (${unit})`;
+        }
       }
     }
     return label;

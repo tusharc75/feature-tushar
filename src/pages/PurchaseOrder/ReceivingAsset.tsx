@@ -3,7 +3,7 @@ import Box from "@material-ui/core/Box/Box";
 import { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { Button, Chip, IconButton, useMediaQuery } from "@material-ui/core";
+import { Button, Chip, IconButton, makeStyles, useMediaQuery } from "@material-ui/core";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
@@ -14,6 +14,19 @@ import { startCase } from "lodash";
 import CreateSeriaizedAsset from "./CreateSerializedAsset";
 import CustomReactTable from "../../components/CustomReactTable/CustomReactTable";
 
+const useStyles = makeStyles(() => ({
+    equal: {
+        color: "green",
+    },
+    later: {
+        color: "yellow",
+    },
+    muchLater: {
+        color: "red",
+    },
+
+}));
+
 const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduct, handleUpdateData }) => {
     const toastConfig = useContext(CustomToastContext);
     const {
@@ -21,6 +34,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
     }: any = useData();
 
     let constPurchaseOrderProduct = purchaseOrderProduct
+    const classes = useStyles();
 
     const [showCreateAssetDialog, setShowCreateAssetDialog] = useState(false)
     const isSmallScreen = useMediaQuery('(max-width:1300px)');
@@ -53,23 +67,32 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
             )
         },
         {
-            accessor: 'productNumber',
-            Header: 'Product Number',
-            Cell: ({ row }) => (
-                row.original.productNumber ? <p className="text-truncate">
-                    {/* {rowData.type === "productInPackage"
-                ? rowData.pkgQty !== 0 ? `${rowData.pkgQty} * ${rowData.qty} = ${rowData.totalQty}` : rowData.qty
-                : rowData.qty} */}
-                    {row.original.productNumber}
-                </p> : <NoDataCell />
-            )
-        },
-        {
             accessor: 'expectedDelivery',
             Header: 'Expected Delivery',
             Cell: ({ row }) => (
                 row.original.expectedDelivery ? <h5 className="createBy text-truncate" title={`${moment(row.original.expectedDelivery.slice(0, 10)).format(dateFormat)}`}>
-                    <span className="">{moment(row.original.expectedDelivery.slice(0, 10)).format("MM/DD/YYYY")}</span>
+                    <span className="">
+                        {moment(row.original.expectedDelivery.slice(0, 10)).format("MM/DD/YYYY")}</span>
+                </h5> : <NoDataCell />
+            )
+        },
+        {
+            accessor: 'actualDelivery',
+            Header: 'Actual Delivery',
+            Cell: ({ row }) => (
+                row.original.actualDelivery ? <h5 className="createBy text-truncate" title={`${moment(row.original.actualDelivery.slice(0, 10)).format(dateFormat)}`}>
+                    <span className="">
+                        <Chip
+                            label={`${moment(row.original.actualDelivery.slice(0, 10)).format("MM/DD/YYYY")}`}
+                            size="small"
+                            className={
+                                moment(row.original.actualDelivery).diff(moment(row.original.expectedDelivery), 'days') > 0 ?
+                                    moment(row.original.actualDelivery).diff(moment(row.original.expectedDelivery), 'days') > 7 ?
+                                        classes.muchLater
+                                        : classes.later
+                                    : classes.equal}
+                        />
+                    </span>
                 </h5> : <NoDataCell />
             )
         },
@@ -99,41 +122,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                 row.original.baseUOM ? <p>{startCase(row.original.baseUOM)}</p> : <NoDataCell />
             )
         },
-        {
-            accessor: 'price',
-            Header: `Price (${currencySymbol})`,
-            Cell: ({ row }) => (
-                <p>{row.original.price ? row.original.price : "0"} </p>
-            )
-        },
-        {
-            accessor: 'tax',
-            Header: 'Tax (%)',
-            Cell: ({ row }) => (
-                <p>{row.original.tax === 0 ? "0" : row.original.tax}</p>
-            )
-        },
-        {
-            accessor: 'taxPerUnit',
-            Header: 'Tax Per Unit',
-            Cell: ({ row }) => (
-                <p>{row.original.taxPerUnit === 0 ? "0" : row.original.taxPerUnit}</p>
-            )
-        },
-        {
-            accessor: 'totalTax',
-            Header: 'Total Tax',
-            Cell: ({ row }) => (
-                <p>{row.original.totalTax === 0 ? "0" : row.original.totalTax}</p>
-            )
-        },
-        {
-            accessor: 'finalPrice',
-            Header: `Final Price (${currencySymbol})`,
-            Cell: ({ row }) => (
-                <p>{row.original.finalPrice}</p>
-            )
-        }
+
     ]
 
     useEffect(() => {
@@ -151,7 +140,9 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                             ...u,
                             description: u.assetNumber,
                             treeId: u._id,
-                            parent: tempProduct.treeId
+                            parent: tempProduct.treeId,
+                            actualDelivery: u.createdBy?.date,
+                            expectedDelivery: tempProduct.expectedDelivery
                         })
                     }
                 }
@@ -201,10 +192,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                     <CustomReactTable
                         columns={columns}
                         data={dataRows}
-                        rowStyle={(rowData) => ({
-                            color: "black",
-                            backgroundColor: rowData?.type?.includes("roduct") && (isNaN(rowData?.finalPrice) || rowData?.finalPrice === 0) ? "#EFCCCC" : "white"
-                        })}
+                        isInValidCheck={(rowData) => rowData?.type?.includes("roduct") && (isNaN(rowData?.finalPrice) || rowData?.finalPrice === 0)}
                         onSelect={setSelectedProducts}
                         childrenProperty="subRows"
                         uniqueKey="_id"

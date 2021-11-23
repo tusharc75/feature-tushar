@@ -577,6 +577,7 @@ const PriceTemplate = () => {
                     isCustomField={true}
                     extraFields={[...productField, ...templateField]}
                     module="price-template"
+                    resource=""
                   />
                 </Box>
                 {

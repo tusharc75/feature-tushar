@@ -2,6 +2,63 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/vebholic/oms_frontend/compare/v2.3.0...v2.4.0) (2021-11-23)
+
+
+### Features
+
+* - Rental management related changes done ([d9a5265](https://github.com/vebholic/oms_frontend/commit/d9a5265f31290f96d6829d7e561bd59baf4103f8))
+* - Rental related changes done ([44c96d9](https://github.com/vebholic/oms_frontend/commit/44c96d9fbd6b19a21c1113220bf563381f4532ed))
+
+
+### Bug Fixes
+
+* **newstepper:** changes for doa ([8149624](https://github.com/vebholic/oms_frontend/commit/8149624590bc01e3d7ec8b94c93ee642733394bf))
+* **pricetemplate:** fix unit label ([8205add](https://github.com/vebholic/oms_frontend/commit/8205add1c8ae174752488f0fc1661335f50854c6))
+
+## [2.3.0](https://github.com/vebholic/oms_frontend/compare/v2.2.0...v2.3.0) (2021-11-22)
+
+
+### Features
+
+* - Bulk update issue fixed ([553e2e0](https://github.com/vebholic/oms_frontend/commit/553e2e0cf65f390d7626ad29a66ca29881a8173f))
+* - Rental management, receiving ticket, loading ticket changes done ([0505142](https://github.com/vebholic/oms_frontend/commit/050514247a82534c6633cc255b49244d854194a0))
+
+## [2.2.0](https://github.com/vebholic/oms_frontend/compare/v2.1.0...v2.2.0) (2021-11-21)
+
+
+### Features
+
+* - PO-219 - Fixed ([9f75205](https://github.com/vebholic/oms_frontend/commit/9f75205bed3d0a811a2bba5a193b7ab7a16cd235))
+* - PO-227 - Partially Done ([e761314](https://github.com/vebholic/oms_frontend/commit/e7613147403d8387d1d54937d9b5f419c632f2fa))
+* - PO-230 - Done ([160b030](https://github.com/vebholic/oms_frontend/commit/160b0308d6778f59075b3218896bd1fd2c75923b))
+* - PO-230 - Remove asset added in rental management ([06c5b4f](https://github.com/vebholic/oms_frontend/commit/06c5b4fef41db778b757433c9651cc37b493daeb))
+
+## [2.1.0](https://github.com/vebholic/oms_frontend/compare/v2.0.0...v2.1.0) (2021-11-20)
+
+
+### Features
+
+* - grid expanded not working issue fixed ([ad24bab](https://github.com/vebholic/oms_frontend/commit/ad24babfceb52fbbfa3487634392ddfd55be031c))
+* - PO-214 - auto generate id added in loading and receiving ticket ([9732af0](https://github.com/vebholic/oms_frontend/commit/9732af09dff1d1c771d8fb4104b040a4b6d6f596))
+* - PO-220 - no 4 is completed ([0aebfb4](https://github.com/vebholic/oms_frontend/commit/0aebfb4cfbf9d463a9b5e92742a78b2e92e0d35e))
+* - PO-220 - Working on it - Too many things as to do in that jira ([343fc6b](https://github.com/vebholic/oms_frontend/commit/343fc6b005a9f645618fb6b97ca457a47e1c6d08))
+* - PO-229 - Loading ticket editable given ([07c081b](https://github.com/vebholic/oms_frontend/commit/07c081b0fb89bdae443992e9f165b78d39611d00))
+* - Serialized asset selection issue fixed ([a5e8af9](https://github.com/vebholic/oms_frontend/commit/a5e8af976773ad0317e289ac5f874744de0f51cf))
+* **dashboard:** dahboard changes ([20ebfb0](https://github.com/vebholic/oms_frontend/commit/20ebfb02a4eb21cea871494e42c0e121366cd6e9))
+* **pages:** change table for mobile ([03059a1](https://github.com/vebholic/oms_frontend/commit/03059a1a15d22fd191cf806ce93ac38e49d519ec))
+* pO changes (Aman) ([deb1a70](https://github.com/vebholic/oms_frontend/commit/deb1a70e3c49331231b6359b3b93f40acbed0780))
+* transfer all the resouces before deleting enity or user ([3edc820](https://github.com/vebholic/oms_frontend/commit/3edc82001fffecf4a108e2bea9790265e5491b1b))
+
+
+### Bug Fixes
+
+* rental job ([fc69e51](https://github.com/vebholic/oms_frontend/commit/fc69e51358f4034e01e5d3a4c93b273fa24216ce))
+* **rentalscreen:** conflict fix ([248763e](https://github.com/vebholic/oms_frontend/commit/248763e0072851a2e04248849eff8dcf6f32c31a))
+* **rentalscreen:** fix conflict ([c6ec1fa](https://github.com/vebholic/oms_frontend/commit/c6ec1fa6505fc5a9390c441d7eed3bef5291788f))
+* **rental:** style fix ([e0fad32](https://github.com/vebholic/oms_frontend/commit/e0fad3236994772ef7dc0528e1346856a8367b42))
+* **rental:** style fix ([b13de14](https://github.com/vebholic/oms_frontend/commit/b13de14e39b38b4681326b7d4e8d53417f8e8b29))
+
 ## [2.0.0](https://github.com/vebholic/oms_frontend/compare/v1.40.0...v2.0.0) (2021-11-19)
 
 

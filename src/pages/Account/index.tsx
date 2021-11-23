@@ -43,6 +43,7 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { GridApi } from 'ag-grid-community';
 
 const AccTypes = [
   {
@@ -60,6 +61,7 @@ const options = ['All', 'Approved', 'Disapproved'];
 let accountTimeout;
 export default function Account(props) {
   const location = useLocation();
+
   let queryParams = queryString.parse(location.search);
   let queryType: string = queryParams.type as string;
   let queryApproval: string = queryParams.approval as string;
@@ -86,9 +88,6 @@ export default function Account(props) {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
   const [isAccDialogVisible, setIsAccDialogVisible] = useState(false);
   const [selectedType, setselectedType] = useState(1);
-  const [count, setCount] = useState(0);
-  const [checkColName, setCheckColName] = useState('');
-  const [checkColValue, setCheckColValue] = useState('');
   const [accountId, setAccountId] = useState(null)
   const [showEntityDialog, setShowEntityDialog] = useState(false)
 
@@ -118,7 +117,7 @@ export default function Account(props) {
   const [selectedIndex, setSelectedIndex] = React.useState(queryApproval === 'Approved' ? 1 : queryApproval === 'Disapproved' ? 2 : 0);
   const [filter, setFilter] = useState(queryType ? queryType : 'All Accounts');
   const [accountNameForClone, setAccountNameForClone] = useState('');
-  
+
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -126,6 +125,8 @@ export default function Account(props) {
   const [columns, setColumns] = useState([])
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+
 
 
   const columnState = JSON.parse(localStorage.getItem(accountResource));
@@ -143,7 +144,49 @@ export default function Account(props) {
 
   useEffect(() => {
     if (queryPage === undefined) {
-      history.push(`?page=${page}`)
+      history.replace(`?page=${page}`)
+    }
+    if (page > 0) {
+      history.replace(
+        queryType && queryApproval && queryColFilter && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
+          : queryType && queryApproval && queryColFilter ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}`
+            : queryType && queryApproval && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
+              : queryType && querySearch && queryColFilter ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
+                : queryApproval && querySearch && queryColFilter ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&seach=${search}`
+                  : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
+                    : queryType && queryColFilter ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+                      : queryType && querySearch ? `?page=${page}&type=${queryType}&search=${querySearch}`
+                        : queryApproval && queryColFilter ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
+                          : queryApproval && querySearch ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
+                            : queryColFilter && querySearch ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+                              : queryType ? `?page=${page}&type=${queryType}`
+                                : queryApproval ? `?page=${page}&approval=${queryApproval}`
+                                  : queryColFilter ? `?page=${page}&colFilter=${queryColFilter}`
+                                    : querySearch ? `?page=${page}&search=${querySearch}`
+                                      : `?page=${page}`
+      )
+    }
+
+    else {
+      history.replace(
+        queryType && queryApproval && queryColFilter && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
+          : queryType && queryApproval && queryColFilter ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}`
+            : queryType && queryApproval && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
+              : queryType && querySearch && queryColFilter ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
+                : queryApproval && querySearch && queryColFilter ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&seach=${search}`
+                  : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
+                    : queryType && queryColFilter ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+                      : queryType && querySearch ? `?page=${page}&type=${queryType}&search=${querySearch}`
+                        : queryApproval && queryColFilter ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
+                          : queryApproval && querySearch ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
+                            : queryColFilter && querySearch ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+                              : queryType ? `?page=${page}&type=${queryType}`
+                                : queryApproval ? `?page=${page}&approval=${queryApproval}`
+                                  : queryColFilter ? `?page=${page}&colFilter=${queryColFilter}`
+                                    : querySearch ? `?page=${page}&search=${querySearch}`
+                                      : `?page=${page}`
+      )
+
     }
   }, [page, queryPage]);
 
@@ -152,6 +195,7 @@ export default function Account(props) {
   }, [])
 
   const fetchGridColumns = async () => {
+
 
     let data
     if (isOffline) {
@@ -171,6 +215,7 @@ export default function Account(props) {
 
     let columns = []
     let rendererNames = []
+
     data.forEach(o => {
       if (["accountName"].indexOf(o?.fieldData?.fieldName) === 0) {
         columns = [...columns, {
@@ -206,16 +251,18 @@ export default function Account(props) {
       { field: 'lead', headerName: 'Related Lead', show: true, cellRenderer: 'leadRenderer' }
       ]
     }
+
     let staticFields = getStaticFields()
     staticFields.forEach(field => {
       columns.push(checkStaticField(routes.projectSales.title, field))
     })
     setColumns([...columns])
 
-    if (queryColFilter !== undefined && (Object.keys(filters).length === 0)) {
+    if (JSON.parse(sessionStorage.getItem("filters")) !== null) {
       let savedFilter = JSON.parse(sessionStorage.getItem("filters"));
       dispatch({ type: 'filter', filters: savedFilter });
-      setCount(1);
+
+
     }
   }
 
@@ -241,7 +288,35 @@ export default function Account(props) {
     if (renderCount > 0) {
       fetchAccounts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, type, filters, sorting, selectedEntity, location]);
+  }, [page, limit, selectedType, type, sorting, selectedEntity, location]);
+
+
+  useEffect(() => {
+    if (search) {
+      history.replace(
+        queryType && queryApproval && queryColFilter ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
+          : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${search}`
+            : queryType && queryColFilter ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${search}`
+              : queryApproval && queryColFilter ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
+                : queryType ? `?page=${page}&type=${queryType}&search=${search}`
+                  : queryApproval ? `?page=${page}&approval=${queryApproval}&search=${search}`
+                    : queryColFilter ? `?page=${page}&colFilter=${queryColFilter}&search=${search}`
+                      : `?page=${page}&search=${search}`)
+    } else {
+      history.replace(
+        queryType && queryApproval && queryColFilter ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}`
+          : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
+            : queryType && queryColFilter ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+              : queryApproval && queryColFilter ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
+                : queryType ? `?page=${page}&type=${queryType}`
+                  : queryApproval ? `?page=${page}&approval=${queryApproval}`
+                    : queryColFilter ? `?page=${page}&colFilter=${queryColFilter}`
+                      : `?page=${page}`
+
+      )
+    }
+  }, [search])
+
 
 
 
@@ -254,72 +329,55 @@ export default function Account(props) {
 
 
   useEffect(() => {
-    if (Object.keys(filters).length > 0 && count === 0) {
-
+    if (Object.keys(filters).length > 0) {
       sessionStorage.setItem("filters", JSON.stringify(filters))
 
-      {
-        Object.keys(filters).map(function (key) {
-          let colName = key;
-          let colValue = filters[key].filter
-          let query = queryColFilter !== undefined ? queryColFilter.substring(1, queryColFilter.length - 1) : `[{colName=${colName},colValue=${colValue}}]`;
 
-          if (queryColFilter === undefined) {
-            history.push(queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${query}` : queryType ? `?page=${page}&type=${queryType}&colFilter=${query}` : queryApproval ? `?page=${page}&approval=${queryApproval}&colFilter=${query}` : `?page=${page}&colFilter=${query}`);
-            setCheckColName(colName);
-            setCheckColValue(colValue);
-
+      let serialize = function (obj) {
+        var str = [];
+        for (var p in obj)
+          if (obj.hasOwnProperty(p)) {
+            str.push("{colName=" + encodeURIComponent(p) + "," + "colValue=" + encodeURIComponent(obj[p].filter) + "}");
           }
-          if (queryColFilter !== undefined && checkColName === colName) {
-            if (queryColFilter.length > 45) {
-              let reducedqueryColFilter = queryColFilter.substring(50)
-              let leftqueryColFilter = queryColFilter.substring(0, 50);
-              let replacedQuery = reducedqueryColFilter.replace(checkColValue, colValue);
-              let combineQuery = leftqueryColFilter + replacedQuery;
-              history.push(queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${combineQuery}` : queryType ? `?page=${page}&type=${queryType}&colFilter=${combineQuery}` : queryApproval ? `?page=${page}&approval=${queryApproval}&colFilter=${combineQuery}` : `?page=${page}&colFilter=${combineQuery}`);
-              setCheckColName(colName);
-              setCheckColValue(colValue);
-            }
-
-            else {
-
-              history.push(queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=[{colName=${colName},colValue=${colValue}}]` : queryType ? `?page=${page}&type=${queryType}&colFilter=[{colName=${colName},colValue=${colValue}}]` : queryApproval ? `?page=${page}&approval=${queryApproval}&colFilter=[{colName=${colName},colValue=${colValue}}]` : `?page=${page}&colFilter=[{colName=${colName},colValue=${colValue}}]`);
-            }
-          }
-          if (queryColFilter !== undefined && checkColName !== colName) {
-
-            if (queryColFilter.length > 42 && Object.keys(filters).length === 1) {
-              history.push(queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}` : queryType ? `?page=${page}&type=${queryType}` : queryApproval ? `?page=${page}&approval=${queryApproval}` : `?page=${page}`)
-
-            }
-            else if (queryColFilter.length > 42 && queryColFilter.length < 84 && queryColFilter.includes(colName) === true) {
-              let newqueryColFilter = queryColFilter.substring(42, 83);
-              history.push(`?page=${page}&colFilter=[{colName=${colName},colValue=${colValue}}${newqueryColFilter}]`);
-            }
-
-
-
-            else {
-
-              let updatedQuery = `[${query}` + `,{colName=${colName},colValue=${colValue}}]`
-
-              history.push(queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${updatedQuery}` : queryType ? `?page=${page}&type=${queryType}&colFilter=${updatedQuery}` : queryApproval ? `?page=${page}&approval=${queryApproval}&colFilter=${updatedQuery}` : `?page=${page}&colFilter=${updatedQuery}`);
-              setCheckColName(colName)
-              setCheckColValue(colValue)
-            }
-          }
-        })
+        return str.join(",");
       }
+
+
+      history.replace(
+        queryType && queryApproval && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+          : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=[${serialize(filters)}]`
+            : queryType && querySearch ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+              : queryApproval && querySearch ? `?page=${page}&approval=${queryApproval}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+                : queryType ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
+                  : queryApproval ? `?page=${page}&approval=${queryApproval}&colFilter=[${serialize}]`
+                    : querySearch ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+                      : `?page=${page}&colFilter=[${serialize(filters)}]`
+
+      )
     }
+
+    if (Object.keys(filters).length === 0 && queryColFilter !== undefined) {
+      history.replace(
+        queryType && queryApproval && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
+          : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
+            : queryType && querySearch ? `?page=${page}&type=${queryType}&search=${querySearch}`
+              : queryApproval && querySearch ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
+                : queryType ? `?page=${page}&type=${queryType}`
+                  : queryApproval ? `?page=${page}&approval=${queryApproval}`
+                    : querySearch ? `?page=${page}&search=${querySearch}`
+                      : `?page=${page}`
+
+      )
+
+
+
+    }
+    if (Object.keys(filters).length === 0 && queryColFilter === undefined) {
+      sessionStorage.removeItem("filters")
+    }
+
   }, [filters])
 
-
-  useEffect(() => {
-    if (queryColFilter === undefined) {
-      sessionStorage.removeItem("filters");
-
-    }
-  }, [queryColFilter])
 
 
 
@@ -354,7 +412,7 @@ export default function Account(props) {
             className="link"
             onClick={() => {
               handleEntityChange(params.data.leadEntity)
-              history.push(`${routes.leadDetail.path}/${params.data.leadId}`)
+              history.replace(`${routes.leadDetail.path}/${params.data.leadId}`)
             }}
             title={params.value}
           >
@@ -559,14 +617,16 @@ export default function Account(props) {
       updatedFilters.push({ field: 'staticData.approved', term: type === 'Approved' });
     }
 
-    if (!isObjectEmpty(filters)) {
+    if (JSON.parse(sessionStorage.getItem("filters")) !== null) {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
         });
       });
+
     }
+
     deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
 
     if (sorting.length > 0) {
@@ -574,6 +634,7 @@ export default function Account(props) {
     }
 
     if (search) {
+
       deepFilter = `${deepFilter}&search=${search}`;
     }
     return deepFilter;
@@ -587,6 +648,15 @@ export default function Account(props) {
     setSelectedIndex(index);
     menuOptionSelection(index);
     setOpen(false);
+    history.replace(
+      queryType && queryColFilter && querySearch ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}&search=${querySearch}`
+        : queryType && queryColFilter ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}`
+          : queryType && querySearch ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}&search=${search}`
+            : querySearch && queryColFilter ? `?page=${page}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}&search=${search}`
+              : queryType ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}`
+                : queryColFilter ? `?page=${page}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}`
+                  : querySearch ? `?page=${page}&approval=${encodeURIComponent(options[index])}&search=${search}`
+                    : `?page=${page}&approval=${encodeURIComponent(options[index])}`)
   };
 
   const handleToggle = () => {
@@ -609,6 +679,8 @@ export default function Account(props) {
 
     if (gridApi) {
       gridApi.setRowData([]);
+
+
     }
 
     let data, count;
@@ -664,7 +736,7 @@ export default function Account(props) {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-    history.push(`?page=${page}&search=${search}`)
+
   };
 
   // ****** ACTIONS BUTTON STUFF *********
@@ -808,8 +880,19 @@ export default function Account(props) {
     if (newFilter != null) {
       setFilter(newFilter);
       handleAccountSelect(AccTypes.find((d) => d.key === newFilter).value);
+      history.replace(
+        queryApproval && queryColFilter && querySearch ? `?page=${page}&type=${newFilter}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
+          : queryApproval && queryColFilter ? `?page=${page}&type=${newFilter}&approval=${queryApproval}&colFilter=${queryColFilter}`
+            : queryApproval && querySearch ? `?page=${page}&type=${newFilter}&approval=${queryApproval}&search=${search}`
+              : queryColFilter && querySearch ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}&search=${search}`
+                : queryApproval ? `?page=${page}&type=${newFilter}&approval=${queryApproval}`
+                  : queryColFilter ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}`
+                    : querySearch ? `?page=${page}&type=${newFilter}&search=${search}`
+                      : `?page=${page}&type=${newFilter}`)
     }
   };
+
+
 
   return (
     <>
@@ -842,81 +925,6 @@ export default function Account(props) {
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
               <div className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
                 <MdAccountCircle className="headerLogo" /> <span id="resourceHeader" className="listingHeader">{routes[accountResource].title}</span>
-                <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
-                  {AccTypes && (
-                    <ToggleButtonGroup
-                      id="resourceTypeSelector"
-                      size="small"
-                      className={`ml-8 ${accountClass.accountActions}`}
-                      value={filter}
-                      exclusive
-                      onChange={handleFilter}
-                    >
-                      {AccTypes.map((k: any, index) => {
-                        return (
-                          <ToggleButton value={k.key} key={index}>
-                            <Link to={`/${accountRoute}?page=${page}&type=${encodeURIComponent(k.key)}`} >
-                              {k.key}
-                            </Link>
-
-                          </ToggleButton>
-                        );
-                      })}
-                    </ToggleButtonGroup>
-                  )}
-                  <ButtonGroup
-                    id="approveDisapprove"
-                    size="small"
-                    className={accountClass.accountActions}
-                    variant="outlined"
-                    color="primary"
-                    ref={anchorRef}
-                    aria-label="small outlined button group"
-                  >
-                    <Button>{queryApproval ? queryApproval : options[selectedIndex]}</Button>
-                    <Button
-                      color="primary"
-                      size="small"
-                      aria-controls={open ? 'split-button-menu' : undefined}
-                      aria-expanded={open ? 'true' : undefined}
-                      aria-label="select merge strategy"
-                      aria-haspopup="menu"
-                      onClick={handleToggle}
-                    >
-                      <ArrowDropDownIcon />
-                    </Button>
-                  </ButtonGroup>
-                  <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
-                    {({ TransitionProps, placement }) => (
-                      <Grow
-                        {...TransitionProps}
-                        style={{
-                          transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
-                        }}
-                      >
-                        <Paper>
-                          <ClickAwayListener onClickAway={handleClose}>
-                            <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
-                              {options.map((option, index) => (
-                                <MenuItem
-                                  key={option}
-                                  selected={index === selectedIndex}
-                                  onClick={(event) => handleMenuItemClick(event, index)}
-                                  style={{ color: 'black' }}
-                                >
-                                  <Link to={queryType ? `/${accountRoute}?page=${page}&type=${queryType}&approval=${encodeURIComponent(option)}` : `/${accountRoute}?page=${page}&approval=${encodeURIComponent(option)}`}>
-                                    {option}
-                                  </Link>
-
-                                </MenuItem>
-                              ))}
-                            </MenuList>
-                          </ClickAwayListener>
-                        </Paper>
-                      </Grow>
-                    )}
-                  </Popper>
-                </div>
 
                 {
                   isOffline
@@ -934,8 +942,10 @@ export default function Account(props) {
                         >
                           {AccTypes.map((k: any, index) => {
                             return (
-                              <ToggleButton value={k.key} key={index}>
+                              <ToggleButton value={k.key} key={index} >
+
                                 {k.key}
+
                               </ToggleButton>
                             );
                           })}
@@ -951,6 +961,7 @@ export default function Account(props) {
                         ref={anchorRef}
                         aria-label="small outlined button group"
                       >
+                        <Button>{queryApproval ? queryApproval : options[selectedIndex]}</Button>
                         <Button
                           color="primary"
                           size="small"
@@ -961,7 +972,7 @@ export default function Account(props) {
                           onClick={handleToggle}
                           className="all-button"
                         >
-                          {options[selectedIndex]}
+
                           <ArrowDropDownIcon className="all-button-sub-icon" />
                         </Button>
                       </ButtonGroup>
@@ -984,6 +995,7 @@ export default function Account(props) {
                                       style={{ color: 'black' }}
                                     >
                                       {option}
+
                                     </MenuItem>
                                   ))}
                                 </MenuList>

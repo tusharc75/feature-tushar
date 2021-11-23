@@ -151,7 +151,8 @@ export default function CustomAgGrid({
   onCellValueChanged = () => { },
   showOnlyShowFilteredRecordSwitch = false,
   idProperty = "_id",
-  allowHeaderSelection = true
+  allowHeaderSelection = true,
+  pinnedBottomRowData = null
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -189,7 +190,7 @@ export default function CustomAgGrid({
       if (localStorage.getItem(renderedFrom)) {
         const columnState = JSON.parse(localStorage.getItem(renderedFrom));
         setTimeout(() => {
-          columnApi.setColumnState(columnState);
+          if (columnApi) columnApi.setColumnState(columnState);
         }, 500)
       }
     } catch (_) {
@@ -290,6 +291,9 @@ export default function CustomAgGrid({
         filter={false}
         onCellValueChanged={onCellValueChanged}
         cellRenderer="actionsRenderer"
+        pinnedRowCellRendererFramework={pinnedBottomRowData ? () => (
+          <></>
+        ) : null}
       ></AgGridColumn>
     }
     else return null
@@ -445,7 +449,7 @@ export default function CustomAgGrid({
               // loadingCellRendererParams={{
               //   loadingMessage: 'One moment please...',
               // }}
-
+              pinnedBottomRowData={pinnedBottomRowData ?? null}
               suppressRowClickSelection={true}
               rowSelection={'multiple'}
               onRowSelected={(event) => {
@@ -515,6 +519,9 @@ export default function CustomAgGrid({
                   checkboxSelection={true}
                   resizable={false}
                   sortable={false}
+                  pinnedRowCellRendererFramework={pinnedBottomRowData ? () => (
+                    <></>
+                  ) : null}
                 ></AgGridColumn>
               )}
 
