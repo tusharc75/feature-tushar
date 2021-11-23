@@ -335,7 +335,7 @@ const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handle
                                                                     />
                                                                 </Grid> : field.type === "converter" || field.type === "currencyAmount" ?
                                                                     <FormTypes
-                                                                        style={{ background: field?.isUneditable ? "#EBEBE4" : field?.isFormulaColor ? "#1e768221" : "" }}
+                                                                        style={{ background: field?.isUneditable ? "#1e768221" : "" }}
                                                                         fields={initialData.fields}
                                                                         fieldData={field}
                                                                         values={values}
@@ -361,7 +361,7 @@ const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handle
                                                                         <Box display="flex" >
                                                                             <Box flexGrow={1}  >
                                                                                 <FormTypes
-                                                                                    style={{ background: field?.isUneditable ? "#EBEBE4" : field?.isFormulaColor ? "#1e768221" : "" }}
+                                                                                    style={{ background: field?.isUneditable ? "#1e768221" : "" }}
                                                                                     fields={initialData.fields}
                                                                                     fieldData={field}
                                                                                     values={values}
