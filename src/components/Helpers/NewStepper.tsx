@@ -243,33 +243,6 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
 
 
                         }
-                        {/* <div style={{ color: "#09445A" }}>
-                        <Link
-                          title={`${doa.users[0]?.firstName} ${doa.users[0]?.lastName}`}
-                          className="link"
-                          to={`${routes.userDetail.path}/${doa.users[0]?.id}`}
-                        >
-                          {`${doa.users[0]?.firstName} ${doa.users[0]?.lastName}`}
-                        </Link>
-                        {doa?.users.length - 1 > 0
-                          && <Box component="span" ml={1}>
-                            <HtmlTooltip title={doa?.users.slice(1).map((u, i) => (
-                              <p key={i}>{`${u.firstName} ${u.lastName}`}</p>
-                            ))}>
-                              <Chip size="small" color='primary' variant="outlined" label={`+ ${doa?.users.length - 1} More`} />
-                            </HtmlTooltip>
-                          </Box>}
-                      </div>
-                      {doa?.proxyBy && <div style={{ color: "#09445A" }}>
-                        <Link
-                          title={doa?.users[0]?.proxyBy?.firstName}
-                          className="link"
-                          to={`${routes.userDetail.path}/${doa?.users[0]?.id}`}
-                        >
-                          {`(${doa?.users[0]?.proxyBy?.firstName} ${doa?.users[0]?.proxyBy?.lastName})`}
-                        </Link>
-                      </div>
-                      } */}
                       </>
                     </StepLabel>
                   </Step>
