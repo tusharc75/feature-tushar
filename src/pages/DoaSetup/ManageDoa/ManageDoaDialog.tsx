@@ -65,13 +65,13 @@ const useStyles = makeStyles((theme) => ({
         padding: "4px !important"
     }
 }));
-const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, doaType = null, open, onClose, from = "EntityDetailPage", isRenderedFromUserSetUp = false }) => {
+const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, minLimit = 0, doaType = null, open, onClose, from = "EntityDetailPage", isRenderedFromUserSetUp = false }) => {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState<any[]>([]);
     const [check, setCheck] = useState(false);
-    const [doaLowerLimit, setDoaLowerLimit] = useState(0);
+    const [doaLowerLimit, setDoaLowerLimit] = useState(minLimit);
     const [currencyData, setCurrencyData] = useState<any[]>([]);
     const [currency, setCurrency] = useState(doaCurrency ? doaCurrency : "");
     const [currencySymbol, setCurrencySymbol] = useState(
@@ -117,7 +117,7 @@ const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, doaT
         }
 
 
-        const userDoa = { _ids: selectedEntity, doaCurrency: selectedType === 2 ? currency : "", doa: doaArray, doaType: selectedType, doaLowerLimit: selectedType === 2 ? doaLowerLimit : 0 };
+        const userDoa = { _ids: selectedEntity, doaCurrency: selectedType === 2 ? currency : "", doa: doaArray, doaType: selectedType, minLimit: selectedType === 2 ? doaLowerLimit : 0 };
         setLoading(true)
         axiosInstance().put('/doa/setups', removeEmptyKeys(userDoa))
             .then(({ data }) => {

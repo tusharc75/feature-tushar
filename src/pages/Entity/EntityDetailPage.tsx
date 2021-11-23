@@ -57,6 +57,8 @@ const EntityDetailsPage = () => {
   const [doa, setDoa] = useState<any[]>([]);
   const [doaCurrency, setDoaCurrency] = useState("");
   const [doaType, setDoaType] = useState(null);
+  const [minLimit, setMinLimit] = useState(null);
+
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
   const [userList, setUserList] = useState<any[]>([]);
   const [showDeleteEntityDialog, setShowDeleteEntityDialog] = useState(false)
@@ -257,6 +259,7 @@ const EntityDetailsPage = () => {
         setDoa(data.doa);
         setDoaCurrency(data.doaCurrency)
         setDoaType(data.doaType)
+        setMinLimit(data.minLimit)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -593,6 +596,7 @@ const EntityDetailsPage = () => {
               setDoaDialogOpen(false);
             }}
             doaType={doaType}
+            minLimit={minLimit}
           />
         </Dialog>
 
