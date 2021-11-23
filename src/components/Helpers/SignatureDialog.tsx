@@ -24,7 +24,7 @@ export default function SignatureDialog(props) {
                 type: activeStep === 0 ? "supervisor" : "deliveryPerson",
                 sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png")
             }
-        } else if (label === "Sign-off - Receive") {
+        } else if (label === "Sign-off - Delivery") {
             signedData = {
                 type: activeStep === 0 ? "deliveryPerson" : "receiver",
                 sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png")
