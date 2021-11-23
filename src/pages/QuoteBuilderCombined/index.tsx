@@ -43,7 +43,7 @@ import CustomDialogComponent from "../../components/CustomDialog/CustomDialogCom
 import VersionStatus from "./VersionStatus";
 import TransferEntityDialog from "../../components/AssignRolesDialog/TransferEntityDialog";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 import { quoteStepColors } from '../../constants/helpers';
@@ -73,6 +73,7 @@ const QuoteBuilders = () => {
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
+  const {getColumnData} = useColumns();
   const { quoteResource } = quote;
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);

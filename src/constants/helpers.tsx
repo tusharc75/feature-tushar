@@ -211,6 +211,16 @@ export const RESOURCE_LABEL = {
   purchaseOrder: 'Purchase Order'
 };
 
+export const sidebarResourceObjectFromValues = () => {
+
+  let obj: any = {};
+
+  Object.keys(sidebarResource).forEach((key) => {
+    obj[sidebarResource[key]] = key
+  })
+  return obj
+}
+
 export const lead = {
   leadResource: 'lead', //  Key of sidebar object
   leadApi: '/lead'

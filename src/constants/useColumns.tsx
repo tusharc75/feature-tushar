@@ -14,8 +14,8 @@ import {
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
 
 import {sidebarResourceObjectFromValues} from './helpers';
+import {useData} from '../StateProvider/Provider';
 
-const permissions : any = {}
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -135,7 +135,12 @@ export const checkStaticField = (renderedFrom, fieldData) => {
 }
 
 export const staticColumns = ["createdBy", "updatedBy"]
-export const getColumnData = (title, field, detailScreenRoute = null, hasPopup = false) => {
+export default function useColumns(){
+    const {
+        state: { permissions, user, selectedEntity },
+    }: any = useData();
+     
+ const getColumnData = (title, field, detailScreenRoute = null, hasPopup = false) => {
     let data = localStorage.getItem("gridMetaData")
 
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
@@ -212,13 +217,13 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
             return {
                 columnData: {
                     ...commonFieldData,
-                    cellRenderer:permissions[permissionForLinks[field?.lookupResource]]?.isRead ? "linkRenderer" : "commonRenderer",
+                    cellRenderer:isForPopup ? (permissions[permissionForLinks[field?.lookupResource]]?.isUpdate ? "linkRenderer" : "commonRenderer") : "linkRenderer",
                     cellRendererParams: {
                         "pathName": pathName, "property": joinedFieldName + 'Id',
                         isForPopup: isForPopup, "more": `rest${joinedFieldName}`
                     }
                 },
-                rendererName: permissions[permissionForLinks[field?.lookupResource]]?.isRead ? "linkRenderer" : "commonRenderer",
+                rendererName: isForPopup ? (permissions[permissionForLinks[field?.lookupResource]]?.isUpdate ? "linkRenderer" : "commonRenderer") : "linkRenderer",
             }
         }
         else if (isRenderWithCopy(field?.type)) {
@@ -270,4 +275,6 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
             }
         }
     }
+}
+return {getColumnData}
 }

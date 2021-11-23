@@ -33,7 +33,7 @@ import HtmlTooltip from '../../components/CustomTooltipTitle'
 import { RiBillLine } from "react-icons/ri";
 import { Autocomplete } from "@material-ui/lab";
 import TextField from "@material-ui/core/TextField";
-import { getColumnData, getStaticFields, getFrameworkComponents, getColumnHiddenStatus } from "../../constants/columns"
+import useColumns, { getStaticFields, getFrameworkComponents, getColumnHiddenStatus } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers";
 import Tooltip from '@material-ui/core/Tooltip'
 
@@ -76,6 +76,7 @@ const Product = () => {
     const [isProductTemplate, setIsProductTemplate] = useState(true);
 
     const { state: { permissions, user, selectedEntity } }: any = useData();
+    const {getColumnData} = useColumns();
     const [productPermissions, setProductPermissions] = useState({
         isCreate: false,
         isUpdate: false,
