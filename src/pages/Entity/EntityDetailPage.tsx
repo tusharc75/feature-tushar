@@ -240,21 +240,21 @@ const EntityDetailsPage = () => {
       .then(({ data: { data } }) => {
         let doaData = [];
 
-        data.doa.forEach((item) => {
-          //  When the user set in doa was deleted, we are getting {} in array like this [{}]
-          //  So added this check
-          if (!isObjectEmpty(item)) {
-            doaData.push({
-              id: item.user?._id,
-              name: [item.user?.firstName, item.user?.lastName].filter(f => f).join(" "),
-              firstName: item.user?.firstName,
-              lastName: item.user?.lastName,
-              amount: item.amount,
-            });
-          }
-        });
+        // data.doa.forEach((item) => {
+        //   //  When the user set in doa was deleted, we are getting {} in array like this [{}]
+        //   //  So added this check
+        //   if (!isObjectEmpty(item)) {
+        //     doaData.push({
+        //       id: item.user?._id,
+        //       name: [item.user?.firstName, item.user?.lastName].filter(f => f).join(" "),
+        //       firstName: item.user?.firstName,
+        //       lastName: item.user?.lastName,
+        //       amount: item.amount,
+        //     });
+        //   }
+        // });
 
-        setDoa(doaData);
+        setDoa(data.doa);
         setDoaCurrency(data.doaCurrency)
         setDoaType(data.doaType)
       })

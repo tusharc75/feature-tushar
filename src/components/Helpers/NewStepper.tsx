@@ -203,14 +203,43 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
             {
               quoteDOA ?
                 (quoteDOA.map((label) => (
-                  <Step key={label?.id}>
+                  <Step key={label.users}>
                     <StepLabel StepIconComponent={label?.status === "approve" ?
                       QontoStepIconForApprove
                       : label?.status === "pending" ?
                         QontoStepIconForPending :
                         QontoStepIconForReject
                     }>
-                      <div style={{ color: "#09445A" }}>
+                      <>
+                        {label?.status === "pending" ?
+                          (<>
+                            {label?.users?.slice(0, 3).map((obj) => (
+                              <div style={{ color: "#09445A" }}>
+                                <Link
+                                  title={obj?.firstName}
+                                  className="link"
+                                  to={`${routes.userDetail.path}/${obj?.id}`}
+                                >
+                                  {`${obj?.firstName} ${obj?.lastName}`}
+                                </Link>
+                              </div>
+                            ))}
+                            {label?.users?.length > 4 && `+ ${label?.users.length - 4} more`}
+                          </>
+                          )
+                          : <div style={{ color: "#09445A" }}>
+                            <Link
+                              title={label?.users.find(d => d?.status === label?.status)?.firstName}
+                              className="link"
+                              to={`${routes.userDetail.path}/${label?.users.find(d => d?.status === label?.status)?.id}`}
+                            >
+                              {`${label?.users.find(d => d?.status === label?.status)?.firstName} ${label?.users.find(d => d.status === label?.status)?.lastName}`}
+                            </Link>
+                          </div>
+
+
+                        }
+                        {/* <div style={{ color: "#09445A" }}>
                         <Link
                           title={label?.name}
                           className="link"
@@ -228,30 +257,35 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
                           {`(${label?.proxyBy?.firstName} ${label?.proxyBy?.lastName})`}
                         </Link>
                       </div>
-                      }
+                      } */}
+                      </>
                     </StepLabel>
                   </Step>
                 )))
-                : (steps.filter((label) => label?.id).map((label) => (
-                  <Step key={label?.id}>
+                : (steps.map((label) => (
+                  <Step key={label}>
                     <StepLabel StepIconComponent={QontoStepIcon}>
-                      <div style={{ color: "#09445A" }}>
-                        <Link
-                          title={label?.name}
-                          className="link"
-                          to={`${routes.userDetail.path}/${label?.id}`}
-                        >
-                          {`${label?.firstName} ${label?.lastName}`}
-                        </Link>
-                      </div>
-                      {doaCurrency && <div style={{ color: "#09445A" }}>{
-                        getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency).length
-                          ? getUniqueCurrencies().filter(
-                            (data) => data?.currencyCode === doaCurrency
-                          )[0].symbolNative
-                          : null}{label?.amount}
-                      </div>}
-
+                      <>
+                        {label?.user?.slice(0, 3).map((obj) => (
+                          <div style={{ color: "#09445A" }}>
+                            <Link
+                              title={obj?.firstName}
+                              className="link"
+                              to={`${routes.userDetail.path}/${obj?.id}`}
+                            >
+                              {`${obj?.firstName} ${obj?.lastName}`}
+                            </Link>
+                          </div>
+                        ))}
+                        {label?.users?.length > 4 && `+ ${label?.users.length - 4} more`}
+                        {doaCurrency && <div style={{ color: "#09445A" }}>{
+                          getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency).length
+                            ? getUniqueCurrencies().filter(
+                              (data) => data?.currencyCode === doaCurrency
+                            )[0].symbolNative
+                            : null}{label?.amount}
+                        </div>}
+                      </>
                     </StepLabel>
                   </Step>
                 )))}
