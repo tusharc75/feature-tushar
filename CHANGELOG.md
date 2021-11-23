@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/vebholic/oms_frontend/compare/v2.3.0...v2.4.0) (2021-11-23)
+
+
+### Features
+
+* - Rental management related changes done ([d9a5265](https://github.com/vebholic/oms_frontend/commit/d9a5265f31290f96d6829d7e561bd59baf4103f8))
+* - Rental related changes done ([44c96d9](https://github.com/vebholic/oms_frontend/commit/44c96d9fbd6b19a21c1113220bf563381f4532ed))
+
+
+### Bug Fixes
+
+* **newstepper:** changes for doa ([8149624](https://github.com/vebholic/oms_frontend/commit/8149624590bc01e3d7ec8b94c93ee642733394bf))
+* **pricetemplate:** fix unit label ([8205add](https://github.com/vebholic/oms_frontend/commit/8205add1c8ae174752488f0fc1661335f50854c6))
+
 ## [2.3.0](https://github.com/vebholic/oms_frontend/compare/v2.2.0...v2.3.0) (2021-11-22)
 
 

@@ -5,7 +5,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
-import { disabledColumns } from "../../constants/columns"
+import { disabledColumns, getSortedColumns } from "../../constants/columns"
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 
 let timeout
@@ -103,7 +103,7 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
         >
           <FormControl component="fieldset" className="px-3 py-2">
             <FormGroup>
-              {columns.map((column: any, index) => {
+              {getSortedColumns(columns).map((column: any, index) => {
                 return (
                   <Tooltip key={index} title={column.disabled ? 'Main columns are always visible' : ''}>
                     <FormControlLabel
