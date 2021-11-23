@@ -96,8 +96,8 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     }, [selectedRecords]);
 
     const columns = [
-        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
         { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
+        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
         { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
         { field: "plant", headerName: "Plant", show: true, disabled: true, cellRenderer: "commonRenderer" },
