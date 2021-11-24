@@ -22,7 +22,7 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 const addSerializedAssetsRenderedFrom = "addSerializedAssets";
 const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected`;
 
-const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts }) => {
+const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, rantalId = null }) => {
     const toastConfig = useContext(CustomToastContext)
 
     const [serializedProducts, setSerializedProducts] = useState([]);
@@ -168,6 +168,11 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
 
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
+        }
+
+        //  To fetch the remaining unassigned assets of that rental management
+        if(rantalId) {
+            deepFilter = `${deepFilter}&rantalId=${rantalId}`;
         }
 
         return deepFilter;

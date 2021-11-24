@@ -460,7 +460,7 @@ export default function DeliveryTicketDetail(props) {
                           </Grid>
                           <Grid item xs={12}>
                             <CustomAgGrid
-                              allowSelection={true}
+                              allowSelection={deliveryTicketData.status === "New"}
                               allowAction={false}
                               columns={columns}
                               dataRows={dataRows}
@@ -622,6 +622,7 @@ export default function DeliveryTicketDetail(props) {
             }}
             isAdding={isAdding}
             selectedProducts={[]}
+            rantalId={deliveryTicketData?.rental?.optionValue}
           // type={inventoryType}
           />
         }
