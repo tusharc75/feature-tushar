@@ -39,7 +39,7 @@ import Service from "./Service";
 import BulkEditDialog from "./BulkEditDialog";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import IssuPO from "./IssuPO";
-import {FaSuitcase, FaWpforms} from "react-icons/fa";
+import {FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms} from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
 import ReceivingAsset from "./ReceivingAsset";
@@ -647,62 +647,69 @@ const PurchaseOrderDetailsPage = () => {
                                                         <Box display="flex" justifyContent="space-between" m={1}>
                                                             <Box display="flex">
                                                                 <Button
-                                                                    variant="contained"
+                                                                    variant= {isMobile ? "outlined" : "contained"}
                                                                     color="primary"
                                                                     size="small"
                                                                     onClick={() => {
                                                                         setIsAddNewProduct(true);
                                                                     }}
                                                                 >
-                                                                    {`Add New ${routes.product.title}`}
+                                                                    {isMobile ? <FaCartPlus size={22}/> : `Add New ${routes.product.title}`}
+
                                                                 </Button>
                                                                 <Box mx={1} />
                                                                 <Button
-                                                                    variant="contained"
+                                                                    variant= {isMobile ? "outlined" : "contained"}
                                                                     color="primary"
                                                                     size="small"
                                                                     onClick={() => {
                                                                         setAddProductDialog(true);
                                                                     }}
                                                                 >
-                                                                    {`Add Existing ${routes.product.title}`}
+                                                                    {isMobile ? <FaCartArrowDown size={22}/> : `Add Existing ${routes.product.title}`}
+                                                                    {}
                                                                 </Button>
                                                             </Box>
                                                         </Box>
                                                         {columns ?
                                                               isMobile ?
                                                                   <CustomSwipableList
-                                                                  allowSelection={true}
-                                                            allowSwipe={true}
-                                                            primaryField={columns?.find(d => d.field === "purchaseOrderNumber")}
-                                                            onClick={(d) => {
-                                                                history.push(`${routes.purchaseOrderDetail.path}/${d._id}`)
-                                                            }}
-                                                            dataRows={dataRows}
-                                                            selectedRecords={selectedRecords}
-                                                            dispatch={dispatch}
-                                                            onEdit={(d) => {
-                                                                history.push(`${routes.purchaseOrderDetail.path}/${d._id}`)
-                                                            }}
-                                                            onDelete={true}
-                                                            extraParamsToCheckDelete={false}
-                                                            rowCount={rowCount}
-                                                            page={page}
-                                                            loading={loading}
-                                                            chips={[
-                                                            ]}
-                                                            permissions={permissions.purchaseOrder}
-                                                            onCreate={() => { }}
-                                                            showClone={false}
-                                                            onClone={() => { }}
-                                                            renderedFrom={"purchaseOrderDetailsPageInventory"}
-                                                            additionalDetails ={[
-                                                                {
-                                                                    icon: <FaSuitcase size={18} />,
-                                                                    field: "customerAccountName"
-                                                                },
-                                                            ]}
-                                                            owerCollaboratorInitialsOrImages ={"owerCollaboratorInitialsOrImages"}
+                                                                      allowSelection={true}
+                                                                      allowSwipe={true}
+                                                                      permissions={permissions}
+                                                                      primaryField={columns?.find(d => d.field === "productName")}
+                                                                      onClick={(data) => {
+                                                                          setShowAddServiceDialog(true)
+                                                                          setSelectedProductData(data)
+                                                                      }}
+                                                                      dataRows={dataRows}
+                                                                      selectedRecords={selectedRecords}
+                                                                      dispatch={dispatch}
+                                                                      onEdit={(data) => {
+                                                                          setShowAddServiceDialog(true)
+                                                                          setSelectedProductData(data)
+                                                                      }}
+                                                                      extraParamsToCheckDelete={true}
+                                                                      onDelete={(data) => {
+                                                                          deletePurchaseOrderProduct([{
+                                                                              id: data._id,
+                                                                          }])
+                                                                      }}
+                                                                      rowCount={rowCount}
+                                                                      page={page}
+                                                                      loading={loading}
+                                                                      chips={
+                                                                          [{
+                                                                              label: `Product Description: `,
+                                                                              field: "productName",
+                                                                              forceShow: true
+                                                                          }]
+                                                                      }
+                                                                      onCreate={null}
+                                                                      showClone={false}
+                                                                      fullHeight={true}
+                                                                      renderedFrom={routes.purchaseOrderDetail.title}
+                                                                      onClone={() => { }}
 
                                                             /> :
 

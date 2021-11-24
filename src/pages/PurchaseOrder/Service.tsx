@@ -19,6 +19,7 @@ import EditIcon from "@material-ui/icons/Edit";
 import { useData } from "../../StateProvider/Provider";
 import {isMobile} from "react-device-detect";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import {GrBusinessService} from "react-icons/all";
 
 
 const Service = ({ currencySymbol, purchaseOrderData ,statusOptions}) => {
@@ -31,6 +32,7 @@ const Service = ({ currencySymbol, purchaseOrderData ,statusOptions}) => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
   const [showAddServiceDialog, setShowAddServiceDialog] = useState(false)
+  const [selectedProductData, setSelectedProductData] = useState(null)
   const [isSavingBulkEditDialog, setIsSavingBulkEditDialog] = useState(false)
   const [selectedServiceData, setSelectedServiceData] = useState(null)
   const [columns, setColumns] = useState([
@@ -150,6 +152,7 @@ const Service = ({ currencySymbol, purchaseOrderData ,statusOptions}) => {
       });
   }
 
+
   const deletePurchaseOrderService = (ids) => {
     axiosInstance().delete(`${purchaseOrder.api}/${purchaseOrderData._id}/service-details/remove/${ids}`)
       .then(() => {
@@ -170,7 +173,7 @@ const Service = ({ currencySymbol, purchaseOrderData ,statusOptions}) => {
         type="button"
         size="small"
       >
-        {"Add Service"}
+        {isMobile ? <GrBusinessService size={20}/> : "Add Service"}
       </Button>
       <Box mx={1} />
     </Box>
@@ -181,26 +184,38 @@ const Service = ({ currencySymbol, purchaseOrderData ,statusOptions}) => {
           isMobile ? <CustomSwipableList
                   allowSelection={true}
                   allowSwipe={true}
-                  primaryField={true}
-                  onClick={true}
-                  dataRows={true}
-                  selectedRecords={true}
-                  dispatch={true}
-                  onEdit={true}
-                  onDelete={true}
+                  permissions={permissions}
+                  primaryField={columns?.find(d => d.field === "description")}
+                  onClick={(data) => {
+                    setShowAddServiceDialog(true)
+                    setSelectedProductData(data)
+                  }}
+                  dataRows={dataRows}
+                  selectedRecords={selectedRecords}
+                  dispatch={dispatch}
+                  onEdit={(data) => {
+                    setShowAddServiceDialog(true)
+                    setSelectedServiceData(data)
+                  }}
                   extraParamsToCheckDelete={true}
-                  rowCount={true}
-                  page={true}
-                  loading={true}
-                  // checkError = {null}
-                  chips={true}
-                  permissions={true}
-                  onCreate={true}
-                  showClone={true}
-                  onClone={true}
-                  renderedFrom={true}
-                  additionalDetails ={[]}
-                  owerCollaboratorInitialsOrImages ={null}
+                  onDelete={(data) => {
+                    deletePurchaseOrderService([data._id])
+                  }}
+                  rowCount={rowCount}
+                  page={page}
+                  loading={loading}
+                  chips={
+                    [{
+                      label: `Product Description: `,
+                      field: "productName",
+                      forceShow: true
+                    }]
+                  }
+                  onCreate={null}
+                  showClone={false}
+                  fullHeight={true}
+                  renderedFrom={routes.purchaseOrderDetail.title}
+                  onClone={() => { }}
 
               /> :
         <CustomAgGrid

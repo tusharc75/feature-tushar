@@ -185,7 +185,10 @@ const Steps = (props) => {
                             activeStep={currentStep}
                             nextButton={
                                     <Button size="small"
-                                            disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
+                                            color="primary"
+                                            hidden={currentStep >= 3 || (currentStep === 0 && isNextStep)}
+                                            disabled={currentStep >= 3 || (currentStep === 0 && isNextStep)}
+                                            variant="contained" endIcon={<KeyboardArrowRight/> }
                                             onClick={() => {
                                                 setCurrentStep(currentStep + 1)
                                             }} >
@@ -199,7 +202,7 @@ const Steps = (props) => {
                             }
                             backButton={
 
-                                    <Button size="small" variant="contained" startIcon={<KeyboardArrowLeft/>} disabled={currentStep === 5 || currentStep === 0} onClick={() => {
+                                    <Button size="small" variant="contained" color={"primary"} startIcon={<KeyboardArrowLeft/>} disabled={currentStep === 5 || currentStep === 0} onClick={() => {
                                         setCurrentStep(currentStep - 1)
                                     }} >
                                         {steps[currentStep - 1] ?? ""}
