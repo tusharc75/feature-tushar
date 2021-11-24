@@ -29,7 +29,7 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { useLocation, useHistory } from "react-router-dom";
 import queryString from "query-string";
 import { isMobile } from 'react-device-detect';
@@ -54,6 +54,7 @@ function Budget() {
     id: null,
     isClone: false
   });
+  const {getColumnData} = useColumns();
   const [columns, setColumns] = useState([])
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
 

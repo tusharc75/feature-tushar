@@ -22,7 +22,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from "react-router-dom";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers"
 import ManagePurchaseOrder from "./ManagePurchaseOrder";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
@@ -45,6 +45,7 @@ const PurchaseOrder = () => {
     const {
         state: { user, permissions },
     }: any = useData();
+    const {getColumnData} = useColumns();
     const history = useHistory();
 
     useEffect(() => {

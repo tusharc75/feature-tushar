@@ -25,7 +25,7 @@ import { GiAbstract055 } from 'react-icons/gi';
 import SearchBox from '../../components/Helpers/SearchBox'
 import ManageDeliveryTicketDialog from "./ManageDeliveryTicket"
 import { sidebarResource, prepareDataForGrid } from "../../constants/helpers"
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { isMobile } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
@@ -37,7 +37,7 @@ const DeliveryTicket = () => {
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
-
+  const {getColumnData} = useColumns();
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
