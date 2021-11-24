@@ -38,7 +38,7 @@ export default function CustomReactTable({
     columns,
     data,
     onSelect,
-    rowStyle,
+    isInValidCheck,
     childrenProperty,
     uniqueKey,
     height = "100%"
@@ -50,7 +50,7 @@ export default function CustomReactTable({
             // When using the useFlexLayout:
             minWidth: 150, // minWidth is only used as a limit for resizing
             width: 150, // width is used for both the flex-basis and flex-grow
-            maxWidth: 200, // maxWidth is only used as a limit for resizing
+            // maxWidth: 250, // maxWidth is only used as a limit for resizing
         }),
         []
     )
@@ -66,9 +66,9 @@ export default function CustomReactTable({
                 //     </span>
                 // ),
                 sticky: "left",
-                width: 50,
-                minWidth: 50,
-                maxWidth: 50,
+                width: 70,
+                minWidth: 70,
+                maxWidth: 70,
                 Cell: ({ row }) =>
                     // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
                     // to build the toggle for expanding a row
@@ -79,13 +79,13 @@ export default function CustomReactTable({
                                     // We can even use the row.depth property
                                     // and paddingLeft to indicate the depth
                                     // of the row
-                                    paddingLeft: `${row.depth * 2}rem`,
+                                    paddingLeft: `${row.depth * 2}rem`
                                 },
                             })}
                         >
                             {row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
                         </span>
-                    ) : null,
+                    ) : <div></div>,
             },
 
             //  Use below selection if pagination is there
@@ -229,9 +229,9 @@ export default function CustomReactTable({
                 <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
                     <TableHead style={{ overflowY: "auto", overflowX: "hidden" }} className="header">
                         {headerGroups.map(headerGroup => (
-                            <TableRow {...headerGroup.getHeaderGroupProps()} style={{ background: "#efefef" }} className="tr">
+                            <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
                                 {headerGroup.headers.map(column => (
-                                    <TableCell {...column.getHeaderProps()} className="th">
+                                    <TableCell {...column.getHeaderProps()} className="th text-truncate">
                                         {column.render('Header')}
                                     </TableCell>
                                 ))}
@@ -248,10 +248,10 @@ export default function CustomReactTable({
                             rows.map((row, index) => {
                                 prepareRow(row)
                                 return (
-                                    <TableRow {...row.getRowProps()} style={rowStyle(row.original)} key={row.original._id ?? index} className="tr">
+                                    <TableRow {...row.getRowProps()} key={row.original._id ?? index} className="tr">
                                         {row.cells.map(cell => {
                                             return (
-                                                <TableCell {...cell.getCellProps()} className="td">
+                                                <TableCell {...cell.getCellProps()} className={`td ${isInValidCheck(row.original) ? "error" : ""}`}>
                                                     {cell.render('Cell')}
                                                 </TableCell>
                                             )
@@ -264,7 +264,7 @@ export default function CustomReactTable({
 
                     <TableFooter style={{ overflowY: "auto", overflowX: "hidden" }} className="footer">
                         {footerGroups.map(group => (
-                            <TableRow {...group.getFooterGroupProps()} style={{ background: "#efefef" }}>
+                            <TableRow {...group.getFooterGroupProps()}>
                                 {group.headers.map(column => (
                                     <TableCell {...column.getFooterProps()} className="font-weight-bold text-black">
                                         {column.render('Footer')}
