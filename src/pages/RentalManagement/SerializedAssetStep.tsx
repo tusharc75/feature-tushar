@@ -14,6 +14,7 @@ import moment from "moment";
 import { startCase, orderBy } from "lodash";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../components/CustomReactTable/CustomReactTable";
+import ManagePurchaseOrder from "../PurchaseOrder/ManagePurchaseOrder";
 
 const SerializedAssetStep = (props) => {
   const { loading, productInventory, currentStep, serializeAssets, fetchProductsData, rentalManagementId, isTabletScreen,
@@ -38,6 +39,8 @@ const SerializedAssetStep = (props) => {
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState([])
   const [deleteData, setDeleteData] = useState([])
+
+  const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState(false);
 
   //  This is copied method from helpers.ts as wee need some modification for this screen only
   const translateDataToTreeForProducts = (data, parentProperty, childProperty, childrenPropertyToStore) => {
@@ -527,9 +530,23 @@ const SerializedAssetStep = (props) => {
               }}
             >
               {`Assign ${routes.productInventory.title}`}
-
             </Button>
             <Box mx={1} component="span" />
+
+            <Button
+              variant="contained"
+              color="primary"
+              type="button"
+              size="small"
+              // disabled={disableCreatePurchaseOrderButton()}
+              onClick={() => {
+                setShowManagePurchaseOrderDialog(true)
+              }}
+            >
+              {`Create ${routes.purchaseOrder.title}`}
+            </Button>
+            <Box mx={1} component="span" />
+
             <Button
               variant="contained"
               color="primary"
@@ -662,6 +679,21 @@ const SerializedAssetStep = (props) => {
         onOk={removeInventory}
       />
     )}
+
+    {
+      showManagePurchaseOrderDialog &&
+      <ManagePurchaseOrder
+        isClone={false}
+        purchaseOrderId={null}
+        onClose={() => setShowManagePurchaseOrderDialog(false)}
+        onSuccess={() => {
+          setShowManagePurchaseOrderDialog(false);
+          // fetchPurchaseOrder()
+        }}
+        productsToSave={[]}
+      />
+    }
+
   </>
   );
 }

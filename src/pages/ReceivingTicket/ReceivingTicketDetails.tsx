@@ -474,7 +474,7 @@ const ReceivingTicketDetails = () => {
                               </Grid>
                               <Grid item xs={12}>
                                 <CustomAgGrid
-                                    allowSelection={true}
+                                    allowSelection={receivingTicketData.status === "New"}
                                     allowAction={false}
                                     columns={columns}
                                     dataRows={dataRows}
@@ -646,6 +646,8 @@ const ReceivingTicketDetails = () => {
           }}
           isAdding={isAdding}
           selectedProducts={[]}
+          rentalId={receivingTicketData?.rentalJob?.optionValue}
+          notIn="receivingTicket"
         // type={inventoryType}
         />
       }
