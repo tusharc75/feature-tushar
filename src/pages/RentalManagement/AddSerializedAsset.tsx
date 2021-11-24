@@ -22,7 +22,7 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 const addSerializedAssetsRenderedFrom = "addSerializedAssets";
 const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected`;
 
-const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, rantalId = null }) => {
+const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, rentalId = null, notIn = null }) => {
     const toastConfig = useContext(CustomToastContext)
 
     const [serializedProducts, setSerializedProducts] = useState([]);
@@ -144,7 +144,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     };
 
     const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}&availableAssets=true`;
+        let deepFilter = `?page=${page}&limit=${limit}`;
 
         if (showFilteredRecordsOnly) {
             deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id))}`;
@@ -171,8 +171,10 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         }
 
         //  To fetch the remaining unassigned assets of that rental management
-        if(rantalId) {
-            deepFilter = `${deepFilter}&rantalId=${rantalId}`;
+        if (rentalId) {
+            deepFilter = `${deepFilter}&rental=${rentalId}&notIn=${notIn}`;
+        } else {
+            deepFilter = `${deepFilter}&availableAssets=true`;
         }
 
         return deepFilter;

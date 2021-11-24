@@ -646,7 +646,8 @@ const ReceivingTicketDetails = () => {
           }}
           isAdding={isAdding}
           selectedProducts={[]}
-          rantalId={receivingTicketData?.rentalJob?.optionValue}
+          rentalId={receivingTicketData?.rentalJob?.optionValue}
+          notIn="receivingTicket"
         // type={inventoryType}
         />
       }

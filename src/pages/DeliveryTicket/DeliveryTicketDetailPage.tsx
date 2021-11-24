@@ -622,7 +622,8 @@ export default function DeliveryTicketDetail(props) {
             }}
             isAdding={isAdding}
             selectedProducts={[]}
-            rantalId={deliveryTicketData?.rental?.optionValue}
+            rentalId={deliveryTicketData?.rental?.optionValue}
+            notIn="loadingTicket"
           // type={inventoryType}
           />
         }
