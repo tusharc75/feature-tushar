@@ -81,6 +81,7 @@ export default function ManageContact(props) {
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showContactDialog, setShowContactDialog] = useState(false);
+  const [accountIdForReportsTo, setAccountIdForReportsTo] = useState('')
 
   useEffect(() => {
 
@@ -502,6 +503,7 @@ export default function ManageContact(props) {
                                               );
                                               handleValuesChange("reportsTo", "")
                                               setFieldValue("reportsTo", "");
+                                              value?.optionValue && setAccountIdForReportsTo(value.optionValue)
                                             }}
                                           />
                                         </Grid>
@@ -594,9 +596,9 @@ export default function ManageContact(props) {
                                                 <IconButton
                                                   onClick={() => setShowContactDialog(true)}
                                                   size="small"
-                                                  disabled={(!isNew && field.disableOnEdit)}
+                                                  disabled={(!isNew && field.disableOnEdit) || !values["accountName"]}
                                                 >
-                                                  <AddIcon color={((!isNew && field.disableOnEdit)) ? "disabled" : "primary"} />
+                                                  <AddIcon color={((!isNew && field.disableOnEdit) || !values["accountName"]) ? "disabled" : "primary"} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -703,6 +705,8 @@ export default function ManageContact(props) {
                         account={account}
                         contactId={null}
                         isClone={false}
+                        accountId = {accountIdForReportsTo}
+                        isAccountFieldDisable={true}
                       />
                       : null
                   }
