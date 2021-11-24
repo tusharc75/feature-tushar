@@ -166,7 +166,13 @@ export default function AccountDetailPage(props) {
 
   useEffect(() => {
     if (deleteAccount && deleteAccount?._id && !showConfirmBox) {
-      console.log('set show confirm box')
+      setShowConfirmBox(true)
+    }
+  }, [deleteAccount])
+
+
+  useEffect(() => {
+    if (deleteAccount && deleteAccount?._id && !showConfirmBox) {
       setShowConfirmBox(true)
     }
   }, [deleteAccount])
@@ -1009,8 +1015,8 @@ export default function AccountDetailPage(props) {
                       }
                     </Box>
                   </TabPanel>
-                  <TabPanel value={tabValue} index={1}>
-                    <Box>
+                  <TabPanel value={tabValue} index={1} >
+                    <Box  style={{overflow: 'auto'}}>
                       <AccountHierarchy
                         data={accountHierarchyData}
                         currentAccountId={accountData._id}

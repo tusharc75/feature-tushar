@@ -245,11 +245,13 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
   const replaceUnit = (label, unit, sUnit = null) => {
     if (label !== "Secondary Unit") {
       if (label.includes("Secondary Unit") && sUnit) {
-        label = `${label.split(" Secondary Unit")[0]} ${sUnit}`;
+        label = `${label.split(" Secondary Unit")[0]} Secondary Unit (${sUnit})`;
       }
 
       if (!label.includes("Secondary Unit") && label.includes("Unit") && unit) {
-        label = `${label.split(" Unit")[0]} ${unit}`;
+        if (label !== "Unit") {
+          label = `${label.split(" Unit")[0]} Unit (${unit})`;
+        }
       }
     }
     return label;
@@ -337,7 +339,7 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                 section.sectionFields.map((field) =>
                                   field.type === "converter" || field.type === "currencyAmount" || field.isConverter ? (
                                     <FormTypes
-                                      style={{ background: field?.isUneditable ? "#EBEBE4" : field?.isFormula ? "#1e768221" : "" }}
+                                      style={{ background: field?.isUneditable ? "#1e768221" : "" }}
                                       fields={initialData.fields}
                                       fieldData={field}
                                       values={values}
@@ -380,7 +382,7 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                         <Box flexGrow={1}>
                                           <FormTypes
                                             {...field}
-                                            style={{ background: field?.isUneditable ? "#EBEBE4" : field?.isFormula ? "#1e768221" : "" }}
+                                            style={{ background: field?.isUneditable ? "#1e768221" : "" }}
                                             productTemplateId={values?.productTemplate}
                                             priceTemplateId={values?.priceTemplate}
                                             fields={initialData.fields}

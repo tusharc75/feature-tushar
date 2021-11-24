@@ -11,7 +11,18 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { purchaseOrder, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL, getUniqueCurrencies } from "../../constants/helpers";
+import {
+    purchaseOrder,
+    getObjKeysWithValues,
+    gridLoadingTimeout,
+    product,
+    RESOURCE_LABEL,
+    getUniqueCurrencies,
+    supplierAccount,
+    customerAccount,
+    dateFormat,
+    quoteStepColors
+} from "../../constants/helpers";
 import ManagePurchaseOrder from "./ManagePurchaseOrder";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
@@ -20,7 +31,6 @@ import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import AddProductDialog from "./AddProductDialog";
-import CreateSeriaizedAsset from "./CreateSerializedAsset";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CreateProduct from "../../components/Product/CreateProduct";
 import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
@@ -29,9 +39,12 @@ import Service from "./Service";
 import BulkEditDialog from "./BulkEditDialog";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import IssuPO from "./IssuPO";
-import { FaWpforms } from "react-icons/fa";
+import {FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms} from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
+import ReceivingAsset from "./ReceivingAsset";
+import {isMobile} from "react-device-detect";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -58,7 +71,6 @@ const PurchaseOrderDetailsPage = () => {
     const [isAddingProducts, setAddingProducts] = useState(false);
     const [product, setProduct] = useState<any[]>([]);
     const [currencySymbol, setCurrencySymbol] = useState(null);
-    const [showCreateAssetDialog, setShowCreateAssetDialog] = useState(false)
     const [updateLoading, setUpdateLoading] = useState(false)
     const [isAddNewProduct, setIsAddNewProduct] = useState(false)
     const [anchorEl, setAnchorEl] = useState(null);
@@ -70,6 +82,7 @@ const PurchaseOrderDetailsPage = () => {
     const [currentStep, setCurrentStep] = useState(0);
     const [downlodingFile, setDownlodingFile] = useState(false)
     const [selectedProductData, setSelectedProductData] = useState(null)
+    const [pdfFileBase64, setPdfFileBase64] = useState(null);
 
     const [tabValue, setTabValue] = useState(0);
 
@@ -139,19 +152,7 @@ const PurchaseOrderDetailsPage = () => {
         { field: "totalTax", headerName: "Total Tax", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
         { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer" },
     ])
-    const columnsReceivingTicet = [
-        { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
-        { field: "expectedDelivery", headerName: "Expected Delivery", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
-        { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        { field: "actualReceived", headerName: "Actual Received", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        { field: "baseUOM", headerName: "Base UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Hour", "Day", "Week", "Month"] }, editable: true },
-        { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        { field: "tax", headerName: "Tax Percent", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        { field: "taxPerUnit", headerName: "Tax Per Unit", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        { field: "totalTax", headerName: "Total Tax", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    ]
+
 
     useEffect(() => {
         if (id) {
@@ -169,6 +170,32 @@ const PurchaseOrderDetailsPage = () => {
                 toastConfig.setToastConfig(error);
             });
         }
+        if (currentStep === 2) {
+            axiosInstance().get(`${purchaseOrder.api}/${id}/pdf`)
+                .then(({ data }) => {
+                    axiosInstance()
+                        .get(`user/download?fileName=${data.data.fileName}`, {
+                            responseType: "blob",
+                        })
+                        .then(({ data }) => {
+                            const file = new Blob([data], { type: 'application/pdf' });
+                            generateBase64forFile(file, 'pdf');
+                        })
+                        .catch((err) => {
+                            toastConfig.setToastConfig({
+                                open: true,
+                                type: 'error',
+                                message: 'PDF generating error'
+                            });
+                        });
+                }).catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    setDownlodingFile(false);
+                })
+        }
+        if (currentStep === 1 && purchaseOrderData?.status !== "In Process") { handleUpdateData({ "status": "In Process" }) }
+        if (currentStep === 3 && purchaseOrderData?.status !== "Issued") { handleUpdateData({ "status": "Issued" }) }
+
         // eslint-disable-next-line
     }, [currentStep]);
 
@@ -187,8 +214,7 @@ const PurchaseOrderDetailsPage = () => {
         axiosInstance().get(`${purchaseOrder.api}/${id}/order-details`).then(({ data: { data } }) => {
             data = data?.map((u) => {
 
-                if ((!currentStepDisable) && (u.totalTax === 0 || u.totalTax === undefined
-                    || u.qty === 0 || u.qty === undefined
+                if ((!currentStepDisable) && (u.qty === 0 || u.qty === undefined
                     || u.finalPrice === 0 || u.finalPrice === undefined)) setCurrentStepDisable(true)
                 return ({
                     ...u,
@@ -197,7 +223,8 @@ const PurchaseOrderDetailsPage = () => {
                     entity: u.productId?.entity,
                     quantity: u.qty,
                     description: u.productId?.productName,
-                    type: "product"
+                    type: "Product",
+                    treeId: u?.productId?._id
 
                 })
             });
@@ -348,6 +375,11 @@ const PurchaseOrderDetailsPage = () => {
                 getPurchaseOrderFields();
                 fetchPurchaseOrderData();
                 fetchPurchaseOrderProduct();
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: 'success',
+                    message: `Status changed to ${obj.status}`
+                });
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
             });
@@ -364,7 +396,7 @@ const PurchaseOrderDetailsPage = () => {
     }
 
     const handleViewPdf = (download) => {
-        axiosInstance().get(`/${purchaseOrder.api}/${id}/pdf`)
+        axiosInstance().get(`${purchaseOrder.api}/${id}/pdf`)
             .then(({ data }) => {
                 axiosInstance()
                     .get(`user/download?fileName=${data.data.fileName}`, {
@@ -375,7 +407,7 @@ const PurchaseOrderDetailsPage = () => {
                             const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
                             const link = document.createElement('a');
                             link.href = url;
-                            link.setAttribute('download', `PurchaseOrder.pdf`);
+                            link.setAttribute('download', `PurchaseOrder-${purchaseOrderData.purchaseOrderNumber}.pdf`);
                             document.body.appendChild(link);
                             link.click();
                         }
@@ -399,6 +431,37 @@ const PurchaseOrderDetailsPage = () => {
             })
     }
 
+    const generateBase64forFile = (blobData, type) => {
+        let reader = new FileReader();
+        reader.readAsDataURL(blobData);
+        reader.onloadend = function () {
+            let base64data = reader.result;
+            if (type === 'pdf') {
+                setPdfFileBase64(base64data);
+            }
+        };
+    };
+    const handleAttachments = () => {
+        let request;
+
+        request = {
+            name: 'Purchase Order',
+            fileUrl: '',
+            relatedTo: [
+                {
+                    type: purchaseOrder.resource,
+                    referenceId: purchaseOrderData?._id,
+                    access: true
+                },
+                {
+                    type: purchaseOrderData?.customerAccountName ? customerAccount?.accountResource : supplierAccount?.accountResource,
+                    referenceId: purchaseOrderData?.customerAccountName ? purchaseOrderData?.customerAccountName?.optionValue : purchaseOrderData?.supplierAccountName?.optionValue,
+                    access: false
+                },
+            ]
+        };
+
+    };
 
     return (
         <>
@@ -469,7 +532,7 @@ const PurchaseOrderDetailsPage = () => {
                                                                 handleStatusChange(o)
                                                             }}
                                                             value={o}
-                                                            disabled={o.optionValue === "Received"}
+                                                            disabled={o.optionValue !== "Issued"}
                                                         >{o?.optionLabel}</MenuItem>
                                                     })
                                                 }
@@ -584,29 +647,72 @@ const PurchaseOrderDetailsPage = () => {
                                                         <Box display="flex" justifyContent="space-between" m={1}>
                                                             <Box display="flex">
                                                                 <Button
-                                                                    variant="contained"
+                                                                    variant= {isMobile ? "outlined" : "contained"}
                                                                     color="primary"
                                                                     size="small"
                                                                     onClick={() => {
                                                                         setIsAddNewProduct(true);
                                                                     }}
                                                                 >
-                                                                    {`Add New ${routes.product.title}`}
+                                                                    {isMobile ? <FaCartPlus size={22}/> : `Add New ${routes.product.title}`}
+
                                                                 </Button>
                                                                 <Box mx={1} />
                                                                 <Button
-                                                                    variant="contained"
+                                                                    variant= {isMobile ? "outlined" : "contained"}
                                                                     color="primary"
                                                                     size="small"
                                                                     onClick={() => {
                                                                         setAddProductDialog(true);
                                                                     }}
                                                                 >
-                                                                    {`Add Existing ${routes.product.title}`}
+                                                                    {isMobile ? <FaCartArrowDown size={22}/> : `Add Existing ${routes.product.title}`}
+                                                                    {}
                                                                 </Button>
                                                             </Box>
                                                         </Box>
                                                         {columns ?
+                                                              isMobile ?
+                                                                  <CustomSwipableList
+                                                                      allowSelection={true}
+                                                                      allowSwipe={true}
+                                                                      permissions={permissions}
+                                                                      primaryField={columns?.find(d => d.field === "productName")}
+                                                                      onClick={(data) => {
+                                                                          setShowAddServiceDialog(true)
+                                                                          setSelectedProductData(data)
+                                                                      }}
+                                                                      dataRows={dataRows}
+                                                                      selectedRecords={selectedRecords}
+                                                                      dispatch={dispatch}
+                                                                      onEdit={(data) => {
+                                                                          setShowAddServiceDialog(true)
+                                                                          setSelectedProductData(data)
+                                                                      }}
+                                                                      extraParamsToCheckDelete={true}
+                                                                      onDelete={(data) => {
+                                                                          deletePurchaseOrderProduct([{
+                                                                              id: data._id,
+                                                                          }])
+                                                                      }}
+                                                                      rowCount={rowCount}
+                                                                      page={page}
+                                                                      loading={loading}
+                                                                      chips={
+                                                                          [{
+                                                                              label: `Product Description: `,
+                                                                              field: "productName",
+                                                                              forceShow: true
+                                                                          }]
+                                                                      }
+                                                                      onCreate={null}
+                                                                      showClone={false}
+                                                                      fullHeight={true}
+                                                                      renderedFrom={routes.purchaseOrderDetail.title}
+                                                                      onClone={() => { }}
+
+                                                            /> :
+
                                                             <CustomAgGridEditable
                                                                 columns={columns}
                                                                 dataRows={dataRows}
@@ -649,54 +755,20 @@ const PurchaseOrderDetailsPage = () => {
                                                         purchaseOrderProduct={purchaseOrderProduct}
                                                         purchaseOrderData={purchaseOrderData}
                                                         handleViewPdf={handleViewPdf}
+                                                        handleUpdateData={handleUpdateData}
                                                         downlodingFile={downlodingFile}
                                                         setCurrentStep={setCurrentStep}
                                                         currentStep={currentStep}
+                                                        handleAttachments={handleAttachments}
+                                                        pdfFileBase64={pdfFileBase64}
                                                     />
                                                 }
                                                 {currentStep === 3 &&
-                                                    <>
-                                                        <Box display="flex" justifyContent="space-between" m={1}>
-                                                            <Box display="flex">
-                                                                <Box mx={1} />
-                                                                <Button
-                                                                    variant="contained"
-                                                                    color="primary"
-                                                                    size="small"
-                                                                    disabled={selectedRecords.length === 0}
-                                                                    onClick={() => { setShowCreateAssetDialog(true) }}
-                                                                >
-                                                                    {`Create Asset`}
-                                                                </Button>
-                                                            </Box>
-                                                        </Box>
-                                                        {columnsReceivingTicet ?
-                                                            <CustomAgGrid
-                                                                columns={columnsReceivingTicet}
-                                                                dataRows={dataRows}
-                                                                frameworkComponents={frameworkComponents}
-                                                                setGridApi={setGridApi}
-                                                                dispatch={dispatch}
-                                                                rowCount={rowCount}
-                                                                limit={limit}
-                                                                pageSizes={pageSizes}
-                                                                page={page}
-                                                                allowAction={false}
-                                                                allowSelection={true}
-                                                                isClientSideGrid={true}
-                                                                loading={loading}
-                                                                renderedFrom="purchaseOrderDetailsPageInventory"
-                                                                refreshGrid={fetchPurchaseOrderProduct}
-                                                            />
-                                                            : <Box
-                                                                p={2}
-                                                                height={500}
-                                                                bgcolor="white">
-                                                                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                                                            </Box>
-                                                        }
-
-                                                    </>
+                                                    <ReceivingAsset
+                                                        currencySymbol={currencySymbol}
+                                                        purchaseOrderData={purchaseOrderData}
+                                                        purchaseOrderProduct={purchaseOrderProduct}
+                                                        handleUpdateData={handleUpdateData} />
                                                 }
                                             </Paper>
                                         </>
@@ -757,18 +829,6 @@ const PurchaseOrderDetailsPage = () => {
                     handleProductInPurchaseOrderClose={() => { setAddProductDialog(false) }}
                     productInPurchaseOrder={product}
                     type={"product"}
-                />
-            }
-            {showCreateAssetDialog &&
-                <CreateSeriaizedAsset
-                    purchaseOrderID={id}
-                    onClose={() => setShowCreateAssetDialog(false)}
-                    onSuccess={() => {
-                        setShowCreateAssetDialog(false)
-                        handleUpdateData({ status: "Received" })
-                    }}
-                    title="Create Asset"
-                    productList={selectedRecords}
                 />
             }
             {isAddNewProduct && (

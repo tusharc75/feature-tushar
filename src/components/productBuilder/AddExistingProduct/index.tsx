@@ -18,7 +18,7 @@ import routes from "../../../components/Helpers/Routes";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import TextField from "@material-ui/core/TextField";
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import { prepareDataForGrid } from "../../../constants/helpers";
 
 var levalOrderBy = [
@@ -54,7 +54,7 @@ const AddExistingProduct = (props) => {
     const [productCategory, setProductCategory] = useState(null);
     const [productTemplate, setProductTemplate] = useState(null);
     const [isProductTemplate, setIsProductTemplate] = useState(true);
-
+    const {getColumnData} = useColumns();
 
     useEffect(() => {
         axiosInstance().get("/product-category?sortBy=name&orderBy=asc").then(({ data: { data } }) => {

@@ -10,10 +10,14 @@ import CustomContainer from "../../components/CustomContainer";
 import { gridLoadingTimeout, gridPageSizes } from "../../constants/helpers";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import routes from "../../components/Helpers/Routes";
+import { useHistory } from 'react-router-dom'
+import { isMobile } from 'react-device-detect';
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 const DOARequest = () => {
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
+  const history = useHistory()
 
   const [state, dispatch] = useReducer(reducer, intialState);
   const {
@@ -161,24 +165,54 @@ const DOARequest = () => {
             </Grid>
           </Grid>
         </div>
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={150}
-          allowSelection={false}
-          allowAction={false}
-          isClientSideGrid={true}
-          loading={loading}
-          renderedFrom="doaRequestPage"
-          refreshGrid={fetchProductBuilder}
-        />
+        {isMobile
+          ? <CustomSwipableList
+            allowSelection={false}
+            allowSwipe={false}
+            permissions={null}
+            primaryField={columns?.find(d => d.field === "name")}
+            onClick={(d) => {
+              history.push(`${routes.budget.path}?id=${d._id}`)
+            }}
+            dataRows={dataRows}
+            selectedRecords={[]}
+            dispatch={dispatch}
+            onEdit={(d) => {
+              history.push(`${routes.budget.path}?id=${d._id}`)
+            }}
+            extraParamsToCheckDelete={true}
+            onDelete={(d) => {
+
+            }}
+            rowCount={rowCount}
+            page={page}
+            loading={loading}
+            additionalDetails={[]}
+            chips={[]}
+            owerCollaboratorInitialsOrImages=""
+            onCreate={() => { }}
+            showClone={false}
+            onClone={() => { }}
+            renderedFrom={"doa-request"}
+
+          /> : <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={150}
+            allowSelection={false}
+            allowAction={false}
+            isClientSideGrid={true}
+            loading={loading}
+            renderedFrom="doaRequestPage"
+            refreshGrid={fetchProductBuilder}
+          />}
       </CustomContainer>
     </Fragment>
   );

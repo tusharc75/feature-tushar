@@ -22,7 +22,7 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 const addSerializedAssetsRenderedFrom = "addSerializedAssets";
 const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected`;
 
-const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts }) => {
+const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, rentalId = null, notIn = null }) => {
     const toastConfig = useContext(CustomToastContext)
 
     const [serializedProducts, setSerializedProducts] = useState([]);
@@ -96,10 +96,11 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     }, [selectedRecords]);
 
     const columns = [
-        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
         { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
+        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
         { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
+        { field: "poNumber", headerName: "Purchase Order", show: true, cellRenderer: "commonRenderer" },
         { field: "plant", headerName: "Plant", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
     ];
@@ -115,7 +116,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         if (selectedProducts.length > 0) {
             queryString = `${queryString}&filterById=${JSON.stringify(selectedProducts.map(m => { return { "field": "product", "term": m?._id ?? "" } }))}&filterByIdType=or`
         }
-        
+
         axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
             data.data = data.data
                 // ?.filter(u => (u?.status === "Available" || u?.status === "New")
@@ -127,6 +128,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                     productName: u.product?.optionLabel,
                     productCategory: u?.productCategory?.optionLabel,
                     warehouse: u?.warehouse?.optionLabel,
+                    poNumber: u?.pONumber?.optionLabel
                 }));
 
 
@@ -142,8 +144,8 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     };
 
     const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}&availableAssets=true`;
-        
+        let deepFilter = `?page=${page}&limit=${limit}`;
+
         if (showFilteredRecordsOnly) {
             deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id))}`;
         }
@@ -166,6 +168,13 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
 
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
+        }
+
+        //  To fetch the remaining unassigned assets of that rental management
+        if (rentalId) {
+            deepFilter = `${deepFilter}&rental=${rentalId}&notIn=${notIn}`;
+        } else {
+            deepFilter = `${deepFilter}&availableAssets=true`;
         }
 
         return deepFilter;
@@ -277,7 +286,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                             // selectedRecords={selectedRecords}
                             renderedFrom={addSerializedAssetsRenderedFrom}
                             showOnlyShowFilteredRecordSwitch={true}
-                            // allowHeaderSelection={false}
+                        // allowHeaderSelection={false}
                         />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </div>

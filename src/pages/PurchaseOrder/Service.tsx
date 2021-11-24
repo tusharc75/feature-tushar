@@ -1,6 +1,6 @@
 
 import Box from "@material-ui/core/Box/Box";
-import { useState, useEffect, useReducer, useContext } from "react";
+import React, { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer, } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom'
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button, IconButton } from "@material-ui/core";
-import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
@@ -18,6 +17,9 @@ import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import EditIcon from "@material-ui/icons/Edit";
 import { useData } from "../../StateProvider/Provider";
+import {isMobile} from "react-device-detect";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import {GrBusinessService} from "react-icons/all";
 
 
 const Service = ({ currencySymbol, purchaseOrderData ,statusOptions}) => {
@@ -30,6 +32,7 @@ const Service = ({ currencySymbol, purchaseOrderData ,statusOptions}) => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
   const [showAddServiceDialog, setShowAddServiceDialog] = useState(false)
+  const [selectedProductData, setSelectedProductData] = useState(null)
   const [isSavingBulkEditDialog, setIsSavingBulkEditDialog] = useState(false)
   const [selectedServiceData, setSelectedServiceData] = useState(null)
   const [columns, setColumns] = useState([
@@ -149,6 +152,7 @@ const Service = ({ currencySymbol, purchaseOrderData ,statusOptions}) => {
       });
   }
 
+
   const deletePurchaseOrderService = (ids) => {
     axiosInstance().delete(`${purchaseOrder.api}/${purchaseOrderData._id}/service-details/remove/${ids}`)
       .then(() => {
@@ -168,9 +172,8 @@ const Service = ({ currencySymbol, purchaseOrderData ,statusOptions}) => {
         color="primary"
         type="button"
         size="small"
-        startIcon={<AiFillFilePdf />}
       >
-        {"Add Service"}
+        {isMobile ? <GrBusinessService size={20}/> : "Add Service"}
       </Button>
       <Box mx={1} />
     </Box>
@@ -178,6 +181,43 @@ const Service = ({ currencySymbol, purchaseOrderData ,statusOptions}) => {
     <Grid item xs={12} md={12} sm={12} className="mt-3">
 
       {columns ?
+          isMobile ? <CustomSwipableList
+                  allowSelection={true}
+                  allowSwipe={true}
+                  permissions={permissions}
+                  primaryField={columns?.find(d => d.field === "description")}
+                  onClick={(data) => {
+                    setShowAddServiceDialog(true)
+                    setSelectedProductData(data)
+                  }}
+                  dataRows={dataRows}
+                  selectedRecords={selectedRecords}
+                  dispatch={dispatch}
+                  onEdit={(data) => {
+                    setShowAddServiceDialog(true)
+                    setSelectedServiceData(data)
+                  }}
+                  extraParamsToCheckDelete={true}
+                  onDelete={(data) => {
+                    deletePurchaseOrderService([data._id])
+                  }}
+                  rowCount={rowCount}
+                  page={page}
+                  loading={loading}
+                  chips={
+                    [{
+                      label: `Product Description: `,
+                      field: "productName",
+                      forceShow: true
+                    }]
+                  }
+                  onCreate={null}
+                  showClone={false}
+                  fullHeight={true}
+                  renderedFrom={routes.purchaseOrderDetail.title}
+                  onClone={() => { }}
+
+              /> :
         <CustomAgGrid
           columns={columns}
           dataRows={dataRows}

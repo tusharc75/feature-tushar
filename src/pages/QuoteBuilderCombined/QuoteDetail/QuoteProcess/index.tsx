@@ -41,7 +41,7 @@ import {
 import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
 import Steps from './Steps';
 import { saveAs } from 'file-saver';
-import { utils, write } from 'xlsx';
+import { utils, write } from 'xlsx-js-style';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import ImportExportIcon from '@material-ui/icons/ImportExport';
@@ -208,7 +208,7 @@ export default function QuoteProcess(props) {
   const history = useHistory();
 
   const [quoteCurrency] = useState(quoteData?.currency);
-  const [nextStep, setNextStep] = useState(true);
+  const [nextStep, setNextStep] = useState(false);
   const [redCard, setRedCard] = useState(false);
   const [totalProfit, setTotalProfit] = useState({
     shortFormatAmount: '',
@@ -330,6 +330,9 @@ export default function QuoteProcess(props) {
     }
     if (tempProcessStatus === 'Customer Process') {
       setNextStep(false);
+    }
+    if (tempProcessStatus === 'Quote Builder') {
+      setNextStep(true);
     }
   }, [quoteData]);
 
@@ -780,15 +783,15 @@ export default function QuoteProcess(props) {
         let obj = {};
         visibleColumnsExcel.forEach((col) => {
           if (Array.isArray(d[col]) && d[col].length > 0) {
-            if (d[col][0].hasOwnProperty('optionLabel')) {
-              obj[col] = d[col].map(d => d.optionLabel).join() || "";
+            if (d[col][0]?.hasOwnProperty('optionLabel')) {
+              obj[col] = d[col]?.map(d => d.optionLabel).join() || "";
             }
             else {
-              obj[col] = d[col].join() || "";
+              obj[col] = d[col]?.join() || "";
             }
           }
-          else if (d[col].hasOwnProperty('optionLabel')) {
-            obj[col] = d[col].optionLabel || "";
+          else if (d[col]?.hasOwnProperty('optionLabel')) {
+            obj[col] = d[col]?.optionLabel || "";
           }
           else {
             obj[col] = d[col] || "";
@@ -797,6 +800,13 @@ export default function QuoteProcess(props) {
 
         newTable.push(obj);
       });
+
+      newTable = newTable.map((row, i) => {
+        return ({
+          "SR No.": i + 1,
+          ...row
+        })
+      })
 
       const res = newTable.reduce(
         (result, item) => {
@@ -809,7 +819,7 @@ export default function QuoteProcess(props) {
           });
           return result;
         },
-        { ['Product Description']: 'Total' }
+        { ['SR No.']: 'Total' }
       );
 
       Object?.keys(res).forEach((k) => {
@@ -823,8 +833,93 @@ export default function QuoteProcess(props) {
 
       newTable.push(res);
 
+      const wb = utils.book_new();
       const ws = utils.json_to_sheet(newTable);
-      const wb = { Sheets: { data: ws }, SheetNames: ['data'] };
+      const range = utils.decode_range(ws['!ref'])
+      let cs,
+        rs: number = range.s.r;
+      let ce,
+        re: number = range.e.r;
+
+      let wscols = [];
+
+      for (cs = range.s.r; cs <= range.e.c; ++cs) {
+        let sCell = utils.encode_cell({ c: cs, r: rs });
+
+        ws[sCell].s = {
+          font: {
+            name: "Calibri",
+            sz: 12,
+            bold: true,
+            color: { rgb: "ffffff" },
+          },
+          fill: {
+            fgColor: { rgb: "02617d" },
+          },
+        };
+
+        if (sCell !== "A1") {
+          wscols.push({ wch: 20 });
+        } else {
+          wscols.push({ wch: 6 });
+        }
+      }
+
+      for (ce = range.e.c; ce >= range.s.r; --ce) {
+        let cell = utils.encode_cell({ c: ce, r: re });
+
+        if (ws[cell])
+          ws[cell].s = {
+            font: {
+              name: "Calibri",
+              sz: 12,
+              bold: true,
+              color: { rgb: "ffffff" },
+            },
+            fill: {
+              fgColor: { rgb: "ff6666" },
+            },
+          };
+      }
+
+      Object.keys(ws).forEach((key, i) => {
+        if (key === "!cols" || key === "!ref") return;
+
+        if (ws[key]?.s) {
+          ws[key].s = {
+            ...ws[key]?.s,
+            alignment: {
+              horizontal: "left",
+            },
+          };
+        } else {
+          if (key.includes("A")) {
+            ws[key].s = {
+              font: {
+                name: "Calibri",
+                sz: 12,
+                bold: false,
+                color: { rgb: "ffffff" },
+              },
+              fill: {
+                fgColor: { rgb: "02617d" },
+              },
+              alignment: {
+                horizontal: "left",
+              },
+            };
+          } else {
+            ws[key].s = {
+              alignment: {
+                horizontal: "left",
+              },
+            };
+          }
+        }
+      });
+
+      ws["!cols"] = wscols;
+      utils.book_append_sheet(wb, ws);
       const excelBuffer = write(wb, {
         bookType: 'xlsx',
         type: 'array'

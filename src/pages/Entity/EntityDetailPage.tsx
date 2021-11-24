@@ -25,6 +25,8 @@ import ManageEntity from "./ManageEntity";
 import NewStepper from "../../components/Helpers/NewStepper";
 import { isObjectEmpty } from "../../constants/helpers";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
+import DeleteButton from "../../components/Helpers/DeleteButton";
+import ResourceTransferDialog from "../../components/ResourceTransferDialog"
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -55,8 +57,11 @@ const EntityDetailsPage = () => {
   const [doa, setDoa] = useState<any[]>([]);
   const [doaCurrency, setDoaCurrency] = useState("");
   const [doaType, setDoaType] = useState(null);
+  const [minLimit, setMinLimit] = useState(null);
+
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
   const [userList, setUserList] = useState<any[]>([]);
+  const [showDeleteEntityDialog, setShowDeleteEntityDialog] = useState(false)
   useEffect(() => {
     if (id) {
       getEntityFields();
@@ -237,23 +242,24 @@ const EntityDetailsPage = () => {
       .then(({ data: { data } }) => {
         let doaData = [];
 
-        data.doa.forEach((item) => {
-          //  When the user set in doa was deleted, we are getting {} in array like this [{}]
-          //  So added this check
-          if (!isObjectEmpty(item)) {
-            doaData.push({
-              id: item.user?._id,
-              name: [item.user?.firstName, item.user?.lastName].filter(f => f).join(" "),
-              firstName: item.user?.firstName,
-              lastName: item.user?.lastName,
-              amount: item.amount,
-            });
-          }
-        });
+        // data.doa.forEach((item) => {
+        //   //  When the user set in doa was deleted, we are getting {} in array like this [{}]
+        //   //  So added this check
+        //   if (!isObjectEmpty(item)) {
+        //     doaData.push({
+        //       id: item.user?._id,
+        //       name: [item.user?.firstName, item.user?.lastName].filter(f => f).join(" "),
+        //       firstName: item.user?.firstName,
+        //       lastName: item.user?.lastName,
+        //       amount: item.amount,
+        //     });
+        //   }
+        // });
 
-        setDoa(doaData);
+        setDoa(data.doa);
         setDoaCurrency(data.doaCurrency)
         setDoaType(data.doaType)
+        setMinLimit(data.minLimit)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -361,26 +367,16 @@ const EntityDetailsPage = () => {
                       Edit
                     </Button>
                   )}
-                  {/* <Box component="span" marginX={1} />
+                  {/* <Box component="span" marginX={1} /> */}
                   {permissions?.entity?.isDelete && (
-                    <span
-                      title={
-                        selectedEntity === id
-                          ? "Primarily selected entity can't be deleted"
-                          : "Permanently delete this entity"
-                      }
-                    >
-                      <DeleteButton
-                        disabled={selectedEntity === id}
-                        text="Delete"
-                        onClick={() => setShowConfirmBox(true)}
-                      />
-                    </span>
-                  )} */}
+                    <DeleteButton
+                      disabled={entityData?.createdBy?.user?._id !== user?.user?._id}
+                      text="Delete"
+                      onClick={() => setShowDeleteEntityDialog(true)}
+                    />
+                  )}
                 </DetailsPageHeader>
               )}
-
-
               <Box>
                 {loading || !entityFields.length ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
@@ -564,6 +560,18 @@ const EntityDetailsPage = () => {
           }
         />
       ) : null}
+      {
+        showDeleteEntityDialog ?
+          <ResourceTransferDialog
+            open={true}
+            resource="Entity"
+            fromResource={{ ...entityData, name: entityData.entityName }}
+            allResourceData={JSON.parse(localStorage.getItem("mappedEntities")).map(o => ({ ...o, name: o?.entityName }))}
+            onClose={() => setShowDeleteEntityDialog(false)}
+            handleDelete={handleDeleteEntity}
+          />
+          : null
+      }
       {doaDialogOpen && (
         <Dialog
           open={doaDialogOpen}
@@ -588,8 +596,10 @@ const EntityDetailsPage = () => {
               setDoaDialogOpen(false);
             }}
             doaType={doaType}
+            minLimit={minLimit}
           />
         </Dialog>
+
       )}
     </>
   );
