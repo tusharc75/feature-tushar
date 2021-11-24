@@ -53,7 +53,7 @@ export const checkFormula = (formula, inputFields) => {
 }
 
 export const getFormulaValue = (formula, inputFields, returnType, decimalPlaces) => {
-    let value = 0
+    let value: any = 0
     try {
         let argument = [];
         let values = [];
@@ -79,10 +79,9 @@ export const getFormulaValue = (formula, inputFields, returnType, decimalPlaces)
             if (isNaN(value)) {
                 value = 0
             }
-            // if (isFinite(value)) {
-            //     value = 0
-            // } 
-            
+            if (value == "Infinity") {
+                value = 0
+            }
             //value = parseFloat(value.toFixed(decimalPlaces))
         }
     }
@@ -786,101 +785,101 @@ export const updateFieldAccordingCurrency = (
     newFieldName: any,
     oldCurrency: any,
     currency: any
-  ) => {
+) => {
     const regexOldFieldName = new RegExp(oldFieldName, 'g');
     fields.forEach((_f: any) => {
-      if (_f.inputFields) {
-        _f.inputFields = _f.inputFields.map(function (_fi: any) {
-          return _fi == oldFieldName ? newFieldName : _fi;
-        });
-      }
-      if (_f.formula) {
-        _f.formula = _f.formula.replace(regexOldFieldName, newFieldName);
-      }
-      if (_f.formulaFields) {
-        _f.formulaFields = _f.formulaFields.map(function (_fi: any) {
-          return _fi == oldFieldName ? newFieldName : _fi;
-        });
-      }
-      if (_f.formulainputFields) {
-        _f.formulainputFields = _f.formulainputFields.map(function (_fi: any) {
-          return _fi == oldFieldName ? newFieldName : _fi;
-        });
-      }
-      if (_f.formulaoption) {
-        for (const x in _f.formulaoption) {
-          if (x === oldFieldName) {
-            _f.formulaoption[newFieldName] = _f.formulaoption[x].replace(
-              regexOldFieldName,
-              newFieldName
-            );
-            delete _f.formulaoption[x];
-          } else {
-            _f.formulaoption[x] = _f.formulaoption[x].replace(regexOldFieldName, newFieldName);
-          }
+        if (_f.inputFields) {
+            _f.inputFields = _f.inputFields.map(function (_fi: any) {
+                return _fi == oldFieldName ? newFieldName : _fi;
+            });
         }
-      }
-      if (_f.formulaOnCurrency) {
-        _f.formulaOnCurrency = _f.formulaOnCurrency.replace(oldCurrency, currency);
-      }
-      if (_f.vlookupInputFields) {
-        _f.vlookupInputFields = _f.vlookupInputFields.map(function (_fi: any) {
-          return _fi == oldFieldName ? newFieldName : _fi;
-        });
-        if (_f.option) {
-          _f.option.forEach((_option: any) => {
-            for (const x in _option) {
-              if (x === oldFieldName) {
-                _option[newFieldName] = _option[x];
-                delete _option[x];
-              }
+        if (_f.formula) {
+            _f.formula = _f.formula.replace(regexOldFieldName, newFieldName);
+        }
+        if (_f.formulaFields) {
+            _f.formulaFields = _f.formulaFields.map(function (_fi: any) {
+                return _fi == oldFieldName ? newFieldName : _fi;
+            });
+        }
+        if (_f.formulainputFields) {
+            _f.formulainputFields = _f.formulainputFields.map(function (_fi: any) {
+                return _fi == oldFieldName ? newFieldName : _fi;
+            });
+        }
+        if (_f.formulaoption) {
+            for (const x in _f.formulaoption) {
+                if (x === oldFieldName) {
+                    _f.formulaoption[newFieldName] = _f.formulaoption[x].replace(
+                        regexOldFieldName,
+                        newFieldName
+                    );
+                    delete _f.formulaoption[x];
+                } else {
+                    _f.formulaoption[x] = _f.formulaoption[x].replace(regexOldFieldName, newFieldName);
+                }
             }
-          });
         }
-      }
+        if (_f.formulaOnCurrency) {
+            _f.formulaOnCurrency = _f.formulaOnCurrency.replace(oldCurrency, currency);
+        }
+        if (_f.vlookupInputFields) {
+            _f.vlookupInputFields = _f.vlookupInputFields.map(function (_fi: any) {
+                return _fi == oldFieldName ? newFieldName : _fi;
+            });
+            if (_f.option) {
+                _f.option.forEach((_option: any) => {
+                    for (const x in _option) {
+                        if (x === oldFieldName) {
+                            _option[newFieldName] = _option[x];
+                            delete _option[x];
+                        }
+                    }
+                });
+            }
+        }
     });
     return fields;
-  };
+};
 
 export const CURReplaceByCurrencySingle = (fields: any, currency: any) => {
     const currencyField = fields.filter((_f: any) => _f.type === 'currencyAmount');
     currencyField.forEach((_c: any) => {
-      if (_c.displayCurrency.length && _c.displayCurrency[0] === 'CUR') {
-        if (_c.isConverter && _c.formulaUnits) {
-          _c.formulaUnits.forEach((_unit: any) => {
-            const oldFieldName =
-              _c.fieldName + '_' + _c.displayCurrency[0].toLowerCase() + '_' + _unit.toLowerCase();
-            const newFieldName =
-              _c.fieldName + '_' + currency.toLowerCase() + '_' + _unit.toLowerCase();
-            if (oldFieldName !== newFieldName) {
-              fields = updateFieldAccordingCurrency(
-                fields,
-                oldFieldName,
-                newFieldName,
-                _c.displayCurrency[0],
-                currency
-              );
+        if (_c.displayCurrency.length && _c.displayCurrency[0] === 'CUR') {
+            if (_c.isConverter && _c.formulaUnits) {
+                _c.formulaUnits.forEach((_unit: any) => {
+                    const oldFieldName =
+                        _c.fieldName + '_' + _c.displayCurrency[0].toLowerCase() + '_' + _unit.toLowerCase();
+                    const newFieldName =
+                        _c.fieldName + '_' + currency.toLowerCase() + '_' + _unit.toLowerCase();
+                    if (oldFieldName !== newFieldName) {
+                        fields = updateFieldAccordingCurrency(
+                            fields,
+                            oldFieldName,
+                            newFieldName,
+                            _c.displayCurrency[0],
+                            currency
+                        );
+                    }
+                });
+                _c.displayCurrency[0] = currency;
+            } else {
+                const oldFieldName = _c.fieldName + '_' + _c.displayCurrency[0].toLowerCase();
+                const newFieldName = _c.fieldName + '_' + currency.toLowerCase();
+                if (oldFieldName !== newFieldName) {
+                    fields = updateFieldAccordingCurrency(
+                        fields,
+                        oldFieldName,
+                        newFieldName,
+                        _c.displayCurrency[0],
+                        currency
+                    );
+                }
+                _c.displayCurrency[0] = currency;
             }
-          });
-          _c.displayCurrency[0] = currency;
-        } else {
-          const oldFieldName = _c.fieldName + '_' + _c.displayCurrency[0].toLowerCase();
-          const newFieldName = _c.fieldName + '_' + currency.toLowerCase();
-          if (oldFieldName !== newFieldName) {
-            fields = updateFieldAccordingCurrency(
-              fields,
-              oldFieldName,
-              newFieldName,
-              _c.displayCurrency[0],
-              currency
-            );
-          }
-          _c.displayCurrency[0] = currency;
         }
-      }
     });
     return fields;
-  };
+};
 
 // export const checkFormula = (formula) => {
 

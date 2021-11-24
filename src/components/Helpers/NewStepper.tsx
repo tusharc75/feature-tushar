@@ -206,64 +206,71 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
           >
             {
               quoteDOA ?
-                (quoteDOA.map((doa, i) => (
-                  <Step key={i}>
-                    <StepLabel StepIconComponent={doa?.status === "approve" ?
+                (quoteDOA.map((label,index) => (
+                  <Step key={index}>
+                    <StepLabel StepIconComponent={label?.status === "approve" ?
                       QontoStepIconForApprove
-                      : doa?.status === "pending" ?
+                      : label?.status === "pending" ?
                         QontoStepIconForPending :
                         QontoStepIconForReject
                     }>
-                      <div style={{ color: "#09445A" }}>
-                        <Link
-                          title={`${doa.users[0]?.firstName} ${doa.users[0]?.lastName}`}
-                          className="link"
-                          to={`${routes.userDetail.path}/${doa.users[0]?.id}`}
-                        >
-                          {`${doa.users[0]?.firstName} ${doa.users[0]?.lastName}`}
-                        </Link>
-                        {doa?.users.length - 1 > 0
-                          && <Box component="span" ml={1}>
-                            <HtmlTooltip title={doa?.users.slice(1).map((u, i) => (
-                              <p key={i}>{`${u.firstName} ${u.lastName}`}</p>
-                            ))}>
-                              <Chip size="small" color='primary' variant="outlined" label={`+ ${doa?.users.length - 1} More`} />
-                            </HtmlTooltip>
-                          </Box>}
-                      </div>
-                      {doa?.proxyBy && <div style={{ color: "#09445A" }}>
-                        <Link
-                          title={doa?.users[0]?.proxyBy?.firstName}
-                          className="link"
-                          to={`${routes.userDetail.path}/${doa?.users[0]?.id}`}
-                        >
-                          {`(${doa?.users[0]?.proxyBy?.firstName} ${doa?.users[0]?.proxyBy?.lastName})`}
-                        </Link>
-                      </div>
-                      }
+                      <>
+                        {label?.status === "pending" ?
+                          (<>
+                            {label?.users?.slice(0, 3).map((obj) => (
+                              <div style={{ color: "#09445A" }}>
+                                <Link
+                                  title={obj?.firstName}
+                                  className="link"
+                                  to={`${routes.userDetail.path}/${obj?.id}`}
+                                >
+                                  {`${obj?.firstName} ${obj?.lastName}`}
+                                </Link>
+                              </div>
+                            ))}
+                            {label?.users?.length > 4 && `+ ${label?.users.length - 4} more`}
+                          </>
+                          )
+                          : <div style={{ color: "#09445A" }}>
+                            <Link
+                              title={label?.users.find(d => d?.status === label?.status)?.firstName}
+                              className="link"
+                              to={`${routes.userDetail.path}/${label?.users.find(d => d?.status === label?.status)?.id}`}
+                            >
+                              {`${label?.users.find(d => d?.status === label?.status)?.firstName} ${label?.users.find(d => d.status === label?.status)?.lastName}`}
+                            </Link>
+                          </div>
+
+
+                        }
+                      </>
                     </StepLabel>
                   </Step>
                 )))
-                : (steps.filter((label) => label?.id).map((label) => (
-                  <Step key={label?.id}>
+                : (steps.map((label) => (
+                  <Step key={label}>
                     <StepLabel StepIconComponent={QontoStepIcon}>
-                      <div style={{ color: "#09445A" }}>
-                        <Link
-                          title={label?.name}
-                          className="link"
-                          to={`${routes.userDetail.path}/${label?.id}`}
-                        >
-                          {`${label?.firstName} ${label?.lastName}`}
-                        </Link>
-                      </div>
-                      {doaCurrency && <div style={{ color: "#09445A" }}>{
-                        getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency).length
-                          ? getUniqueCurrencies().filter(
-                            (data) => data?.currencyCode === doaCurrency
-                          )[0].symbolNative
-                          : null}{label?.amount}
-                      </div>}
-
+                      <>
+                        {label?.user?.slice(0, 3).map((obj) => (
+                          <div style={{ color: "#09445A" }}>
+                            <Link
+                              title={obj?.firstName}
+                              className="link"
+                              to={`${routes.userDetail.path}/${obj?.id}`}
+                            >
+                              {`${obj?.firstName} ${obj?.lastName}`}
+                            </Link>
+                          </div>
+                        ))}
+                        {label?.users?.length > 4 && `+ ${label?.users.length - 4} more`}
+                        {doaCurrency && <div style={{ color: "#09445A" }}>{
+                          getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency).length
+                            ? getUniqueCurrencies().filter(
+                              (data) => data?.currencyCode === doaCurrency
+                            )[0].symbolNative
+                            : null}{label?.amount}
+                        </div>}
+                      </>
                     </StepLabel>
                   </Step>
                 )))}

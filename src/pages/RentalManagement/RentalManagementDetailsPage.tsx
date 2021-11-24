@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
+import React, { useState, useEffect, useContext, Fragment, useReducer, useMemo } from "react";
 import { Grid, Box, Button, Paper, CircularProgress, useMediaQuery, Typography, Tab, Tabs } from "@material-ui/core";
 import { Skeleton, Alert } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
@@ -13,7 +13,7 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import {
   getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow,
-  dateFormat, pricingCondition, generateUniqueId, treeToFlatArray
+  dateFormat, pricingCondition, generateUniqueId, treeToFlatArray, formatAmountWithCurrency
 } from "../../constants/helpers";
 import Steps from "./Steps";
 import AddExistingProductInventory from "./AddExistingProductInventory";
@@ -593,8 +593,10 @@ const RentalManagementDetailsPage = () => {
     {
       accessor: 'detail',
       Header: 'Detail',
+      minWidth: 300,
+      width: 300,
       Cell: ({ row }) => (
-        <div style={{ width: 250, display: "flex", alignItems: 'center' }}>
+        <div style={{ display: "flex", alignItems: 'center' }}>
           <p
             onClick={() => handleClick(row.original)}
             className="link text-truncate"
@@ -667,18 +669,34 @@ const RentalManagementDetailsPage = () => {
     },
     {
       accessor: 'price',
-      Header: `Price (${currencySymbol})`,
+      Header: `Price Per UOM (${currencySymbol})`,
       Cell: ({ row }) => (
         row.original.price ? <p>{row.original.price}</p> : <NoDataCell />
       ),
       Footer: info => {
-        const total = React.useMemo(
+        const total = useMemo(
           () =>
             info.rows.filter(f => f.values.hasOwnProperty("price") && !isNaN(f.values.price)).reduce((sum, row) => row.values.price + sum, 0),
           [info.rows]
         )
 
-        return <>{currencySymbol} {total}</>
+        return <>{currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
+      }
+    },
+    {
+      accessor: 'amount',
+      Header: `Total Quantity Price (${currencySymbol})`,
+      Cell: ({ row }) => (
+        row.original.amount ? <p>{row.original.amount}</p> : <NoDataCell />
+      ),
+      Footer: info => {
+        const total = useMemo(
+          () =>
+            info.rows.filter(f => f.values.hasOwnProperty("amount") && !isNaN(f.values.amount)).reduce((sum, row) => row.values.amount + sum, 0),
+          [info.rows]
+        )
+
+        return <>{currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
       }
     },
     {
@@ -695,13 +713,13 @@ const RentalManagementDetailsPage = () => {
         row.original.finalPrice ? <p>{row.original.finalPrice}</p> : <NoDataCell />
       ),
       Footer: info => {
-        const total = React.useMemo(
+        const total = useMemo(
           () =>
             info.rows.filter(f => f.values.hasOwnProperty("finalPrice") && !isNaN(f.values.finalPrice)).reduce((sum, row) => row.values.finalPrice + sum, 0),
           [info.rows]
         )
 
-        return <>{currencySymbol} {total}</>
+        return <>{currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
       }
     }
   ]
@@ -1200,10 +1218,11 @@ const RentalManagementDetailsPage = () => {
                               height="calc(100vh - 345px)"
                               columns={columns}
                               data={dataForNewTabData}
-                              rowStyle={(rowData) => ({
-                                color: "black",
-                                backgroundColor: rowData.isValid ? "white" : "#EFCCCC"
-                              })}
+                              isInValidCheck={(rowData) => !rowData.isValid}
+                              // rowStyle={(rowData) => ({
+                              //   color: "black",
+                              //   background: rowData.isValid ? "white" : "#EFCCCC"
+                              // })}
                               onSelect={setSelectedProducts}
                               childrenProperty="subRows"
                               uniqueKey="id"
@@ -1317,6 +1336,7 @@ const RentalManagementDetailsPage = () => {
                       showActivity={showActivity}
                       currentStep={currentStep}
                       currencySymbol={currencySymbol}
+                      currencyCode={rentalManagementData?.currency}
                       loading={loading}
                       serializeAssets={serializeAssets}
                       setNextStep={setNextStep}

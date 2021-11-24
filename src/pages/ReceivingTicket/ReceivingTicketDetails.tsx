@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Grid, Box, Button, Paper, Typography } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Typography, IconButton, Tooltip } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -23,6 +23,9 @@ import ViewSignsDialog from '../DeliveryTicket/ViewSignsDialog';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from "../../components/Activity";
 import { isMobile, isTablet } from "react-device-detect";
+import AddSerializedAsset from '../RentalManagement/AddSerializedAsset';
+import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
+import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 
 const renderedFrom = "receivingTicketDetailInventoryPage";
 
@@ -62,6 +65,10 @@ const ReceivingTicketDetails = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, page, limit, pageSizes, selectedRecords } = state;
+
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
+  const [isAdding, setIsAdding] = useState(false);
+
   useEffect(() => {
     if (id) {
       fetchReceivingTicketData()
@@ -120,6 +127,8 @@ const ReceivingTicketDetails = () => {
         if (data?.productInventory && data?.productInventory.length) {
           let ids = data?.productInventory.map(o => o?.optionValue)
           fetchProductInventory(ids)
+        } else {
+          dispatch({ type: "initialize", data: [], count: 0 });
         }
 
         if (permissions?.receivingTicket?.isUpdate && openEdit === "true") {
@@ -167,7 +176,7 @@ const ReceivingTicketDetails = () => {
   }
 
   let label = receivingTicketData ? receivingTicketData?.status === "New" ? "Sign-off - Dispatch" :
-    (receivingTicketData?.status === "In-Transit") ? "Sign-off - Receive" : "" : ""
+    (receivingTicketData?.status === "In-Transit") ? "Sign-off - Delivery" : "" : ""
 
   const handleSignature = (signedData) => {
     const { type, sign: newSign } = signedData;
@@ -241,7 +250,12 @@ const ReceivingTicketDetails = () => {
       });
     });
   }
+
   const fetchProductInventory = (productInventories) => {
+    if (!productInventories) {
+      productInventories = receivingTicketData?.productInventory?.map(o => o?.optionValue)
+    }
+
     dispatch({ type: "loading", loading: true });
 
     if (gridApi) {
@@ -346,18 +360,36 @@ const ReceivingTicketDetails = () => {
                               Serialized Assets
                             </Typography>
 
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              type="button"
-                              size="small"
-                              disabled={selectedRecords.length === 0}
-                              onClick={() => {
-                                setShowRemoveAssetFromReceivingTicketDialog(true)
-                              }}
-                            >
-                              Remove Serialized Assets
-                            </Button>
+                            {
+                              receivingTicketData.status === "New" && <IconButton
+                                onClick={() => {
+                                  setAddSerializedAssetDialog(true)
+                                }}
+                                color='primary'
+                                size="small"
+                              >
+                                <Tooltip
+                                  title="Add More Serialized Assets">
+                                  <AddBoxRoundedIcon />
+                                </Tooltip>
+                              </IconButton>
+                            }
+
+                            {
+                              receivingTicketData.status === "New" && <IconButton
+                                disabled={selectedRecords.length === 0}
+                                onClick={() => {
+                                  setShowRemoveAssetFromReceivingTicketDialog(true)
+                                }}
+                                color='primary'
+                                size="small"
+                              >
+                                <Tooltip
+                                  title="Remove Serialized Assets">
+                                  <RemoveCircleRoundedIcon />
+                                </Tooltip>
+                              </IconButton>
+                            }
 
                           </Grid>
                           <Grid item xs={12}>
@@ -500,6 +532,36 @@ const ReceivingTicketDetails = () => {
           okBtnLoading={okBtnLoading}
         />
       )}
+      {addSerializedAssetDialog &&
+        <AddSerializedAsset
+          addSerializedAsset={(newRecordsToAdd) => {
+
+            axiosInstance().post(`${receivingTicket.receivingTicketApi}/${id}/add-assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })
+              .then(({ data }) => {
+                setAddSerializedAssetDialog(false)
+                fetchReceivingTicketData()
+                setIsAdding(false)
+                toastConfig.setToastConfig({
+                  open: true,
+                  type: "success",
+                  message: data.message,
+                });
+              }).catch((error) => {
+                setAddSerializedAssetDialog(false)
+                setIsAdding(false)
+                toastConfig.setToastConfig(error)
+              });
+
+          }}
+          handleSerializedAssetClose={() => {
+            setAddSerializedAssetDialog(false);
+            // setSelectedProducts([])
+          }}
+          isAdding={isAdding}
+          selectedProducts={[]}
+        // type={inventoryType}
+        />
+      }
     </>
   );
 };

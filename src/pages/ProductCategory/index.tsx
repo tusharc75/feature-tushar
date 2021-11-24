@@ -29,7 +29,7 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useLocation } from "react-router-dom";
 import queryString from "query-string";
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers"
 
 function reducer(state, action) {
@@ -129,6 +129,7 @@ const ProductCategory = () => {
     const {
         state: { permissions, user, selectedEntity },
     }: any = useData();
+    const {getColumnData} = useColumns();
 
     const [productCategoryPermissions, setProductCategoryPermissions] = useState({
         isCreate: permissions.productCategory?.isCreate,
@@ -224,15 +225,23 @@ const ProductCategory = () => {
     }
 
     const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
-        <Chip
-            className="ml-3 link"
-            style={{ backgroundColor: `${params.data.chipColour}` }}
-            label={`${params.value}`}
-            onClick={() => {
-                setProductCategoryId(params.data.id);
-                setOpen({ open: true, isClone: false });
-            }}
-        />
+        {
+            productCategoryPermissions.isUpdate ?
+                <Chip
+                    className="ml-3 link"
+                    style={{ backgroundColor: `${params.data.chipColour}` }}
+                    label={`${params.value}`}
+                    onClick={() => {
+                        setProductCategoryId(params.data.id);
+                        setOpen({ open: true, isClone: false });
+                    }}
+                /> :
+                <Chip
+                    className="ml-3"
+                    style={{ backgroundColor: `${params.data.chipColour}` }}
+                    label={`${params.value}`}
+                />
+        }
     </span>
 
     const ActionsRenderer = params => <Fragment>

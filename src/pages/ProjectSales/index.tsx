@@ -20,7 +20,7 @@ import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { sidebarResource, prepareDataForGrid } from "../../constants/helpers"
-import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
 
 function reducer(state, action) {
   switch (action.type) {
@@ -118,6 +118,7 @@ const ProjectSales: FC = () => {
   const {
     state: { user, permissions, selectedEntity },
   }: any = useData();
+  const {getColumnData} = useColumns();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);

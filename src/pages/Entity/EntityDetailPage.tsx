@@ -57,6 +57,8 @@ const EntityDetailsPage = () => {
   const [doa, setDoa] = useState<any[]>([]);
   const [doaCurrency, setDoaCurrency] = useState("");
   const [doaType, setDoaType] = useState(null);
+  const [minLimit, setMinLimit] = useState(null);
+
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
   const [userList, setUserList] = useState<any[]>([]);
   const [showDeleteEntityDialog, setShowDeleteEntityDialog] = useState(false)
@@ -240,23 +242,24 @@ const EntityDetailsPage = () => {
       .then(({ data: { data } }) => {
         let doaData = [];
 
-        data.doa.forEach((item) => {
-          //  When the user set in doa was deleted, we are getting {} in array like this [{}]
-          //  So added this check
-          if (!isObjectEmpty(item)) {
-            doaData.push({
-              id: item.user?._id,
-              name: [item.user?.firstName, item.user?.lastName].filter(f => f).join(" "),
-              firstName: item.user?.firstName,
-              lastName: item.user?.lastName,
-              amount: item.amount,
-            });
-          }
-        });
+        // data.doa.forEach((item) => {
+        //   //  When the user set in doa was deleted, we are getting {} in array like this [{}]
+        //   //  So added this check
+        //   if (!isObjectEmpty(item)) {
+        //     doaData.push({
+        //       id: item.user?._id,
+        //       name: [item.user?.firstName, item.user?.lastName].filter(f => f).join(" "),
+        //       firstName: item.user?.firstName,
+        //       lastName: item.user?.lastName,
+        //       amount: item.amount,
+        //     });
+        //   }
+        // });
 
-        setDoa(doaData);
+        setDoa(data.doa);
         setDoaCurrency(data.doaCurrency)
         setDoaType(data.doaType)
+        setMinLimit(data.minLimit)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -593,6 +596,7 @@ const EntityDetailsPage = () => {
               setDoaDialogOpen(false);
             }}
             doaType={doaType}
+            minLimit={minLimit}
           />
         </Dialog>
 

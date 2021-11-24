@@ -28,7 +28,7 @@ import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import Chip from "@material-ui/core/Chip"
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers"
 import { useLocation } from "react-router-dom";
 import queryString from "query-string";
@@ -39,6 +39,7 @@ const AddressResource = () => {
   const {
     state: { permissions, user, selectedEntity }
   }: any = useData();
+  const {getColumnData} = useColumns();
 
   const [warehousePermissions, setWarehousePermissions] = useState({
     isCreate: permissions?.warehouse?.isCreate,
