@@ -11,7 +11,18 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { purchaseOrder, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL, getUniqueCurrencies, supplierAccount, customerAccount, dateFormat } from "../../constants/helpers";
+import {
+    purchaseOrder,
+    getObjKeysWithValues,
+    gridLoadingTimeout,
+    product,
+    RESOURCE_LABEL,
+    getUniqueCurrencies,
+    supplierAccount,
+    customerAccount,
+    dateFormat,
+    quoteStepColors
+} from "../../constants/helpers";
 import ManagePurchaseOrder from "./ManagePurchaseOrder";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
@@ -28,12 +39,12 @@ import Service from "./Service";
 import BulkEditDialog from "./BulkEditDialog";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import IssuPO from "./IssuPO";
-import { FaWpforms } from "react-icons/fa";
+import {FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms} from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
 import ReceivingAsset from "./ReceivingAsset";
+import {isMobile} from "react-device-detect";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { isMobile } from 'react-device-detect';
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -636,97 +647,99 @@ const PurchaseOrderDetailsPage = () => {
                                                         <Box display="flex" justifyContent="space-between" m={1}>
                                                             <Box display="flex">
                                                                 <Button
-                                                                    variant="contained"
+                                                                    variant= {isMobile ? "outlined" : "contained"}
                                                                     color="primary"
                                                                     size="small"
                                                                     onClick={() => {
                                                                         setIsAddNewProduct(true);
                                                                     }}
                                                                 >
-                                                                    {`Add New ${routes.product.title}`}
+                                                                    {isMobile ? <FaCartPlus size={22}/> : `Add New ${routes.product.title}`}
+
                                                                 </Button>
                                                                 <Box mx={1} />
                                                                 <Button
-                                                                    variant="contained"
+                                                                    variant= {isMobile ? "outlined" : "contained"}
                                                                     color="primary"
                                                                     size="small"
                                                                     onClick={() => {
                                                                         setAddProductDialog(true);
                                                                     }}
                                                                 >
-                                                                    {`Add Existing ${routes.product.title}`}
+                                                                    {isMobile ? <FaCartArrowDown size={22}/> : `Add Existing ${routes.product.title}`}
+                                                                    {}
                                                                 </Button>
                                                             </Box>
                                                         </Box>
-                                                        {
-                                                            isMobile ?
-                                                                <CustomSwipableList
-                                                                    allowSelection={true}
-                                                                    allowSwipe={true}
-                                                                    permissions={permissions}
-                                                                    primaryField={columns?.find(d => d.field === "productName")}
-                                                                    onClick={(data) => {
-                                                                        setShowAddServiceDialog(true)
-                                                                        setSelectedProductData(data)
+                                                        {columns ?
+                                                              isMobile ?
+                                                                  <CustomSwipableList
+                                                                      allowSelection={true}
+                                                                      allowSwipe={true}
+                                                                      permissions={permissions}
+                                                                      primaryField={columns?.find(d => d.field === "productName")}
+                                                                      onClick={(data) => {
+                                                                          setShowAddServiceDialog(true)
+                                                                          setSelectedProductData(data)
+                                                                      }}
+                                                                      dataRows={dataRows}
+                                                                      selectedRecords={selectedRecords}
+                                                                      dispatch={dispatch}
+                                                                      onEdit={(data) => {
+                                                                          setShowAddServiceDialog(true)
+                                                                          setSelectedProductData(data)
+                                                                      }}
+                                                                      extraParamsToCheckDelete={true}
+                                                                      onDelete={(data) => {
+                                                                          deletePurchaseOrderProduct([{
+                                                                              id: data._id,
+                                                                          }])
+                                                                      }}
+                                                                      rowCount={rowCount}
+                                                                      page={page}
+                                                                      loading={loading}
+                                                                      chips={
+                                                                          [{
+                                                                              label: `Product Description: `,
+                                                                              field: "productName",
+                                                                              forceShow: true
+                                                                          }]
+                                                                      }
+                                                                      onCreate={null}
+                                                                      showClone={false}
+                                                                      fullHeight={true}
+                                                                      renderedFrom={routes.purchaseOrderDetail.title}
+                                                                      onClone={() => { }}
 
-                                                                    }}
-                                                                    dataRows={dataRows}
-                                                                    selectedRecords={selectedRecords}
-                                                                    dispatch={dispatch}
-                                                                    onEdit={(data) => {
-                                                                        setShowAddServiceDialog(true)
-                                                                        setSelectedProductData(data)
-                                                                    }}
-                                                                    extraParamsToCheckDelete={true}
-                                                                    onDelete={(data) => {
-                                                                        deletePurchaseOrderProduct([{
-                                                                            id: data._id,
-                                                                        }])
-                                                                    }}
-                                                                    rowCount={rowCount}
-                                                                    page={page}
-                                                                    loading={loading}
-                                                                    chips={
-                                                                        [{
-                                                                            label: `Product Description: `,
-                                                                            field: "productName",
-                                                                            forceShow: true
-                                                                        }]
-                                                                    }
-                                                                    onCreate={null}
-                                                                    showClone={false}
-                                                                    fullHeight={true}
-                                                                    renderedFrom={routes.purchaseOrderDetail.title}
-                                                                    onClone={() => { }}
-                                                                /> : (columns ?
-                                                                    <CustomAgGridEditable
-                                                                        columns={columns}
-                                                                        dataRows={dataRows}
-                                                                        frameworkComponents={frameworkComponents}
-                                                                        setGridApi={setGridApi}
-                                                                        dispatch={dispatch}
-                                                                        rowCount={rowCount}
-                                                                        limit={limit}
-                                                                        pageSizes={pageSizes}
-                                                                        page={page}
-                                                                        allowAction={true}
-                                                                        actionWidth={150}
-                                                                        allowSelection={true}
-                                                                        isClientSideGrid={true}
-                                                                        loading={loading}
-                                                                        onCellValueChanged={(row) => {
-                                                                            handleUpdateOrderProduct(row.data)
-                                                                        }}
-                                                                        renderedFrom="purchaseOrderDetailsPageInventory"
-                                                                        refreshGrid={fetchPurchaseOrderProduct}
-                                                                    />
-                                                                    : <Box
-                                                                        p={2}
-                                                                        height={500}
-                                                                        bgcolor="white">
-                                                                        <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                                                                    </Box>)
+                                                            /> :
 
+                                                            <CustomAgGridEditable
+                                                                columns={columns}
+                                                                dataRows={dataRows}
+                                                                frameworkComponents={frameworkComponents}
+                                                                setGridApi={setGridApi}
+                                                                dispatch={dispatch}
+                                                                rowCount={rowCount}
+                                                                limit={limit}
+                                                                pageSizes={pageSizes}
+                                                                page={page}
+                                                                allowAction={true}
+                                                                actionWidth={150}
+                                                                allowSelection={true}
+                                                                isClientSideGrid={true}
+                                                                loading={loading}
+                                                                onCellValueChanged={(row) => {
+                                                                    handleUpdateOrderProduct(row.data)
+                                                                }}
+                                                                renderedFrom="purchaseOrderDetailsPageInventory"
+                                                                refreshGrid={fetchPurchaseOrderProduct}
+                                                            />
+                                                            : <Box
+                                                                p={2}
+                                                                height={500}
+                                                                bgcolor="white">
+                                                                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                                                            </Box>
                                                         }
 
                                                     </>
