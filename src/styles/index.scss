@@ -469,11 +469,19 @@ body::-webkit-scrollbar-thumb {
 
 .link {
   color: var(--link) !important;
+  word-wrap: break-word;
+
+
+}
+.MuiTable-root {
+  width: calc(100vw - 92px ) !important;
+  display: block !important;
 }
 
 .link:hover {
   text-decoration: underline !important;
   cursor: pointer !important;
+
 }
 
 .header-links {
@@ -513,6 +521,26 @@ body::-webkit-scrollbar-thumb {
     margin-left: 12px;
   }
 }
+
+  .MuiTimelineItem-missingOppositeContent:before{
+    display: none;
+  }
+
+  .timeline-content-layout{
+    display: flex;
+    justify-content: space-between;
+    h3{
+      font-size: 15px;
+      font-weight: bold;
+      color: #04279A;
+    }
+    h4{
+      padding-top: 2px;
+      font-size: 12px;
+    }
+
+  }
+
 
 .headerLogo {
   font-size: 1.15rem;

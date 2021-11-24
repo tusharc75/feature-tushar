@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Grid, Box, Button, Paper, Typography } from '@material-ui/core';
+import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
+import {Grid, Box, Button, Paper, Typography, IconButton, Tooltip, Tabs, Tab} from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -23,6 +23,35 @@ import ViewSignsDialog from '../DeliveryTicket/ViewSignsDialog';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from "../../components/Activity";
 import { isMobile, isTablet } from "react-device-detect";
+import AddSerializedAsset from '../RentalManagement/AddSerializedAsset';
+import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
+import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
+import {FaWpforms} from "react-icons/fa";
+import {BiFoodMenu} from "react-icons/bi";
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: any;
+  value: any;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+      <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
+        {children}
+      </div>
+  );
+}
+
+function a11yProps(index: any) {
+  return {
+    id: `main-tab-${index}`,
+    'aria-controls': `main-tabpanel-${index}`
+  };
+}
+
 
 const renderedFrom = "receivingTicketDetailInventoryPage";
 
@@ -58,10 +87,19 @@ const ReceivingTicketDetails = () => {
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false)
 
   const [canEdit, setCanEdit] = useState(false)
+  const [tabValue, setTabValue] = useState(0);
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, page, limit, pageSizes, selectedRecords } = state;
+
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
+  const [isAdding, setIsAdding] = useState(false);
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
   useEffect(() => {
     if (id) {
       fetchReceivingTicketData()
@@ -120,6 +158,8 @@ const ReceivingTicketDetails = () => {
         if (data?.productInventory && data?.productInventory.length) {
           let ids = data?.productInventory.map(o => o?.optionValue)
           fetchProductInventory(ids)
+        } else {
+          dispatch({ type: "initialize", data: [], count: 0 });
         }
 
         if (permissions?.receivingTicket?.isUpdate && openEdit === "true") {
@@ -167,7 +207,7 @@ const ReceivingTicketDetails = () => {
   }
 
   let label = receivingTicketData ? receivingTicketData?.status === "New" ? "Sign-off - Dispatch" :
-    (receivingTicketData?.status === "In-Transit") ? "Sign-off - Receive" : "" : ""
+    (receivingTicketData?.status === "In-Transit") ? "Sign-off - Delivery" : "" : ""
 
   const handleSignature = (signedData) => {
     const { type, sign: newSign } = signedData;
@@ -241,7 +281,12 @@ const ReceivingTicketDetails = () => {
       });
     });
   }
+
   const fetchProductInventory = (productInventories) => {
+    if (!productInventories) {
+      productInventories = receivingTicketData?.productInventory?.map(o => o?.optionValue)
+    }
+
     dispatch({ type: "loading", loading: true });
 
     if (gridApi) {
@@ -336,53 +381,127 @@ const ReceivingTicketDetails = () => {
                 </Grid>
               ) : (
                 <>
-                  <DetailsPage data={receivingTicketData} fields={receivingTicketFields} />
-                  {
-                    dataRows && dataRows.length ?
-                      <>
-                        <Grid container spacing={1} className="p-2">
-                          <Grid item xs={12} className="mt-2 d-flex gap-2">
-                            <Typography variant="subtitle1" className="font-weight-bold text-primary">
-                              Serialized Assets
-                            </Typography>
+                  <Tabs
+                      className="quote-tab"
+                      value={tabValue}
+                      onChange={handleMainTabChange}
+                      textColor="primary"
+                      TabIndicatorProps={{
+                        style: {
+                          display: 'none'
+                        }
+                      }}
+                  >
 
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              type="button"
-                              size="small"
-                              disabled={selectedRecords.length === 0}
-                              onClick={() => {
-                                setShowRemoveAssetFromReceivingTicketDialog(true)
-                              }}
-                            >
-                              Remove Serialized Assets
-                            </Button>
+                    <Tab
+                        className={'tabLayout'}
+                        style={{
+                          background: tabValue === 1 ? 'white' : '',
+                          color: tabValue === 1 ? '#163340' : '#163340'
+                        }}
+                        label={
+                          <div className="d-flex align-items-center tab-font">
+                            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                          </div>
+                        }
+                        {...a11yProps(0)}
+                    />
+                    <Tab
+                        className={'tabLayout'}
+                        style={{
+                          background: tabValue === 2 ? 'white' : '',
+                          color: tabValue === 2 ? 'blue' : '#163340'
+                        }}
+                        label={
+                          <div className="d-flex align-items-center tab-font">
+                            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                          </div>
+                        }
+                        {...a11yProps(1)}
+                    />
+                    <div className={'uio'}> </div>
+                  </Tabs>
 
-                          </Grid>
-                          <Grid item xs={12}>
-                            <CustomAgGrid
-                              allowSelection={true}
-                              allowAction={false}
-                              columns={columns}
-                              dataRows={dataRows}
-                              frameworkComponents={frameworkComponents}
-                              setGridApi={setGridApi}
-                              dispatch={dispatch}
-                              rowCount={rowCount}
-                              limit={limit}
-                              pageSizes={pageSizes}
-                              page={page}
-                              actionWidth={150}
-                              loading={false}
-                              renderedFrom={renderedFrom}
-                              refreshGrid={fetchProductInventory}
-                            />
-                          </Grid>
-                        </Grid>
-                      </>
-                      : null
-                  }
+                  <TabPanel value={tabValue} index={0}>
+
+                    <DetailsPage data={receivingTicketData} fields={receivingTicketFields} />
+
+                  </TabPanel>
+
+                  <TabPanel value={tabValue} index={1}>
+
+
+                    {
+                      dataRows && dataRows.length ?
+                          <>
+                            <Grid container spacing={1} className="p-2">
+                              <Grid item xs={12} className="mt-2 d-flex gap-2">
+                                <Typography variant="subtitle1" className="font-weight-bold text-primary">
+                                  Serialized Assets
+                                </Typography>
+
+                                {
+                                  receivingTicketData.status === "New" && <IconButton
+                                      onClick={() => {
+                                        setAddSerializedAssetDialog(true)
+                                      }}
+                                      color='primary'
+                                      size="small"
+                                  >
+                                    <Tooltip
+                                        title="Add More Serialized Assets">
+                                      <AddBoxRoundedIcon />
+                                    </Tooltip>
+                                  </IconButton>
+                                }
+
+                                {
+                                  receivingTicketData.status === "New" && <IconButton
+                                      disabled={selectedRecords.length === 0}
+                                      onClick={() => {
+                                        setShowRemoveAssetFromReceivingTicketDialog(true)
+                                      }}
+                                      color='primary'
+                                      size="small"
+                                  >
+                                    <Tooltip
+                                        title="Remove Serialized Assets">
+                                      <RemoveCircleRoundedIcon />
+                                    </Tooltip>
+                                  </IconButton>
+                                }
+
+                              </Grid>
+                              <Grid item xs={12}>
+                                <CustomAgGrid
+                                    allowSelection={receivingTicketData.status === "New"}
+                                    allowAction={false}
+                                    columns={columns}
+                                    dataRows={dataRows}
+                                    frameworkComponents={frameworkComponents}
+                                    setGridApi={setGridApi}
+                                    dispatch={dispatch}
+                                    rowCount={rowCount}
+                                    limit={limit}
+                                    pageSizes={pageSizes}
+                                    page={page}
+                                    actionWidth={150}
+                                    loading={false}
+                                    renderedFrom={renderedFrom}
+                                    refreshGrid={fetchProductInventory}
+                                />
+                              </Grid>
+                            </Grid>
+                          </>
+                          : null
+                    }
+
+
+                  </TabPanel>
+
+
+
+
                 </>
               )}
             </Paper>
@@ -500,6 +619,38 @@ const ReceivingTicketDetails = () => {
           okBtnLoading={okBtnLoading}
         />
       )}
+      {addSerializedAssetDialog &&
+        <AddSerializedAsset
+          addSerializedAsset={(newRecordsToAdd) => {
+
+            axiosInstance().post(`${receivingTicket.receivingTicketApi}/${id}/add-assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })
+              .then(({ data }) => {
+                setAddSerializedAssetDialog(false)
+                fetchReceivingTicketData()
+                setIsAdding(false)
+                toastConfig.setToastConfig({
+                  open: true,
+                  type: "success",
+                  message: data.message,
+                });
+              }).catch((error) => {
+                setAddSerializedAssetDialog(false)
+                setIsAdding(false)
+                toastConfig.setToastConfig(error)
+              });
+
+          }}
+          handleSerializedAssetClose={() => {
+            setAddSerializedAssetDialog(false);
+            // setSelectedProducts([])
+          }}
+          isAdding={isAdding}
+          selectedProducts={[]}
+          rentalId={receivingTicketData?.rentalJob?.optionValue}
+          notIn="receivingTicket"
+        // type={inventoryType}
+        />
+      }
     </>
   );
 };

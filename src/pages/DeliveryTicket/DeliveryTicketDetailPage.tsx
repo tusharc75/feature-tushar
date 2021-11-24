@@ -1,10 +1,10 @@
 import { useContext, useEffect, useMemo, useState, useReducer, Fragment } from 'react'
 import { useHistory, useParams } from "react-router-dom";
-import { Paper, Box, Grid, Button, Typography } from "@material-ui/core";
+import { Paper, Box, Grid, Button, Typography, IconButton, Tooltip } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
-import { yyyyMMDD, deliveryTicket, sidebarResource, getObjKeysWithValues, defaultActivityShow } from "../../constants/helpers";
+import { yyyyMMDD, deliveryTicket, sidebarResource, getObjKeysWithValues, defaultActivityShow, dateTimeFormat } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import routes from "../../components/Helpers/Routes";
@@ -26,12 +26,16 @@ import Activity from "../../components/Activity";
 import { isMobile, isTablet } from "react-device-detect";
 import SignatureDialog from '../../components/Helpers/SignatureDialog';
 import ViewSignsDialog from './ViewSignsDialog'
+import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
+import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
+import moment from 'moment';
+import AddSerializedAsset from '../RentalManagement/AddSerializedAsset';
 
 const renderedFrom = "deliveryTicketDetailInventoryPage"
 
 const mappedStatus = {
   "Sign-off - Dispatch": "In-Transit",
-  "Sign-off - Receive": "Delivered"
+  "Sign-off - Delivery": "Delivered"
 }
 
 export default function DeliveryTicketDetail(props) {
@@ -58,6 +62,11 @@ export default function DeliveryTicketDetail(props) {
   const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false)
   const { dataRows, rowCount, page, limit, pageSizes, selectedRecords } = state;
   const [canEdit, setCanEdit] = useState(false)
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
+
+  const [startDeliveryDate, setStartDeliveryDate] = useState(null);
+  const [signOffDate, setSignOffDate] = useState(null);
+  const [isAdding, setIsAdding] = useState(false);
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
@@ -127,7 +136,17 @@ export default function DeliveryTicketDetail(props) {
         .get(`${deliveryTicketApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
           setDeliveryTicketData(data)
-          
+
+          const startDeliverySignatures = data?.signatures.filter(f => f.status === "Start Delivery" && f.date);
+          if (startDeliverySignatures && startDeliverySignatures.length > 0) {
+            setStartDeliveryDate(moment(startDeliverySignatures[startDeliverySignatures.length - 1].date).format(dateTimeFormat));
+          }
+
+          const signOffSignatures = data?.signatures.filter(f => f.status === "Sign-Off" && f.date);
+          if (signOffSignatures && signOffSignatures.length > 0) {
+            setSignOffDate(moment(signOffSignatures[signOffSignatures.length - 1].date).format(dateTimeFormat));
+          }
+
           setCanEdit(
             [...(data?.collaborator ?? []), data?.owner ?? {}].some(
               (obj) => obj.optionValue === user.user._id
@@ -138,6 +157,8 @@ export default function DeliveryTicketDetail(props) {
           if (data?.productInventory && data?.productInventory.length) {
             let ids = data?.productInventory.map(o => o?.optionValue)
             fetchProductInventory(ids)
+          } else {
+            dispatch({ type: "initialize", data: [], count: 0 });
           }
           setLoading(false);
         })
@@ -255,7 +276,7 @@ export default function DeliveryTicketDetail(props) {
   }
 
   let label = deliveryTicketData ? deliveryTicketData?.status === "New" ? "Sign-off - Dispatch" :
-    (deliveryTicketData?.status === "In-Transit") ? "Sign-off - Receive" : "" : ""
+    (deliveryTicketData?.status === "In-Transit") ? "Sign-off - Delivery" : "" : ""
 
   const handleSignature = (signedData) => {
     const { type, sign: newSign } = signedData;
@@ -314,7 +335,7 @@ export default function DeliveryTicketDetail(props) {
                   mainPoints={deliveryTicketData ? getMainPoints : ""}
                   showHeading={true}
                 >
-                  {permissions?.deliveryTicket?.isUpdate && canEdit && (
+                  {permissions?.deliveryTicket?.isUpdate && canEdit && deliveryTicketData.status !== "Delivered" && (
                     <Button
                       variant="contained"
                       color="primary"
@@ -380,8 +401,21 @@ export default function DeliveryTicketDetail(props) {
                 <>
                   {(deliveryTicketData && deliveryTicketFields.length > 0 ?
                     <DetailsPage
-                      data={deliveryTicketData}
-                      fields={deliveryTicketFields} /> : null
+                      data={{ ...deliveryTicketData, actualDispatchedDate: startDeliveryDate, actualDeliveredDate: signOffDate }}
+                      fields={[...deliveryTicketFields, {
+                        fieldData: {
+                          fieldLabel: "Actual Dispatched Date",
+                          fieldName: "actualDispatchedDate",
+                          sectionName: "Sign-off Information"
+                        }
+                      }, {
+                        fieldData: {
+                          fieldLabel: "Actual Delivered Date",
+                          fieldName: "actualDeliveredDate",
+                          sectionName: "Sign-off Information"
+                        }
+                      }
+                      ]} /> : null
                   )}
                   {
                     dataRows && dataRows.length ?
@@ -392,23 +426,41 @@ export default function DeliveryTicketDetail(props) {
                               Serialized Assets
                             </Typography>
 
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              type="button"
-                              size="small"
-                              disabled={selectedRecords.length === 0}
-                              onClick={() => {
-                                setShowRemoveAssetFromLoadingTicketDialog(true)
-                              }}
-                            >
-                              Remove Serialized Assets
-                            </Button>
+                            {
+                              deliveryTicketData.status === "New" && <IconButton
+                                onClick={() => {
+                                  setAddSerializedAssetDialog(true)
+                                }}
+                                color='primary'
+                                size="small"
+                              >
+                                <Tooltip
+                                  title="Add More Serialized Assets">
+                                  <AddBoxRoundedIcon />
+                                </Tooltip>
+                              </IconButton>
+                            }
+
+                            {
+                              deliveryTicketData.status === "New" && <IconButton
+                                disabled={selectedRecords.length === 0}
+                                onClick={() => {
+                                  setShowRemoveAssetFromLoadingTicketDialog(true)
+                                }}
+                                color='primary'
+                                size="small"
+                              >
+                                <Tooltip
+                                  title="Remove Serialized Assets">
+                                  <RemoveCircleRoundedIcon />
+                                </Tooltip>
+                              </IconButton>
+                            }
 
                           </Grid>
                           <Grid item xs={12}>
                             <CustomAgGrid
-                              allowSelection={true}
+                              allowSelection={deliveryTicketData.status === "New"}
                               allowAction={false}
                               columns={columns}
                               dataRows={dataRows}
@@ -542,6 +594,39 @@ export default function DeliveryTicketDetail(props) {
             okBtnLoading={okBtnLoading}
           />
         )}
+
+        {addSerializedAssetDialog &&
+          <AddSerializedAsset
+            addSerializedAsset={(newRecordsToAdd) => {
+
+              axiosInstance().post(`${deliveryTicket.deliveryTicketApi}/${id}/add-assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })
+                .then(({ data }) => {
+                  setAddSerializedAssetDialog(false)
+                  fetchDeliveryTicketData()
+                  setIsAdding(false)
+                  toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: data.message,
+                  });
+                }).catch((error) => {
+                  setAddSerializedAssetDialog(false)
+                  setIsAdding(false)
+                  toastConfig.setToastConfig(error)
+                });
+
+            }}
+            handleSerializedAssetClose={() => {
+              setAddSerializedAssetDialog(false);
+              // setSelectedProducts([])
+            }}
+            isAdding={isAdding}
+            selectedProducts={[]}
+            rentalId={deliveryTicketData?.rental?.optionValue}
+            notIn="loadingTicket"
+          // type={inventoryType}
+          />
+        }
       </Fragment>
     </>
   );

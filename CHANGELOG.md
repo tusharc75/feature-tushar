@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.5.0](https://github.com/vebholic/oms_frontend/compare/v2.4.0...v2.5.0) (2021-11-24)
+
+
+### Features
+
+* - Rental management changes ([7303d7b](https://github.com/vebholic/oms_frontend/commit/7303d7b4b6e224ed088ce172fa528c23cb979a99))
+* - Rental Management Related Changes ([d95b6b7](https://github.com/vebholic/oms_frontend/commit/d95b6b78210592c1fbe242acb78817dc701758cc))
+* - Rental Management Related Changes Done ([731ce07](https://github.com/vebholic/oms_frontend/commit/731ce079e5285ab1cf147ef884edbe9f1d476045))
+* changes added for org graph contacts ([d454b75](https://github.com/vebholic/oms_frontend/commit/d454b75038eaf0854dab078d6bd7416125c47fae))
+* doa changes ([4da1342](https://github.com/vebholic/oms_frontend/commit/4da134217879e23a5daed26e2acc4cf97baac73f))
+* doa changes ([be6c152](https://github.com/vebholic/oms_frontend/commit/be6c152a56357a66d3519002d31a95168339f5f8))
+* edit org chart in contacts and add contacts functionality added ([e699394](https://github.com/vebholic/oms_frontend/commit/e699394828420168180a72db1ddefb14255bae04))
+* quote excel change ([2001d7e](https://github.com/vebholic/oms_frontend/commit/2001d7e5859ef880e3504b162261db940173330d))
+* **quotebuilder:** excel styling ([e171c1f](https://github.com/vebholic/oms_frontend/commit/e171c1f7de5d5398c5a637b6e834fb8446e0523f))
+
+
+### Bug Fixes
+
+* **accessibility implemetation po-118:** aCCESSIBILITY PO-118 ([fc62244](https://github.com/vebholic/oms_frontend/commit/fc622449b95ffd95f09d1bdcd1f4691283532e63))
+* **accessibility with queryparams with page number fix po-118:** accessibility ([a6fbbce](https://github.com/vebholic/oms_frontend/commit/a6fbbce37c00c42dc8ef87fe87846d41bdd700f3))
+* doa changes ([f058831](https://github.com/vebholic/oms_frontend/commit/f058831ee16fa2b10c31dc97dccecaaee7bd533f))
+* formula infinity issue and editeble field ([0d8e1e4](https://github.com/vebholic/oms_frontend/commit/0d8e1e4b2880483fa872a8957d3f28df072a6ca8))
+
 ## [2.4.0](https://github.com/vebholic/oms_frontend/compare/v2.3.0...v2.4.0) (2021-11-23)
 
 
