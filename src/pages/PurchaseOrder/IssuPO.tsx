@@ -1,6 +1,6 @@
 
 import Box from "@material-ui/core/Box/Box";
-import { useState, useEffect, useReducer, useContext } from "react";
+import React, { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer, } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -13,6 +13,9 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CreateEmail } from "../../components/Activity/Email/CreateEmail";
 import { isMobile, isTablet } from "react-device-detect";
 import { AiFillFilePdf } from "react-icons/ai";
+import routes from "../../components/Helpers/Routes";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import {BiPurchaseTagAlt, MdEmail} from "react-icons/all";
 
 
 const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBase64, downlodingFile, setCurrentStep, currentStep, handleAttachments }) => {
@@ -41,6 +44,11 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handle
         { field: "totalTax", headerName: "Total Tax", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer" },
     ])
+
+    const [showAddServiceDialog, setShowAddServiceDialog] = useState(false)
+    const [selectedProductData, setSelectedProductData] = useState(null)
+
+
 
 
     const frameworkComponents = {
@@ -110,11 +118,12 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handle
                             color="primary"
                             type="button"
                             size="small"
-                            startIcon={<AiFillFilePdf />}
+                            startIcon={isMobile ? '' : <AiFillFilePdf />}
                             disabled={downlodingFile}
                             onClick={() => { handleViewPdf(false) }}
                         >
-                            {downlodingFile ? "Please wait..." : "Preview"}
+                            {isMobile ? <AiFillFilePdf size={22}/> : downlodingFile ? "Please wait..." : "Preview"}
+
                         </Button>
                     </>
                 )}
@@ -126,17 +135,18 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handle
                             color="primary"
                             type="button"
                             size="small"
-                            startIcon={<AiFillFilePdf />}
+                            startIcon={isMobile ? '' : <AiFillFilePdf />}
                             disabled={downlodingFile}
                             onClick={() => { handleViewPdf(true) }}
                         >
-                            {downlodingFile ? "Please wait..." : "Download"}
+                            {isMobile ? <AiFillFilePdf size={22}/> : downlodingFile ? "Please wait..." : "Download" }
+                            {}
                         </Button>
                     </>
                 )}
                 <Box mx={1} />
                 {permissions?.purchaseOrder?.isRead && <Button
-                    variant="contained"
+                    variant={isMobile ? "outlined" : "contained" }
                     color="primary"
                     size="small"
                     onClick={() => {
@@ -144,14 +154,14 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handle
                     }
                     }
                 >
-                    {`Send Email`}
+                    {isMobile ? <MdEmail size={22}/> : `Send Email`}
                 </Button>
                 }
             </Box>
             <Box display="flex" justifyContent="flex-end" p="4px">
                 <Box mx={1} />
                 <Button
-                    variant="contained"
+                    variant={isMobile ? "outlined" : "contained"}
                     color="primary"
                     size="small"
                     onClick={() => {
@@ -160,7 +170,8 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handle
                     }
                     }
                 >
-                    {`Issue PO`}
+                    {isMobile ? <BiPurchaseTagAlt size={22}/> : `Issue PO` }
+
                 </Button>
             </Box>
         </Box>
@@ -168,6 +179,38 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handle
         <Grid item xs={12} md={12} sm={12} className="mt-3">
 
             {columns ?
+                isMobile ? <CustomSwipableList
+                        allowSelection={true}
+                        allowSwipe={true}
+                        permissions={permissions}
+                        primaryField={columns?.find(d => d.field === "description")}
+                        onClick={() => {
+                        }}
+                        dataRows={dataRows}
+                        selectedRecords={selectedRecords}
+                        dispatch={dispatch}
+                        onEdit={() => {
+
+                        }}
+                        extraParamsToCheckDelete={true}
+                        onDelete={() => {}}
+                        rowCount={rowCount}
+                        page={page}
+                        loading={loading}
+                        chips={
+                            [{
+                                label: `Product Description: `,
+                                field: "productName",
+                                forceShow: true
+                            }]
+                        }
+                        onCreate={null}
+                        showClone={false}
+                        fullHeight={true}
+                        renderedFrom={routes.purchaseOrderDetail.title}
+                        onClone={() => { }}
+
+                    /> :
                 <CustomAgGrid
                     columns={columns}
                     dataRows={dataRows}
@@ -183,6 +226,7 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handle
                     allowSelection={false}
                     renderedFrom="purchaseOrderDetailsPageService"
                 />
+
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
 
             }
