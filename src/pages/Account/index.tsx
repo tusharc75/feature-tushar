@@ -90,7 +90,6 @@ export default function Account(props) {
   const [accountId, setAccountId] = useState(null)
   const [showEntityDialog, setShowEntityDialog] = useState(false)
 
-
   const [singleAccountDelete, setSingleAccountDelete] = useState({
     id: null,
     show: false,
@@ -146,16 +145,56 @@ export default function Account(props) {
     if (queryPage === undefined) {
       history.replace(`?page=${page}`)
     }
+    if (page > 0) {
+      history.replace(
+        queryType && queryApproval && queryColFilter && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
+          : queryType && queryApproval && queryColFilter ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}`
+            : queryType && queryApproval && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
+              : queryType && querySearch && queryColFilter ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
+                : queryApproval && querySearch && queryColFilter ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&seach=${search}`
+                  : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
+                    : queryType && queryColFilter ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+                      : queryType && querySearch ? `?page=${page}&type=${queryType}&search=${querySearch}`
+                        : queryApproval && queryColFilter ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
+                          : queryApproval && querySearch ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
+                            : queryColFilter && querySearch ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+                              : queryType ? `?page=${page}&type=${queryType}`
+                                : queryApproval ? `?page=${page}&approval=${queryApproval}`
+                                  : queryColFilter ? `?page=${page}&colFilter=${queryColFilter}`
+                                    : querySearch ? `?page=${page}&search=${querySearch}`
+                                      : `?page=${page}`
+      )
+    }
+
+    else {
+      history.replace(
+        queryType && queryApproval && queryColFilter && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
+          : queryType && queryApproval && queryColFilter ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}`
+            : queryType && queryApproval && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
+              : queryType && querySearch && queryColFilter ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
+                : queryApproval && querySearch && queryColFilter ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&seach=${search}`
+                  : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
+                    : queryType && queryColFilter ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+                      : queryType && querySearch ? `?page=${page}&type=${queryType}&search=${querySearch}`
+                        : queryApproval && queryColFilter ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
+                          : queryApproval && querySearch ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
+                            : queryColFilter && querySearch ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+                              : queryType ? `?page=${page}&type=${queryType}`
+                                : queryApproval ? `?page=${page}&approval=${queryApproval}`
+                                  : queryColFilter ? `?page=${page}&colFilter=${queryColFilter}`
+                                    : querySearch ? `?page=${page}&search=${querySearch}`
+                                      : `?page=${page}`
+      )
+
+    }
   }, [page, queryPage]);
-
-
 
   useEffect(() => {
     fetchGridColumns()
   }, [])
 
   const fetchGridColumns = async () => {
-   
+
 
     let data
     if (isOffline) {
@@ -175,7 +214,7 @@ export default function Account(props) {
 
     let columns = []
     let rendererNames = []
-    
+
     data.forEach(o => {
       if (["accountName"].indexOf(o?.fieldData?.fieldName) === 0) {
         columns = [...columns, {
@@ -217,13 +256,13 @@ export default function Account(props) {
       columns.push(checkStaticField(routes.projectSales.title, field))
     })
     setColumns([...columns])
-    
+
     if (JSON.parse(sessionStorage.getItem("filters")) !== null) {
       let savedFilter = JSON.parse(sessionStorage.getItem("filters"));
       dispatch({ type: 'filter', filters: savedFilter });
-      
 
-      }
+
+    }
   }
 
   useEffect(() => {
@@ -248,7 +287,7 @@ export default function Account(props) {
     if (renderCount > 0) {
       fetchAccounts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, type,  sorting, selectedEntity, location]);
+  }, [page, limit, selectedType, type, sorting, selectedEntity, location]);
 
 
   useEffect(() => {
@@ -288,56 +327,55 @@ export default function Account(props) {
   }, [querySearch])
 
 
-
   useEffect(() => {
-    if (Object.keys(filters).length > 0 ) {
+    if (Object.keys(filters).length > 0) {
       sessionStorage.setItem("filters", JSON.stringify(filters))
-    
 
-     let  serialize = function(obj) {
+
+      let serialize = function (obj) {
         var str = [];
         for (var p in obj)
           if (obj.hasOwnProperty(p)) {
-            str.push("{colName="+encodeURIComponent(p) + "," + "colValue="+encodeURIComponent(obj[p].filter)+"}");
+            str.push("{colName=" + encodeURIComponent(p) + "," + "colValue=" + encodeURIComponent(obj[p].filter) + "}");
           }
         return str.join(",");
       }
-      
-  
+
+
       history.replace(
-         queryType && queryApproval && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=[${serialize(filters)}]&search=${querySearch}`
-         : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=[${serialize(filters)}]`
-         : queryType && querySearch ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]&search=${querySearch}` 
-         : queryApproval && querySearch ? `?page=${page}&approval=${queryApproval}&colFilter=[${serialize(filters)}]&search=${querySearch}` 
-         : queryType ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
-         : queryApproval ? `?page=${page}&approval=${queryApproval}&colFilter=[${serialize}]`
-         :querySearch ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
-         :  `?page=${page}&colFilter=[${serialize(filters)}]`
-       
-        )
-  }
+        queryType && queryApproval && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+          : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=[${serialize(filters)}]`
+            : queryType && querySearch ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+              : queryApproval && querySearch ? `?page=${page}&approval=${queryApproval}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+                : queryType ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
+                  : queryApproval ? `?page=${page}&approval=${queryApproval}&colFilter=[${serialize}]`
+                    : querySearch ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+                      : `?page=${page}&colFilter=[${serialize(filters)}]`
 
-  if(Object.keys(filters).length === 0 && queryColFilter !== undefined  ){
-    history.replace(
-      queryType && queryApproval && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
-      : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
-      : queryType && querySearch ? `?page=${page}&type=${queryType}&search=${querySearch}` 
-      : queryApproval && querySearch ? `?page=${page}&approval=${queryApproval}&search=${querySearch}` 
-      : queryType ? `?page=${page}&type=${queryType}`
-      : queryApproval ? `?page=${page}&approval=${queryApproval}`
-      :querySearch ? `?page=${page}&search=${querySearch}`
-      :  `?page=${page}`
-    
-     )
+      )
+    }
 
-   
-   
-  }
-  if(Object.keys(filters).length === 0 && queryColFilter === undefined){
-    sessionStorage.removeItem("filters")
-   }
+    if (Object.keys(filters).length === 0 && queryColFilter !== undefined) {
+      history.replace(
+        queryType && queryApproval && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
+          : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
+            : queryType && querySearch ? `?page=${page}&type=${queryType}&search=${querySearch}`
+              : queryApproval && querySearch ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
+                : queryType ? `?page=${page}&type=${queryType}`
+                  : queryApproval ? `?page=${page}&approval=${queryApproval}`
+                    : querySearch ? `?page=${page}&search=${querySearch}`
+                      : `?page=${page}`
 
-    }, [filters])
+      )
+
+
+
+    }
+    if (Object.keys(filters).length === 0 && queryColFilter === undefined) {
+      sessionStorage.removeItem("filters")
+    }
+
+  }, [filters])
 
 
 
@@ -578,7 +616,7 @@ export default function Account(props) {
       updatedFilters.push({ field: 'staticData.approved', term: type === 'Approved' });
     }
 
-    if(JSON.parse(sessionStorage.getItem("filters")) !== null){
+    if (JSON.parse(sessionStorage.getItem("filters")) !== null) {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
@@ -640,8 +678,8 @@ export default function Account(props) {
 
     if (gridApi) {
       gridApi.setRowData([]);
-      
-     
+
+
     }
 
     let data, count;
