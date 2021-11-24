@@ -407,7 +407,7 @@ const Steps = (props) => {
                   className={classes.rejected}
                   variant="body1"
                   style={{ fontWeight: "normal" }}
-                >
+                >+
                   User doesn't have DOA setup for this amount
                 </Typography>
               </div>

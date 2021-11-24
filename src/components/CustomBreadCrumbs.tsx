@@ -36,12 +36,13 @@ const CustomBreadCrumbs = ({
               className={`${"cursor-pointer"} ${"setLink"}`} >
               {route.title}
             </Link>
+
         ) : <Typography
           onClick={() => {
             if (route?.hasOnClick) {
               onRouteClick()
             }
-          }} key={index} className={`${"cursor-pointer"} ${"setLink"}`}>
+          }} key={index} className={`${"cursor-pointer"} ${"setLink"} ${'text-truncate'}`} >
           {route.title}
         </Typography>
 

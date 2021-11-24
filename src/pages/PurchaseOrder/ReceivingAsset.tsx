@@ -13,6 +13,9 @@ import moment from "moment";
 import { startCase } from "lodash";
 import CreateSeriaizedAsset from "./CreateSerializedAsset";
 import CustomReactTable from "../../components/CustomReactTable/CustomReactTable";
+import {isMobile} from "react-device-detect";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import routes from "../../components/Helpers/Routes";
 
 const useStyles = makeStyles(() => ({
     equal: {
@@ -189,7 +192,38 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                     }
                     height={"calc(100vh - 330px)"}
                 >
-                    <CustomReactTable
+                    {isMobile ? <CustomSwipableList
+                        allowSelection={true}
+                        allowSwipe={true}
+                        permissions={permissions}
+                        primaryField={columns?.find(d => d.Header === "productDescription")}
+                        onClick={() => {
+                        }}
+                        dataRows={dataRows}
+                        selectedRecords={selectedRecords}
+                        dispatch={dispatch}
+                        onEdit={() => {
+                        }}
+                        extraParamsToCheckDelete={true}
+                        onDelete={() => {
+                        }}
+                        rowCount={rowCount}
+                        page={page}
+                        loading={loading}
+                        chips={
+                            [{
+                                label: `Product Description: `,
+                                field: "productName",
+                                forceShow: true
+                            }]
+                        }
+                        onCreate={null}
+                        showClone={false}
+                        fullHeight={true}
+                        renderedFrom={routes.purchaseOrderDetail.title}
+                        onClone={() => { }}
+
+                    /> : <CustomReactTable
                         columns={columns}
                         data={dataRows}
                         isInValidCheck={(rowData) => rowData?.type?.includes("roduct") && (isNaN(rowData?.finalPrice) || rowData?.finalPrice === 0)}
@@ -197,6 +231,8 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                         childrenProperty="subRows"
                         uniqueKey="_id"
                     />
+                    }
+
                 </Box>
 
             </>
