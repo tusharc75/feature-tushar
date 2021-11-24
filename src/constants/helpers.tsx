@@ -220,6 +220,7 @@ export const sidebarResourceObjectFromValues = () => {
   Object.keys(sidebarResource).forEach((key) => {
     obj[sidebarResource[key]] = key
   })
+  obj['Project Sales'] = "projectStrategy"
   return obj
 }
 
