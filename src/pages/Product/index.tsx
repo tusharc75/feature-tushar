@@ -13,7 +13,7 @@ import { RiShoppingBag3Fill } from 'react-icons/ri';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { ExpandMore } from "@material-ui/icons";
-import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
+import { Box, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
@@ -21,19 +21,19 @@ import ImportExportLinks from "../../components/Product/ImportExportLinks";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { product, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
 import {
-    CommonRenderer,
-    CreatedByRenderer,
-    UpdatedByRenderer
+    CommonRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useData } from "../../StateProvider/Provider";
 import { sortBy } from 'lodash';
-import HtmlTooltip from '../../components/CustomTooltipTitle'
 import { RiBillLine } from "react-icons/ri";
 import { Autocomplete } from "@material-ui/lab";
 import TextField from "@material-ui/core/TextField";
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import useColumns, {
+    getStaticFields, getFrameworkComponents,
+    getColumnHiddenStatus, getSortedColumns
+} from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers";
 import Tooltip from '@material-ui/core/Tooltip'
 import { MdAccountCircle } from "react-icons/md";
@@ -81,8 +81,9 @@ const Product = () => {
     const [isProductTemplate, setIsProductTemplate] = useState(true);
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [clonedData, setClonedData] = useState([])
-    const localStorageSelectedRecords = `${"productPage"}_selected`;
+    const localStorageSelectedRecords = `${routes.product.title}_selected`;
     const { state: { permissions, user, selectedEntity } }: any = useData();
+    const { getColumnData } = useColumns();
     const [productPermissions, setProductPermissions] = useState({
         isCreate: false,
         isUpdate: false,
@@ -212,8 +213,9 @@ const Product = () => {
             data.productTemplate?.forEach((ele) => {
                 GenrateColoum(ele.fields, columns, rendererNames)
             })
-            columns.push({ field: "inventoryCount", headerName: "Inventory Count", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" })
-            columns.push({ field: "warehouses", headerName: "Plants", show: true, cellRenderer: "commonRenderer", leval: "price-builder-custom" })
+
+            columns.push({ field: "inventoryCount", headerName: "Inventory Count", show: getColumnHiddenStatus(routes.product.title, "inventoryCount"), cellRenderer: "commonRenderer", leval: "price-builder-custom" })
+            columns.push({ field: "warehouses", headerName: "Plants", show: getColumnHiddenStatus(routes.product.title, "warehouses"), cellRenderer: "commonRenderer", leval: "price-builder-custom" })
             columns = sortBy(columns, function (item: any) {
                 return levalOrderBy.indexOf(item.leval)
             });
@@ -618,8 +620,8 @@ const Product = () => {
                     showClone={true}
                     onClone={(data) => {
                         OpenProduct(data._id); setIsClone(true)
-                     }}
-                    renderedFrom={"productPage"}
+                    }}
+                    renderedFrom={routes.product.title}
                 /> :
                     <CustomAgGrid
                         columns={columns}
@@ -633,7 +635,7 @@ const Product = () => {
                         page={page}
                         actionWidth={150}
                         loading={loading}
-                        renderedFrom="productPage"
+                        renderedFrom={routes.product.title}
                         refreshGrid={fetchProduct}
                     />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}

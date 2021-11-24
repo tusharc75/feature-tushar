@@ -4,13 +4,14 @@ import { reducer, intialState } from "../../components/AgGridComponents/CustomAg
 import axiosInstance from '../../axios/axiosInstance'
 import routes from "../../components/Helpers/Routes";
 import { prepareDataForGrid } from "../../constants/helpers"
-import { getColumnData, getFrameworkComponents, getStaticFields } from "../../constants/columns"
+import useColumns, {getFrameworkComponents, getStaticFields } from "../../constants/useColumns"
 
 const ProductsTable = ({ productList = [], updateLoading = false, handleUpdateQuantity = null }) => {
 
   const [columns, setColumns] = useState([])
   const [gridApi, setGridApi] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const {getColumnData} = useColumns();
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
 

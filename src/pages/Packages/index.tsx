@@ -22,7 +22,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
-import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/columns';
+import useColumns, {getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
 import ProductListDialog from './ProductListDialog';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
@@ -43,6 +43,7 @@ const PackageList = () => {
     const {
         state: { user, permissions, selectedEntity }
     }: any = useData();
+    const {getColumnData} = useColumns();
     const [selectedType, setSelectedType] = useState(1);
     const [renderCount, setRenderCount] = useState(0);
     const [deleteLoading, setDeleteLoading] = useState(false);
@@ -203,7 +204,7 @@ const PackageList = () => {
             <HideWhenOffline>
                 <GridDeleteIcon
                     hasDeletePermission={permissions?.packages.isDelete}
-                    ownerId={params.data.ownerId}
+                    ownerId={user?.user?._id}
                     userId={user?.user?._id}
                     onDelete={() =>
                         setSinglePackageDelete({

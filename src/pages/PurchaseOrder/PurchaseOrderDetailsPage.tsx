@@ -11,30 +11,45 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { purchaseOrder, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL, getUniqueCurrencies } from "../../constants/helpers";
+import {
+    purchaseOrder,
+    getObjKeysWithValues,
+    gridLoadingTimeout,
+    product,
+    RESOURCE_LABEL,
+    getUniqueCurrencies,
+    supplierAccount,
+    customerAccount,
+    dateFormat,
+    quoteStepColors
+} from "../../constants/helpers";
 import ManagePurchaseOrder from "./ManagePurchaseOrder";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
+import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import AddProductDialog from "./AddProductDialog";
-import Add from "@material-ui/icons/Add";
-import { Delete } from "@material-ui/icons";
-import { Formik, Form, FieldArray, Field } from "formik";
-import CreateSeriaizedAsset from "./CreateSerializedAsset";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CreateProduct from "../../components/Product/CreateProduct";
 import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
 import Steps from "./Steps";
-import {FaWpforms} from "react-icons/fa";
-import {BiFoodMenu} from "react-icons/bi";
+import Service from "./Service";
+import BulkEditDialog from "./BulkEditDialog";
+import HtmlTooltip from "../../components/CustomTooltipTitle";
+import IssuPO from "./IssuPO";
+import {FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms} from "react-icons/fa";
+import { BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
 import queryString from 'query-string';
+import ReceivingAsset from "./ReceivingAsset";
+import {isMobile} from "react-device-detect";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
-const purchaseOrderSteps = ["Add Product", "Additional Cost", "Issue PO", "Receiving Asset"]
+const purchaseOrderSteps = ["Add Product", "Add Services", "Issue PO", "Receiving Asset"]
 
 const PurchaseOrderDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -57,17 +72,20 @@ const PurchaseOrderDetailsPage = () => {
     const [addProductDialog, setAddProductDialog] = useState(false);
     const [isAddingProducts, setAddingProducts] = useState(false);
     const [product, setProduct] = useState<any[]>([]);
-    const [additionalCost, setAdditionalCost] = useState<any[]>([]);
     const [currencySymbol, setCurrencySymbol] = useState(null);
-    const [showCreateAssetDIalog, setShowCreateAssetDIalog] = useState(false)
     const [updateLoading, setUpdateLoading] = useState(false)
     const [isAddNewProduct, setIsAddNewProduct] = useState(false)
     const [anchorEl, setAnchorEl] = useState(null);
     const [statusOptions, setStatusOptions] = useState([])
     const [purchaseOrderProduct, setPurchaseOrderProduct] = useState([])
     const [allowedToEdit, setAllowedToEdit] = useState(false);
+    const [showAddServiceDialog, setShowAddServiceDialog] = useState(false)
+    const [isSavingBulkEditDialog, setIsSavingBulkEditDialog] = useState(false)
+    const [currentStepDisable, setCurrentStepDisable] = useState(false)
     const [currentStep, setCurrentStep] = useState(0);
     const [downlodingFile, setDownlodingFile] = useState(false)
+    const [selectedProductData, setSelectedProductData] = useState(null)
+    const [pdfFileBase64, setPdfFileBase64] = useState(null);
 
     const [tabValue, setTabValue] = useState(0);
 
@@ -91,7 +109,7 @@ const PurchaseOrderDetailsPage = () => {
     const ActionsRenderer = (params) => (
         <>
             <GridDeleteIcon
-                hasDeletePermission={permissions?.rentalManagement?.isDelete}
+                hasDeletePermission={permissions?.purchaseOrder?.isUpdate}
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
                 onDelete={() => {
@@ -102,6 +120,20 @@ const PurchaseOrderDetailsPage = () => {
                 }
                 entity="rentalManagement"
             />
+            {
+                <HtmlTooltip title="Edit">
+                    <IconButton
+                        size="small"
+                        aria-label="Clone"
+                        onClick={() => {
+                            setShowAddServiceDialog(true)
+                            setSelectedProductData(params.data)
+                        }}
+                    >
+                        <EditIcon color="primary" />
+                    </IconButton>
+                </HtmlTooltip>
+            }
         </>
     );
 
@@ -116,13 +148,14 @@ const PurchaseOrderDetailsPage = () => {
         { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
         { field: "expectedDelivery", headerName: "Expected Delivery", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
         { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        { field: "uom", headerName: "Base UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Hour", "Day", "Week", "Month"] }, editable: true },
+        { field: "baseUOM", headerName: "Base UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Hour", "Day", "Week", "Month"] }, editable: true },
         { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
         { field: "tax", headerName: "Tax Percent", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
         { field: "taxPerUnit", headerName: "Tax Per Unit", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
         { field: "totalTax", headerName: "Total Tax", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
         { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer" },
     ])
+
 
     useEffect(() => {
         if (id) {
@@ -140,6 +173,32 @@ const PurchaseOrderDetailsPage = () => {
                 toastConfig.setToastConfig(error);
             });
         }
+        if (currentStep === 2) {
+            axiosInstance().get(`${purchaseOrder.api}/${id}/pdf`)
+                .then(({ data }) => {
+                    axiosInstance()
+                        .get(`user/download?fileName=${data.data.fileName}`, {
+                            responseType: "blob",
+                        })
+                        .then(({ data }) => {
+                            const file = new Blob([data], { type: 'application/pdf' });
+                            generateBase64forFile(file, 'pdf');
+                        })
+                        .catch((err) => {
+                            toastConfig.setToastConfig({
+                                open: true,
+                                type: 'error',
+                                message: 'PDF generating error'
+                            });
+                        });
+                }).catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    setDownlodingFile(false);
+                })
+        }
+        if (currentStep === 1 && purchaseOrderData?.status !== "In Process") { handleUpdateData({ "status": "In Process" }) }
+        if (currentStep === 3 && purchaseOrderData?.status !== "Issued") { handleUpdateData({ "status": "Issued" }) }
+
         // eslint-disable-next-line
     }, [currentStep]);
 
@@ -154,15 +213,24 @@ const PurchaseOrderDetailsPage = () => {
         if (gridApi) {
             gridApi.setRowData([]);
         }
+        setCurrentStepDisable(false)
         axiosInstance().get(`${purchaseOrder.api}/${id}/order-details`).then(({ data: { data } }) => {
-            data = data?.map((u) => ({
-                ...u,
-                productName: u.productId?.productName,
-                productNumber: u.productId?.productNumber,
-                entity: u.productId?.entity,
-                quantity: u.qty
+            data = data?.map((u) => {
 
-            }));
+                if ((!currentStepDisable) && (u.qty === 0 || u.qty === undefined
+                    || u.finalPrice === 0 || u.finalPrice === undefined)) setCurrentStepDisable(true)
+                return ({
+                    ...u,
+                    productName: u.productId?.productName,
+                    productNumber: u.productId?.productNumber,
+                    entity: u.productId?.entity,
+                    quantity: u.qty,
+                    description: u.productId?.productName,
+                    type: "Product",
+                    treeId: u?.productId?._id
+
+                })
+            });
             setPurchaseOrderProduct(data)
             dispatch({ type: "initialize", data: data, count: data.length });
             dispatch({ type: "loading", loading: false });
@@ -188,7 +256,6 @@ const PurchaseOrderDetailsPage = () => {
             { title: `${data?.purchaseOrderNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
             setPurchaseOrderData(data);
             setCurrentStep(purchaseOrderSteps.indexOf(data?.processStatus) !== -1 ? purchaseOrderSteps.indexOf(data?.processStatus) : 0)
-            setAdditionalCost(data.additionalCost ? data.additionalCost.map(u => ({ "type": u.type, "value": u.value })) : [{ "type": "", "value": 0 }]);
             setCurrencySymbol(
                 getUniqueCurrencies().find(
                     (d) => d.currencyCode === data["currency"]
@@ -252,7 +319,7 @@ const PurchaseOrderDetailsPage = () => {
         // let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
         setAddingProducts(true)
         let tempProductArray = productInventoryArray.map(d => ({
-            "productId": d.id,
+            "productId": d.id || d.productId,
             "qty": parseInt(d.quantity || d.qty) || 0,
             "value": parseInt(d.price) || 0,
             "expectedDelivery": purchaseOrderData?.deliveryDate
@@ -270,32 +337,12 @@ const PurchaseOrderDetailsPage = () => {
             });
     }
 
-    const addProductInPurchaseOrder = (productInventoryArray) => {
-
-        setAddingProducts(true)
-        let tempProductArray = productInventoryArray.map(d => ({
-            "productId": d.productId,
-            "qty": parseInt(d.quantity || d.qty) || 0,
-            "value": parseInt(d.price || d.mrp) || 0,
-        }))
-        axiosInstance().post(`${purchaseOrder.api}/${id}/order-details/add`, { "orderDetails": tempProductArray }).then(() => {
-            setAddProductDialog(false)
-            fetchPurchaseOrderProduct()
-            setAddingProducts(false)
-        })
-            .catch((error) => {
-                setAddProductDialog(false)
-                toastConfig.setToastConfig(error)
-                setAddingProducts(false)
-            });
-    };
-
     const handleUpdateOrderProduct = (row) => {
         let tempProductArray = {
             "qty": parseInt(row.quantity || row.qty) || 0,
-            "value": parseInt(row.price || row.value) || 0,
+            "value": parseInt(row.value) || 0,
             "expectedDelivery": row.expectedDelivery || "",
-            "uom": row.uom || "",
+            "baseUOM": row.baseUOM || "",
             "price": row.price || 0,
             "finalPrice": row.finalPrice || 0,
             "actualReceived": row.actualReceived || 0,
@@ -311,25 +358,11 @@ const PurchaseOrderDetailsPage = () => {
                 setAddProductDialog(false)
                 fetchPurchaseOrderProduct()
                 setAddingProducts(false)
+                setShowAddServiceDialog(false)
             }).catch((error) => {
                 setAddProductDialog(false)
                 toastConfig.setToastConfig(error)
                 setAddingProducts(false)
-            });
-    }
-
-    const handleSaveAdditionalCost = (additionalCostTemp) => {
-
-        let tempProductArray = additionalCostTemp.map(d => ({
-            "type": d.type,
-            "value": parseInt(d.value),
-        }))
-
-        axiosInstance().post(`${purchaseOrder.api}/${id}/additonal-cost`, { "additionalCost": tempProductArray })
-            .then(() => {
-                fetchPurchaseOrderData()
-            }).catch((error) => {
-                toastConfig.setToastConfig(error)
             });
     }
 
@@ -350,12 +383,17 @@ const PurchaseOrderDetailsPage = () => {
             const fieldsDataForUpdate = purchaseOrderFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             let values = getObjKeysWithValues(purchaseOrderData, fieldsDataForUpdate)
             values["status"] = obj.status
-            if (obj.reason) values["scrapingReason"] = obj.reason
+            // if (obj.reason) values["scrapingReason"] = obj.reason
             values["_id"] = id
             axiosInstance().put(`${purchaseOrder.api}`, values).then(({ data: { data } }) => {
                 getPurchaseOrderFields();
                 fetchPurchaseOrderData();
                 fetchPurchaseOrderProduct();
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: 'success',
+                    message: `Status changed to ${obj.status}`
+                });
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
             });
@@ -372,7 +410,7 @@ const PurchaseOrderDetailsPage = () => {
     }
 
     const handleViewPdf = (download) => {
-        axiosInstance().get(`/${purchaseOrder.api}/${id}/pdf`)
+        axiosInstance().get(`${purchaseOrder.api}/${id}/pdf`)
             .then(({ data }) => {
                 axiosInstance()
                     .get(`user/download?fileName=${data.data.fileName}`, {
@@ -383,7 +421,7 @@ const PurchaseOrderDetailsPage = () => {
                             const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
                             const link = document.createElement('a');
                             link.href = url;
-                            link.setAttribute('download', `PurchaseOrder.pdf`);
+                            link.setAttribute('download', `PurchaseOrder-${purchaseOrderData.purchaseOrderNumber}.pdf`);
                             document.body.appendChild(link);
                             link.click();
                         }
@@ -407,6 +445,37 @@ const PurchaseOrderDetailsPage = () => {
             })
     }
 
+    const generateBase64forFile = (blobData, type) => {
+        let reader = new FileReader();
+        reader.readAsDataURL(blobData);
+        reader.onloadend = function () {
+            let base64data = reader.result;
+            if (type === 'pdf') {
+                setPdfFileBase64(base64data);
+            }
+        };
+    };
+    const handleAttachments = () => {
+        let request;
+
+        request = {
+            name: 'Purchase Order',
+            fileUrl: '',
+            relatedTo: [
+                {
+                    type: purchaseOrder.resource,
+                    referenceId: purchaseOrderData?._id,
+                    access: true
+                },
+                {
+                    type: purchaseOrderData?.customerAccountName ? customerAccount?.accountResource : supplierAccount?.accountResource,
+                    referenceId: purchaseOrderData?.customerAccountName ? purchaseOrderData?.customerAccountName?.optionValue : purchaseOrderData?.supplierAccountName?.optionValue,
+                    access: false
+                },
+            ]
+        };
+
+    };
 
     return (
         <>
@@ -417,104 +486,104 @@ const PurchaseOrderDetailsPage = () => {
                 </Grid>
                 <Grid container spacing={1} className="detail-container">
 
-                    <Grid item xs={12} sm={12}  spacing={2}>
+                    <Grid item xs={12} sm={12} spacing={2}>
 
-                            <Paper style={{height:"650px"}}>
-                                {!purchaseOrderData ? (
-                                    <div>
-                                        <Skeleton variant="text" width="150px" height="40px" />
-                                        <Box display="flex">
-                                            <Skeleton
-                                                style={{ borderRadius: 6 }}
-                                                width="120px"
-                                                height="80px"
-                                            />
-                                            <Box marginX={1} />
-                                            <Skeleton
-                                                style={{ borderRadius: 6 }}
-                                                width="120px"
-                                                height="80px"
-                                            />
-                                        </Box>
-                                    </div>
-                                ) : (
+                        <Paper style={{ height: "650px" }}>
+                            {!purchaseOrderData ? (
+                                <div>
+                                    <Skeleton variant="text" width="150px" height="40px" />
+                                    <Box display="flex">
+                                        <Skeleton
+                                            style={{ borderRadius: 6 }}
+                                            width="120px"
+                                            height="80px"
+                                        />
+                                        <Box marginX={1} />
+                                        <Skeleton
+                                            style={{ borderRadius: 6 }}
+                                            width="120px"
+                                            height="80px"
+                                        />
+                                    </Box>
+                                </div>
+                            ) : (
 
-                                    <DetailsPageHeader
-                                        heading={headingLbl}
-                                        mainPoints={mainPoints}
-                                        showHeading={true}
-                                    >
-
-                                        {(permissions?.purchaseOrder?.isUpdate &&
-                                            <>
-                                                <Button
-                                                    variant="outlined"
-                                                    color="default"
-                                                    size="small"
-                                                    onClick={openActions}
-                                                    disabled={updateLoading || purchaseOrderData?.status === "Received"}
-                                                    aria-controls="action-menu"
-                                                    endIcon={<ExpandMore />}
-                                                >
-                                                    Change Status
-                                                </Button>
-                                                <Menu
-                                                    anchorEl={anchorEl}
-                                                    keepMounted
-                                                    getContentAnchorEl={null}
-                                                    anchorOrigin={{
-                                                        vertical: 'bottom',
-                                                        horizontal: 'left'
-                                                    }}
-                                                    id="action-menu"
-                                                    open={Boolean(anchorEl)}
-                                                    onClose={closeActions}>
-                                                    {
-                                                        statusOptions.map(o => {
-                                                            return <MenuItem
-                                                                onClick={() => {
-                                                                    closeActions()
-                                                                    handleStatusChange(o)
-                                                                }}
-                                                                value={o}
-                                                                disabled={o.optionValue === "Received"}
-                                                            >{o?.optionLabel}</MenuItem>
-                                                        })
-                                                    }
-                                                </Menu>
-                                            </>
-                                        )}
-                                        {permissions?.purchaseOrder?.isUpdate && (
-                                            <>
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    size="small"
-                                                    onClick={handleOpenUpdateDialog}
-                                                >
-                                                    Edit
-                                                </Button>
-                                            </>
-                                        )}
-
-                                    </DetailsPageHeader>
-                                )}
-
-
-
-
-                                <Tabs
-                                    className="quote-tab"
-                                    value={tabValue}
-                                    onChange={handleMainTabChange}
-                                    textColor="primary"
-                                    TabIndicatorProps={{
-                                        style: {
-                                            display: 'none'
-                                        }
-                                    }}
+                                <DetailsPageHeader
+                                    heading={headingLbl}
+                                    mainPoints={mainPoints}
+                                    showHeading={true}
                                 >
-                                    {/* <Tab
+
+                                    {(permissions?.purchaseOrder?.isUpdate &&
+                                        <>
+                                            <Button
+                                                variant="outlined"
+                                                color="default"
+                                                size="small"
+                                                onClick={openActions}
+                                                disabled={updateLoading || purchaseOrderData?.status === "Received"}
+                                                aria-controls="action-menu"
+                                                endIcon={<ExpandMore />}
+                                            >
+                                                Change Status
+                                            </Button>
+                                            <Menu
+                                                anchorEl={anchorEl}
+                                                keepMounted
+                                                getContentAnchorEl={null}
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'left'
+                                                }}
+                                                id="action-menu"
+                                                open={Boolean(anchorEl)}
+                                                onClose={closeActions}>
+                                                {
+                                                    statusOptions.map(o => {
+                                                        return <MenuItem
+                                                            onClick={() => {
+                                                                closeActions()
+                                                                handleStatusChange(o)
+                                                            }}
+                                                            value={o}
+                                                            disabled={o.optionValue !== "Issued"}
+                                                        >{o?.optionLabel}</MenuItem>
+                                                    })
+                                                }
+                                            </Menu>
+                                        </>
+                                    )}
+                                    {permissions?.purchaseOrder?.isUpdate && (
+                                        <>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                size="small"
+                                                onClick={handleOpenUpdateDialog}
+                                            >
+                                                Edit
+                                            </Button>
+                                        </>
+                                    )}
+
+                                </DetailsPageHeader>
+                            )}
+
+
+
+
+                            <Tabs
+                                className="quote-tab"
+                                value={tabValue}
+                                onChange={handleMainTabChange}
+                                textColor="primary"
+                                TabIndicatorProps={{
+                                    style: {
+                                        display: 'none'
+                                    }
+                                }}
+                            >
+                                {/* <Tab
                         className={"tabLayout"}
                       style={{
                         background: tabValue === 0 ? "white" : "",
@@ -528,93 +597,136 @@ const PurchaseOrderDetailsPage = () => {
                       }
                       {...a11yProps(0)}
                     /> */}
-                                    <Tab
-                                        className={'tabLayout'}
-                                        style={{
-                                            background: tabValue === 1 ? 'white' : '',
-                                            color: tabValue === 1 ? '#163340' : '#163340'
-                                        }}
-                                        label={
-                                            <div className="d-flex align-items-center tab-font">
-                                                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                                            </div>
-                                        }
-                                        {...a11yProps(0)}
-                                    />
-                                    <Tab
-                                        className={'tabLayout'}
-                                        style={{
-                                            background: tabValue === 2 ? 'white' : '',
-                                            color: tabValue === 2 ? 'blue' : '#163340'
-                                        }}
-                                        label={
-                                            <div className="d-flex align-items-center tab-font">
-                                                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                                            </div>
-                                        }
-                                        {...a11yProps(1)}
-                                    />
-                                    <div className={'uio'}> </div>
-                                </Tabs>
+                                <Tab
+                                    className={'tabLayout'}
+                                    style={{
+                                        background: tabValue === 1 ? 'white' : '',
+                                        color: tabValue === 1 ? '#163340' : '#163340'
+                                    }}
+                                    label={
+                                        <div className="d-flex align-items-center tab-font">
+                                            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                                        </div>
+                                    }
+                                    {...a11yProps(0)}
+                                />
+                                <Tab
+                                    className={'tabLayout'}
+                                    style={{
+                                        background: tabValue === 2 ? 'white' : '',
+                                        color: tabValue === 2 ? 'blue' : '#163340'
+                                    }}
+                                    label={
+                                        <div className="d-flex align-items-center tab-font">
+                                            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                                        </div>
+                                    }
+                                    {...a11yProps(1)}
+                                />
+                                <div className={'uio'}> </div>
+                            </Tabs>
 
-                                <TabPanel value={tabValue} index={0}>
-                                    <Box>
-                                        {loadingPurchaseOrder || !purchaseOrderFields.length ? (
-                                            <Grid container spacing={2} style={{ padding: "8px" }}>
-                                                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                                            </Grid>
-                                        ) : (
-                                            <>
-                                                <DetailsPage data={purchaseOrderData}
-                                                             fields={purchaseOrderFields} />
-                                            </>
-                                        )}
-                                    </Box>
-                                    <Grid container spacing={2}>
-                                    </Grid>
-                                </TabPanel>
+                            <TabPanel value={tabValue} index={0}>
+                                <Box>
+                                    {loadingPurchaseOrder || !purchaseOrderFields.length ? (
+                                        <Grid container spacing={2} style={{ padding: "8px" }}>
+                                            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                                        </Grid>
+                                    ) : (
+                                        <>
+                                            <DetailsPage data={purchaseOrderData}
+                                                fields={purchaseOrderFields} />
+                                        </>
+                                    )}
+                                </Box>
+                                <Grid container spacing={2}>
+                                </Grid>
+                            </TabPanel>
 
-                                <TabPanel value={tabValue} index={1}>
-                                    <Grid item xs={12} sm={12} md={12} lg={12} >
-                                        <Grid item xs={12} sm={12} md={12} lg={12}>
-                                            <>
+                            <TabPanel value={tabValue} index={1}>
+                                <Grid item xs={12} sm={12} md={12} lg={12} >
+                                    <Grid item xs={12} sm={12} md={12} lg={12}>
+                                        <>
 
-                                                <Paper>
-                                                    <Steps
-                                                        // className={styles.steps_box}
-                                                        isNextStep={!Boolean(purchaseOrderProduct.length)}
-                                                        steps={purchaseOrderSteps.slice(0, 5)}
-                                                        currentStep={currentStep}
-                                                        setCurrentStep={setCurrentStep}
-                                                    />
-                                                    {currentStep === 0 &&
+                                            <Paper>
+                                                <Steps
+                                                    // className={styles.steps_box}
+                                                    isNextStep={!Boolean(purchaseOrderProduct.length) || currentStepDisable}
+                                                    steps={purchaseOrderSteps.slice(0, 5)}
+                                                    currentStep={currentStep}
+                                                    setCurrentStep={setCurrentStep}
+                                                />
+                                                {currentStep === 0 &&
                                                     <>
                                                         <Box display="flex" justifyContent="space-between" m={1}>
                                                             <Box display="flex">
                                                                 <Button
-                                                                    variant="contained"
+                                                                    variant= {isMobile ? "outlined" : "contained"}
                                                                     color="primary"
                                                                     size="small"
                                                                     onClick={() => {
                                                                         setIsAddNewProduct(true);
                                                                     }}
                                                                 >
-                                                                    {`Add New ${routes.product.title}`}
+                                                                    {isMobile ? <FaCartPlus size={22}/> : `Add New ${routes.product.title}`}
+
                                                                 </Button>
                                                                 <Box mx={1} />
                                                                 <Button
-                                                                    variant="contained"
+                                                                    variant= {isMobile ? "outlined" : "contained"}
                                                                     color="primary"
                                                                     size="small"
                                                                     onClick={() => {
                                                                         setAddProductDialog(true);
                                                                     }}
                                                                 >
-                                                                    {`Add Existing ${routes.product.title}`}
+                                                                    {isMobile ? <FaCartArrowDown size={22}/> : `Add Existing ${routes.product.title}`}
+                                                                    {}
                                                                 </Button>
                                                             </Box>
                                                         </Box>
                                                         {columns ?
+                                                              isMobile ?
+                                                                  <CustomSwipableList
+                                                                      allowSelection={true}
+                                                                      allowSwipe={true}
+                                                                      permissions={permissions}
+                                                                      primaryField={columns?.find(d => d.field === "productName")}
+                                                                      onClick={(data) => {
+                                                                          setShowAddServiceDialog(true)
+                                                                          setSelectedProductData(data)
+                                                                      }}
+                                                                      dataRows={dataRows}
+                                                                      selectedRecords={selectedRecords}
+                                                                      dispatch={dispatch}
+                                                                      onEdit={(data) => {
+                                                                          setShowAddServiceDialog(true)
+                                                                          setSelectedProductData(data)
+                                                                      }}
+                                                                      extraParamsToCheckDelete={true}
+                                                                      onDelete={(data) => {
+                                                                          deletePurchaseOrderProduct([{
+                                                                              id: data._id,
+                                                                          }])
+                                                                      }}
+                                                                      rowCount={rowCount}
+                                                                      page={page}
+                                                                      loading={loading}
+                                                                      chips={
+                                                                          [{
+                                                                              label: `Product Description: `,
+                                                                              field: "productName",
+                                                                              forceShow: true
+                                                                          }]
+                                                                      }
+                                                                      onCreate={null}
+                                                                      showClone={false}
+                                                                      fullHeight={true}
+                                                                      renderedFrom={routes.purchaseOrderDetail.title}
+                                                                      onClone={() => { }}
+
+                                                            /> :
+
                                                             <CustomAgGridEditable
                                                                 columns={columns}
                                                                 dataRows={dataRows}
@@ -645,301 +757,47 @@ const PurchaseOrderDetailsPage = () => {
                                                         }
 
                                                     </>
-                                                    }
-                                                    {(currentStep === 1) && (
-                                                        <Formik
-                                                            initialValues={{ additionalCost: additionalCost || [{ "type": "", "value": 0 }] }}
-                                                            enableReinitialize={true}
-                                                            onSubmit={() => { }}>
-                                                            {({ values }) => (
-                                                                <>
-                                                                    <Form>
-                                                                        <Container className="p-0">
-                                                                            <Grid
-                                                                                container
-                                                                                direction="row"
-                                                                                justify="space-evenly"
-                                                                                alignItems="center"
-                                                                            >
-                                                                                <Grid item md={12}>
-                                                                                    {values.additionalCost && values.additionalCost.length > 0 && (
-
-                                                                                        <Box className={""}>
-                                                                                            <Grid
-                                                                                                container
-                                                                                                spacing={2}
-                                                                                                direction="row"
-                                                                                                justify="flex-start"
-                                                                                                alignItems="center"
-                                                                                            >
-                                                                                                <Grid item md={1}> # </Grid>
-                                                                                                <Grid item md={2}> Type </Grid>
-                                                                                                <Grid item md={2}> Value </Grid>
-                                                                                                <Grid item md={1}></Grid>
-
-                                                                                            </Grid>
-                                                                                        </Box>
-                                                                                    )}
-                                                                                    <Box className="p-1">
-                                                                                        <FieldArray
-                                                                                            name="additionalCost"
-                                                                                            render={arrayHelpers => (
-                                                                                                <div>
-                                                                                                    {values.additionalCost && values.additionalCost.length > 0 ? (
-                                                                                                        values.additionalCost.map((userVal, index) => (
-                                                                                                            <Grid
-                                                                                                                container
-                                                                                                                spacing={2}
-                                                                                                                direction="row"
-                                                                                                                justify="flex-start"
-                                                                                                                alignItems="center"
-                                                                                                                key={index}
-                                                                                                            >
-                                                                                                                <Grid item md={1}>{index + 1}</Grid>
-
-                                                                                                                <Grid item md={2}>
-                                                                                                                    <Field
-                                                                                                                        fullWidth
-                                                                                                                        variant="outlined"
-                                                                                                                        type="text"
-                                                                                                                        size="small"
-                                                                                                                        component={TextField}
-                                                                                                                        name="type"
-                                                                                                                        placeholder="Type"
-                                                                                                                        value={userVal.type}
-                                                                                                                        onChange={(e) => {
-                                                                                                                            arrayHelpers.replace(index, {
-                                                                                                                                ...values.additionalCost[index],
-                                                                                                                                ["type"]: e.target.value
-                                                                                                                            })
-                                                                                                                        }}
-                                                                                                                    />
-                                                                                                                </Grid>
-                                                                                                                {
-                                                                                                                    <Grid item md={2}>
-                                                                                                                        <Field
-                                                                                                                            fullWidth
-                                                                                                                            InputProps={{
-                                                                                                                                startAdornment: (
-                                                                                                                                    <InputAdornment position="start">
-                                                                                                                                        {currencySymbol ? currencySymbol : ""}
-                                                                                                                                    </InputAdornment>
-                                                                                                                                ),
-                                                                                                                            }}
-                                                                                                                            startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ""}
-                                                                                                                            variant="outlined"
-                                                                                                                            type="text"
-                                                                                                                            size="small"
-                                                                                                                            component={TextField}
-                                                                                                                            name="value"
-                                                                                                                            placeholder="Enter Value"
-                                                                                                                            value={userVal.value}
-                                                                                                                            onChange={(e) => {
-                                                                                                                                arrayHelpers.replace(index, {
-                                                                                                                                    ...values.additionalCost[index],
-                                                                                                                                    ["value"]: e.target.value.replace(/[^0-9]/g, '')
-                                                                                                                                })
-                                                                                                                            }}
-                                                                                                                        />
-                                                                                                                    </Grid>
-                                                                                                                }
-                                                                                                                <Grid item md={1}>
-                                                                                                                    <ButtonGroup size="small" aria-label="small outlined button group">
-                                                                                                                        <IconButton
-                                                                                                                            size="small"
-                                                                                                                            aria-label="add"
-                                                                                                                            onClick={() => {
-                                                                                                                                arrayHelpers.push({
-                                                                                                                                    "type": "", "value": 0
-                                                                                                                                })
-                                                                                                                            }
-                                                                                                                            } >
-                                                                                                                            <Add />
-                                                                                                                        </IconButton>
-                                                                                                                        <IconButton size="small" aria-label="delete" style={{ color: "#f44336" }} onClick={() => arrayHelpers.remove(index)} >
-                                                                                                                            <Delete />
-                                                                                                                        </IconButton>
-                                                                                                                    </ButtonGroup>
-                                                                                                                </Grid>
-                                                                                                            </Grid>
-                                                                                                        ))
-                                                                                                    ) : (
-                                                                                                        <Grid item md={12} className="d-flex  align-items-center justify-content-center">
-                                                                                                            <Button
-                                                                                                                variant="contained"
-                                                                                                                color="primary"
-                                                                                                                size="large"
-                                                                                                                onClick={() => {
-                                                                                                                    arrayHelpers.push({ "type": "", "value": 0 })
-                                                                                                                }}
-                                                                                                            >
-                                                                                                                Add Cost Type
-                                                                                                            </Button>
-                                                                                                        </Grid>
-                                                                                                    )}
-                                                                                                </div>
-                                                                                            )}
-                                                                                        />
-                                                                                    </Box>
-                                                                                    <Box display="flex" justifyContent="space-between" m={1}>
-                                                                                        <Box display="flex-end">
-                                                                                            <Button
-                                                                                                variant="contained"
-                                                                                                color="primary"
-                                                                                                size="small"
-                                                                                                onClick={() => handleSaveAdditionalCost(values.additionalCost)}
-                                                                                            >
-                                                                                                Save
-                                                                                            </Button>
-                                                                                            <Box mx={1} />
-                                                                                        </Box>
-                                                                                    </Box>
-                                                                                </Grid>
-                                                                            </Grid>
-                                                                        </Container>
-                                                                    </Form>
-                                                                </>
-                                                            )}
-                                                        </Formik>
-                                                    )}
-                                                    {currentStep === 2 &&
-                                                    <>
-                                                        <Box display="flex" justifyContent="space-between" m={1}>
-                                                            <Box display="flex">
-                                                                {permissions?.purchaseOrder?.isRead && (
-                                                                    <>
-                                                                        <Button
-                                                                            variant="contained"
-                                                                            color="primary"
-                                                                            size="small"
-                                                                            disabled={downlodingFile}
-                                                                            onClick={() => { handleViewPdf(false) }}
-                                                                        >
-                                                                            {downlodingFile ? "Please wait..." : "Preview"}
-                                                                        </Button>
-                                                                    </>
-                                                                )}
-                                                                <Box mx={1} />
-                                                                {permissions?.purchaseOrder?.isRead && (
-                                                                    <>
-                                                                        <Button
-                                                                            variant="contained"
-                                                                            color="primary"
-                                                                            size="small"
-                                                                            disabled={downlodingFile}
-                                                                            onClick={() => { handleViewPdf(false) }}
-                                                                        >
-                                                                            {downlodingFile ? "Please wait..." : "Download"}
-                                                                        </Button>
-                                                                    </>
-                                                                )}
-                                                                <Box mx={1} />
-                                                                <Button
-                                                                    variant="contained"
-                                                                    color="primary"
-                                                                    size="small"
-                                                                    onClick={() => { setCurrentStep(currentStep + 1) }}
-                                                                >
-                                                                    {`Issue PO`}
-                                                                </Button>
-                                                            </Box>
-                                                        </Box>
-                                                        {columns ?
-                                                            <CustomAgGridEditable
-                                                                columns={columns}
-                                                                dataRows={dataRows}
-                                                                frameworkComponents={frameworkComponents}
-                                                                setGridApi={setGridApi}
-                                                                dispatch={dispatch}
-                                                                rowCount={rowCount}
-                                                                limit={limit}
-                                                                pageSizes={pageSizes}
-                                                                page={page}
-                                                                allowAction={true}
-                                                                actionWidth={150}
-                                                                allowSelection={true}
-                                                                isClientSideGrid={true}
-                                                                loading={loading}
-                                                                onCellValueChanged={(row) => {
-                                                                    handleUpdateOrderProduct(row.data)
-                                                                }}
-                                                                renderedFrom="purchaseOrderDetailsPageInventory"
-                                                                refreshGrid={fetchPurchaseOrderProduct}
-                                                            />
-                                                            : <Box
-                                                                p={2}
-                                                                height={500}
-                                                                bgcolor="white">
-                                                                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                                                            </Box>
-                                                        }
-
-                                                    </>
-                                                    }
-                                                    {currentStep === 3 &&
-                                                    <>
-                                                        <Box display="flex" justifyContent="space-between" m={1}>
-                                                            <Box display="flex">
-                                                                <Box mx={1} />
-                                                                <Button
-                                                                    variant="contained"
-                                                                    color="primary"
-                                                                    size="small"
-                                                                    disabled={selectedRecords.length === 0}
-                                                                    onClick={() => { setShowCreateAssetDIalog(true) }}
-                                                                >
-                                                                    {`Create Asset`}
-                                                                </Button>
-                                                            </Box>
-                                                        </Box>
-                                                        {columns ?
-                                                            <CustomAgGrid
-                                                                columns={
-                                                                    [...columns.map(d => ({
-                                                                        field: d.field, headerName: d.headerName, show: d.show, disabled: d.disabled, cellRenderer: d.cellRenderer
-                                                                    })),
-                                                                        { field: "actualReceived", headerName: "Actual Received", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true }
-                                                                    ]
-                                                                }
-                                                                dataRows={dataRows}
-                                                                frameworkComponents={frameworkComponents}
-                                                                setGridApi={setGridApi}
-                                                                dispatch={dispatch}
-                                                                rowCount={rowCount}
-                                                                limit={limit}
-                                                                pageSizes={pageSizes}
-                                                                page={page}
-                                                                allowAction={false}
-                                                                allowSelection={true}
-                                                                isClientSideGrid={true}
-                                                                loading={loading}
-                                                                renderedFrom="purchaseOrderDetailsPageInventory"
-                                                                refreshGrid={fetchPurchaseOrderProduct}
-                                                            />
-                                                            : <Box
-                                                                p={2}
-                                                                height={500}
-                                                                bgcolor="white">
-                                                                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                                                            </Box>
-                                                        }
-
-                                                    </>
-                                                    }
-                                                </Paper>
-                                            </>
-                                        </Grid>
+                                                }
+                                                {(currentStep === 1) && (
+                                                    <Service
+                                                        currencySymbol={currencySymbol}
+                                                        purchaseOrderData={purchaseOrderData}
+                                                        statusOptions={statusOptions} />
+                                                )}
+                                                {currentStep === 2 &&
+                                                    <IssuPO
+                                                        purchaseOrderProduct={purchaseOrderProduct}
+                                                        purchaseOrderData={purchaseOrderData}
+                                                        handleViewPdf={handleViewPdf}
+                                                        handleUpdateData={handleUpdateData}
+                                                        downlodingFile={downlodingFile}
+                                                        setCurrentStep={setCurrentStep}
+                                                        currentStep={currentStep}
+                                                        handleAttachments={handleAttachments}
+                                                        pdfFileBase64={pdfFileBase64}
+                                                    />
+                                                }
+                                                {currentStep === 3 &&
+                                                    <ReceivingAsset
+                                                        currencySymbol={currencySymbol}
+                                                        purchaseOrderData={purchaseOrderData}
+                                                        purchaseOrderProduct={purchaseOrderProduct}
+                                                        handleUpdateData={handleUpdateData} />
+                                                }
+                                            </Paper>
+                                        </>
                                     </Grid>
+                                </Grid>
 
-                                </TabPanel>
-
-
-
+                            </TabPanel>
 
 
 
 
-                            </Paper>
+
+
+
+                        </Paper>
 
 
 
@@ -987,29 +845,31 @@ const PurchaseOrderDetailsPage = () => {
                     type={"product"}
                 />
             }
-            {showCreateAssetDIalog &&
-                <CreateSeriaizedAsset
-                    purchaseOrderID={id}
-                    onClose={() => setShowCreateAssetDIalog(false)}
-                    onSuccess={() => {
-                        setShowCreateAssetDIalog(false)
-                        handleUpdateData({ status: "Received" })
-                    }}
-                    title="Create Asset"
-                    productList={selectedRecords}
-                />
-            }
             {isAddNewProduct && (
                 <CreateProduct
                     isClone={false}
                     productId={null}
                     handleClose={() => setIsAddNewProduct(false)}
                     isAddInBuilder={true}
-                    addProductInBuilder={addProductInPurchaseOrder}
+                    addProductInBuilder={handleAddProduct}
                     openFrom="builder"
                     fromQuote={true}
                 />
             )}
+            {showAddServiceDialog &&
+                <BulkEditDialog
+                    isSaving={isSavingBulkEditDialog}
+                    onClose={() => {
+                        setShowAddServiceDialog(false)
+                        setSelectedProductData(null)
+                    }}
+                    submitBulkEdit={selectedProductData ? handleUpdateOrderProduct : handleUpdateOrderProduct}
+                    currencySymbol={currencySymbol}
+                    data={selectedProductData}
+                    type={"product"}
+                    statusOptions={statusOptions}
+                />
+            }
         </>
     );
 };

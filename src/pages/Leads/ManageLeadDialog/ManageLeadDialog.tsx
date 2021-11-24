@@ -30,7 +30,8 @@ import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import ManageMarketSegmentDialog from "../../MarketSegment/ManageMarketSegmentDialog";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
-import {FaDiceOne} from "react-icons/fa";
+import { FaDiceOne } from "react-icons/fa";
+import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 
 const arr = [...Array(9).keys()];
 
@@ -55,6 +56,7 @@ export default function ManageLeadDialog({
   const [disableOwnerSelection] = useState(
     !isNew && user.user._id !== dataToUpdate.owner.optionValue
   );
+  const { isOffline, offlineGridData, offlineFieldsData, updateOfflineGridData, updateFieldsData } = useContext(CustomOfflineContext);
 
   const [leadData, setLeadData] = useState({
     fields: [],
@@ -175,86 +177,104 @@ export default function ManageLeadDialog({
     }
   }, []);
 
-  const getLeadFields = () => {
+  const getLeadFields = async () => {
     if (selectedEntity) {
       setLoadingData(true);
-      axiosInstance()
-        .get(`/field?resource=Lead&entity=${selectedEntity}`)
-        .then(({ data: { data } }) => {
-          const newFields = [];
 
-          const filterData = isNew
-            ? data.filter((d) => d.isCreate)
-            : data.filter((d) => d.isUpdate);
+      let data
+      if (isOffline) {
+        data = offlineFieldsData["lead"] ?? []
+      }
+      else {
+        if (selectedEntity) {
+          const response = await axiosInstance()
+            .get(`/field?resource=Lead&entity=${selectedEntity}`)
 
-          //  Initialize market segment dropdown which have parentMarketSegment === "" or that record have child
-          const marketSegmentDropdownData = filterData.map(m => m.fieldData).find(
-            (d) => d.fieldName === formFieldNames.marketSegment
-          );
-          if (marketSegmentDropdownData) {
-            setMainMarketSegmentDataSource(marketSegmentDropdownData.option);
+          data = response?.data?.data
+        } else {
+          data = [];
+        }
 
-            let initializeMarketSegmentDataSource = [];
-            marketSegmentDropdownData.option.forEach(option => {
-              if (option.parentMarketSegment === "" || marketSegmentDropdownData.option.some(s => s.parentMarketSegment === option.optionValue)) {
-                initializeMarketSegmentDataSource.push(option);
-              }
-            })
-            setMarketSegmentDataSource(initializeMarketSegmentDataSource);
+        try {
+          updateFieldsData("lead", data);
+        } catch (ex) {
+          console.error(`Lead: Error while storing data for Offline context. Error: ${ex.message}`)
+        }
+      }
+
+      const newFields = [];
+
+      const filterData = isNew
+        ? data.filter((d) => d.isCreate)
+        : data.filter((d) => d.isUpdate);
+
+      //  Initialize market segment dropdown which have parentMarketSegment === "" or that record have child
+      const marketSegmentDropdownData = filterData.map(m => m.fieldData).find(
+        (d) => d.fieldName === formFieldNames.marketSegment
+      );
+      if (marketSegmentDropdownData) {
+        setMainMarketSegmentDataSource(marketSegmentDropdownData.option);
+
+        let initializeMarketSegmentDataSource = [];
+        marketSegmentDropdownData.option.forEach(option => {
+          if (option.parentMarketSegment === "" || marketSegmentDropdownData.option.some(s => s.parentMarketSegment === option.optionValue)) {
+            initializeMarketSegmentDataSource.push(option);
           }
+        })
+        setMarketSegmentDataSource(initializeMarketSegmentDataSource);
+      }
 
-          if (isNew) {
-            filterData.map((_f) => {
-              if (isNew && userId && _f.fieldData.fieldName === "owner") {
-                _f = initializeDropdownById(
-                  _f,
-                  _f.fieldData.fieldName,
-                  userId
-                );
+      if (isNew) {
+        filterData.map((_f) => {
+          if (isNew && userId && _f.fieldData.fieldName === "owner") {
+            _f = initializeDropdownById(
+              _f,
+              _f.fieldData.fieldName,
+              userId
+            );
+          }
+          newFields.push(_f.fieldData);
+        });
+
+        if (isClone) {
+          axiosInstance()
+            .get(`${leadApi}/${leadId}?entity=${selectedEntity}`)
+            .then(({ data: { data } }) => {
+
+              const { _id, firstName, lastName, middleName, email, ...rest } = data
+              let tempData = { ...rest }
+              if (marketSegmentDropdownData) {
+                setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data?.marketSegment?.optionValue));
               }
-              newFields.push(_f.fieldData);
-            });
-
-            if (isClone) {
-              axiosInstance()
-                .get(`${leadApi}/${leadId}?entity=${selectedEntity}`)
-                .then(({ data: { data } }) => {
-
-                  const { _id, firstName, lastName, middleName, email, ...rest } = data
-                  let tempData = { ...rest }
-                  if (marketSegmentDropdownData) {
-                    setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data?.marketSegment?.optionValue));
-                  }
-                  setLeadData({
-                    fields: newFields,
-                    initialValues: getObjKeysWithValues(tempData, newFields),
-                  });
-                  setFormValues(getObjKeysWithValues(tempData, newFields))
-                })
-            }
-            else {
               setLeadData({
                 fields: newFields,
-                initialValues: getObjKeys("", newFields),
+                initialValues: getObjKeysWithValues(tempData, newFields),
               });
-              setFormValues(getObjKeys("", newFields))
-            }
+              setFormValues(getObjKeysWithValues(tempData, newFields))
+            })
+        }
+        else {
+          setLeadData({
+            fields: newFields,
+            initialValues: getObjKeys("", newFields),
+          });
+          setFormValues(getObjKeys("", newFields))
+        }
 
-            setTimeout(() => setLoadingData(false), 500);
-          } else {
-            if (marketSegmentDropdownData) {
-              setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === dataToUpdate.marketSegment?.optionValue));
-            }
+        setTimeout(() => setLoadingData(false), 500);
+      } else {
+        if (marketSegmentDropdownData) {
+          setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === dataToUpdate.marketSegment?.optionValue));
+        }
 
-            filterData.map((_f) => newFields.push(_f.fieldData));
-            setLeadData({
-              fields: newFields,
-              initialValues: getObjKeysWithValues(dataToUpdate, newFields),
-            });
-            setFormValues(getObjKeysWithValues(dataToUpdate, newFields))
-            setTimeout(() => setLoadingData(false), 500);
-          }
+        filterData.map((_f) => newFields.push(_f.fieldData));
+        setLeadData({
+          fields: newFields,
+          initialValues: getObjKeysWithValues(dataToUpdate, newFields),
         });
+        setFormValues(getObjKeysWithValues(dataToUpdate, newFields))
+        setTimeout(() => setLoadingData(false), 500);
+      }
     }
   };
 
@@ -420,7 +440,7 @@ export default function ManageLeadDialog({
                           form.name && (
                             <div key={i}>
                               <div className={"detail-box-content"}>
-                                <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
                                 <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
                               </div>
                               <Box marginY={2}>

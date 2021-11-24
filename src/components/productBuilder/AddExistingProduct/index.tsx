@@ -4,7 +4,7 @@ import Button from '@material-ui/core/Button';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import Dialog from '@material-ui/core/Dialog'
 import axiosInstance from '../../../axios/axiosInstance'
-import { gridLoadingTimeout, isObjectEmpty, product } from '../../../constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, product } from '../../../constants/helpers';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
@@ -18,7 +18,7 @@ import routes from "../../../components/Helpers/Routes";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import TextField from "@material-ui/core/TextField";
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import { prepareDataForGrid } from "../../../constants/helpers";
 
 var levalOrderBy = [
@@ -32,6 +32,7 @@ var levalOrderBy = [
 
 const ignoreField = ["qty", "priceTemplate"]
 const renderedFrom = "productPage";
+const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
 const AddExistingProduct = (props) => {
 
@@ -53,8 +54,7 @@ const AddExistingProduct = (props) => {
     const [productCategory, setProductCategory] = useState(null);
     const [productTemplate, setProductTemplate] = useState(null);
     const [isProductTemplate, setIsProductTemplate] = useState(true);
-
-    const localStorageSelectedRecords = `${renderedFrom}_selected`;
+    const {getColumnData} = useColumns();
 
     useEffect(() => {
         axiosInstance().get("/product-category?sortBy=name&orderBy=asc").then(({ data: { data } }) => {
@@ -132,9 +132,8 @@ const AddExistingProduct = (props) => {
         let deepFilter = `?page=${page}&limit=${limit}`;
 
         if (showFilteredRecordsOnly) {
-            const savedIds = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedIds)}`;
-          }
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id))}`;
+        }
 
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
@@ -172,19 +171,9 @@ const AddExistingProduct = (props) => {
 
     const fetchProduct = () => {
         dispatch({ type: "loading", loading: true });
-        
+
         if (gridApi) {
             gridApi.setRowData([]);
-        }
-
-        let oldSelectedRecords = [];
-        const localStorageKey = `${renderedFrom}_selected`;
-        try {
-            if (localStorage.getItem(localStorageKey)) {
-                oldSelectedRecords = [...JSON.parse(localStorage.getItem(localStorageKey))]
-            }
-        } catch (ex) {
-            console.error("Error is parsing products localstorage value")
         }
 
         const queryString = getQueryString();
@@ -297,40 +286,44 @@ const AddExistingProduct = (props) => {
     }
 
     const handleAdd = () => {
-        console.log(productList)
-        let rows = productList.filter(
-            (val) => selectedRecords.filter((u) => val._id === u._id).length > 0
-        );
-        rows.forEach((_d) => {
-            _d.productId = _d._id
-            if (_d.fields) {
-                const qtyField = _d.fields.filter((_f) => _f.fieldName === "qty")
-                if (qtyField.length) {
-                    if (!qtyField[0].isFormula) {
-                        _d.qty = 0
+        dispatch({ type: "loading", loading: true });
+
+        axiosInstance().get(`${product.api}?limit=0&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords).map(m => m._id))}`).then(({ data: { data } }) => {
+            data.forEach((_d) => {
+                _d.productId = _d._id
+                if (_d.fields) {
+                    const qtyField = _d.fields.filter((_f) => _f.fieldName === "qty")
+                    if (qtyField.length) {
+                        if (!qtyField[0].isFormula) {
+                            _d.qty = 0
+                        }
                     }
                 }
-            }
-            delete _d.id
-            delete _d.brand
-            delete _d.createdBy
-            delete _d.updatedBy
-            delete _d.fields
-            for (const [key, value] of Object.entries(_d)) {
-                if (typeof value === 'object' && value && value["optionValue"]) {
-                    _d[key] = value["optionValue"]
+                delete _d.id
+                delete _d.brand
+                delete _d.createdBy
+                delete _d.updatedBy
+                delete _d.fields
+                for (const [key, value] of Object.entries(_d)) {
+                    if (typeof value === 'object' && value && value["optionValue"]) {
+                        _d[key] = value["optionValue"]
+                    }
+                    if (Array.isArray(value) && value.length && value[0].optionValue) {
+                        const entity = []
+                        value && value.forEach((ele) => {
+                            entity.push(ele.optionValue)
+                        })
+                        _d[key] = entity
+                    }
                 }
-                if (Array.isArray(value) && value.length && value[0].optionValue) {
-                    const entity = []
-                    value && value.forEach((ele) => {
-                        entity.push(ele.optionValue)
-                    })
-                    _d[key] = entity
-                }
-            }
-        })
-        addProductInBuilder(rows)
-        handleClose()
+            })
+            addProductInBuilder(data)
+            handleClose();
+
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
+            dispatch({ type: "loading", loading: false });
+        });
     }
 
     return (<Dialog
@@ -405,8 +398,8 @@ const AddExistingProduct = (props) => {
                             value={search}
                         />
                         <Box ml={1} mt={1} >
-                            <Button size="small" color="primary" onClick={handleAdd} variant="contained" disabled={selectedRecords.length > 0 ? false : true}  >
-                                {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
+                            <Button size="small" color="primary" onClick={handleAdd} variant="contained" disabled={getLocalStorageArrayData(localStorageSelectedRecords).length > 0 ? false : true}>
+                                {getLocalStorageArrayData(localStorageSelectedRecords).length ? "(" + getLocalStorageArrayData(localStorageSelectedRecords).length + ")  " : ""}
                                 Add</Button>
                         </Box>
                     </Grid>

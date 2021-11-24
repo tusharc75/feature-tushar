@@ -104,6 +104,8 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
               return <Grid key={index} item xs={12} sm={6} md={4}>
                 <Card className="detailCard">
                   <CardContent className="detailListing">
+                    <div className="cardStyle"> </div>
+                    <Grid item xs={12}>
                     <Grid container className="detailCardHeader">
                       <Grid item xs={12} sm={12}>
                         {
@@ -131,6 +133,7 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                           <DisplayData key="3" label='Phone' showCopyToText={true} icon={<BiPhone size={15} />} value={obj.phone || ''} />
                         }
                       </Grid>
+                    </Grid>
                     </Grid>
                   </CardContent>
                 </Card>

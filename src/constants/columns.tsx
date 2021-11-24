@@ -13,6 +13,11 @@ import {
     CheckboxRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
 
+import {sidebarResourceObjectFromValues} from './helpers';
+
+const permissions : any = {}
+
+const permissionForLinks = sidebarResourceObjectFromValues();
 
 export const staticFrameworkRender = {
     "createdByRenderer": CreatedByRenderer,
@@ -108,11 +113,19 @@ export const getStaticFields = () => {
         { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
         { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }]
 }
+export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
+    let data = localStorage.getItem("gridMetaData")
+    let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
+    if (gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom].hide.length) {
+        return gridMetaData[renderedFrom].hide.indexOf(fieldName) >= 0 ? false : true
+    }
+    return true
+}
 
 export const checkStaticField = (renderedFrom, fieldData) => {
     let data = localStorage.getItem("gridMetaData")
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
-    if (gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom].hide.length) {
+    if (gridMetaData && gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom].hide.length) {
         return {
             ...fieldData,
             show: gridMetaData[renderedFrom].hide.indexOf(fieldData?.field) >= 0 ? false : true
@@ -121,17 +134,31 @@ export const checkStaticField = (renderedFrom, fieldData) => {
     return fieldData
 }
 
+export const getSortedColumns = (columns = []) => {
+    return columns.sort(function (a, b) {
+        let columnNameA = a.headerName.toUpperCase(); // ignore upper and lowercase
+        let columnNameB = b.headerName.toUpperCase(); // ignore upper and lowercase
+        if (columnNameA < columnNameB) {
+            return -1;
+        }
+        if (columnNameA > columnNameB) {
+            return 1;
+        }
+        return 0;
+    })
+}
 export const staticColumns = ["createdBy", "updatedBy"]
 export const getColumnData = (title, field, detailScreenRoute = null, hasPopup = false) => {
     let data = localStorage.getItem("gridMetaData")
 
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
+
     if (!gridMetaData) {
         gridMetaData = {}
     }
 
     let updatedTitle = camelCase(title)
-    if (gridMetaData[updatedTitle]?.hidden && gridMetaData[updatedTitle]?.hidden.indexOf(field?.fieldName) >= 0) {
+    if (gridMetaData[title]?.hidden && gridMetaData[title]?.hidden.indexOf(field?.fieldName) >= 0) {
         return null
     }
     else if (hideColumns.indexOf(field?.fieldName) >= 0) {
@@ -142,8 +169,8 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
         let commonFieldData = {
             field: field?.fieldName,
             headerName: fieldHeaderName,
-            show: gridMetaData[updatedTitle]?.hide && gridMetaData[updatedTitle]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
-            disabled: gridMetaData[updatedTitle]?.disabled && gridMetaData[updatedTitle]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
+            show: gridMetaData[title]?.hide && gridMetaData[title]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
+            disabled: gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
             primaryField: field?.primaryField ?? false
         }
         if (field?.fieldName === "firstName" && field?.primaryField === false) {
@@ -168,10 +195,10 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
                     ...commonFieldData,
                     disabled: true,
                     field: field?.fieldName === "firstName" ? "concatedName" : field.fieldName,
-                    cellRenderer: "linkRenderer",
+                    cellRenderer: permissions[permissionForLinks[field?.lookupResource]]?.isRead ? "linkRenderer" : "commonRenderer",
                     cellRendererParams: { "pathName": detailScreenRoute, "property": "_id", isForPopup: hasPopup }
                 },
-                rendererName: 'linkRenderer',
+                rendererName: permissions[permissionForLinks[field?.lookupResource]]?.isRead ? "linkRenderer" : "commonRenderer",
             }
         }
         else if (field?.lookup) {
@@ -198,13 +225,13 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
             return {
                 columnData: {
                     ...commonFieldData,
-                    cellRenderer: "linkRenderer",
+                    cellRenderer:permissions[permissionForLinks[field?.lookupResource]]?.isRead ? "linkRenderer" : "commonRenderer",
                     cellRendererParams: {
                         "pathName": pathName, "property": joinedFieldName + 'Id',
                         isForPopup: isForPopup, "more": `rest${joinedFieldName}`
                     }
                 },
-                rendererName: 'linkRenderer',
+                rendererName: permissions[permissionForLinks[field?.lookupResource]]?.isRead ? "linkRenderer" : "commonRenderer",
             }
         }
         else if (isRenderWithCopy(field?.type)) {

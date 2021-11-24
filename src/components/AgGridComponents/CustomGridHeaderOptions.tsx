@@ -5,24 +5,28 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
-import { disabledColumns } from "../../constants/columns"
+import { disabledColumns, getSortedColumns } from "../../constants/columns"
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 
 let timeout
 export default function CustomGridHeaderOptions({ columns, setColumns, columnApi,
-  refreshGrid = null, renderedFrom = null, isClientSideGrid = false, dispatch: gridDispatch = null, showOnlyShowFilteredRecordSwitch = false }) {
+  refreshGrid = null, renderedFrom = null, isClientSideGrid = false, dispatch: gridDispatch = null, showOnlyShowFilteredRecordSwitch = false,
+  saveColumnOptions = false
+}) {
 
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
   const [checked, setChecked] = useState(false);
   const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null);
   const { isOffline } = useContext(CustomOfflineContext);
-  const { state: { user, gridMetaData } }: any = useData();
+  const { state: { user } }: any = useData();
   const { dispatch }: any = useData();
+
 
   const updateGridHiddenColumns = (hiddenColumns = []) => {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(function () {
-      let request = { ...gridMetaData }
+      let data = localStorage.getItem("gridMetaData")
+      let request = (data == 'undefined') ? {} : { ...JSON.parse(data) }
       if (request[renderedFrom]) {
         request[renderedFrom].hide = [...hiddenColumns]
       }
@@ -99,7 +103,7 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
         >
           <FormControl component="fieldset" className="px-3 py-2">
             <FormGroup>
-              {columns.map((column: any, index) => {
+              {getSortedColumns(columns).map((column: any, index) => {
                 return (
                   <Tooltip key={index} title={column.disabled ? 'Main columns are always visible' : ''}>
                     <FormControlLabel
@@ -122,7 +126,7 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
                             const nonHiddenColumns = newColumns.filter((d) => d.show).map((m) => m.field);
                             columnApi.setColumnsVisible(hiddenColumns, false);
                             columnApi.setColumnsVisible(nonHiddenColumns, true);
-                            if (!isClientSideGrid) {
+                            if ((!isClientSideGrid) || saveColumnOptions) {
                               let tempColumnState = columnApi.getColumnState()
                               let hidedColumns = tempColumnState.filter(o => o?.hide)
                                 .map(o => o?.colId)

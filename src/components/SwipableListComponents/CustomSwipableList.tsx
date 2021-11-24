@@ -3,11 +3,12 @@ import { Grid, Checkbox, FormControlLabel, Fab, Chip, Tooltip, Menu, MenuItem, I
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { isMobile } from 'react-device-detect';
 import AddIcon from "@material-ui/icons/Add";
-import { MdDelete } from "react-icons/md";
 import { dateFormat } from '../../constants/helpers';
 import moment from 'moment';
 import { BiEdit } from 'react-icons/bi';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { MdAccountCircle, MdDelete, MdEdit, } from "react-icons/md";
+import { FaCopy, FaSuitcase } from "react-icons/all";
 
 //  Swipe functionalities are removed as we are facing overlap issue in mobile quote details screen
 export default function CustomSwipableList({
@@ -71,7 +72,7 @@ export default function CustomSwipableList({
     return <>
         {
             allowSelection && <Grid container>
-                <Grid item xs={12} sm={12} className="pl-2 border-bottom">
+                <Grid item xs={12} sm={12} className="border-bottom all-check-box">
                     <FormControlLabel
                         control={
                             <Checkbox
@@ -196,7 +197,7 @@ export default function CustomSwipableList({
                                         }
                                     </div>
                                     {
-                                    chips.length > 0 &&
+                                        chips.length > 0 &&
                                         <div className="d-flex gap-2 mt-1 mb-1 flex-wrap ml-2">
                                             {
                                                 [
@@ -211,7 +212,7 @@ export default function CustomSwipableList({
                                         </div>
                                     }
                                     {
-                                        d[owerCollaboratorInitialsOrImages]?.length > 0 && <div className="avatars ml-2 mt-2">
+                                        owerCollaboratorInitialsOrImages && d[owerCollaboratorInitialsOrImages]?.length > 0 && <div className="avatars ml-2 mt-2">
                                             {
                                                 [...d[owerCollaboratorInitialsOrImages].slice(0, 5)].map((d, index) => (
                                                     <span className="avatars__item" key={index}>

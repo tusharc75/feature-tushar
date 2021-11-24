@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState, useReducer } from 'react';
 import { useData } from '../../StateProvider/Provider';
-import { Button, Menu, MenuItem, Tooltip, IconButton, Grid, Chip, MenuList, Box } from '@material-ui/core';
+import { Button, Menu, MenuItem, Tooltip, IconButton, Grid, Chip, MenuList } from '@material-ui/core';
 import ReactGa from 'react-ga';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import { ExpandMore, AddOutlined } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
@@ -38,12 +38,13 @@ import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes"
 import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import { HiBadgeCheck } from "react-icons/hi"
-import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
-import { FcProcess } from "react-icons/fc";
-import { isMobile } from 'react-device-detect';
-import { MdEmail } from 'react-icons/md';
-import { AiFillPhone } from 'react-icons/ai';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
+import { useLocation } from 'react-router-dom';
+import queryString from 'query-string';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { GridApi } from 'ag-grid-community';
+
 const AccTypes = [
   {
     key: 'All Accounts',
@@ -59,19 +60,29 @@ const options = ['All', 'Approved', 'Disapproved'];
 
 let accountTimeout;
 export default function Account(props) {
+  const location = useLocation();
+
+  let queryParams = queryString.parse(location.search);
+  let queryType: string = queryParams.type as string;
+  let queryApproval: string = queryParams.approval as string;
+  let querySearch: string = queryParams.search as string;
+  let queryPage: string = queryParams.page as string;
+  let queryColFilter: string = queryParams.colFilter as string;
+
   const toastConfig = useContext(CustomToastContext);
+  const {getColumnData} = useColumns();
 
   const {
     account: { accountApi, accountResource, accountRoute }
   } = props;
-
+  const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
   const {
     state: { user, permissions, selectedEntity }, dispatch: entityDispatch
   }: any = useData();
   const history = useHistory();
   const [cloneId, setCloneId] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
-  const [type, setType] = useState(options[0]);
+  const [type, setType] = useState(options[queryApproval === 'Approved' ? 1 : queryApproval === 'Disapproved' ? 2 : 0]);
   const [renderCount, setRenderCount] = useState(0);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
@@ -79,9 +90,6 @@ export default function Account(props) {
   const [selectedType, setselectedType] = useState(1);
   const [accountId, setAccountId] = useState(null)
   const [showEntityDialog, setShowEntityDialog] = useState(false)
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([])
-  const localStorageSelectedRecords = `${"accountResource"}_selected`;
 
   const [singleAccountDelete, setSingleAccountDelete] = useState({
     id: null,
@@ -106,18 +114,21 @@ export default function Account(props) {
   const [open, setOpen] = React.useState(false);
   const [entities, setEntities] = useState([])
   const anchorRef = React.useRef<HTMLDivElement>(null);
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
-  const [filter, setFilter] = useState('All Accounts');
+  const [selectedIndex, setSelectedIndex] = React.useState(queryApproval === 'Approved' ? 1 : queryApproval === 'Disapproved' ? 2 : 0);
+  const [filter, setFilter] = useState(queryType ? queryType : 'All Accounts');
   const [accountNameForClone, setAccountNameForClone] = useState('');
+
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const [columns, setColumns] = useState([])
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
+
+
+
   const columnState = JSON.parse(localStorage.getItem(accountResource));
 
 
@@ -132,25 +143,85 @@ export default function Account(props) {
   }
 
   useEffect(() => {
+    if (queryPage === undefined) {
+      history.replace(`?page=${page}`)
+    }
+    if (page > 0) {
+      history.replace(
+        queryType && queryApproval && queryColFilter && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
+          : queryType && queryApproval && queryColFilter ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}`
+            : queryType && queryApproval && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
+              : queryType && querySearch && queryColFilter ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
+                : queryApproval && querySearch && queryColFilter ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&seach=${search}`
+                  : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
+                    : queryType && queryColFilter ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+                      : queryType && querySearch ? `?page=${page}&type=${queryType}&search=${querySearch}`
+                        : queryApproval && queryColFilter ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
+                          : queryApproval && querySearch ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
+                            : queryColFilter && querySearch ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+                              : queryType ? `?page=${page}&type=${queryType}`
+                                : queryApproval ? `?page=${page}&approval=${queryApproval}`
+                                  : queryColFilter ? `?page=${page}&colFilter=${queryColFilter}`
+                                    : querySearch ? `?page=${page}&search=${querySearch}`
+                                      : `?page=${page}`
+      )
+    }
+
+    else {
+      history.replace(
+        queryType && queryApproval && queryColFilter && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
+          : queryType && queryApproval && queryColFilter ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}`
+            : queryType && queryApproval && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
+              : queryType && querySearch && queryColFilter ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
+                : queryApproval && querySearch && queryColFilter ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&seach=${search}`
+                  : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
+                    : queryType && queryColFilter ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+                      : queryType && querySearch ? `?page=${page}&type=${queryType}&search=${querySearch}`
+                        : queryApproval && queryColFilter ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
+                          : queryApproval && querySearch ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
+                            : queryColFilter && querySearch ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+                              : queryType ? `?page=${page}&type=${queryType}`
+                                : queryApproval ? `?page=${page}&approval=${queryApproval}`
+                                  : queryColFilter ? `?page=${page}&colFilter=${queryColFilter}`
+                                    : querySearch ? `?page=${page}&search=${querySearch}`
+                                      : `?page=${page}`
+      )
+
+    }
+  }, [page, queryPage]);
+
+  useEffect(() => {
     fetchGridColumns()
   }, [])
 
   const fetchGridColumns = async () => {
 
-    const response = await axiosInstance()
-      .get(`/field?resource=${sidebarResource[accountResource]}`)
 
-    let data = response?.data?.data
+    let data
+    if (isOffline) {
+      data = offlineFieldsData[accountResource] ?? []
+    }
+    else {
+      const response = await axiosInstance()
+        .get(`/field?resource=${sidebarResource[accountResource]}`)
+
+      data = response?.data?.data
+      try {
+        updateFieldsData(accountResource, data);
+      } catch (ex) {
+        console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`)
+      }
+    }
 
     let columns = []
     let rendererNames = []
+
     data.forEach(o => {
       if (["accountName"].indexOf(o?.fieldData?.fieldName) === 0) {
         columns = [...columns, {
           pivotIndex: 0,
           field: 'accountName', headerName: 'Account Name', show: true, disabled: true,
-          cellRenderer: 'accountNameRenderer',
-          primaryField: true
+          cellRenderer: 'accountNameRenderer'
         }]
       }
       else {
@@ -180,20 +251,26 @@ export default function Account(props) {
       { field: 'lead', headerName: 'Related Lead', show: true, cellRenderer: 'leadRenderer' }
       ]
     }
+
     let staticFields = getStaticFields()
     staticFields.forEach(field => {
       columns.push(checkStaticField(routes.projectSales.title, field))
     })
     setColumns([...columns])
+
+    if (JSON.parse(sessionStorage.getItem("filters")) !== null) {
+      let savedFilter = JSON.parse(sessionStorage.getItem("filters"));
+      dispatch({ type: 'filter', filters: savedFilter });
+
+
+    }
   }
-  //  Grid Variables - End
 
   useEffect(() => {
     if (permissions) {
       setAccountPermissions(permissions[accountResource]);
     }
   }, [permissions]);
-
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -211,7 +288,99 @@ export default function Account(props) {
     if (renderCount > 0) {
       fetchAccounts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, type, filters, sorting, selectedEntity]);
+  }, [page, limit, selectedType, type, sorting, selectedEntity, location]);
+
+
+  useEffect(() => {
+    if (search) {
+      history.replace(
+        queryType && queryApproval && queryColFilter ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
+          : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${search}`
+            : queryType && queryColFilter ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${search}`
+              : queryApproval && queryColFilter ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
+                : queryType ? `?page=${page}&type=${queryType}&search=${search}`
+                  : queryApproval ? `?page=${page}&approval=${queryApproval}&search=${search}`
+                    : queryColFilter ? `?page=${page}&colFilter=${queryColFilter}&search=${search}`
+                      : `?page=${page}&search=${search}`)
+    } else {
+      history.replace(
+        queryType && queryApproval && queryColFilter ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}`
+          : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
+            : queryType && queryColFilter ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+              : queryApproval && queryColFilter ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
+                : queryType ? `?page=${page}&type=${queryType}`
+                  : queryApproval ? `?page=${page}&approval=${queryApproval}`
+                    : queryColFilter ? `?page=${page}&colFilter=${queryColFilter}`
+                      : `?page=${page}`
+
+      )
+    }
+  }, [search])
+
+
+
+
+  useEffect(() => {
+    if (querySearch) {
+      dispatch({ type: 'search', search: querySearch });
+
+    }
+  }, [querySearch])
+
+
+  useEffect(() => {
+    if (Object.keys(filters).length > 0) {
+      sessionStorage.setItem("filters", JSON.stringify(filters))
+
+
+      let serialize = function (obj) {
+        var str = [];
+        for (var p in obj)
+          if (obj.hasOwnProperty(p)) {
+            str.push("{colName=" + encodeURIComponent(p) + "," + "colValue=" + encodeURIComponent(obj[p].filter) + "}");
+          }
+        return str.join(",");
+      }
+
+
+      history.replace(
+        queryType && queryApproval && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+          : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=[${serialize(filters)}]`
+            : queryType && querySearch ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+              : queryApproval && querySearch ? `?page=${page}&approval=${queryApproval}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+                : queryType ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
+                  : queryApproval ? `?page=${page}&approval=${queryApproval}&colFilter=[${serialize}]`
+                    : querySearch ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+                      : `?page=${page}&colFilter=[${serialize(filters)}]`
+
+      )
+    }
+
+    if (Object.keys(filters).length === 0 && queryColFilter !== undefined) {
+      history.replace(
+        queryType && queryApproval && querySearch ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
+          : queryType && queryApproval ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
+            : queryType && querySearch ? `?page=${page}&type=${queryType}&search=${querySearch}`
+              : queryApproval && querySearch ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
+                : queryType ? `?page=${page}&type=${queryType}`
+                  : queryApproval ? `?page=${page}&approval=${queryApproval}`
+                    : querySearch ? `?page=${page}&search=${querySearch}`
+                      : `?page=${page}`
+
+      )
+
+
+
+    }
+    if (Object.keys(filters).length === 0 && queryColFilter === undefined) {
+      sessionStorage.removeItem("filters")
+    }
+
+  }, [filters])
+
+
+
+
 
   const AccountNameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
@@ -243,7 +412,7 @@ export default function Account(props) {
             className="link"
             onClick={() => {
               handleEntityChange(params.data.leadEntity)
-              history.push(`${routes.leadDetail.path}/${params.data.leadId}`)
+              history.replace(`${routes.leadDetail.path}/${params.data.leadId}`)
             }}
             title={params.value}
           >
@@ -436,7 +605,8 @@ export default function Account(props) {
   };
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterAccounts=${selectedType}`;
+
+    let deepFilter = `?page=${page}&limit=${limit}&filterAccounts=${queryType === "My Accounts" ? 2 : selectedType}`;
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -447,14 +617,16 @@ export default function Account(props) {
       updatedFilters.push({ field: 'staticData.approved', term: type === 'Approved' });
     }
 
-    if (!isObjectEmpty(filters)) {
+    if (JSON.parse(sessionStorage.getItem("filters")) !== null) {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
         });
       });
+
     }
+
     deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
 
     if (sorting.length > 0) {
@@ -462,6 +634,7 @@ export default function Account(props) {
     }
 
     if (search) {
+
       deepFilter = `${deepFilter}&search=${search}`;
     }
     return deepFilter;
@@ -475,6 +648,15 @@ export default function Account(props) {
     setSelectedIndex(index);
     menuOptionSelection(index);
     setOpen(false);
+    history.replace(
+      queryType && queryColFilter && querySearch ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}&search=${querySearch}`
+        : queryType && queryColFilter ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}`
+          : queryType && querySearch ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}&search=${search}`
+            : querySearch && queryColFilter ? `?page=${page}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}&search=${search}`
+              : queryType ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}`
+                : queryColFilter ? `?page=${page}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}`
+                  : querySearch ? `?page=${page}&approval=${encodeURIComponent(options[index])}&search=${search}`
+                    : `?page=${page}&approval=${encodeURIComponent(options[index])}`)
   };
 
   const handleToggle = () => {
@@ -497,84 +679,53 @@ export default function Account(props) {
 
     if (gridApi) {
       gridApi.setRowData([]);
+
+
     }
 
-    axiosInstance()
-      .get(`${accountApi}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
+    let data, count;
 
-          let finalObject = prepareDataForGrid(u, user);
-          finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
-          finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
-          finalObject["allowedToEdit"] = (
-            [...(u.collaborator ?? []), u.owner].some(
-              (d) => d?.optionValue === user?.user?._id
-            )
-          );
-          finalObject["owerCollaboratorInitialsOrImages"] = [];
-          if (finalObject["owner"])
-            finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] });
+    if (!isOffline) {
+      const response: any = await axiosInstance().get(`${accountApi}${queryString}`);
 
-          finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
-            if (f.initials) {
-              f.initials = f.initials.split(" ").map((i) => i[0]).join("");
-            }
-          })
-          let res = {
-            ...finalObject,
-            canDelete: u.owner?.optionValue === user?.user._id,
+      data = response?.data?.data;
+      count = response?.data?.count;
+    }
+    else {
+      data = offlineGridData && offlineGridData[accountResource] || [];
+      count = offlineGridData && offlineGridData[accountResource]?.length || 0;
+    }
 
-            isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
-            lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
-            leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
-            leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
-            approved: u.staticData?.approved,
+    try {
+      updateOfflineGridData(accountResource, data);
+    } catch (ex) {
+      console.error(`${accountResource}: Error while storing data for Offline context. Error: ${ex.message}`)
+    }
 
-            masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
-            masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : '',
+    let rows = data.map((u) => {
 
-          };
-          return res;
-        });
-        setIsAllChecked(false);
-        setClonedData(data);
-        if (appendRows) {
-          dispatch({
-            type: "initialize", data: [...dataRows, ...rows],
-            count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: "initialize", data: rows, count: count,
-            selectedRecords: rows.filter(f => f.isChecked === true)
-          });
-        }
+      let finalObject = prepareDataForGrid(u, user);
+      let res = {
+        ...finalObject,
+        canDelete: u.owner?.optionValue === user?.user._id,
 
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
-            if (oldSelectedRecords.length > 0) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(
-                  oldSelectedRecords.some((o) => o === node.data._id)
-                );
-              });
-            }
-          } catch (ex) {
-            console.error("Error in getting selected records from local storage")
-          }
-        }
-        dispatch({ type: 'initialize', data: rows, count: count });
+        isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
+        lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
+        leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
+        leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
+        approved: u.staticData?.approved,
 
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        dispatch({ type: 'loading', loading: false });
-      });
+        masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
+        masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : '',
+
+      };
+      return res;
+    });
+    dispatch({ type: 'initialize', data: rows, count: count });
+
+    setTimeout(() => {
+      dispatch({ type: 'loading', loading: false });
+    }, gridLoadingTimeout);
   };
 
   const cloneAccount = async (data) => {
@@ -585,6 +736,7 @@ export default function Account(props) {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
+
   };
 
   // ****** ACTIONS BUTTON STUFF *********
@@ -728,8 +880,19 @@ export default function Account(props) {
     if (newFilter != null) {
       setFilter(newFilter);
       handleAccountSelect(AccTypes.find((d) => d.key === newFilter).value);
+      history.replace(
+        queryApproval && queryColFilter && querySearch ? `?page=${page}&type=${newFilter}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
+          : queryApproval && queryColFilter ? `?page=${page}&type=${newFilter}&approval=${queryApproval}&colFilter=${queryColFilter}`
+            : queryApproval && querySearch ? `?page=${page}&type=${newFilter}&approval=${queryApproval}&search=${search}`
+              : queryColFilter && querySearch ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}&search=${search}`
+                : queryApproval ? `?page=${page}&type=${newFilter}&approval=${queryApproval}`
+                  : queryColFilter ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}`
+                    : querySearch ? `?page=${page}&type=${newFilter}&search=${search}`
+                      : `?page=${page}&type=${newFilter}`)
     }
   };
+
+
 
   return (
     <>
@@ -762,198 +925,213 @@ export default function Account(props) {
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
               <div className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
                 <MdAccountCircle className="headerLogo" /> <span id="resourceHeader" className="listingHeader">{routes[accountResource].title}</span>
-                <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`}>
-                  {AccTypes && (
-                    <ToggleButtonGroup
-                      id="resourceTypeSelector"
-                      size="small"
-                      className={`ml-8 ${accountClass.accountActions}`}
-                      value={filter}
-                      exclusive
-                      onChange={handleFilter}
-                    >
-                      {AccTypes.map((k: any, index) => {
-                        return (
-                          <ToggleButton value={k.key} key={index}>
-                            {k.key}
-                          </ToggleButton>
-                        );
-                      })}
-                    </ToggleButtonGroup>
-                  )}
-                  <ButtonGroup
-                    id="approveDisapprove"
-                    size="small"
-                    className={accountClass.accountActions}
-                    variant="outlined"
-                    color="primary"
-                    ref={anchorRef}
-                    aria-label="small outlined button group"
-                  >
-                    <Button>{options[selectedIndex]}</Button>
-                    <Button
-                      color="primary"
-                      size="small"
-                      aria-controls={open ? 'split-button-menu' : undefined}
-                      aria-expanded={open ? 'true' : undefined}
-                      aria-label="select merge strategy"
-                      aria-haspopup="menu"
-                      onClick={handleToggle}
-                    >
-                      <ArrowDropDownIcon />
-                    </Button>
-                  </ButtonGroup>
-                  <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
-                    {({ TransitionProps, placement }) => (
-                      <Grow
-                        {...TransitionProps}
-                        style={{
-                          transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
-                        }}
+
+                {
+                  isOffline
+                    ? <></>
+                    : <div className={`d-flex align-items-center gap-1 layout-for-mobile ${accountClass.account_header_add_btn_action_btn_group}`}>
+
+                      {AccTypes && (
+                        <ToggleButtonGroup
+                          id="resourceTypeSelector"
+                          size="small"
+                          className={`ml-8 ${accountClass.accountActions}`}
+                          value={filter}
+                          exclusive
+                          onChange={handleFilter}
+                        >
+                          {AccTypes.map((k: any, index) => {
+                            return (
+                              <ToggleButton value={k.key} key={index} >
+
+                                {k.key}
+
+                              </ToggleButton>
+                            );
+                          })}
+                        </ToggleButtonGroup>
+                      )}
+
+                      <ButtonGroup
+                        id="approveDisapprove"
+                        size="small"
+                        className={accountClass.accountActions}
+                        variant="outlined"
+                        color="primary"
+                        ref={anchorRef}
+                        aria-label="small outlined button group"
                       >
-                        <Paper>
-                          <ClickAwayListener onClickAway={handleClose}>
-                            <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
-                              {options.map((option, index) => (
-                                <MenuItem
-                                  key={option}
-                                  selected={index === selectedIndex}
-                                  onClick={(event) => handleMenuItemClick(event, index)}
-                                  style={{ color: 'black' }}
-                                >
-                                  {option}
-                                </MenuItem>
-                              ))}
-                            </MenuList>
-                          </ClickAwayListener>
-                        </Paper>
-                      </Grow>
-                    )}
-                  </Popper>
-                </div>
-              </div>
-            </Grid>
-            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1" justify="flex-end">
-              <Grid id="resourceOperations" className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
-                <Box className={styles.filter_side_header} component="div" >
-                  <div className="d-flex gap-2">
-                    <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="100%" value={search} />
-                    <div className="d-flex gap-2">
-                      {accountPermissions.isCreate && !isMobile && (
+                        <Button>{queryApproval ? queryApproval : options[selectedIndex]}</Button>
                         <Button
-                          variant="contained"
                           color="primary"
                           size="small"
-                          onClick={clickCreateNew}
-                          startIcon={<AddOutlined />}
+                          aria-controls={open ? 'split-button-menu' : undefined}
+                          aria-expanded={open ? 'true' : undefined}
+                          aria-label="select merge strategy"
+                          aria-haspopup="menu"
+                          onClick={handleToggle}
+                          className="all-button"
                         >
-                          Add
+
+                          <ArrowDropDownIcon className="all-button-sub-icon" />
                         </Button>
-                      )}
-                      {(accountPermissions.isDelete || accountPermissions.approveAccount) && (
-                        <Button
-                          disabled={selectedRecords.length === 0}
-                          variant="outlined"
-                          color="default"
-                          size="small"
-                          onClick={openActions}
-                          aria-controls="action-menu"
-                        >
-                          Actions <ExpandMore />
-                        </Button>
-                      )}
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        {accountPermissions.isUpdate && accountPermissions.approveAccount && (
-                          <MenuItem
-                            disabled={selectedRecords.filter((d) => !d.approved).length === 0}
-                            onClick={() => {
-                              closeActions();
-                              setMultipleApproveDisapproveAccount({
-                                show: true,
-                                approved: true,
-                                selectedRecords: selectedRecords.filter((d) => !d.approved).length
-                              });
+                      </ButtonGroup>
+                      <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
+                        {({ TransitionProps, placement }) => (
+                          <Grow
+                            {...TransitionProps}
+                            style={{
+                              transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
                             }}
                           >
-                            Approve Accounts &nbsp; <Chip size="small" label={selectedRecords.filter((d) => !d.approved).length} />
-                          </MenuItem>
+                            <Paper>
+                              <ClickAwayListener onClickAway={handleClose}>
+                                <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
+                                  {options.map((option, index) => (
+                                    <MenuItem
+                                      key={option}
+                                      selected={index === selectedIndex}
+                                      onClick={(event) => handleMenuItemClick(event, index)}
+                                      style={{ color: 'black' }}
+                                    >
+                                      {option}
+
+                                    </MenuItem>
+                                  ))}
+                                </MenuList>
+                              </ClickAwayListener>
+                            </Paper>
+                          </Grow>
                         )}
-                        {accountPermissions.isUpdate && accountPermissions.approveAccount && (
-                          <MenuItem
-                            disabled={selectedRecords.filter((d) => d.approved).length === 0}
-                            onClick={() => {
-                              closeActions();
-                              setMultipleApproveDisapproveAccount({
-                                show: true,
-                                approved: false,
-                                selectedRecords: selectedRecords.filter((d) => d.approved).length
-                              });
-                            }}
-                          >
-                            Disapprove Accounts &nbsp; <Chip size="small" label={selectedRecords.filter((d) => d.approved).length} />
-                          </MenuItem>
-                        )}
-                        {accountPermissions.isDelete && (
-                          <MenuItem
-                            disabled={selectedRecords.length === 0}
-                            onClick={() => {
-                              if (selectedRecords.some((d) => d.canDelete === false)) {
-                                closeActions();
-                                setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
-                              } else {
-                                closeActions();
-                                setShowDeleteConfirmBox(true);
-                              }
-                            }}
-                          >
-                            Delete
-                          </MenuItem>
-                        )}
-                        {accountPermissions.isUpdate && (
-                          <MenuItem
-                            disabled={selectedRecords.length === 0}
-                            onClick={() => {
-                              if (selectedRecords.some((d) => d?.isAllowedToUpdate === false)) {
-                                closeActions();
-                                setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
-                              } else {
-                                closeActions();
-                                if (selectedRecords.length) {
-                                  let entities = []
-                                  selectedRecords.map(current => {
-                                    if (current?.entityId) {
-                                      entities = [...entities, current?.entityId]
-                                    }
-                                    if (current?.restentity) {
-                                      let restEntities = current?.restentity.map(o => o.optionValue)
-                                      entities = [...entities, ...restEntities]
-                                    }
-                                  })
-                                  setEntities([...entities])
-                                }
-                                setShowEntityDialog(true)
-                              }
-                            }}
-                          >
-                            Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
-                          </MenuItem>
-                        )}
-                      </Menu>
+                      </Popper>
                     </div>
-                  </div>
-                </Box>
-              </Grid>
+                }
+              </div>
+            </Grid>
+            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1 " justify="flex-end" >
+              <div id="resourceOperations" className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`} style={{ flexGrow: 1 }}>
+                <Grid sm={12} className={styles.search_box_layout} style={{ display: "flex", flexGrow: 1 }} >
+                  {
+                    !isOffline && <SearchBox onSearch={handleSearch} searchbox="account_header_search_bar" style={{ flexGrow: 1 }} value={search} />
+                  }
+                </Grid>
+                <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`} >
+                  {accountPermissions.isCreate && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      className={styles.add_submit_btn}
+                      onClick={clickCreateNew}
+                      startIcon={<AddOutlined />}
+                    >
+                      Add
+                    </Button>
+                  )}
+
+                  {!isOffline && (accountPermissions.isDelete || accountPermissions.approveAccount) && (
+                    <Button
+                      disabled={selectedRecords.length === 0}
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      className={styles.add_submit_btn}
+                      onClick={openActions}
+                      aria-controls="action-menu"
+                    >
+                      Actions <ExpandMore />
+                    </Button>
+                  )}
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    {accountPermissions.isUpdate && accountPermissions.approveAccount && (
+                      <MenuItem
+                        disabled={selectedRecords.filter((d) => !d.approved).length === 0}
+                        onClick={() => {
+                          closeActions();
+                          setMultipleApproveDisapproveAccount({
+                            show: true,
+                            approved: true,
+                            selectedRecords: selectedRecords.filter((d) => !d.approved).length
+                          });
+                        }}
+                      >
+                        Approve Accounts &nbsp; <Chip size="small" label={selectedRecords.filter((d) => !d.approved).length} />
+                      </MenuItem>
+                    )}
+                    {accountPermissions.isUpdate && accountPermissions.approveAccount && (
+                      <MenuItem
+                        disabled={selectedRecords.filter((d) => d.approved).length === 0}
+                        onClick={() => {
+                          closeActions();
+                          setMultipleApproveDisapproveAccount({
+                            show: true,
+                            approved: false,
+                            selectedRecords: selectedRecords.filter((d) => d.approved).length
+                          });
+                        }}
+                      >
+                        Disapprove Accounts &nbsp; <Chip size="small" label={selectedRecords.filter((d) => d.approved).length} />
+                      </MenuItem>
+                    )}
+                    {accountPermissions.isDelete && (
+                      <MenuItem
+                        disabled={selectedRecords.length === 0}
+                        onClick={() => {
+                          if (selectedRecords.some((d) => d.canDelete === false)) {
+                            closeActions();
+                            setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
+                          } else {
+                            closeActions();
+                            setShowDeleteConfirmBox(true);
+                          }
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                    )}
+                    {accountPermissions.isUpdate && (
+                      <MenuItem
+                        disabled={selectedRecords.length === 0}
+                        onClick={() => {
+                          if (selectedRecords.some((d) => d?.isAllowedToUpdate === false)) {
+                            closeActions();
+                            setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+                          } else {
+                            closeActions();
+                            if (selectedRecords.length) {
+                              let entities = []
+                              selectedRecords.map(current => {
+                                if (current?.entityId) {
+                                  entities = [...entities, current?.entityId]
+                                }
+                                if (current?.restentity) {
+                                  let restEntities = current?.restentity.map(o => o.optionValue)
+                                  entities = [...entities, ...restEntities]
+                                }
+                              })
+                              setEntities([...entities])
+                            }
+                            setShowEntityDialog(true)
+                          }
+                        }}
+                      >
+                        Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
+                      </MenuItem>
+                    )}
+                  </Menu>
+                </div>
+              </div>
             </Grid>
           </Grid>
 
@@ -971,64 +1149,23 @@ export default function Account(props) {
 
         {
           Object.keys(frameWorkComponent).length > 0 ?
-            isMobile ? <CustomSwipableList
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={accountPermissions}
-              primaryField={columns?.find(d => d.primaryField)}
-              onClick={(data) => {
-                history.push(`${routes.customerAccountDetail.path}/${data._id}`)
-              }}
+            <CustomAgGrid
+              columns={columns}
               dataRows={dataRows}
-              selectedRecords={selectedRecords}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
               dispatch={dispatch}
-              onEdit={(data) => {
-                history.push(`${routes.customerAccountDetail.path}/${data._id}?openEdit=true`)
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                setSingleAccountDelete({
-                  show: true,
-                  id: data._id,
-                  accountName: data.accountName
-                })
-              }}
               rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
               page={page}
               loading={loading}
-              additionalDetails={[
-                {
-                  icon: <MdEmail size={18} />,
-                  field: "email1"
-                },
-                {
-                  icon: <AiFillPhone size={18} />,
-                  field: "contactNumber1"
-                },
-              ]}
-              chips={[
-
-              ]}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={clickCreateNew}
-              showClone={true}
-              onClone={(data) => { cloneAccount(data); }}
               renderedFrom={accountResource}
-            /> :
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                loading={loading}
-                renderedFrom={accountResource}
-                refreshGrid={fetchAccounts}
-              /> : null}
+              refreshGrid={fetchAccounts}
+              isClientSideGrid={isOffline}
+              allowAction={!isOffline}
+              allowSelection={!isOffline}
+            /> : null}
 
 
         {showDeleteWarningConfirmBox?.show ? (

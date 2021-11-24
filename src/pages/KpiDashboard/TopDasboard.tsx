@@ -30,8 +30,9 @@ import Loader from '../../components/Loader';
 import TopDashboardTable from './TopDashboardTable';
 import { Skeleton } from '@material-ui/lab';
 
+
 const TopDashboard = (props) => {
-  const { moment, currency, filterCurrency, salesFilter, getExchangeRates, setCurrency } = props;
+  const { moment, currency, filterCurrency, selectedEntity, salesFilter, getExchangeRates, setCurrency } = props;
   const [anchorElChart, setAnchorElChart] = useState(null);
 
   const [tableView, setTableView] = useState(false);
@@ -41,7 +42,8 @@ const TopDashboard = (props) => {
     revenue: 0,
     spend: 0,
     profit: 0,
-    profitValue: 0
+    profitValue: 0,
+    totalValueMT: 0
   });
 
   const [salesData, setSalesData] = useState({
@@ -52,12 +54,13 @@ const TopDashboard = (props) => {
 
   const fetchSalesData = useCallback(() => {
     let params = {
-      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
+      entity: selectedEntity || "",
       marketSegment: salesFilter.marketSegment ? salesFilter.marketSegment['id'] : '',
       subMarketSegment: salesFilter.subMarketSegment ? salesFilter.subMarketSegment['id'] : '',
       productCategory: salesFilter.productCategory ? salesFilter.productCategory['id'] : '',
       salesRep: salesFilter.salesRep ? salesFilter.salesRep['id'] : '',
       customerAccount: salesFilter.customerAccount ? salesFilter.customerAccount['id'] : '',
+      country: salesFilter.country ? salesFilter.country["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -127,6 +130,7 @@ const TopDashboard = (props) => {
         }
 
         setSalesRevenue({
+          ...salesRevenue,
           revenue: revenueRate ? revenueRate.rates[filterCurrency] : revenue,
           spend: spendRate ? spendRate.rates[filterCurrency] : spend,
           profit: profit,
@@ -160,11 +164,21 @@ const TopDashboard = (props) => {
       .catch((err) => {
         setLoadingChart(false);
       });
-  }, [salesFilter, filterCurrency]);
+  }, [salesFilter, filterCurrency, selectedEntity]);
 
   useEffect(() => {
     fetchSalesData();
   }, [fetchSalesData]);
+
+  useEffect(() => {
+    axiosInstance().get("dashboard/total-weight-sold")
+      .then(({ data }) => {
+        setSalesRevenue({ ...salesRevenue, totalValueMT: data?.data.qty })
+      })
+      .catch((err) => {
+
+      })
+  }, [selectedEntity])
 
   useEffect(() => {
     const tableD = salesData.allData.map((d) => ({
@@ -238,20 +252,20 @@ const TopDashboard = (props) => {
       <Grid item xs={12} sm={12} md={12} lg={8}>
         <Box mb={2}>
           <Grid container spacing={2} alignItems="stretch">
-            <Grid item sm={4} xs={12}>
+            <Grid item md={3} sm={6} xs={12}>
               <Paper>
                 <Box p={2} textAlign="center">
                   <Grid container>
-                    <Grid item xs={3} sm={3} md={2} className="d-flex align-items-center" justifyContent="center">
+                    {/* <Grid item xs={3} sm={3} md={2} className="d-flex align-items-center" justifyContent="center">
                       <img alt="image" className={styles.state_img} src={SVG("booked_value")}></img>
-                    </Grid>
-                    <Grid item xs={9} sm={9} md={10} className="pull-left">
+                    </Grid> */}
+                    <Grid item xs={12} className="pull-left">
                       {!loadingChart ? (
-                        <Typography variant="h5" className={styles.price}>
+                        <Typography className={styles.price}>
                           {salesRevenue.revenue ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.revenue).fullFormatAmount : 0}
                         </Typography>
                       ) : (
-                        <Skeleton variant="text" width={200} height={40} />
+                        <Skeleton variant="text" width={100} height={40} />
                       )}
                       <Typography variant="h6" className={styles.title}>
                         Total Offered Value
@@ -261,20 +275,20 @@ const TopDashboard = (props) => {
                 </Box>
               </Paper>
             </Grid>
-            <Grid item sm={4} xs={12}>
+            <Grid item md={3} sm={6} xs={12}>
               <Paper>
                 <Box p={2} textAlign="center">
                   <Grid container>
-                    <Grid item xs={3} sm={3} md={2} className="d-flex align-items-center" justifyContent="center">
+                    {/* <Grid item xs={3} sm={3} md={2} className="d-flex align-items-center" justifyContent="center">
                       <img alt="image" className={styles.state_img} src={SVG("total_cost")}></img>
-                    </Grid>
-                    <Grid item xs={9} sm={9} md={10} className="pull-left">
+                    </Grid> */}
+                    <Grid item xs={12} className="pull-left">
                       {!loadingChart ? (
-                        <Typography variant="h5" className={styles.price}>
+                        <Typography className={styles.price}>
                           {salesRevenue.spend ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue.spend).fullFormatAmount : 0}
                         </Typography>
                       ) : (
-                        <Skeleton variant="text" width={200} height={40} />
+                        <Skeleton variant="text" width={100} height={40} />
                       )}
                       <Typography variant="h6" className={styles.title}>
                         Total Cost
@@ -284,23 +298,46 @@ const TopDashboard = (props) => {
                 </Box>
               </Paper>
             </Grid>
-            <Grid item sm={4} xs={12}>
+            <Grid item md={3} sm={6} xs={12}>
               <Paper>
                 <Box p={2} textAlign="center">
                   <Grid container>
-                    <Grid item xs={3} sm={3} md={2} className="d-flex align-items-center" justifyContent="center">
+                    {/* <Grid item xs={3} sm={3} md={2} className="d-flex align-items-center" justifyContent="center">
                       <img alt="image" className={styles.state_img} src={SVG("profit")}></img>
-                    </Grid>
-                    <Grid item xs={9} sm={9} md={10} className="pull-left">
+                    </Grid> */}
+                    <Grid item xs={12} className="pull-left">
                       {!loadingChart ? (
-                        <Typography variant="h5" className={styles.price}>
-                          {salesRevenue?.profitValue ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue?.profitValue).fullFormatAmount : 0}({salesRevenue.profit}%)
+                        <Typography className={styles.price}>
+                          {`${salesRevenue?.profitValue ? formatAmountWithCurrency(filterCurrency || currency, salesRevenue?.profitValue).fullFormatAmount : 0} (${salesRevenue.profit}%)`}
                         </Typography>
                       ) : (
-                        <Skeleton variant="text" width={200} height={40} />
+                        <Skeleton variant="text" width={100} height={40} />
                       )}
                       <Typography variant="h6" className={styles.title}>
                         Gross Margin
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </Paper>
+            </Grid>
+            <Grid item md={3} sm={6} xs={12}>
+              <Paper>
+                <Box p={2} textAlign="center">
+                  <Grid container>
+                    {/* <Grid item xs={3} sm={3} md={2} className="d-flex align-items-center" justifyContent="center">
+                      <img alt="image" width="30px" className={styles.state_img} src={SVG("profit")}></img>
+                    </Grid> */}
+                    <Grid item xs={12} className="pull-left">
+                      {!loadingChart ? (
+                        <Typography className={styles.price}>
+                          {`${salesRevenue?.totalValueMT.toFixed(2)}`}
+                        </Typography>
+                      ) : (
+                        <Skeleton variant="text" width={100} height={40} />
+                      )}
+                      <Typography variant="h6" className={styles.title}>
+                        Total Offered Value in MT
                       </Typography>
                     </Grid>
                   </Grid>
@@ -332,7 +369,7 @@ const TopDashboard = (props) => {
               </Menu>
             </Box>
             <Box textAlign="center" mb={2}>
-              <Typography variant="h5">Total offered value in {filterCurrency || currency}</Typography>
+              <Typography variant="h5">Total offered value in {filterCurrency || currency} vs Budget</Typography>
             </Box>
             {!loadingChart ? (
               <Box>

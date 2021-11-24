@@ -23,7 +23,7 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import './style.scss';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import { FcProcess } from "react-icons/fc";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
@@ -48,6 +48,7 @@ const Leads = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
+  const {getColumnData} = useColumns();
   const { leadResource, leadApi } = lead;
   const [selectedType, setSelectedType] = useState(1);
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
@@ -63,7 +64,7 @@ const Leads = () => {
   });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
-  const { isOffline, offlineGridData, updateOfflineGridData } = useContext(CustomOfflineContext);
+  const { isOffline, offlineGridData, offlineFieldsData, updateOfflineGridData, updateFieldsData } = useContext(CustomOfflineContext);
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -125,48 +126,63 @@ const Leads = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=Lead&entity=${selectedEntity}`)
-      .then(({ data: { data } }) => {
-        let columns = []
-        let rendererNames = []
-        data.forEach(o => {
-          if (["concatedName"].find(d => d === o?.fieldData?.fieldName)) {
-            columns = [...columns, {
-              disabled: true,
-              field: "concatedName",
-              headerName: "Lead Name",
-              pivotIndex: 0,
-              show: true,
-              cellRenderer: "nameRenderer",
-              primaryField: true
-            }]
-          }
-          else {
-            let currentColumn = getColumnData(leadResource, o?.fieldData, leadDetailPage.path)
+  const fetchGridColumns = async () => {
+    let data
+    if (isOffline) {
+      data = offlineFieldsData["lead"] ?? []
+    }
+    else {
+      if (selectedEntity) {
+        const response = await axiosInstance()
+          .get(`/field?resource=Lead&entity=${selectedEntity}`)
 
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData]
-              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                rendererNames.push(currentColumn?.rendererName)
-              }
-            }
-          }
-        })
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          nameRenderer: NameRenderer,
-          relatedOpportunityRenderer: RelatedOpportunityRenderer,
-          actionsRenderer: ActionsRenderer
+        data = response?.data?.data
+      } else {
+        data = [];
+      }
+
+      try {
+        updateFieldsData("lead", data);
+      } catch (ex) {
+        console.error(`Lead: Error while storing data for Offline context. Error: ${ex.message}`)
+      }
+    }
+
+    let columns = []
+    let rendererNames = []
+    data.forEach(o => {
+
+      let currentColumn = getColumnData(leadResource, o?.fieldData, leadDetailPage.path)
+
+      if (["concatedName"].find(d => d === o?.fieldData?.fieldName)) {
+        columns = [...columns, {
+          disabled: true,
+          field: "concatedName",
+          headerName: "Lead Name",
+          pivotIndex: 0,
+          show: true,
+          cellRenderer: "nameRenderer",
+          primaryField: true
+        }]
+      }
+      else if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData]
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName)
         }
-        setFrameWorkComponent({ ...tempFrameworkComponent })
-        columns = [...columns,
-        { field: 'relatedOpportunity', headerName: 'Related Opportunity', show: true, cellRenderer: 'relatedOpportunityRenderer' },
-        ...getStaticFields()]
-        setColumns([...columns])
-      })
+      }
+    })
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      relatedOpportunityRenderer: RelatedOpportunityRenderer,
+      actionsRenderer: ActionsRenderer
+    }
+    setFrameWorkComponent({ ...tempFrameworkComponent })
+    columns = [...columns,
+    { field: 'relatedOpportunity', headerName: 'Related Opportunity', show: true, cellRenderer: 'relatedOpportunityRenderer' },
+    ...getStaticFields()]
+    setColumns([...columns])
   }
 
 

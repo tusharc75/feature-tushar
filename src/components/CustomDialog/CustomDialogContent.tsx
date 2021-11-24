@@ -13,7 +13,7 @@ const DialogContent = withStyles((theme) => ({
 function CustomDialogContent({ children }) {
     return (
         <React.Fragment>
-            <DialogContent dividers>
+            <DialogContent>
                 {children}
             </DialogContent>
         </React.Fragment>

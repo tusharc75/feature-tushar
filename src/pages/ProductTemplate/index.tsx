@@ -83,8 +83,6 @@ const ProductTemplate: FC = () => {
         });
     }
     //  Grid Variables - End
-
-
     const { productTemplateApi } = productTemplate;
 
     useEffect(() => {
@@ -256,7 +254,7 @@ const ProductTemplate: FC = () => {
                     finalObject["allowedToEdit"] = permissions.productTemplate.isUpdate;
                     return {
                         ...finalObject,
-                     
+
                     };
 
                     // let res = {
@@ -384,7 +382,8 @@ const ProductTemplate: FC = () => {
                 /> :
                     <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                         dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
-                        loading={loading} renderedFrom="productTemplatePage"
+                        loading={loading}
+                        renderedFrom={routes?.productTemplate?.title}
                         refreshGrid={fetchProductTemplate}
                     />
                 }

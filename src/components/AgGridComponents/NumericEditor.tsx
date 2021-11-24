@@ -5,6 +5,9 @@ import React, {
     useRef,
     useState,
 } from 'react';
+import IconButton from '@material-ui/core/IconButton';
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 
 const KEY_BACKSPACE = 8;
 const KEY_DELETE = 46;
@@ -13,6 +16,7 @@ const KEY_ENTER = 13;
 const KEY_TAB = 9;
 
 export default forwardRef((props: any, ref) => {
+
     const createInitialState = () => {
         let startValue;
         let highlightAllOnFocus = true;
@@ -133,13 +137,23 @@ export default forwardRef((props: any, ref) => {
         };
     });
 
-    return (
+    console.log(props)
+    return (<React.Fragment>
         <input
             ref={refInput}
             value={value}
+            type="number"
+            onBlur={() => props.stopEditing()}
             onChange={(event) => setValue(event.target.value)}
-            onKeyDown={(event) => onKeyDown(event)}
+            //onKeyDown={(event) => onKeyDown(event)}
             style={{ width: '100%' }}
         />
+        <IconButton size="small" color="primary" onClick={() => props.stopEditing()} >
+            <CheckCircleOutlineIcon fontSize="small" />
+        </IconButton>
+        <IconButton size="small" color="primary" onClick={() => props.stopEditing()} >
+            <HighlightOffIcon fontSize="small" />
+        </IconButton>
+    </React.Fragment>
     );
 });

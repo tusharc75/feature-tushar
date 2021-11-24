@@ -6,6 +6,7 @@ import { KeyboardDatePicker } from '@material-ui/pickers';
 import { FilterList } from '@material-ui/icons';
 import FormTypes from '../../components/Helpers/FormTypes';
 import { dateFormatForInputControl } from '../../constants/helpers';
+import Countries from "../../constants/Country.json"
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -21,13 +22,13 @@ const useStyles = makeStyles((theme) => ({
       height: "auto",
     }
   },
-  currencyBox:{
+  currencyBox: {
     width: "250px",
     [theme.breakpoints.down("xs")]: {
       width: "auto",
     }
   },
-  status:{
+  status: {
     width: "100%",
     [theme.breakpoints.down("xs")]: {
       width: "auto",
@@ -41,7 +42,6 @@ const useStyles = makeStyles((theme) => ({
 const Filters = (props) => {
   const classes = useStyles();
   const {
-    entities,
     marketSegments,
     subMarketSegments,
     productCategory,
@@ -51,8 +51,6 @@ const Filters = (props) => {
     moment,
     salesReps,
     customerAccounts,
-    status,
-    setStatus,
     currency,
     setCurrency
   } = props;
@@ -129,7 +127,7 @@ const Filters = (props) => {
       >
         <Box p={2}>
           <Box width="250px">
-            <Autocomplete
+            {/* <Autocomplete
               fullWidth
               size="small"
               disabled={salesFilter.allEntity}
@@ -142,7 +140,7 @@ const Filters = (props) => {
                 setSalesFilter({ ...salesFilter, entity: val });
               }}
               renderInput={(params) => <TextField {...params} label="Entity" variant="outlined" />}
-            />
+            /> */}
             <Box mt={1} />
             <Autocomplete
               size="small"
@@ -167,7 +165,14 @@ const Filters = (props) => {
               getOptionLabel={(option) => option.name || ''}
               getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
               onChange={(_, val) => {
-                setSalesFilter({ ...salesFilter, customerAccount: val });
+                let data = { ...salesFilter, customerAccount: val }
+                if (val?.country) {
+                  let foundCountry = Countries.find(o => o.optionValue === val?.country)
+                  if (foundCountry) {
+                    data.country = foundCountry
+                  }
+                }
+                setSalesFilter({ ...data });
               }}
               renderInput={(params) => <TextField {...params} label="Customer Account" variant="outlined" />}
             />
@@ -214,6 +219,19 @@ const Filters = (props) => {
               onChange={(_, val) => setSalesFilter({ ...salesFilter, productCategory: val })}
               renderInput={(params) => <TextField {...params} label="Product Category" variant="outlined" />}
             />
+            <Box mt={1} />
+
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={Countries}
+              autoHighlight
+              value={salesFilter.country}
+              getOptionLabel={(option) => option.optionLabel || ''}
+              getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
+              onChange={(_, val) => setSalesFilter({ ...salesFilter, country: val })}
+              renderInput={(params) => <TextField {...params} label="Country" variant="outlined" />}
+            />
           </Box>
         </Box>
       </Popover>
@@ -226,7 +244,7 @@ const Filters = (props) => {
                   Filters
                 </Button>
               </Grid>
-              <Grid item xs={6} sm={4} md={3}>
+              {/* <Grid item xs={6} sm={4} md={3}>
                 <FormControl className={classes.status} size="small" variant="outlined">
                   <InputLabel id="status">Status</InputLabel>
                   <Select labelId="status" id="status" value={status} onChange={(e) => setStatus(e.target.value)}>
@@ -235,7 +253,7 @@ const Filters = (props) => {
                     <MenuItem value={'open'}>Open</MenuItem>
                   </Select>
                 </FormControl>
-              </Grid>
+              </Grid> */}
               <Grid item xs={6} sm={4} md={3}>
                 <FormTypes
                   fullWidth={false}

@@ -35,15 +35,15 @@ function CustomDialogHeader({ title, onClose, showManimizeMaximize = false, isMi
     return (
         <React.Fragment>
             <MuiDialogTitle disableTypography className={classes.root}>
-                <Typography variant="h6" className={`${classes.dialogTitle} ${"title-layout"}`}>{title}</Typography>
-                <div className={`${classes.closeButton} ${"close"}`}>
-                    <span className="form-label-style required-text" style={{ borderBottom: "none" }}>* Required Fields</span>
+                <Typography variant="h6" className={`${classes.dialogTitle} title-layout text-truncate`}>{title}</Typography>
+                <div className={`${classes.closeButton} close`}>
+                    <span className="form-label-style required-text mr-2" style={{ borderBottom: "none" }}>* Required Fields</span>
                     {
                         showManimizeMaximize && (!(isMobile || isTablet)) && <IconButton
                             aria-label="close"
                             onClick={onMinimizeMaximize}
                             size="small"
-                            className="mr-2 ml-3 close-button"
+                            className="mr-2 close-button"
                         >
                             {isMinimized ? <FiMaximize2 /> : <FiMinimize2 />}
                         </IconButton>
@@ -53,9 +53,8 @@ function CustomDialogHeader({ title, onClose, showManimizeMaximize = false, isMi
                             aria-label="close"
                             onClick={onClose}
                             size="small"
-
                         >
-                            <CloseIcon className={"close-button"}/>
+                            <CloseIcon className="close-button" />
                         </IconButton>
                     }
                 </div>

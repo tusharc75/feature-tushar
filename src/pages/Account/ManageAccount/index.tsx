@@ -10,6 +10,7 @@ import {
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 
 export default function ManageAccountDialog(props) {
   const toastConfig = useContext(CustomToastContext);
@@ -30,8 +31,11 @@ export default function ManageAccountDialog(props) {
     marketSegmentId = null,
     subMarketSegmentId = null,
     isClone = false,
-    accountNameForClone = ''
+    accountNameForClone = '',
+    parentId = null
   } = props;
+
+  const { isOffline, offlineFieldsData, offlineGridData, updateFieldsData } = useContext(CustomOfflineContext);
   const {
     state: { user },
   }: any = useData();
@@ -86,60 +90,103 @@ export default function ManageAccountDialog(props) {
     };
   }, [user]);
 
-  const getAccountFields = () => {
+  const getAccountFields = async () => {
     setLoading(true);
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource[accountResource]}`)
-      .then(({ data: { data } }) => {
-        const newFields = [];
-        data
-          .filter((d) => d.isCreate)
-          .map((_f) => {
-            if (userId && _f.fieldData.fieldName == "owner") {
-              _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
-            }
-            if (marketSegmentId && _f.fieldData.fieldName === formFieldNames.marketSegment) {
-              _f = initializeDropdownById(_f, _f.fieldData.fieldName, marketSegmentId)
-            }
-            if (subMarketSegmentId && _f.fieldData.fieldName === formFieldNames.subMarketSegment) {
-              _f = initializeDropdownById(_f, _f.fieldData.fieldName, subMarketSegmentId)
-            }
 
-            newFields.push(_f.fieldData);
-          });
+    let data
+    if (isOffline) {
+      data = offlineFieldsData[accountResource] ?? []
+    }
+    else {
+      const response = await axiosInstance()
+        .get(`/field?resource=${sidebarResource[accountResource]}`)
 
-        setAccountData({
-          fields: newFields,
-          initialValues: getObjKeys("", newFields),
-        });
-        setFormValues(getObjKeys("", newFields))
-        setTimeout(() => setLoading(false), 500);
-      })
-      .catch((err) => setLoading(false));
+      data = response?.data?.data
+
+      try {
+        updateFieldsData(accountResource, data);
+      } catch (ex) {
+        console.error(`Lead: Error while storing data for Offline context. Error: ${ex.message}`)
+      }
+    }
+
+    const newFields = [];
+    data
+      .filter((d) => d.isCreate)
+      .map((_f) => {
+        if (userId && _f.fieldData.fieldName == "owner") {
+          _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
+        }
+        if (marketSegmentId && _f.fieldData.fieldName === formFieldNames.marketSegment) {
+          _f = initializeDropdownById(_f, _f.fieldData.fieldName, marketSegmentId)
+        }
+        if (subMarketSegmentId && _f.fieldData.fieldName === formFieldNames.subMarketSegment) {
+          _f = initializeDropdownById(_f, _f.fieldData.fieldName, subMarketSegmentId)
+        }
+
+        if (parentId && _f.fieldData.fieldName === formFieldNames.parentAccount) {
+          _f = initializeDropdownById(_f, _f.fieldData.fieldName, parentId)
+        }
+
+        newFields.push(_f.fieldData);
+      });
+
+    let initialData = getObjKeys("", newFields)
+
+    setAccountData({
+      fields: newFields,
+      initialValues: initialData,
+    });
+    setFormValues(getObjKeys("", newFields))
+    setTimeout(() => setLoading(false), 500);
+
   };
 
   const handleCreateAccount = (values, saveAndNew, setValues) => {
     setLoading(true);
-    axiosInstance()
-      .post(`/${accountApi}`, values)
-      .then(({ data }) => {
-        const newId = data.data._id;
-        onClose({ fetch: true, id: newId });
-        if (isGetAccountData) onGetAddedAccount(data);
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
+
+    if (!isOffline) {
+      axiosInstance()
+        .post(`/${accountApi}`, values)
+        .then(({ data }) => {
+          const newId = data.data._id;
+          onClose({ fetch: true, id: newId });
+          if (isGetAccountData) onGetAddedAccount(data);
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+          if (Boolean(isRedirectToDetailPage)) {
+            history.push(`${accountApi}/detail/${newId}`);
+          }
+          setLoading(false);
+        })
+        .catch((error) => {
+          setLoading(false);
+          toastConfig.setToastConfig(error);
         });
-        if (isRedirectToDetailPage) {
-          history.push(`${accountApi}/detail/${newId}`);
-        }
-        setLoading(false);
-      })
-      .catch((error) => {
-        setLoading(false);
-        toastConfig.setToastConfig(error);
-      });
+    } else {
+      let storedData = {};
+
+      if (localStorage.getItem("offlineDataToSave")) {
+        storedData = JSON.parse(localStorage.getItem("offlineDataToSave"));
+      }
+
+      const dataToSave = {
+        api: accountApi,
+        method: "post",
+        values: values
+      };
+
+      if (!storedData[accountResource]) {
+        storedData[accountResource] = [];
+      }
+      storedData[accountResource].push(dataToSave)
+
+      localStorage.setItem("offlineDataToSave", JSON.stringify(storedData));
+      onClose({ fetch: false, id: null })
+    }
   };
 
   const handleValuesChange = (name, value) => {
@@ -166,6 +213,8 @@ export default function ManageAccountDialog(props) {
       subMarketSegmentId={subMarketSegmentId}
       isClone={isClone}
       accountNameForClone={accountNameForClone}
+      accountResource={accountResource}
+      accountApi={accountApi}
     />
   );
 }

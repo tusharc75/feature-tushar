@@ -3,7 +3,7 @@ import moment from "moment";
 import { AiOutlineLoading } from "react-icons/ai";
 import CustomRenderCell from "../Helpers/CustomRenderCell";
 import NoDataCell from "../Helpers/NoDataCell";
-import { dateFormat } from "../../constants/helpers"
+import { dateFormat, dateTimeFormat } from "../../constants/helpers"
 import Avatar from "@material-ui/core/Avatar"
 import Tooltip from "@material-ui/core/Tooltip"
 import { Link } from 'react-router-dom'
@@ -34,6 +34,15 @@ export const DateRenderer = params => params.value ? (
 ) : (
     <NoDataCell />
 );
+
+export const DateTimeRenderer = params => params.value ? (
+    <h5 className="createBy" title={`${moment(params.value).format(dateTimeFormat)}`}>
+        {moment(params.value).format(dateTimeFormat)}
+    </h5>
+) : (
+    <NoDataCell />
+);
+
 export const CheckboxRenderer = params => (
     <span>
         {Boolean(params?.value) ? "Yes" : "No"}
@@ -62,7 +71,7 @@ const getTitle = data => {
 }
 export const LinkRenderer = params => params.value ? (
     <>
-        <Link className="link" to={params?.isForPopup ? `${params?.pathName}?id=${params?.data[params?.property]}` :
+        <Link className="link text-truncate" to={params?.isForPopup ? `${params?.pathName}?id=${params?.data[params?.property]}` :
             `${params?.pathName}/${params?.data[params?.property]}`} title={params?.value}>{params?.value}</Link>
 
         {

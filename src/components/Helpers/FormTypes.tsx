@@ -1006,7 +1006,7 @@ const FormTypes = (props) => {
                 name={name}
                 label={getLabel(label)}
                 variant="outlined"
-                style={{outline:"1px solid white"}}
+                style={{ outline: "1px solid white" }}
                 error={touched[name] && Boolean(errors[name])}
                 helperText={touched[name] && errors[name]}
                 required={required}
@@ -1088,7 +1088,8 @@ const FormTypes = (props) => {
                   error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
                   helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
                   ref={inputNumberRef}
-                  onChange={onChange ? onChange : (e) => handleConverterChange(name, _unit, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))}
+                  onChange={onChange ? onChange : (e) => handleConverterChange(name, _unit,
+                    e.target.value === "" ? "" : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))}
                   InputProps={{
                     inputProps: { min: 0 },
                     readOnly: fieldData && fieldData.isUneditable ? true : false
@@ -1348,17 +1349,19 @@ const FormTypes = (props) => {
             </Box>
             {i === 0 && (
               <Box>
-                <HtmlTooltip title="Add Currency" className="formActionButton">
-                  <IconButton
-                    onClick={() => {
-                      setIsExtraDispayType(true);
-                    }}
-                    color="primary"
-                    size="small"
-                  >
-                    <CreditCardIcon />
-                  </IconButton>
-                </HtmlTooltip>
+                {fieldData.hideConverter ? null :
+                  <HtmlTooltip title="Add Currency" className="formActionButton">
+                    <IconButton
+                      onClick={() => {
+                        setIsExtraDispayType(true);
+                      }}
+                      color="primary"
+                      size="small"
+                    >
+                      <CreditCardIcon />
+                    </IconButton>
+                  </HtmlTooltip>
+                }
                 {(fieldData.leval === 'product-custom' ||
                   fieldData.leval === 'product-builder-custom' ||
                   fieldData.leval === 'price-builder-custom') && (
@@ -1408,7 +1411,7 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(name, parseFloat(e.target.value));
+              handleChange(name, e.target.value === "" ? "" : parseFloat(e.target.value));
             }
         }
         InputProps={{
@@ -1481,7 +1484,8 @@ const FormTypes = (props) => {
             disableCloseOnSelect={true}
             options={fieldData && fieldData.isDependentDropdown ?
               option.filter((_f) => _f[fieldData.dropdowDependentOn] === values[fieldData.dropdowDependentOn]) :
-              option}
+              //  Some times for resource dropdown we are not getting optionLabel, and multi-select breaks
+              option.filter(f => f.optionLabel)}
             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
             value={values[name] ? option.filter((data: any) => values[name].includes(data.optionValue)) : []}
             getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
@@ -1883,7 +1887,7 @@ const FormTypes = (props) => {
           value={values[name]}
           name={name}
           label={getLabel(label)}
-          onChange={onChange ? onChange : (date) => setFieldValue(name, date ? date : '')}
+          onChange={onChange ? onChange : (date) => handleChange(name, date ? date : '')}
           // onChange={(date) => setFieldValue(name, date ? date : "")}
           error={customError[name] || (touched[name] && Boolean(errors[name]))}
           helperText={customError[name] || (touched[name] && errors[name])}

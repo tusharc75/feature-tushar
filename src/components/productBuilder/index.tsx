@@ -9,7 +9,6 @@ import ProductDialog from "./ProductDialog";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
-import { Link } from "react-router-dom";
 import { ExpandMore } from "@material-ui/icons";
 import { Menu, MenuItem, Dialog, TextField } from "@material-ui/core";
 import { AddField } from "../FormBuilder/AddField";
@@ -32,7 +31,7 @@ import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
 import CustomButton from "../Helpers/CustomButton";
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns } from "../../constants/columns"
 import { prepareDataForGrid } from "../../constants/helpers";
 
 let levalOrderBy = [
@@ -142,7 +141,7 @@ const ProductBuilder = (props) => {
       setColumns([...columns])
       dispatch({ type: "initialize", data: rows, count: rows.length });
       setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
-      refreshProducts(data.product);
+      refreshProducts(data);
     })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -201,14 +200,14 @@ const ProductBuilder = (props) => {
   const ProductNameRenderer = (params) => (
     <>
       {Editable ? (
-        <Link
+        <a
           className="link"
           onClick={() => {
             openProductModel(params.data._id);
           }}
         >
           {params.data.srno}
-        </Link>
+        </a>
       ) : (
         <>{params.data.srno}</>
       )}
@@ -233,7 +232,7 @@ const ProductBuilder = (props) => {
               col.width = 180
               col.show = true
               col.leval = ele.leval
-              if (!ele.isFormula && !ele.isUneditable && Editable && ele.leval !== 'product' && ele.leval !== 'product-custom') {
+              if (!ele.isFormula && !ele.isUneditable && Editable) {
                 col.cellRenderer = "commonRenderer";
                 col.cellEditor = "numericCellEditor";
                 col.editable = true;
@@ -256,7 +255,7 @@ const ProductBuilder = (props) => {
                 col.width = 180
                 col.show = true
                 col.leval = ele.leval
-                if (!ele.isFormula && !ele.isUneditable && Editable && ele.leval !== 'product' && ele.leval !== 'product-custom') {
+                if (!ele.isFormula && !ele.isUneditable && Editable) {
                   col.cellRenderer = "commonRenderer";
                   col.cellEditor = "numericCellEditor";
                   col.editable = true;
@@ -279,7 +278,7 @@ const ProductBuilder = (props) => {
               col.width = 180
               col.show = true
               col.leval = ele.leval
-              if (!ele.isFormula && !ele.isUneditable && Editable && ele.leval !== 'product' && ele.leval !== 'product-custom') {
+              if (!ele.isFormula && !ele.isUneditable && Editable) {
                 col.cellRenderer = "commonRenderer";
                 col.cellEditor = "numericCellEditor";
                 col.editable = true;
@@ -295,7 +294,7 @@ const ProductBuilder = (props) => {
         if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
           let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path, true)
           if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
-            if (!ele.isFormula && !ele.isUneditable && Editable && ele.leval !== 'product' && ele.leval !== 'product-custom') {
+            if (!ele.isFormula && !ele.isUneditable && Editable) {
               if (ele.type === "decimal" || ele.type === "percent") {
                 currentColumn.columnData.cellEditor = "numericCellEditor";
               }
@@ -639,7 +638,7 @@ const ProductBuilder = (props) => {
                 setIsClone(true);
               }}
               fullHeight={true}
-              renderedFrom="productBuilderGrid"
+              renderedFrom={routes.productBuilder.title}
             /> : ((columns && frameWorkComponent) ? <CustomAgGridEditable
               currency={currency}
               forProductBuilder={isPriceBuilder}
@@ -660,7 +659,8 @@ const ProductBuilder = (props) => {
               onCellValueChanged={onCellValueChanged}
               loading={loading}
               className="product-builder-edit-grid"
-              renderedFrom="productBuilderGrid"
+              renderedFrom={routes.productBuilder.title}
+              saveColumnOptions={true}
             /> : (
               <Loader style={{ minHeight: 300 }} text="Loading..." />
             ))

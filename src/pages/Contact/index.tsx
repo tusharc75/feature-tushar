@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState, useReducer, Fragment } from 'react';
 import { Box, Button, Menu, MenuItem, Grid } from '@material-ui/core';
 import { useData } from '../../StateProvider/Provider';
-import { Link } from 'react-router-dom';
+import { Link,useLocation } from 'react-router-dom';
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
@@ -11,6 +11,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import CustomContainer from '../../components/CustomContainer';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import styles from '../Leads/Header.module.scss';
+import style from "./contact.module.scss"
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
@@ -32,13 +33,14 @@ import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import { MdAccountCircle } from "react-icons/md";
 import { AiFillPhone } from "react-icons/ai";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 import { MdEmail } from 'react-icons/md';
+import queryString from 'query-string';
 
 const ContactTypes = [
   {
@@ -53,6 +55,15 @@ const ContactTypes = [
 
 let contactTimeout;
 export default function Contact(props) {
+  const location = useLocation();
+  let queryParams = queryString.parse(location.search);
+  let queryPage: string = queryParams.page as string;
+  let queryType: string = queryParams.type as string;
+  let querySearch: string = queryParams.search as string;
+  let queryColFilter: string = queryParams.colFilter as string;
+
+
+
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -63,6 +74,9 @@ export default function Contact(props) {
     account
   } = props;
   const [selectedType, setSelectedType] = useState(1);
+  const [count, setCount] = useState(0);
+  const [checkColName, setCheckColName] = useState('');
+  const [checkColValue, setCheckColValue] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const [contactId, setContactId] = useState('');
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -88,11 +102,11 @@ export default function Contact(props) {
   });
   const [showEntityDialog, setShowEntityDialog] = useState(false)
 
-  const [filter, setFilter] = useState('All Contacts');
+  const [filter, setFilter] = useState(queryType ? queryType : 'All Contacts');
   const [entities, setEntities] = useState([])
   const [columns, setColumns] = useState([])
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
-
+  const {getColumnData} = useColumns();
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -101,6 +115,15 @@ export default function Contact(props) {
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([])
   const localStorageSelectedRecords = `${contactResource}_selected`;
+
+
+
+  useEffect(() => {
+    if (queryPage === undefined) {
+      history.push(`?page=${page}`)
+    }
+  }, [page, queryPage]);
+
 
   useEffect(() => {
     fetchGridColumns()
@@ -153,6 +176,13 @@ export default function Contact(props) {
       columns.push(checkStaticField(routes.projectSales.title, field))
     })
     setColumns([...columns])
+
+    if (queryColFilter !== undefined && (Object.keys(filters).length === 0)) {
+      let savedFilter = JSON.parse(sessionStorage.getItem("filters"));
+      dispatch({ type: 'filter', filters: savedFilter });
+      setCount(1);
+    }
+
   }
   //  Grid Variables - End
   if (columnState) {
@@ -204,7 +234,85 @@ export default function Contact(props) {
     if (renderCount > 0) {
       getContacts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity,location]);
+
+  useEffect(() => {
+    if (querySearch) {
+      dispatch({ type: 'search', search: querySearch });
+
+    }
+  }, [querySearch])
+
+
+  useEffect(() => {
+    if (Object.keys(filters).length > 0 && count === 0) {
+
+      sessionStorage.setItem("filters", JSON.stringify(filters))
+
+      {
+        Object.keys(filters).map(function (key) {
+          let colName = key;
+          let colValue = filters[key].filter
+          let query = queryColFilter !== undefined ? queryColFilter.substring(1, queryColFilter.length - 1) : `[{colName=${colName},colValue=${colValue}}]`;
+
+          if (queryColFilter === undefined) {
+            history.push( queryType ? `?page=${page}&type=${queryType}&colFilter=${query}` :  `?page=${page}&colFilter=${query}`);
+            setCheckColName(colName);
+            setCheckColValue(colValue);
+
+          }
+          if (queryColFilter !== undefined && checkColName === colName) {
+            if (queryColFilter.length > 45) {
+              let reducedqueryColFilter = queryColFilter.substring(50)
+              let leftqueryColFilter = queryColFilter.substring(0, 50);
+              let replacedQuery = reducedqueryColFilter.replace(checkColValue, colValue);
+              let combineQuery = leftqueryColFilter + replacedQuery;
+              history.push( queryType ? `?page=${page}&type=${queryType}&colFilter=${combineQuery}` : `?page=${page}&colFilter=${combineQuery}`);
+              setCheckColName(colName);
+              setCheckColValue(colValue);
+            }
+
+            else {
+
+              history.push( queryType ? `?page=${page}&type=${queryType}&colFilter=[{colName=${colName},colValue=${colValue}}]` : `?page=${page}&colFilter=[{colName=${colName},colValue=${colValue}}]`);
+            }
+          }
+          if (queryColFilter !== undefined && checkColName !== colName) {
+
+            if (queryColFilter.length > 42 && Object.keys(filters).length === 1) {
+              history.push( queryType ? `?page=${page}&type=${queryType}` :  `?page=${page}`)
+
+            }
+            else if (queryColFilter.length > 42 && queryColFilter.length < 84 && queryColFilter.includes(colName) === true) {
+              let newqueryColFilter = queryColFilter.substring(42, 83);
+              history.push(`?page=${page}&colFilter=[{colName=${colName},colValue=${colValue}}${newqueryColFilter}]`);
+            }
+
+
+
+            else {
+
+              let updatedQuery = `[${query}` + `,{colName=${colName},colValue=${colValue}}]`
+
+              history.push(queryType ? `?page=${page}&type=${queryType}&colFilter=${updatedQuery}` :  `?page=${page}&colFilter=${updatedQuery}`);
+              setCheckColName(colName)
+              setCheckColValue(colValue)
+            }
+          }
+        })
+      }
+    }
+  }, [filters])
+
+  useEffect(() => {
+    if (queryColFilter === undefined) {
+      sessionStorage.removeItem("filters");
+
+    }
+  }, [queryColFilter])
+
+
+
 
   const handleEntityChange = (entityId) => {
     entityDispatch({ type: SET_SELECTED_ENTITY, payload: entityId });
@@ -347,7 +455,7 @@ export default function Contact(props) {
   };
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterContacts=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}&filterContacts=${queryType === "My Accounts" ? 2 : selectedType}`;
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -525,6 +633,7 @@ export default function Contact(props) {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
+    history.push(`?page=${page}&search=${search}`)
   };
 
   const handleContactSelect = (filterValues) => {
@@ -562,18 +671,21 @@ export default function Contact(props) {
         <div className={`${contactClass['contact_header_inner_container']}`}>
           <Grid container className="header-panel" justify="space-between" alignContent="center">
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-              <Grid container>
-                <Grid item md={4} sm={4} xs={6} className="d-flex align-items-center gap-1" >
+              <Grid container className="gap-1">
+                <Grid  className="d-flex align-items-center gap-1" >
                   <MdContacts className="headerLogo" />
                   <span id="resourceHeader" className="listingHeader">{routes[contactResource].title}</span>
                 </Grid>
-                <Grid item md={4} sm={4} xs={6}>
+                <Grid >
                   {ContactTypes && (
                     <ToggleButtonGroup id="resourceTypeSelector" size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
                       {ContactTypes.map((k, index) => {
                         return (
                           <ToggleButton value={k.key} key={index}>
-                            {k.key}
+                           <Link to={`/${contactRoute}?page=${page}&type=${encodeURIComponent(k.key)}`} >
+                              {k.key}
+                            </Link>
+
                           </ToggleButton>
                         );
                       })}
@@ -627,6 +739,7 @@ export default function Contact(props) {
                       >
                         Actions <ExpandMore />
                       </Button>
+                      
                       <Menu
                         anchorEl={anchorEl}
                         keepMounted

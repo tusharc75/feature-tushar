@@ -24,7 +24,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from "react-router-dom";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers"
 import { MdAccountCircle } from "react-icons/md";
 import { AiFillCrown } from "react-icons/all";
@@ -53,6 +53,7 @@ const ProductInventory = () => {
     const {
         state: { permissions },
     }: any = useData();
+    const {getColumnData} = useColumns();
     const history = useHistory();
 
     const [warehouse, setWarehouse] = useState(history.location?.state?.warehouse);

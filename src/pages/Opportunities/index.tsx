@@ -31,6 +31,7 @@ import { AiFillCrown } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 import { FaSuitcase } from 'react-icons/fa';
+import useColumns from '../../constants/useColumns';
 
 let opportunityTimeout;
 const OpportunityTypes = [
@@ -50,6 +51,7 @@ const Opportunities = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
+  const {getColumnData} = useColumns();
   const { opportunityResource, opportunityApi } = opportunity;
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
@@ -372,7 +374,7 @@ const Opportunities = () => {
               ...finalObject,
               canDelete: u.owner?.optionValue === user?.user._id,
               stage: u.stage,
-              closeDate: u?.closeDate ? displayDate(u.closeDate) : '',
+              closeDate: u?.closeDate,
             };
             return res;
           });

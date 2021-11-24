@@ -1,12 +1,12 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Box, Grid, Paper, Container } from '@material-ui/core';
+import { useState, useEffect } from 'react';
+import { Box, Grid, Paper } from '@material-ui/core';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import moment from 'moment';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import Layout from '../../components/Layout';
 import axiosInstance from '../../axios/axiosInstance';
-import { entity, marketSegment, customerAccount } from '../../constants/helpers';
+import { marketSegment, customerAccount } from '../../constants/helpers';
 import OpportunityDashboards from './OpportunityDashboards';
 import Filters from './Filters';
 import styles from './dashboard.module.scss';
@@ -15,20 +15,20 @@ import TopDashboard from './TopDasboard';
 import Top2Dashboard from './Top2Dashboard';
 import OpportunitiesDashboard from './OpportunitiesDashboard';
 import OpportunityTrends from './OpportunityTrends';
+import { useData } from '../../StateProvider/Provider'
 
 const Dashboard = () => {
+  const { state: { selectedEntity } } = useData()
   const [currency, setCurrency] = useState('');
   const [filterCurrency, setFilterCurrency] = useState('');
-  const [entities, setEntities] = useState([]);
   const [salesReps, setSalesReps] = useState([]);
   const [customerAccounts, setCustomerAccounts] = useState([]);
   const [productCategory, setProductCategory] = useState([]);
   const [marketSegments, setMarketSegments] = useState([]);
   const [subMarketSegments, setSubMarketSegments] = useState([]);
-  const [status, setStatus] = useState('open');
+
 
   const [salesFilter, setSalesFilter] = useState({
-    entity: {},
     marketSegment: {},
     salesRep: {},
     customerAccount: {},
@@ -37,9 +37,9 @@ const Dashboard = () => {
     between: {
       from: new Date(moment().subtract(1, 'year').calendar()),
       to: new Date()
-    }
+    },
+    country: {}
   });
-
   const getExchangeRates = async (date, amount) => {
     if (filterCurrency && filterCurrency !== currency) {
       if (amount > 0) {
@@ -59,21 +59,11 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    fetchEntities();
     fetchMarketSegment();
     fetchProductCategory();
     fetchSalesReps();
     fetchCustomerAccount();
   }, []);
-
-  const fetchEntities = () => {
-    axiosInstance()
-      .get(`${entity.entityApi}?limit=0`)
-      .then(({ data: { data } }) => {
-        setEntities(data.map((d) => ({ id: d._id, name: d.entityName })));
-      })
-      .catch((err) => { });
-  };
 
   const fetchProductCategory = () => {
     axiosInstance()
@@ -136,7 +126,6 @@ const Dashboard = () => {
                 currency={filterCurrency}
                 setCurrency={setFilterCurrency}
                 moment={moment}
-                entities={entities}
                 salesReps={salesReps}
                 customerAccounts={customerAccounts}
                 marketSegments={marketSegments}
@@ -145,11 +134,10 @@ const Dashboard = () => {
                 setSubMarketSegment={setSubMarketSegments}
                 salesFilter={salesFilter}
                 setSalesFilter={setSalesFilter}
-                status={status}
-                setStatus={setStatus}
               />
               <Box className={styles.dashboard_container}>
                 <TopDashboard
+                  selectedEntity={selectedEntity}
                   filterCurrency={filterCurrency}
                   salesFilter={salesFilter}
                   currency={currency}
@@ -159,6 +147,7 @@ const Dashboard = () => {
                 />
 
                 <Top2Dashboard
+                  selectedEntity={selectedEntity}
                   getExchangeRates={getExchangeRates}
                   salesFilter={salesFilter}
                   filterCurrency={filterCurrency}
@@ -167,15 +156,19 @@ const Dashboard = () => {
                 />
 
                 <OpportunityDashboards
+                  selectedEntity={selectedEntity}
                   moment={moment}
                   getExchangeRates={getExchangeRates}
                   filterCurrency={filterCurrency}
                   currency={currency}
                   salesFilter={salesFilter}
-                  status={status}
                 />
 
-                <OpportunityTrends moment={moment} salesFilter={salesFilter} />
+                <OpportunityTrends
+                  selectedEntity={selectedEntity}
+                  moment={moment}
+                  salesFilter={salesFilter}
+                />
 
                 <Box my={2}>
                   <OpportunitiesDashboard />

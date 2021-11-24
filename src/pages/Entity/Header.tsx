@@ -14,8 +14,12 @@ const EntityHeader = (props) => {
     entityPermissions,
     openUserDialog,
     anyEntitySelected,
+    selectedRecords = [],
+    manageDeleteEntity,
+    canDelete
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
+  const [showDeleteEntityDialog, setShowDeleteEntityDialog] = useState(null);
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -24,6 +28,7 @@ const EntityHeader = (props) => {
   const closeActions = () => {
     setAnchorEl(null);
   };
+
 
   return (
     <Grid container className={styles.filter_side_container}>
@@ -78,17 +83,17 @@ const EntityHeader = (props) => {
                 open={Boolean(anchorEl)}
                 onClose={closeActions}
               >
-                {/* {entityPermissions.isDelete && (
+                {entityPermissions.isDelete && selectedRecords.length && (
                   <MenuItem
-                    disabled={Boolean(canDelete)}
+                    disabled={selectedRecords.length > 1 ? true : Boolean(!canDelete) ? true : false}
                     onClick={() => {
-                      showConfirmBox(null);
+                      manageDeleteEntity()
                       closeActions();
                     }}
                   >
                     Delete
                   </MenuItem>
-                )} */}
+                )}
                 {entityPermissions.isUpdate && (
                   <MenuItem
                     disabled={!anyEntitySelected}
