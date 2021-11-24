@@ -29,31 +29,8 @@ const useStyles = makeStyles(() => ({
 
 
 
-export default function BasicTimeline(
+export default function CustomTimeline(
     {
-        // allowSelection,
-        // allowSwipe,
-        // primaryField,
-        // onClick,
-        // dataRows,
-        // selectedRecords,
-        // dispatch,
-        // onEdit,
-        // onDelete,
-        // extraParamsToCheckDelete,
-        // rowCount,
-        // page,
-        // loading,
-        // checkError = null,
-        // chips,
-        // permissions,
-        // onCreate,
-        // showClone,
-        // onClone,
-        // fullHeight = false,
-        // renderedFrom,
-        // additionalDetails = [],
-        // owerCollaboratorInitialsOrImages = null
         dataRows
     }
 ) {
