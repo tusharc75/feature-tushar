@@ -331,6 +331,9 @@ export default function QuoteProcess(props) {
     if (tempProcessStatus === 'Customer Process') {
       setNextStep(false);
     }
+    if (tempProcessStatus === 'Quote Builder') {
+      setNextStep(true);
+    }
   }, [quoteData]);
 
   useEffect(() => {
