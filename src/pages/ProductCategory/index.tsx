@@ -361,13 +361,9 @@ const ProductCategory = () => {
 
             let rows = data.map((u) => {
                 let finalObject = prepareDataForGrid(u);
-                finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
+                finalObject["canDelete"] = permissions.productCategory.isDelete;
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
-                finalObject["allowedToEdit"] = (
-                    [...(u.collaborator ?? []), u.owner].some(
-                        (d) => d?.optionValue === user?.user?._id
-                    )
-                );
+                finalObject["allowedToEdit"] = permissions.productCategory.isUpdate;
                 return {
                     ...finalObject,
                 };

@@ -554,7 +554,7 @@ const Opportunities = () => {
             isMobile ? <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.opportunityResource}
+              permissions={permissions[opportunityResource]}
               primaryField={columns?.find(d => d.primaryField)}
               onClick={(data) => {
                 history.push(`${routes.opportunityDetail.path}/${data._id}`)
@@ -590,8 +590,8 @@ const Opportunities = () => {
               ]}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={clickCreateNew}
-              showClone={false}
-              onClone={() => { }}
+              showClone={true}
+              onClone={(data) => {  setShowCreateOpportunityDialog({ open: true, isClone: true, idToClone: data._id })}}
               renderedFrom={opportunityResource}
             /> :
               <CustomAgGrid

@@ -603,7 +603,7 @@ const Leads = () => {
             isMobile ? <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.leadResource}
+              permissions={permissions[leadResource]}
               primaryField={columns?.find(d => d.primaryField)}
               onClick={(data) => {
                 history.push(`${routes.leadDetail.path}/${data._id}`)
@@ -635,7 +635,7 @@ const Leads = () => {
               ]}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={handleCreate}
-              showClone={false}
+              showClone={true}
               onClone={(data) => { setIsOpen({ open: true, isClone: true, idToClone: data._id }) }}
               renderedFrom={leadResource}
             /> :

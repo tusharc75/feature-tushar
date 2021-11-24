@@ -35,6 +35,7 @@ import { MdAccountCircle } from "react-icons/md";
 import { AiFillCrown } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
+import { prepareDataForGrid } from "../../constants/helpers";
 
 let productTemplateTimeout;
 
@@ -249,19 +250,29 @@ const ProductTemplate: FC = () => {
 
                     const { createdBy, updatedBy, staticData, ...restProperties } = u;
 
-                    let res = {
-                        ...restProperties,
-                        id: u._id,
-                        createdBy: u.createdBy?.user?.concatedName,
-                        createdByDate: u.createdBy?.date,
-                        updatedBy: u.updatedBy?.user?.concatedName,
-                        updatedByDate: u.updatedBy?.date,
+                    let finalObject = prepareDataForGrid(u);
+                    finalObject["canDelete"] = permissions.productTemplate.isDelete && user?.user?._id === u?.owner.optionValue;
+                    finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                    finalObject["allowedToEdit"] = permissions.productTemplate.isUpdate;
+                    return {
+                        ...finalObject,
+                     
                     };
 
+                    // let res = {
+                    //     ...restProperties,
+                    //     id: u._id,
+                    //     createdBy: u.createdBy?.user?.concatedName,
+                    //     createdByDate: u.createdBy?.date,
+                    //     updatedBy: u.updatedBy?.user?.concatedName,
+                    //     updatedByDate: u.updatedBy?.date,
+                    // };
 
-                    return res;
+
+                    // return res;
                 });
-
+                setIsAllChecked(false);
+                setClonedData(data);
                 dispatch({ type: "initialize", data: rows, count: count });
                 setTimeout(() => {
                     dispatch({ type: "loading", loading: false });

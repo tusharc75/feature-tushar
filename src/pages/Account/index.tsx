@@ -974,7 +974,7 @@ export default function Account(props) {
             isMobile ? <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.accountResource}
+              permissions={accountPermissions}
               primaryField={columns?.find(d => d.primaryField)}
               onClick={(data) => {
                 history.push(`${routes.customerAccountDetail.path}/${data._id}`)

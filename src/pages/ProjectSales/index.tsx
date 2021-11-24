@@ -23,9 +23,7 @@ import { sidebarResource, prepareDataForGrid } from "../../constants/helpers"
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
 import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown } from "react-icons/all";
-import { FaSuitcase } from 'react-icons/fa';
+import { useHistory } from 'react-router-dom';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -120,6 +118,7 @@ const intialState = {
 let projectSalesTimeout;
 const ProjectSales: FC = () => {
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
   const {
     state: { user, permissions, selectedEntity },
   }: any = useData();
@@ -355,24 +354,11 @@ const ProjectSales: FC = () => {
           let rows = data.map((project) => {
 
             let finalObject = prepareDataForGrid(project, user);
-            finalObject["canDelete"] = project.owner?.optionValue === user?.user._id;
+            finalObject["canDelete"] = finalObject["projectManagerId"] === user?.user._id;
             finalObject["isChecked"] = selectedRecords.some(s => s._id === project._id);
-            finalObject["allowedToEdit"] = (
-              [...(project.collaborator ?? []), project.owner].some(
-                (d) => d?.optionValue === user?.user?._id
-              )
-            );
+            finalObject["allowedToEdit"] = finalObject["projectManagerId"] === user?.user._id;
 
-            finalObject["owerCollaboratorInitialsOrImages"] = [];
-            if (finalObject["owner"])
-              finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] });
-
-            finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
-              if (f.initials) {
-                f.initials = f.initials.split(" ").map((i) => i[0]).join("");
-              }
-            })
-
+            finalObject["owerCollaboratorInitialsOrImages"] = [{initials:finalObject["projectManager"]}];
             return {
               ...finalObject,
               isManager: user.user._id === project?.projectManager?.optionValue,
@@ -549,20 +535,20 @@ const ProjectSales: FC = () => {
                 <CustomSwipableList
                   allowSelection={true}
                   allowSwipe={true}
-                  permissions={permissions.projectStrategy}
+                  permissions={permissions?.projectStrategy}
                   primaryField={columns?.find(d => d.primaryField)}
                   onClick={(data) => {
-                    //history.push(`${routes.rentalManagementDetail.path}/${data._id}`)
+                    history.push(`${routes.projectSalesDetail.path}/${data._id}`)
                   }}
                   dataRows={dataRows}
                   selectedRecords={selectedRecords}
                   dispatch={dispatch}
                   onEdit={(data) => {
-                    // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
+                    history.push(`${routes.projectSalesDetail.path}/${data._id}?openEdit=true`)
                   }}
                   extraParamsToCheckDelete={true}
                   onDelete={(data) => {
-
+                    showConfirmBox(data)
                   }}
                   rowCount={rowCount}
                   page={page}
@@ -574,8 +560,10 @@ const ProjectSales: FC = () => {
                     }
                   ]}
                   onCreate={handleCreate}
-                  showClone={false}
-                  onClone={() => { }}
+                  showClone={true}
+                  onClone={(data) => {
+                    setIsOpen({ open: true, isClone: true, idToClone: data._id })
+                   }}
                   renderedFrom={routes.projectSales.title}
                 /> :
                 <CustomAgGrid

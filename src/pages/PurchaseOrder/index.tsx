@@ -26,6 +26,10 @@ import { getColumnData, getStaticFields, getFrameworkComponents } from "../../co
 import { prepareDataForGrid } from "../../constants/helpers"
 import ManagePurchaseOrder from "./ManagePurchaseOrder";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
+import { MdAccountCircle } from "react-icons/md";
+import { AiFillCrown } from "react-icons/all";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile } from 'react-device-detect';
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -40,7 +44,10 @@ const PurchaseOrder = () => {
     const [columns, setColumns] = useState([])
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+    const [isAllChecked, setIsAllChecked] = useState(false);
+    const [clonedData, setClonedData] = useState([])
+    const localStorageSelectedRecords = `${routes.purchaseOrder?.title}_selected`;
 
     const {
         state: { user, permissions },
@@ -91,12 +98,68 @@ const PurchaseOrder = () => {
         }
 
         const queryString = getQueryString();
+        let dataToProcess, count;
         axiosInstance().get(`${purchaseOrder.api}${queryString}`).then(({ data }) => {
-            data.data = data.data?.map((u, i) => ({
-                ...prepareDataForGrid(u, user)
-            }));
+            dataToProcess = data?.data;
+            count = data?.count;
 
-            dispatch({ type: "initialize", data: data.data, count: data.count });
+            let rows = dataToProcess.map((u) => {
+                const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
+
+                let finalObject = prepareDataForGrid(u);
+                finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                finalObject["allowedToEdit"] = (
+                    [...(u.collaborator ?? []), u.owner].some(
+                        (d) => d?.optionValue === user?.user?._id
+                    )
+                );
+
+                finalObject["owerCollaboratorInitialsOrImages"] = [];
+                if (finalObject["owner"])
+                    finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] });
+
+                finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
+                    if (f.initials) {
+                        f.initials = f.initials.split(" ").map((i) => i[0]).join("");
+                    }
+                })
+
+                let res = {
+                    ...finalObject,
+                };
+                return res;
+            });
+            setIsAllChecked(false);
+            setClonedData(data)
+            if (appendRows) {
+                dispatch({
+                    type: "initialize", data: [...dataRows, ...rows],
+                    count: data.count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+                });
+            } else {
+                dispatch({
+                    type: "initialize", data: rows, count: data.count,
+                    selectedRecords: rows.filter(f => f.isChecked === true)
+                });
+            }
+
+            if (gridApi) {
+                try {
+                    let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
+                    if (oldSelectedRecords.length > 0) {
+                        gridApi.forEachNode(function (node) {
+                            node.setSelected(
+                                oldSelectedRecords.some((o) => o === node.data._id)
+                            );
+                        });
+                    }
+                } catch (ex) {
+                    console.error("Error in getting selected records from local storage")
+                }
+            }
+
+            dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
@@ -255,72 +318,114 @@ const PurchaseOrder = () => {
                     </Grid>
                     <Grid xs={6} container className={styles.filter_side} >
                         <Box className={styles.filter_side_header} component="div" >
-
-                            <SearchBox
-                                onSearch={handleSearch}
-                                searchbox={styles.search_box_input}
-                                width="242px"
-                                size="small"
-                                value={search}
-                            />
-                            {permissions?.purchaseOrder?.isCreate &&
-                                <Button className={styles.add_submit_btn} onClick={() => {
-                                    setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: null })
-                                }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                            }
-
-                            <HtmlTooltip title="Please select some purchase orders">
-                                <span>
-                                    <Button
-                                        className={styles.action_submit_btn}
-                                        variant="outlined"
-                                        color="default"
-                                        size="small"
-                                        onClick={openActions}
-                                        disabled={selectedRecords.length ? false : true}
-                                        aria-controls="action-menu"
-                                    >Actions <ExpandMore />
-                                    </Button>
-                                </span>
-                            </HtmlTooltip>
-                            <Menu
-                                anchorEl={anchorEl}
-                                keepMounted
-                                getContentAnchorEl={null}
-                                anchorOrigin={{
-                                    vertical: "bottom",
-                                    horizontal: "left",
-                                }}
-                                id="action-menu"
-                                open={Boolean(anchorEl)}
-                                onClose={closeActions}
-                            >
-                                {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
-                                    closeActions()
-                                    setShowDeleteConfirmBox(true)
-                                }}>Delete</MenuItem>}
-                            </Menu>
+                            <div className="d-flex gap-2">
+                                <SearchBox
+                                    onSearch={handleSearch}
+                                    width="242px"
+                                    size="small"
+                                    value={search}
+                                />
+                                {permissions?.purchaseOrder?.isCreate && !isMobile &&
+                                    <Button className={styles.add_submit_btn} onClick={() => {
+                                        setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: null })
+                                    }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                }
+                                <div className="d-flex gap-2">
+                                    <HtmlTooltip title="Please select some purchase orders">
+                                        <span>
+                                            <Button
+                                                variant="outlined"
+                                                color="default"
+                                                size="small"
+                                                onClick={openActions}
+                                                disabled={selectedRecords.length ? false : true}
+                                                aria-controls="action-menu"
+                                            >Actions <ExpandMore />
+                                            </Button>
+                                        </span>
+                                    </HtmlTooltip>
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        keepMounted
+                                        getContentAnchorEl={null}
+                                        anchorOrigin={{
+                                            vertical: "bottom",
+                                            horizontal: "left",
+                                        }}
+                                        id="action-menu"
+                                        open={Boolean(anchorEl)}
+                                        onClose={closeActions}
+                                    >
+                                        {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
+                                            closeActions()
+                                            setShowDeleteConfirmBox(true)
+                                        }}>Delete</MenuItem>}
+                                    </Menu>
+                                </div>
+                            </div>
                         </Box>
                     </Grid>
                 </Grid>
             </div>
             {columns ?
                 Object.keys(frameWorkComponent).length > 0 ?
-                    <CustomAgGrid
-                        columns={columns}
-                        dataRows={dataRows}
-                        frameworkComponents={frameWorkComponent}
-                        setGridApi={setGridApi}
-                        dispatch={dispatch}
-                        rowCount={rowCount}
-                        limit={limit}
-                        pageSizes={pageSizes}
-                        page={page}
-                        actionWidth={150}
-                        loading={loading}
-                        renderedFrom={routes.purchaseOrder?.title}
-                        refreshGrid={fetchPurchaseOrder}
-                    /> : null
+                    isMobile ?
+                        <CustomSwipableList
+                            allowSelection={true}
+                            allowSwipe={true}
+                            permissions={permissions.purchaseOrder}
+                            primaryField={columns?.find(d => d.primaryField)}
+                            onClick={(data) => {
+                                history.push(`${routes.purchaseOrderDetail.path}/${data._id}`)
+                            }}
+                            dataRows={dataRows}
+                            selectedRecords={selectedRecords}
+                            dispatch={dispatch}
+                            onEdit={(data) => {
+                                history.push(`${routes.purchaseOrderDetail.path}/${data._id}?openEdit=true`)
+                            }}
+                            extraParamsToCheckDelete={true}
+                            onDelete={(data) => {
+                                setDeleteRecord(data);
+                                setShowDeleteConfirmBox(true)
+                            }}
+                            rowCount={rowCount}
+                            page={page}
+                            loading={loading}
+                            chips={[
+                                {
+                                    label: "Delivery Date: ",
+                                    field: "deliveryDate",
+                                    fieldType: "date",
+                                     setBackground : (data) => { return data.status === "" && new Date() > new Date(data.deliveryDate) ? {backgroundColor : "#efcccc"} : null }
+                                },
+                                {
+                                    label: "Status: ",
+                                    field: "status",
+                                }
+                            ]}
+                            onCreate={(data) => {
+                                setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: null })
+                            }}
+                            showClone={true}
+                            onClone={(data) => { setShowManagePurchaseOrderDialog({ open: true, isClone: true, idToClone: data._id }); }}
+                            renderedFrom={routes.purchaseOrder?.title}
+                        /> :
+                        <CustomAgGrid
+                            columns={columns}
+                            dataRows={dataRows}
+                            frameworkComponents={frameWorkComponent}
+                            setGridApi={setGridApi}
+                            dispatch={dispatch}
+                            rowCount={rowCount}
+                            limit={limit}
+                            pageSizes={pageSizes}
+                            page={page}
+                            actionWidth={150}
+                            loading={loading}
+                            renderedFrom={routes.purchaseOrder?.title}
+                            refreshGrid={fetchPurchaseOrder}
+                        /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
         {

@@ -35,6 +35,7 @@ import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import routes from '../../components/Helpers/Routes';
+import queryString from 'query-string';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -44,6 +45,8 @@ const ContactDetailsPage = (props) => {
     contactBreadcrumb
   } = props;
   const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit } = parsed;
   const {
     state: { user, permissions, selectedEntity, tour }, dispatch
   }: any = useData();
@@ -54,7 +57,7 @@ const ContactDetailsPage = (props) => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [contactFields, setContactFields] = useState([]);
   const [mainPoints, setMainPoints] = useState({});
-  const [, setAllowedToEdit] = useState(false);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
@@ -140,6 +143,9 @@ const ContactDetailsPage = (props) => {
     axiosInstance()
       .get(`/${contactApi}/${id}`)
       .then(({ data: { data } }) => {
+
+        
+
         handleMainPoints(data);
         let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
 
@@ -184,6 +190,15 @@ const ContactDetailsPage = (props) => {
           current: true
         });
 
+        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        setAllowedToEdit(isAllowedToEdit);
+        
+        if (isAllowedToEdit && openEdit === 'true') {
+          setOpenUpdateDialog(true);
+          const params = new URLSearchParams();
+          params.delete('openEdit');
+          history.push({ search: params.toString() });
+        }
         setOrgChartData(orgChartData);
       })
       .catch((err) => {

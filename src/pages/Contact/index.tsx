@@ -697,7 +697,7 @@ export default function Contact(props) {
               isMobile ? <CustomSwipableList
                 allowSelection={true}
                 allowSwipe={true}
-                permissions={permissions.contactPermission}
+                permissions={contactPermissions}
                 primaryField={columns?.find(d => d.primaryField)}
                 onClick={(data) => {
                   history.push(`${routes.customerContactDetail.path}/${data._id}`)
@@ -737,8 +737,8 @@ export default function Contact(props) {
                 ]}
                 owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                 onCreate={clickCreateNew}
-                showClone={false}
-                onClone={() => { }}
+                showClone={true}
+                onClone={(data) => {  setShowCreateContactDialog({ open: true, isClone: true, idToClone: data._id }) }}
                 renderedFrom={contactResource}
               /> : <CustomAgGrid
                 columns={columns}

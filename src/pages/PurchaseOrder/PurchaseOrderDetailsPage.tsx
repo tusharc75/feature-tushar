@@ -30,6 +30,7 @@ import Steps from "./Steps";
 import {FaWpforms} from "react-icons/fa";
 import {BiFoodMenu} from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
+import queryString from 'query-string';
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -37,9 +38,10 @@ const purchaseOrderSteps = ["Add Product", "Additional Cost", "Issue PO", "Recei
 
 const PurchaseOrderDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
-
     const { id } = useParams();
     const history = useHistory();
+    const parsed = queryString.parse(history.location.search);
+    const { openEdit } = parsed;
     const {
         state: { user, permissions }
     }: any = useData();
@@ -63,7 +65,7 @@ const PurchaseOrderDetailsPage = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [statusOptions, setStatusOptions] = useState([])
     const [purchaseOrderProduct, setPurchaseOrderProduct] = useState([])
-
+    const [allowedToEdit, setAllowedToEdit] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
     const [downlodingFile, setDownlodingFile] = useState(false)
 
@@ -171,11 +173,14 @@ const PurchaseOrderDetailsPage = () => {
     };
 
     const fetchPurchaseOrderData = async () => {
-        setLoadingPurchaseOrder(true);
+        setLoadingPurchaseOrder(true);  
         try {
             const {
                 data: { data },
             } = await axiosInstance().get(`${purchaseOrder.api}/${id}`);
+
+            const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+            setAllowedToEdit(isAllowedToEdit);
 
             handleMainPoints(data);
             setHeadingLbl(`${data?.purchaseOrderNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
@@ -189,6 +194,14 @@ const PurchaseOrderDetailsPage = () => {
                     (d) => d.currencyCode === data["currency"]
                 )?.symbolNative
             );
+
+            if (isAllowedToEdit && openEdit === 'true') {
+                setOpenUpdateDialog(true);
+                const params = new URLSearchParams();
+                params.delete('openEdit');
+                history.push({ search: params.toString() });
+              }
+   
             setLoadingPurchaseOrder(false);
         } catch (error) {
             toastConfig.setToastConfig(error);

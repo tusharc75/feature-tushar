@@ -156,13 +156,9 @@ const AddressResource = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u,user);
-          finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
+          finalObject["canDelete"] = warehousePermissions.isDelete;
           finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
-          finalObject["allowedToEdit"] = (
-            [...(u.collaborator ?? []), u.owner].some(
-              (d) => d?.optionValue === user?.user?._id
-            )
-          );
+          finalObject["allowedToEdit"] = warehousePermissions.isUpdate;
 
           return finalObject
         });

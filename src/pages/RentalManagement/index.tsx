@@ -625,8 +625,8 @@ const RentalManagement = () => {
                   ]}
                   owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                   onCreate={clickCreateNew}
-                  showClone={false}
-                  onClone={() => { }}
+                  showClone={true}
+                  onClone={(data) => { setShowManageRentalManagementDialog({ open: true, isClone: true, idToClone: data._id }) }}
                   renderedFrom={pageTitle}
                 /> :
                 <CustomAgGrid

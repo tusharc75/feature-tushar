@@ -33,6 +33,7 @@ import { displayDate } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import { MdAccountCircle } from "react-icons/md";
 import { AiFillCrown } from "react-icons/all";
+import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 
 const tabs = {
   Inbox: 1,
@@ -69,7 +70,7 @@ const Email = () => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([])
-  const localStorageSelectedRecords = "productTemplatePage_selected";
+  const localStorageSelectedRecords = "emailPage_selected";
 
   const [columns,] = useState([
     { field: 'to', headerName: 'Recipient', show: true, disabled: true, cellRenderer: 'recipentRenderer' },
@@ -366,7 +367,7 @@ const Email = () => {
                     activityName="email"
                   />
                   <div className="d-flex gap-2">
-                    <Button
+                    {!isMobile && <Button
                       variant="contained"
                       color="primary"
                       size="small"
@@ -377,10 +378,9 @@ const Email = () => {
                     >
                       Add
                     </Button>
-
+                    }
                     {/* </Box> */}
                     <Button
-                      className={styles.action_submit_btn}
                       variant="outlined"
                       color="default"
                       size="small"
@@ -417,22 +417,50 @@ const Email = () => {
             </Grid>
           </Grid>
         </div>
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={150}
-          loading={loading}
-          renderedFrom="emailPage"
-          refreshGrid={fetchEmails}
-        />
-
+        {
+          isMobile ?
+            <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={permissions.note}
+              primaryField={columns?.find(d => d.primaryField)}
+              onClick={(data) => {
+              } }
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(data) => {
+              } }
+              extraParamsToCheckDelete={true}
+              onDelete={(data) => {
+                showConfirmBox(data);
+              } }
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              onCreate={() => {
+                setOpen(true);
+              } }
+              showClone={false}
+              onClone={() => { } }
+              renderedFrom={"emailPage"} chips={undefined}            />
+            :
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameworkComponents}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={150}
+              loading={loading}
+              renderedFrom="emailPage"
+              refreshGrid={fetchEmails}
+            />
+        }
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}

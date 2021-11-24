@@ -171,22 +171,11 @@ const Product = () => {
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
             let rows = data.data.map((u) => {
                 let finalObject = prepareDataForGrid(u);
-                finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
+                finalObject["canDelete"] = permissions.product.isDelete;
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
-                finalObject["allowedToEdit"] = (
-                    [...(u.collaborator ?? []), u.owner].some(
-                        (d) => d?.optionValue === user?.user?._id
-                    )
-                );
-
+                finalObject["allowedToEdit"] = permissions.product.isUpdate;
                 return {
                     ...finalObject,
-
-                    canDelete: u.owner?.optionValue === user?.user._id,
-                    relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
-                    relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
-                    relatedLeadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
-
                 };
             });
             setIsAllChecked(false);
