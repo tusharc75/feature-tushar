@@ -109,6 +109,8 @@ import BOMTable from "./pages/BOM";
 import PurchaseOrder from "./pages/PurchaseOrder";
 import PurchaseOrderDetailsPage from "./pages/PurchaseOrder/PurchaseOrderDetailsPage";
 import { entity } from "./constants/helpers"
+import TransferAsset from "./pages/TransferAssets/Index";
+import TransferAssetDetailPage from "./pages/TransferAssets/TransferAssetDetailPage";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -642,6 +644,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.purchaseOrderDetail.path}/:id`} >
               <PurchaseOrderDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.transferAsset.path} >
+              <TransferAsset />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.transferAssetDetail.path}/:id`} >
+              <TransferAssetDetailPage />
             </PrivateRoute>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}

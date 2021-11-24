@@ -156,7 +156,8 @@ export const sidebarResource = {
   priceBuilder: 'Price Builder',
   flags: 'Flags',
   projectSales: 'Project Sales',
-  purchaseOrder: 'Purchase Order'
+  purchaseOrder: 'Purchase Order',
+  transferAsset: 'Transfer Asset'
 
 };
 
@@ -208,7 +209,8 @@ export const RESOURCE_LABEL = {
   salesOrder: 'Sales Order',
   eCommerce: 'e-Commerce',
   packages: 'Packages',
-  purchaseOrder: 'Purchase Order'
+  purchaseOrder: 'Purchase Order',
+  transferAsset: 'Transfer Asset'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -386,6 +388,13 @@ export const purchaseOrder = {
   route: '/purchase-order',
   permission: 'purchaseOrder',
   resource: 'purchaseOrder'
+};
+
+export const transferAsset = {
+  api: '/transfer-asset',
+  route: '/transfer-asset',
+  permission: 'transferAsset',
+  resource: 'transferAsset'
 };
 
 export const profileMenuItems = {
