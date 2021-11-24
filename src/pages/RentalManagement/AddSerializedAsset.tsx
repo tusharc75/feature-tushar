@@ -96,10 +96,11 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     }, [selectedRecords]);
 
     const columns = [
-        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
         { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
+        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
         { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
+        { field: "poNumber", headerName: "Purchase Order", show: true, cellRenderer: "commonRenderer" },
         { field: "plant", headerName: "Plant", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
     ];
@@ -127,6 +128,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                     productName: u.product?.optionLabel,
                     productCategory: u?.productCategory?.optionLabel,
                     warehouse: u?.warehouse?.optionLabel,
+                    poNumber: u?.pONumber?.optionLabel
                 }));
 
 

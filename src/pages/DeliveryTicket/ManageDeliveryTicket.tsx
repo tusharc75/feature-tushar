@@ -25,7 +25,7 @@ const ManageDeliveryTicket = (props) => {
     const {
         state: { user },
     }: any = useData();
-    
+
     const toastConfig = useContext(CustomToastContext)
     const { deliveryTicketApi } = deliveryTicket;
     const { deliveryTicketId, onClose, onSuccess, warehouseId = null, productInventoryForDeliveryTicket = null, rentalData = null } = props;
@@ -247,7 +247,8 @@ const ManageDeliveryTicket = (props) => {
                                                     <Grid spacing={3} container>
                                                         {form.sectionFields.map((field, index2) => (
                                                             <Grid key={index2} item xs={12} sm={6} md={6}>
-                                                                {field.fieldName === "customerAccount" || field.fieldName === "deliveryType" ? (
+                                                                {field.fieldName === "customerAccount" || field.fieldName === "deliveryType" ||
+                                                                    field.fieldName === "status" || field.fieldName === "actualDeliveredDate" || field.fieldName === "actualDispatchedDate" ? (
                                                                     <FormTypes
                                                                         {...field}
                                                                         disabled={true}
