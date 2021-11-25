@@ -256,7 +256,7 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
                             <Link
                               title={obj?.firstName}
                               className="link"
-                              to={`${routes.userDetail.path}/${obj?.id}`}
+                              to={`${routes.userDetail.path}/${obj?._id}`}
                             >
                               {`${obj?.firstName} ${obj?.lastName}`}
                             </Link>
