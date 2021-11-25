@@ -1,21 +1,21 @@
 
 import Box from "@material-ui/core/Box/Box";
 import { useState, useEffect, useReducer, useContext } from "react";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
+import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
+import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { Button, Chip, IconButton, makeStyles, useMediaQuery } from "@material-ui/core";
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import NoDataCell from "../../components/Helpers/NoDataCell";
-import { dateFormat, defaultActivityShow, gridLoadingTimeout, productInventory, purchaseOrder, rentalManagement, translateDataToTree } from "../../constants/helpers";
-import { useData } from "../../StateProvider/Provider";
+import axiosInstance from "../../../axios/axiosInstance";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import NoDataCell from "../../../components/Helpers/NoDataCell";
+import { dateFormat, defaultActivityShow, gridLoadingTimeout, productInventory, purchaseOrder, rentalManagement, translateDataToTree } from "../../../constants/helpers";
+import { useData } from "../../../StateProvider/Provider";
 import moment from "moment";
 import { startCase } from "lodash";
 import CreateSeriaizedAsset from "./CreateSerializedAsset";
-import CustomReactTable from "../../components/CustomReactTable/CustomReactTable";
+import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
 import {isMobile} from "react-device-detect";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import routes from "../../components/Helpers/Routes";
+import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
+import routes from "../../../components/Helpers/Routes";
 
 const useStyles = makeStyles(() => ({
     equal: {
