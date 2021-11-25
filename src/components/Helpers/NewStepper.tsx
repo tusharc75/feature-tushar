@@ -206,7 +206,7 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
           >
             {
               quoteDOA ?
-                (quoteDOA.map((label,index) => (
+                (quoteDOA.map((label, index) => (
                   <Step key={index}>
                     <StepLabel StepIconComponent={label?.status === "approve" ?
                       QontoStepIconForApprove

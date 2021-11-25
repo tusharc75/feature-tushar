@@ -27,61 +27,42 @@ import ManagePurchaseOrder from "./ManagePurchaseOrder";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
-import EditIcon from "@material-ui/icons/Edit";
-import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import AddProductDialog from "./AddProductDialog";
-import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import CreateProduct from "../../components/Product/CreateProduct";
-import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
 import Steps from "./Steps";
-import Service from "./Service";
-import BulkEditDialog from "./BulkEditDialog";
-import HtmlTooltip from "../../components/CustomTooltipTitle";
-import IssuPO from "./IssuPO";
-import {FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms} from "react-icons/fa";
+import { FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms } from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
 import ReceivingAsset from "./ReceivingAsset";
-import {isMobile} from "react-device-detect";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import Product from "./Product";
+import Service from "./Service";
+import IssuePo from "./IssuePo";
+
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
 const purchaseOrderSteps = ["Add Product", "Add Services", "Issue PO", "Receiving Asset"]
 
 const PurchaseOrderDetailsPage = () => {
-    const toastConfig = useContext(CustomToastContext);
 
+    const toastConfig = useContext(CustomToastContext);
     const { id } = useParams();
     const history = useHistory();
-    const {
-        state: { user, permissions }
-    }: any = useData();
+    const { state: { user, permissions } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState("");
     const [loadingPurchaseOrder, setLoadingPurchaseOrder] = useState(false);
-    const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
     const [purchaseOrderData, setPurchaseOrderData] = useState(null);
     const [showConfirmBox, setShowConfirmBox] = useState(false);
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
     const [purchaseOrderFields, setPurchaseOrderFields] = useState([]);
     const [mainPoints, setMainPoints] = useState(null);
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
-    const [addProductDialog, setAddProductDialog] = useState(false);
-    const [isAddingProducts, setAddingProducts] = useState(false);
-    const [product, setProduct] = useState<any[]>([]);
     const [currencySymbol, setCurrencySymbol] = useState(null);
     const [updateLoading, setUpdateLoading] = useState(false)
-    const [isAddNewProduct, setIsAddNewProduct] = useState(false)
     const [anchorEl, setAnchorEl] = useState(null);
     const [statusOptions, setStatusOptions] = useState([])
     const [purchaseOrderProduct, setPurchaseOrderProduct] = useState([])
-    const [showAddServiceDialog, setShowAddServiceDialog] = useState(false)
-    const [isSavingBulkEditDialog, setIsSavingBulkEditDialog] = useState(false)
     const [currentStepDisable, setCurrentStepDisable] = useState(false)
     const [currentStep, setCurrentStep] = useState(0);
     const [downlodingFile, setDownlodingFile] = useState(false)
-    const [selectedProductData, setSelectedProductData] = useState(null)
     const [pdfFileBase64, setPdfFileBase64] = useState(null);
 
     const [tabValue, setTabValue] = useState(0);
@@ -97,70 +78,11 @@ const PurchaseOrderDetailsPage = () => {
         setTabValue(newValue);
     };
 
-
-
-    const [gridApi, setGridApi] = useState(null);
-    const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
-    const ActionsRenderer = (params) => (
-        <>
-            <GridDeleteIcon
-                hasDeletePermission={permissions?.purchaseOrder?.isUpdate}
-                ownerId={user?.user?._id}
-                userId={user?.user?._id}
-                onDelete={() => {
-                    deletePurchaseOrderProduct([{
-                        id: params.data._id,
-                    }])
-                }
-                }
-                entity="rentalManagement"
-            />
-            {
-                <HtmlTooltip title="Edit">
-                    <IconButton
-                        size="small"
-                        aria-label="Clone"
-                        onClick={() => {
-                            setShowAddServiceDialog(true)
-                            setSelectedProductData(params.data)
-                        }}
-                    >
-                        <EditIcon color="primary" />
-                    </IconButton>
-                </HtmlTooltip>
-            }
-        </>
-    );
-
-    const frameworkComponents = {
-        commonRenderer: CommonRenderer,
-        actionsRenderer: ActionsRenderer,
-        dateRenderer: DateRenderer,
-    };
-
-    const [columns, setColumns] = useState([
-        { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
-        { field: "expectedDelivery", headerName: "Expected Delivery", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
-        { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        { field: "baseUOM", headerName: "Base UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Hour", "Day", "Week", "Month"] }, editable: true },
-        { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        { field: "tax", headerName: "Tax Percent", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        { field: "taxPerUnit", headerName: "Tax Per Unit", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        { field: "totalTax", headerName: "Total Tax", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    ])
-
-
     useEffect(() => {
         if (id) {
             getPurchaseOrderFields();
             fetchPurchaseOrderData();
-            fetchPurchaseOrderProduct();
         }
-
     }, [id]);
 
     useEffect(() => {
@@ -195,7 +117,6 @@ const PurchaseOrderDetailsPage = () => {
         }
         if (currentStep === 1 && purchaseOrderData?.status !== "In Process") { handleUpdateData({ "status": "In Process" }) }
         if (currentStep === 3 && purchaseOrderData?.status !== "Issued") { handleUpdateData({ "status": "Issued" }) }
-
         // eslint-disable-next-line
     }, [currentStep]);
 
@@ -203,38 +124,6 @@ const PurchaseOrderDetailsPage = () => {
         let mainPoint = {};
         // mainPoint['Account Name'] = data?.accountName?.optionLabel || '';
         setMainPoints(mainPoint);
-    };
-
-    const fetchPurchaseOrderProduct = () => {
-        dispatch({ type: "loading", loading: true });
-        if (gridApi) {
-            gridApi.setRowData([]);
-        }
-        setCurrentStepDisable(false)
-        axiosInstance().get(`${purchaseOrder.api}/${id}/order-details`).then(({ data: { data } }) => {
-            data = data?.map((u) => {
-
-                if ((!currentStepDisable) && (u.qty === 0 || u.qty === undefined
-                    || u.finalPrice === 0 || u.finalPrice === undefined)) setCurrentStepDisable(true)
-                return ({
-                    ...u,
-                    productName: u.productId?.productName,
-                    productNumber: u.productId?.productNumber,
-                    entity: u.productId?.entity,
-                    quantity: u.qty,
-                    description: u.productId?.productName,
-                    type: "Product",
-                    treeId: u?.productId?._id
-
-                })
-            });
-            setPurchaseOrderProduct(data)
-            dispatch({ type: "initialize", data: data, count: data.length });
-            dispatch({ type: "loading", loading: false });
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-            dispatch({ type: "loading", loading: false });
-        });
     };
 
     const fetchPurchaseOrderData = async () => {
@@ -272,10 +161,6 @@ const PurchaseOrderDetailsPage = () => {
                             setStatusOptions([...o.fieldData.option])
                             return true
                         }
-                        if (o?.fieldData?.fieldName === "taxSchedule" && !columns.some(d => d.field === "taxSchedule")) {
-                            setColumns([...columns, { field: "taxSchedule", headerName: "Tax Schedule", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: o.fieldData?.option?.map(d => d?.optionLabel) }, editable: true }])
-
-                        }
                     })
                 }
             })
@@ -284,13 +169,11 @@ const PurchaseOrderDetailsPage = () => {
             });
     };
 
-
     const handleOpenUpdateDialog = () => {
         setOpenUpdateDialog(true);
     };
 
     const handleDelete = () => {
-
         axiosInstance().put(`${purchaseOrder.api}/remove`, { "ids": [] }).then(() => {
             setShowConfirmBox(false);
             history.goBack();
@@ -298,58 +181,6 @@ const PurchaseOrderDetailsPage = () => {
             toastConfig.setToastConfig(error)
             setShowConfirmBox(false);
         });
-    }
-
-
-    const handleAddProduct = (productInventoryArray) => {
-        // let tempProductArray = productInventoryArray.map(d => { return { "inventory": d._id, "costing": { "costPerDay": 0, "totalCost": 0, "startDate": rentalManagementData.rentalStartDate, "dueDate": rentalManagementData.rentalEndDate } } })
-        setAddingProducts(true)
-        let tempProductArray = productInventoryArray.map(d => ({
-            "productId": d.id || d.productId,
-            "qty": parseInt(d.quantity || d.qty) || 0,
-            "value": parseInt(d.price) || 0,
-            "expectedDelivery": purchaseOrderData?.deliveryDate
-        }))
-
-        axiosInstance().post(`${purchaseOrder.api}/${id}/order-details/add`, { "orderDetails": tempProductArray })
-            .then(() => {
-                setAddProductDialog(false)
-                fetchPurchaseOrderProduct()
-                setAddingProducts(false)
-            }).catch((error) => {
-                setAddProductDialog(false)
-                toastConfig.setToastConfig(error)
-                setAddingProducts(false)
-            });
-    }
-
-    const handleUpdateOrderProduct = (row) => {
-        let tempProductArray = {
-            "qty": parseInt(row.quantity || row.qty) || 0,
-            "value": parseInt(row.value) || 0,
-            "expectedDelivery": row.expectedDelivery || "",
-            "baseUOM": row.baseUOM || "",
-            "price": row.price || 0,
-            "finalPrice": row.finalPrice || 0,
-            "actualReceived": row.actualReceived || 0,
-            "billed": row.billed || 0,
-            "taxSchedule": row.taxSchedule || "",
-            "tax": row.tax || 0,
-            "taxPerUnit": row.taxPerUnit || 0,
-            "totalTax": row.totalTax || 0
-        }
-
-        axiosInstance().post(`${purchaseOrder.api}/${id}/order-details/update?orderId=${row._id}`, tempProductArray)
-            .then(() => {
-                setAddProductDialog(false)
-                fetchPurchaseOrderProduct()
-                setAddingProducts(false)
-                setShowAddServiceDialog(false)
-            }).catch((error) => {
-                setAddProductDialog(false)
-                toastConfig.setToastConfig(error)
-                setAddingProducts(false)
-            });
     }
 
     const openActions = (event) => {
@@ -364,7 +195,6 @@ const PurchaseOrderDetailsPage = () => {
     }
 
     const handleUpdateData = (obj) => {
-
         if (obj.status) {
             const fieldsDataForUpdate = purchaseOrderFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             let values = getObjKeysWithValues(purchaseOrderData, fieldsDataForUpdate)
@@ -374,7 +204,6 @@ const PurchaseOrderDetailsPage = () => {
             axiosInstance().put(`${purchaseOrder.api}`, values).then(({ data: { data } }) => {
                 getPurchaseOrderFields();
                 fetchPurchaseOrderData();
-                fetchPurchaseOrderProduct();
                 toastConfig.setToastConfig({
                     open: true,
                     type: 'success',
@@ -384,15 +213,6 @@ const PurchaseOrderDetailsPage = () => {
                 toastConfig.setToastConfig(error);
             });
         }
-    }
-
-    const deletePurchaseOrderProduct = (products) => {
-        axiosInstance().delete(`${purchaseOrder.api}/${id}/order-details/delete?orderId=${products.map(d => d.id)}`)
-            .then(() => {
-                fetchPurchaseOrderProduct()
-            }).catch((error) => {
-                toastConfig.setToastConfig(error)
-            });
     }
 
     const handleViewPdf = (download) => {
@@ -441,6 +261,7 @@ const PurchaseOrderDetailsPage = () => {
             }
         };
     };
+
     const handleAttachments = () => {
         let request;
 
@@ -466,14 +287,11 @@ const PurchaseOrderDetailsPage = () => {
     return (
         <>
             <Fragment>
-
                 <Grid container className="headerbox">
                     <CustomBreadCrumbs routes={customizedRoutes} />
                 </Grid>
                 <Grid container spacing={1} className="detail-container">
-
                     <Grid item xs={12} sm={12} spacing={2}>
-
                         <Paper style={{ height: "650px" }}>
                             {!purchaseOrderData ? (
                                 <div>
@@ -493,13 +311,11 @@ const PurchaseOrderDetailsPage = () => {
                                     </Box>
                                 </div>
                             ) : (
-
                                 <DetailsPageHeader
                                     heading={headingLbl}
                                     mainPoints={mainPoints}
                                     showHeading={true}
                                 >
-
                                     {(permissions?.purchaseOrder?.isUpdate &&
                                         <>
                                             <Button
@@ -554,10 +370,6 @@ const PurchaseOrderDetailsPage = () => {
 
                                 </DetailsPageHeader>
                             )}
-
-
-
-
                             <Tabs
                                 className="quote-tab"
                                 value={tabValue}
@@ -628,12 +440,10 @@ const PurchaseOrderDetailsPage = () => {
                                 <Grid container spacing={2}>
                                 </Grid>
                             </TabPanel>
-
                             <TabPanel value={tabValue} index={1}>
                                 <Grid item xs={12} sm={12} md={12} lg={12} >
                                     <Grid item xs={12} sm={12} md={12} lg={12}>
                                         <>
-
                                             <Paper>
                                                 <Steps
                                                     // className={styles.steps_box}
@@ -643,115 +453,22 @@ const PurchaseOrderDetailsPage = () => {
                                                     setCurrentStep={setCurrentStep}
                                                 />
                                                 {currentStep === 0 &&
-                                                    <>
-                                                        <Box display="flex" justifyContent="space-between" m={1}>
-                                                            <Box display="flex">
-                                                                <Button
-                                                                    variant= {isMobile ? "outlined" : "contained"}
-                                                                    color="primary"
-                                                                    size="small"
-                                                                    onClick={() => {
-                                                                        setIsAddNewProduct(true);
-                                                                    }}
-                                                                >
-                                                                    {isMobile ? <FaCartPlus size={22}/> : `Add New ${routes.product.title}`}
-
-                                                                </Button>
-                                                                <Box mx={1} />
-                                                                <Button
-                                                                    variant= {isMobile ? "outlined" : "contained"}
-                                                                    color="primary"
-                                                                    size="small"
-                                                                    onClick={() => {
-                                                                        setAddProductDialog(true);
-                                                                    }}
-                                                                >
-                                                                    {isMobile ? <FaCartArrowDown size={22}/> : `Add Existing ${routes.product.title}`}
-                                                                    {}
-                                                                </Button>
-                                                            </Box>
-                                                        </Box>
-                                                        {columns ?
-                                                              isMobile ?
-                                                                  <CustomSwipableList
-                                                                      allowSelection={true}
-                                                                      allowSwipe={true}
-                                                                      permissions={permissions}
-                                                                      primaryField={columns?.find(d => d.field === "productName")}
-                                                                      onClick={(data) => {
-                                                                          setShowAddServiceDialog(true)
-                                                                          setSelectedProductData(data)
-                                                                      }}
-                                                                      dataRows={dataRows}
-                                                                      selectedRecords={selectedRecords}
-                                                                      dispatch={dispatch}
-                                                                      onEdit={(data) => {
-                                                                          setShowAddServiceDialog(true)
-                                                                          setSelectedProductData(data)
-                                                                      }}
-                                                                      extraParamsToCheckDelete={true}
-                                                                      onDelete={(data) => {
-                                                                          deletePurchaseOrderProduct([{
-                                                                              id: data._id,
-                                                                          }])
-                                                                      }}
-                                                                      rowCount={rowCount}
-                                                                      page={page}
-                                                                      loading={loading}
-                                                                      chips={
-                                                                          [{
-                                                                              label: `Product Description: `,
-                                                                              field: "productName",
-                                                                              forceShow: true
-                                                                          }]
-                                                                      }
-                                                                      onCreate={null}
-                                                                      showClone={false}
-                                                                      fullHeight={true}
-                                                                      renderedFrom={routes.purchaseOrderDetail.title}
-                                                                      onClone={() => { }}
-
-                                                            /> :
-
-                                                            <CustomAgGridEditable
-                                                                columns={columns}
-                                                                dataRows={dataRows}
-                                                                frameworkComponents={frameworkComponents}
-                                                                setGridApi={setGridApi}
-                                                                dispatch={dispatch}
-                                                                rowCount={rowCount}
-                                                                limit={limit}
-                                                                pageSizes={pageSizes}
-                                                                page={page}
-                                                                allowAction={true}
-                                                                actionWidth={150}
-                                                                allowSelection={true}
-                                                                isClientSideGrid={true}
-                                                                loading={loading}
-                                                                onCellValueChanged={(row) => {
-                                                                    handleUpdateOrderProduct(row.data)
-                                                                }}
-                                                                renderedFrom="purchaseOrderDetailsPageInventory"
-                                                                refreshGrid={fetchPurchaseOrderProduct}
-                                                            />
-                                                            : <Box
-                                                                p={2}
-                                                                height={500}
-                                                                bgcolor="white">
-                                                                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                                                            </Box>
-                                                        }
-
-                                                    </>
+                                                    <Product
+                                                        purchaseOrderData={purchaseOrderData}
+                                                        currentStepDisable={currentStepDisable}
+                                                        setCurrentStepDisable={setCurrentStepDisable}
+                                                        id={id}
+                                                        setPurchaseOrderProduct={setPurchaseOrderProduct}
+                                                    />
                                                 }
                                                 {(currentStep === 1) && (
                                                     <Service
-                                                        currencySymbol={currencySymbol}
                                                         purchaseOrderData={purchaseOrderData}
-                                                        statusOptions={statusOptions} />
+                                                        id={id}
+                                                    />
                                                 )}
                                                 {currentStep === 2 &&
-                                                    <IssuPO
+                                                    <IssuePo
                                                         purchaseOrderProduct={purchaseOrderProduct}
                                                         purchaseOrderData={purchaseOrderData}
                                                         handleViewPdf={handleViewPdf}
@@ -774,27 +491,8 @@ const PurchaseOrderDetailsPage = () => {
                                         </>
                                     </Grid>
                                 </Grid>
-
                             </TabPanel>
-
-
-
-
-
-
-
                         </Paper>
-
-
-
-
-
-
-
-
-
-
-
                     </Grid>
                     <Box my={1} />
                 </Grid>
@@ -810,7 +508,6 @@ const PurchaseOrderDetailsPage = () => {
                     onOk={handleDelete}
                 />
             )}
-
             {openUpdateDialog &&
                 <ManagePurchaseOrder
                     isClone={false}
@@ -820,40 +517,6 @@ const PurchaseOrderDetailsPage = () => {
                         setOpenUpdateDialog(false);
                         fetchPurchaseOrderData()
                     }}
-                />
-            }
-            {addProductDialog &&
-                <AddProductDialog
-                    isAddingProducts={isAddingProducts}
-                    addProductInPurchaseOrder={handleAddProduct}
-                    handleProductInPurchaseOrderClose={() => { setAddProductDialog(false) }}
-                    productInPurchaseOrder={product}
-                    type={"product"}
-                />
-            }
-            {isAddNewProduct && (
-                <CreateProduct
-                    isClone={false}
-                    productId={null}
-                    handleClose={() => setIsAddNewProduct(false)}
-                    isAddInBuilder={true}
-                    addProductInBuilder={handleAddProduct}
-                    openFrom="builder"
-                    fromQuote={true}
-                />
-            )}
-            {showAddServiceDialog &&
-                <BulkEditDialog
-                    isSaving={isSavingBulkEditDialog}
-                    onClose={() => {
-                        setShowAddServiceDialog(false)
-                        setSelectedProductData(null)
-                    }}
-                    submitBulkEdit={selectedProductData ? handleUpdateOrderProduct : handleUpdateOrderProduct}
-                    currencySymbol={currencySymbol}
-                    data={selectedProductData}
-                    type={"product"}
-                    statusOptions={statusOptions}
                 />
             }
         </>
