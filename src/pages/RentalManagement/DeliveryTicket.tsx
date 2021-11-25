@@ -59,6 +59,11 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
                 }
               })
             })
+
+            tempProductInventory.forEach((d) => {
+              d["hideSelection"] = d.status === "In-Transit";
+            })
+            
             dispatch({
               type: "initialize", data: tempProductInventory, count: tempProductInventory.length
             });
@@ -162,7 +167,6 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
       }
     }
   }
-
 
   return (<>
 
