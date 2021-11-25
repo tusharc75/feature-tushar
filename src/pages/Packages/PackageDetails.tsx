@@ -1,9 +1,9 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
+import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import {
   Grid,
   Box,
   Button,
-  Paper
+  Paper, Tabs, Tab
 } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
@@ -24,6 +24,35 @@ import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog'
 import ProductsTable from './ProductsTable';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import styles from './packages.module.scss'
+import {FaWpforms} from "react-icons/fa";
+import {BiFoodMenu} from "react-icons/bi";
+
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: any;
+  value: any;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+      <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
+        {children}
+      </div>
+  );
+}
+
+function a11yProps(index: any) {
+  return {
+    id: `main-tab-${index}`,
+    'aria-controls': `main-tabpanel-${index}`
+  };
+}
+
+
 
 const PackageDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -45,6 +74,12 @@ const PackageDetails = () => {
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
+
+  const [tabValue, setTabValue] = useState(0);
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
 
   useEffect(() => {
     if (id) {
@@ -172,45 +207,100 @@ const PackageDetails = () => {
                 </Grid>
               ) : (
                 <>
+
+                <Tabs
+                    className="quote-tab"
+                    value={tabValue}
+                    onChange={handleMainTabChange}
+                    textColor="primary"
+                    TabIndicatorProps={{
+                      style: {
+                        display: 'none'
+                      }
+                    }}
+                >
+
+                  <Tab
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 1 ? 'white' : '',
+                        color: tabValue === 1 ? '#163340' : '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                        </div>
+                      }
+                      {...a11yProps(0)}
+                  />
+                  <Tab
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 2 ? 'white' : '',
+                        color: tabValue === 2 ? 'blue' : '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                        </div>
+                      }
+                      {...a11yProps(1)}
+                  />
+                  <div className={'uio'}> </div>
+                </Tabs>
+
+                <TabPanel value={tabValue} index={0}>
+
                   <DetailsPage data={packageData} fields={packageFields} />
+
+                </TabPanel>
+
+                <TabPanel value={tabValue} index={1}>
+
+                  <Box mt={2} className="bg-white">
+                    <Box mb={1}>
+                      <div className={`p-2 gap-3 ${styles.package_grid_template}`}>
+                        <h3>Product(s)</h3>
+                        <ImportExportLinks
+                            permissions={permissions?.packages}
+                            module="packages-products"
+                            api={packages.packageApi}
+                            afterImportCompleted={() => {
+                              getProducts();
+                            }}
+                            isExportAllOrSomeFeature={true}
+                            total={products?.length}
+                            recordsToExport={products.length}
+                            ids={[]}
+                            additionalParams={`refrenceId=${id}`}
+                            isBackgroundWhite={true}
+                        />
+                        <Button className="text-transform-none" variant="outlined" color="primary" startIcon={<Add />} size="small" onClick={() => setShowProductAssignDialog(true)}>
+                          Assign Product(s)
+                        </Button>
+                      </div>
+                    </Box>
+
+                    {
+                      products.length ?
+                          <ProductsTable
+                              productList={products}
+                              handleUpdateQuantity={handleUpdateQuantity}
+                              updateLoading={quantityUpdateLoading || packagesLoading}
+                          /> : null
+                    }
+
+                  </Box>
+
+
+
+                </TabPanel>
+
+
                 </>
               )}
             </Box>
           </Paper>
-          <Box mt={2} className="bg-white">
-            <Box mb={1}>
-              <div className={`p-2 gap-3 ${styles.package_grid_template}`}>
-                <h3>Product(s)</h3>
-                <ImportExportLinks
-                  permissions={permissions?.packages}
-                  module="packages-products"
-                  api={packages.packageApi}
-                  afterImportCompleted={() => {
-                    getProducts();
-                  }}
-                  isExportAllOrSomeFeature={true}
-                  total={products?.length}
-                  recordsToExport={products.length}
-                  ids={[]}
-                  additionalParams={`refrenceId=${id}`}
-                  isBackgroundWhite={true}
-                />
-                <Button className="text-transform-none" variant="outlined" color="primary" startIcon={<Add />} size="small" onClick={() => setShowProductAssignDialog(true)}>
-                  Assign Product(s)
-                </Button>
-              </div>
-            </Box>
-
-            {
-              products.length ?
-                <ProductsTable
-                  productList={products}
-                  handleUpdateQuantity={handleUpdateQuantity}
-                  updateLoading={quantityUpdateLoading || packagesLoading}
-                /> : null
-            }
-
-          </Box>
 
           {/* {
             packageData?.products ?

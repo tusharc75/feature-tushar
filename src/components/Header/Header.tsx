@@ -101,7 +101,8 @@ const useStyles = makeStyles((theme) => ({
     display: 'none',
     [theme.breakpoints.up('sm')]: {
       display: 'flex',
-      alignItems: 'center'
+      alignItems: 'center',
+      // gap: '5px'
     }
   },
   sectionMobile: {
@@ -119,7 +120,8 @@ const useStyles = makeStyles((theme) => ({
   brandLogo: {
     maxWidth: '10%',
     height: '45px',
-    borderRadius: '4px'
+    borderRadius: '4px',
+    marginRight:"5px"
   },
   entitySelect: {
     fontSize: '16px',
@@ -1013,6 +1015,7 @@ const Header = ({ toggleDrawer }) => {
               {['local', 'development'].includes(process.env.REACT_APP_ENV) && (
                 <IconButton
                   id="shoppingCartButton"
+                  title={"My Cart"}
                   aria-describedby={fullScreenNotificationId}
                   aria-label="settings"
                   color="inherit"
@@ -1021,9 +1024,10 @@ const Header = ({ toggleDrawer }) => {
                       pathname: '/product/my-cart'
                     });
                   }}
+                  className="showIconLayout"
                 >
                   <Badge color="secondary" badgeContent={cartCount}>
-                    <ShoppingCartIcon />
+                    <ShoppingCartIcon className="setIcon"/>
                   </Badge>
                 </IconButton>
               )}
@@ -1033,10 +1037,12 @@ const Header = ({ toggleDrawer }) => {
                 aria-describedby={fullScreenNotificationId}
                 aria-label="settings"
                 color="inherit"
+                title="Notifications"
                 onClick={handleFullScreenNotificationClick}
+                className="showIconLayout"
               >
                 <Badge badgeContent={notification ? notification.count : 0} color="secondary">
-                  <Notifications />
+                  <Notifications className="setIcon"/>
                 </Badge>
               </IconButton>
 
@@ -1073,10 +1079,12 @@ const Header = ({ toggleDrawer }) => {
                 aria-describedby={fullScreenChatNotificationId}
                 aria-label="settings"
                 color="inherit"
+                title="Chats"
                 onClick={handleFullScreenChatNotificationClick}
+                className="showIconLayout"
               >
                 <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary">
-                  <ChatIcon />
+                  <ChatIcon className="setIcon"/>
                 </Badge>
               </IconButton>
 
@@ -1111,8 +1119,8 @@ const Header = ({ toggleDrawer }) => {
               </Badge>
             </IconButton> */}
 
-            <IconButton id="helpButton" aria-label="help" color="inherit" onClick={startTour}>
-              <HelpOutline />
+            <IconButton id="helpButton" aria-label="help" color="inherit" onClick={startTour} className="showIconLayout" title="Help">
+              <HelpOutline className="setIcon"/>
             </IconButton>
           </div>
 

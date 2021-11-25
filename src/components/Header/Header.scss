@@ -3,4 +3,19 @@
     #headerEnitySelect{
         padding-right: 2px;
     }
-} 
+}
+
+//.setIcon:hover{
+//    color: var(--primary);
+//}
+
+.showIconLayout{
+    padding: 10px !important;
+}
+
+.showIconLayout:hover {
+    outline: 1px solid #42ABA8 !important;
+    .setIcon{
+        color: #42ABA8 !important;
+    }
+}
