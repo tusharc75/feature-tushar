@@ -31,11 +31,11 @@ import Steps from "./Steps";
 import { FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms } from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
-import ReceivingAsset from "./ReceivingAsset";
+
 import Product from "./Product";
 import Service from "./Service";
 import IssuePo from "./IssuePo";
-
+import ReceivingAsset from "./ReceivingAsset";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -117,7 +117,6 @@ const PurchaseOrderDetailsPage = () => {
         }
         if (currentStep === 1 && purchaseOrderData?.status !== "In Process") { handleUpdateData({ "status": "In Process" }) }
         if (currentStep === 3 && purchaseOrderData?.status !== "Issued") { handleUpdateData({ "status": "Issued" }) }
-        // eslint-disable-next-line
     }, [currentStep]);
 
     const handleMainPoints = (data) => {
@@ -469,7 +468,6 @@ const PurchaseOrderDetailsPage = () => {
                                                 )}
                                                 {currentStep === 2 &&
                                                     <IssuePo
-                                                        purchaseOrderProduct={purchaseOrderProduct}
                                                         purchaseOrderData={purchaseOrderData}
                                                         handleViewPdf={handleViewPdf}
                                                         handleUpdateData={handleUpdateData}

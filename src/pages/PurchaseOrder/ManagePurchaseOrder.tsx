@@ -19,7 +19,7 @@ import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { FaDiceOne } from "react-icons/fa";
 
 const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, productId = null, productCategory = null,
-    productsToSave = [], isFromSerializedAssetStepFromRental = false, rentalManagementId = null }) => {
+    productsToSave = [], isFromSerializedAssetStepFromRental = false, currency = null, rentalManagementId = null }) => {
 
     const toastConfig = useContext(CustomToastContext)
     const [loading, setLoading] = useState(false);
@@ -63,6 +63,9 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                 }
                 if (rentalManagementId) {
                     createValues["rentalJob"] = rentalManagementId
+                }
+                if (currency) {
+                    createValues["currency"] = currency
                 }
                 setInitialData({
                     fields: setFieldsInAscendingOrder(fieldsDataForCreate),

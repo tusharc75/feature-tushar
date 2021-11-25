@@ -2,12 +2,12 @@ import { useContext, useEffect, useState, FC, Fragment } from 'react';
 import { Dialog, Button, Box, TextField, Grid, IconButton, ButtonGroup, Container, InputAdornment } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { Add, Delete } from '@material-ui/icons';
-import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { generateUniqueId, packages, product, purchaseOrder } from '../../constants/helpers';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import axiosInstance from '../../../axios/axiosInstance';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { generateUniqueId, packages, product, purchaseOrder } from '../../../constants/helpers';
 import { Formik, Form, FieldArray, Field } from 'formik';
 
 const CreateSerializedAsset = (props) => {
