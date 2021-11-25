@@ -402,7 +402,11 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
               axiosInstance().put(`${productInventoryHelperObject.api}/update-status`, {
                 comment: statusToUpdate.message,
                 assets: selectedRecords.map(m => m?._id ?? m?.id),
-                status: statusToUpdate.status
+                status: statusToUpdate.status,
+                reference: {
+                  _id: rentalManagementId,
+                  type: "Rental"
+                }
               }).then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
                 setStatusToUpdate({ open: false, isUpdating: false, status: "", message: "" });
