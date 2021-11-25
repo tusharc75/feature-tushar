@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useMemo, useState, useReducer, Fragment } from 'react'
+import { useContext, useEffect, useMemo, useState, useReducer, Fragment } from 'react'
 import { useHistory, useParams } from "react-router-dom";
-import {Paper, Box, Grid, Button, Typography, IconButton, Tooltip, Tabs, Tab} from "@material-ui/core";
+import { Paper, Box, Grid, Button, Typography, IconButton, Tooltip } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
@@ -30,36 +30,6 @@ import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import moment from 'moment';
 import AddSerializedAsset from '../RentalManagement/AddSerializedAsset';
-import {FaWpforms} from "react-icons/fa";
-import {BiFoodMenu} from "react-icons/bi";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-      <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-        {children}
-      </div>
-  );
-}
-
-
-function a11yProps(index: any) {
-  return {
-    id: `main-tab-${index}`,
-    'aria-controls': `main-tabpanel-${index}`
-  };
-}
-
-
 
 const renderedFrom = "deliveryTicketDetailInventoryPage"
 
@@ -97,16 +67,6 @@ export default function DeliveryTicketDetail(props) {
   const [startDeliveryDate, setStartDeliveryDate] = useState(null);
   const [signOffDate, setSignOffDate] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
-
-  const [tabValue, setTabValue] = useState(0);
-
-  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setTabValue(newValue);
-  };
-
-
-
-
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
@@ -439,176 +399,88 @@ export default function DeliveryTicketDetail(props) {
                 </Box>
               ) : (
                 <>
-
-                <Tabs
-                    className="quote-tab"
-                    value={tabValue}
-                    onChange={handleMainTabChange}
-                    textColor="primary"
-                    TabIndicatorProps={{
-                      style: {
-                        display: 'none'
-                      }
-                    }}
-                >
-
-                  <Tab
-                      className={'tabLayout'}
-                      style={{
-                        background: tabValue === 1 ? 'white' : '',
-                        color: tabValue === 1 ? '#163340' : '#163340'
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                        </div>
-                      }
-                      {...a11yProps(0)}
-                  />
-                  <Tab
-                      className={'tabLayout'}
-                      style={{
-                        background: tabValue === 2 ? 'white' : '',
-                        color: tabValue === 2 ? 'blue' : '#163340'
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                        </div>
-                      }
-                      {...a11yProps(1)}
-                  />
-                  <div className={'uio'}> </div>
-                </Tabs>
-
-                <TabPanel value={tabValue} index={0}>
                   {(deliveryTicketData && deliveryTicketFields.length > 0 ?
-                          <DetailsPage
-                              data={{ ...deliveryTicketData, actualDispatchedDate: startDeliveryDate, actualDeliveredDate: signOffDate }}
-                              fields={[...deliveryTicketFields, {
-                                fieldData: {
-                                  fieldLabel: "Actual Dispatched Date",
-                                  fieldName: "actualDispatchedDate",
-                                  sectionName: "Sign-off Information"
-                                }
-                              }, {
-                                fieldData: {
-                                  fieldLabel: "Actual Delivered Date",
-                                  fieldName: "actualDeliveredDate",
-                                  sectionName: "Sign-off Information"
-                                }
-                              }
-                              ]} /> : null
+                    <DetailsPage
+                      data={{ ...deliveryTicketData, actualDispatchedDate: startDeliveryDate, actualDeliveredDate: signOffDate }}
+                      fields={[...deliveryTicketFields, {
+                        fieldData: {
+                          fieldLabel: "Actual Dispatched Date",
+                          fieldName: "actualDispatchedDate",
+                          sectionName: "Sign-off Information"
+                        }
+                      }, {
+                        fieldData: {
+                          fieldLabel: "Actual Delivered Date",
+                          fieldName: "actualDeliveredDate",
+                          sectionName: "Sign-off Information"
+                        }
+                      }
+                      ]} /> : null
                   )}
+                  {
+                    dataRows && dataRows.length ?
+                      <>
+                        <Grid container spacing={1} className="p-2">
+                          <Grid item xs={12} className="mt-2 d-flex gap-2">
+                            <Typography variant="subtitle1" className="font-weight-bold text-primary">
+                              Serialized Assets
+                            </Typography>
 
-                </TabPanel>
+                            {
+                              deliveryTicketData.status === "New" && <IconButton
+                                onClick={() => {
+                                  setAddSerializedAssetDialog(true)
+                                }}
+                                color='primary'
+                                size="small"
+                              >
+                                <Tooltip
+                                  title="Add More Serialized Assets">
+                                  <AddBoxRoundedIcon />
+                                </Tooltip>
+                              </IconButton>
+                            }
 
+                            {
+                              deliveryTicketData.status === "New" && <IconButton
+                                disabled={selectedRecords.length === 0}
+                                onClick={() => {
+                                  setShowRemoveAssetFromLoadingTicketDialog(true)
+                                }}
+                                color='primary'
+                                size="small"
+                              >
+                                <Tooltip
+                                  title="Remove Serialized Assets">
+                                  <RemoveCircleRoundedIcon />
+                                </Tooltip>
+                              </IconButton>
+                            }
 
-                  <TabPanel value={tabValue} index={1}>
-                    {
-                      dataRows && dataRows.length ?
-                          <>
-                            <Grid container spacing={1} className="p-2">
-                              <Grid item xs={12} className="mt-2 d-flex gap-2">
-                                <Typography variant="subtitle1" className="font-weight-bold text-primary">
-                                  Serialized Assets
-                                </Typography>
-
-                                {
-                                  deliveryTicketData.status === "New" && <IconButton
-                                      onClick={() => {
-                                        setAddSerializedAssetDialog(true)
-                                      }}
-                                      color='primary'
-                                      size="small"
-                                  >
-                                    <Tooltip
-                                        title="Add More Serialized Assets">
-                                      <AddBoxRoundedIcon />
-                                    </Tooltip>
-                                  </IconButton>
-                                }
-
-                                {
-                                  deliveryTicketData.status === "New" && <IconButton
-                                      disabled={selectedRecords.length === 0}
-                                      onClick={() => {
-                                        setShowRemoveAssetFromLoadingTicketDialog(true)
-                                      }}
-                                      color='primary'
-                                      size="small"
-                                  >
-                                    <Tooltip
-                                        title="Remove Serialized Assets">
-                                      <RemoveCircleRoundedIcon />
-                                    </Tooltip>
-                                  </IconButton>
-                                }
-
-                              </Grid>
-                              <Grid item xs={12}>
-
-                                {isMobile ? <CustomSwipableList
-                                        allowSelection={true}
-                                        allowSwipe={true}
-                                        permissions={permissions}
-                                        primaryField={columns?.find(d => d.field === "assetNumber")}
-                                        onClick={(data) => {
-                                          history.push(`${routes.productInventoryDetail.path}/${data._id}`)
-                                        }}
-                                        dataRows={dataRows}
-                                        selectedRecords={selectedRecords}
-                                        dispatch={dispatch}
-                                        onEdit={null}
-                                        extraParamsToCheckDelete={true}
-                                        onDelete={null}
-                                        rowCount={rowCount}
-                                        page={page}
-                                        loading={false}
-                                        chips={
-                                          [{
-                                            label: `Product Description: `,
-                                            field: "productName",
-                                            forceShow: true
-                                          }]
-                                        }
-                                        onCreate={null}
-                                        showClone={false}
-                                        fullHeight={true}
-                                        renderedFrom={renderedFrom}
-                                        onClone={() => {
-                                        }}
-
-                                    /> :
-
-                                    <CustomAgGrid
-                                        allowSelection={true}
-                                        allowAction={false}
-                                        columns={columns}
-                                        dataRows={dataRows}
-                                        frameworkComponents={frameworkComponents}
-                                        setGridApi={setGridApi}
-                                        dispatch={dispatch}
-                                        rowCount={rowCount}
-                                        limit={limit}
-                                        pageSizes={pageSizes}
-                                        page={page}
-                                        actionWidth={150}
-                                        loading={false}
-                                        renderedFrom={renderedFrom}
-                                        refreshGrid={fetchProductInventory}
-                                    />
-                                }
-                              </Grid>
-                            </Grid>
-                          </>
-                          : null
-                    }
-
-                  </TabPanel>
-
-
-
+                          </Grid>
+                          <Grid item xs={12}>
+                            <CustomAgGrid
+                              allowSelection={deliveryTicketData.status === "New"}
+                              allowAction={false}
+                              columns={columns}
+                              dataRows={dataRows}
+                              frameworkComponents={frameworkComponents}
+                              setGridApi={setGridApi}
+                              dispatch={dispatch}
+                              rowCount={rowCount}
+                              limit={limit}
+                              pageSizes={pageSizes}
+                              page={page}
+                              actionWidth={150}
+                              loading={false}
+                              renderedFrom={renderedFrom}
+                              refreshGrid={fetchProductInventory}
+                            />
+                          </Grid>
+                        </Grid>
+                      </>
+                      : null
+                  }
                 </>
               )}
             </Paper>
@@ -750,6 +622,8 @@ export default function DeliveryTicketDetail(props) {
             }}
             isAdding={isAdding}
             selectedProducts={[]}
+            rentalId={deliveryTicketData?.rental?.optionValue}
+            notIn="loadingTicket"
           // type={inventoryType}
           />
         }

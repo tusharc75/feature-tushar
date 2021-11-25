@@ -65,13 +65,13 @@ const useStyles = makeStyles((theme) => ({
         padding: "4px !important"
     }
 }));
-const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, minLimit = 0, doaType = null, open, onClose, from = "EntityDetailPage", isRenderedFromUserSetUp = false }) => {
+const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, doaMinLimit = 0, doaType = null, open, onClose, from = "EntityDetailPage", isRenderedFromUserSetUp = false }) => {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState<any[]>([]);
     const [check, setCheck] = useState(false);
-    const [doaLowerLimit, setDoaLowerLimit] = useState(minLimit);
+    const [doaLowerLimit, setDoaLowerLimit] = useState(doaMinLimit);
     const [currencyData, setCurrencyData] = useState<any[]>([]);
     const [currency, setCurrency] = useState(doaCurrency ? doaCurrency : "");
     const [currencySymbol, setCurrencySymbol] = useState(
@@ -117,7 +117,7 @@ const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, minL
         }
 
 
-        const userDoa = { _ids: selectedEntity, doaCurrency: selectedType === 2 ? currency : "", doa: doaArray, doaType: selectedType, minLimit: selectedType === 2 ? doaLowerLimit : 0 };
+        const userDoa = { _ids: selectedEntity, doaCurrency: selectedType === 2 ? currency : "", doa: doaArray, doaType: selectedType, doaMinLimit: selectedType === 2 ? doaLowerLimit : 0 };
         setLoading(true)
         axiosInstance().put('/doa/setups', removeEmptyKeys(userDoa))
             .then(({ data }) => {
@@ -166,13 +166,16 @@ const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, minL
 
     const validate = (values) => {
         let errors = null;
-        let minTemp = values.users.reduce(function (previous, current) {
-            return previous.amount < current.amount ? previous : current;
-        });
 
-        if (values.users.length > 0) {
+        if (values?.users?.length > 0) {
+            let minTemp = values?.users?.reduce(function (previous, current) {
+                return previous?.amount < current?.amount ? previous : current;
+            });
             let tempUser = values.users.find(item => item.id === selectedEntity[0] || item.id === "self")
             if (tempUser && tempUser.amount !== minTemp.amount) {
+                errors = "Too many characters!";
+            }
+            if (doaLowerLimit > minTemp.amount) {
                 errors = "Too many characters!";
             }
 
@@ -230,6 +233,9 @@ const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, minL
                                             setDoaLowerLimit(Number(e.target.value.replace(/[^0-9]/g, '')))
                                         }}
                                         required
+                                        error={formikRef?.current?.values ? validate(formikRef?.current?.values) : false}
+                                        helperText={formikRef?.current?.values ? validate(formikRef?.current?.values) ? "should have minimum amount" : "" : ""}
+
                                     />
                                     <Autocomplete className={classes.currencyStyle}
                                         fullWidth

@@ -208,7 +208,7 @@ export default function QuoteProcess(props) {
   const history = useHistory();
 
   const [quoteCurrency] = useState(quoteData?.currency);
-  const [nextStep, setNextStep] = useState(true);
+  const [nextStep, setNextStep] = useState(false);
   const [redCard, setRedCard] = useState(false);
   const [totalProfit, setTotalProfit] = useState({
     shortFormatAmount: '',
@@ -330,6 +330,9 @@ export default function QuoteProcess(props) {
     }
     if (tempProcessStatus === 'Customer Process') {
       setNextStep(false);
+    }
+    if (tempProcessStatus === 'Quote Builder') {
+      setNextStep(true);
     }
   }, [quoteData]);
 

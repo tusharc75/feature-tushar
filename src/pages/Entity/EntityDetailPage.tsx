@@ -57,7 +57,7 @@ const EntityDetailsPage = () => {
   const [doa, setDoa] = useState<any[]>([]);
   const [doaCurrency, setDoaCurrency] = useState("");
   const [doaType, setDoaType] = useState(null);
-  const [minLimit, setMinLimit] = useState(null);
+  const [doaMinLimit, setDoaMinLimit] = useState(null);
 
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
   const [userList, setUserList] = useState<any[]>([]);
@@ -67,7 +67,6 @@ const EntityDetailsPage = () => {
       getEntityFields();
       fetchEntityData();
       fetchEntityUser();
-      fetchUsers();
       fetchDoa();
     }
   }, [id]);
@@ -95,6 +94,7 @@ const EntityDetailsPage = () => {
       .get(`/user?filterById=[{"field": "entities.entity", "term": "${id}"}]`)
       .then(({ data: { data } }) => {
         setUsers(data);
+        getRows(data)
         setUsersLoading(false);
       })
       .catch((err) => {
@@ -259,7 +259,7 @@ const EntityDetailsPage = () => {
         setDoa(data.doa);
         setDoaCurrency(data.doaCurrency)
         setDoaType(data.doaType)
-        setMinLimit(data.minLimit)
+        setDoaMinLimit(data.doaMinLimit)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -267,17 +267,6 @@ const EntityDetailsPage = () => {
         setDoa([]);
       });
   };
-
-  const fetchUsers = () => {
-    axiosInstance()
-      .get("/user")
-      .then(({ data: { data, count } }) => {
-        getRows(data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  }
 
   const getRows = (data: []) => {
     const rows = data.length
@@ -596,7 +585,7 @@ const EntityDetailsPage = () => {
               setDoaDialogOpen(false);
             }}
             doaType={doaType}
-            minLimit={minLimit}
+            doaMinLimit={doaMinLimit}
           />
         </Dialog>
 

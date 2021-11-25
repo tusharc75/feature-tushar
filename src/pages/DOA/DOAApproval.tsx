@@ -85,7 +85,7 @@ const DOAApproval = () => {
         setQuoteData(data.quote)
         setProductBuilderId(data?.version?.productBuilderId)
         setQData(data);
-        if (data.Quote_Status !== "Sent for DOA") {
+        if (data?.version?.status !== "Sent for DOA") {
           setQStatus(false);
         }
       })
@@ -255,10 +255,8 @@ const DOAApproval = () => {
                     <GiVintageRobot />
                   </IconButton>
                 </Tooltip>
-                {QData &&
-                  QStatus &&
-                  QData?.DOA.approveBy.filter((u) => u.user === currentUser._id)
-                    .length === 0 ? (
+                {QData && QStatus &&
+                  QData?.DOA.requestTo.find((u) => u === currentUser._id) ? (
                   <>
                     <Button
                       onClick={() => {
@@ -339,15 +337,15 @@ const DOAApproval = () => {
                         <span
                           title={
                             formatAmountWithCurrency(
-                              QData["TotalSellingPricecurr"],
+                              quoteData?.currency,
                               totalSellingPrice
                             ).fullFormatAmount
                           }
                         >
                           {
                             formatAmountWithCurrency(
-                              QData["TotalSellingPricecurr"],
-                              QData["TotalSellingPriceamount"]
+                              quoteData?.currency,
+                              totalSellingPrice
                             ).fullFormatAmount || 0
                           }
                         </span>

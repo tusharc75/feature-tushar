@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.6.0](https://github.com/vebholic/oms_frontend/compare/v2.5.0...v2.6.0) (2021-11-25)
+
+
+### Features
+
+* - Link not coming issue fixed ([03d0602](https://github.com/vebholic/oms_frontend/commit/03d0602a6e1665b3c2e069cb4871af22a4e2046a))
+* - PO-255 - Create PO Done from Rental Serialized Asset Step ([4fd7b91](https://github.com/vebholic/oms_frontend/commit/4fd7b916af97000bd61cbb09e1c414efb49c1ff0))
+* - PO-256 - Add More Serialized Assets in Loading and Receiving Tickets Done ([ea94917](https://github.com/vebholic/oms_frontend/commit/ea949171a863c9b703189ba0812da22202438e4d))
+* - PO-256 - Changes done from frontend ([b1ce117](https://github.com/vebholic/oms_frontend/commit/b1ce11794d02eb9a4d5a87a5f308b261c81ceff5))
+* test ([223ffc8](https://github.com/vebholic/oms_frontend/commit/223ffc80f9d6f5a1ef201340fc6198866ecc647b))
+* **transferasset:** add list and detail pages ([19dc6f5](https://github.com/vebholic/oms_frontend/commit/19dc6f54a482b7f00f8c626f74f38707ce77f424))
+
+
+### Bug Fixes
+
+* doa accept reject bug in doa request page ([e8a6e3a](https://github.com/vebholic/oms_frontend/commit/e8a6e3a5acdc5572c9f55eef46844af9fd7837ee))
+* next button timing issue ([24ed3ef](https://github.com/vebholic/oms_frontend/commit/24ed3ef47aabdfccb307e75183b51c91b2f7e301))
+* **serializeassets:** fix mobile table ([9a153b5](https://github.com/vebholic/oms_frontend/commit/9a153b5254178c4be21fadd47556214bab936aeb))
+* stepper disable fix ([b32f091](https://github.com/vebholic/oms_frontend/commit/b32f09132c71ca5415666e1fa9116a6506836acc))
+* **trasferasset:** minor fix ([6e74597](https://github.com/vebholic/oms_frontend/commit/6e74597923ec2c18c2b2b2bdaebaeb47ac96d719))
+
 ## [2.5.0](https://github.com/vebholic/oms_frontend/compare/v2.4.0...v2.5.0) (2021-11-24)
 
 
