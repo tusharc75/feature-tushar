@@ -206,7 +206,7 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
           >
             {
               quoteDOA ?
-                (quoteDOA.map((label,index) => (
+                (quoteDOA.map((label, index) => (
                   <Step key={index}>
                     <StepLabel StepIconComponent={label?.status === "approve" ?
                       QontoStepIconForApprove
@@ -256,7 +256,7 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
                             <Link
                               title={obj?.firstName}
                               className="link"
-                              to={`${routes.userDetail.path}/${obj?.id}`}
+                              to={`${routes.userDetail.path}/${obj?._id}`}
                             >
                               {`${obj?.firstName} ${obj?.lastName}`}
                             </Link>
