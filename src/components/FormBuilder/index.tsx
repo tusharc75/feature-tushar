@@ -72,7 +72,7 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
   if (module === 'pdf-template') {
     filterFieldType = ['SINGLELINE', 'MULTILINE', 'IMAGEUPLOAD'];
   }
-  if (["Rental Management Product", "Rental Management Cost"].includes(resource)) {
+  if (["Rental Management Product", "Rental Management Cost", "Purchase Order Product", "Purchase Order Service"].includes(resource)) {
     filterFieldType = []
     module = "form-builder-extra"
   }
