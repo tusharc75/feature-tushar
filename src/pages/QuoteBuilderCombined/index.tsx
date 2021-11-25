@@ -284,7 +284,7 @@ const QuoteBuilders = () => {
         columns = [...columns, {
           disabled: true,
           field: "quoteName",
-          headerName: "Quote Name",
+          headerName: "Quote Number",
           pivotIndex: 0,
           show: true,
           cellRenderer: "quoteNameRenderer",
