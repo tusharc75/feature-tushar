@@ -36,6 +36,7 @@ import useColumns,{
 } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers";
 import Tooltip from '@material-ui/core/Tooltip'
+import {isMobile} from "react-device-detect";
 
 const ignoreField = ["qty", "priceTemplate"]
 
@@ -438,8 +439,11 @@ const Product = () => {
         <div className="main-container">
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <RiShoppingBag3Fill size={22} style={{ paddingBottom: "3px" }} className="headerLogo" /> <span className="listingHeader">{routes.product.title} </span>
+                    <Grid item xs={isMobile ? 12 : 6} className="d-flex align-items-center gap-1">
+                        <RiShoppingBag3Fill size={22} style={{ paddingBottom: "3px" }} className="headerLogo" />
+                        <Grid xs={5}>
+                        <span className="listingHeader">{routes.product.title} </span>
+                        </Grid>
                         <Autocomplete
                             style={{ width: "250px" }}
                             options={productCategoryList}
@@ -492,7 +496,7 @@ const Product = () => {
                                 )}
                             />}
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={isMobile ? 12 : 6}>
                         <Grid container className={styles.filter_side} >
                             <Box className={styles.filter_side_header} component="div" >
                                 <SearchBox
