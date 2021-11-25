@@ -28,6 +28,7 @@ import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import {FaWpforms} from "react-icons/fa";
 import {BiFoodMenu} from "react-icons/bi";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -473,23 +474,60 @@ const ReceivingTicketDetails = () => {
 
                               </Grid>
                               <Grid item xs={12}>
-                                <CustomAgGrid
-                                    allowSelection={receivingTicketData.status === "New"}
-                                    allowAction={false}
-                                    columns={columns}
-                                    dataRows={dataRows}
-                                    frameworkComponents={frameworkComponents}
-                                    setGridApi={setGridApi}
-                                    dispatch={dispatch}
-                                    rowCount={rowCount}
-                                    limit={limit}
-                                    pageSizes={pageSizes}
-                                    page={page}
-                                    actionWidth={150}
-                                    loading={false}
-                                    renderedFrom={renderedFrom}
-                                    refreshGrid={fetchProductInventory}
-                                />
+                                {isMobile ? <CustomSwipableList
+                                        allowSelection={true}
+                                        allowSwipe={true}
+                                        permissions={permissions}
+                                        primaryField={columns?.find(d => d.field === "assetNumber")}
+                                        onClick={(data) => {
+                                          history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                                        }}
+                                        dataRows={dataRows}
+                                        selectedRecords={selectedRecords}
+                                        dispatch={dispatch}
+                                        onEdit={() => {
+
+                                        }}
+                                        extraParamsToCheckDelete={true}
+                                        onDelete={() => {
+                                        }}
+                                        rowCount={rowCount}
+                                        page={page}
+                                        loading={loading}
+                                        chips={
+                                          [{
+                                            label: `Product Description: `,
+                                            field: "productName",
+                                            forceShow: true
+                                          }]
+                                        }
+                                        onCreate={null}
+                                        showClone={false}
+                                        fullHeight={true}
+                                        renderedFrom={"receivingTicketDetailInventoryPage"}
+                                        onClone={() => {
+                                        }}
+
+                                    /> :
+
+                                    <CustomAgGrid
+                                        allowSelection={receivingTicketData.status === "New"}
+                                        allowAction={false}
+                                        columns={columns}
+                                        dataRows={dataRows}
+                                        frameworkComponents={frameworkComponents}
+                                        setGridApi={setGridApi}
+                                        dispatch={dispatch}
+                                        rowCount={rowCount}
+                                        limit={limit}
+                                        pageSizes={pageSizes}
+                                        page={page}
+                                        actionWidth={150}
+                                        loading={false}
+                                        renderedFrom={renderedFrom}
+                                        refreshGrid={fetchProductInventory}
+                                    />
+                                }
                               </Grid>
                             </Grid>
                           </>
