@@ -27,23 +27,14 @@ import ManagePurchaseOrder from "./ManagePurchaseOrder";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
-import EditIcon from "@material-ui/icons/Edit";
-import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import CreateProduct from "../../components/Product/CreateProduct";
-import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
 import Steps from "./Steps";
-import Service from "./Service";
-import HtmlTooltip from "../../components/CustomTooltipTitle";
-import IssuPO from "./IssuPO";
 import { FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms } from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
 import ReceivingAsset from "./ReceivingAsset";
-import { isMobile } from "react-device-detect";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import Product from "./Product";
+import Service from "./Service";
+import IssuePo from "./IssuePo";
 
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
@@ -472,12 +463,12 @@ const PurchaseOrderDetailsPage = () => {
                                                 }
                                                 {(currentStep === 1) && (
                                                     <Service
-                                                        currencySymbol={currencySymbol}
                                                         purchaseOrderData={purchaseOrderData}
-                                                        statusOptions={statusOptions} />
+                                                        id={id}
+                                                    />
                                                 )}
                                                 {currentStep === 2 &&
-                                                    <IssuPO
+                                                    <IssuePo
                                                         purchaseOrderProduct={purchaseOrderProduct}
                                                         purchaseOrderData={purchaseOrderData}
                                                         handleViewPdf={handleViewPdf}
