@@ -46,9 +46,10 @@ import { FaWpforms } from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
 import { AddOutlined } from '@material-ui/icons';
-import ManageAdditionalCostDialog from "./ManageAdditionalCostDialog";
 import CustomReactTable from "../../components/CustomReactTable/CustomReactTable";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+
+import AdditionalCost from "./AdditionalCost";
 
 const rentalProcessSteps = ["New", "Additional Cost", "Serialized Asset", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
@@ -110,9 +111,7 @@ const RentalManagementDetailsPage = () => {
 
   const { pricingConditionApi } = pricingCondition
 
-  const [additionalCostDeleteConfirmation, setAdditionalCostDeleteConfirmation] = useState({ open: false, id: null })
-  const costTypeList = ["Repair", "Delivery", "Assembly"]
-  const uomTypeList = ["Pcs"]
+
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
@@ -144,32 +143,11 @@ const RentalManagementDetailsPage = () => {
     // eslint-disable-next-line
   }, [id]);
 
-  useEffect(() => {
-    // const currencyCode = getUniqueCurrencies().find(
-    //   (d) => d.currencyCode === rentalManagementData["currency"]
-    // )?.symbolNative ?? "";
-
-    if (additionalCost && additionalCost.length > 0) {
-      setPinnedBottomRowData([{
-        amount: `${currencySymbol} ${sum(additionalCost.map(s => s.amount))}`
-      }])
-    } else {
-      setPinnedBottomRowData([{
-        amount: `${currencySymbol} 0`
-      }])
-    }
-
-  }, [currencySymbol, additionalCost])
 
   useEffect(() => {
     if (currentStep === 0) {
       fetchProductInventory()
     }
-
-    if (currentStep === 2 && additionalCost.length > 0) {
-      handleSaveAdditionalCost(additionalCost)
-    }
-
     if (currentStep >= 0 && currentStep <= 4) {
       axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/process-status`, { "processStatus": rentalProcessSteps[currentStep] }).then(({ data }) => {
       }).catch((error) => {
@@ -192,10 +170,10 @@ const RentalManagementDetailsPage = () => {
       const data: any = {}
       data.conditionType = ["Rent"]
       data.material = arr.map(ele => ({
-        materialId: ele?._id,
+        materialId: ele?.id,
         materialType: ele?.type.includes("roduct") ? "product" : "packages",
         qty: ele?.qty,
-        rentType: ele?.pricingMethod,
+        pricingMethod: ele?.pricingMethod,
         unit: ele?.UOM,
         currency: rentalManagementData?.currency
       }))
@@ -217,24 +195,6 @@ const RentalManagementDetailsPage = () => {
     let mainPoint = {};
     setMainPoints(mainPoint);
   };
-
-  const handleSaveAdditionalCost = (values) => {
-    axiosInstance()
-      .post(`${rentalManagement.rentalManagementApi}/${id}/additional-cost`, {
-        "additionalCost": values.map(d => ({
-          "type": d.type,
-          "value": d.amount ? Number(d.amount) : 0,
-          "description": d?.description,
-          "uom": d.uom,
-          "qty": d.qty ? Number(d.qty) : 0
-        }))
-      })
-      .then(() => {
-        setAddExistingProductDialog({ open: false, type: "" })
-      }).catch((error) => {
-        toastConfig.setToastConfig(error)
-      });
-  }
 
   const fetchRentalManagementData = async () => {
     try {
@@ -564,30 +524,13 @@ const RentalManagementDetailsPage = () => {
     // </Link>
   );
 
-  const RentalJobActionsRenderer = (params) => (
-    <GridDeleteIcon
-      hasDeletePermission={true}
-      ownerId={user?.user?._id}
-      userId={user?.user?._id}
-      onDelete={() => {
-        setAdditionalCostDeleteConfirmation({ open: true, id: params.data.id })
-      }}
-      entity=""
-    />
-  );
 
-  const rentalJobFrameworkComponents = {
-    typeRenderer: RentalJobTypeRenderer,
-    commonRenderer: CommonRenderer,
-    actionsRenderer: RentalJobActionsRenderer
-  };
 
 
   const handleClick = (rowData) => {
     setIsProductEdit({ open: true, editType: "single" })
     setRecordToUpdate(rowData)
   }
-
 
   const columns = [
     {
@@ -1272,56 +1215,9 @@ const RentalManagementDetailsPage = () => {
                     </>
                   )}
                   {(currentStep === 1) && (
-                    <div className="mx-2">
-                      <div className="d-flex justify-content-end mb-2">
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          className={styles.add_submit_btn}
-                          onClick={() => {
-                            setShowManageAdditionalCostDialog({
-                              open: true,
-                              isNew: true,
-                              record: null,
-                            })
-                          }}
-                          startIcon={<AddOutlined />}
-                        >
-                          Add
-                        </Button>
-                      </div>
-                      <CustomAgGrid
-                        columns={[
-                          { field: "rowIndex", headerName: "#" },
-                          // { field: "sequence", headerName: "#", show: true, disabled: true },
-                          { field: "type", headerName: "Cost Type", show: true, disabled: true, cellRenderer: "typeRenderer" },
-                          { field: "description", headerName: "Description", show: true, disabled: true },
-                          { field: "qty", headerName: "Quantity", show: true, disabled: true },
-                          { field: "uom", headerName: "Unit of Measure", show: true, disabled: true },
-                          { field: "amount", headerName: `Amount (${currencySymbol})`, show: true, disabled: true },
-                        ]}
-                        dataRows={additionalCost}
-                        frameworkComponents={rentalJobFrameworkComponents}
-                        setGridApi={setGridApi}
-                        dispatch={dispatch}
-                        rowCount={rowCount}
-                        limit={limit}
-                        pageSizes={pageSizes}
-                        page={page}
-                        actionWidth={150}
-                        allowSelection={false}
-                        allowAction={true}
-                        loading={loading}
-                        isClientSideGrid={true}
-                        // onCellValueChanged={(row) => { updateProductData(row.data) }}
-                        renderedFrom="rental_job_additional_cost"
-                        refreshGrid={() => { }}
-                        idProperty="id"
-                        pinnedBottomRowData={pinnedBottomRowData}
-                      />
-                    </div>
-
+                    <AdditionalCost
+                      rentalManagementData={rentalManagementData}
+                    />
                   )}
                   {(currentStep === 2) && (
                     <SerializedAssetStep
@@ -1563,54 +1459,6 @@ const RentalManagementDetailsPage = () => {
         //   data={recordToUpdate}
         //   selectedProducts={selectedProducts}
         // />
-      }
-      {
-        showManageAdditionalCostDialog.open && <ManageAdditionalCostDialog
-          open={showManageAdditionalCostDialog.open}
-          isNew={showManageAdditionalCostDialog.isNew}
-          record={showManageAdditionalCostDialog.record}
-          onClose={() => {
-            setShowManageAdditionalCostDialog({
-              open: false,
-              isNew: false,
-              record: null
-            })
-          }}
-          onSubmit={(values) => {
-            if (showManageAdditionalCostDialog.isNew) {
-              if (additionalCost) {
-                setAdditionalCost(prevState => [...prevState, { ...values, rowIndex: prevState.length + 1 }])
-              } else {
-                setAdditionalCost([{ ...values, rowIndex: 1 }]);
-              }
-            }
-            else {
-              setAdditionalCost(prevState => prevState.map(item => item.id === values.id ? { ...item, ...values } : item))
-            }
-
-            setShowManageAdditionalCostDialog({
-              open: false,
-              isNew: false,
-              record: null
-            })
-          }}
-          currencySymbol={currencySymbol}
-          costTypeList={costTypeList}
-          uomTypeList={uomTypeList}
-        />
-      }
-      {
-        additionalCostDeleteConfirmation.open && <ConfirmationDialog
-          open={additionalCostDeleteConfirmation.open}
-          message="Are you sure you want to delete additional cost ?"
-          onClose={() => setAdditionalCostDeleteConfirmation({ open: false, id: null })}
-          onOk={() => {
-            setAdditionalCostDeleteConfirmation({ open: false, id: null });
-
-            const recordsExpectDeleted = additionalCost.filter(f => f.id !== additionalCostDeleteConfirmation.id);
-            setAdditionalCost([...recordsExpectDeleted.map((m, index) => ({ ...m, rowIndex: index + 1 }))]);
-          }}
-        />
       }
     </>
   );
