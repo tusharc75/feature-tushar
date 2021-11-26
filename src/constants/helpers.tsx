@@ -220,6 +220,7 @@ export const sidebarResourceObjectFromValues = () => {
   Object.keys(sidebarResource).forEach((key) => {
     obj[sidebarResource[key]] = key
   })
+  obj['Project Sales'] = "projectStrategy"
   return obj
 }
 
@@ -258,6 +259,7 @@ export const quoteBuilder = {
 };
 
 export const rentalManagement = {
+  api: '/rental-management',
   rentalManagementResource: 'rentalManagement',
   rentalManagementApi: '/rental-management',
   resource: "rental-management"
@@ -666,7 +668,7 @@ export const initializeDropdownById = (field, fieldName, id) => {
 };
 export const dateFormat = localStorage.getItem("dateFormat") ?? "MM/DD/YYYY";
 export const dateTimeFormat = localStorage.getItem("dateTimeFormat") ?? "MM/DD/YYYY hh:mm A";
-export const cardDateFormat = localStorage.getItem("cardDateFormat") ?? "MM,DD YYYY";
+export const cardDateFormat = localStorage.getItem("cardDateFormat") ?? "MMM DD, YYYY";
 
 export const dateFormatForInputControl = localStorage.getItem("dateFormatForInputControl") ?? "MM/dd/yyyy";
 // export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
