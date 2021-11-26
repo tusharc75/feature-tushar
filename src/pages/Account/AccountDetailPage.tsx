@@ -479,6 +479,12 @@ export default function AccountDetailPage(props) {
     // }
     getAccountFields(data);
     setLoading(false);
+    if (openEdit === 'true') {
+      setOpenUpdateDialog(true);
+      const params = new URLSearchParams();
+      params.delete('openEdit');
+      history.push({ search: params.toString() });
+    }
     initializeGraphData();
 
   };

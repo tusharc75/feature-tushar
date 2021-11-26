@@ -709,8 +709,7 @@ export default function Account(props) {
       let res = {
         ...finalObject,
         canDelete: u.owner?.optionValue === user?.user._id,
-
-        isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
+        allowedToEdit: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
         lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
         leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
         leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
@@ -1162,9 +1161,9 @@ export default function Account(props) {
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
                 onEdit={(d) => {
-                  history.push(`${accountApi}/detail/${d._id}`)
+                  history.push(`${accountApi}/detail/${d._id}?openEdit=true`)
                 }}
-                extraParamsToCheckDelete={false}
+                extraParamsToCheckDelete={true}
                 onDelete={(d) => {
                   setSingleAccountDelete({
                     show: true,
