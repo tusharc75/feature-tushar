@@ -4,17 +4,10 @@ import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../../axios/axiosInstance";
 import routes from "../../../components/Helpers/Routes";
-import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
-import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
-import DetailsPageHeader from "../../../components/DetailsPageHeader";
-import DetailsPage from "../../../components/Shared/DetailsPage";
 import { useData } from "../../../StateProvider/Provider";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { purchaseOrder } from "../../../constants/helpers";
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import MenuItem from "@material-ui/core/MenuItem"
-import Menu from "@material-ui/core/Menu"
 import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -29,7 +22,7 @@ import CustomSwipableList from "../../../components/SwipableListComponents/Custo
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { prepareDataForGrid } from "../../../constants/helpers";
-import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns } from "../../../constants/columns"
+import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "../../../constants/columns"
 
 
 const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable, id, setPurchaseOrderProduct }) => {
@@ -40,7 +33,6 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     const [columns, setColumns] = useState([{ field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" }])
 
-    const [frameWorkComponent, setFrameWorkComponent] = useState(null)
 
     const [addProductDialog, setAddProductDialog] = useState(false);
     const [isAddingProducts, setAddingProducts] = useState(false);
@@ -50,6 +42,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     const [showProductDialog, setShowProductDialog] = useState(false)
     const [selectedProductData, setSelectedProductData] = useState(null)
 
+    const [frameWorkComponent, setFrameWorkComponent] = useState(null)
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
@@ -59,104 +52,11 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
         fetchPurchaseOrderProduct();
     }, [id]);
 
-    const GenrateColoum = (fields, column, rendererNames, editable) => {
-        let _fields = fields;
-        _fields.forEach((ele) => {
-            if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
-                if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
-                    ele.displayUnits.forEach((_unit) => {
-                        let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
-                        let fieldLabel = ele.fieldLabel + " " + _unit
-                        if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                            let col: any = {}
-                            col.field = fieldName
-                            col.headerName = fieldLabel
-                            col.width = 180
-                            col.show = true
-                            col.leval = ele.leval
-                            if (!ele.isFormula && !ele.isUneditable && editable) {
-                                col.cellRenderer = "commonRenderer";
-                                col.cellEditor = "numericCellEditor";
-                                col.editable = true;
-                            } else {
-                                col.cellRenderer = "commonRenderer";
-                            }
-                            column.push(col)
-                        }
-                    })
-                }
-                else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
-                    ele.displayUnits.forEach((_unit) => {
-                        ele.displayCurrency.forEach((_currency) => {
-                            let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
-                            let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
-                            if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                                let col: any = {}
-                                col.field = fieldName
-                                col.headerName = fieldLabel
-                                col.width = 180
-                                col.show = true
-                                col.leval = ele.leval
-                                if (!ele.isFormula && !ele.isUneditable && editable) {
-                                    col.cellRenderer = "commonRenderer";
-                                    col.cellEditor = "numericCellEditor";
-                                    col.editable = true;
-                                } else {
-                                    col.cellRenderer = "commonRenderer";
-                                }
-                                column.push(col)
-                            }
-                        })
-                    })
-                }
-                else if (ele.type === "currencyAmount") {
-                    ele.displayCurrency.forEach((_currency) => {
-                        let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
-                        let fieldLabel = ele.fieldLabel + " " + _currency
-                        if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                            let col: any = {}
-                            col.field = fieldName
-                            col.headerName = fieldLabel
-                            col.width = 180
-                            col.show = true
-                            col.leval = ele.leval
-                            if (!ele.isFormula && !ele.isUneditable && editable) {
-                                col.cellRenderer = "commonRenderer";
-                                col.cellEditor = "numericCellEditor";
-                                col.editable = true;
-                            } else {
-                                col.cellRenderer = "commonRenderer";
-                            }
-                            column.push(col)
-                        }
-                    })
-                }
-            }
-            else {
-                if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-                    let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path, true)
-                    if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
-                        if (!ele.isFormula && !ele.isUneditable && editable) {
-                            if (ele.type === "decimal" || ele.type === "percent") {
-                                currentColumn.columnData.cellEditor = "numericCellEditor";
-                            }
-                            currentColumn.columnData.editable = true;
-                        }
-                    }
-                    column.push({ ...currentColumn.columnData, leval: ele.leval });
-                    if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                        rendererNames.push(currentColumn?.rendererName)
-                    }
-                }
-            }
-        })
-    }
-
     useEffect(() => {
         axiosInstance().get("/field/child?resource=Purchase Order Product").then(({ data: { data } }) => {
             const fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
             let rendererNames = [];
-            GenrateColoum(fields, columns, rendererNames, false);
+            genrateColoum(fields, columns, rendererNames, false);
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
             tempFrameworkComponent = {
                 commonRenderer: CommonRenderer,

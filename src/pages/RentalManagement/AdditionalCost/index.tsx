@@ -7,13 +7,13 @@ import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { purchaseOrder } from "../../../constants/helpers";
+import { rentalManagement } from "../../../constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../../components/Helpers/GridDeleteIcon";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
-import ServiceDialog from "./ServiceDialog";
+import AdditionalCostDialog from "./AdditionalCostDialog";
 import { FaCartArrowDown, FaCartPlus } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
@@ -23,8 +23,7 @@ import { prepareDataForGrid } from "../../../constants/helpers";
 import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "../../../constants/columns"
 import { GrBusinessService } from "react-icons/all";
 
-
-const Product = ({ purchaseOrderData, id }) => {
+const AdditionalCost = ({ rentalManagementData }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -35,16 +34,16 @@ const Product = ({ purchaseOrderData, id }) => {
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-    const [showServiceDialog, setShowServiceDialog] = useState(false)
-    const [selectedServiceData, setSelectedServiceData] = useState(null)
+    const [showCostDialog, setShowCostDialog] = useState(false)
+    const [selectedCostData, setSelectedCostData] = useState(null)
 
     useEffect(() => {
-        fetchPurchaseOrderService();
-    }, [id]);
+        fetchAdditionalCost();
+    }, []);
 
     useEffect(() => {
-        axiosInstance().get("/field/child?resource=Purchase Order Service").then(({ data: { data } }) => {
-            const fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
+        axiosInstance().get("/field/child?resource=Rental Management Cost").then(({ data: { data } }) => {
+            const fields = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
             let rendererNames = [];
             genrateColoum(fields, columns, rendererNames, false);
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
@@ -58,12 +57,12 @@ const Product = ({ purchaseOrderData, id }) => {
         })
     }, []);
 
-    const fetchPurchaseOrderService = () => {
+    const fetchAdditionalCost = () => {
         dispatch({ type: "loading", loading: true });
         if (gridApi) {
             gridApi.setRowData([]);
         }
-        axiosInstance().get(`${purchaseOrder.api}/service/${id}`).then(({ data: { data } }) => {
+        axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`).then(({ data: { data } }) => {
             let rows = data?.map((item) => {
                 let res: any = {
                     ...prepareDataForGrid(item),
@@ -85,49 +84,49 @@ const Product = ({ purchaseOrderData, id }) => {
                     size="small"
                     aria-label="Clone"
                     onClick={() => {
-                        setShowServiceDialog(true)
-                        setSelectedServiceData(params.data)
+                        setShowCostDialog(true)
+                        setSelectedCostData(params.data)
                     }}
                 >
                     <EditIcon color="primary" />
                 </IconButton>
             </HtmlTooltip>
             <GridDeleteIcon
-                hasDeletePermission={permissions?.purchaseOrder?.isUpdate}
+                hasDeletePermission={permissions?.rentalManagement?.isUpdate}
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
                 onDelete={() => {
-                    deletePurchaseOrderService([params.data._id])
+                    handleDeleteCost([params.data._id])
                 }}
                 entity="rentalManagement"
             />
         </>
     );
 
-    const handleAddService = (rows) => {
-        axiosInstance().post(`${purchaseOrder.api}/service/${id}/add`, { services: rows })
+    const handleAddCost = (rows) => {
+        axiosInstance().post(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/add`, { additionalCost: rows })
             .then(() => {
-                fetchPurchaseOrderService()
-                setShowServiceDialog(false)
+                fetchAdditionalCost()
+                setShowCostDialog(false)
             }).catch((error) => {
                 toastConfig.setToastConfig(error)
             });
     }
 
-    const handleUpdateService = (rows) => {
-        axiosInstance().put(`${purchaseOrder.api}/service/${id}/update`, { services: rows })
+    const handleUpdateCost = (rows) => {
+        axiosInstance().put(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/update`, { additionalCost: rows })
             .then(() => {
-                fetchPurchaseOrderService()
-                setShowServiceDialog(false)
+                fetchAdditionalCost()
+                setShowCostDialog(false)
             }).catch((error) => {
                 toastConfig.setToastConfig(error)
             });
     }
 
-    const deletePurchaseOrderService = (ids) => {
-        axiosInstance().post(`${purchaseOrder.api}/service/${id}/delete`, { ids })
+    const handleDeleteCost = (ids) => {
+        axiosInstance().post(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/delete`, { ids })
             .then(() => {
-                fetchPurchaseOrderService()
+                fetchAdditionalCost()
             }).catch((error) => {
                 toastConfig.setToastConfig(error)
             });
@@ -142,11 +141,11 @@ const Product = ({ purchaseOrderData, id }) => {
                         color="primary"
                         size="small"
                         onClick={() => {
-                            setShowServiceDialog(true);
-                            setSelectedServiceData(null)
+                            setShowCostDialog(true);
+                            setSelectedCostData(null)
                         }}
                     >
-                        {isMobile ? <GrBusinessService size={20} /> : "Add Service"}
+                        {isMobile ? <GrBusinessService size={20} /> : "Add Cost"}
                     </Button>
                 </Box>
             </Box>
@@ -157,19 +156,19 @@ const Product = ({ purchaseOrderData, id }) => {
                     permissions={permissions}
                     primaryField={columns?.find(d => d.field === "description")}
                     onClick={(data) => {
-                        setShowServiceDialog(true)
-                        setSelectedServiceData(data)
+                        setShowCostDialog(true)
+                        setSelectedCostData(data)
                     }}
                     dataRows={dataRows}
                     selectedRecords={selectedRecords}
                     dispatch={dispatch}
                     onEdit={(data) => {
-                        setShowServiceDialog(true)
-                        setSelectedServiceData(data)
+                        setShowCostDialog(true)
+                        setSelectedCostData(data)
                     }}
                     extraParamsToCheckDelete={true}
                     onDelete={(data) => {
-                        deletePurchaseOrderService([data._id])
+                        handleDeleteCost([data._id])
                     }}
                     rowCount={rowCount}
                     page={page}
@@ -184,7 +183,7 @@ const Product = ({ purchaseOrderData, id }) => {
                     onCreate={null}
                     showClone={false}
                     fullHeight={true}
-                    renderedFrom={routes.purchaseOrderDetail.title}
+                    renderedFrom={routes.rentalManagement.title}
                     onClone={() => { }}
                 />
                 :
@@ -206,8 +205,8 @@ const Product = ({ purchaseOrderData, id }) => {
                     onCellValueChanged={(row) => {
                         //handleUpdateOrderProduct(row.data)
                     }}
-                    renderedFrom="purchaseOrderDetailsPageInventory"
-                    refreshGrid={fetchPurchaseOrderService}
+                    renderedFrom="rentalmanagmentadditionalcost"
+                    refreshGrid={fetchAdditionalCost}
                 />
                 : <Box
                     p={2}
@@ -216,20 +215,20 @@ const Product = ({ purchaseOrderData, id }) => {
                     <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
             }
-            {showServiceDialog &&
-                <ServiceDialog
+            {showCostDialog &&
+                <AdditionalCostDialog
                     onClose={() => {
-                        setShowServiceDialog(false)
-                        setSelectedServiceData(null)
+                        setShowCostDialog(false)
+                        setSelectedCostData(null)
                     }}
-                    handleAddService={handleAddService}
-                    handleUpdateService={handleUpdateService}
-                    currency={purchaseOrderData?.currency}
-                    serviceData={selectedServiceData}
+                    handleAddCost={handleAddCost}
+                    handleUpdateCost={handleUpdateCost}
+                    currency={rentalManagementData?.currency}
+                    costData={selectedCostData}
                 />
             }
         </Fragment>
     );
 };
 
-export default Product;
+export default AdditionalCost;

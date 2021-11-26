@@ -42,7 +42,6 @@ const SerializedAssetStep = (props) => {
 
   const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, products: [] });
 
-
   useEffect(() => {
     const flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => (f.type === "Product" || f.type === "productInPackage") && f.qty !== f.subRows?.length);
     setShowManagePurchaseOrderDialog(prevState => {
@@ -712,6 +711,7 @@ const SerializedAssetStep = (props) => {
         }}
         productsToSave={[...showManagePurchaseOrderDialog.products]}
         isFromSerializedAssetStepFromRental={true}
+        currency={currencyCode}
         rentalManagementId={rentalManagementId}
       />
     }

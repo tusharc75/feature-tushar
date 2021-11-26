@@ -16,60 +16,75 @@ import { AiFillFilePdf } from "react-icons/ai";
 import routes from "../../../components/Helpers/Routes";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import { BiPurchaseTagAlt, MdEmail } from "react-icons/all";
+import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
+import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "../../../constants/columns"
+import { prepareDataForGrid } from "../../../constants/helpers";
 
 
-const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBase64, downlodingFile, setCurrentStep, currentStep, handleAttachments }) => {
+const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBase64, downlodingFile, setCurrentStep, currentStep, handleAttachments }) => {
+
     const toastConfig = useContext(CustomToastContext);
-    const {
-        state: { user, permissions }
-    }: any = useData();
+    const { state: { user, permissions } }: any = useData();
+
     const [sendEmail, setSendEmail] = useState(false);
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
     const [generatingPdfFile, setGeneratingFile] = useState(false);
-
 
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
     const [columns, setColumns] = useState([
         { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "expectedDelivery", headerName: "Expected Delivery", show: true, disabled: true, cellRenderer: "dateRenderer" },
-        { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "uom", headerName: "Base UOM", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "tax", headerName: "Tax Percent", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "taxPerUnit", headerName: "Tax Per Unit", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "totalTax", headerName: "Total Tax", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
+        { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" }
     ])
+    const [frameWorkComponent, setFrameWorkComponent] = useState(null)
 
-    const [showAddServiceDialog, setShowAddServiceDialog] = useState(false)
-    const [selectedProductData, setSelectedProductData] = useState(null)
-
-
-
-
-    const frameworkComponents = {
-        dateRenderer: DateRenderer,
-        commonRenderer: CommonRenderer,
-    };
+    useEffect(() => {
+        axiosInstance().get("/field/child?resource=Purchase Order Product").then(({ data: { data } }) => {
+            let fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
+            axiosInstance().get("/field/child?resource=Purchase Order Service").then(({ data: { data } }) => {
+                fields = [...fields, ...CURReplaceByCurrencySingle(data, purchaseOrderData.currency)]
+                let rendererNames = [];
+                genrateColoum(fields, columns, rendererNames, false);
+                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+                tempFrameworkComponent = {
+                    commonRenderer: CommonRenderer,
+                    ...tempFrameworkComponent,
+                }
+                setFrameWorkComponent({ ...tempFrameworkComponent })
+                setColumns([...columns])
+            })
+        })
+    }, []);
 
     useEffect(() => {
         fetchEmailsData()
-        let tempCombinedData = JSON.parse(JSON.stringify(purchaseOrderProduct))
         dispatch({ type: "loading", loading: true });
-        axiosInstance().get(`${purchaseOrder.api}/service/${purchaseOrderData._id}`)
-            .then(({ data }) => {
-                data?.data?.map((u) => tempCombinedData.push({
-                    ...u,
-                    quantity: u.qty,
-                    type: "Service"
-                }));
-                dispatch({
-                    type: "initialize", data: tempCombinedData, count: tempCombinedData.length
+        let productServiceData = []
+        axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`).then(({ data: { data } }) => {
+            productServiceData = data;
+            productServiceData.forEach((e) => {
+                e.type = "Product";
+                e.productName = e.productDetail?.productName
+                e.productNumber = e.productDetail?.productNumber
+            })
+            axiosInstance().get(`${purchaseOrder.api}/service/${purchaseOrderData._id}`).then(({ data: { data } }) => {
+                data.forEach((e) => {
+                    if (!e.type) {
+                        e.type = "Service";
+                    }
+                })
+                productServiceData = [...productServiceData, ...data];
+                let rows = productServiceData?.map((item) => {
+                    let res: any = {
+                        ...prepareDataForGrid(item),
+                    };
+                    return res;
                 });
+                dispatch({ type: "initialize", data: rows, count: rows.length });
                 setTimeout(() => {
                     dispatch({ type: "loading", loading: false });
                 }, gridLoadingTimeout);
@@ -77,6 +92,10 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handle
                 dispatch({ type: "loading", loading: false });
                 toastConfig.setToastConfig(error)
             });
+        }).catch((error) => {
+            dispatch({ type: "loading", loading: false });
+            toastConfig.setToastConfig(error)
+        });
     }, []);
 
     const fetchEmailsData = () => {
@@ -136,7 +155,6 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handle
                         onClick={() => { handleViewPdf(true) }}
                     >
                         {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
-                        { }
                     </Button>
                 )}
                 <Box mx={1} />
@@ -167,7 +185,7 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handle
             </Box>
         </Box>
         <Grid item xs={12} md={12} sm={12} className="mt-3">
-            {columns ?
+            {columns && frameWorkComponent ?
                 isMobile ? <CustomSwipableList
                     allowSelection={true}
                     allowSwipe={true}
@@ -201,7 +219,7 @@ const IssuPO = ({ purchaseOrderProduct, purchaseOrderData, handleViewPdf, handle
                     <CustomAgGrid
                         columns={columns}
                         dataRows={dataRows}
-                        frameworkComponents={frameworkComponents}
+                        frameworkComponents={frameWorkComponent}
                         setGridApi={setGridApi}
                         dispatch={dispatch}
                         rowCount={rowCount}
