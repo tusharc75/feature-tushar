@@ -249,7 +249,7 @@ const ProductTemplate: FC = () => {
                     const { createdBy, updatedBy, staticData, ...restProperties } = u;
 
                     let finalObject = prepareDataForGrid(u);
-                    finalObject["canDelete"] = permissions.productTemplate.isDelete && user?.user?._id === u?.owner.optionValue;
+                    finalObject["canDelete"] = permissions.productTemplate.isDelete && user?.user?._id === u?.owner;
                     finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
                     finalObject["allowedToEdit"] = permissions.productTemplate.isUpdate;
                     return {
@@ -346,16 +346,16 @@ const ProductTemplate: FC = () => {
                 {isMobile ? <CustomSwipableList
                     allowSelection={true}
                     allowSwipe={true}
-                    permissions={permissions.productTemplate}
+                    permissions={productTemplatePermissions}
                     primaryField={columns?.find(d => d.primaryField)}
                     onClick={(data) => {
-                        history.push(`${routes.productTemplate.path}/${data._id}?openEdit=true`)
+                        history.push(`${routes.productTemplate.path}/${data._id}`)
                     }}
                     dataRows={dataRows}
                     selectedRecords={selectedRecords}
                     dispatch={dispatch}
                     onEdit={(data) => {
-                        history.push(`${routes.productTemplate.path}/${data._id}?openEdit=true`)
+                        history.push(`${routes.productTemplate.path}/${data._id}`)
                     }}
                     extraParamsToCheckDelete={true}
                     onDelete={handleDelete}

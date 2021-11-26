@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState, useReducer, Fragment } from 'react';
 import { Box, Button, Menu, MenuItem, Grid } from '@material-ui/core';
 import { useData } from '../../StateProvider/Provider';
-import { Link,useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
@@ -33,7 +33,7 @@ import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import useColumns, {getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import { MdAccountCircle } from "react-icons/md";
 import { AiFillPhone } from "react-icons/ai";
@@ -106,7 +106,7 @@ export default function Contact(props) {
   const [entities, setEntities] = useState([])
   const [columns, setColumns] = useState([])
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
-  const {getColumnData} = useColumns();
+  const { getColumnData } = useColumns();
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -234,7 +234,7 @@ export default function Contact(props) {
     if (renderCount > 0) {
       getContacts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity,location]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, location]);
 
   useEffect(() => {
     if (querySearch) {
@@ -256,7 +256,7 @@ export default function Contact(props) {
           let query = queryColFilter !== undefined ? queryColFilter.substring(1, queryColFilter.length - 1) : `[{colName=${colName},colValue=${colValue}}]`;
 
           if (queryColFilter === undefined) {
-            history.push( queryType ? `?page=${page}&type=${queryType}&colFilter=${query}` :  `?page=${page}&colFilter=${query}`);
+            history.push(queryType ? `?page=${page}&type=${queryType}&colFilter=${query}` : `?page=${page}&colFilter=${query}`);
             setCheckColName(colName);
             setCheckColValue(colValue);
 
@@ -267,20 +267,20 @@ export default function Contact(props) {
               let leftqueryColFilter = queryColFilter.substring(0, 50);
               let replacedQuery = reducedqueryColFilter.replace(checkColValue, colValue);
               let combineQuery = leftqueryColFilter + replacedQuery;
-              history.push( queryType ? `?page=${page}&type=${queryType}&colFilter=${combineQuery}` : `?page=${page}&colFilter=${combineQuery}`);
+              history.push(queryType ? `?page=${page}&type=${queryType}&colFilter=${combineQuery}` : `?page=${page}&colFilter=${combineQuery}`);
               setCheckColName(colName);
               setCheckColValue(colValue);
             }
 
             else {
 
-              history.push( queryType ? `?page=${page}&type=${queryType}&colFilter=[{colName=${colName},colValue=${colValue}}]` : `?page=${page}&colFilter=[{colName=${colName},colValue=${colValue}}]`);
+              history.push(queryType ? `?page=${page}&type=${queryType}&colFilter=[{colName=${colName},colValue=${colValue}}]` : `?page=${page}&colFilter=[{colName=${colName},colValue=${colValue}}]`);
             }
           }
           if (queryColFilter !== undefined && checkColName !== colName) {
 
             if (queryColFilter.length > 42 && Object.keys(filters).length === 1) {
-              history.push( queryType ? `?page=${page}&type=${queryType}` :  `?page=${page}`)
+              history.push(queryType ? `?page=${page}&type=${queryType}` : `?page=${page}`)
 
             }
             else if (queryColFilter.length > 42 && queryColFilter.length < 84 && queryColFilter.includes(colName) === true) {
@@ -294,7 +294,7 @@ export default function Contact(props) {
 
               let updatedQuery = `[${query}` + `,{colName=${colName},colValue=${colValue}}]`
 
-              history.push(queryType ? `?page=${page}&type=${queryType}&colFilter=${updatedQuery}` :  `?page=${page}&colFilter=${updatedQuery}`);
+              history.push(queryType ? `?page=${page}&type=${queryType}&colFilter=${updatedQuery}` : `?page=${page}&colFilter=${updatedQuery}`);
               setCheckColName(colName)
               setCheckColValue(colValue)
             }
@@ -672,7 +672,7 @@ export default function Contact(props) {
           <Grid container className="header-panel" justify="space-between" alignContent="center">
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
               <Grid container className="gap-1">
-                <Grid  className="d-flex align-items-center gap-1" >
+                <Grid className="d-flex align-items-center gap-1" >
                   <MdContacts className="headerLogo" />
                   <span id="resourceHeader" className="listingHeader">{routes[contactResource].title}</span>
                 </Grid>
@@ -682,7 +682,7 @@ export default function Contact(props) {
                       {ContactTypes.map((k, index) => {
                         return (
                           <ToggleButton value={k.key} key={index}>
-                           <Link to={`/${contactRoute}?page=${page}&type=${encodeURIComponent(k.key)}`} >
+                            <Link to={`/${contactRoute}?page=${page}&type=${encodeURIComponent(k.key)}`} >
                               {k.key}
                             </Link>
 
@@ -739,7 +739,7 @@ export default function Contact(props) {
                       >
                         Actions <ExpandMore />
                       </Button>
-                      
+
                       <Menu
                         anchorEl={anchorEl}
                         keepMounted
@@ -813,13 +813,13 @@ export default function Contact(props) {
                 permissions={contactPermissions}
                 primaryField={columns?.find(d => d.primaryField)}
                 onClick={(data) => {
-                  history.push(`${routes.customerContactDetail.path}/${data._id}`)
+                  history.push(`${contactApi}/${data._id}`)
                 }}
                 dataRows={dataRows}
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
                 onEdit={(data) => {
-                  history.push(`${routes.customerContactDetail.path}/${data._id}?openEdit=true`)
+                  history.push(`${contactApi}/detail/${data._id}?openEdit=true`)
                 }}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {
@@ -851,7 +851,7 @@ export default function Contact(props) {
                 owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                 onCreate={clickCreateNew}
                 showClone={true}
-                onClone={(data) => {  setShowCreateContactDialog({ open: true, isClone: true, idToClone: data._id }) }}
+                onClone={(data) => { setShowCreateContactDialog({ open: true, isClone: true, idToClone: data._id }) }}
                 renderedFrom={contactResource}
               /> : <CustomAgGrid
                 columns={columns}

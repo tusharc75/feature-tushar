@@ -24,7 +24,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from "react-router-dom";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers"
 import { MdAccountCircle } from "react-icons/md";
 import { AiFillCrown } from "react-icons/all";
@@ -45,7 +45,7 @@ const ProductInventory = () => {
     const [columns, setColumns] = useState([])
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords,appendRows } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [clonedData, setClonedData] = useState([])
     const localStorageSelectedRecords = "warehouse_selected";
@@ -53,7 +53,7 @@ const ProductInventory = () => {
     const {
         state: { permissions },
     }: any = useData();
-    const {getColumnData} = useColumns();
+    const { getColumnData } = useColumns();
     const history = useHistory();
 
     const [warehouse, setWarehouse] = useState(history.location?.state?.warehouse);
@@ -106,29 +106,28 @@ const ProductInventory = () => {
 
         const queryString = getQueryString();
         axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
-            let rows = data.data?.map((u,user) => {
+            let rows = data.data?.map((u, user) => {
                 let finalObject = prepareDataForGrid(u);
-                finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
+                finalObject["canDelete"] = permissions?.productInventory?.isDelete
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
-                finalObject["allowedToEdit"] = (
-                  [...(u.collaborator ?? []), u.owner].some(
-                    (d) => d?.optionValue === user?.user?._id
-                  )
-                );
-                return finalObject
+                finalObject["allowedToEdit"] = permissions?.productInventory.isUpdate
+                return {
+                    ...finalObject,
+
+                };
             });
             setIsAllChecked(false);
-            setClonedData(data);
+            setClonedData(data.data);
             if (appendRows) {
-              dispatch({
-                type: "initialize", data: [...dataRows, ...rows],
-                count: data.count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
-              });
+                dispatch({
+                    type: "initialize", data: [...dataRows, ...rows],
+                    count: data.data.count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+                });
             } else {
-              dispatch({
-                type: "initialize", data: rows, count: data.count,
-                selectedRecords: rows.filter(f => f.isChecked === true)
-              });
+                dispatch({
+                    type: "initialize", data: rows, count: data.count,
+                    selectedRecords: rows.filter(f => f.isChecked === true)
+                });
             }
             dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => {
@@ -359,7 +358,40 @@ const ProductInventory = () => {
                     </Grid>
                 </Grid>
             </div>
-            {columns ?
+            {columns ? isMobile ? <CustomSwipableList
+                allowSelection={true}
+                allowSwipe={true}
+                permissions={permissions?.productInventory}
+                primaryField={columns?.find(d => d.field === "assetNumber")}
+                onClick={(d) => {
+                    history.push(`${routes.productInventoryDetail.path}/${d._id}`)
+                }}
+                dataRows={dataRows}
+                selectedRecords={selectedRecords}
+                dispatch={dispatch}
+                onEdit={(d) => {
+                    history.push(`${routes.productInventoryDetail.path}/${d._id}`)
+                }}
+                extraParamsToCheckDelete={false}
+                onDelete={(d) => {
+                    setDeleteRecord(d);
+                    setShowDeleteConfirmBox(true)
+                }}
+                rowCount={rowCount}
+                page={page}
+                loading={loading}
+                additionalDetails={[]}
+                chips={[
+                    {
+                        label: "Serial Number : ",
+                        field: "serialNumber",
+                    },
+                ]}
+                owerCollaboratorInitialsOrImages=""
+                onCreate={() => { }}
+                showClone={true}
+                onClone={(data) => { setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id }); }}
+                renderedFrom={routes.productInventory?.title} /> :
                 Object.keys(frameWorkComponent).length > 0 ?
                     <CustomAgGrid
                         columns={columns}

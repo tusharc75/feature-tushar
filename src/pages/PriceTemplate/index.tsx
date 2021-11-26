@@ -9,7 +9,7 @@ import {
     Tooltip,
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { priceTemplate, isObjectEmpty, gridLoadingTimeout } from "../../constants/helpers";
+import { priceTemplate, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
@@ -245,16 +245,14 @@ const PriceTemplate: FC = () => {
 
                     const { createdBy, updatedBy, staticData, ...restProperties } = u;
 
-                    let res = {
-                        ...restProperties,
-                        id: u._id,
-                        createdBy: u.createdBy?.user?.concatedName,
-                        createdById: u.createdBy?.user?._id,
-                        createdByDate: u.createdBy?.date,
-                        updatedBy: u.updatedBy?.user?.concatedName,
-                        updatedByDate: u.updatedBy?.date,
+                    let finalObject = prepareDataForGrid(u);
+                    finalObject["canDelete"] = permissions.productTemplate.isDelete && user?.user?._id === u?.owner;
+                    finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                    finalObject["allowedToEdit"] = permissions.productTemplate.isUpdate;
+                    return {
+                        ...finalObject,
+
                     };
-                    return res;
                 });
 
                 dispatch({ type: "initialize", data: rows, count: count });
@@ -300,7 +298,7 @@ const PriceTemplate: FC = () => {
                                     />
                                     <div className="d-flex gap-2">
                                         {priceTemplatePermissions.isCreate && !isMobile &&
-                                            <Button  onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                            <Button onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                                         }
                                         {priceTemplatePermissions.isDelete &&
                                             <Button
@@ -336,16 +334,16 @@ const PriceTemplate: FC = () => {
                 {isMobile ? <CustomSwipableList
                     allowSelection={true}
                     allowSwipe={true}
-                    permissions={permissions.priceTemplate}
+                    permissions={priceTemplatePermissions}
                     primaryField={columns?.find(d => d.primaryField)}
                     onClick={(data) => {
-                        history.push(`${routes.priceTemplate.path}/${data._id}?openEdit=true`)
+                        history.push(`${routes.priceTemplate.path}/${data._id}`)
                     }}
                     dataRows={dataRows}
                     selectedRecords={selectedRecords}
                     dispatch={dispatch}
                     onEdit={(data) => {
-                        history.push(`${routes.priceTemplate.path}/${data._id}?openEdit=true`)
+                        history.push(`${routes.priceTemplate.path}/${data._id}`)
                     }}
                     extraParamsToCheckDelete={true}
                     onDelete={handleDelete}
