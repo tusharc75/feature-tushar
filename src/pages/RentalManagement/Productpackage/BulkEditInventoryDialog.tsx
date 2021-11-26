@@ -147,7 +147,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = (
     if (data) {
       if (values?.qty > 0 && values?.pricingMethod !== '' && values?.UOM !== '') {
         const priceData = await calculatePrice([values]);
-        if (priceData && priceData.length) {
+        if (priceData && priceData.length && priceData[0].mrp) {
           let price: any = priceData[0].mrp;
           handleChange('price', price);
           handlePriceCalculation(price, 'price');
