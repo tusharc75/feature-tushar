@@ -75,25 +75,23 @@ const TransferAssetDetailPage = () => {
       .get('/field?resource=Transfer Asset')
       .then(({ data: { data } }) => {
         let fields = []
-        console.log(transferType)
         data.forEach((field: any) => {
-          const { fieldData } = field
+
           if (transferType === "Internal") {
-            if (fieldData.fieldName !== "transferToSupplier" || fieldData.fieldName !== "transferToCustomer") {
+            if (field.fieldData.fieldName !== "transferToSupplier" && field.fieldData.fieldName !== "transferToCustomer") {
               fields.push(field)
             }
           } else if (transferType === "External Supplier") {
-            if (fieldData.fieldName !== "transferToPlant" || fieldData.fieldName !== "transferToCustomer") {
+            if (field.fieldData.fieldName !== "transferToPlant" && field.fieldData.fieldName !== "transferToCustomer") {
               fields.push(field)
             }
           } else if (transferType === "External Customer") {
-            if (fieldData.fieldName !== "transferToSupplier" || fieldData.fieldName !== "transferToPlant") {
+            if (field.fieldData.fieldName !== "transferToSupplier" && field.fieldData.fieldName !== "transferToPlant") {
               fields.push(field)
             }
           }
         })
 
-        console.log(fields)
         setTransferAssetFields(fields);
         setLoading(false);
       })
