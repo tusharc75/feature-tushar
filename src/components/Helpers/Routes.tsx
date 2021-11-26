@@ -297,13 +297,21 @@ const routes = {
     title: storedRoutes ? storedRoutes.packages?.title : RESOURCE_LABEL.packages,
     path: "/packages/detail",
   },
-  purchaseOrder:{
+  purchaseOrder: {
     title: storedRoutes ? storedRoutes.purchaseOrder?.title : RESOURCE_LABEL.purchaseOrder,
     path: "/purchase-order",
   },
-  purchaseOrderDetail:{
+  purchaseOrderDetail: {
     title: storedRoutes ? storedRoutes.purchaseOrder?.title : RESOURCE_LABEL.purchaseOrder,
     path: "/purchase-order/detail",
+  },
+  transferAsset: {
+    title: storedRoutes ? storedRoutes.transferAsset?.title : RESOURCE_LABEL.transferAsset,
+    path: "/transfer-asset",
+  },
+  transferAssetDetail: {
+    title: storedRoutes ? storedRoutes.transferAsset?.title : RESOURCE_LABEL.transferAsset,
+    path: "/transfer-asset/detail",
   }
 };
 

@@ -81,6 +81,9 @@ const CreateFormBuilder = () => {
                     _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''))
                 }
                 _field_data.order = ++order
+                if (!_field_data.roleType) {
+                    _field_data.roleType = 0;
+                }
                 data.push(_field_data)
             })
         })

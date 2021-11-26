@@ -174,7 +174,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         if (rentalId) {
             deepFilter = `${deepFilter}&rental=${rentalId}&notIn=${notIn}`;
         } else {
-            deepFilter = `${deepFilter}&availableAssets=true`;
+            deepFilter = `${deepFilter}&entityWise=1&availableAssets=true`;
         }
 
         return deepFilter;

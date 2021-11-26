@@ -206,7 +206,6 @@ const RentalManagement = () => {
 
   const handleSingleDeleteRentalManagement = async () => {
     dispatch({ type: "loading", loading: true });
-
     axiosInstance()
       .put(`${rentalManagementApi}/remove`, {
         ids: [singleRentalManagementDelete.id],

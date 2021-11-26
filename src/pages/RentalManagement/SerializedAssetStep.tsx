@@ -9,7 +9,7 @@ import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { dateFormat, formatAmountWithCurrency, rentalManagement, treeToFlatArray } from "../../constants/helpers";
+import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray } from "../../constants/helpers";
 import moment from "moment";
 import { startCase, orderBy } from "lodash";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -40,7 +40,19 @@ const SerializedAssetStep = (props) => {
   const [selectedProducts, setSelectedProducts] = useState([])
   const [deleteData, setDeleteData] = useState([])
 
-  const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState(false);
+  const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, products: [] });
+
+  useEffect(() => {
+    const flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => (f.type === "Product" || f.type === "productInPackage") && f.qty !== f.subRows?.length);
+    setShowManagePurchaseOrderDialog(prevState => {
+      return {
+        ...prevState,
+        products: flatArray.map(m => { return { _id: m._id ?? m.id, assetsCount: m.qty - (m.subRows?.length ?? 0) } })
+      }
+    });
+
+  }, [selectedProducts])
+
 
   //  This is copied method from helpers.ts as wee need some modification for this screen only
   const translateDataToTreeForProducts = (data, parentProperty, childProperty, childrenPropertyToStore) => {
@@ -538,9 +550,9 @@ const SerializedAssetStep = (props) => {
               color="primary"
               type="button"
               size="small"
-              // disabled={disableCreatePurchaseOrderButton()}
+              disabled={showManagePurchaseOrderDialog.products.length === 0}
               onClick={() => {
-                setShowManagePurchaseOrderDialog(true)
+                setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: true }))
               }}
             >
               {`Create ${routes.purchaseOrder.title}`}
@@ -655,7 +667,8 @@ const SerializedAssetStep = (props) => {
         }
       </Grid> */}
     </Grid>
-    {addSerializedAssetDialog &&
+    {
+      addSerializedAssetDialog &&
       <AddSerializedAsset
         addSerializedAsset={handleAddSerializedAsset}
         handleSerializedAssetClose={() => {
@@ -667,30 +680,39 @@ const SerializedAssetStep = (props) => {
       // type={inventoryType}
       />
     }
-    {showConfirmBox && (
-      <ConfirmationDialog
-        open={showConfirmBox}
-        message={`Are you sure you want to remove?`}
-        onClose={() => {
-          setShowConfirmBox(false);
-          setDeleteData([])
-        }}
-        okBtnLoading={deleting}
-        onOk={removeInventory}
-      />
-    )}
+    {
+      showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to remove?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+            setDeleteData([])
+          }}
+          okBtnLoading={deleting}
+          onOk={removeInventory}
+        />
+      )
+    }
 
     {
-      showManagePurchaseOrderDialog &&
+      showManagePurchaseOrderDialog.open &&
       <ManagePurchaseOrder
         isClone={false}
         purchaseOrderId={null}
-        onClose={() => setShowManagePurchaseOrderDialog(false)}
+        onClose={() => setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: false }))}
         onSuccess={() => {
-          setShowManagePurchaseOrderDialog(false);
-          // fetchPurchaseOrder()
+          setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: false }))
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: `${sidebarResource.purchaseOrder} has been created successfully`,
+          });
         }}
-        productsToSave={[]}
+        productsToSave={[...showManagePurchaseOrderDialog.products]}
+        isFromSerializedAssetStepFromRental={true}
+        currency={currencyCode}
+        rentalManagementId={rentalManagementId}
       />
     }
 

@@ -6,20 +6,44 @@ import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/
 import { Link } from 'react-router-dom'
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Tooltip, IconButton } from "@material-ui/core";
+import {
+  Button, Tooltip, IconButton, Menu, MenuItem,
+  Dialog, TextField, CircularProgress
+} from "@material-ui/core";
 import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import { gridLoadingTimeout, receivingTicket, rentalManagement, sidebarResource } from "../../constants/helpers";
+import {
+  gridLoadingTimeout, receivingTicket, rentalManagement,
+  sidebarResource, productInventory as productInventoryHelperObject
+} from "../../constants/helpers";
 import { groupBy } from "lodash";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import { makeStyles } from '@material-ui/core/styles';
 
 const renderedFrom = "rentalManagementDetailsPageReceivingTicket"
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: theme.palette.background.paper,
+  },
+  paper: {
+    width: '80%',
+    maxHeight: 435,
+  },
+}));
+
 const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketDialog, rentalManagementId }) => {
+  const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
   const [gridApi, setGridApi] = useState(null);
@@ -28,6 +52,17 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
   const [downlodingFile, setDownlodingFile] = useState(false)
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false)
   const [okBtnLoading, setOkBtnLoading] = useState(false)
+
+  const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: "", message: "" })
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     fetchRecords();
@@ -68,9 +103,9 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
                   })
                 })
 
-                // tempProductInventory.forEach((d) => {
-                //   d["hideSelection"] = d.status === "In-Transit";
-                // })
+                tempProductInventory.forEach((d) => {
+                  d["hideSelection"] = d.status === "In-Transit";
+                })
 
                 dispatch({
                   type: "initialize", data: tempProductInventory, count: tempProductInventory.length
@@ -150,6 +185,10 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
     });
   }
 
+  const updateStatusOfSelectedAssets = (status) => {
+
+  }
+
   return (<>
 
     <Box display="flex" justifyContent="flex-end">
@@ -191,6 +230,45 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
       </Button>
       <Box mx={1} />
 
+      <Button variant="outlined" color="primary" aria-controls="simple-menu"
+        aria-haspopup="true"
+        disabled={selectedRecords.length === 0}
+        size="small"
+        onClick={handleClick}
+        endIcon={<ArrowDropDownIcon />}>
+        Change Status
+      </Button>
+      <Menu
+        id="simple-menu"
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={() => {
+          setAnchorEl(null)
+          setStatusToUpdate({ open: true, isUpdating: false, status: "Repair", message: "" })
+        }}>Repair</MenuItem>
+        <MenuItem onClick={() => {
+          setAnchorEl(null)
+          setStatusToUpdate({ open: true, isUpdating: false, status: "Scrap", message: "" })
+        }}>Scrap</MenuItem>
+        <MenuItem onClick={() => {
+          setAnchorEl(null)
+          setStatusToUpdate({ open: true, isUpdating: false, status: "Lost", message: "" })
+        }}>Lost</MenuItem>
+      </Menu>
+
+      <Box mx={1} />
       <IconButton
         disabled={(selectedRecords.length === 0) || currentStep === 5 || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId")))}
         onClick={() => {
@@ -277,6 +355,78 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
         okBtnLoading={okBtnLoading}
       />
     )}
+
+    {
+      statusToUpdate.open && <Dialog open
+        classes={{
+          paper: classes.paper,
+        }}
+        onClose={() => setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false, open: false }))}
+      >
+        <CustomDialogHeader title="Are you sure ?"
+          showRequiredLabel={false}
+          onClose={() => setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false, open: false }))} />
+
+        <CustomDialogContent>
+          <Box className="my-2">
+
+            {
+              statusToUpdate.status === "Repair" ? <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
+                : <TextField
+                  id="outlined-multiline-static"
+                  label={`Please enter the reason for ${statusToUpdate.status}`}
+                  multiline
+                  fullWidth
+                  rows={4}
+                  value={statusToUpdate.message}
+                  variant="outlined"
+                  onChange={(e) => {
+                    setStatusToUpdate(prevState => ({ ...prevState, message: e.target.value }))
+                  }}
+                />
+            }
+
+          </Box>
+        </CustomDialogContent>
+
+        <CustomDialogFooter>
+          <Button
+            size="small"
+            variant="outlined" color="primary" onClick={() => setStatusToUpdate(prevState => ({ ...prevState, open: false }))}>
+            Cancel
+          </Button>
+          <Button
+            size="small"
+            onClick={() => {
+              setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
+              axiosInstance().put(`${productInventoryHelperObject.api}/update-status`, {
+                comment: statusToUpdate.message,
+                assets: selectedRecords.map(m => m?._id ?? m?.id),
+                status: statusToUpdate.status
+              }).then(({ data }) => {
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
+                setStatusToUpdate({ open: false, isUpdating: false, status: "", message: "" });
+                fetchRecords();
+              }).catch((error) => {
+                setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false }));
+                toastConfig.setToastConfig(error)
+              })
+            }}
+            disabled={statusToUpdate.isUpdating}
+            variant="contained"
+            color="primary"
+          >
+            {
+              statusToUpdate.isUpdating ? <CircularProgress
+                style={{ marginRight: "8px" }}
+                size={20} color="inherit" /> : null
+            }
+            Change Status
+          </Button>
+        </CustomDialogFooter>
+      </Dialog>
+    }
+
   </>
   );
 }
