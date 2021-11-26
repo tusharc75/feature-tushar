@@ -259,6 +259,7 @@ export const quoteBuilder = {
 };
 
 export const rentalManagement = {
+  api: '/rental-management',
   rentalManagementResource: 'rentalManagement',
   rentalManagementApi: '/rental-management',
   resource: "rental-management"
