@@ -16,30 +16,30 @@ import {
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateUtils from '@date-io/date-fns';
 import moment from 'moment';
-import { dateFormatForInputControl } from '../../constants/helpers';
-import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import { dateFormatForInputControl } from '../../../constants/helpers';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { startCase } from 'lodash';
-import axiosInstance from "../../axios/axiosInstance";
+import axiosInstance from "../../../axios/axiosInstance";
 import { groupBy } from 'lodash';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/helpers";
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, isFieldNotTouched } from "./../../constants/helpers";
+import { CustomDialogTransition, isFieldNotTouched } from "..//../../constants/helpers";
 import { Formik, Form } from "formik";
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
-import CustomButton from '../../components/Helpers/CustomButton'
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
+import CustomButton from '../../../components/Helpers/CustomButton'
 import { FaDiceOne } from "react-icons/fa";
-import FormTypes from "../../components/Helpers/FormTypes";
+import FormTypes from "../../../components/Helpers/FormTypes";
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import { CURReplaceByCurrencySingle } from "../../constants/formulaUtility";
+import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
   isSaving: boolean;
   submitBulkEdit: VoidFunction | any;
-  currency: string;
+  rentalManagementData: any;
   data?: object | any;
   calculatePrice?: VoidFunction | any;
   endDate: any;
@@ -53,7 +53,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     onClose,
     isSaving,
     submitBulkEdit,
-    currency,
+    rentalManagementData,
     data,
     startDate,
     endDate,
@@ -68,7 +68,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
 
   useEffect(() => {
     axiosInstance().get("/field/child?resource=Rental Management Product").then(({ data: { data } }) => {
-      data = CURReplaceByCurrencySingle(data, currency)
+      data = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
       setInitialData({
         fields: data,
         values: getObjKeys("", data),
