@@ -609,7 +609,7 @@ export default function QuoteProcess(props) {
       inventory.push(inventorydata);
     });
     // requiredFieldArray.every(v => v.value === true) ? setNextStep(true) : setNextStep(false)
-    setColName(colName);
+    // setColName(colName);
     setDynamicTableData(dynamicTable);
     return {
       inventory: inventory,
@@ -1588,6 +1588,7 @@ export default function QuoteProcess(props) {
                   setIsAddNewProduct={setIsAddNewProduct}
                   isAddExistingProduct={isAddExistingProduct}
                   setIsAddExistingProduct={setIsAddExistingProduct}
+                  setColumnForPDFExcel={setColName}
                   refreshProducts={refreshProducts}
                   stage={ProcessStatus === 'New' ? 'product' : 'cost'}
                   isPriceBuilder={ProcessStatus === 'Price Builder'}
@@ -1641,32 +1642,19 @@ export default function QuoteProcess(props) {
         </Dialog>
       )}
 
-      {isRearrangeColumns && (
+      {(isRearrangeColumns || isRearrangeColumnsExcel) && (
         <DndProvider backend={HTML5Backend}>
           <ColumnsDialog
-            setColumns={setVisibleColumns}
-            columns={visibleColumns}
-            setOpenDialog={setRearrangeColumns}
+            setColumns={isRearrangeColumns ? setVisibleColumns : setVisibleColumnsExcel}
+            columns={isRearrangeColumns ? visibleColumns : visibleColumnsExcel}
+            visibleColumns={isRearrangeColumns ? visibleColumnsExcel : visibleColumns} //we need both columns to update quote
+            setOpenDialog={isRearrangeColumns ? setRearrangeColumns : setRearrangeColumnsExcel}
             id={quoteData._id}
             version={currentVersion}
             refresh={fetchQuoteData}
             versionStatus={versionStatus}
             selectedTNC={state?.selectedRecords}
-          />
-        </DndProvider>
-      )}
-
-      {isRearrangeColumnsExcel && (
-        <DndProvider backend={HTML5Backend}>
-          <ColumnsDialog
-            setColumns={setVisibleColumnsExcel}
-            columns={visibleColumns}
-            setOpenDialog={setRearrangeColumnsExcel}
-            id={quoteData._id}
-            version={currentVersion}
-            refresh={fetchQuoteData}
-            versionStatus={versionStatus}
-            selectedTNC={state?.selectedRecords}
+            type={isRearrangeColumns ? "pdf" : "excel"}
           />
         </DndProvider>
       )}
@@ -1848,7 +1836,8 @@ export default function QuoteProcess(props) {
                 </FormControl>
               </Grid>
               <Grid item xs={1} md={1} sm={1}>
-                <IconButton disabled={!allowedToEdit} title="Re-arrange columns" color="inherit" onClick={() => showPDFArrangeColumns ? setRearrangeColumns(true) : setRearrangeColumnsExcel(true)}>
+                <IconButton disabled={!allowedToEdit} title="Re-arrange columns" color="inherit"
+                  onClick={() => showPDFArrangeColumns ? setRearrangeColumns(true) : setRearrangeColumnsExcel(true)}>
                   <ImportExportIcon />
                 </IconButton>
               </Grid>

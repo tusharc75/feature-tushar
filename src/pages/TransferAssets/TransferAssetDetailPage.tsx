@@ -15,9 +15,11 @@ import { transferAsset } from '../../constants/helpers';
 import ManageTransferAsset from './ManageTransferAsset';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import queryString from 'query-string';
-import TransferSteps from './TransferAssetSteps';
+import TransferStepper from './TransferAssetSteps';
+import AssetsGrid from './AssetsGrid';
+import LoadingTicketGrid from './LoadingTicketGrid';
 
-const transferSteps = ['Add Assets', 'Transfer Plant'];
+const transferSteps = ['Add Assets', 'Loading Ticket'];
 
 const TransferAssetDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -34,11 +36,15 @@ const TransferAssetDetailPage = () => {
   const [isDeleting, setDeleting] = useState(false);
   const [transferAssetData, setTransferAssetData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [isNextStep, setNextStep] = useState(true);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [transferAssetFields, setTransferAssetFields] = useState([]);
+  const [existingAssets, setExistingAssets] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
+  const [plantId, setPlantId] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
+  const [isTransferEnded, setTransferIsEnded] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -47,6 +53,16 @@ const TransferAssetDetailPage = () => {
     // eslint-disable-next-line
   }, [id]);
 
+  useEffect(() => {
+    if (currentStep >= 0 && currentStep <= 1) {
+      axiosInstance()
+        .put(`${routes.transferAsset.path}/${id}/process-status`, { processStatus: transferSteps[currentStep] })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }, [currentStep]);
+
   const handleMainPoints = (data) => {
     let mainPoint = {};
     mainPoint['Transfer Asset Number'] = data.transferAssetNumber;
@@ -54,11 +70,29 @@ const TransferAssetDetailPage = () => {
     setMainPoints(mainPoint);
   };
 
-  const getRessourceFields = () => {
+  const getRessourceFields = (transferType) => {
     axiosInstance()
       .get('/field?resource=Transfer Asset')
       .then(({ data: { data } }) => {
-        setTransferAssetFields(data);
+        let fields = []
+        data.forEach((field: any) => {
+
+          if (transferType === "Internal") {
+            if (field.fieldData.fieldName !== "transferToSupplier" && field.fieldData.fieldName !== "transferToCustomer") {
+              fields.push(field)
+            }
+          } else if (transferType === "External Supplier") {
+            if (field.fieldData.fieldName !== "transferToPlant" && field.fieldData.fieldName !== "transferToCustomer") {
+              fields.push(field)
+            }
+          } else if (transferType === "External Customer") {
+            if (field.fieldData.fieldName !== "transferToSupplier" && field.fieldData.fieldName !== "transferToPlant") {
+              fields.push(field)
+            }
+          }
+        })
+
+        setTransferAssetFields(fields);
         setLoading(false);
       })
       .catch((err) => {
@@ -72,11 +106,13 @@ const TransferAssetDetailPage = () => {
     axiosInstance()
       .get(`${routes.transferAsset.path}/${id}`)
       .then(({ data: { data } }) => {
+        getRessourceFields(data?.transferType);
         setTransferAssetData(data);
         handleMainPoints(data);
+        setPlantId(data?.transferFromPlant.optionValue);
         setHeadingLabel(data.transferAssetNumber);
+        setCurrentStep(transferSteps.indexOf(data?.processStatus) !== -1 ? transferSteps.indexOf(data?.processStatus) : 0);
         setCustomizedRoutes([routes.transferAsset, { title: data.transferAssetNumber }]);
-        getRessourceFields();
 
         if (permissions?.transferAsset?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
@@ -96,20 +132,43 @@ const TransferAssetDetailPage = () => {
   };
 
   const handleDelete = () => {
-    setDeleting(true)
+    setDeleting(true);
     axiosInstance()
       .put(`${transferAsset.api}/remove`, { ids: [id] })
       .then(() => {
-        setDeleting(false)
+        setDeleting(false);
         setShowConfirmBox(false);
         history.goBack();
       })
       .catch((error) => {
-        setDeleting(false)
+        setDeleting(false);
         toastConfig.setToastConfig(error);
         setShowConfirmBox(false);
       });
   };
+
+  /**
+   * FETCH ASSETS FOR TRANSFER
+   */
+
+  const fetchAssets = (forceRefresh) =>
+    new Promise((resolve, reject) => {
+      if (existingAssets.length > 0 && !forceRefresh) {
+        resolve(existingAssets);
+      }
+
+      if (existingAssets.length === 0 || forceRefresh) {
+        axiosInstance()
+          .get(`${routes.transferAsset.path}/get-asset/${id}`)
+          .then(({ data: { data } }) => {
+            setExistingAssets(data);
+            resolve(data);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      }
+    });
 
   return (
     <>
@@ -117,54 +176,78 @@ const TransferAssetDetailPage = () => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
-            <Paper>
-              {!transferAssetData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                    <Box marginX={1} />
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  </Box>
-                </div>
-              ) : (
-                <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
-                  {permissions?.transferAsset?.isUpdate && (
-                    <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                      Edit
-                    </Button>
-                  )}
-                  {permissions?.transferAsset?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-                </DetailsPageHeader>
-              )}
-
-              <Box>
-                {loading || !transferAssetFields.length ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <>
-                    <DetailsPage data={transferAssetData} fields={transferAssetFields} />
-                  </>
+        <div className="detail-container">
+          <Paper>
+            {!transferAssetData ? (
+              <div>
+                <Skeleton variant="text" width="150px" height="40px" />
+                <Box display="flex">
+                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                  <Box marginX={1} />
+                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                </Box>
+              </div>
+            ) : (
+              <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
+                {permissions?.transferAsset?.isUpdate && (
+                  <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                    Edit
+                  </Button>
                 )}
-              </Box>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}></Grid>
-        </Grid>
+                {permissions?.transferAsset?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              </DetailsPageHeader>
+            )}
 
-        <Paper>
-          <TransferSteps
-            isNextStep={true}
-            steps={transferSteps}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-          />
-        </Paper>
+            <Box>
+              {loading || !transferAssetData ? (
+                <Grid container spacing={2} style={{ padding: '8px' }}>
+                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                </Grid>
+              ) : (
+                <DetailsPage data={transferAssetData} fields={transferAssetFields} />
+              )}
+            </Box>
+          </Paper>
+
+          <Box my={2} bgcolor="white">
+            <Paper>
+              <TransferStepper
+                isTransferEnded={isTransferEnded}
+                isNextStep={isNextStep}
+                steps={transferSteps}
+                currentStep={currentStep}
+                setCurrentStep={setCurrentStep}
+              />
+            </Paper>
+            <Box my={1}>
+              {currentStep === 0 && (
+                <AssetsGrid
+                  fetchAssets={fetchAssets}
+                  currentStep={currentStep}
+                  plantId={plantId}
+                  transferAssetId={id}
+                  permissions={permissions}
+                  user={user}
+                  setNextStep={setNextStep}
+                />
+              )}
+              {currentStep === 1 && (
+                <LoadingTicketGrid
+                  transferAssetId={id}
+                  transferAssetData={transferAssetData}
+                  fetchAssets={fetchAssets}
+                  plantId={plantId}
+                  warehouse={transferAssetData?.transferFromPlant}
+                  permissions={permissions}
+                  setNextStep={setNextStep}
+                  setTransferIsEnded={setTransferIsEnded}
+                />
+              )}
+            </Box>
+          </Box>
+        </div>
       </Fragment>
+      {/* Confirm Delete Dialog */}
       {showConfirmBox && (
         <ConfirmationDialog
           okBtnLoading={isDeleting}
@@ -176,6 +259,7 @@ const TransferAssetDetailPage = () => {
           onOk={handleDelete}
         />
       )}
+      {/* Manage Transfer Asset Data */}
       {openUpdateDialog && (
         <ManageTransferAsset
           isClone={false}
@@ -184,7 +268,7 @@ const TransferAssetDetailPage = () => {
             setOpenUpdateDialog(false);
           }}
           onSuccess={() => {
-            getRessourceFields();
+            fetchTransferAssetData();
             setOpenUpdateDialog(false);
           }}
         />
