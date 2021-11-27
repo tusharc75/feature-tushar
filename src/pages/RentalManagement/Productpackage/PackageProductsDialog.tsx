@@ -1,15 +1,15 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Dialog, Box, Button, Grid, CircularProgress } from '@material-ui/core';
 
-import SearchBox from '../../components/Helpers/SearchBox';
-import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { gridLoadingTimeout, CustomDialogTransition, product, packages } from '../../constants/helpers';
-import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import CustomAgGridEditable from '../../components/AgGridComponents/CustomAgGridEditable';
-import axiosInstance from '../../axios/axiosInstance';
+import SearchBox from '../../../components/Helpers/SearchBox';
+import { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
+import { gridLoadingTimeout, CustomDialogTransition, product, packages } from '../../../constants/helpers';
+import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import CustomAgGridEditable from '../../../components/AgGridComponents/CustomAgGridEditable';
+import axiosInstance from '../../../axios/axiosInstance';
 
 const PackageProductsDialog = ({ packageId, onClose, products, onSuccess, rentalApi, rentalId }) => {
   const [productData, setProductData] = useState([]);

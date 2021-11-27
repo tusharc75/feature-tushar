@@ -126,7 +126,7 @@ const RentalManagement = () => {
     }
     else {
       const response = await axiosInstance()
-        .get(`/field?resource=Rental Management&entity=${selectedEntity}`)
+        .get(`/field?resource=Rental Management&entity=${selectedEntity}&view=true`)
 
       data = response?.data?.data
       try {
@@ -206,7 +206,6 @@ const RentalManagement = () => {
 
   const handleSingleDeleteRentalManagement = async () => {
     dispatch({ type: "loading", loading: true });
-
     axiosInstance()
       .put(`${rentalManagementApi}/remove`, {
         ids: [singleRentalManagementDelete.id],

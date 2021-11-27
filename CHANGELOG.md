@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.8.0](https://github.com/vebholic/oms_frontend/compare/v2.7.0...v2.8.0) (2021-11-27)
+
+
+### Features
+
+* **formbuilder:** added Transfer Asset option in lookup dropdown ([21c914a](https://github.com/vebholic/oms_frontend/commit/21c914a1b162725469dbb27725d889cad832075c))
+* **transferasset:** loading ticket step finish ([1b7a0f1](https://github.com/vebholic/oms_frontend/commit/1b7a0f1c721d5abfe8bbef067d7fc0b87ade4ec6))
+
+
+### Bug Fixes
+
+* columns fixes ([8cbb83f](https://github.com/vebholic/oms_frontend/commit/8cbb83ffa81a23b85096a217e7d71b6741cb2b4f))
+* rental ([0558168](https://github.com/vebholic/oms_frontend/commit/055816860457b88c963982f53993b105d8a0b54f))
+* rental managment ([00fc353](https://github.com/vebholic/oms_frontend/commit/00fc353c9efef536dbe2c2b3a051a68bc518633c))
+* **transferasset:** show fields conditionally ([35381d9](https://github.com/vebholic/oms_frontend/commit/35381d9d5e97beffbfaaea9f558875e361b8906d))
+
+## [2.7.0](https://github.com/vebholic/oms_frontend/compare/v2.6.0...v2.7.0) (2021-11-26)
+
+
+### Features
+
+* - PO-260 - Status Change Code Done ([f4cfa1d](https://github.com/vebholic/oms_frontend/commit/f4cfa1d30675d94c213ebcc1949ad5b83aa975d8))
+* - PO-262 - Blank success message issue fixed ([b92f86b](https://github.com/vebholic/oms_frontend/commit/b92f86b11ea68ba669744ee9f293666e9f320a40))
+* - React table freezing issue fixed ([6249a43](https://github.com/vebholic/oms_frontend/commit/6249a435449691d5f2298f492e11bec27eeae5e1))
+* **formbuilder:** added Transfer Assets option in lookup dropdown ([c9fa228](https://github.com/vebholic/oms_frontend/commit/c9fa2285cba465a93cc1cdfe97751dfe19c447ca))
+* po changes ([f2f6068](https://github.com/vebholic/oms_frontend/commit/f2f6068bd55f4ae24ef512e41461f70908b00bbd))
+* po changes ([d0c61b5](https://github.com/vebholic/oms_frontend/commit/d0c61b5e2ca77c2091f384d8f79f8bc04f4942a3))
+* rental job ([9c26012](https://github.com/vebholic/oms_frontend/commit/9c260121d43655201047ad43b289fcfb19acbda8))
+
+
+### Bug Fixes
+
+* bug fix ([812826f](https://github.com/vebholic/oms_frontend/commit/812826fc4f641b178ff2545f7e16dfb3f7746cfd))
+* doa fixes ([127b75e](https://github.com/vebholic/oms_frontend/commit/127b75e105f2ea9e086a6b809f71f2acee36051b))
+* po bug fix ([aa67ee0](https://github.com/vebholic/oms_frontend/commit/aa67ee082009103f6c61c6863b8f2d04b2d7c2b6))
+* po changes ([94556e5](https://github.com/vebholic/oms_frontend/commit/94556e5485ab986063cad775a2e9553b4aa87b13))
+
 ## [2.6.0](https://github.com/vebholic/oms_frontend/compare/v2.5.0...v2.6.0) (2021-11-25)
 
 
