@@ -318,6 +318,12 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
           allowAction={false}
           loading={loading}
           renderedFrom={renderedFrom}
+          rowClassRules={{
+            "red-data-row":
+              function (params) {
+                return ["Scrap", "Lost"].some(s => s === params.data.status);
+              },
+          }}
         />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
 
