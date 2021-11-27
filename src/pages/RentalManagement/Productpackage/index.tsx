@@ -50,7 +50,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
     const [isProductEdit, setIsProductEdit] = useState({ open: false, editType: null });
     const [isAddingProducts, setAddingProducts] = useState(false);
     const [productInventory, setProductInventory] = useState<any[]>([]);
-    const [dataForNewTabData, setDataForNewTabData] = useState([]);
+    const [dataForNewTabData, setDataForNewTabData] = useState(null);
     const [packageForProducts, setPackageForProducts] = useState(null)
     const [recordToUpdate, setRecordToUpdate] = useState(null)
     const [deleteData, setDeleteData] = useState(null);
@@ -557,7 +557,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                 </HtmlTooltip>
             </Box>
         </Box>
-        {columns ?
+        {columns && dataForNewTabData ?
             <>
                 <Box
                     p="6px"
@@ -615,10 +615,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                               /> */}
                 </Box>
             </>
-            : <Box
-                p={2}
-                height={500}
-                bgcolor="white">
+            : <Box p={2} height={500} bgcolor="white">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
         }
