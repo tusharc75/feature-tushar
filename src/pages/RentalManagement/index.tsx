@@ -126,7 +126,7 @@ const RentalManagement = () => {
     }
     else {
       const response = await axiosInstance()
-        .get(`/field?resource=Rental Management&entity=${selectedEntity}`)
+        .get(`/field?resource=Rental Management&entity=${selectedEntity}&view=true`)
 
       data = response?.data?.data
       try {

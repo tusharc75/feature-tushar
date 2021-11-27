@@ -75,7 +75,7 @@ const DeliveryTicket = () => {
 
   const fetchGridMetadata = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource["deliveryTicket"]}&entity=${selectedEntity}`)
+      .get(`/field?resource=${sidebarResource["deliveryTicket"]}&entity=${selectedEntity}&view=true`)
       .then(({ data: { data } }) => {
         let columns = []
         let rendererNames = []

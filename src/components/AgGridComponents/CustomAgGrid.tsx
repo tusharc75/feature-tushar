@@ -370,6 +370,7 @@ export default function CustomAgGrid({
             isClientSideGrid={isClientSideGrid}
             dispatch={dispatch}
             showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
+            selectedRecords={selectedRecords}
           />
 
           <div id="grid-listing" className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
