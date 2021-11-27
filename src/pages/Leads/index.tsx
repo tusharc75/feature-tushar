@@ -128,7 +128,7 @@ const Leads = () => {
     else {
       if (selectedEntity) {
         const response = await axiosInstance()
-          .get(`/field?resource=Lead&entity=${selectedEntity}`)
+          .get(`/field?resource=Lead&entity=${selectedEntity}&view=true`)
 
         data = response?.data?.data
       } else {

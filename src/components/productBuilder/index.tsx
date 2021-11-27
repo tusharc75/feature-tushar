@@ -58,6 +58,7 @@ const ProductBuilder = (props) => {
     hasPermission,
     permissions,
     fromQuote,
+    setColumnForPDFExcel,
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
@@ -139,6 +140,7 @@ const ProductBuilder = (props) => {
       }
       setFrameWorkComponent({ ...tempFrameworkComponent })
       setColumns([...columns])
+      setColumnForPDFExcel([...columns].filter(d => d.field !== "srno").map(d => d.headerName))
       dispatch({ type: "initialize", data: rows, count: rows.length });
       setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
       refreshProducts(data);

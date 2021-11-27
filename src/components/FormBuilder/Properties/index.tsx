@@ -69,7 +69,7 @@ const LookupResource = [
   { name: 'Receiving Ticket', value: 'Receiving Ticket' },
   { name: 'Repair Job', value: 'Repair Job' },
   { name: 'Sales Order', value: 'Sales Order' },
-  { name: 'Transfer Assets', value: 'Transfer Assets' }
+  { name: 'Transfer Asset', value: 'Transfer Asset' }
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields }) => {

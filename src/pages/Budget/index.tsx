@@ -103,7 +103,7 @@ function Budget() {
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=Budget`)
+      .get(`/field?resource=Budget&view=true`)
       .then(({ data: { data } }) => {
         let columns = []
         let rendererNames = []

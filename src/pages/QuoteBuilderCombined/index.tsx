@@ -273,7 +273,7 @@ const QuoteBuilders = () => {
   const fetchGridColumns = async () => {
 
     const response = await axiosInstance()
-      .get(`/field?resource=Quotes&entity=${selectedEntity}`)
+      .get(`/field?resource=Quotes&entity=${selectedEntity}&view=true`)
 
     let data = response?.data?.data
 
