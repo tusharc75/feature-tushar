@@ -23,7 +23,7 @@ import CustomAgGrid, {
 import styles from "../Leads/Header.module.scss";
 import { GiAbstract055 } from 'react-icons/gi';
 import SearchBox from '../../components/Helpers/SearchBox'
-import ManageDeliveryTicketDialog from "./ManageDeliveryTicket"
+import ManageDeliveryTicket from "./ManageDeliveryTicket"
 import { sidebarResource, prepareDataForGrid } from "../../constants/helpers"
 import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { isMobile } from 'react-device-detect';
@@ -75,7 +75,7 @@ const DeliveryTicket = () => {
 
   const fetchGridMetadata = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource["deliveryTicket"]}&entity=${selectedEntity}&view=true`)
+      .get(`/field?resource=${sidebarResource["deliveryTicket"]}&entity=${selectedEntity}&view=true&showHiddenFields=true`)
       .then(({ data: { data } }) => {
         let columns = []
         let rendererNames = []
@@ -473,7 +473,7 @@ const DeliveryTicket = () => {
 
           {
             showManageDeliveryTicket ?
-              <ManageDeliveryTicketDialog
+              <ManageDeliveryTicket
                 onClose={() => setShowManageDeliveryTicket(false)}
                 onSuccess={() => {
                   fetchDeliveryTicket()

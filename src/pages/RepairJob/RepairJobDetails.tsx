@@ -1,7 +1,7 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper } from '@material-ui/core';
+import { useState, useEffect, useContext, useReducer } from 'react';
+import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, Link } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -11,14 +11,42 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { repairJob } from '../../constants/helpers';
+import {
+  gridLoadingTimeout, prepareDataForGrid, productInventory, repairJob, sidebarResource,
+  repairJobProcessSteps
+} from '../../constants/helpers';
 import ManageRepairJob from './ManageRepairJob';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import queryString from "query-string";
+import { BiFoodMenu } from 'react-icons/bi';
+import { FaWpforms } from 'react-icons/fa';
+import TabPanel from '../../components/TabPanel';
+import CustomCommonSteps from '../../components/CustomCommonSteps/CustomCommonSteps';
+import AddSerializedAsset from '../RentalManagement/AddSerializedAsset';
+import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import { getFrameworkComponents } from '../../constants/columns';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import useColumns from '../../constants/useColumns';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
+import RepairJobReceivingTicket from './RepairJobReceivingTicket';
+import RepairJobDeliveryTicket from './RepairJobDeliveryTicket';
+
+const renderedFrom = "repairJobDetails"
+
+const step1RenderedFrom = `${renderedFrom}_assets`
+
+function a11yProps(index: any) {
+  return {
+    id: `main-tab-${index}`,
+    'aria-controls': `main-tabpanel-${index}`
+  };
+}
 
 const RepairJobDetails = () => {
   const toastConfig = useContext(CustomToastContext);
 
+  const { getColumnData } = useColumns();
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -27,7 +55,7 @@ const RepairJobDetails = () => {
     state: { user, permissions }
   }: any = useData();
   const [headingLabel, setHeadingLabel] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [showLoading, setShowLoading] = useState(false);
   const [repairJobData, setRepairJobData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -35,46 +63,175 @@ const RepairJobDetails = () => {
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
 
+  const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
+
+  const [tabValue, setTabValue] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [nextStep, setNextStep] = useState(true)
+  const [rows, setRows] = useState([]);
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
+  const [isAdding, setIsAdding] = useState(false)
+
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
+  const isTabletScreen = useMediaQuery('(max-width:960px)');
+  const [okBtnLoading, setOkBtnLoading] = useState(false)
+
+  const [step1FrameworkComponent, setStep1FrameworkComponent] = useState(null)
+  const [step1GridApi, setStep1GridApi] = useState(null);
+  const [step1State, step1Dispatch] = useReducer(reducer, intialState);
+  const { dataRows: step1DataRows, rowCount: step1RowCount, loading: step1Loading, page: step1Page,
+    limit: step1Limit, pageSizes: step1PageSizes, search: step1Search, filters: step1Filters, sorting: step1Sorting,
+    selectedRecords: step1SelectedRecords } = step1State;
+
+  const [step1Columns, setStep1Columns] = useState([])
+
   useEffect(() => {
     if (id) {
-      fetchRepairJobData()
+      fetchAssignedSerializedAssetsFields();
+      fetchRepairJobData();
+      fetchAssignedSerializedAssets();
     }
     // eslint-disable-next-line
   }, [id]);
 
-  const handleMainPoints = (data) => {
-    let mainPoint = {};
-    mainPoint['Repair Job Name'] = data?.repairJobName || '';
-    mainPoint['Status'] = data?.status || '';
-    mainPoint['Repair Person'] = data?.repairPerson?.optionLabel || '';
-    setMainPoints(mainPoint);
-  };
+  const fetchAssignedSerializedAssetsFields = () => {
+    step1Dispatch({ type: "loading", loading: true });
 
-  const getRessourceFields = () => {
-    setLoading(true);
+    axiosInstance().get(`/field/?resource=${sidebarResource.productInventory}`).then(({ data: { data } }) => {
+
+      let columns = []
+      let rendererNames = []
+      data.forEach(o => {
+
+        if (o?.fieldData?.fieldName === "assetNumber") {
+          columns = [...columns, {
+            pivotIndex: 0,
+            field: o?.fieldData?.fieldName,
+            headerName: o?.fieldData?.fieldLabel,
+            show: true,
+            disabled: true,
+            primaryField: true,
+            cellRenderer: 'assetNumberRenderer'
+          }]
+        }
+        else {
+          let currentColumn = getColumnData(productInventory.permission, o?.fieldData, `/${routes.productInventoryDetail.path}`)
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData]
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
+          }
+        }
+        return o?.fieldData
+      })
+
+      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+      tempFrameworkComponent = {
+        commonRenderer: CommonRenderer,
+        assetNumberRenderer: AssetNumberRenderer,
+        actionsRenderer: ActionsRenderer,
+        ...tempFrameworkComponent,
+      }
+      setStep1FrameworkComponent({ ...tempFrameworkComponent })
+      setStep1Columns([...columns])
+    })
+  }
+
+
+  const fetchAssignedSerializedAssets = () => {
+    axiosInstance().get(`${repairJob.repairJobApi}/${id}/get-assets`)
+      .then(({ data: { data } }) => {
+
+        let rows = data.map((u) => {
+          return prepareDataForGrid(u, user);
+        });
+
+        step1Dispatch({
+          type: "initialize", data: rows, count: rows.length
+        });
+
+        setTimeout(() => {
+          step1Dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
+
+      }).catch((error) => {
+        setAddSerializedAssetDialog(false)
+        setIsAdding(false)
+        toastConfig.setToastConfig(error)
+      });
+  }
+
+  const ActionsRenderer = (params) => (
+    <GridDeleteIcon
+      hasDeletePermission={permissions?.repairJob?.isUpdate}
+      ownerId={user?.user?._id}
+      userId={user?.user?._id}
+      onDelete={() => {
+        setShowAssetRemoveConfirmationDialog({ open: true, id: params.data._id, ids: [] });
+      }}
+      entity={sidebarResource.productInventory}
+    />
+  );
+
+  const deleteRepairJobAssets = () => {
+    setOkBtnLoading(true)
+
+    axiosInstance().put(`${repairJob.repairJobApi}/${id}/remove-assets`, { ids: showAssetRemoveConfirmationDialog.id ? [showAssetRemoveConfirmationDialog.id] : showAssetRemoveConfirmationDialog.ids })
+      .then(({ data }) => {
+        setOkBtnLoading(false);
+        setShowAssetRemoveConfirmationDialog({ open: false, id: null, ids: [] });
+        fetchAssignedSerializedAssets();
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
+
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setShowLoading(false);
+      })
+  }
+
+  const AssetNumberRenderer = (params) => (
+    <span className="d-flex gap-2 align-items-center">
+      <Link className="link" to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+        <CustomRenderCell value={params.value} />
+      </Link>
+    </span>
+  );
+
+  const getResourceFields = () => {
+    setShowLoading(true);
     axiosInstance()
-      .get('/field?resource=Repair Job')
+      .get(`/field?resource=${sidebarResource.repairJob}`)
       .then(({ data: { data } }) => {
         setRepairJobFields(data)
-        setLoading(false);
+        setShowLoading(false);
 
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setLoading(false);
+        setShowLoading(false);
       });
   };
 
   const fetchRepairJobData = () => {
-    setLoading(true);
+    setShowLoading(true);
     axiosInstance()
       .get(`${routes.repairJob.path}/${id}`)
       .then(({ data: { data } }) => {
         setRepairJobData(data)
-        handleMainPoints(data)
+        if (data.processStatus) {
+          const step = repairJobProcessSteps.findIndex(f => f === data.processStatus);
+          if (step > -1)
+            setCurrentStep(step);
+        }
         setHeadingLabel(data.repairJobName);
         setCustomizedRoutes([routes.repairJob, { title: data.repairJobName }]);
-        getRessourceFields();
+        getResourceFields();
 
         if (permissions?.repairJob?.isUpdate && openEdit === "true") {
           setOpenUpdateDialog(true)
@@ -82,11 +239,11 @@ const RepairJobDetails = () => {
           params.delete("openEdit")
           history.push({ search: params.toString() })
         }
-        
+
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setLoading(false);
+        setShowLoading(false);
 
       });
   };
@@ -108,37 +265,127 @@ const RepairJobDetails = () => {
       });
   };
 
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  const disableNextStep = () => {
+    if (currentStep === 0) {
+      return step1DataRows.length === 0;
+    } else {
+
+    }
+
+    return true;
+  }
+
+  const onNextButtonClick = (oldStep, nextStep) => {
+    axiosInstance()
+      .put(`${repairJob.repairJobApi}/${id}/process-status`, {
+        "processStatus": repairJobProcessSteps[nextStep]
+      })
+      .then(() => {
+
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
+  const onPreviousButtonClick = (oldStep, previousStep) => {
+    axiosInstance()
+      .put(`${repairJob.repairJobApi}/${id}/process-status`, {
+        "processStatus": repairJobProcessSteps[previousStep]
+      })
+      .then(() => {
+
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   return (
     <>
-      <Fragment>
-        <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={customizedRoutes} />
-        </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
-            <Paper>
-              {!repairJobData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                    <Box marginX={1} />
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  </Box>
-                </div>
-              ) : (
-                <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
-                  {permissions?.repairJob?.isUpdate && (
-                    <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                      Edit
-                    </Button>
-                  )}
-                  {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-                </DetailsPageHeader>
-              )}
+      <Grid container className="headerbox">
+        <CustomBreadCrumbs routes={customizedRoutes} />
+      </Grid>
 
+      <Grid container spacing={1} className="detail-container">
+        <Grid item xs={12} sm={12} spacing={2}>
+          <Paper style={{ height: "650px" }}>
+            {!repairJobData ? (
+              <div>
+                <Skeleton variant="text" width="150px" height="40px" />
+              </div>
+            ) : (
+              <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
+                {permissions?.repairJob?.isUpdate && (
+                  <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                    Edit
+                  </Button>
+                )}
+                {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              </DetailsPageHeader>
+            )}
+
+
+            <Tabs
+              className="quote-tab"
+              value={tabValue}
+              onChange={handleMainTabChange}
+              textColor="primary"
+              TabIndicatorProps={{
+                style: {
+                  display: 'none'
+                }
+              }}
+            >
+              {/* <Tab
+                        className={"tabLayout"}
+                      style={{
+                        background: tabValue === 0 ? "white" : "",
+                        color: tabValue === 0 ? "blue" : "#163340",
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font ">
+                          <InfoIcon className="mr-1" fontSize="inherit" /> All
+                          Version Status
+                        </div>
+                      }
+                      {...a11yProps(0)}
+                    /> */}
+              <Tab
+                className={'tabLayout'}
+                style={{
+                  background: tabValue === 1 ? 'white' : '',
+                  color: tabValue === 1 ? '#163340' : '#163340'
+                }}
+                label={
+                  <div className="d-flex align-items-center tab-font">
+                    <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                  </div>
+                }
+                {...a11yProps(0)}
+              />
+              <Tab
+                className={'tabLayout'}
+                style={{
+                  background: tabValue === 2 ? 'white' : '',
+                  color: tabValue === 2 ? 'blue' : '#163340'
+                }}
+                label={
+                  <div className="d-flex align-items-center tab-font">
+                    <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                  </div>
+                }
+                {...a11yProps(1)}
+              />
+              <div className={'uio'}> </div>
+            </Tabs>
+
+
+            <TabPanel value={tabValue} index={0}>
               <Box>
-                {loading || !repairJobFields.length ? (
+                {showLoading || !repairJobFields.length ? (
                   <Grid container spacing={2} style={{ padding: '8px' }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
                   </Grid>
@@ -148,11 +395,104 @@ const RepairJobDetails = () => {
                   </>
                 )}
               </Box>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}></Grid>
+
+            </TabPanel>
+
+            <TabPanel value={tabValue} index={1}>
+
+              <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <>
+                    <Paper>
+                      <CustomCommonSteps
+                        disableNextStep={disableNextStep()}
+                        nextStep={nextStep}
+                        steps={repairJobProcessSteps.filter(f => f !== "End")}
+                        currentStep={currentStep}
+                        setCurrentStep={setCurrentStep}
+                        onNextButtonClick={onNextButtonClick}
+                        onPreviousButtonClick={onPreviousButtonClick}
+                      />
+
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} sm={12} md={12} lg={12}>
+                          {(currentStep === 0) && (
+                            <>
+                              <Box display="flex" mt={2} mb={2} pr={1} justifyContent="flex-end" alignItems="center" className="gap-2">
+                                <Button
+                                  variant="contained"
+                                  color="primary"
+                                  type="button"
+                                  size="small"
+                                  onClick={() => {
+                                    setAddSerializedAssetDialog(true)
+                                  }}
+                                >
+                                  {`Add ${routes.productInventory.title}`}
+                                </Button>
+
+                                <Button
+                                  variant="contained"
+                                  color="primary"
+                                  type="button"
+                                  size="small"
+                                  disabled={step1SelectedRecords.length === 0}
+                                  onClick={() => {
+                                    setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: step1SelectedRecords.map(m => m._id ?? m.id) });
+                                  }}
+                                >
+                                  Delete
+                                </Button>
+                              </Box>
+
+                              <Grid item xs={12} md={12} sm={12} className="mt-3">
+
+                                {step1Columns ?
+                                  <CustomAgGrid
+                                    columns={step1Columns}
+                                    dataRows={step1DataRows}
+                                    frameworkComponents={step1FrameworkComponent}
+                                    setGridApi={setStep1GridApi}
+                                    dispatch={step1Dispatch}
+                                    rowCount={step1RowCount}
+                                    limit={step1Limit}
+                                    pageSizes={step1PageSizes}
+                                    page={step1Page}
+                                    allowAction={true}
+                                    actionWidth={150}
+                                    loading={step1Loading}
+                                    allowSelection={true}
+                                    renderedFrom={step1RenderedFrom}
+                                  />
+                                  : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+                                }
+                              </Grid>
+                            </>
+                          )}
+
+                          {(currentStep === 1) && (
+                            <RepairJobDeliveryTicket repairJobData={repairJobData} />
+                          )}
+
+                          {(currentStep === 2 || currentStep === 3) && (
+                            <RepairJobReceivingTicket repairJobData={repairJobData} />
+                          )}
+                        </Grid>
+                      </Grid>
+
+                    </Paper>
+
+                  </>
+                </Grid>
+              </Grid>
+
+            </TabPanel>
+
+          </Paper>
         </Grid>
-      </Fragment>
+        <Box my={1} />
+      </Grid>
+
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -163,6 +503,22 @@ const RepairJobDetails = () => {
           onOk={handleDelete}
         />
       )}
+
+      {
+        showAssetRemoveConfirmationDialog.open && (
+          <ConfirmationDialog
+            open={true}
+            message={`Are you sure you want to delete ${showAssetRemoveConfirmationDialog.id ? "asset" : "selected assets"} ?`}
+            onClose={() => {
+              setShowAssetRemoveConfirmationDialog(prevState => ({ ...prevState, open: false }));
+            }}
+            onOk={deleteRepairJobAssets}
+            okBtnLoading={okBtnLoading}
+          />
+        )
+      }
+
+
       {openUpdateDialog && (
         <ManageRepairJob
           open={openUpdateDialog}
@@ -172,11 +528,46 @@ const RepairJobDetails = () => {
             setOpenUpdateDialog(false);
           }}
           onSuccess={() => {
-            getRessourceFields();
+            getResourceFields();
             setOpenUpdateDialog(false);
           }}
         />
       )}
+
+      {
+        addSerializedAssetDialog &&
+        <AddSerializedAsset
+          addSerializedAsset={(newRecordsToAdd) => {
+            setIsAdding(true);
+
+            axiosInstance().post(`${repairJob.repairJobApi}/${id}/add-assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })
+              .then(({ data }) => {
+                setAddSerializedAssetDialog(false)
+                fetchAssignedSerializedAssets();
+                setIsAdding(false)
+                toastConfig.setToastConfig({
+                  open: true,
+                  type: "success",
+                  message: data.message,
+                });
+              }).catch((error) => {
+                setAddSerializedAssetDialog(false)
+                setIsAdding(false)
+                toastConfig.setToastConfig(error)
+              });
+
+          }}
+          handleSerializedAssetClose={() => {
+            setAddSerializedAssetDialog(false);
+          }}
+          isAdding={isAdding}
+          selectedProducts={[]}
+          queryString={`ignoreIds=${JSON.stringify(step1DataRows.map(m => m._id ?? m.id))}&repairable=true`}
+        />
+      }
+
+
+
     </>
   );
 };

@@ -15,7 +15,8 @@ import {
   isFieldNotTouched,
   repairJob,
   setFieldsInAscendingOrder,
-  yupSchema
+  yupSchema,
+  repairJobProcessSteps
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -23,7 +24,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
-import {FaDiceOne} from "react-icons/fa";
+import { FaDiceOne } from "react-icons/fa";
 
 const ManageRepairJob = (props) => {
   const { isClone, repairJobId, onClose, onSuccess, open, inventories, fromInventory } = props
@@ -37,7 +38,7 @@ const ManageRepairJob = (props) => {
   const [formsData, setFormsData] = useState([]);
   const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  
+
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(repairJobData.fields));
   }, [repairJobData.fields]);
@@ -128,16 +129,25 @@ const ManageRepairJob = (props) => {
       axiosInstance()
         .post(`${repairJob.repairJobApi}`, values)
         .then(({ data: { data, message } }) => {
-          if (!fromInventory) {
-            history.push(`${routes.repairJobDetail.path}/${data._id}`);
-          }
-          setSubmitting(false);
-          onSuccess(data);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: message
-          });
+          
+          axiosInstance()
+            .put(`${repairJob.repairJobApi}/${data._id}/process-status`, {
+              "processStatus": repairJobProcessSteps[0]
+            })
+            .then(() => {
+              if (!fromInventory) {
+                history.push(`${routes.repairJobDetail.path}/${data._id}`);
+              }
+              setSubmitting(false);
+              onSuccess(data);
+              toastConfig.setToastConfig({
+                open: true,
+                type: 'success',
+                message: message
+              });
+            }).catch((error) => {
+              toastConfig.setToastConfig(error);
+            });
         })
         .catch((error) => {
           setSubmitting(false);
@@ -238,7 +248,7 @@ const ManageRepairJob = (props) => {
                           form.name && (
                             <div key={i}>
                               <div className={"detail-box-content"}>
-                                <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
                                 <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
                               </div>
                               <Box marginY={2}>
