@@ -198,7 +198,7 @@ const RepairJobReceivingTicket = ({ repairJobData }) => {
 
     return (<>
 
-        <Box display="flex" justifyContent="flex-end">
+        <Box display="flex" justifyContent="flex-end" className="gap-1">
             {/* <Button
                 onClick={() => {
                     setDownlodingFile(true);
@@ -276,37 +276,40 @@ const RepairJobReceivingTicket = ({ repairJobData }) => {
             </Menu>
 
             <Box mx={1} /> */}
-            <IconButton
-                disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("receivingTicketId"))}
-                onClick={() => {
-                    handleReceivingTicketDialog(selectedRecords)
-                }}
-                color='primary'
-                size="small"
-            >
-                <Tooltip
-                    title="Create Receiving Ticket">
-                    <AddBoxRoundedIcon />
-                </Tooltip>
-            </IconButton>
 
-            <Box mx={1} />
+            {
+                repairJobData?.processStatus !== "End" &&
+                <IconButton
+                    disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("receivingTicketId"))}
+                    onClick={() => {
+                        handleReceivingTicketDialog(selectedRecords)
+                    }}
+                    color='primary'
+                    size="small"
+                >
+                    <Tooltip
+                        title="Create Receiving Ticket">
+                        <AddBoxRoundedIcon />
+                    </Tooltip>
+                </IconButton>
+            }
 
-            <IconButton
-                disabled={selectedRecords.length === 0 || selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId"))}
-                onClick={() => {
-                    setShowRemoveAssetFromReceivingTicketDialog(true)
-                }}
-                color='primary'
-                size="small"
-            >
-                <Tooltip
-                    title="Remove Assets From Receiving Ticket(s)">
-                    <RemoveCircleRoundedIcon />
-                </Tooltip>
-            </IconButton>
-
-            <Box mx={1} />
+            {
+                repairJobData?.processStatus !== "End" &&
+                <IconButton
+                    disabled={selectedRecords.length === 0 || selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId"))}
+                    onClick={() => {
+                        setShowRemoveAssetFromReceivingTicketDialog(true)
+                    }}
+                    color='primary'
+                    size="small"
+                >
+                    <Tooltip
+                        title="Remove Assets From Receiving Ticket(s)">
+                        <RemoveCircleRoundedIcon />
+                    </Tooltip>
+                </IconButton>
+            }
         </Box>
 
         <Grid item xs={12} md={12} sm={12} className="mt-3">
@@ -322,6 +325,7 @@ const RepairJobReceivingTicket = ({ repairJobData }) => {
                     limit={limit}
                     pageSizes={pageSizes}
                     page={page}
+                    allowSelection={repairJobData?.processStatus !== "End"}
                     allowAction={false}
                     loading={loading}
                     renderedFrom={renderedFrom}

@@ -20,11 +20,7 @@ import ManageDeliveryTicket from '../DeliveryTicket/ManageDeliveryTicket';
 
 const renderedFrom = "repairJob_delivery_ticket"
 
-const RepairJobDeliveryTicket = ({
-  repairJobData
-  // rentalManagementData,
-  // fetchRentalData
-}) => {
+const RepairJobDeliveryTicket = ({ repairJobData }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [gridApi, setGridApi] = useState(null);
@@ -222,37 +218,40 @@ const RepairJobDeliveryTicket = ({
       </Button>
       <Box mx={1} /> */}
 
-      <IconButton
-        disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId"))}
-        onClick={() => {
-          handleDeliveryTicketDialog(selectedRecords)
-        }}
-        color='primary'
-        size="small"
-      >
-        <Tooltip
-          title="Create Loading Ticket">
-          <AddBoxRoundedIcon />
-        </Tooltip>
-      </IconButton>
+      {
+        repairJobData?.processStatus !== "End" &&
+        <IconButton
+          disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId"))}
+          onClick={() => {
+            handleDeliveryTicketDialog(selectedRecords)
+          }}
+          color='primary'
+          size="small"
+        >
+          <Tooltip
+            title="Create Loading Ticket">
+            <AddBoxRoundedIcon />
+          </Tooltip>
+        </IconButton>
+      }
 
-      <Box mx={1} />
+      {
+        repairJobData?.processStatus !== "End" &&
 
-      <IconButton
-        disabled={selectedRecords.length === 0 || selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId"))}
-        onClick={() => {
-          setShowRemoveAssetFromLoadingTicketDialog(true)
-        }}
-        color='primary'
-        size="small"
-      >
-        <Tooltip
-          title="Remove Assets From Loading Ticket(s)">
-          <RemoveCircleRoundedIcon />
-        </Tooltip>
-      </IconButton>
-
-      <Box mx={1} />
+        <IconButton
+          disabled={selectedRecords.length === 0 || selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId"))}
+          onClick={() => {
+            setShowRemoveAssetFromLoadingTicketDialog(true)
+          }}
+          color='primary'
+          size="small"
+        >
+          <Tooltip
+            title="Remove Assets From Loading Ticket(s)">
+            <RemoveCircleRoundedIcon />
+          </Tooltip>
+        </IconButton>
+      }
 
       {/* <Button
         variant="contained"
@@ -282,9 +281,9 @@ const RepairJobDeliveryTicket = ({
           limit={limit}
           pageSizes={pageSizes}
           page={page}
+          allowSelection={repairJobData?.processStatus !== "End"}
           allowAction={false}
           loading={loading}
-          allowSelection={true}
           renderedFrom={renderedFrom}
         />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
