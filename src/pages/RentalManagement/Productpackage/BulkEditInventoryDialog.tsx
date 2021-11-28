@@ -16,14 +16,14 @@ import {
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateUtils from '@date-io/date-fns';
 import moment from 'moment';
-import { dateFormatForInputControl } from '../../constants/helpers';
-import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import { dateFormatForInputControl } from '../../../constants/helpers';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { startCase } from 'lodash';
-import axiosInstance from "../../axios/axiosInstance";
+import axiosInstance from "../../../axios/axiosInstance";
 import { groupBy } from 'lodash';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -147,7 +147,7 @@ const BulkEditInventoryDialog: FC<EditDialogProps> = (
     if (data) {
       if (values?.qty > 0 && values?.pricingMethod !== '' && values?.UOM !== '') {
         const priceData = await calculatePrice([values]);
-        if (priceData && priceData.length) {
+        if (priceData && priceData.length && priceData[0].mrp) {
           let price: any = priceData[0].mrp;
           handleChange('price', price);
           handlePriceCalculation(price, 'price');

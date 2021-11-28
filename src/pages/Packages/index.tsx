@@ -90,7 +90,7 @@ const PackageList = () => {
         if (isOffline) {
             data = offlineFieldsData;
         } else {
-            const response = await axiosInstance().get(`/field?resource=Packages&entity=${selectedEntity}`);
+            const response = await axiosInstance().get(`/field?resource=Packages&entity=${selectedEntity}&view=true`);
 
             data = response?.data?.data;
             try {

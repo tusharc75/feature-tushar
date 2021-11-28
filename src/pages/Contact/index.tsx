@@ -132,7 +132,7 @@ export default function Contact(props) {
   const fetchGridColumns = async () => {
 
     const response = await axiosInstance()
-      .get(`/field?resource=${sidebarResource[contactResource]}`)
+      .get(`/field?resource=${sidebarResource[contactResource]}&view=true`)
 
     let data = response?.data?.data
 

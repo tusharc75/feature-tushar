@@ -107,7 +107,7 @@ const Opportunities = () => {
   const fetchGridColumns = async () => {
 
     const response = await axiosInstance()
-      .get(`/field?resource=Opportunity&entity=${selectedEntity}`)
+      .get(`/field?resource=Opportunity&entity=${selectedEntity}&view=true`)
 
     let data = response?.data?.data
 

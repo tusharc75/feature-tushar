@@ -164,7 +164,7 @@ const ProjectSales: FC = () => {
   const fetchGridColumns = async () => {
 
     const response = await axiosInstance()
-      .get(`/field?resource=Project Sales`)
+      .get(`/field?resource=Project Sales&view=true`)
 
     let data = response?.data?.data
 

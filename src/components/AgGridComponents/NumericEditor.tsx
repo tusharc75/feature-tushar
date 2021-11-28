@@ -137,7 +137,6 @@ export default forwardRef((props: any, ref) => {
         };
     });
 
-    console.log(props)
     return (<React.Fragment>
         <input
             ref={refInput}
