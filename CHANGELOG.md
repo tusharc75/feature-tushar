@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.9.0](https://github.com/vebholic/oms_frontend/compare/v2.8.0...v2.9.0) (2021-11-28)
+
+
+### Features
+
+* - Rental Id passed as a reference when status changed from rental > receiving ticket" ([5206217](https://github.com/vebholic/oms_frontend/commit/52062179f3a9d88b0f5604ab707207b10fe01778))
+* - Repair job changes done ([433fad0](https://github.com/vebholic/oms_frontend/commit/433fad035130ab2b8f974fd7dab5c6397c5b8329))
+* - Repair job screen initially finished ([0c91b8c](https://github.com/vebholic/oms_frontend/commit/0c91b8cfb98b3ecce7117cd95fc1502ef781cd83))
+
 ## [2.8.0](https://github.com/vebholic/oms_frontend/compare/v2.7.0...v2.8.0) (2021-11-27)
 
 
