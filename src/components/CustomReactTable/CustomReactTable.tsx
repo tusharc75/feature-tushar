@@ -38,7 +38,7 @@ export default function CustomReactTable({
     columns,
     data,
     onSelect,
-    isInValidCheck,
+    isInValidCheck = null,
     childrenProperty,
     uniqueKey,
     height = "100%"
@@ -251,7 +251,7 @@ export default function CustomReactTable({
                                     <TableRow {...row.getRowProps()} key={row.original._id ?? index} className="tr">
                                         {row.cells.map(cell => {
                                             return (
-                                                <TableCell {...cell.getCellProps()} className={`td ${isInValidCheck(row.original) ? "error" : ""}`}>
+                                                <TableCell {...cell.getCellProps()} className={`td ${isInValidCheck ? (isInValidCheck(row.original) ? "error" : "") : ""}`}>
                                                     {cell.render('Cell')}
                                                 </TableCell>
                                             )
@@ -262,17 +262,20 @@ export default function CustomReactTable({
                         }
                     </TableBody>
 
-                    <TableFooter style={{ overflowY: "auto", overflowX: "hidden" }} className="footer">
-                        {footerGroups.map(group => (
-                            <TableRow {...group.getFooterGroupProps()}>
-                                {group.headers.map(column => (
-                                    <TableCell {...column.getFooterProps()} className="font-weight-bold text-black">
-                                        {column.render('Footer')}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        ))}
-                    </TableFooter>
+                    {
+                        rows?.length > 0 &&
+                        <TableFooter style={{ overflowY: "auto", overflowX: "hidden" }} className="footer">
+                            {footerGroups.map(group => (
+                                <TableRow {...group.getFooterGroupProps()}>
+                                    {group.headers.map(column => (
+                                        <TableCell {...column.getFooterProps()} className="font-weight-bold text-black">
+                                            {column.render('Footer')}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))}
+                        </TableFooter>
+                    }
 
                 </MaUTable>
             </div>

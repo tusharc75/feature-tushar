@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.9.0](https://github.com/vebholic/oms_frontend/compare/v2.8.0...v2.9.0) (2021-11-28)
+
+
+### Features
+
+* - Rental Id passed as a reference when status changed from rental > receiving ticket" ([5206217](https://github.com/vebholic/oms_frontend/commit/52062179f3a9d88b0f5604ab707207b10fe01778))
+* - Repair job changes done ([433fad0](https://github.com/vebholic/oms_frontend/commit/433fad035130ab2b8f974fd7dab5c6397c5b8329))
+* - Repair job screen initially finished ([0c91b8c](https://github.com/vebholic/oms_frontend/commit/0c91b8cfb98b3ecce7117cd95fc1502ef781cd83))
+
+## [2.8.0](https://github.com/vebholic/oms_frontend/compare/v2.7.0...v2.8.0) (2021-11-27)
+
+
+### Features
+
+* **formbuilder:** added Transfer Asset option in lookup dropdown ([21c914a](https://github.com/vebholic/oms_frontend/commit/21c914a1b162725469dbb27725d889cad832075c))
+* **transferasset:** loading ticket step finish ([1b7a0f1](https://github.com/vebholic/oms_frontend/commit/1b7a0f1c721d5abfe8bbef067d7fc0b87ade4ec6))
+
+
+### Bug Fixes
+
+* columns fixes ([8cbb83f](https://github.com/vebholic/oms_frontend/commit/8cbb83ffa81a23b85096a217e7d71b6741cb2b4f))
+* rental ([0558168](https://github.com/vebholic/oms_frontend/commit/055816860457b88c963982f53993b105d8a0b54f))
+* rental managment ([00fc353](https://github.com/vebholic/oms_frontend/commit/00fc353c9efef536dbe2c2b3a051a68bc518633c))
+* **transferasset:** show fields conditionally ([35381d9](https://github.com/vebholic/oms_frontend/commit/35381d9d5e97beffbfaaea9f558875e361b8906d))
+
 ## [2.7.0](https://github.com/vebholic/oms_frontend/compare/v2.6.0...v2.7.0) (2021-11-26)
 
 

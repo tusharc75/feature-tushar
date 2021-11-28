@@ -79,7 +79,7 @@ const MarketSegment = () => {
 
     const fetchGridColumns = () => {
         axiosInstance()
-            .get(`/field?resource=Market Segment`)
+            .get(`/field?resource=Market Segment&view=true`)
             .then(({ data: { data } }) => {
                 let columns = []
                 let rendererNames = []

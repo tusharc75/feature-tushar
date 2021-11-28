@@ -90,6 +90,7 @@ const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handle
                 _f.isFormulaColor = _f.isFormula;
                 _f.isFormula = false;
                 _f.isMulitFormula = false;
+                _f.unitoption = [];
             })
             setInitialData({
                 fields: _fields,
