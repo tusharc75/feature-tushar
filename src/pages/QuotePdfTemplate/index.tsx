@@ -268,10 +268,8 @@ const QuotePdfTemplate: FC = () => {
 
                 let rows = data.map((u) => {
 
-                    const { createdBy, updatedBy, staticData, ...restProperties } = u;
-
                     let finalObject = prepareDataForGrid(u);
-                    finalObject["canDelete"] = permissions.quotePdfTemplate.isDelete && user?.user?._id === u?.owner;
+                    finalObject["canDelete"] = permissions.quotePdfTemplate.isDelete && user?.user?._id === finalObject["owner"];
                     finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
                     finalObject["allowedToEdit"] = permissions.quotePdfTemplate.isUpdate;
                     return {
@@ -368,7 +366,7 @@ const QuotePdfTemplate: FC = () => {
                     onEdit={(d) => {
                         history.push(`${routes.quotePdfTemplateDetail.path}/${d._id}`)
                     }}
-                    extraParamsToCheckDelete={false}
+                    extraParamsToCheckDelete={true}
                     onDelete={(d) => {
                         setDeleteRecord(d);
                         setShowDeleteConfirmBox(true)

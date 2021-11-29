@@ -12,7 +12,7 @@ import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CreateRole from "./CreateRole";
 import { PERMISSION } from "../../constants/Roles";
-import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty, gridLoadingTimeout } from "../../constants/helpers";
+import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid } from "../../constants/helpers";
 import RoleHeader from "./RoleHeader";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -284,20 +284,17 @@ const Roles: FC = () => {
       .then(({ data: { data, count } }) => {
 
         let rows = data.map((u) => {
-          const { createdBy, updatedBy, ...restProperties } = u;
 
-          let res = {
-            ...restProperties,
-            id: u._id,
+          let finalObject = prepareDataForGrid(u);
+          finalObject["canDelete"] = permissions.role.isDelete;
+          finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+          finalObject["allowedToEdit"] = permissions.role.isUpdate;
+          return {
+            ...finalObject,
             type: `${u.type === roleTypes.find((d) => d.key === "Global")?.value ? "Global" : "Regional"} Role`,
-
-            createdBy: u.createdBy?.user?.concatedName,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date,
           };
-          return res;
         });
+
 
         dispatch({ type: "initialize", data: rows, count: count });
         setTimeout(() => {
@@ -461,7 +458,7 @@ const Roles: FC = () => {
             onEdit={(d) => {
               history.push(`${routes.roleDetail.path}/${d._id}`)
             }}
-            extraParamsToCheckDelete={false}
+            extraParamsToCheckDelete={true}
             onDelete={(d) => {
 
             }}

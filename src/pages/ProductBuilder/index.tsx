@@ -30,8 +30,11 @@ import CustomAgGrid, {
 } from "../../components/AgGridComponents/CustomAgGrid";
 import { Menu, MenuItem } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
-import { gridLoadingTimeout } from "../../constants/helpers";
+import { gridLoadingTimeout, prepareDataForGrid } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile } from 'react-device-detect';
+import { useHistory } from "react-router-dom";
 
 const ProductBuilder = () => {
   const {
@@ -40,6 +43,7 @@ const ProductBuilder = () => {
       user: { user },
     },
   } = useData();
+  const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [isCreate, setIsCreate] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -126,18 +130,15 @@ const ProductBuilder = () => {
       .get(`/productbuilder`)
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
-          const { createdBy, ...restProperties } = u;
 
-          let res = {
-            ...restProperties,
-            id: u._id,
-            name: u.name,
-            createdBy: u.createdBy?.user?.concatedCreatedByName,
-            createdById: u.createdBy?.user?._id,
-            createdByDate: u.createdBy?.date,
+          let finalObject = prepareDataForGrid(u);
+          finalObject["canDelete"] = permission.isDelete && finalObject["createdById"] === user?._id;;
+          finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+          finalObject["allowedToEdit"] = permission.isUpdate;
+          return {
+            ...finalObject,
+
           };
-
-          return res;
         });
 
         dispatch({ type: "initialize", data: rows, count: data.length });
@@ -280,24 +281,52 @@ const ProductBuilder = () => {
             </Grid>
           </Grid>
         </div>
-
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
+        {isMobile ? <CustomSwipableList
           allowSelection={true}
-          actionWidth={100}
-          isClientSideGrid={true}
+          allowSwipe={true}
+          permissions={permission}
+          primaryField={columns?.find(d => d.field === "name")}
+          onClick={(d) => {
+            history.push(`${routes.productBuilder.path}/${d.id}`)
+          }}
+          dataRows={dataRows}
+          selectedRecords={selectedRecords}
+          dispatch={dispatch}
+          onEdit={(d) => {
+            history.push(`${routes.productBuilder.path}/${d.id}`)
+          }}
+          extraParamsToCheckDelete={true}
+          onDelete={(d) => {
+            setDeleteRecord(d);
+            setShowDeleteConfirmBox(true)
+          }}
+          rowCount={rowCount}
+          page={page}
           loading={loading}
-          refreshGrid={fetchProductBuilder}
-        />
-
+          additionalDetails={[]}
+          chips={[]}
+          owerCollaboratorInitialsOrImages=""
+          onCreate={() => { }}
+          showClone={false}
+          onClone={() => { }}
+          renderedFrom={routes.productBuilder.title} /> :
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            allowSelection={true}
+            actionWidth={100}
+            isClientSideGrid={true}
+            loading={loading}
+            refreshGrid={fetchProductBuilder}
+          />
+        }
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -325,3 +354,5 @@ const ProductBuilder = () => {
 };
 
 export default ProductBuilder;
+
+
