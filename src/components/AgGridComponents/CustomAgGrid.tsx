@@ -152,7 +152,8 @@ export default function CustomAgGrid({
   showOnlyShowFilteredRecordSwitch = false,
   idProperty = "_id",
   allowHeaderSelection = true,
-  pinnedBottomRowData = null
+  pinnedBottomRowData = null,
+  rowClassRules = null
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -379,6 +380,7 @@ export default function CustomAgGrid({
               gridOptions={customGridOptions}
               rowData={dataRows}
               onColumnMoved={onColumnMoved}
+              rowClassRules={rowClassRules}
               onGridReady={onGridReady}
               suppressDragLeaveHidesColumns={true}
               accentedSort={true}
