@@ -24,8 +24,12 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from "react-router-dom";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers"
+import { MdAccountCircle } from "react-icons/md";
+import { AiFillCrown } from "react-icons/all";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile } from 'react-device-detect';
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -41,12 +45,15 @@ const ProductInventory = () => {
     const [columns, setColumns] = useState([])
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+    const [isAllChecked, setIsAllChecked] = useState(false);
+    const [clonedData, setClonedData] = useState([])
+    const localStorageSelectedRecords = "warehouse_selected";
 
     const {
         state: { permissions },
     }: any = useData();
-    const {getColumnData} = useColumns();
+    const { getColumnData } = useColumns();
     const history = useHistory();
 
     const [warehouse, setWarehouse] = useState(history.location?.state?.warehouse);
@@ -99,11 +106,30 @@ const ProductInventory = () => {
 
         const queryString = getQueryString();
         axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
-            data.data = data.data?.map((u, i) => ({
-                ...prepareDataForGrid(u),
-            }));
+            let rows = data.data?.map((u, user) => {
+                let finalObject = prepareDataForGrid(u);
+                finalObject["canDelete"] = permissions?.productInventory?.isDelete
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                finalObject["allowedToEdit"] = permissions?.productInventory.isUpdate
+                return {
+                    ...finalObject,
 
-            dispatch({ type: "initialize", data: data.data, count: data.count });
+                };
+            });
+            setIsAllChecked(false);
+            setClonedData(data.data);
+            if (appendRows) {
+                dispatch({
+                    type: "initialize", data: [...dataRows, ...rows],
+                    count: data.data.count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+                });
+            } else {
+                dispatch({
+                    type: "initialize", data: rows, count: data.count,
+                    selectedRecords: rows.filter(f => f.isChecked === true)
+                });
+            }
+            dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
@@ -332,7 +358,40 @@ const ProductInventory = () => {
                     </Grid>
                 </Grid>
             </div>
-            {columns ?
+            {columns ? isMobile ? <CustomSwipableList
+                allowSelection={true}
+                allowSwipe={true}
+                permissions={permissions?.productInventory}
+                primaryField={columns?.find(d => d.field === "assetNumber")}
+                onClick={(d) => {
+                    history.push(`${routes.productInventoryDetail.path}/${d._id}`)
+                }}
+                dataRows={dataRows}
+                selectedRecords={selectedRecords}
+                dispatch={dispatch}
+                onEdit={(d) => {
+                    history.push(`${routes.productInventoryDetail.path}/${d._id}`)
+                }}
+                extraParamsToCheckDelete={false}
+                onDelete={(d) => {
+                    setDeleteRecord(d);
+                    setShowDeleteConfirmBox(true)
+                }}
+                rowCount={rowCount}
+                page={page}
+                loading={loading}
+                additionalDetails={[]}
+                chips={[
+                    {
+                        label: "Serial Number : ",
+                        field: "serialNumber",
+                    },
+                ]}
+                owerCollaboratorInitialsOrImages=""
+                onCreate={() => { }}
+                showClone={true}
+                onClone={(data) => { setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id }); }}
+                renderedFrom={routes.productInventory?.title} /> :
                 Object.keys(frameWorkComponent).length > 0 ?
                     <CustomAgGrid
                         columns={columns}
