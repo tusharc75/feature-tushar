@@ -331,7 +331,7 @@ export default function QuoteProcess(props) {
     if (tempProcessStatus === 'Customer Process') {
       setNextStep(false);
     }
-    if (tempProcessStatus === 'Quote Builder') {
+    if (tempProcessStatus === 'Quote Builder' || "Send To Customer") {
       setNextStep(true);
     }
   }, [quoteData]);
