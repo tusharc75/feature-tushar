@@ -9,7 +9,7 @@ import {
     Tooltip,
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { quotePdfTemplate, isObjectEmpty, gridLoadingTimeout, quoteBuilder } from "../../constants/helpers";
+import { quotePdfTemplate, isObjectEmpty, gridLoadingTimeout, quoteBuilder, prepareDataForGrid } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
@@ -43,7 +43,7 @@ const QuotePdfTemplate: FC = () => {
     const { qbApi } = quoteBuilder;
 
     const {
-        state: { permissions, selectedEntity },
+        state: { permissions, selectedEntity, user },
     }: any = useData();
     const [renderCount, setRenderCount] = useState(0);
 
@@ -268,17 +268,14 @@ const QuotePdfTemplate: FC = () => {
 
                 let rows = data.map((u) => {
 
-                    const { createdBy, updatedBy, ...restProperties } = u;
+                    let finalObject = prepareDataForGrid(u);
+                    finalObject["canDelete"] = permissions.quotePdfTemplate.isDelete && user?.user?._id === finalObject["owner"];
+                    finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                    finalObject["allowedToEdit"] = permissions.quotePdfTemplate.isUpdate;
+                    return {
+                        ...finalObject,
 
-                    let res = {
-                        ...restProperties,
-                        id: u._id,
-                        createdBy: u.createdBy?.user?.concatedName,
-                        createdByDate: u.createdBy?.date,
-                        updatedBy: u.updatedBy?.user?.concatedName,
-                        updatedByDate: u.updatedBy?.date,
                     };
-                    return res;
                 });
 
                 dispatch({ type: "initialize", data: rows, count: count });
@@ -369,7 +366,7 @@ const QuotePdfTemplate: FC = () => {
                     onEdit={(d) => {
                         history.push(`${routes.quotePdfTemplateDetail.path}/${d._id}`)
                     }}
-                    extraParamsToCheckDelete={false}
+                    extraParamsToCheckDelete={true}
                     onDelete={(d) => {
                         setDeleteRecord(d);
                         setShowDeleteConfirmBox(true)

@@ -44,6 +44,7 @@ import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { GridApi } from 'ag-grid-community';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 
 const AccTypes = [
   {
@@ -708,8 +709,7 @@ export default function Account(props) {
       let res = {
         ...finalObject,
         canDelete: u.owner?.optionValue === user?.user._id,
-
-        isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
+        allowedToEdit: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
         lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
         leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
         leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
@@ -1149,6 +1149,43 @@ export default function Account(props) {
 
         {
           Object.keys(frameWorkComponent).length > 0 ?
+          isMobile ? <CustomSwipableList
+                allowSelection={true}
+                allowSwipe={true}
+                permissions={accountPermissions}
+                primaryField={columns?.find(d => d.field === "accountName")}
+                onClick={(d) => {
+                    history.push(`${accountApi}/detail/${d._id}`)
+                }}
+                dataRows={dataRows}
+                selectedRecords={selectedRecords}
+                dispatch={dispatch}
+                onEdit={(d) => {
+                  history.push(`${accountApi}/detail/${d._id}?openEdit=true`)
+                }}
+                extraParamsToCheckDelete={true}
+                onDelete={(d) => {
+                  setSingleAccountDelete({
+                    show: true,
+                    id: d._id,
+                    accountName: d.accountName
+                  });
+                }}
+                rowCount={rowCount}
+                page={page}
+                loading={loading}
+                additionalDetails={[]}
+                chips={[
+                    // {
+                    //     label: "Serial Number : ",
+                    //     field: "serialNumber",
+                    // },
+                ]}
+                owerCollaboratorInitialsOrImages=""
+                onCreate={() => { }}
+                showClone={true}
+                onClone={(data) => { cloneAccount(data)}}
+                renderedFrom={accountResource} /> :
             <CustomAgGrid
               columns={columns}
               dataRows={dataRows}

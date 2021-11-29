@@ -38,6 +38,7 @@ import ProcessFlow from '../../components/ProcessFlow';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { SVG } from '../../assets';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import queryString from 'query-string';
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -68,6 +69,8 @@ function OpportunityDetailsPage() {
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false);
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
   const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' })
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit } = parsed;
 
   const [messageDialog, setMessageDialog] = useState({
     open: false,
@@ -87,7 +90,6 @@ function OpportunityDetailsPage() {
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [, setShowAtLast] = useState(false);
   const [, setAdditionalFieldName] = useState('');
-
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
   }
@@ -159,7 +161,8 @@ function OpportunityDetailsPage() {
           Object.assign(modifiedData, data);
           modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).fullFormatAmount;
           setCopyOfOpportunityData(modifiedData);
-
+          const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+          setAllowedToEdit(isAllowedToEdit);
           handleMainPoints(data);
           setHeadingLbl(data.opportunityName);
 
@@ -203,7 +206,12 @@ function OpportunityDetailsPage() {
             tempExpanded.customerContacts = false;
           }
           setExpanded(tempExpanded);
-
+          if (isAllowedToEdit && openEdit === 'true') {
+            setOpenUpdateDialog(true);
+            const params = new URLSearchParams();
+            params.delete('openEdit');
+            history.push({ search: params.toString() });
+          }
           getOpportunityFields(data);
           setCustomizedRoutes([routes.opportunity, { title: `${data.opportunityName}` }]);
         })
