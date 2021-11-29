@@ -29,8 +29,8 @@ import { isMobile } from "react-device-detect";
 import { BiFoodMenu } from "react-icons/bi";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import CustomTimeline from "../../components/CustomTimeline";
-import {GiAutoRepair, GrStatusInfo} from "react-icons/all";
-import {MdEdit} from "react-icons/md";
+import { GiAutoRepair, GrStatusInfo } from "react-icons/all";
+import { MdEdit } from "react-icons/md";
 
 
 
@@ -179,13 +179,13 @@ const ProductInventoryDetailsPage = () => {
       gridApi.setRowData([]);
     }
     axiosInstance().get(`/history/inventory/${id}`).then(({ data: { data } }) => {
-      setProductInventoryHistoryData(data)
       data = data?.map((u) => ({
         ...u,
         id: u.inventory?._id,
         reference: u.reference?.optionLabel,
         referenceId: u.reference?.optionValue
       }));
+      setProductInventoryHistoryData(data)
       dispatch({ type: "initialize", data: data, count: data.length });
       dispatch({ type: "loading", loading: false });
     }).catch((error) => {
@@ -342,7 +342,7 @@ const ProductInventoryDetailsPage = () => {
                         size="small"
                         onClick={() => setShowRepairJobDialog(true)}
                       >
-                        {isMobile ? <GiAutoRepair size={20}/> : "Create Repair Job"}
+                        {isMobile ? <GiAutoRepair size={20} /> : "Create Repair Job"}
 
                       </Button>
                       <Button
@@ -352,9 +352,9 @@ const ProductInventoryDetailsPage = () => {
                         onClick={openActions}
                         disabled={updateLoading}
                         aria-controls="action-menu"
-                        endIcon={isMobile ? <ExpandMore style={{width: "12px" , height:"12px"}}/> : <ExpandMore />}
+                        endIcon={isMobile ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
                       >
-                        {isMobile ? <GrStatusInfo size={20}/> : "Change Status"}
+                        {isMobile ? <GrStatusInfo size={20} /> : "Change Status"}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -379,12 +379,12 @@ const ProductInventoryDetailsPage = () => {
                         }
                       </Menu>
                       <Button
-                        variant= {isMobile ? "text" : "outlined"}
+                        variant={isMobile ? "text" : "outlined"}
                         color="primary"
                         size="small"
                         onClick={handleOpenUpdateDialog}
                       >
-                        {isMobile ? <MdEdit size={22}/> : "Edit"}
+                        {isMobile ? <MdEdit size={22} /> : "Edit"}
                       </Button>
                     </>
                   )}
@@ -545,55 +545,29 @@ const ProductInventoryDetailsPage = () => {
                           Asset History
                         </h3>
                       </div>
-                      <div>
-                        <CustomTimeline dataRows= {productInventoryHistoryData}/>
-                      </div>
+                      {isMobile && <div>
+                        <CustomTimeline dataRows={productInventoryHistoryData} />
+                      </div>}
 
                       <Grid item xs={12} sm={12} md={12} lg={12} className="mt-1">
-                        {columns ?
-
-
-
-                          isMobile ? <CustomSwipableList
-                            allowSelection={false}
-                            allowSwipe={false}
-                            permissions={permissions.productInventory}
-                            primaryField={columns?.find((d: any) => d?.field === "reference")}
-                            onClick={(data) => { console.log(data) }}
+                        {!isMobile && columns ?
+                          <CustomAgGrid
+                            columns={columns}
                             dataRows={dataRows}
+                            frameworkComponents={frameworkComponents}
+                            setGridApi={setGridApi}
                             dispatch={dispatch}
-                            onClone={() => { }}
-                            selectedRecords={selectedRecords}
-                            showClone={false}
-                            onEdit={() => { }}
-                            extraParamsToCheckDelete={false}
-                            onDelete={() => { }}
                             rowCount={rowCount}
+                            limit={limit}
+                            pageSizes={pageSizes}
                             page={page}
+                            allowAction={false}
+                            allowSelection={false}
+                            isClientSideGrid={true}
                             loading={loading}
-                            additionalDetails={[]}
-                            chips={[]}
-                            owerCollaboratorInitialsOrImages=""
-                            onCreate={() => { }}
-                            renderedFrom={productInventory.route}
-                          /> :
-                            <CustomAgGrid
-                              columns={columns}
-                              dataRows={dataRows}
-                              frameworkComponents={frameworkComponents}
-                              setGridApi={setGridApi}
-                              dispatch={dispatch}
-                              rowCount={rowCount}
-                              limit={limit}
-                              pageSizes={pageSizes}
-                              page={page}
-                              allowAction={false}
-                              allowSelection={false}
-                              isClientSideGrid={true}
-                              loading={loading}
-                              renderedFrom="rentalManagementDetailsPageInventory"
-                              refreshGrid={fetchProductInventoryHistory}
-                            />
+                            renderedFrom="rentalManagementDetailsPageInventory"
+                            refreshGrid={fetchProductInventoryHistory}
+                          />
                           : <Box
                             p={2}
                             height={500}

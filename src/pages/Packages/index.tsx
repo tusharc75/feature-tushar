@@ -22,11 +22,15 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
-import useColumns, {getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
 import ProductListDialog from './ProductListDialog';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import { prepareDataForGrid } from "../../constants/helpers"
+import { MdAccountCircle } from "react-icons/md";
+import { AiFillCrown } from "react-icons/all";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile } from 'react-device-detect';
 
 let packagesTimeout;
 
@@ -39,7 +43,7 @@ const PackageList = () => {
     const {
         state: { user, permissions, selectedEntity }
     }: any = useData();
-    const {getColumnData} = useColumns();
+    const { getColumnData } = useColumns();
     const [selectedType, setSelectedType] = useState(1);
     const [renderCount, setRenderCount] = useState(0);
     const [deleteLoading, setDeleteLoading] = useState(false);
@@ -72,7 +76,10 @@ const PackageList = () => {
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+    const [isAllChecked, setIsAllChecked] = useState(false);
+    const [clonedData, setClonedData] = useState([])
+    const localStorageSelectedRecords = "productTemplatePage_selected";
 
     useEffect(() => {
         fetchGridColumns();
@@ -332,10 +339,14 @@ const PackageList = () => {
             let rows = data.map((u) => {
                 const { owner, createdBy, updatedBy, ...restProperties } = u;
 
-                let res = {
-                    ...prepareDataForGrid(u, user)
+                let finalObject = prepareDataForGrid(u);
+                finalObject["canDelete"] = permissions.packages.isDelete;
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                finalObject["allowedToEdit"] = permissions.packages.isUpdate;
+
+                return {
+                    ...finalObject,
                 };
-                return res;
             });
 
             dispatch({ type: 'initialize', data: rows, count: count });
@@ -489,23 +500,56 @@ const PackageList = () => {
                     </div>
 
                     {Object.keys(frameWorkComponent).length > 0 ? (
-                        <CustomAgGrid
-                            columns={columns}
+                        isMobile ? <CustomSwipableList
+                            allowSelection={true}
+                            allowSwipe={true}
+                            permissions={permissions?.packages}
+                            primaryField={columns?.find(d => d.primaryField)}
+                            onClick={(data) => {
+                                history.push(`${routes.packagesDetail.path}/${data._id}`)
+                            }}
                             dataRows={dataRows}
-                            frameworkComponents={frameWorkComponent}
-                            setGridApi={setGridApi}
+                            selectedRecords={selectedRecords}
                             dispatch={dispatch}
+                            onEdit={(data) => {
+                                history.push(`${routes.packagesDetail.path}/${data._id}?openEdit=true`)
+                            }}
+                            extraParamsToCheckDelete={true}
+                            onDelete={(data) => {
+                                setDeleteRecord({})
+                            }}
                             rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
                             page={page}
-                            actionWidth={140}
                             loading={loading}
+                            additionalDetails={[
+
+                            ]}
+                            chips={[
+
+                            ]}
+                            owerCollaboratorInitialsOrImages=""
+                            onCreate={clickCreateNew}
+                            showClone={true}
+                            onClone={(data) => { setShowManagePackageDialog({ open: true, isClone: true, idToClone: data._id }); }}
                             renderedFrom={pageTitle}
-                            allowSelection={!isOffline}
-                            isClientSideGrid={isOffline}
-                            refreshGrid={fetchPackages}
-                        />
+                        /> :
+                            <CustomAgGrid
+                                columns={columns}
+                                dataRows={dataRows}
+                                frameworkComponents={frameWorkComponent}
+                                setGridApi={setGridApi}
+                                dispatch={dispatch}
+                                rowCount={rowCount}
+                                limit={limit}
+                                pageSizes={pageSizes}
+                                page={page}
+                                actionWidth={140}
+                                loading={loading}
+                                renderedFrom={pageTitle}
+                                allowSelection={!isOffline}
+                                isClientSideGrid={isOffline}
+                                refreshGrid={fetchPackages}
+                            />
                     ) : null}
 
                     {showDeleteWarningConfirmBox ? (

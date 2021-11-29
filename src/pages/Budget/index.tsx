@@ -29,7 +29,7 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { useLocation, useHistory } from "react-router-dom";
 import queryString from "query-string";
 import { isMobile } from 'react-device-detect';
@@ -54,7 +54,7 @@ function Budget() {
     id: null,
     isClone: false
   });
-  const {getColumnData} = useColumns();
+  const { getColumnData } = useColumns();
   const [columns, setColumns] = useState([])
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
 
@@ -249,13 +249,18 @@ function Budget() {
     axiosInstance()
       .get(`/budget${queryString}`)
       .then(({ data: { data, count } }) => {
-        let rows = data.map((item) => {
-          let res = {
-            ...prepareDataForGrid(item, user),
-          };
-          return res;
-        });
 
+        let rows = data.map((u) => {
+
+          let finalObject = prepareDataForGrid(u);
+          finalObject["canDelete"] = permissions.budget.isDelete;
+          finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+          finalObject["allowedToEdit"] = permissions.budget.isUpdate;
+          return {
+            ...finalObject,
+
+          };
+        });
         dispatch({ type: "initialize", data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: "loading", loading: false });
@@ -419,13 +424,13 @@ function Budget() {
               permissions={permissions.budget}
               primaryField={columns?.find(d => d.primaryField)}
               onClick={(d) => {
-                history.push(`${routes.budget.path}?id=${d._id}`)
+                setShowManageBudgetDialog({ show: true, id: d.id, isClone: false });
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(d) => {
-                history.push(`${routes.budget.path}?id=${d._id}`)
+                setShowManageBudgetDialog({ show: true, id: d.id, isClone: false });
               }}
               extraParamsToCheckDelete={true}
               onDelete={(d) => {

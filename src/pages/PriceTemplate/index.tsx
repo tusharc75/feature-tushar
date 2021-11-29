@@ -9,7 +9,7 @@ import {
     Tooltip,
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { priceTemplate, isObjectEmpty, gridLoadingTimeout } from "../../constants/helpers";
+import { priceTemplate, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
@@ -30,6 +30,8 @@ import { CgTemplate } from 'react-icons/cg';
 import SearchBox from '../../components/Helpers/SearchBox'
 import { ExpandMore } from "@material-ui/icons";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile } from 'react-device-detect';
 
 let priceTemplateTimeout;
 
@@ -55,13 +57,16 @@ const PriceTemplate: FC = () => {
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+    const [isAllChecked, setIsAllChecked] = useState(false);
+    const [clonedData, setClonedData] = useState([])
+    const localStorageSelectedRecords = "productTemplatePage_selected";
 
     // const [showGridFilters, setShowGridFilters] = useState(true)
     const columnState = JSON.parse(localStorage.getItem("priceTemplatePage"));
 
     const columns = [
-        { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "name", headerName: "Name", show: true, disabled: true, primaryField: true, cellRenderer: "nameRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
@@ -240,16 +245,14 @@ const PriceTemplate: FC = () => {
 
                     const { createdBy, updatedBy, staticData, ...restProperties } = u;
 
-                    let res = {
-                        ...restProperties,
-                        id: u._id,
-                        createdBy: u.createdBy?.user?.concatedName,
-                        createdById: u.createdBy?.user?._id,
-                        createdByDate: u.createdBy?.date,
-                        updatedBy: u.updatedBy?.user?.concatedName,
-                        updatedByDate: u.updatedBy?.date,
+                    let finalObject = prepareDataForGrid(u);
+                    finalObject["canDelete"] = permissions.productTemplate.isDelete && user?.user?._id === u?.owner;
+                    finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                    finalObject["allowedToEdit"] = permissions.productTemplate.isUpdate;
+                    return {
+                        ...finalObject,
+
                     };
-                    return res;
                 });
 
                 dispatch({ type: "initialize", data: rows, count: count });
@@ -286,52 +289,87 @@ const PriceTemplate: FC = () => {
                         </Grid>
                         <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
                             <Box className={styles.filter_side_header} component="div" >
-                                <SearchBox
-                                    onSearch={handleSearch}
-                                    searchbox={styles.search_box_input}
-                                    width="242px"
-                                    value={search}
-                                />
-                                {priceTemplatePermissions.isCreate &&
-                                    <Button className={styles.add_submit_btn} onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                                }
-                                {priceTemplatePermissions.isDelete &&
-                                    <Button
-                                        className={styles.action_submit_btn}
-                                        variant="outlined"
-                                        color="default"
-                                        size="small"
-                                        onClick={openActions}
-                                        disabled={selectedRecords.length ? false : true}
-                                        aria-controls="action-menu"
-                                    >Actions <ExpandMore />
-                                    </Button>
-                                }
-                                <Menu
-                                    anchorEl={anchorEl}
-                                    keepMounted
-                                    getContentAnchorEl={null}
-                                    anchorOrigin={{
-                                        vertical: "bottom",
-                                        horizontal: "left",
-                                    }}
-                                    id="action-menu"
-                                    open={Boolean(anchorEl)}
-                                    onClose={closeActions}
-                                >
-                                    <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                                </Menu>
+                                <div className="d-flex gap-2">
+                                    <SearchBox
+                                        onSearch={handleSearch}
+                                        searchbox={styles.search_box_input}
+                                        width="242px"
+                                        value={search}
+                                    />
+                                    <div className="d-flex gap-2">
+                                        {priceTemplatePermissions.isCreate && !isMobile &&
+                                            <Button onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                        }
+                                        {priceTemplatePermissions.isDelete &&
+                                            <Button
+                                                variant="outlined"
+                                                color="default"
+                                                size="small"
+                                                onClick={openActions}
+                                                disabled={selectedRecords.length ? false : true}
+                                                aria-controls="action-menu"
+                                            >Actions <ExpandMore />
+                                            </Button>
+                                        }
+                                        <Menu
+                                            anchorEl={anchorEl}
+                                            keepMounted
+                                            getContentAnchorEl={null}
+                                            anchorOrigin={{
+                                                vertical: "bottom",
+                                                horizontal: "left",
+                                            }}
+                                            id="action-menu"
+                                            open={Boolean(anchorEl)}
+                                            onClose={closeActions}
+                                        >
+                                            <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                                        </Menu>
+                                    </div>
+                                </div>
                             </Box>
                         </Grid>
                     </Grid>
                 </div>
-
-                <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
-                    loading={loading} renderedFrom="priceTemplatePage"
-                    refreshGrid={fetchpriceTemplate}
-                />
-
+                {isMobile ? <CustomSwipableList
+                    allowSelection={true}
+                    allowSwipe={true}
+                    permissions={priceTemplatePermissions}
+                    primaryField={columns?.find(d => d.primaryField)}
+                    onClick={(data) => {
+                        history.push(`${routes.priceTemplate.path}/${data._id}`)
+                    }}
+                    dataRows={dataRows}
+                    selectedRecords={selectedRecords}
+                    dispatch={dispatch}
+                    onEdit={(data) => {
+                        history.push(`${routes.priceTemplate.path}/${data._id}`)
+                    }}
+                    extraParamsToCheckDelete={true}
+                    onDelete={handleDelete}
+                    rowCount={rowCount}
+                    page={page}
+                    loading={loading}
+                    additionalDetails={[]}
+                    chips={[]}
+                    owerCollaboratorInitialsOrImages=""
+                    onCreate={() => {
+                        CreateNew(0, false)
+                    }
+                    }
+                    showClone={true}
+                    onClone={(data) => {
+                        CreateNew(data.id, true)
+                    }
+                    }
+                    renderedFrom={"priceTemplatePage"}
+                /> :
+                    <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+                        dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
+                        loading={loading} renderedFrom="priceTemplatePage"
+                        refreshGrid={fetchpriceTemplate}
+                    />
+                }
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog
                         open={showDeleteConfirmBox}

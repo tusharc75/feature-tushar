@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.9.1](https://github.com/vebholic/oms_frontend/compare/v2.9.0...v2.9.1) (2021-11-29)
+
+
+### Bug Fixes
+
+* bulkedit issue fixed ([7face50](https://github.com/vebholic/oms_frontend/commit/7face504189d33e80a6c4f169911a2484527bd9c))
+
 ## [2.9.0](https://github.com/vebholic/oms_frontend/compare/v2.8.0...v2.9.0) (2021-11-28)
 
 
