@@ -22,7 +22,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
-import useColumns, {getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
 import ProductListDialog from './ProductListDialog';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
@@ -43,7 +43,7 @@ const PackageList = () => {
     const {
         state: { user, permissions, selectedEntity }
     }: any = useData();
-    const {getColumnData} = useColumns();
+    const { getColumnData } = useColumns();
     const [selectedType, setSelectedType] = useState(1);
     const [renderCount, setRenderCount] = useState(0);
     const [deleteLoading, setDeleteLoading] = useState(false);
@@ -339,10 +339,14 @@ const PackageList = () => {
             let rows = data.map((u) => {
                 const { owner, createdBy, updatedBy, ...restProperties } = u;
 
-                let res = {
-                    ...prepareDataForGrid(u, user)
+                let finalObject = prepareDataForGrid(u);
+                finalObject["canDelete"] = permissions.packages.isDelete;
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                finalObject["allowedToEdit"] = permissions.packages.isUpdate;
+
+                return {
+                    ...finalObject,
                 };
-                return res;
             });
 
             dispatch({ type: 'initialize', data: rows, count: count });
@@ -518,15 +522,15 @@ const PackageList = () => {
                             page={page}
                             loading={loading}
                             additionalDetails={[
-                             
+
                             ]}
                             chips={[
-                             
+
                             ]}
                             owerCollaboratorInitialsOrImages=""
                             onCreate={clickCreateNew}
                             showClone={true}
-                            onClone={(data) => { setShowManagePackageDialog({ open: true, isClone: true, idToClone: data._id });}}
+                            onClone={(data) => { setShowManagePackageDialog({ open: true, isClone: true, idToClone: data._id }); }}
                             renderedFrom={pageTitle}
                         /> :
                             <CustomAgGrid
