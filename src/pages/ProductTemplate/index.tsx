@@ -31,6 +31,11 @@ import { ImInsertTemplate } from 'react-icons/im';
 import SearchBox from '../../components/Helpers/SearchBox'
 import { ExpandMore } from "@material-ui/icons";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { MdAccountCircle } from "react-icons/md";
+import { AiFillCrown } from "react-icons/all";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile } from 'react-device-detect';
+import { prepareDataForGrid } from "../../constants/helpers";
 
 let productTemplateTimeout;
 
@@ -56,12 +61,15 @@ const ProductTemplate: FC = () => {
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+    const [isAllChecked, setIsAllChecked] = useState(false);
+    const [clonedData, setClonedData] = useState([])
+    const localStorageSelectedRecords = "productTemplatePage_selected";
 
     // const [showGridFilters, setShowGridFilters] = useState(true)
     const columnState = JSON.parse(localStorage.getItem("productTemplatePage"));
     const columns = [
-        { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "name", headerName: "Name", show: true, disabled: true, primaryField: true, cellRenderer: "nameRenderer" },
         { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
         { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     ];
@@ -240,17 +248,29 @@ const ProductTemplate: FC = () => {
 
                     const { createdBy, updatedBy, staticData, ...restProperties } = u;
 
-                    let res = {
-                        ...restProperties,
-                        id: u._id,
-                        createdBy: u.createdBy?.user?.concatedName,
-                        createdByDate: u.createdBy?.date,
-                        updatedBy: u.updatedBy?.user?.concatedName,
-                        updatedByDate: u.updatedBy?.date,
-                    };
-                    return res;
-                });
+                    let finalObject = prepareDataForGrid(u);
+                    finalObject["canDelete"] = permissions.productTemplate.isDelete && user?.user?._id === u?.owner;
+                    finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                    finalObject["allowedToEdit"] = permissions.productTemplate.isUpdate;
+                    return {
+                        ...finalObject,
 
+                    };
+
+                    // let res = {
+                    //     ...restProperties,
+                    //     id: u._id,
+                    //     createdBy: u.createdBy?.user?.concatedName,
+                    //     createdByDate: u.createdBy?.date,
+                    //     updatedBy: u.updatedBy?.user?.concatedName,
+                    //     updatedByDate: u.updatedBy?.date,
+                    // };
+
+
+                    // return res;
+                });
+                setIsAllChecked(false);
+                setClonedData(data);
                 dispatch({ type: "initialize", data: rows, count: count });
                 setTimeout(() => {
                     dispatch({ type: "loading", loading: false });
@@ -281,53 +301,92 @@ const ProductTemplate: FC = () => {
                         </Grid>
                         <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
                             <Box className={styles.filter_side_header} component="div" >
-                                <SearchBox
-                                    onSearch={handleSearch}
-                                    searchbox={styles.search_box_input}
-                                    width="242px"
-                                    value={search}
-                                />
-                                {productTemplatePermissions.isCreate &&
-                                    <Button className={styles.add_submit_btn} onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                                }
-                                {productTemplatePermissions.isDelete &&
-                                    <Button
-                                        className={styles.action_submit_btn}
-                                        variant="outlined"
-                                        color="default"
-                                        size="small"
-                                        onClick={openActions}
-                                        disabled={selectedRecords.length ? false : true}
-                                        aria-controls="action-menu"
-                                    >Actions <ExpandMore />
-                                    </Button>
-                                }
-                                <Menu
-                                    anchorEl={anchorEl}
-                                    keepMounted
-                                    getContentAnchorEl={null}
-                                    anchorOrigin={{
-                                        vertical: "bottom",
-                                        horizontal: "left",
-                                    }}
-                                    id="action-menu"
-                                    open={Boolean(anchorEl)}
-                                    onClose={closeActions}
-                                >
-                                    <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                                </Menu>
+                                <div className="d-flex gap-2">
+                                    <SearchBox
+                                        onSearch={handleSearch}
+                                        searchbox={styles.search_box_input}
+                                        width="242px"
+                                        value={search}
+                                    />
+                                    <div className="d-flex gap-2">
+                                        {productTemplatePermissions.isCreate && !isMobile &&
+                                            <Button onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                        }
+                                        {productTemplatePermissions.isDelete &&
+                                            <Button
+                                                variant="outlined"
+                                                color="default"
+                                                size="small"
+                                                onClick={openActions}
+                                                disabled={selectedRecords.length ? false : true}
+                                                aria-controls="action-menu"
+                                            >Actions <ExpandMore />
+                                            </Button>
+                                        }
+                                        <Menu
+                                            anchorEl={anchorEl}
+                                            keepMounted
+                                            getContentAnchorEl={null}
+                                            anchorOrigin={{
+                                                vertical: "bottom",
+                                                horizontal: "left",
+                                            }}
+                                            id="action-menu"
+                                            open={Boolean(anchorEl)}
+                                            onClose={closeActions}
+                                        >
+                                            <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                                        </Menu>
+                                    </div>
+                                </div>
                             </Box>
                         </Grid>
                     </Grid>
                 </div>
-
-                <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                    dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
+                {isMobile ? <CustomSwipableList
+                    allowSelection={true}
+                    allowSwipe={true}
+                    permissions={productTemplatePermissions}
+                    primaryField={columns?.find(d => d.primaryField)}
+                    onClick={(data) => {
+                        history.push(`${routes.productTemplate.path}/${data._id}`)
+                    }}
+                    dataRows={dataRows}
+                    selectedRecords={selectedRecords}
+                    dispatch={dispatch}
+                    onEdit={(data) => {
+                        history.push(`${routes.productTemplate.path}/${data._id}`)
+                    }}
+                    extraParamsToCheckDelete={true}
+                    onDelete={handleDelete}
+                    rowCount={rowCount}
+                    page={page}
                     loading={loading}
-                    renderedFrom={routes?.productTemplate?.title}
-                    refreshGrid={fetchProductTemplate}
-                />
+                    additionalDetails={[
 
+                    ]}
+                    chips={[
+
+                    ]}
+                    owerCollaboratorInitialsOrImages=""
+                    onCreate={() => {
+                        CreateNew(0, false)
+                    }
+                    }
+                    showClone={true}
+                    onClone={(data) => {
+                        CreateNew(data.id, true)
+                    }
+                    }
+                    renderedFrom={"productTemplatePage"}
+                /> :
+                    <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+                        dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
+                        loading={loading}
+                        renderedFrom={routes?.productTemplate?.title}
+                        refreshGrid={fetchProductTemplate}
+                    />
+                }
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog
                         open={showDeleteConfirmBox}

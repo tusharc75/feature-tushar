@@ -42,6 +42,8 @@ export const termsAndConditionDocumentUploadMaxSize = {
   text: '2 MB'
 };
 
+export const repairJobProcessSteps = ["Serialized Assets", "Loading Ticket", "Receiving Ticket", "End"];
+
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
 

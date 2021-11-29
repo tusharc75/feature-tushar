@@ -26,6 +26,7 @@ import { CommonRenderer, CommonRendererWithCopy } from '../../../components/AgGr
 import { GoArrowDown } from 'react-icons/go';
 import { ExpandMore } from '@material-ui/icons';
 import routes from '../../../components/Helpers/Routes';
+import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -138,9 +139,10 @@ export default function Attachment() {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const columnState = JSON.parse(localStorage.getItem('attachmentPage'));
+  const localStorageSelectedRecords = "attachmentPage_selected";
 
   const [columns, setColumns] = useState([
-    { field: 'name', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
+    { field: 'name', headerName: 'Name', primaryField: true, show: true, disabled: true, cellRenderer: 'nameRenderer' },
     {
       field: 'createdAt',
       headerName: 'Created At',
@@ -396,74 +398,111 @@ export default function Attachment() {
             </Grid>
             <Grid item xs={7} className={styles.filter_side}>
               <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>
-                <SearchFilter
-                  handleChangeFilter={handleChangeFilter}
-                  filter={filter}
-                  chip={{ size: 'small' }}
-                  activityName="attachment"
-                />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  className={styles.add_submit_btn}
-                  onClick={() => setOpen(true)}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
-                <Button
-                  className={styles.action_submit_btn}
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords.length > 0 ? false : true}
-                >
-                  Actions <ExpandMore />
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={!selectedRecords.some((records) => records.canEdit)}
-                    onClick={() => {
-                      showConfirmBox(null);
-                      closeActions();
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
+                <div className="d-flex gap-2">
+                  <SearchFilter
+                    handleChangeFilter={handleChangeFilter}
+                    filter={filter}
+                    chip={{ size: 'small' }}
+                    activityName="attachment"
+                  />
+                  
+                    {!isMobile && <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => setOpen(true)}
+                      startIcon={<AddOutlined />}
+                    >
+                      Add
+                    </Button>
+                    }
+                    <div className="d-flex gap-2">
+                    <Button
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      aria-controls="action-menu"
+                      disabled={selectedRecords.length > 0 ? false : true}
+                    >
+                      Actions <ExpandMore />
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <MenuItem
+                        disabled={!selectedRecords.some((records) => records.canEdit)}
+                        onClick={() => {
+                          showConfirmBox(null);
+                          closeActions();
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                    </Menu>
+                  </div>
+                </div>
               </Box>
             </Grid>
           </Grid>
         </div>
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={150}
-          loading={loading}
-          renderedFrom="attachmentPage"
-          refreshGrid={fetchAttachments}
-        />
+        {
+          isMobile ? <CustomSwipableList
+            allowSelection={true}
+            allowSwipe={true}
+            permissions={permissions.attachment}
+            primaryField={columns?.find(d => d.primaryField)}
+            onClick={(data) => {
+            }}
+            dataRows={dataRows}
+            selectedRecords={selectedRecords}
+            dispatch={dispatch}
+            onEdit={(data) => {
+            }}
+            additionalDetails={[
+                             
+            ]}
+            chips={[
+             
+            ]}
+            extraParamsToCheckDelete={true}
+            onDelete={(data) => {
+              showConfirmBox(data);
+            }}
+            rowCount={rowCount}
+            page={page}
+            loading={loading}
+            onCreate={() => {
+              setOpen(true);
+            }}
+            showClone={false}
+            onClone={() => {}}
+            renderedFrom={"attachmentPage"} /> :
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameworkComponents}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={150}
+              loading={loading}
+              renderedFrom="attachmentPage"
+              refreshGrid={fetchAttachments}
+            />
+        }
         {open ? (
           <Dialog
             open={open}
