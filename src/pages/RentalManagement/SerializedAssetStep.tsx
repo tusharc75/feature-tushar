@@ -9,7 +9,7 @@ import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray } from "../../constants/helpers";
+import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray, generateUniqueId } from "../../constants/helpers";
 import moment from "moment";
 import { startCase, orderBy } from "lodash";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -508,15 +508,39 @@ const SerializedAssetStep = (props) => {
     if (selectedProducts.length === 0 || selectedProducts.some(s => s.hasOwnProperty("assetNumber")))
       return true;
 
-    let disableAssignSerializedAssetsButton = false;
-    selectedProducts.forEach((d) => {
-      if (d.subRows && d.subRows?.length > 0) {
-        disableAssignSerializedAssetsButton = d.subRows.length === d.qty;
-        return;
-      }
-    })
+    // const d = [...selectedProducts.filter(p => p?.type?.includes("roduct")).map(m => { return { ...m, _id: m.id } })]
 
-    return disableAssignSerializedAssetsButton;
+    // let disableAssignSerializedAssetsButton = false;
+
+
+    const flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => (f.type === "Product" || f.type === "productInPackage") && f.qty !== f.subRows?.length);
+
+    // selectedProducts.forEach((d) => {
+    //   if (d.subRows && d.subRows?.length > 0) {
+    //     disableAssignSerializedAssetsButton = d?.type?.includes("roduct") && d?.subRows?.length !== d?.qty
+    //     return;
+    //   }
+    // })
+
+
+
+    return flatArray.length === 0;
+
+
+    // const getMissingAssetsRecords = flatArray.map(m => { return { _id: m._id ?? m.id, assetsCount: m.qty - (m.subRows?.length ?? 0) } });
+    // return getMissingAssetsRecords.some(s => s.assetsCount !== 0)
+
+
+
+
+    // selectedProducts.forEach((d) => {
+    //   if (d.subRows && d.subRows?.length > 0) {
+    //     disableAssignSerializedAssetsButton = d.subRows.length === d.qty;
+    //     return;
+    //   }
+    // })
+
+    // return disableAssignSerializedAssetsButton;
   }
 
   return (<>
