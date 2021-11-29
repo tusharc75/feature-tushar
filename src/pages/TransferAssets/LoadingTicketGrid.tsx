@@ -99,7 +99,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
       for (let i = 0; i < ticketData.length; i++) {
         for (let j = 0; j < assetData.length; j++) {
-          if (ticketData[i]?.productInventory.some(assetId => assetData[j]._id === assetId)) {
+          if (ticketData[i]?.productInventory.some((asset: any) => (
+            assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset)
+          ))) {
             assetData[j].deliveryTicket = ticketData[i].deliveryJobName
             assetData[j].deliveryTicketId = ticketData[i]._id
           }
