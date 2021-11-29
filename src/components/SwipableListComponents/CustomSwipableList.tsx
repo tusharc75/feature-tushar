@@ -1,11 +1,14 @@
 import { useState, useEffect, Fragment } from 'react'
-import { Grid, Checkbox, FormControlLabel, Fab, Chip, Tooltip, Menu, MenuItem } from '@material-ui/core'
+import { Grid, Checkbox, FormControlLabel, Fab, Chip, Tooltip, Menu, MenuItem, IconButton } from '@material-ui/core'
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { isMobile } from 'react-device-detect';
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz"
 import AddIcon from "@material-ui/icons/Add";
+import { dateFormat } from '../../constants/helpers';
+import moment from 'moment';
+import { BiEdit } from 'react-icons/bi';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { MdAccountCircle, MdDelete, MdEdit, } from "react-icons/md";
-import { FaCopy , FaSuitcase } from "react-icons/all";
+import { FaCopy, FaSuitcase } from "react-icons/all";
 
 //  Swipe functionalities are removed as we are facing overlap issue in mobile quote details screen
 export default function CustomSwipableList({
@@ -121,7 +124,7 @@ export default function CustomSwipableList({
                 >
                     {
                         dataRows.map((d, index) => (
-                            <Grid key={d._id} container className={`py-2 border-bottom card-shadow mt-2 mb-2 ${index === 0 ? "mt-2 mb-2" : ""} ${checkError && checkError(d) ? "red-data-row" : ""}`}>
+                            <Grid key={d._id} container className={`py-2 border-bottom card-shadow mt-2 mb-2 ${index === 0 ? "mt-1 mb-1" : ""} ${checkError && checkError(d) ? "red-data-row" : ""}`}>
                                 {
                                     allowSelection && <Grid item xs={1} sm={1}>
                                         <Checkbox
@@ -155,18 +158,25 @@ export default function CustomSwipableList({
                                         }
 
                                         {
-                                            allowSwipe && permissions.isUpdate && d.allowedToEdit && permissions.isDelete && d.canDelete &&
-                                            <div className="icon-layout mr-2 d-flex">
+                                            allowSwipe && permissions?.isUpdate && d.allowedToEdit && permissions?.isDelete && d.canDelete &&
+                                            <div className="icon-layout mr-2 d-flex align-items-center gap-1">
                                                 {
-                                                    showClone &&
-                                                    <FaCopy onClick={() => onClone(d)} size={20} className="ml-1" />
+                                                    showClone && permissions?.isCreate &&
+                                                    <IconButton
+                                                        size="small"
+                                                        aria-label="Clone"
+                                                        onClick={() => {
+                                                            onClone(d)
+                                                        }}>
+                                                        <FileCopyIcon fontSize="small" color="primary" />
+                                                    </IconButton>
                                                 }
                                                 {
-                                                    permissions.isUpdate && d.allowedToEdit && <MdEdit size={20} onClick={() => onEdit(d)} className="ml-1" style={{ color: "#43AEAA" }} />
+                                                    permissions?.isUpdate && d.allowedToEdit && <BiEdit size={20} onClick={() => onEdit(d)} style={{ color: "#43AEAA" }} />
                                                 }
                                                 {
-                                                    extraParamsToCheckDelete && permissions.isDelete && d.canDelete &&
-                                                    <MdDelete size={20} onClick={() => onDelete(d)} className="ml-1" style={{ color: "var(--danger-light)" }} />
+                                                    extraParamsToCheckDelete && permissions?.isDelete && d.canDelete &&
+                                                    <MdDelete size={20} onClick={() => onDelete(d)} style={{ color: "var(--danger-light)" }} />
                                                 }
                                             </div>
 
@@ -176,6 +186,7 @@ export default function CustomSwipableList({
                                     <div className="swipe-card-additional-details">
                                         {
                                             additionalDetails.map((a, index) => (
+                                                d[a.field] !== null && d[a.field] !== "" && d[a.field] !== undefined &&
                                                 <div key={index} className="ml-2 my-1">
                                                     <div className="swipe-card-additional-details-inner">
                                                         <span style={{ color: "#337FFB" }} className="d-flex align-items-center">{a.icon}</span>
@@ -185,20 +196,21 @@ export default function CustomSwipableList({
                                             ))
                                         }
                                     </div>
-
-                                    <div className="d-flex gap-2 mt-2 mb-1 flex-wrap ml-2">
-                                        {
-                                            [
-                                                ...chips.map(c => (
-                                                    c.forceShow === true || d[c.field] ? <Chip className="overflow-hidden" key={c.field} variant="outlined"
-                                                        onClick={c.onClick ? () => c.onClick(d, index) : null}
-                                                        size="small" label={`${c.label} ${d[c.field] ?? ""}`} style={c.chipColorVariable ? generateChipStyle(c.chipColorVariable, d[c.field]?.toLowerCase()) : {}}
-                                                    /> : <Fragment key={c.field}></Fragment>
-                                                ))
-                                            ]
-                                        }
-                                    </div>
-
+                                    {
+                                        chips.length > 0 &&
+                                        <div className="d-flex gap-2 mt-1 mb-1 flex-wrap ml-2">
+                                            {
+                                                [
+                                                    ...chips.map(c => (
+                                                        c.forceShow === true || d[c.field] ? <Chip className="overflow-hidden" key={c.field}
+                                                            onClick={c.onClick ? () => c.onClick(d, index) : null}
+                                                            size="small" label={`${c.label} ${(c.fieldType === "date" ? moment(d[c.field]).format(dateFormat) : d[c.field]) ?? ""}`} style={c.setBackground && c.setBackground(d) ? c.setBackground(d) : c.chipColorVariable ? generateChipStyle(c.chipColorVariable, d[c.field]?.toLowerCase()) : {}}
+                                                        /> : <Fragment key={c.field}></Fragment>
+                                                    ))
+                                                ]
+                                            }
+                                        </div>
+                                    }
                                     {
                                         owerCollaboratorInitialsOrImages && d[owerCollaboratorInitialsOrImages]?.length > 0 && <div className="avatars ml-2 mt-2">
                                             {

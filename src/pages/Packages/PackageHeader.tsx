@@ -15,6 +15,7 @@ import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import styles from "../Leads/Header.module.scss";
 import HideWhenOffline from "../../components/HideWhenOffline";
+import { isMobile } from "react-device-detect";
 
 function PackageHeader(props) {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -82,76 +83,77 @@ function PackageHeader(props) {
             </Grid>
             <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
                 <Box className={styles.filter_side_header} component="div">
-                    <HideWhenOffline>
-                        <SearchBox
-                            onSearch={onSearch}
-                            searchbox={styles.search_box_input}
-                            value={searchVal}
-                            size="small"
-                            placeholder="Search Packages"
-                            width="300px"
-                        />
-                    </HideWhenOffline>
-
-                    {packagePermissions.isCreate && packagePermissions.isUpdate && (
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            className={styles.add_submit_btn}
-                            onClick={onCreate}
-                            startIcon={<AddOutlined />}
-                        >
-                            Add
-                        </Button>
-                    )}
-
-                    <HideWhenOffline>
-
-                        <>
-                            <Button
-                                disabled={canDelete}
-                                variant="outlined"
-                                color="default"
+                    <div className="d-flex gap-2">
+                        <HideWhenOffline>
+                            <SearchBox
+                                onSearch={onSearch}
+                                searchbox={styles.search_box_input}
+                                value={searchVal}
                                 size="small"
-                                onClick={openActions}
-                                className={styles.action_submit_btn}
-                                aria-controls="action-menu"
-                            >
-                                Actions <ExpandMore />
-                            </Button>
-                            <Menu
-                                anchorEl={anchorEl}
-                                keepMounted
-                                getContentAnchorEl={null}
-                                anchorOrigin={{
-                                    vertical: "bottom",
-                                    horizontal: "left",
-                                }}
-                                id="action-menu"
-                                open={Boolean(anchorEl)}
-                                onClose={closeActions}
-                            >
-                                {packagePermissions.isDelete && <MenuItem
-                                    onClick={() => {
-                                        closeActions();
-                                        showConfirmBox(null);
-                                    }}
+                                placeholder="Search Packages"
+                                width="300px"
+                            />
+                        </HideWhenOffline>
+                        <div className="d-flex gap-2">
+                            {packagePermissions.isCreate && packagePermissions.isUpdate && !isMobile && (
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    size="small"
+                                    onClick={onCreate}
+                                    startIcon={<AddOutlined />}
                                 >
-                                    Delete
-                                </MenuItem>}
-                                {packagePermissions.isUpdate && <MenuItem
-                                    onClick={() => {
-                                        openAssingToProduct()
-                                        closeActions();
-                                    }}
-                                >
-                                    Assign Products
-                                </MenuItem>}
-                            </Menu>
-                        </>
+                                    Add
+                                </Button>
+                            )}
 
-                    </HideWhenOffline>
+                            <HideWhenOffline>
+
+                                <>
+                                    <Button
+                                        disabled={canDelete}
+                                        variant="outlined"
+                                        color="default"
+                                        size="small"
+                                        onClick={openActions}
+                                        aria-controls="action-menu"
+                                    >
+                                        Actions <ExpandMore />
+                                    </Button>
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        keepMounted
+                                        getContentAnchorEl={null}
+                                        anchorOrigin={{
+                                            vertical: "bottom",
+                                            horizontal: "left",
+                                        }}
+                                        id="action-menu"
+                                        open={Boolean(anchorEl)}
+                                        onClose={closeActions}
+                                    >
+                                        {packagePermissions.isDelete && <MenuItem
+                                            onClick={() => {
+                                                closeActions();
+                                                showConfirmBox(null);
+                                            }}
+                                        >
+                                            Delete
+                                        </MenuItem>}
+                                        {packagePermissions.isUpdate && <MenuItem
+                                            onClick={() => {
+                                                openAssingToProduct()
+                                                closeActions();
+                                            }}
+                                        >
+                                            Assign Products
+                                        </MenuItem>}
+                                    </Menu>
+                                </>
+
+                            </HideWhenOffline>
+                        </div>
+                    </div>
                 </Box>
             </Grid>
         </Grid>

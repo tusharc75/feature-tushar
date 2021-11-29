@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState, useReducer, Fragment } from 'react';
 import { Box, Button, Menu, MenuItem, Grid } from '@material-ui/core';
 import { useData } from '../../StateProvider/Provider';
-import { Link,useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
@@ -33,8 +33,13 @@ import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import useColumns, {getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
 import NoDataCell from '../../components/Helpers/NoDataCell';
+import { MdAccountCircle } from "react-icons/md";
+import { AiFillPhone } from "react-icons/ai";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile } from 'react-device-detect';
+import { MdEmail } from 'react-icons/md';
 import queryString from 'query-string';
 
 const ContactTypes = [
@@ -101,12 +106,15 @@ export default function Contact(props) {
   const [entities, setEntities] = useState([])
   const [columns, setColumns] = useState([])
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
-  const {getColumnData} = useColumns();
+  const { getColumnData } = useColumns();
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
   const columnState = JSON.parse(localStorage.getItem(contactResource));
+  const [isAllChecked, setIsAllChecked] = useState(false);
+  const [clonedData, setClonedData] = useState([])
+  const localStorageSelectedRecords = `${contactResource}_selected`;
 
 
 
@@ -131,14 +139,25 @@ export default function Contact(props) {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      let currentColumn = getColumnData(contactResource, o?.fieldData, `/${contactRoute}/detail`)
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData]
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName)
+      if (["concatedName"].find(d => d === o?.fieldData?.fieldName)) {
+        columns = [...columns, {
+          disabled: true,
+          field: "concatedName",
+          headerName: "Contact Name",
+          pivotIndex: 0,
+          show: true,
+          primaryField: true
+        }]
+      } else {
+        let currentColumn = getColumnData(contactResource, o?.fieldData, `/${contactRoute}/detail`)
+        if (currentColumn !== null) {
+          columns = [...columns, currentColumn?.columnData]
+          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+            rendererNames.push(currentColumn?.rendererName)
+          }
         }
+        return o?.fieldData
       }
-      return o?.fieldData
     })
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
     tempFrameworkComponent = {
@@ -215,7 +234,7 @@ export default function Contact(props) {
     if (renderCount > 0) {
       getContacts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity,location]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, location]);
 
   useEffect(() => {
     if (querySearch) {
@@ -237,7 +256,7 @@ export default function Contact(props) {
           let query = queryColFilter !== undefined ? queryColFilter.substring(1, queryColFilter.length - 1) : `[{colName=${colName},colValue=${colValue}}]`;
 
           if (queryColFilter === undefined) {
-            history.push( queryType ? `?page=${page}&type=${queryType}&colFilter=${query}` :  `?page=${page}&colFilter=${query}`);
+            history.push(queryType ? `?page=${page}&type=${queryType}&colFilter=${query}` : `?page=${page}&colFilter=${query}`);
             setCheckColName(colName);
             setCheckColValue(colValue);
 
@@ -248,20 +267,20 @@ export default function Contact(props) {
               let leftqueryColFilter = queryColFilter.substring(0, 50);
               let replacedQuery = reducedqueryColFilter.replace(checkColValue, colValue);
               let combineQuery = leftqueryColFilter + replacedQuery;
-              history.push( queryType ? `?page=${page}&type=${queryType}&colFilter=${combineQuery}` : `?page=${page}&colFilter=${combineQuery}`);
+              history.push(queryType ? `?page=${page}&type=${queryType}&colFilter=${combineQuery}` : `?page=${page}&colFilter=${combineQuery}`);
               setCheckColName(colName);
               setCheckColValue(colValue);
             }
 
             else {
 
-              history.push( queryType ? `?page=${page}&type=${queryType}&colFilter=[{colName=${colName},colValue=${colValue}}]` : `?page=${page}&colFilter=[{colName=${colName},colValue=${colValue}}]`);
+              history.push(queryType ? `?page=${page}&type=${queryType}&colFilter=[{colName=${colName},colValue=${colValue}}]` : `?page=${page}&colFilter=[{colName=${colName},colValue=${colValue}}]`);
             }
           }
           if (queryColFilter !== undefined && checkColName !== colName) {
 
             if (queryColFilter.length > 42 && Object.keys(filters).length === 1) {
-              history.push( queryType ? `?page=${page}&type=${queryType}` :  `?page=${page}`)
+              history.push(queryType ? `?page=${page}&type=${queryType}` : `?page=${page}`)
 
             }
             else if (queryColFilter.length > 42 && queryColFilter.length < 84 && queryColFilter.includes(colName) === true) {
@@ -275,7 +294,7 @@ export default function Contact(props) {
 
               let updatedQuery = `[${query}` + `,{colName=${colName},colValue=${colValue}}]`
 
-              history.push(queryType ? `?page=${page}&type=${queryType}&colFilter=${updatedQuery}` :  `?page=${page}&colFilter=${updatedQuery}`);
+              history.push(queryType ? `?page=${page}&type=${queryType}&colFilter=${updatedQuery}` : `?page=${page}&colFilter=${updatedQuery}`);
               setCheckColName(colName)
               setCheckColValue(colValue)
             }
@@ -483,6 +502,24 @@ export default function Contact(props) {
         let rows = data.map((u) => {
 
           let finalObject = prepareDataForGrid(u, user);
+          finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
+          finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+          finalObject["allowedToEdit"] = (
+            [...(u.collaborator ?? []), u.owner].some(
+              (d) => d?.optionValue === user?.user?._id
+            )
+          );
+
+          finalObject["owerCollaboratorInitialsOrImages"] = [];
+          if (finalObject["owner"])
+            finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] });
+
+          finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
+            if (f.initials) {
+              f.initials = f.initials.split(" ").map((i) => i[0]).join("");
+            }
+          })
+
           return {
             ...finalObject,
 
@@ -493,6 +530,34 @@ export default function Contact(props) {
 
           };
         });
+        setIsAllChecked(false);
+        setClonedData(data)
+        if (appendRows) {
+          dispatch({
+            type: "initialize", data: [...dataRows, ...rows],
+            count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+          });
+        } else {
+          dispatch({
+            type: "initialize", data: rows, count: count,
+            selectedRecords: rows.filter(f => f.isChecked === true)
+          });
+        }
+
+        if (gridApi) {
+          try {
+            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
+            if (oldSelectedRecords.length > 0) {
+              gridApi.forEachNode(function (node) {
+                node.setSelected(
+                  oldSelectedRecords.some((o) => o === node.data._id)
+                );
+              });
+            }
+          } catch (ex) {
+            console.error("Error in getting selected records from local storage")
+          }
+        }
 
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
@@ -607,7 +672,7 @@ export default function Contact(props) {
           <Grid container className="header-panel" justify="space-between" alignContent="center">
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
               <Grid container className="gap-1">
-                <Grid  className="d-flex align-items-center gap-1" >
+                <Grid className="d-flex align-items-center gap-1" >
                   <MdContacts className="headerLogo" />
                   <span id="resourceHeader" className="listingHeader">{routes[contactResource].title}</span>
                 </Grid>
@@ -617,7 +682,7 @@ export default function Contact(props) {
                       {ContactTypes.map((k, index) => {
                         return (
                           <ToggleButton value={k.key} key={index}>
-                           <Link to={`/${contactRoute}?page=${page}&type=${encodeURIComponent(k.key)}`} >
+                            <Link to={`/${contactRoute}?page=${page}&type=${encodeURIComponent(k.key)}`} >
                               {k.key}
                             </Link>
 
@@ -643,96 +708,98 @@ export default function Contact(props) {
               </Grid>
             </Grid>
             <Grid item md={6} sm={6} xs={12} className={styles.filter_side}>
-              <Box id="resourceOperations" className={styles.filter_side_header} component="div" style={{flexGrow:1}}>
-                <Grid sm={12} className={styles.search_box_layout} style={{display:"flex" , flexGrow: 1  }} >
-                <SearchBox  style={{flexGrow:1, maxWidth:"400px" }} onSearch={handleSearch} searchbox={styles.search_box_input} value={search} size="small" />
-                </Grid>
-                {contactPermissions.isCreate && (
-                  <>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={clickCreateNew}
-                      startIcon={<AddIcon />}
-                      className={styles.add_submit_btn}
-                    >
-                      Add
-                    </Button>
-                  </>
-                )}
-                <>
-                  <Button
-                    // disabled={Boolean(!selectedBrand)}
-                    disabled={selectedRecords.length === 0}
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    className={styles.action_submit_btn}
-                    aria-controls="action-menu"
-                  >
-                    Actions <ExpandMore />
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    {contactPermissions.isDelete && (
-                      <MenuItem
-                        disabled={selectedRecords.length === 0}
-                        onClick={() => {
-                          if (selectedRecords.some((d) => d.canDelete === false)) {
-                            closeActions();
-                            setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
-                          } else {
-                            closeActions();
-                            setShowDeleteConfirmBox(true);
-                          }
-                        }}>
-                        Delete
-                      </MenuItem>)}
-                    {contactPermissions.isUpdate && (
-                      <MenuItem
-                        disabled={selectedRecords.length === 0}
-                        onClick={() => {
-                          if (selectedRecords.some((d) => d.isUpdate === false)) {
-                            closeActions();
-                            setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
-                          } else {
-                            closeActions();
-                            if (selectedRecords.length) {
-                              let entities = []
-                              selectedRecords.map(current => {
-
-                                if (current?.entityId) {
-                                  entities = [...entities, current?.entityId]
-                                }
-                                if (current?.restentity) {
-                                  let restEntities = current?.restentity.map(o => o?.optionValue)
-                                  entities = [...entities, ...restEntities]
-                                }
-                              })
-                              setEntities([...entities])
-                            }
-                            setShowEntityDialog(true)
-                          }
-                        }}
-                      >
-                        Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
-                      </MenuItem>
+              <Box id="resourceOperations" className={styles.filter_side_header} component="div">
+                <div className="d-flex gap-2">
+                  <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} value={search} size="small" />
+                  <div className="d-flex gap-2">
+                    {contactPermissions.isCreate && !isMobile && (
+                      <>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={clickCreateNew}
+                          startIcon={<AddIcon />}
+                          className={styles.add_submit_btn}
+                        >
+                          Add
+                        </Button>
+                      </>
                     )}
-                  </Menu>
-                </>
+                    <>
+                      <Button
+                        // disabled={Boolean(!selectedBrand)}
+                        disabled={selectedRecords.length === 0}
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        // className={styles.action_submit_btn}
+                        aria-controls="action-menu"
+                      >
+                        Actions <ExpandMore />
+                      </Button>
 
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        {contactPermissions.isDelete && (
+                          <MenuItem
+                            disabled={selectedRecords.length === 0}
+                            onClick={() => {
+                              if (selectedRecords.some((d) => d.canDelete === false)) {
+                                closeActions();
+                                setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
+                              } else {
+                                closeActions();
+                                setShowDeleteConfirmBox(true);
+                              }
+                            }}>
+                            Delete
+                          </MenuItem>)}
+                        {contactPermissions.isUpdate && (
+                          <MenuItem
+                            disabled={selectedRecords.length === 0}
+                            onClick={() => {
+                              if (selectedRecords.some((d) => d.isUpdate === false)) {
+                                closeActions();
+                                setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+                              } else {
+                                closeActions();
+                                if (selectedRecords.length) {
+                                  let entities = []
+                                  selectedRecords.map(current => {
+
+                                    if (current?.entityId) {
+                                      entities = [...entities, current?.entityId]
+                                    }
+                                    if (current?.restentity) {
+                                      let restEntities = current?.restentity.map(o => o?.optionValue)
+                                      entities = [...entities, ...restEntities]
+                                    }
+                                  })
+                                  setEntities([...entities])
+                                }
+                                setShowEntityDialog(true)
+                              }
+                            }}
+                          >
+                            Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
+                          </MenuItem>
+                        )}
+                      </Menu>
+                    </>
+                  </div>
+                </div>
               </Box>
             </Grid>
           </Grid>
@@ -740,7 +807,53 @@ export default function Contact(props) {
         <Box component="div">
           {
             Object.keys(frameWorkComponent).length > 0 ?
-              <CustomAgGrid
+              isMobile ? <CustomSwipableList
+                allowSelection={true}
+                allowSwipe={true}
+                permissions={contactPermissions}
+                primaryField={columns?.find(d => d.primaryField)}
+                onClick={(data) => {
+                  history.push(`${contactApi}/${data._id}`)
+                }}
+                dataRows={dataRows}
+                selectedRecords={selectedRecords}
+                dispatch={dispatch}
+                onEdit={(data) => {
+                  history.push(`${contactApi}/detail/${data._id}?openEdit=true`)
+                }}
+                extraParamsToCheckDelete={true}
+                onDelete={(data) => {
+                  setSingleContactDelete({
+                    show: true,
+                    id: data._id,
+                    contactedName: data.concatedName
+                  });
+                }}
+                rowCount={rowCount}
+                page={page}
+                loading={loading}
+                additionalDetails={[
+                  {
+                    icon: <MdEmail size={18} />,
+                    field: "email"
+                  },
+                  {
+                    icon: <AiFillPhone size={18} />,
+                    field: "phone"
+                  },
+                ]}
+                chips={[
+                  {
+                    label: "Entity: ",
+                    field: "entity",
+                  },
+                ]}
+                owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                onCreate={clickCreateNew}
+                showClone={true}
+                onClone={(data) => { setShowCreateContactDialog({ open: true, isClone: true, idToClone: data._id }) }}
+                renderedFrom={contactResource}
+              /> : <CustomAgGrid
                 columns={columns}
                 dataRows={dataRows}
                 frameworkComponents={frameWorkComponent}

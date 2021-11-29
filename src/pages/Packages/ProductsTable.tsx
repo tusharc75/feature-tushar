@@ -4,14 +4,21 @@ import { reducer, intialState } from "../../components/AgGridComponents/CustomAg
 import axiosInstance from '../../axios/axiosInstance'
 import routes from "../../components/Helpers/Routes";
 import { prepareDataForGrid } from "../../constants/helpers"
-import useColumns, {getFrameworkComponents, getStaticFields } from "../../constants/useColumns"
+import useColumns, { getFrameworkComponents, getStaticFields } from "../../constants/useColumns"
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { isMobile } from 'react-device-detect';
+import { useHistory } from 'react-router-dom';
+import { useData } from '../../StateProvider/Provider';
 
-const ProductsTable = ({ productList = [], updateLoading = false, handleUpdateQuantity = null }) => {
-
+const ProductsTable = ({ productList = [], updateLoading = false, handleUpdateQuantity = null, handleAssignProduct = null }) => {
+  const history = useHistory();
+  const {
+    state: { permissions }
+  }: any = useData();
   const [columns, setColumns] = useState([])
   const [gridApi, setGridApi] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
-  const {getColumnData} = useColumns();
+  const { getColumnData } = useColumns();
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
 
@@ -79,25 +86,56 @@ const ProductsTable = ({ productList = [], updateLoading = false, handleUpdateQu
   return (
     <>
       {
-        Object.keys(frameWorkComponent).length > 0 ?
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={150}
-            loading={loading || updateLoading}
-            allowSelection={false}
-            actionLabel="Quantity"
-            renderedFrom="productPage"
-            actionEditable={true}
-            onCellValueChanged={handleUpdateQuantity}
-          /> : null}
+        isMobile ? <CustomSwipableList
+          allowSelection={true}
+          allowSwipe={true}
+          permissions={permissions.product}
+          primaryField={columns?.find(d => d.primaryField)}
+          onClick={(data) => {
+            history.push(`${routes.productDetail.path}/${data._id}`)
+          }}
+          dataRows={dataRows}
+          selectedRecords={[]}
+          dispatch={dispatch}
+          onEdit={(data) => { }}
+          extraParamsToCheckDelete={true}
+          onDelete={(data) => { }}
+          rowCount={rowCount}
+          page={page}
+          loading={loading}
+          additionalDetails={[
+          ]}
+          chips={[
+            {
+              label: "Quantity : ",
+              field: "qty",
+            },
+          ]}
+          owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+          onCreate={() => { handleAssignProduct(true) }}
+          showClone={true}
+          onClone={(data) => { }}
+          renderedFrom={"productPackageDetails"}
+        /> :
+          Object.keys(frameWorkComponent).length > 0 ?
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={150}
+              loading={loading || updateLoading}
+              allowSelection={false}
+              actionLabel="Quantity"
+              renderedFrom="productPage"
+              actionEditable={true}
+              onCellValueChanged={handleUpdateQuantity}
+            /> : null}
     </ >
   );
 };
