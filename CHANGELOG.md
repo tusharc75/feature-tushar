@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.10.0](https://github.com/vebholic/oms_frontend/compare/v2.9.1...v2.10.0) (2021-11-30)
+
+
+### Features
+
+* - Rental end date issue fixed ([2d1d1f9](https://github.com/vebholic/oms_frontend/commit/2d1d1f9f9300d652f07ba5d02c12547692746c5f))
+* card ([07a7c67](https://github.com/vebholic/oms_frontend/commit/07a7c67842d60f62504d681db6bfda0e6cadfc9a))
+* grid added for mobile ([1d10e8f](https://github.com/vebholic/oms_frontend/commit/1d10e8f39c3ecd397b0f5084a885eb80ddb5db13))
+* **loadingticket:** dynamic form for transfer asset ([4aa3eaf](https://github.com/vebholic/oms_frontend/commit/4aa3eaf6876d1886c4245e2f497993000896bd04))
+* mobile ui changes and timeline changes ([e88af3d](https://github.com/vebholic/oms_frontend/commit/e88af3d8d86b46886fdb51b051546d26c79b07f6))
+* rental Management ([fc040d0](https://github.com/vebholic/oms_frontend/commit/fc040d03ae6e50332915424a3feeac9764282b78))
+* resolved ([0f54f53](https://github.com/vebholic/oms_frontend/commit/0f54f539d5c465c1527b4b4c33216c40284a3a18))
+* ui change for Mobile ([bc22408](https://github.com/vebholic/oms_frontend/commit/bc22408a18180d613e2b842ca82a08a42598d360))
+
+
+### Bug Fixes
+
+* jhon changes ([308d25c](https://github.com/vebholic/oms_frontend/commit/308d25c17f730b1c67a83b71795baf810c81d296))
+* jhon changes ([5503d6d](https://github.com/vebholic/oms_frontend/commit/5503d6db73545ba6cb460072d3feb558c58a4081))
+* pO-330 ([8b8c91d](https://github.com/vebholic/oms_frontend/commit/8b8c91d7426d6bd749eb25012d3c3967b601a9d2))
+* quote changes stepper color ([3e67dcc](https://github.com/vebholic/oms_frontend/commit/3e67dcc02eb3ac9478e17036e9e3417c237e3092))
+* **transferassetdetail:** header style change ([d8357e0](https://github.com/vebholic/oms_frontend/commit/d8357e05b66ecbc8dcd54be50d1b5ec8392adb7b))
+
 ### [2.9.1](https://github.com/vebholic/oms_frontend/compare/v2.9.0...v2.9.1) (2021-11-29)
 
 
