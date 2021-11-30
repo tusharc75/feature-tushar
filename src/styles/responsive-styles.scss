@@ -33,6 +33,9 @@
 .all-button{
     font-size: 0.7rem !important;
 }
+.help_icon{
+    padding: 5px 10px !important;
+}
 
 
 @media only screen and (max-width: 600px) {
@@ -51,7 +54,7 @@
         padding: 2px !important;
     }
     .MuiButton-outlinedSizeSmall {
-        padding: 2px 9px !important;
+        padding: 2px 9px ;
         font-size: 0.6rem;
     }
     .MuiMenuItem-root {
@@ -267,6 +270,13 @@
     }
     .all-button-sub-icon{
         font-size: 18px !important;
+    }
+}
+
+@media only screen and (max-width: 380px){
+    .tab-font {
+        font-size: 12px;
+        line-height: 18px;
     }
 }
 

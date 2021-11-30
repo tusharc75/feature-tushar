@@ -49,9 +49,10 @@ const ManageDeliveryTicket = (props) => {
     const [disableOwnerSelection, setDisableOwnerSelection] = useState(false);
 
     useEffect(() => {
-        if (initialData.fields.length > 0) {
+        const fields = initialData.fields
+        if (fields.length > 0) {
 
-            const ownerCollabOptions = initialData.fields.filter(
+            const ownerCollabOptions = fields.filter(
                 (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
             );
             if (ownerCollabOptions.length > 0) {
@@ -60,9 +61,47 @@ const ManageDeliveryTicket = (props) => {
                 setCollaboratorData(ownerCollabOptions[0].option);
             }
 
-            setFormsData(setFieldsInAscendingOrder(initialData.fields));
+            const modifiedData = setFieldsInAscendingOrder(fields)
+
+            const newFilteredData = modifiedData.filter((formData) => {
+                if (transferData) {
+                    if (transferData?.transferType === "Internal") {
+                        if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
+                            return false
+                        }
+                    }
+
+                    if (transferData?.transferType.includes("External Supplier")) {
+                        if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
+                            return false
+                        }
+                    }
+                    if (transferData?.transferType.includes("External Customer")) {
+                        if (formData.name.includes("Supplier") || formData.name.includes("Plant")) {
+                            return false
+                        }
+                    }
+                }
+
+                if (repairJobData) {
+                    if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
+                        return false
+                    }
+                }
+
+                if (rentalData) {
+                    if (formData.name.includes("Supplier") || formData.name.includes("Plant")) {
+                        return false
+                    }
+                }
+
+                return true
+
+            })
+
+            setFormsData(newFilteredData);
         }
-    }, [initialData.fields]);
+    }, [initialData.fields, transferData, repairJobData, rentalData]);
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
         setOwnerData(
@@ -130,6 +169,15 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["deliveryJobName"] = `${transferData?.transferAssetNumber}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = "Transfer Asset";
                     tempInitialData["transferAsset"] = transferData?._id;
+                    if (transferData?.transferType === "Internal") {
+                        tempInitialData["receivingPlant"] = transferData?.transferToPlant.optionValue;
+                    }
+                    if (transferData?.transferType === "External Customer") {
+                        tempInitialData["customerAccount"] = transferData?.transferToCustomer.optionValue;
+                    }
+                    if (transferData?.transferType === "External Supplier") {
+                        tempInitialData["supplierAccount"] = transferData?.transferToSupplier.optionValue;
+                    }
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
                         values: tempInitialData,
@@ -148,7 +196,7 @@ const ManageDeliveryTicket = (props) => {
             .catch((error) => {
                 toastConfig.setToastConfig(error);
             });
-    }, [deliveryTicketId]);
+    }, [deliveryTicketId, transferData]);
 
 
     const handleSubmit = (values) => {
@@ -276,7 +324,7 @@ const ManageDeliveryTicket = (props) => {
                                                                 field.fieldName === "transferAsset" && Boolean(transferData) ? null :
                                                                     field.fieldName === "rentalJob" && Boolean(rentalData) ? null :
                                                                         <Grid key={index2} item xs={12} sm={6} md={6}>
-                                                                            {( field.fieldName === "rentalJob" && field.fieldName === "customerAccount") || field.fieldName === "deliveryType" ||
+                                                                            {(field.fieldName === "rentalJob" && field.fieldName === "customerAccount") || field.fieldName === "deliveryType" ||
                                                                                 field.fieldName === "status" || field.fieldName === "actualDeliveredDate" || field.fieldName === "actualDispatchedDate" ? (
                                                                                 <FormTypes
                                                                                     {...field}

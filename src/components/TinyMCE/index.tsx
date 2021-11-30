@@ -68,7 +68,7 @@ export default function TinyMCE(props) {
         fileUploadMaxSize = { ...documentUploadMaxSize }, onUploadFile = null,
         onUploadImage = null, usePublicUrlforFileUpload = false,
         doNotShowUploadFile = false, showVariableDropdown = false, id, isCheckHeight = false, disabledEditor = false,
-        isSendToCustomer = false, onQuoteUpload = null
+        isSendToCustomer = false, onQuoteUpload = null, variables = null
     } = props
 
     const classes = useStyles();
@@ -503,10 +503,7 @@ export default function TinyMCE(props) {
                                                     open={Boolean(anchorEl)}
                                                     onClose={closeActions}>
                                                     {
-                                                        ['entity', 'customerAccountName', 'quoteDate', 'quoteName',
-                                                            'version', 'quoteId', "currency", "expiryDate", "collaborator",
-                                                            "customerContactName", "currentDate", "owner", "incoTerms"
-                                                        ].map(o => {
+                                                        variables && variables.map(o => {
                                                             return <MenuItem
                                                                 onClick={() => handleVaribleSelect(o)}
                                                                 value={o}>{mappedVariablesNames[o]}</MenuItem>
