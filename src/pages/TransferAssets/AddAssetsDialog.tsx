@@ -232,7 +232,7 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
                   </Grid>
                 </Grid>
               </Box>
-              {columns ? (
+              {Object.keys(frameWorkComponent).length > 0 ? (
                 <CustomAgGrid
                   columns={columns}
                   dataRows={dataRows}

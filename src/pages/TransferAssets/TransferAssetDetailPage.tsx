@@ -326,6 +326,7 @@ const TransferAssetDetailPage = () => {
                       permissions={permissions}
                       user={user}
                       setNextStep={setNextStep}
+                      ownerId={transferAssetData?.createdBy.user._id}
                     />
                   )}
                   {currentStep === 1 && (
