@@ -12,7 +12,8 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from '../../components/AgGridComponents/CustomAgGrid';
 import axiosInstance from '../../axios/axiosInstance';
-
+import { prepareDataForGrid } from "../../constants/helpers"
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 interface AssetsGridProps {
   permissions?: any;
   user?: any;
@@ -31,16 +32,54 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   const [isRemovingAssets, setRemovingAssets] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [removeData, setRemoveData] = useState([])
+  const [columns, setColumns] = useState([])
   const [openAddNewAssets, setOpenAddNewAssets] = useState(false);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const [gridApi, setGridApi] = useState(null);
   const [agGridState, gridDispatch] = useReducer(gridReducer, gridState);
+  const { getColumnData } = useColumns();
   const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = agGridState;
-  const columns = [
-    { field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer' },
-    { field: 'serialNumber', headerName: 'Serial Number', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'product', headerName: 'Product Description', show: true, cellRenderer: 'productRenderer' },
-    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
-  ];
+  // const columns = [
+  //   { field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer' },
+  //   { field: 'serialNumber', headerName: 'Serial Number', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+  //   { field: 'product', headerName: 'Product Description', show: true, cellRenderer: 'productRenderer' },
+  //   { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
+  // ];
+
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get("/field?resource=Product Inventory")
+      .then(({ data: { data } }) => {
+        let columns = []
+        let rendererNames = []
+        data.forEach(o => {
+          if (o?.fieldData?.fieldName === "serialNumber") {
+            o.fieldData.primaryField = true
+          }
+          let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
+
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData]
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
+          }
+        })
+        console.log(rendererNames)
+
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+          actionsRenderer: ActionsRenderer,
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        columns = [...columns, ...getStaticFields()]
+        setColumns([...columns])
+      })
+  }
 
   const AssetRenderer = (params) =>
     params.value ? (
@@ -75,13 +114,13 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     </>
   );
 
-  const frameworkComponents = {
-    productRenderer: ProductRenderer,
-    assetRenderer: AssetRenderer,
-    commonRenderer: CommonRenderer,
-    actionsRenderer: ActionsRenderer,
-    dateRenderer: DateRenderer
-  };
+  // const frameworkComponents = {
+  //   productRenderer: ProductRenderer,
+  //   assetRenderer: AssetRenderer,
+  //   commonRenderer: CommonRenderer,
+  //   actionsRenderer: ActionsRenderer,
+  //   dateRenderer: DateRenderer
+  // };
 
   useEffect(() => {
     if (transferAssetId) {
@@ -98,11 +137,10 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
 
     try {
       let data = await fetchAssets(forceRefresh)
-      data = data?.map((d: any) => ({
-        ...d,
-        product: d.product.optionLabel,
-        productId: d.product.optionValue,
-      }))
+      data = data?.map((d: any) => {
+        let finalObject = prepareDataForGrid(d);
+        return finalObject
+      })
       gridDispatch({ type: "initialize", data: data, count: data.length })
       gridDispatch({ type: "loading", loading: false });
     } catch (error) {
@@ -178,7 +216,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
         <CustomAgGrid
           columns={columns}
           dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
+          frameworkComponents={frameWorkComponent}
           setGridApi={setGridApi}
           dispatch={gridDispatch}
           rowCount={rowCount}
