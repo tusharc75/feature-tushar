@@ -6,7 +6,7 @@ import routes from '../../components/Helpers/Routes';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import { isMobile } from 'react-device-detect';
-import { CommonRenderer, DateRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import AddAssetsDialog from './AddAssetsDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -22,10 +22,11 @@ interface AssetsGridProps {
   setNextStep?: any;
   fetchAssets: any;
   transferAssetId: string | any;
+  ownerId: string | any;
 }
 
 const AssetsGrid: FC<AssetsGridProps> = (props) => {
-  const { permissions, user, plantId, fetchAssets, transferAssetId } = props
+  const { permissions, user, plantId, fetchAssets, transferAssetId, ownerId } = props
   const toastConfig = useContext(CustomToastContext);
 
 
@@ -68,7 +69,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
             }
           }
         })
-        console.log(rendererNames)
 
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
@@ -103,7 +103,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     <>
       <GridDeleteIcon
         hasDeletePermission={permissions?.transferAsset?.isUpdate}
-        ownerId={user?.user?._id}
+        ownerId={ownerId}
         userId={user?.user?._id}
         onDelete={() => {
           setShowConfirmBox(true);
@@ -213,24 +213,25 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       </Box>
 
       <Box mt={1}>
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
-          dispatch={gridDispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={true}
-          actionWidth={100}
-          allowSelection={true}
-          isClientSideGrid={true}
-          loading={gridLoading}
-          renderedFrom="transferAssetPage"
-          refreshGrid={() => fetchAssetsData(true)}
-        />
+        {Object.keys(frameWorkComponent).length > 0 ?
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameWorkComponent}
+            setGridApi={setGridApi}
+            dispatch={gridDispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            allowAction={true}
+            actionWidth={100}
+            allowSelection={true}
+            isClientSideGrid={true}
+            loading={gridLoading}
+            renderedFrom="transferAssetPage"
+            refreshGrid={() => fetchAssetsData(true)}
+          /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
       </Box>
 
       {/* Add Assets Dialog */}

@@ -323,6 +323,7 @@ const TransferAsset = () => {
             page={page}
             actionWidth={150}
             loading={loading}
+            isClientSideGrid={true}
             renderedFrom={routes.transferAsset?.title}
             refreshGrid={fetchTransferAsset}
           /> : null
