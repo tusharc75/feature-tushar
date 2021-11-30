@@ -7,6 +7,8 @@ import SearchBox from "../../components/Helpers/SearchBox";
 import { BiNetworkChart } from "react-icons/bi";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import routes from "../../components/Helpers/Routes";
+import {isMobile} from "react-device-detect";
+import {MdAdd} from "react-icons/all";
 
 const ProjectStrategyHeader = (props) => {
   const {
@@ -55,8 +57,9 @@ const ProjectStrategyHeader = (props) => {
           <ToggleButton value={2}>My Projects</ToggleButton>
         </ToggleButtonGroup>
       </Grid>
-      <Grid item xs={6} className={styles.filter_side}>
-        <Box component="div" className={styles.filter_side_header}>
+      <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side}>
+        <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header}>
+          <Grid>
           <SearchBox
             onSearch={onSearch}
             value={searchVal}
@@ -65,30 +68,35 @@ const ProjectStrategyHeader = (props) => {
             placeholder="Search Project Sales"
             width="242px"
           />
+          </Grid>
+
+          <Grid style={{display: "flex" , gap:"5px"}}>
 
           {permissions?.isCreate && permissions?.isUpdate && (
             <Button
-              className={styles.add_submit_btn}
-              variant="contained"
+              // className={styles.add_submit_btn}
+              variant={isMobile ? "text" : "contained"}
               color="primary"
               size="small"
               onClick={onCreate}
-              startIcon={<AddOutlined />}
+              className={isMobile ? "mobile_button" : styles.add_submit_btn}
+              // startIcon={<AddOutlined />}
             >
-              Add
+              {isMobile ? <MdAdd size={23}/> : "Add"}
             </Button>
           )}
 
           <>
             <Button
-              className={styles.action_submit_btn}
-              variant="outlined"
+              // className={styles.action_submit_btn}
+                variant={isMobile ? "text" : "contained"}
               color="default"
               size="small"
               onClick={openActions}
               aria-controls="action-menu"
+              className={isMobile ? "mobile_button" : styles.action_submit_btn}
             >
-              Actions <ExpandMore />
+              {isMobile ? "" :  "Actions" } <ExpandMore/>
             </Button>
 
             <Menu
@@ -145,7 +153,9 @@ const ProjectStrategyHeader = (props) => {
                 </MenuItem>
               )}
             </Menu>
+
           </>
+          </Grid>
         </Box>
       </Grid>
     </Grid>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Box, Button, Grid, Paper, useMediaQuery } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useHistory, useParams } from 'react-router-dom';
@@ -38,6 +38,7 @@ import ProcessFlow from '../../components/ProcessFlow';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { SVG } from '../../assets';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import {MdDelete, MdEdit} from "react-icons/md";
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -578,15 +579,15 @@ function OpportunityDetailsPage() {
                 showHeading={true}
               >
                 {allowedToEdit ? (
-                  <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                    Edit
+                  <Button variant={isMobile ? "outlined" : "contained"} color="primary" size="small" onClick={handleOpenUpdateDialog} className="mobile_button_layout">
+                    {isMobile ? <MdEdit/> : "Edit"}
                   </Button>
                 ) : null}
                 {opportunityPermissions.isDelete &&
                   opportunityData?.owner.optionValue &&
                   user?.user?._id &&
                   opportunityData.owner.optionValue === user.user._id ? (
-                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                  <DeleteButton text={isMobile ? <MdDelete/> : "Delete"} onClick={() => setShowConfirmBox(true)} />
                 ) : null}
               </DetailsPageHeader>
             )}

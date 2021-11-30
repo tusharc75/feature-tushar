@@ -21,6 +21,8 @@ import ProcessFlow from '../../components/ProcessFlow';
 import { isMobile, isTablet } from 'react-device-detect';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import {MdDelete, MdEdit} from "react-icons/md";
+import {FaFunnelDollar} from "react-icons/all";
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -377,16 +379,18 @@ const LeadDetailsPage = () => {
                   showHeading={true}
                 >
                   {leadsPermissions.isUpdate && allowedToEdit && (
-                    <Button variant="contained" color="primary" size="small" onClick={handleOpneUpdateDialog}>
-                      Edit
+                    <Button variant={isMobile ? "outlined" : "contained"} color="primary" size="small" onClick={handleOpneUpdateDialog} className="mobile_button_layout">
+                      {isMobile ? <MdEdit/> : "Edit"}
                     </Button>
                   )}
                   {!isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && (
                     <>
                       <Button
-                        variant="contained"
+                        variant={isMobile ? "outlined" : "contained"}
                         color="primary"
                         size="small"
+                        className="mobile_button_layout"
+                        style={isMobile ? {color:"var(--warning-light)" , borderColor:"var(--warning-light)"} : {}}
                         onClick={() => {
                           const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter((d) => d).join(' ');
                           setConvertLeadToOpportunityConfirmationDialog({
@@ -397,11 +401,11 @@ const LeadDetailsPage = () => {
                           });
                         }}
                       >
-                        Convert Lead To Opportunity
+                        {isMobile ? <FaFunnelDollar/> : "Convert Lead To Opportunity"}
                       </Button>
                     </>
                   )}
-                  {leadsPermissions.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                  {leadsPermissions.isDelete && allowedToDelete && <DeleteButton text={isMobile ? <MdDelete/> :"Delete"} onClick={() => setShowConfirmBox(true)} />}
                 </DetailsPageHeader>
               )}
 
