@@ -42,12 +42,14 @@ import Activity from "../../components/Activity";
 import CreateProjectSales from "./CreateProjectSales";
 import { isMobile, isTablet } from 'react-device-detect';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
-import {MdDelete, MdEdit} from "react-icons/md";
+import queryString from 'query-string';
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit } = parsed;
   const {
     state: { user, permissions },
   }: any = useData();
@@ -82,6 +84,7 @@ const ProjectSalesDetails = () => {
     nodes: [],
     colorPalette: null,
   });
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
 
 
 
@@ -137,6 +140,9 @@ const ProjectSalesDetails = () => {
         modifiedData.amount
       ).fullFormatAmount;
 
+      const isAllowedToEdit = (data.projectManager.optionValue  === user?.user?._id);
+      setAllowedToEdit(isAllowedToEdit);
+
       setCopyOfProjectSalesData(modifiedData);
 
       setProjectSalesData(data);
@@ -152,6 +158,12 @@ const ProjectSalesDetails = () => {
       setQuotes(data.staticData?.quoteBuilder);
       setCustomerContacts(data.staticData?.customerContact);
       initializeGraphData();
+      if (isAllowedToEdit && openEdit === 'true') {
+        setOpenUpdateDialog(true);
+        const params = new URLSearchParams();
+        params.delete('openEdit');
+        history.push({ search: params.toString() });
+      }
 
       setLoading(false);
     } catch (error) {
@@ -382,18 +394,17 @@ const ProjectSalesDetails = () => {
                   {(permissions?.projectStrategy?.isUpdate && isTeamMember) ||
                     isManager ? (
                     <Button
-                        variant={isMobile ? "outlined" : "contained"}
+                      variant="contained"
                       color="primary"
                       size="small"
-                        className="mobile_button_layout"
                       onClick={handleOpenUpdateDialog}
                     >
-                      {isMobile ? <MdEdit/> : "Edit"}
+                      Edit
                     </Button>
                   ) : null}
                   {permissions?.projectStrategy?.isDelete && isManager ? (
                     <DeleteButton
-                      text={isMobile ? <MdDelete/> : "Delete"}
+                      text="Delete"
                       onClick={() => {
                         handleDeleteProject(id);
                       }}
@@ -422,13 +433,11 @@ const ProjectSalesDetails = () => {
                       aria-label="icon tabs example"
                     >
                       <Tab
-                          className='tabLayout'
                         label="Project Sales"
                         aria-controls="a11y-tabpanel-0"
                         id="a11y-tab-0"
                       />
                       <Tab
-                          className='tabLayout'
                         label="OM-Neurons"
                         aria-controls="a11y-tabpanel-1"
                         id="a11y-tab-1"

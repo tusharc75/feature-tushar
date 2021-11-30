@@ -85,7 +85,7 @@ export default function NewCreateQuotePdfTemplate() {
     const [isLandscapChecked, setIsLandscapChecked] = useState(false)
     const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
     const [isPreview, setIsPreview] = useState(false)
-
+    const typeOptions = [routes.quoteBuilder.title, routes.rentalManagement.title, routes.repairJob.title, routes.purchaseOrder.title,]
     const onBackButtonEvent = (e) => {
         if (hasPermissionToUpdate) {
             e.preventDefault();
@@ -351,7 +351,7 @@ export default function NewCreateQuotePdfTemplate() {
                                             disabled={!hasPermissionToUpdate || Boolean(quoteData?._id)}
                                             variant="outlined"
                                             type="text"
-                                            label="Quote PDF Template Name"
+                                            label="PDF Template Name"
                                             required={true}
                                             name="name"
                                             fullWidth
@@ -512,6 +512,32 @@ export default function NewCreateQuotePdfTemplate() {
                                             )}
                                         />}
                                     </Grid>
+                                    <Grid item xs={12} sm={3} >
+                                        {<Autocomplete
+                                            disabled={!hasPermissionToUpdate}
+                                            getOptionLabel={(option: any) => (option ? option : "")}
+                                            value={typeOptions.filter((data) => data === values["type"]).length
+                                                ? typeOptions.filter((data) => data === values["type"])[0]
+                                                : ""}
+                                            options={typeOptions}
+                                            onChange={(e, val) => {
+                                                setFieldValue("type", val ? val : "");
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    required={true}
+                                                    margin="dense"
+                                                    name="type"
+                                                    label="Type"
+                                                    variant="outlined"
+                                                    error={touched["type"] && Boolean(errors["type"])}
+                                                    helperText={touched["type"] && errors["type"]}
+                                                    fullWidth
+                                                />
+                                            )}
+                                        />}
+                                    </Grid>
                                 </Grid>}
 
                                 <Grid container spacing={1}>
@@ -572,6 +598,7 @@ export default function NewCreateQuotePdfTemplate() {
                                             helperText="Value must be between 5 to 20"
                                         />
                                     </Grid>
+
                                 </Grid>
                             </Form>
                         )}
@@ -595,6 +622,10 @@ export default function NewCreateQuotePdfTemplate() {
                                 completePercentage
                             ) => null}
                             showVariableDropdown={true}
+                            variables={['entity', 'customerAccountName', 'quoteDate', 'quoteName',
+                                'version', 'quoteId', "currency", "expiryDate", "collaborator",
+                                "customerContactName", "currentDate", "owner", "incoTerms"
+                            ]}
                             isCheckHeight={true}
                         />
                     </Box>

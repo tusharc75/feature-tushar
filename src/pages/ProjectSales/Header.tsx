@@ -7,8 +7,7 @@ import SearchBox from "../../components/Helpers/SearchBox";
 import { BiNetworkChart } from "react-icons/bi";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import routes from "../../components/Helpers/Routes";
-import {isMobile} from "react-device-detect";
-import {MdAdd} from "react-icons/all";
+import { isMobile } from "react-device-detect";
 
 const ProjectStrategyHeader = (props) => {
   const {
@@ -57,105 +56,98 @@ const ProjectStrategyHeader = (props) => {
           <ToggleButton value={2}>My Projects</ToggleButton>
         </ToggleButtonGroup>
       </Grid>
-      <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side}>
-        <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header}>
-          <Grid>
-          <SearchBox
-            onSearch={onSearch}
-            value={searchVal}
-            searchbox={styles.search_box_input}
-            size="small"
-            placeholder="Search Project Sales"
-            width="242px"
-          />
-          </Grid>
-
-          <Grid style={{display: "flex" , gap:"5px"}}>
-
-          {permissions?.isCreate && permissions?.isUpdate && (
-            <Button
-              // className={styles.add_submit_btn}
-              variant={isMobile ? "text" : "contained"}
-              color="primary"
+      <Grid item xs={6} className={styles.filter_side}>
+        <Box component="div" className={styles.filter_side_header}>
+          <div className="d-flex gap-2">
+            <SearchBox
+              onSearch={onSearch}
+              value={searchVal}
+              searchbox={styles.search_box_input}
               size="small"
-              onClick={onCreate}
-              className={isMobile ? "mobile_button" : styles.add_submit_btn}
-              // startIcon={<AddOutlined />}
-            >
-              {isMobile ? <MdAdd size={23}/> : "Add"}
-            </Button>
-          )}
-
-          <>
-            <Button
-              // className={styles.action_submit_btn}
-                variant={isMobile ? "text" : "contained"}
-              color="default"
-              size="small"
-              onClick={openActions}
-              aria-controls="action-menu"
-              className={isMobile ? "mobile_button" : styles.action_submit_btn}
-            >
-              {isMobile ? "" :  "Actions" } <ExpandMore/>
-            </Button>
-
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              {permissions?.isDelete && (
-                <MenuItem
-                  disabled={canDelete}
-                  onClick={() => {
-                    showConfirmBox(null);
-                    closeActions();
-                  }}
+              placeholder="Search Project Sales"
+              width="242px"
+            />
+            <div className="d-flex gap-2">
+              {permissions?.isCreate && permissions?.isUpdate && !isMobile && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={onCreate}
+                  startIcon={<AddOutlined />}
                 >
-                  Delete
-                </MenuItem>)}
-              {permissions?.isUpdate && (
-                <MenuItem
-                  disabled={selectedRecords.length === 0}
-                  onClick={() => {
-                    if (selectedRecords.some((d) => d.isUpdate === false)) {
-                      closeActions();
-                      setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
-                    } else {
-                      closeActions();
-                      if (selectedRecords.length) {
-                        let entities = []
-                        selectedRecords.map(current => {
-                          if (current?.entity) {
-                            if (current?.entityId) {
-                              entities.push(current?.entityId)
-                            }
-                            if (current?.restentity) {
-                              let restEntities = current?.restentity.map(o => o.optionValue)
-                              entities = [...entities, ...restEntities]
-                            }
-                          }
-                        })
-                        setEntities([...entities])
-                      }
-                      setShowEntityDialog(true)
-                    }
-                  }}
-                >
-                  Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
-                </MenuItem>
+                  Add
+                </Button>
               )}
-            </Menu>
 
-          </>
-          </Grid>
+              <>
+                <Button
+                  variant="outlined"
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                >
+                  Actions <ExpandMore />
+                </Button>
+
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  {permissions?.isDelete && (
+                    <MenuItem
+                      disabled={canDelete}
+                      onClick={() => {
+                        showConfirmBox(null);
+                        closeActions();
+                      }}
+                    >
+                      Delete
+                    </MenuItem>)}
+                  {permissions?.isUpdate && (
+                    <MenuItem
+                      disabled={selectedRecords.length === 0}
+                      onClick={() => {
+                        if (selectedRecords.some((d) => d.isUpdate === false)) {
+                          closeActions();
+                          setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+                        } else {
+                          closeActions();
+                          if (selectedRecords.length) {
+                            let entities = []
+                            selectedRecords.map(current => {
+                              if (current?.entity) {
+                                if (current?.entityId) {
+                                  entities.push(current?.entityId)
+                                }
+                                if (current?.restentity) {
+                                  let restEntities = current?.restentity.map(o => o.optionValue)
+                                  entities = [...entities, ...restEntities]
+                                }
+                              }
+                            })
+                            setEntities([...entities])
+                          }
+                          setShowEntityDialog(true)
+                        }
+                      }}
+                    >
+                      Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
+                    </MenuItem>
+                  )}
+                </Menu>
+              </>
+            </div>
+          </div>
         </Box>
       </Grid>
     </Grid>

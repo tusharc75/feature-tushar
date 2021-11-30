@@ -29,7 +29,7 @@ import { useData } from '../../../StateProvider/Provider';
 import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne } from "react-icons/fa";
 
-const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryForReceivingTicket = null, rentalData = null, isRedirectToDetailPage = true, onClose, onSuccess, open }) => {
+const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryForReceivingTicket = null, rentalData = null, repairJobData = null, isRedirectToDetailPage = true, onClose, onSuccess, open }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -74,8 +74,25 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
       setCollaboratorData(ownerCollabOptions[0].option);
     }
 
-    setFormsData(setFieldsInAscendingOrder(receivingTicketData.fields));
-  }, [receivingTicketData.fields]);
+    const fields = receivingTicketData.fields
+
+    const modifiedData = setFieldsInAscendingOrder(fields)
+    const newFilteredData = modifiedData.filter((formData) => {
+      if (repairJobData) {
+        if (formData.name.includes("Customer")) {
+          return false
+        }
+      }
+      if (rentalData) {
+        if (formData.name.includes("Supplier")) {
+          return false
+        }
+      }
+      return true
+    })
+
+    setFormsData(newFilteredData);
+  }, [receivingTicketData.fields, repairJobData, rentalData]);
 
   const onOwnerDropdownOpen = (selectedCollaborator) => {
     setOwnerData(
@@ -140,12 +157,26 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
             tempInitialData["rentalJob"] = rentalData._id
             tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
             tempInitialData["pickupAddress"] = rentalData.shippingAddress
+            tempInitialData["type"] = "Rental Job"
             tempInitialData["receivingJobName"] = `${rentalData?.rentalJobName}_${generateUniqueIdOnly()}`
             setReceivingTicketData({
               fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rentalJob"),
               initialValues: tempInitialData,
             });
             setFormValues(tempInitialData)
+          } else if (productInventoryForReceivingTicket && repairJobData) {
+            setDisableReceivingJobName(true);
+            const tempInitialData = getObjKeys("", fieldsDataForCreate)
+            tempInitialData["productInventory"] = productInventoryForReceivingTicket.map(d => d._id)
+            tempInitialData["repairJob"] = repairJobData._id
+            tempInitialData["type"] = "Repair Job"
+            tempInitialData["receivingJobName"] = `${repairJobData?.repairJobName}_${generateUniqueIdOnly()}`
+            setReceivingTicketData({
+              fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "repairJob"),
+              initialValues: tempInitialData,
+            });
+            setFormValues(tempInitialData)
+
           }
           else {
             let initialData = getObjKeys('', fieldsDataForCreate);
@@ -307,7 +338,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field) => (
                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                      {field.fieldName === "customerAccount" || field.fieldName === "pickupAddress" || field.fieldName === "deliveryType" ? (
+                                      {(rentalData && field.fieldName === "customerAccount") || (rentalData && field.fieldName === "pickupAddress") || field.fieldName === "deliveryType" ? (
                                         <FormTypes
                                           {...field}
                                           disabled={true}

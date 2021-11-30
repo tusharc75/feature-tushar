@@ -14,6 +14,7 @@ import { ExpandMore } from "@material-ui/icons";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import styles from "../Leads/Header.module.scss";
+import { isMobile } from "react-device-detect";
 
 function OpportunitiesHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -75,72 +76,75 @@ function OpportunitiesHeader(props) {
       </Grid>
       <Grid item xs={6} className={styles.filter_side}>
         <Box className={styles.filter_side_header} component="div">
-          <SearchBox
-            onSearch={onSearch}
-            searchbox={styles.search_box_input}
-            value={searchVal}
-            size="small"
-            placeholder="Search Opportunity"
-            width="242px"
-          />
-
-          {opportunityPermissions.isCreate && opportunityPermissions.isUpdate && (
-            <Button
-              variant="contained"
-              color="primary"
+          <div className="d-flex gap-2">
+            <SearchBox
+              onSearch={onSearch}
+              searchbox={styles.search_box_input}
+              value={searchVal}
               size="small"
-              className={styles.add_submit_btn}
-              onClick={onCreate}
-              startIcon={<AddOutlined />}
-            >
-              Add
-            </Button>
-          )}
-          {opportunityPermissions.isDelete && (
-            <>
-              <Button
-                disabled={canDelete}
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                className={styles.action_submit_btn}
-                aria-controls="action-menu"
-              >
-                Actions <ExpandMore />
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    showConfirmBox(null);
-                  }}
+              placeholder="Search Opportunity"
+              width="242px"
+            />
+            <div className="d-flex gap-2">
+              {opportunityPermissions.isCreate && opportunityPermissions.isUpdate && !isMobile && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  // className={styles.add_submit_btn}
+                  onClick={onCreate}
+                  startIcon={<AddOutlined />}
                 >
-                  Delete
-                </MenuItem>
-                <MenuItem
-                  disabled={selectedRecords.find((d) => d.canDelete === false)}
-                  onClick={() => {
-                    closeActions();
-                    showTransferEntityDialog();
-                  }}
-                >
-                  Transfer Entity
-                </MenuItem>
-              </Menu>
-            </>
-          )}
+                  Add
+                </Button>
+              )}
+              {opportunityPermissions.isDelete && (
+                <>
+                  <Button
+                    disabled={canDelete}
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    // className={styles.action_submit_btn}
+                    aria-controls="action-menu"
+                  >
+                    Actions <ExpandMore />
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "left",
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      onClick={() => {
+                        closeActions();
+                        showConfirmBox(null);
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
+                    <MenuItem
+                      disabled={selectedRecords.find((d) => d.canDelete === false)}
+                      onClick={() => {
+                        closeActions();
+                        showTransferEntityDialog();
+                      }}
+                    >
+                      Transfer Entity
+                    </MenuItem>
+                  </Menu>
+                </>
+              )}
+            </div>
+          </div>
         </Box>
       </Grid>
     </Grid>

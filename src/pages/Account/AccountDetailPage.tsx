@@ -73,6 +73,7 @@ import ProcessFlow from "../../components/ProcessFlow";
 import AdditionalDialogPopUp from "../../components/AdditionalDialogPopUp";
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import queryString from 'query-string';
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import {MdDelete, MdEdit} from "react-icons/md";
 
@@ -92,7 +93,8 @@ function DisplayData({ label, value, icon }) {
 export default function AccountDetailPage(props) {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit } = parsed;
   const {
     account: { accountApi, accountResource, accountRoute },
     accountBreadcrumb,
@@ -138,6 +140,7 @@ export default function AccountDetailPage(props) {
   const [deleteAccount, setDeleteAccountId] = useState<any>({})
   const [additionalFieldName, setAdditionalFieldName] = useState("")
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [
     showAccountHierarchyInFullScreenDialog,
     setShowAccountHierarchyInFullScreenDialog,
@@ -443,7 +446,12 @@ export default function AccountDetailPage(props) {
         } else {
           updatedAccount["type"] = "parent";
         }
-
+        // if (isAllowedToEdit && openEdit === 'true') {
+        //   setOpenUpdateDialog(true);
+        //   const params = new URLSearchParams();
+        //   params.delete('openEdit');
+        //   history.push({ search: params.toString() });
+        // }
         newData.push(updatedAccount);
       });
 
@@ -472,6 +480,12 @@ export default function AccountDetailPage(props) {
     // }
     getAccountFields(data);
     setLoading(false);
+    if (openEdit === 'true') {
+      setOpenUpdateDialog(true);
+      const params = new URLSearchParams();
+      params.delete('openEdit');
+      history.push({ search: params.toString() });
+    }
     initializeGraphData();
 
   };
@@ -1047,7 +1061,7 @@ export default function AccountDetailPage(props) {
                     </Box>
                   </TabPanel>
                   <TabPanel value={tabValue} index={1} >
-                    <Box  style={{overflow: 'auto'}}>
+                    <Box style={{ overflow: 'auto' }}>
                       <AccountHierarchy
                         data={accountHierarchyData}
                         currentAccountId={accountData._id}

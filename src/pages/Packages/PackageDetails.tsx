@@ -24,8 +24,8 @@ import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog'
 import ProductsTable from './ProductsTable';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import styles from './packages.module.scss'
-import {FaWpforms} from "react-icons/fa";
-import {BiFoodMenu} from "react-icons/bi";
+import { FaWpforms } from "react-icons/fa";
+import { BiFoodMenu } from "react-icons/bi";
 
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
@@ -39,9 +39,9 @@ function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
   return (
-      <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-        {children}
-      </div>
+    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
+      {children}
+    </div>
   );
 }
 
@@ -208,7 +208,7 @@ const PackageDetails = () => {
               ) : (
                 <>
 
-                <Tabs
+                  <Tabs
                     className="quote-tab"
                     value={tabValue}
                     onChange={handleMainTabChange}
@@ -218,9 +218,9 @@ const PackageDetails = () => {
                         display: 'none'
                       }
                     }}
-                >
+                  >
 
-                  <Tab
+                    <Tab
                       className={'tabLayout'}
                       style={{
                         background: tabValue === 1 ? 'white' : '',
@@ -232,8 +232,8 @@ const PackageDetails = () => {
                         </div>
                       }
                       {...a11yProps(0)}
-                  />
-                  <Tab
+                    />
+                    <Tab
                       className={'tabLayout'}
                       style={{
                         background: tabValue === 2 ? 'white' : '',
@@ -245,23 +245,23 @@ const PackageDetails = () => {
                         </div>
                       }
                       {...a11yProps(1)}
-                  />
-                  <div className={'uio'}> </div>
-                </Tabs>
+                    />
+                    <div className={'uio'}> </div>
+                  </Tabs>
 
-                <TabPanel value={tabValue} index={0}>
+                  <TabPanel value={tabValue} index={0}>
 
-                  <DetailsPage data={packageData} fields={packageFields} />
+                    <DetailsPage data={packageData} fields={packageFields} />
 
-                </TabPanel>
+                  </TabPanel>
 
-                <TabPanel value={tabValue} index={1}>
+                  <TabPanel value={tabValue} index={1}>
 
-                  <Box mt={2} className="bg-white">
-                    <Box mb={1}>
-                      <div className={`p-2 gap-3 ${styles.package_grid_template}`}>
-                        <h3>Product(s)</h3>
-                        <ImportExportLinks
+                    <Box mt={2} className="bg-white">
+                      <Box mb={1}>
+                        <div className={`p-2 gap-3 ${styles.package_grid_template}`}>
+                          <h3>Product(s)</h3>
+                          <ImportExportLinks
                             permissions={permissions?.packages}
                             module="packages-products"
                             api={packages.packageApi}
@@ -274,27 +274,28 @@ const PackageDetails = () => {
                             ids={[]}
                             additionalParams={`refrenceId=${id}`}
                             isBackgroundWhite={true}
-                        />
-                        <Button className="text-transform-none" variant="outlined" color="primary" startIcon={<Add />} size="small" onClick={() => setShowProductAssignDialog(true)}>
-                          Assign Product(s)
-                        </Button>
-                      </div>
+                          />
+                          <Button className="text-transform-none" variant="outlined" color="primary" startIcon={<Add />} size="small" onClick={() => setShowProductAssignDialog(true)}>
+                            Assign Product(s)
+                          </Button>
+                        </div>
+                      </Box>
+
+                      {
+                        products.length ?
+                          <ProductsTable
+                            productList={products}
+                            handleUpdateQuantity={handleUpdateQuantity}
+                            handleAssignProduct={setShowProductAssignDialog}
+                            updateLoading={quantityUpdateLoading || packagesLoading}
+                          /> : null
+                      }
+
                     </Box>
 
-                    {
-                      products.length ?
-                          <ProductsTable
-                              productList={products}
-                              handleUpdateQuantity={handleUpdateQuantity}
-                              updateLoading={quantityUpdateLoading || packagesLoading}
-                          /> : null
-                    }
-
-                  </Box>
 
 
-
-                </TabPanel>
+                  </TabPanel>
 
 
                 </>
