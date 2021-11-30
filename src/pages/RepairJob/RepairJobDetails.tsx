@@ -24,7 +24,7 @@ import TabPanel from '../../components/TabPanel';
 import CustomCommonSteps from '../../components/CustomCommonSteps/CustomCommonSteps';
 import AddSerializedAsset from '../RentalManagement/AddSerializedAsset';
 import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import { getFrameworkComponents } from '../../constants/columns';
+import { getFrameworkComponents, genrateColoum } from '../../constants/columns';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import useColumns from '../../constants/useColumns';
@@ -83,7 +83,11 @@ const RepairJobDetails = () => {
     limit: step1Limit, pageSizes: step1PageSizes, search: step1Search, filters: step1Filters, sorting: step1Sorting,
     selectedRecords: step1SelectedRecords } = step1State;
 
-  const [step1Columns, setStep1Columns] = useState([])
+  const [step1Columns, setStep1Columns] = useState([
+    { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "assetNumberRenderer" },
+    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "product", headerName: "Product Description", show: true, cellRenderer: "commonRenderer" },
+  ])
 
   useEffect(() => {
     if (id) {
@@ -97,44 +101,20 @@ const RepairJobDetails = () => {
   const fetchAssignedSerializedAssetsFields = () => {
     step1Dispatch({ type: "loading", loading: true });
 
-    axiosInstance().get(`/field/?resource=${sidebarResource.productInventory}`).then(({ data: { data } }) => {
+    axiosInstance().get(`/field/child?resource=Repair Job Asset`).then(({ data: { data } }) => {
 
-      let columns = []
-      let rendererNames = []
-      data.forEach(o => {
-
-        if (o?.fieldData?.fieldName === "assetNumber") {
-          columns = [...columns, {
-            pivotIndex: 0,
-            field: o?.fieldData?.fieldName,
-            headerName: o?.fieldData?.fieldLabel,
-            show: true,
-            disabled: true,
-            primaryField: true,
-            cellRenderer: 'assetNumberRenderer'
-          }]
-        }
-        else {
-          let currentColumn = getColumnData(productInventory.permission, o?.fieldData, `/${routes.productInventoryDetail.path}`)
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData]
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName)
-            }
-          }
-        }
-        return o?.fieldData
-      })
-
+      let rendererNames = [];
+      genrateColoum(data, step1Columns, rendererNames, false);
       let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
       tempFrameworkComponent = {
-        commonRenderer: CommonRenderer,
         assetNumberRenderer: AssetNumberRenderer,
+        commonRenderer: CommonRenderer,
         actionsRenderer: ActionsRenderer,
         ...tempFrameworkComponent,
       }
       setStep1FrameworkComponent({ ...tempFrameworkComponent })
-      setStep1Columns([...columns])
+      setStep1Columns([...step1Columns])
+
     })
   }
 
@@ -269,16 +249,6 @@ const RepairJobDetails = () => {
     setTabValue(newValue);
   };
 
-  const disableNextStep = () => {
-    if (currentStep === 0) {
-      return step1DataRows.length === 0;
-    } else {
-
-    }
-
-    return true;
-  }
-
   const onNextButtonClick = (oldStep, nextStep) => {
     axiosInstance()
       .put(`${repairJob.repairJobApi}/${id}/process-status`, {
@@ -405,7 +375,7 @@ const RepairJobDetails = () => {
                   <>
                     <Paper>
                       <CustomCommonSteps
-                        disableNextStep={disableNextStep()}
+                        disableNextStep={step1DataRows.length === 0}
                         nextStep={nextStep}
                         steps={repairJobProcessSteps.filter(f => f !== "End")}
                         currentStep={currentStep}
