@@ -364,6 +364,7 @@ const TransferAssetDetailPage = () => {
       {/* Manage Transfer Asset Data */}
       {openUpdateDialog && (
         <ManageTransferAsset
+          number={transferAssetData?.transferAssetNumber}
           isClone={false}
           transferAssetId={id}
           onClose={() => {
