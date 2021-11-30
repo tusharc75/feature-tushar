@@ -838,6 +838,19 @@ const Header = ({ toggleDrawer }) => {
         <Box component="span" mx={1} my={2} />
         <p>Help</p>
       </MenuItem>
+
+      <MenuItem id="shoppingCartButton"                   onClick={() => {
+        history.push({
+          pathname: '/product/my-cart'
+        });
+      }}
+      >
+        <Badge color="secondary" badgeContent={cartCount}>
+          <ShoppingCartIcon className="setIcon"/>
+        </Badge>
+        <Box component="span" mx={1} />
+        <p>Cart</p>
+      </MenuItem>
     </Menu>
   );
 
