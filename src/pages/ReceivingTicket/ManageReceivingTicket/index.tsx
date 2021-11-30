@@ -74,8 +74,25 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
       setCollaboratorData(ownerCollabOptions[0].option);
     }
 
-    setFormsData(setFieldsInAscendingOrder(receivingTicketData.fields));
-  }, [receivingTicketData.fields]);
+    const fields = receivingTicketData.fields
+
+    const modifiedData = setFieldsInAscendingOrder(fields)
+    const newFilteredData = modifiedData.filter((formData) => {
+      if (repairJobData) {
+        if (formData.name.includes("Customer")) {
+          return false
+        }
+      }
+      if (rentalData) {
+        if (formData.name.includes("Supplier")) {
+          return false
+        }
+      }
+      return true
+    })
+
+    setFormsData(newFilteredData);
+  }, [receivingTicketData.fields, repairJobData, rentalData]);
 
   const onOwnerDropdownOpen = (selectedCollaborator) => {
     setOwnerData(

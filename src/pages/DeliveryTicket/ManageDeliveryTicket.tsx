@@ -64,20 +64,32 @@ const ManageDeliveryTicket = (props) => {
             const modifiedData = setFieldsInAscendingOrder(fields)
 
             const newFilteredData = modifiedData.filter((formData) => {
+                if (transferData) {
+                    if (transferData?.transferType === "Internal") {
+                        if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
+                            return false
+                        }
+                    }
 
-
-                if (transferData?.transferType === "Internal") {
-                    if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
-                        return false
+                    if (transferData?.transferType.includes("External Supplier")) {
+                        if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
+                            return false
+                        }
+                    }
+                    if (transferData?.transferType.includes("External Customer")) {
+                        if (formData.name.includes("Supplier") || formData.name.includes("Plant")) {
+                            return false
+                        }
                     }
                 }
 
-                if (transferData?.transferType.includes("External Supplier")) {
+                if (repairJobData) {
                     if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
                         return false
                     }
                 }
-                if (transferData?.transferType.includes("External Customer")) {
+
+                if (rentalData) {
                     if (formData.name.includes("Supplier") || formData.name.includes("Plant")) {
                         return false
                     }
@@ -89,7 +101,7 @@ const ManageDeliveryTicket = (props) => {
 
             setFormsData(newFilteredData);
         }
-    }, [initialData.fields, transferData]);
+    }, [initialData.fields, transferData, repairJobData, rentalData]);
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
         setOwnerData(
