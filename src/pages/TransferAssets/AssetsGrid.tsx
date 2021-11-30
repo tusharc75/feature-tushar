@@ -9,7 +9,9 @@ import { isMobile } from 'react-device-detect';
 import { CommonRenderer, DateRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import AddAssetsDialog from './AddAssetsDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from '../../components/AgGridComponents/CustomAgGrid';
+import axiosInstance from '../../axios/axiosInstance';
 
 interface AssetsGridProps {
   permissions?: any;
@@ -26,6 +28,9 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   const toastConfig = useContext(CustomToastContext);
 
 
+  const [isRemovingAssets, setRemovingAssets] = useState(false);
+  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [removeData, setRemoveData] = useState([])
   const [openAddNewAssets, setOpenAddNewAssets] = useState(false);
   const [gridApi, setGridApi] = useState(null);
   const [agGridState, gridDispatch] = useReducer(gridReducer, gridState);
@@ -61,7 +66,10 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
         hasDeletePermission={permissions?.transferAsset?.isUpdate}
         ownerId={user?.user?._id}
         userId={user?.user?._id}
-        onDelete={() => { }}
+        onDelete={() => {
+          setShowConfirmBox(true);
+          setRemoveData([params.data._id])
+        }}
         entity=""
       />
     </>
@@ -115,6 +123,30 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     //   })
   };
 
+  /**
+   * Handle Remove Assets
+   */
+  const handleRemoveAssets = async () => {
+    if (removeData.length > 0) {
+      setRemovingAssets(true)
+      try {
+        await axiosInstance().put(`${routes.transferAsset.path}/remove-asset/${transferAssetId}`, {
+          assets: removeData
+        })
+        setRemoveData([])
+        setShowConfirmBox(false);
+        setRemovingAssets(false)
+        fetchAssetsData(true)
+      } catch (error) {
+        setShowConfirmBox(false);
+        setRemovingAssets(false)
+        setRemoveData([])
+        toastConfig.setToastConfig(error);
+      }
+
+    }
+  }
+
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" mx="4px">
@@ -128,7 +160,16 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
         >
           {`Add ${routes.productInventory.title}`}
         </Button>
-        <Button variant="contained" size="small" color="primary" disabled={selectedRecords.length === 0}>
+        <Button
+          variant="contained"
+          size="small"
+          color="primary"
+          disabled={selectedRecords.length === 0}
+          onClick={() => {
+            setShowConfirmBox(true);
+            setRemoveData(selectedRecords.map((asset: any) => asset?._id))
+          }}
+        >
           Remove Assets
         </Button>
       </Box>
@@ -164,7 +205,18 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           existingAssets={dataRows.map(asset => asset._id)}
         />
       }
-
+      {/* Confirm Delete Dialog */}
+      {showConfirmBox && (
+        <ConfirmationDialog
+          okBtnLoading={isRemovingAssets}
+          open={showConfirmBox}
+          message={`Are you sure you want to remove asset(s)?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={handleRemoveAssets}
+        />
+      )}
     </Fragment>
   )
 }
