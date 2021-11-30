@@ -11,13 +11,13 @@ import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, transferAsset, setFieldsInAscendingOrder } from '../../constants/helpers';
-import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues } from '../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues, RESOURCE_LABEL } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 
-const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose, onSuccess }) => {
+const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose, onSuccess, number = "" }) => {
   const toastConfig = useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -121,7 +121,7 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
           {({ values, errors, touched, setFieldValue, submitForm, setFieldError }) => (
             <Fragment>
               <CustomDialogHeader
-                title={transferAssetId ? (isClone ? 'Clone' : 'Update ' + routes.transferAsset.title) : 'Create ' + routes.transferAsset.title}
+                title={transferAssetId ? (isClone ? 'Clone' : `Update ${RESOURCE_LABEL.transferAsset} (${number})`) : 'Create ' + RESOURCE_LABEL.transferAsset}
                 onClose={() => {
                   if (isFieldNotTouched(initialData, values)) onClose();
                   else setShowConfirmDialog(true);
@@ -147,7 +147,7 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                                     <FormTypes
                                       isNew={Boolean(transferAssetId)}
                                       {...field}
-                                      disabled={Boolean(transferAssetId) && field.disableOnEdit && !isClone}
+                                      disabled={Boolean(transferAssetId)}
                                       values={values}
                                       errors={{ ...errors }}
                                       touched={touched}
@@ -173,7 +173,7 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                                     <FormTypes
                                       isNew={Boolean(transferAssetId)}
                                       {...field}
-                                      disabled={Boolean(transferAssetId) && field.disableOnEdit && !isClone}
+                                      disabled={Boolean(transferAssetId)}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
@@ -199,7 +199,7 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                                     <FormTypes
                                       isNew={Boolean(transferAssetId)}
                                       {...field}
-                                      disabled={Boolean(transferAssetId) && field.disableOnEdit && !isClone}
+                                      disabled={Boolean(transferAssetId)}
                                       values={values}
                                       errors={{ ...errors }}
                                       touched={touched}
@@ -224,7 +224,7 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                                   <FormTypes
                                     isNew={Boolean(transferAssetId)}
                                     {...field}
-                                    disabled={Boolean(transferAssetId) && field.disableOnEdit && !isClone}
+                                    disabled={Boolean(transferAssetId)}
                                     values={values}
                                     errors={errors}
                                     touched={touched}
@@ -254,7 +254,7 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                                   <FormTypes
                                     isNew={Boolean(transferAssetId)}
                                     {...field}
-                                    disabled={Boolean(transferAssetId) && field.disableOnEdit && !isClone}
+                                    disabled={Boolean(transferAssetId) && field.disableOnEdit && !isClone || (Boolean(transferAssetId) && field.fieldName === "transferFromPlant")}
                                     values={values}
                                     errors={errors}
                                     touched={touched}
