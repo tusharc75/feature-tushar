@@ -119,10 +119,10 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
 
     const isFieldNotTouched = (initialData, values) => {
         return Object.values(
-            simplifyValues(initialData.values, initialData?.fields[0]?.sectionFields || [])
+            simplifyValues(initialData.values, formsData[0]?.sectionFields || [])
         ).toString() ===
             Object.values(
-                simplifyValues(values, initialData?.fields[0]?.sectionFields || [])
+                simplifyValues(values, formsData[0]?.sectionFields || [])
             ).toString()
     }
 
@@ -239,6 +239,10 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                 color="primary"
                                 type="submit"
                                 onClick={submitForm}
+                                disabled={
+                                    loading ||
+                                    isFieldNotTouched(initialData, values)
+                                }
                             > Save</CustomButton>
                         </CustomDialogFooter>
 
