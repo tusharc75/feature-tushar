@@ -147,7 +147,7 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                                     <FormTypes
                                       isNew={Boolean(transferAssetId)}
                                       {...field}
-                                      disabled={Boolean(transferAssetId)}
+                                      disabled={Boolean(transferAssetId) && field.disableOnEdit}
                                       values={values}
                                       errors={{ ...errors }}
                                       touched={touched}
@@ -173,7 +173,7 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                                     <FormTypes
                                       isNew={Boolean(transferAssetId)}
                                       {...field}
-                                      disabled={Boolean(transferAssetId)}
+                                      disabled={Boolean(transferAssetId) && field.disableOnEdit}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
@@ -199,7 +199,7 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                                     <FormTypes
                                       isNew={Boolean(transferAssetId)}
                                       {...field}
-                                      disabled={Boolean(transferAssetId)}
+                                      disabled={Boolean(transferAssetId) && field.disableOnEdit}
                                       values={values}
                                       errors={{ ...errors }}
                                       touched={touched}
@@ -254,7 +254,7 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                                   <FormTypes
                                     isNew={Boolean(transferAssetId)}
                                     {...field}
-                                    disabled={Boolean(transferAssetId) && field.disableOnEdit && !isClone || (Boolean(transferAssetId) && field.fieldName === "transferFromPlant")}
+                                    disabled={Boolean(transferAssetId) && field.disableOnEdit}
                                     values={values}
                                     errors={errors}
                                     touched={touched}

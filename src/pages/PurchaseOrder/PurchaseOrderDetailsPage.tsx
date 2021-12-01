@@ -61,12 +61,9 @@ const PurchaseOrderDetailsPage = () => {
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
     const [currencySymbol, setCurrencySymbol] = useState(null);
     const [updateLoading, setUpdateLoading] = useState(false)
-    const [anchorEl, setAnchorEl] = useState(null);
     const [statusOptions, setStatusOptions] = useState([])
     const [purchaseOrderProduct, setPurchaseOrderProduct] = useState([])
     const [allowedToEdit, setAllowedToEdit] = useState(false);
-    const [showAddServiceDialog, setShowAddServiceDialog] = useState(false)
-    const [isSavingBulkEditDialog, setIsSavingBulkEditDialog] = useState(false)
     const [currentStepDisable, setCurrentStepDisable] = useState(false)
     const [currentStep, setCurrentStep] = useState(0);
     const [downlodingFile, setDownlodingFile] = useState(false)
@@ -200,13 +197,6 @@ const PurchaseOrderDetailsPage = () => {
         });
     }
 
-    const openActions = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const closeActions = () => {
-        setAnchorEl(null);
-    };
     const handleStatusChange = o => {
         handleUpdateData({ status: o.optionValue })
     }
@@ -333,45 +323,6 @@ const PurchaseOrderDetailsPage = () => {
                                     mainPoints={mainPoints}
                                     showHeading={true}
                                 >
-                                    {(permissions?.purchaseOrder?.isUpdate &&
-                                        <>
-                                            <Button
-                                                variant="outlined"
-                                                color="default"
-                                                size="small"
-                                                onClick={openActions}
-                                                disabled={updateLoading || purchaseOrderData?.status === "Received"}
-                                                aria-controls="action-menu"
-                                                endIcon={<ExpandMore />}
-                                            >
-                                                Change Status
-                                            </Button>
-                                            <Menu
-                                                anchorEl={anchorEl}
-                                                keepMounted
-                                                getContentAnchorEl={null}
-                                                anchorOrigin={{
-                                                    vertical: 'bottom',
-                                                    horizontal: 'left'
-                                                }}
-                                                id="action-menu"
-                                                open={Boolean(anchorEl)}
-                                                onClose={closeActions}>
-                                                {
-                                                    statusOptions.map(o => {
-                                                        return <MenuItem
-                                                            onClick={() => {
-                                                                closeActions()
-                                                                handleStatusChange(o)
-                                                            }}
-                                                            value={o}
-                                                            disabled={o.optionValue !== "Issued"}
-                                                        >{o?.optionLabel}</MenuItem>
-                                                    })
-                                                }
-                                            </Menu>
-                                        </>
-                                    )}
                                     {permissions?.purchaseOrder?.isUpdate && (
                                         <>
                                             <Button
