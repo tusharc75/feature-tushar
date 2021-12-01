@@ -85,7 +85,7 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
 
       setFormData(initialData);
 
-      const customFormArr = initialData.map((fD) => fD.resource?.id && fD.resource.id);
+      const customFormArr = initialData.map((fD) => fD.resource?.id && fD.resource.id).filter((x) => x);
       const filteredData =
         resourceData.length > 0
           ? resourceData.filter((d) => !customFormArr.includes(d?.id))
@@ -94,9 +94,10 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
     } else {
       const customFormArr = formData.map((fD) => fD.resource?.id).filter((x) => x);
       const filteredData =
-        resourceData.length > 0
-          ? resourceData.filter((d) => !customFormArr.includes(d?.id))
-          : allResourceData.filter((d) => !customFormArr.includes(d?.id));
+        allResourceData.length > 0
+          ? allResourceData.filter((d) => !customFormArr.includes(d?.id))
+          : resourceData.filter((d) => !customFormArr.includes(d?.id));
+      console.log(customFormArr, filteredData)
       setResourceData(filteredData);
     }
   }, [formData]);

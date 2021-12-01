@@ -562,7 +562,7 @@ const PackageList = () => {
                     {isConfirmDialogVisible ? (
                         <ConfirmationDialog
                             open={isConfirmDialogVisible}
-                            message={`Are you sure you want to delete ${deleteRecord?.packageName ? 'Package' : 'selected Packages'}   ${deleteRecord.packageName || ''}?`}
+                            message={`Are you sure you want to delete ${deleteRecord?.packageName ? 'this Package' : 'selected Packages'}?`}
                             onClose={() => {
                                 if (deleteRecord) setDeleteRecord({});
                                 setIsConformDialogVisible(false);
@@ -575,7 +575,7 @@ const PackageList = () => {
                     {singlePackageDelete.show ? (
                         <ConfirmationDialog
                             open={singlePackageDelete.show}
-                            message={`Are you sure you want to delete Package: ${singlePackageDelete.packageName}?`}
+                            message={`Are you sure you want to delete this Package?`}
                             onClose={() =>
                                 setSinglePackageDelete({
                                     id: null,
