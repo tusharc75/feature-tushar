@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.11.0](https://github.com/vebholic/oms_frontend/compare/v2.10.0...v2.11.0) (2021-12-01)
+
+
+### Features
+
+* - Serialized assets columns fetching done from form builder ([ea71106](https://github.com/vebholic/oms_frontend/commit/ea71106039354e59cffbd8ef1beb6f22082d124a))
+* **dynamicform:** loading and receiving ticket ([8e6b1e3](https://github.com/vebholic/oms_frontend/commit/8e6b1e3eecab04ef090f8af4b3450baf25fd2a46))
+
+
+### Bug Fixes
+
+* pO bug fixes ([f591b07](https://github.com/vebholic/oms_frontend/commit/f591b0777da38cfb51b91e5397a05a272c390fcd))
+* **transferasset:** add title for update ([fca67b3](https://github.com/vebholic/oms_frontend/commit/fca67b3d26050e79cbf69ce3caf9f88b76647735))
+* **transferasset:** fix remove not working ([36aaf5c](https://github.com/vebholic/oms_frontend/commit/36aaf5c8a8ec152e5b743f97706798f3ff914fbf))
+* **transferasset:** plant info in add assets ([1234459](https://github.com/vebholic/oms_frontend/commit/12344592098d790a10134695a055d5e3f35dcd6b))
+* **transferasset:** transfer asset grid filter ([c1e005d](https://github.com/vebholic/oms_frontend/commit/c1e005db06e3a590cd72830be58988a829a1c579))
+
 ## [2.10.0](https://github.com/vebholic/oms_frontend/compare/v2.9.1...v2.10.0) (2021-11-30)
 
 
