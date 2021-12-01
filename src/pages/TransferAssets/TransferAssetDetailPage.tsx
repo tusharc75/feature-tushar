@@ -309,6 +309,7 @@ const TransferAssetDetailPage = () => {
             <TabPanel value={tabValue} index={1}>
               <Box my={2}>
                 <TransferStepper
+                  hasAssets={existingAssets.length > 0}
                   isTransferEnded={isTransferEnded}
                   isNextStep={isNextStep}
                   steps={transferSteps}
