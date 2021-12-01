@@ -175,7 +175,7 @@ const TransferSteps = (props) => {
                                   setCurrentStep(currentStep + 1)
                                 }}
                                 size="small"
-                                disabled={currentStep >= 1 || (currentStep === 0 && !isNextStep) || isTransferEnded}
+                                disabled={currentStep >= 1 || isTransferEnded}
 
                               >
                                 Next
@@ -228,7 +228,7 @@ const TransferSteps = (props) => {
                           onClick={() => {
                             setCurrentStep(currentStep + 1)
                           }}
-                          disabled={currentStep >= 1 || (currentStep === 0 && !isNextStep) || isTransferEnded}
+                          disabled={currentStep >= 1 || isTransferEnded}
                           className="stepperButtonNext"
                         >
                           <RiShareForwardFill />
