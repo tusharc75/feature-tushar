@@ -94,7 +94,8 @@ const TransferSteps = (props) => {
     steps,
     currentStep,
     isTransferEnded,
-    setCurrentStep
+    setCurrentStep,
+    hasAssets
   } = props;
   const classes = useStyles();
   let activeStep = currentStep;
@@ -175,7 +176,7 @@ const TransferSteps = (props) => {
                                   setCurrentStep(currentStep + 1)
                                 }}
                                 size="small"
-                                disabled={currentStep >= 1 || isTransferEnded}
+                                disabled={currentStep >= 1 || !hasAssets || isTransferEnded}
 
                               >
                                 Next
@@ -228,7 +229,7 @@ const TransferSteps = (props) => {
                           onClick={() => {
                             setCurrentStep(currentStep + 1)
                           }}
-                          disabled={currentStep >= 1 || isTransferEnded}
+                          disabled={currentStep >= 1 || !hasAssets || isTransferEnded}
                           className="stepperButtonNext"
                         >
                           <RiShareForwardFill />
