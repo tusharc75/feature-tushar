@@ -575,7 +575,7 @@ const PackageList = () => {
                     {singlePackageDelete.show ? (
                         <ConfirmationDialog
                             open={singlePackageDelete.show}
-                            message={`Are you sure you want to delete this Package?`}
+                            message={`Are you sure you want to delete this Package: ${deleteRecord?.packageName} ?`}
                             onClose={() =>
                                 setSinglePackageDelete({
                                     id: null,
