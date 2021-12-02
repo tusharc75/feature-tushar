@@ -15,6 +15,7 @@ import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import { processFieldName } from '../../constants/helpers';
 import { isMobile } from 'react-device-detect';
+import {MdAdd} from "react-icons/all";
 
 function LeadsHeader(props) {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -74,9 +75,10 @@ function LeadsHeader(props) {
                 </ToggleButtonGroup>
             }
         </Grid>
-        <Grid item xs={6} className={styles.filter_side}>
-            <Box className={styles.filter_side_header} component="div">
-                <div className="d-flex gap-2">
+        <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side}>
+            <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+
+                    <Grid style={{display: "flex", flex:1}}>
                     <SearchBox
                         onSearch={onSearch}
                         searchbox={styles.search_box_input}
@@ -84,33 +86,39 @@ function LeadsHeader(props) {
                         size="small"
                         placeholder="Search Leads"
                         width='242px'
+                        style={isMobile ? {flex:1} : {}}
                     />
-                    <div className="d-flex gap-2">
+
+                    </Grid>
+
+                        <Grid style={{display: "flex" , gap:"5px"}}>
                         {
-                            leadPermissions.isCreate && !isMobile &&
+                            leadPermissions.isCreate &&
                             <Button
-                                variant="contained"
+                                variant={isMobile ? "text" : "contained"}
                                 color="primary"
                                 size="small"
                                // className={styles.add_submit_btn}
                                 onClick={onCreate}
-                                startIcon={<AddOutlined />}
+                                // startIcon={<AddOutlined />}
+                                className={isMobile ? "mobile_button" : styles.add_submit_btn}
                             >
-                                Add
+                                {isMobile ? <MdAdd size={23}/> : "Add"}
                             </Button>
                         }
 
                         {
                             (leadPermissions.isDelete || allowToConvertLeadToOpportunity) && <>
                                 <Button
-                                    variant="outlined"
+                                    variant={isMobile ? "text" : "contained"}
                                     color="default"
                                     size="small"
                                    // className={styles.action_submit_btn}
                                     onClick={openActions}
                                     aria-controls="action-menu"
+                                    className={isMobile ? "mobile_button" : styles.action_submit_btn}
                                 >
-                                    Actions <ExpandMore />
+                                    {isMobile ? "" :  "Actions" } <ExpandMore/>
                                 </Button>
 
                                 <Menu
@@ -177,8 +185,7 @@ function LeadsHeader(props) {
                                     onClose={() => setMessageDialog({ open: false, message: null })}
                                 />
                             ) : null}
-                    </div>
-                </div>
+                        </Grid>
             </Box>
         </Grid>
     </Grid>

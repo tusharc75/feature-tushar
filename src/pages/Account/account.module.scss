@@ -63,6 +63,15 @@
   gap: 0.25rem;
   -webkit-gap: 0.25rem;
 }
+
+.mobile_filter_side_header{
+  display: flex;
+  justify-content: space-between;
+  gap: 0.50rem;
+
+}
+
+
 @supports (not (gap:0.25rem)) and (not (-webkit-gap: 0.25rem)){
   .account_header > *:not(:nth-child(1)) {
       margin-left: 0.25rem !important;

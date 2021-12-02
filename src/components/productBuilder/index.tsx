@@ -628,7 +628,8 @@ const ProductBuilder = (props) => {
                   }
                 })
                 ] : [{
-                  label: `Product Description: `,
+
+                  label: `Product description: `,
                   field: "productName",
                   forceShow: true
                 }] : []

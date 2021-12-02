@@ -45,6 +45,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { GridApi } from 'ag-grid-community';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import {MdAdd} from "react-icons/all";
 
 const AccTypes = [
   {
@@ -1008,38 +1009,40 @@ export default function Account(props) {
                 }
               </div>
             </Grid>
-            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1 " justify="flex-end" >
-              <div id="resourceOperations" className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`} style={{ flexGrow: 1 }}>
-                <Grid sm={12} className={styles.search_box_layout} style={{ display: "flex", flexGrow: 1 }} >
+            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1 " justify={isMobile ? "flex-start" : "flex-end"} >
+              <div id="resourceOperations" className={`${isMobile ? accountClass.mobile_filter_side_header : accountClass.account_header} ${accountClass['account_header-mobile']}`} style={isMobile ? {flex:1} : {}}>
+                <Grid style={{display: "flex", flex:1}}>
                   {
-                    !isOffline && <SearchBox onSearch={handleSearch} searchbox="account_header_search_bar" style={{ flexGrow: 1 }} value={search} />
+                    !isOffline && <SearchBox onSearch={handleSearch} searchbox="account_header_search_bar" style={isMobile ? {flex:1} : {}} value={search}  width={isMobile ? "200px" : "300px"}/>
                   }
                 </Grid>
-                <div className={`d-flex align-items-center gap-1 ${accountClass.account_header_add_btn_action_btn_group}`} >
-                  {accountPermissions.isCreate && (
+
+                <Grid style={{display: "flex" , gap:"5px"}}>
+
+                  {accountPermissions?.isCreate && (
                     <Button
-                      variant="contained"
+                        variant={isMobile ? "text" : "contained"}
                       color="primary"
                       size="small"
-                      className={styles.add_submit_btn}
+                      className={isMobile ? "mobile_button" : styles.add_submit_btn}
                       onClick={clickCreateNew}
-                      startIcon={<AddOutlined />}
+                        startIcon={isMobile ? null : <AddOutlined />}
                     >
-                      Add
+                      {isMobile ? <MdAdd size={23}/> : "Add"}
                     </Button>
                   )}
 
                   {!isOffline && (accountPermissions.isDelete || accountPermissions.approveAccount) && (
                     <Button
                       disabled={selectedRecords.length === 0}
-                      variant="outlined"
+                      variant={isMobile ? "text" : "outlined"}
                       color="default"
                       size="small"
-                      className={styles.add_submit_btn}
+                      className={isMobile ? "mobile_button" : styles.add_submit_btn}
                       onClick={openActions}
                       aria-controls="action-menu"
                     >
-                      Actions <ExpandMore />
+                      {isMobile ? "" : "Actions"} <ExpandMore />
                     </Button>
                   )}
                   <Menu
@@ -1130,7 +1133,7 @@ export default function Account(props) {
                       </MenuItem>
                     )}
                   </Menu>
-                </div>
+                </Grid>
               </div>
             </Grid>
           </Grid>
@@ -1182,7 +1185,7 @@ export default function Account(props) {
                     // },
                 ]}
                 owerCollaboratorInitialsOrImages=""
-                onCreate={() => { }}
+                onCreate={clickCreateNew}
                 showClone={true}
                 onClone={(data) => { cloneAccount(data)}}
                 renderedFrom={accountResource} /> :
