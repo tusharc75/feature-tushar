@@ -11,7 +11,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import CustomContainer from '../../components/CustomContainer';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import styles from '../Leads/Header.module.scss';
-import style from "./contact.module.scss"
+import style from './contact.module.scss';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
@@ -24,16 +24,16 @@ import { Chip } from '@material-ui/core';
 import routes from './../../components/Helpers/Routes';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import contactClass from './contact.module.scss'
+import contactClass from './contact.module.scss';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-import EntitySelectionsDialog from "../../components/EntitySelections"
-import { AiOutlineDeploymentUnit } from "react-icons/ai"
-import { sidebarResource } from "../../constants/helpers"
-import Tooltip from "@material-ui/core/Tooltip"
-import IconButton from "@material-ui/core/IconButton"
+import EntitySelectionsDialog from '../../components/EntitySelections';
+import { AiOutlineDeploymentUnit } from 'react-icons/ai';
+import { sidebarResource } from '../../constants/helpers';
+import Tooltip from '@material-ui/core/Tooltip';
+import IconButton from '@material-ui/core/IconButton';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import { MdAccountCircle } from "react-icons/md";
 import { AiFillPhone } from "react-icons/ai";
@@ -62,12 +62,11 @@ export default function Contact(props) {
   let querySearch: string = queryParams.search as string;
   let queryColFilter: string = queryParams.colFilter as string;
 
-
-
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, selectedEntity, permissions }, dispatch: entityDispatch
+    state: { user, selectedEntity, permissions },
+    dispatch: entityDispatch
   }: any = useData();
   const {
     contact: { contactApi, contactResource, contactPermission, contactRoute },
@@ -98,14 +97,14 @@ export default function Contact(props) {
     isCreate: permissions[contactResource]?.isCreate,
     isUpdate: permissions[contactResource]?.isUpdate,
     isRead: permissions[contactResource]?.isRead,
-    isDelete: permissions[contactResource]?.isDelete,
+    isDelete: permissions[contactResource]?.isDelete
   });
-  const [showEntityDialog, setShowEntityDialog] = useState(false)
+  const [showEntityDialog, setShowEntityDialog] = useState(false);
 
   const [filter, setFilter] = useState(queryType ? queryType : 'All Contacts');
-  const [entities, setEntities] = useState([])
-  const [columns, setColumns] = useState([])
-  const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [entities, setEntities] = useState([]);
+  const [columns, setColumns] = useState([]);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const { getColumnData } = useColumns();
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -116,74 +115,74 @@ export default function Contact(props) {
   const [clonedData, setClonedData] = useState([])
   const localStorageSelectedRecords = `${contactResource}_selected`;
 
-
-
   useEffect(() => {
     if (queryPage === undefined) {
-      history.push(`?page=${page}`)
+      history.push(`?page=${page}`);
+    }
+    if (page > 0) {
+      history.replace(
+        queryType && querySearch && queryColFilter
+          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
+          : queryType && queryColFilter
+          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+          : queryType && querySearch
+          ? `?page=${page}&type=${queryType}&search=${querySearch}`
+          : queryColFilter && querySearch
+          ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+          : queryType
+          ? `?page=${page}&type=${queryType}`
+          : queryColFilter
+          ? `?page=${page}&colFilter=${queryColFilter}`
+          : querySearch
+          ? `?page=${page}&search=${querySearch}`
+          : `?page=${page}`
+      );
     }
   }, [page, queryPage]);
 
-
   useEffect(() => {
-    fetchGridColumns()
-  }, [])
+    fetchGridColumns();
+  }, []);
 
   const fetchGridColumns = async () => {
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource[contactResource]}`);
 
-    const response = await axiosInstance()
-      .get(`/field?resource=${sidebarResource[contactResource]}&view=true`)
+    let data = response?.data?.data;
 
-    let data = response?.data?.data
-
-    let columns = []
-    let rendererNames = []
-    data.forEach(o => {
-      if (["concatedName"].find(d => d === o?.fieldData?.fieldName)) {
-        columns = [...columns, {
-          disabled: true,
-          field: "concatedName",
-          headerName: "Contact Name",
-          pivotIndex: 0,
-          show: true,
-          primaryField: true
-        }]
-      } else {
-        let currentColumn = getColumnData(contactResource, o?.fieldData, `/${contactRoute}/detail`)
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData]
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName)
-          }
+    let columns = [];
+    let rendererNames = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(contactResource, o?.fieldData, `/${contactRoute}/detail`);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName);
         }
         return o?.fieldData
       }
-    })
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+      return o?.fieldData;
+    });
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
       relatedLeadRenderer: RelatedLeadRenderer,
       actionsRenderer: ActionsRenderer
+    };
+    if (contactResource.includes('customer')) {
+      columns = [...columns, { field: 'relatedLead', headerName: 'Related Lead', show: true, cellRenderer: 'relatedLeadRenderer' }];
     }
-    if (contactResource.includes("customer")) {
-      columns = [...columns,
-      { field: 'relatedLead', headerName: 'Related Lead', show: true, cellRenderer: 'relatedLeadRenderer' },
-      ]
-    }
-    setFrameWorkComponent({ ...tempFrameworkComponent })
-    let staticFields = getStaticFields()
-    staticFields.forEach(field => {
-      columns.push(checkStaticField(routes.projectSales.title, field))
-    })
-    setColumns([...columns])
+    setFrameWorkComponent({ ...tempFrameworkComponent });
+    let staticFields = getStaticFields();
+    staticFields.forEach((field) => {
+      columns.push(checkStaticField(routes.projectSales.title, field));
+    });
+    setColumns([...columns]);
 
-    if (queryColFilter !== undefined && (Object.keys(filters).length === 0)) {
-      let savedFilter = JSON.parse(sessionStorage.getItem("filters"));
+    if (JSON.parse(sessionStorage.getItem('filters')) !== null) {
+      let savedFilter = JSON.parse(sessionStorage.getItem('filters'));
       dispatch({ type: 'filter', filters: savedFilter });
-      setCount(1);
     }
-
-  }
+  };
   //  Grid Variables - End
   if (columnState) {
     columns.map((item) => {
@@ -199,6 +198,15 @@ export default function Contact(props) {
     if (newFilter !== null) {
       setFilter(newFilter);
       handleContactSelect(ContactTypes.find((d) => d.key === newFilter).value);
+      history.replace(
+        querySearch && queryColFilter
+          ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}&search=${search}`
+          : queryColFilter
+          ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}`
+          : querySearch
+          ? `?page=${page}&type=${newFilter}&search=${search}`
+          : `?page=${page}&type=${newFilter}`
+      );
     }
   };
 
@@ -237,116 +245,106 @@ export default function Contact(props) {
   }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, location]);
 
   useEffect(() => {
+    if (search) {
+      history.replace(
+        queryType && queryColFilter
+          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${search}`
+          : queryType
+          ? `?page=${page}&type=${queryType}&search=${search}`
+          : queryColFilter
+          ? `?page=${page}&colFilter=${queryColFilter}&search=${search}`
+          : `?page=${page}&search=${search}`
+      );
+    } else {
+      history.replace(
+        queryType && queryColFilter
+          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+          : queryType
+          ? `?page=${page}&type=${queryType}`
+          : queryColFilter
+          ? `?page=${page}&colFilter=${queryColFilter}`
+          : `?page=${page}`
+      );
+    }
+  }, [search]);
+
+  useEffect(() => {
     if (querySearch) {
       dispatch({ type: 'search', search: querySearch });
-
     }
-  }, [querySearch])
-
+  }, [querySearch]);
 
   useEffect(() => {
-    if (Object.keys(filters).length > 0 && count === 0) {
+    if (Object.keys(filters).length > 0) {
+      sessionStorage.setItem('filters', JSON.stringify(filters));
 
-      sessionStorage.setItem("filters", JSON.stringify(filters))
-
-      {
-        Object.keys(filters).map(function (key) {
-          let colName = key;
-          let colValue = filters[key].filter
-          let query = queryColFilter !== undefined ? queryColFilter.substring(1, queryColFilter.length - 1) : `[{colName=${colName},colValue=${colValue}}]`;
-
-          if (queryColFilter === undefined) {
-            history.push(queryType ? `?page=${page}&type=${queryType}&colFilter=${query}` : `?page=${page}&colFilter=${query}`);
-            setCheckColName(colName);
-            setCheckColValue(colValue);
-
+      let serialize = function (obj) {
+        var str = [];
+        for (var p in obj)
+          if (obj.hasOwnProperty(p)) {
+            str.push('{colName=' + encodeURIComponent(p) + ',' + 'colValue=' + encodeURIComponent(obj[p].filter) + '}');
           }
-          if (queryColFilter !== undefined && checkColName === colName) {
-            if (queryColFilter.length > 45) {
-              let reducedqueryColFilter = queryColFilter.substring(50)
-              let leftqueryColFilter = queryColFilter.substring(0, 50);
-              let replacedQuery = reducedqueryColFilter.replace(checkColValue, colValue);
-              let combineQuery = leftqueryColFilter + replacedQuery;
-              history.push(queryType ? `?page=${page}&type=${queryType}&colFilter=${combineQuery}` : `?page=${page}&colFilter=${combineQuery}`);
-              setCheckColName(colName);
-              setCheckColValue(colValue);
-            }
+        return str.join(',');
+      };
 
-            else {
-
-              history.push(queryType ? `?page=${page}&type=${queryType}&colFilter=[{colName=${colName},colValue=${colValue}}]` : `?page=${page}&colFilter=[{colName=${colName},colValue=${colValue}}]`);
-            }
-          }
-          if (queryColFilter !== undefined && checkColName !== colName) {
-
-            if (queryColFilter.length > 42 && Object.keys(filters).length === 1) {
-              history.push(queryType ? `?page=${page}&type=${queryType}` : `?page=${page}`)
-
-            }
-            else if (queryColFilter.length > 42 && queryColFilter.length < 84 && queryColFilter.includes(colName) === true) {
-              let newqueryColFilter = queryColFilter.substring(42, 83);
-              history.push(`?page=${page}&colFilter=[{colName=${colName},colValue=${colValue}}${newqueryColFilter}]`);
-            }
-
-
-
-            else {
-
-              let updatedQuery = `[${query}` + `,{colName=${colName},colValue=${colValue}}]`
-
-              history.push(queryType ? `?page=${page}&type=${queryType}&colFilter=${updatedQuery}` : `?page=${page}&colFilter=${updatedQuery}`);
-              setCheckColName(colName)
-              setCheckColValue(colValue)
-            }
-          }
-        })
-      }
+      history.replace(
+        queryType && querySearch
+          ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+          : queryType
+          ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
+          : querySearch
+          ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+          : `?page=${page}&colFilter=[${serialize(filters)}]`
+      );
     }
-  }, [filters])
 
-  useEffect(() => {
-    if (queryColFilter === undefined) {
-      sessionStorage.removeItem("filters");
-
+    if (Object.keys(filters).length === 0 && queryColFilter !== undefined) {
+      history.replace(
+        queryType && querySearch
+          ? `?page=${page}&type=${queryType}&search=${querySearch}`
+          : queryType
+          ? `?page=${page}&type=${queryType}`
+          : querySearch
+          ? `?page=${page}&search=${querySearch}`
+          : `?page=${page}`
+      );
     }
-  }, [queryColFilter])
-
-
-
+    if (Object.keys(filters).length === 0 && queryColFilter === undefined) {
+      sessionStorage.removeItem('filters');
+    }
+  }, [filters]);
 
   const handleEntityChange = (entityId) => {
     entityDispatch({ type: SET_SELECTED_ENTITY, payload: entityId });
-  }
+  };
 
   const hasAccessToEntity = (id) => {
     const entityList = user.entity?.map((entity) => entity._id);
     return entityList.includes(id);
-  }
+  };
 
   const RelatedLeadRenderer = (params) =>
     params.value ? (
-      params?.data?.relatedLeadEntity === selectedEntity ?
+      params?.data?.relatedLeadEntity === selectedEntity ? (
         <Link className="link" to={`${routes.leadDetail.path}/${params.data.relatedLeadId}`} title={params.value}>
           {params.value}
         </Link>
-        :
-        hasAccessToEntity(params?.data?.relatedLeadEntity) ?
-          <span
-            className="link"
-            onClick={() => {
-              handleEntityChange(params.data?.relatedLeadEntity)
-              history.push(`${routes.leadDetail.path}/${params.data.relatedLeadId}`)
-            }}
-            title={params.value}
-          >
-            {params.value}
-          </span>
-          :
-          <span
-            title={params.value}
-          >
-            <CustomRenderCell value={params.value} />
-          </span>
+      ) : hasAccessToEntity(params?.data?.relatedLeadEntity) ? (
+        <span
+          className="link"
+          onClick={() => {
+            handleEntityChange(params.data?.relatedLeadEntity);
+            history.push(`${routes.leadDetail.path}/${params.data.relatedLeadId}`);
+          }}
+          title={params.value}
+        >
+          {params.value}
+        </span>
+      ) : (
+        <span title={params.value}>
+          <CustomRenderCell value={params.value} />
+        </span>
+      )
     ) : (
       <NoDataCell />
     );
@@ -354,13 +352,14 @@ export default function Contact(props) {
   const ActionsRenderer = (params) => (
     <>
       <Tooltip
-        className={contactPermissions.isCreate ? "" : "cursor-stop"}
-        title={contactPermissions.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+        className={contactPermissions.isCreate ? '' : 'cursor-stop'}
+        title={contactPermissions.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
+      >
         <IconButton
           size="small"
           aria-label="Clone"
           onClick={() => {
-            setShowCreateContactDialog({ open: true, isClone: true, idToClone: params.data._id })
+            setShowCreateContactDialog({ open: true, isClone: true, idToClone: params.data._id });
           }}
         >
           <FileCopyIcon fontSize="small" color="primary" />
@@ -380,41 +379,40 @@ export default function Contact(props) {
         entity="contact"
       />
 
-      {
-        contactPermissions.isUpdate && params.data?.isAllowedToUpdate ?
-          <Tooltip title="Entity">
-            <IconButton
-              size="small"
-              aria-label="Entity"
-              onClick={() => {
-                setContactId(params.data._id)
-                setShowEntityDialog(true)
+      {contactPermissions.isUpdate && params.data?.isAllowedToUpdate ? (
+        <Tooltip title="Entity">
+          <IconButton
+            size="small"
+            aria-label="Entity"
+            onClick={() => {
+              setContactId(params.data._id);
+              setShowEntityDialog(true);
+              if (params?.data?.entityId) {
+                let entities = [];
                 if (params?.data?.entityId) {
-                  let entities = []
-                  if (params?.data?.entityId) {
-                    entities.push(params?.data?.entityId)
-                  }
-                  if (params?.data?.restentity) {
-                    let restEntities = params?.data?.restentity.map(o => o?.optionValue)
-                    entities = [...entities, ...restEntities]
-                  }
-                  setEntities([...entities])
+                  entities.push(params?.data?.entityId);
                 }
-                else if (params?.data?.restentity) {
-                  let restEntities = params?.data?.restentity.map(o => o?.optionValue)
-                  setEntities([...restEntities])
+                if (params?.data?.restentity) {
+                  let restEntities = params?.data?.restentity.map((o) => o?.optionValue);
+                  entities = [...entities, ...restEntities];
                 }
-              }}>
-              <AiOutlineDeploymentUnit fontSize="15" color="primary" />
-            </IconButton>
-          </Tooltip> : (
-            <Tooltip className="cursor-stop" title="You do not have permission to update entity">
-              <IconButton aria-label="Clone" size="small">
-                <AiOutlineDeploymentUnit fontSize="15" />
-              </IconButton>
-            </Tooltip>
-          )
-      }
+                setEntities([...entities]);
+              } else if (params?.data?.restentity) {
+                let restEntities = params?.data?.restentity.map((o) => o?.optionValue);
+                setEntities([...restEntities]);
+              }
+            }}
+          >
+            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to update entity">
+          <IconButton aria-label="Clone" size="small">
+            <AiOutlineDeploymentUnit fontSize="15" />
+          </IconButton>
+        </Tooltip>
+      )}
     </>
   );
 
@@ -455,7 +453,7 @@ export default function Contact(props) {
   };
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterContacts=${queryType === "My Accounts" ? 2 : selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}&filterContacts=${queryType === 'My Accounts' ? 2 : selectedType}`;
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -500,7 +498,6 @@ export default function Contact(props) {
       .get(`${contactApi}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-
           let finalObject = prepareDataForGrid(u, user);
           finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
           finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
@@ -526,8 +523,7 @@ export default function Contact(props) {
             canDelete: u.owner?.optionValue === user?.user._id,
             relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
             relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
-            relatedLeadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
-
+            relatedLeadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity
           };
         });
         setIsAllChecked(false);
@@ -568,7 +564,6 @@ export default function Contact(props) {
         toastConfig.setToastConfig(err);
         dispatch({ type: 'loading', loading: false });
       });
-
   };
 
   const handleSingleDeleteContacts = async () => {
@@ -633,7 +628,6 @@ export default function Contact(props) {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-    history.push(`?page=${page}&search=${search}`)
   };
 
   const handleContactSelect = (filterValues) => {
@@ -644,8 +638,7 @@ export default function Contact(props) {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes[contactResource].title }]}
-          />
+          <CustomBreadCrumbs routes={[{ title: routes[contactResource].title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
@@ -660,8 +653,8 @@ export default function Contact(props) {
             recordsToExport={selectedRecords.length}
             ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll()
-              else getContacts()
+              if (gridApi) gridApi.deselectAll();
+              else getContacts();
             }}
           />
         </Grid>
@@ -672,20 +665,19 @@ export default function Contact(props) {
           <Grid container className="header-panel" justify="space-between" alignContent="center">
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
               <Grid container className="gap-1">
-                <Grid className="d-flex align-items-center gap-1" >
+                <Grid className="d-flex align-items-center gap-1">
                   <MdContacts className="headerLogo" />
-                  <span id="resourceHeader" className="listingHeader">{routes[contactResource].title}</span>
+                  <span id="resourceHeader" className="listingHeader">
+                    {routes[contactResource].title}
+                  </span>
                 </Grid>
-                <Grid >
+                <Grid>
                   {ContactTypes && (
                     <ToggleButtonGroup id="resourceTypeSelector" size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
                       {ContactTypes.map((k, index) => {
                         return (
                           <ToggleButton value={k.key} key={index}>
-                            <Link to={`/${contactRoute}?page=${page}&type=${encodeURIComponent(k.key)}`} >
-                              {k.key}
-                            </Link>
-
+                            {k.key}
                           </ToggleButton>
                         );
                       })}
@@ -708,174 +700,133 @@ export default function Contact(props) {
               </Grid>
             </Grid>
             <Grid item md={6} sm={6} xs={12} className={styles.filter_side}>
-              <Box id="resourceOperations" className={styles.filter_side_header} component="div">
-                <div className="d-flex gap-2">
-                  <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} value={search} size="small" />
-                  <div className="d-flex gap-2">
-                    {contactPermissions.isCreate && !isMobile && (
-                      <>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          onClick={clickCreateNew}
-                          startIcon={<AddIcon />}
-                          className={styles.add_submit_btn}
-                        >
-                          Add
-                        </Button>
-                      </>
-                    )}
-                    <>
-                      <Button
-                        // disabled={Boolean(!selectedBrand)}
+              <Box id="resourceOperations" className={styles.filter_side_header} component="div" style={{ flexGrow: 1 }}>
+                <Grid sm={12} className={styles.search_box_layout} style={{ display: 'flex', flexGrow: 1 }}>
+                  <SearchBox
+                    style={{ flexGrow: 1, maxWidth: '400px' }}
+                    onSearch={handleSearch}
+                    searchbox={styles.search_box_input}
+                    value={search}
+                    size="small"
+                  />
+                </Grid>
+                {contactPermissions.isCreate && (
+                  <>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={clickCreateNew}
+                      startIcon={<AddIcon />}
+                      className={styles.add_submit_btn}
+                    >
+                      Add
+                    </Button>
+                  </>
+                )}
+                <>
+                  <Button
+                    // disabled={Boolean(!selectedBrand)}
+                    disabled={selectedRecords.length === 0}
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    className={styles.action_submit_btn}
+                    aria-controls="action-menu"
+                  >
+                    Actions <ExpandMore />
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    {contactPermissions.isDelete && (
+                      <MenuItem
                         disabled={selectedRecords.length === 0}
-                        variant="outlined"
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        // className={styles.action_submit_btn}
-                        aria-controls="action-menu"
-                      >
-                        Actions <ExpandMore />
-                      </Button>
-
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
+                        onClick={() => {
+                          if (selectedRecords.some((d) => d.canDelete === false)) {
+                            closeActions();
+                            setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
+                          } else {
+                            closeActions();
+                            setShowDeleteConfirmBox(true);
+                          }
                         }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
                       >
-                        {contactPermissions.isDelete && (
-                          <MenuItem
-                            disabled={selectedRecords.length === 0}
-                            onClick={() => {
-                              if (selectedRecords.some((d) => d.canDelete === false)) {
-                                closeActions();
-                                setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
-                              } else {
-                                closeActions();
-                                setShowDeleteConfirmBox(true);
-                              }
-                            }}>
-                            Delete
-                          </MenuItem>)}
-                        {contactPermissions.isUpdate && (
-                          <MenuItem
-                            disabled={selectedRecords.length === 0}
-                            onClick={() => {
-                              if (selectedRecords.some((d) => d.isUpdate === false)) {
-                                closeActions();
-                                setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
-                              } else {
-                                closeActions();
-                                if (selectedRecords.length) {
-                                  let entities = []
-                                  selectedRecords.map(current => {
-
-                                    if (current?.entityId) {
-                                      entities = [...entities, current?.entityId]
-                                    }
-                                    if (current?.restentity) {
-                                      let restEntities = current?.restentity.map(o => o?.optionValue)
-                                      entities = [...entities, ...restEntities]
-                                    }
-                                  })
-                                  setEntities([...entities])
+                        Delete
+                      </MenuItem>
+                    )}
+                    {contactPermissions.isUpdate && (
+                      <MenuItem
+                        disabled={selectedRecords.length === 0}
+                        onClick={() => {
+                          if (selectedRecords.some((d) => d.isUpdate === false)) {
+                            closeActions();
+                            setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+                          } else {
+                            closeActions();
+                            if (selectedRecords.length) {
+                              let entities = [];
+                              selectedRecords.map((current) => {
+                                if (current?.entityId) {
+                                  entities = [...entities, current?.entityId];
                                 }
-                                setShowEntityDialog(true)
-                              }
-                            }}
-                          >
-                            Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
-                          </MenuItem>
-                        )}
-                      </Menu>
-                    </>
-                  </div>
-                </div>
+                                if (current?.restentity) {
+                                  let restEntities = current?.restentity.map((o) => o?.optionValue);
+                                  entities = [...entities, ...restEntities];
+                                }
+                              });
+                              setEntities([...entities]);
+                            }
+                            setShowEntityDialog(true);
+                          }
+                        }}
+                     
+                      >
+                        Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
+                      </MenuItem>
+                    )}
+                  </Menu>
+                </>
               </Box>
             </Grid>
           </Grid>
         </div>
         <Box component="div">
-          {
-            Object.keys(frameWorkComponent).length > 0 ?
-              isMobile ? <CustomSwipableList
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={contactPermissions}
-                primaryField={columns?.find(d => d.primaryField)}
-                onClick={(data) => {
-                  history.push(`${contactApi}/${data._id}`)
-                }}
-                dataRows={dataRows}
-                selectedRecords={selectedRecords}
-                dispatch={dispatch}
-                onEdit={(data) => {
-                  history.push(`${contactApi}/detail/${data._id}?openEdit=true`)
-                }}
-                extraParamsToCheckDelete={true}
-                onDelete={(data) => {
-                  setSingleContactDelete({
-                    show: true,
-                    id: data._id,
-                    contactedName: data.concatedName
-                  });
-                }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                additionalDetails={[
-                  {
-                    icon: <MdEmail size={18} />,
-                    field: "email"
-                  },
-                  {
-                    icon: <AiFillPhone size={18} />,
-                    field: "phone"
-                  },
-                ]}
-                chips={[
-                  {
-                    label: "Entity: ",
-                    field: "entity",
-                  },
-                ]}
-                owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                onCreate={clickCreateNew}
-                showClone={true}
-                onClone={(data) => { setShowCreateContactDialog({ open: true, isClone: true, idToClone: data._id }) }}
-                renderedFrom={contactResource}
-              /> : <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                actionWidth={170}
-                page={page}
-                loading={loading}
-                renderedFrom={contactResource}
-                refreshGrid={getContacts}
-              /> : null
-          }
+          {Object.keys(frameWorkComponent).length > 0 ? (
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              actionWidth={170}
+              page={page}
+              loading={loading}
+              renderedFrom={contactResource}
+              refreshGrid={getContacts}
+            />
+          ) : null}
 
           {showDeleteWarningConfirmBox?.show ? (
             <MessageDialog
               open={showDeleteWarningConfirmBox?.show}
-              message={showDeleteWarningConfirmBox?.isDelete ?
-                `You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`
-                : `You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`
+              message={
+                showDeleteWarningConfirmBox?.isDelete
+                  ? `You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`
+                  : `You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`
               }
               onClose={() => setShowDeleteWarningConfirmBox({ show: false, isDelete: false })}
             />
@@ -919,20 +870,19 @@ export default function Contact(props) {
               onOk={handleSingleDeleteContacts}
             />
           ) : null}
-          {
-            showEntityDialog ?
-              <EntitySelectionsDialog
-                open={showEntityDialog}
-                resource={sidebarResource[contactResource]}
-                resourceIds={selectedRecords.length ? selectedRecords.map(o => o._id) : [contactId]}
-                onClose={() => {
-                  setShowEntityDialog(false)
-                  setContactId("")
-                }}
-                onSuccess={getContacts}
-                entities={entities}
-              /> : null
-          }
+          {showEntityDialog ? (
+            <EntitySelectionsDialog
+              open={showEntityDialog}
+              resource={sidebarResource[contactResource]}
+              resourceIds={selectedRecords.length ? selectedRecords.map((o) => o._id) : [contactId]}
+              onClose={() => {
+                setShowEntityDialog(false);
+                setContactId('');
+              }}
+              onSuccess={getContacts}
+              entities={entities}
+            />
+          ) : null}
         </Box>
       </CustomContainer>
     </Fragment>
