@@ -82,8 +82,8 @@ function RentalManagementHeader(props) {
         {children}
       </Grid>
       <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
-        <Box className={styles.filter_side_header} component="div">
-          <div className="d-flex gap-2">
+        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+          <Grid style={{display: "flex", flex:1}}>
             <HideWhenOffline>
               <SearchBox
                 onSearch={onSearch}
@@ -91,10 +91,14 @@ function RentalManagementHeader(props) {
                 value={searchVal}
                 size="small"
                 placeholder={`Search ${routes.rentalManagement.title}`}
-                width="300px"
+                style={isMobile ? {flex:1} : {}}
               />
             </HideWhenOffline>
-            <div className="d-flex gap-2">
+
+          </Grid>
+
+
+          <Grid style={{display: "flex" , gap:"5px"}}>
               {RentalManagementPermissions.isCreate && RentalManagementPermissions.isUpdate && !isMobile && (
                 <Button
                   variant="contained"
@@ -117,7 +121,7 @@ function RentalManagementHeader(props) {
                         variant={isMobile ? "text" : "outlined"}
                         color="default"
                         size="small"
-                        className={isMobile ? "mobile-action-view" : "Des-action"}
+                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
                         onClick={openActions}
                         // className={styles.action_submit_btn}
                         aria-controls="action-menu"
@@ -167,8 +171,8 @@ function RentalManagementHeader(props) {
                   )
                 }
               </HideWhenOffline>
-            </div>
-          </div>
+          </Grid>
+
         </Box>
       </Grid>
     </Grid>

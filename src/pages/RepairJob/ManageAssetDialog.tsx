@@ -167,25 +167,8 @@ export default function ManageAssetDialog({ open, fields, asset, selectedRecords
                                         onClick={() => {
                                             setIsUpdating(true);
                                             submitForm();
-
-                                            // axiosInstance().put(`${productInventoryHelperObject.api}/update-status`, {
-                                            //     comment: statusToUpdate.message,
-                                            //     assets: selectedRecords.map(m => m?._id ?? m?.id),
-                                            //     status: statusToUpdate.status,
-                                            //     reference: {
-                                            //         _id: rentalManagementId,
-                                            //         type: "Rental"
-                                            //     }
-                                            // }).then(({ data }) => {
-                                            //     toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
-
-                                            //     fetchRecords();
-                                            // }).catch((error) => {
-                                            //     setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false }));
-                                            //     toastConfig.setToastConfig(error)
-                                            // })
                                         }}
-                                        disabled={isUpdating}
+                                        disabled={isUpdating || Object.keys(errors).length > 0}
                                         variant="contained"
                                         color="primary"
                                     >

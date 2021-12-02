@@ -562,13 +562,13 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                 <Box
                     p="6px"
                     zIndex={5}
-                    width={
-                        isTabletScreen
-                            ? "calc(100vw - 20px)"
-                            : isSmallScreen
-                                ? "calc(100vw - 78px)"
-                                : showActivity ? "100%" : "calc(100vw - 100px)"
-                    }
+                    // width={
+                    //     isTabletScreen
+                    //         ? "calc(100vw - 20px)"
+                    //         : isSmallScreen
+                    //             ? "calc(100vw - 78px)"
+                    //             : showActivity ? "100%" : "calc(100vw - 100px)"
+                    // }
                     height="calc(100vh - 330px)"
                 >
                     <CustomReactTable

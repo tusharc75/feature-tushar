@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.12.0](https://github.com/vebholic/oms_frontend/compare/v2.11.0...v2.12.0) (2021-12-02)
+
+
+### Features
+
+* - Loading Ticket, Receiving Ticket Not Coming Issue Fixed In Rental Management ([2cfa143](https://github.com/vebholic/oms_frontend/commit/2cfa1438ad446d882a2575c4c1fe37eb8da3abcf))
+* - PO-405 - Bulk/Single Edit Serialized Asset Done in repair job ([a107df3](https://github.com/vebholic/oms_frontend/commit/a107df38e51e02a015f59b8def84eb3b2e177195))
+
+
+### Bug Fixes
+
+* **loadingticket:** date issue ([70eb653](https://github.com/vebholic/oms_frontend/commit/70eb65305f50d9de4f25a2e491770ce0a610a4b8))
+* **loadingticket:** sign validation ([ef5c8d3](https://github.com/vebholic/oms_frontend/commit/ef5c8d30628a572e29d5fdb41da849746a79eacc))
+* **loadintticket:** date fix ([2dc1d5e](https://github.com/vebholic/oms_frontend/commit/2dc1d5e48e1e6ce16490bc46932538a6be3a6e44))
+* **packagedetail:** fix filter ([eb8c9b1](https://github.com/vebholic/oms_frontend/commit/eb8c9b101b89b1d0c435fb393fb545531b09df19))
+* **packagedetails:** fix filter ([55d5378](https://github.com/vebholic/oms_frontend/commit/55d537880137c0806157d14edd5b654cd895755f))
+* pO-352 ([e2a3b31](https://github.com/vebholic/oms_frontend/commit/e2a3b31f7572ebf642a0f3f0d0c34f6cbae6910b))
+* **transferasset:** disable next ([28902e9](https://github.com/vebholic/oms_frontend/commit/28902e9aa5d6e3629858db9300dd5e214a918710))
+
 ## [2.11.0](https://github.com/vebholic/oms_frontend/compare/v2.10.0...v2.11.0) (2021-12-01)
 
 
