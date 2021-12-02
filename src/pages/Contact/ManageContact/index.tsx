@@ -53,7 +53,7 @@ export default function ManageContactDialog(props) {
 
   useEffect(() => {
     const { contactData } = props;
-    if (contactData && contactData?.fields && contactData?.initialValues) {
+    if (contactData && contactData?.fields.length !== 0 && contactData?.initialValues.length !== 0) {
       setContactData({
         fields: contactData.fields,
         initialValues: contactData.initialValues,

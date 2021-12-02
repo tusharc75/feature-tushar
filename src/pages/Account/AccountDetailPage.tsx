@@ -56,7 +56,7 @@ import {
   FcBinoculars,
   FcConferenceCall,
   FcMultipleSmartphones,
-  FcMoneyTransfer,
+  FcMoneyTransfer, FcApproval, FcDisapprove,
 } from "react-icons/fc";
 import ManageOpportunityDialog from "../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
 import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
@@ -73,7 +73,9 @@ import ProcessFlow from "../../components/ProcessFlow";
 import AdditionalDialogPopUp from "../../components/AdditionalDialogPopUp";
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import queryString from 'query-string';
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
+import {MdDelete, MdEdit} from "react-icons/md";
 
 function DisplayData({ label, value, icon }) {
   return (
@@ -91,7 +93,8 @@ function DisplayData({ label, value, icon }) {
 export default function AccountDetailPage(props) {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit } = parsed;
   const {
     account: { accountApi, accountResource, accountRoute },
     accountBreadcrumb,
@@ -137,6 +140,7 @@ export default function AccountDetailPage(props) {
   const [deleteAccount, setDeleteAccountId] = useState<any>({})
   const [additionalFieldName, setAdditionalFieldName] = useState("")
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [
     showAccountHierarchyInFullScreenDialog,
     setShowAccountHierarchyInFullScreenDialog,
@@ -442,7 +446,12 @@ export default function AccountDetailPage(props) {
         } else {
           updatedAccount["type"] = "parent";
         }
-
+        // if (isAllowedToEdit && openEdit === 'true') {
+        //   setOpenUpdateDialog(true);
+        //   const params = new URLSearchParams();
+        //   params.delete('openEdit');
+        //   history.push({ search: params.toString() });
+        // }
         newData.push(updatedAccount);
       });
 
@@ -471,6 +480,12 @@ export default function AccountDetailPage(props) {
     // }
     getAccountFields(data);
     setLoading(false);
+    if (openEdit === 'true') {
+      setOpenUpdateDialog(true);
+      const params = new URLSearchParams();
+      params.delete('openEdit');
+      history.push({ search: params.toString() });
+    }
     initializeGraphData();
 
   };
@@ -890,20 +905,26 @@ export default function AccountDetailPage(props) {
                     <>
                       <Button
                         id="detailApproveButton"
-                        variant="contained"
+                        variant={isMobile ? "outlined" : "contained"}
                         size="small"
                         color={
                           accountData.staticData?.approved
                             ? "secondary"
                             : "primary"
                         }
+
+                        className={
+                          accountData.staticData?.approved
+                              ? isMobile ? accountClass.mobile_button_layout_secondary : ""
+                              : isMobile ? accountClass.mobile_button_layout : ""
+                        }
                         onClick={() => {
                           setShowApproveDisapproveConfirmBox(true);
                         }}
                       >
                         {accountData.staticData?.approved
-                          ? "Disapprove"
-                          : "Approve"}
+                          ? isMobile ? <FcDisapprove /> : "Disapprove"
+                          : isMobile ? <FcApproval /> : "Approve"}
                       </Button>
                     </>
                   )
@@ -917,12 +938,15 @@ export default function AccountDetailPage(props) {
                     <>
                       <Button
                         id="detailEditButton"
-                        variant="contained"
+                        variant={isMobile ? "outlined" : "contained"}
                         color="primary"
                         size="small"
                         onClick={handleOpneUpdateDialog}
+                        className={isMobile ? accountClass.mobile_button_layout : ""}
+
                       >
-                        Edit
+                        {isMobile ? <MdEdit/> : "Edit"}
+
                       </Button>
                     </>
                   )
@@ -937,8 +961,11 @@ export default function AccountDetailPage(props) {
                     accountData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       id="detailDeleteButton"
-                      text="Delete"
+                      text={isMobile ? <MdDelete/> : "Delete"}
                       onClick={() => setShowConfirmBox(true)}
+                      style={{color:"#f44336", border: "1px solid #f44336"  }}
+                      className={isMobile ? accountClass.mobile_button_layout : ""}
+
                     />
                   ) : null
                 }
@@ -984,24 +1011,42 @@ export default function AccountDetailPage(props) {
                     }}
                   >
                     <Tab
-                      label="Details"
+                      label={
+                        <div className="tab-font">
+                        Details
+                        </div>
+                      }
                       aria-controls="a11y-tabpanel-0"
                       id="a11y-tab-0"
+                      className="tabLayout"
                     />
                     <Tab
-                      label="Account Hierarchy"
+                      label={
+                        <div className="tab-font">
+                        Account Hierarchy
+                        </div>
+                      }
                       aria-controls="a11y-tabpanel-1"
                       id="a11y-tab-1"
+                      className="tabLayout"
                     />
 
                     {
                       !isOffline && <Tab
-                        label="OM-Neurons"
+                        label={
+                          <div className="tab-font">
+                          OM-Neurons
+                          </div>
+                        }
                         aria-controls="a11y-tabpanel-2"
                         id="a11y-tab-2"
+                        className="tabLayout"
+
                       />
                     }
+                    <div className={'uio'}> </div>
                   </Tabs>
+
                   <TabPanel value={tabValue} index={0}>
                     <Box>
                       {
@@ -1016,7 +1061,7 @@ export default function AccountDetailPage(props) {
                     </Box>
                   </TabPanel>
                   <TabPanel value={tabValue} index={1} >
-                    <Box  style={{overflow: 'auto'}}>
+                    <Box style={{ overflow: 'auto' }}>
                       <AccountHierarchy
                         data={accountHierarchyData}
                         currentAccountId={accountData._id}

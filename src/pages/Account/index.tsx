@@ -44,6 +44,7 @@ import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { GridApi } from 'ag-grid-community';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 
 const AccTypes = [
   {
@@ -731,8 +732,7 @@ export default function Account(props) {
       let res = {
         ...finalObject,
         canDelete: u.owner?.optionValue === user?.user._id,
-
-        isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
+        allowedToEdit: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
         lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
         leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
         leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,

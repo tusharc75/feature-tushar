@@ -56,9 +56,9 @@ const CreateProductBuilder = () => {
       });
   };
 
-  const handleSave = () => {};
+  const handleSave = () => { };
 
-  const refreshProducts = (data) => {};
+  const refreshProducts = (data) => { };
 
   const [isAddNewProduct, setIsAddNewProduct] = useState(false);
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
@@ -220,6 +220,7 @@ const CreateProductBuilder = () => {
                           refreshProducts={refreshProducts}
                           Editable={true}
                           stage="product"
+                          setColumnForPDFExcel={() => { }}
                         />
                       )}
                     </Box>
@@ -242,6 +243,7 @@ const CreateProductBuilder = () => {
                           refreshProducts={refreshProducts}
                           Editable={true}
                           stage="cost"
+                          setColumnForPDFExcel={() => { }}
                         />
                       )}
                     </Box>
@@ -296,6 +298,7 @@ const CreateProductBuilder = () => {
                           setIsAddExistingProduct={setIsAddExistingProduct}
                           refreshProducts={refreshProducts}
                           Editable={true}
+                          setColumnForPDFExcel={() => { }}
                         />
                       )}
                     </Box>

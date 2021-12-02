@@ -766,7 +766,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                         tooltipMessage={field?.tooltipMessage}
                                                                                         size="small"
                                                                                         minDate={new Date()}
-                                                                                        maxDate={moment(values["rentalEndDate"]).subtract(1, "day")}
+                                                                                        maxDate={values["rentalEndDate"] ? moment(values["rentalEndDate"]).subtract(1, "day") : moment().add(5, "years")}
                                                                                     />
                                                                                 ) : field.fieldName === "rentalEndDate" ? (
                                                                                     <FormTypes

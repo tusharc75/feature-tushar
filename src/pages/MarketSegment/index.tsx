@@ -79,7 +79,7 @@ const MarketSegment = () => {
 
     const fetchGridColumns = () => {
         axiosInstance()
-            .get(`/field?resource=Market Segment`)
+            .get(`/field?resource=Market Segment&view=true`)
             .then(({ data: { data } }) => {
                 let columns = []
                 let rendererNames = []
@@ -217,9 +217,16 @@ const MarketSegment = () => {
         axiosInstance().get(`${marketSegment.marketSegmentApi}${queryString}`).then(({ data: { data, count } }) => {
 
             let rows = data.map((u) => {
-                return prepareDataForGrid(u);
-            });
 
+                let finalObject = prepareDataForGrid(u);
+                finalObject["canDelete"] = permissions.marketSegment.isDelete;
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                finalObject["allowedToEdit"] = permissions.marketSegment.isUpdate;
+                return {
+                    ...finalObject,
+
+                };
+            });
             dispatch({ type: "initialize", data: rows, count: count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
@@ -345,7 +352,7 @@ const MarketSegment = () => {
                     selectedRecords={selectedRecords}
                     dispatch={dispatch}
                     onEdit={(d) => {
-
+                        setOpen({ open: true, isClone: false, idToClone: d.id });
                     }}
                     extraParamsToCheckDelete={true}
                     onDelete={(d) => {

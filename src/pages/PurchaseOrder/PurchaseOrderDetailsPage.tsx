@@ -31,6 +31,7 @@ import Steps from "./Steps";
 import { FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms } from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
+import queryString from 'query-string';
 
 import Product from "./Product";
 import Service from "./Service";
@@ -42,11 +43,14 @@ const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.ge
 const purchaseOrderSteps = ["Add Product", "Add Services", "Issue PO", "Receiving Asset"]
 
 const PurchaseOrderDetailsPage = () => {
-
     const toastConfig = useContext(CustomToastContext);
     const { id } = useParams();
     const history = useHistory();
-    const { state: { user, permissions } }: any = useData();
+    const parsed = queryString.parse(history.location.search);
+    const { openEdit } = parsed;
+    const {
+        state: { user, permissions }
+    }: any = useData();
     const [headingLbl, setHeadingLbl] = useState("");
     const [loadingPurchaseOrder, setLoadingPurchaseOrder] = useState(false);
     const [purchaseOrderData, setPurchaseOrderData] = useState(null);
@@ -57,9 +61,9 @@ const PurchaseOrderDetailsPage = () => {
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
     const [currencySymbol, setCurrencySymbol] = useState(null);
     const [updateLoading, setUpdateLoading] = useState(false)
-    const [anchorEl, setAnchorEl] = useState(null);
     const [statusOptions, setStatusOptions] = useState([])
     const [purchaseOrderProduct, setPurchaseOrderProduct] = useState([])
+    const [allowedToEdit, setAllowedToEdit] = useState(false);
     const [currentStepDisable, setCurrentStepDisable] = useState(false)
     const [currentStep, setCurrentStep] = useState(0);
     const [downlodingFile, setDownlodingFile] = useState(false)
@@ -132,6 +136,9 @@ const PurchaseOrderDetailsPage = () => {
                 data: { data },
             } = await axiosInstance().get(`${purchaseOrder.api}/${id}`);
 
+            const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+            setAllowedToEdit(isAllowedToEdit);
+
             handleMainPoints(data);
             setHeadingLbl(`${data?.purchaseOrderNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
             setCustomizedRoutes([routes.purchaseOrder,
@@ -143,6 +150,14 @@ const PurchaseOrderDetailsPage = () => {
                     (d) => d.currencyCode === data["currency"]
                 )?.symbolNative
             );
+
+            if (isAllowedToEdit && openEdit === 'true') {
+                setOpenUpdateDialog(true);
+                const params = new URLSearchParams();
+                params.delete('openEdit');
+                history.push({ search: params.toString() });
+            }
+
             setLoadingPurchaseOrder(false);
         } catch (error) {
             toastConfig.setToastConfig(error);
@@ -182,13 +197,6 @@ const PurchaseOrderDetailsPage = () => {
         });
     }
 
-    const openActions = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const closeActions = () => {
-        setAnchorEl(null);
-    };
     const handleStatusChange = o => {
         handleUpdateData({ status: o.optionValue })
     }
@@ -315,45 +323,6 @@ const PurchaseOrderDetailsPage = () => {
                                     mainPoints={mainPoints}
                                     showHeading={true}
                                 >
-                                    {(permissions?.purchaseOrder?.isUpdate &&
-                                        <>
-                                            <Button
-                                                variant="outlined"
-                                                color="default"
-                                                size="small"
-                                                onClick={openActions}
-                                                disabled={updateLoading || purchaseOrderData?.status === "Received"}
-                                                aria-controls="action-menu"
-                                                endIcon={<ExpandMore />}
-                                            >
-                                                Change Status
-                                            </Button>
-                                            <Menu
-                                                anchorEl={anchorEl}
-                                                keepMounted
-                                                getContentAnchorEl={null}
-                                                anchorOrigin={{
-                                                    vertical: 'bottom',
-                                                    horizontal: 'left'
-                                                }}
-                                                id="action-menu"
-                                                open={Boolean(anchorEl)}
-                                                onClose={closeActions}>
-                                                {
-                                                    statusOptions.map(o => {
-                                                        return <MenuItem
-                                                            onClick={() => {
-                                                                closeActions()
-                                                                handleStatusChange(o)
-                                                            }}
-                                                            value={o}
-                                                            disabled={o.optionValue !== "Issued"}
-                                                        >{o?.optionLabel}</MenuItem>
-                                                    })
-                                                }
-                                            </Menu>
-                                        </>
-                                    )}
                                     {permissions?.purchaseOrder?.isUpdate && (
                                         <>
                                             <Button

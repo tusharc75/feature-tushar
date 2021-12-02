@@ -1,26 +1,17 @@
-import React, { useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
-import Button from "@material-ui/core/Button";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import clsx from "clsx";
-import { GiBackwardTime } from "react-icons/gi";
 import IconButton from '@material-ui/core/IconButton';
 import {
-  StepIconProps,
+
   Grid,
 } from "@material-ui/core";
 import {
-  IoIosArrowDroprightCircle,
+
   IoIosArrowDropleftCircle,
 } from "react-icons/io";
-import { GoPencil } from "react-icons/go";
-import { BsCheckCircle } from "react-icons/bs";
-import { AiOutlineCloseCircle } from "react-icons/ai";
-import { FaHourglassHalf } from "react-icons/fa";
-
 import { isMobile } from "react-device-detect";
 import { TiArrowBack } from "react-icons/ti";
 import { RiShareForwardFill } from "react-icons/ri";
@@ -97,78 +88,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const useColorlibStepIconStyles = makeStyles((theme) => ({
-  root: {
-
-    color: "#d1c4c4",
-    width: 30,
-    height: 30,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  active: {
-
-    color: "#047d1c !important",
-  },
-  completed: {
-    color: "#3f3f02 !important",
-  },
-  rejected: {
-    color: "#b3a6a6 !important",
-  },
-}));
-
 const TransferSteps = (props) => {
   const {
     isNextStep,
     steps,
     currentStep,
-    setCurrentStep
+    isTransferEnded,
+    setCurrentStep,
+    hasAssets
   } = props;
   const classes = useStyles();
   let activeStep = currentStep;
-  const toastConfig = useContext(CustomToastContext);
-  const ColorlibStepIcon = (props: StepIconProps) => {
-    const classes = useColorlibStepIconStyles();
-    var { active, completed } = props;
-    var rejected = false;
-    let status = 1;
-    if (active) {
-      status = 1;
-      active = true;
-      completed = false;
-      rejected = false;
-    }
-    if (props.icon === steps.length && props.active) {
-
-      status = 4;
-      active = false;
-      completed = false;
-      rejected = true;
-
-    }
-
-    const icons: { [index: string]: React.ReactElement } = {
-      1: <GiBackwardTime size={20} />,
-      2: <GoPencil size={20} />,
-      3: <BsCheckCircle size={20} />,
-      4: <AiOutlineCloseCircle size={20} color={rejected ? "red" : ""} />,
-      5: <FaHourglassHalf size={20} />,
-    };
-
-    return (
-      <div
-        className={clsx(classes.root, {
-          [classes.active]: active,
-          [classes.completed]: completed,
-          [classes.rejected]: rejected,
-        })}
-      >
-        {icons["3"]}
-      </div>
-    );
-  };
 
   return (
     <div>
@@ -187,7 +117,7 @@ const TransferSteps = (props) => {
                   {(
                     <div>
                       <IconButton
-                        disabled={currentStep === 5 || currentStep === 0}
+                        disabled={currentStep === 0 || isTransferEnded}
                         onClick={() => {
                           setCurrentStep(currentStep - 1)
                         }}
@@ -215,7 +145,7 @@ const TransferSteps = (props) => {
                           <div>
                             <IconButton
                               color="primary"
-                              disabled={currentStep === 5 || currentStep === 0}
+                              disabled={currentStep === 1 || (currentStep === 0 && !isNextStep) || isTransferEnded}
                               onClick={() => {
                                 setCurrentStep(currentStep + 1)
                               }}
@@ -246,7 +176,7 @@ const TransferSteps = (props) => {
                                   setCurrentStep(currentStep + 1)
                                 }}
                                 size="small"
-                                disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
+                                disabled={currentStep >= 1 || !hasAssets || isTransferEnded}
 
                               >
                                 Next
@@ -260,20 +190,18 @@ const TransferSteps = (props) => {
                 </Grid>
               </Grid>
               <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={activeStep}>
-                {steps.map((label, i) => (
+                {steps.map((label: string, i: number) => (
                   <Step
                     key={label}
                     className={clsx(classes.step, {
-                      [classes.active]:
-                        currentStep > i ||
-                        steps[currentStep] === "End",
+                      [classes.active]: currentStep > i || isTransferEnded,
                       [classes.currentStep]: currentStep === i,
                       [classes.inActive]: currentStep !== i,
+
                     })}
                   >
                     <StepLabel
                       style={{ color: "#555" }}
-                      // StepIconComponent={ColorlibStepIcon}
                       className="currentStepColor"
                     >
                       {label}
@@ -301,7 +229,7 @@ const TransferSteps = (props) => {
                           onClick={() => {
                             setCurrentStep(currentStep + 1)
                           }}
-                          disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
+                          disabled={currentStep >= 1 || !hasAssets || isTransferEnded}
                           className="stepperButtonNext"
                         >
                           <RiShareForwardFill />

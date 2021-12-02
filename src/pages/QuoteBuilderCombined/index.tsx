@@ -48,9 +48,8 @@ import CustomSwipableList from "../../components/SwipableListComponents/CustomSw
 import { isMobile } from 'react-device-detect';
 import { quoteStepColors } from '../../constants/helpers';
 import InfiniteScroll from "react-infinite-scroll-component";
-import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown } from "react-icons/all";
 import { FaSuitcase } from "react-icons/fa";
+import { AiFillCrown } from "react-icons/all";
 import IconButton from "@material-ui/core/IconButton";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 
@@ -273,7 +272,7 @@ const QuoteBuilders = () => {
   const fetchGridColumns = async () => {
 
     const response = await axiosInstance()
-      .get(`/field?resource=Quotes&entity=${selectedEntity}`)
+      .get(`/field?resource=Quotes&entity=${selectedEntity}&view=true`)
 
     let data = response?.data?.data
 

@@ -35,6 +35,11 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import NoDataCell from '../../components/Helpers/NoDataCell';
+import { MdAccountCircle } from "react-icons/md";
+import { AiFillPhone } from "react-icons/ai";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile } from 'react-device-detect';
+import { MdEmail } from 'react-icons/md';
 import queryString from 'query-string';
 
 const ContactTypes = [
@@ -104,8 +109,11 @@ export default function Contact(props) {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
   const columnState = JSON.parse(localStorage.getItem(contactResource));
+  const [isAllChecked, setIsAllChecked] = useState(false);
+  const [clonedData, setClonedData] = useState([])
+  const localStorageSelectedRecords = `${contactResource}_selected`;
 
   useEffect(() => {
     if (queryPage === undefined) {
@@ -150,6 +158,7 @@ export default function Contact(props) {
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
           rendererNames.push(currentColumn?.rendererName);
         }
+        return o?.fieldData
       }
       return o?.fieldData;
     });
@@ -490,6 +499,24 @@ export default function Contact(props) {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
+          finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
+          finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+          finalObject["allowedToEdit"] = (
+            [...(u.collaborator ?? []), u.owner].some(
+              (d) => d?.optionValue === user?.user?._id
+            )
+          );
+
+          finalObject["owerCollaboratorInitialsOrImages"] = [];
+          if (finalObject["owner"])
+            finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] });
+
+          finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
+            if (f.initials) {
+              f.initials = f.initials.split(" ").map((i) => i[0]).join("");
+            }
+          })
+
           return {
             ...finalObject,
 
@@ -499,6 +526,34 @@ export default function Contact(props) {
             relatedLeadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity
           };
         });
+        setIsAllChecked(false);
+        setClonedData(data)
+        if (appendRows) {
+          dispatch({
+            type: "initialize", data: [...dataRows, ...rows],
+            count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+          });
+        } else {
+          dispatch({
+            type: "initialize", data: rows, count: count,
+            selectedRecords: rows.filter(f => f.isChecked === true)
+          });
+        }
+
+        if (gridApi) {
+          try {
+            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
+            if (oldSelectedRecords.length > 0) {
+              gridApi.forEachNode(function (node) {
+                node.setSelected(
+                  oldSelectedRecords.some((o) => o === node.data._id)
+                );
+              });
+            }
+          } catch (ex) {
+            console.error("Error in getting selected records from local storage")
+          }
+        }
 
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
@@ -735,6 +790,7 @@ export default function Contact(props) {
                             setShowEntityDialog(true);
                           }
                         }}
+                     
                       >
                         Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
                       </MenuItem>
