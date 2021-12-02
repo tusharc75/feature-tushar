@@ -293,11 +293,6 @@ function App() {
             />
             <Route
               // exact
-              path="/logout"
-              render={Logout}
-            />
-            <Route
-              // exact
               path="/office365/login"
               render={({ location }) => conditionalRedirect(AzureLogin, location)}
             />
@@ -306,6 +301,9 @@ function App() {
             <Route exact path="/reset-password" render={({ location }) => conditionalRedirect(ResetPassword, location)} />
             <PrivateRoute exact path="/">
               <Dashboard />
+            </PrivateRoute>
+            <PrivateRoute exact path="/logout">
+              <Logout />
             </PrivateRoute>
             <PrivateRoute exact path={routes.lead.path}>
               <Leads />
