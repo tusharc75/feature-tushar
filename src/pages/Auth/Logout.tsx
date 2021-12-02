@@ -5,7 +5,7 @@ import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
-const Login = () => {
+const Logout = () => {
   const history = useHistory();
   const { dispatch }: any = useData();
   const toastConfig = useContext(CustomToastContext);
@@ -32,4 +32,4 @@ const Login = () => {
   return <div>Loading...</div>;
 };
 
-export default Login;
+export default Logout;

@@ -294,7 +294,7 @@ function App() {
             <Route
               // exact
               path="/logout"
-              render={({ location }) => conditionalRedirect(Logout, location)}
+              render={Logout}
             />
             <Route
               // exact
