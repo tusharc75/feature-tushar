@@ -190,7 +190,9 @@ export default function QuoteProcess(props) {
     updatingVersion,
     globalLoading,
     setShowTotalSalesDialog,
-    showTotalSalesDialog
+    showTotalSalesDialog,
+    DOAlimit,
+    DOAsetup,
   } = props;
   const defaultSelectColumns = [
     'Product Description',
@@ -237,9 +239,6 @@ export default function QuoteProcess(props) {
   const [DOAneeded, setDOAneeded] = useState(false);
   const [Customerreq, setCustomerreq] = useState(true);
   const [DOAData, setDOAData] = useState(null);
-  const [DOAlimit, setDOALimit] = useState(0);
-  const [DOAmaxLimit, setDOAMaxLimit] = useState(0);
-  const [DOAsetup, setDOAsetup] = useState(false);
   const [DOAApproved, setDOAApproved] = useState(false);
   const [DOARequestId, setDOARequestId] = useState(null);
   const [visibleColumns, setVisibleColumns] = useState(defaultSelectColumns);
@@ -317,7 +316,6 @@ export default function QuoteProcess(props) {
   }, [columnView]);
 
   useEffect(() => {
-    fetchDoaLimit();
     fetchUserEmails();
     const tempProcessStatus = quoteData?.versions[currentVersion]?.processStatus;
     const tempOverallStatus = quoteData?.versions[currentVersion]?.status;
@@ -636,7 +634,6 @@ export default function QuoteProcess(props) {
   };
 
   const refreshProducts = (data) => {
-    fetchDoaLimit();
 
     if (ProcessStatus === 'New' && data?.product?.length === 0) {
       setNextStep(false);
@@ -659,21 +656,6 @@ export default function QuoteProcess(props) {
     productBuilderdatatoQuoteBuilderdata(data);
   };
 
-  const fetchDoaLimit = () => {
-    if (quoteData) {
-      axiosInstance()
-        .post('doa-request/limit', { entity: selectedEntity })
-        .then(({ data: { data } }) => {
-          setDOAsetup(data.doasetup);
-          setDOALimit(data.limit ? data.limit : 0);
-          setDOAMaxLimit(data.maxLimit.limit ? data.maxLimit.limit : 0);
-          // setLastUser(data.lastUser);
-        })
-        .catch((err) => {
-          // toastConfig.setToastConfig(err);
-        });
-    }
-  };
 
   const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
     if (BuilderData && Object.keys(BuilderData).length !== 0) {
