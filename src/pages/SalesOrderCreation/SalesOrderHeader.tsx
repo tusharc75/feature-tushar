@@ -6,6 +6,8 @@ import { ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import styles from '../Leads/Header.module.scss';
+import {isMobile} from "react-device-detect";
+import {MdAdd} from "react-icons/all";
 
 function SalesOrderHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -61,33 +63,40 @@ function SalesOrderHeader(props) {
         {children}
       </Grid>
       <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
-        <Box className={styles.filter_side_header} component="div">
+        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+
+          <Grid style={{display: "flex", flex:1}}>
           <SearchBox
             onSearch={onSearch}
             searchbox={styles.search_box_input}
             value={searchVal}
             size="small"
+            width="200px"
             placeholder="Search Sales Orders"
-            width="300px"
+            style={isMobile ? {flex:1} : {}}
           />
 
+          </Grid>
+
+
+          <Grid style={{display: "flex" , gap:"5px"}}>
           {SalesOrderPermissions?.isCreate && SalesOrderPermissions?.isUpdate && (
-            <Button variant="contained" color="primary" size="small" className={styles.add_submit_btn} onClick={onCreate} startIcon={<AddOutlined />}>
-              Add
+            <Button  variant={isMobile ? "text" : "contained"} color="primary" size="small" className={isMobile ? "mobile_button" : styles.add_submit_btn} onClick={onCreate} >
+              {isMobile ? <MdAdd size={23}/> : "Add"}
             </Button>
           )}
           {SalesOrderPermissions?.isDelete && (
             <>
               <Button
                 disabled={canDelete}
-                variant="outlined"
+                variant={isMobile ? "text" : "contained"}
                 color="default"
                 size="small"
                 onClick={openActions}
-                className={styles.action_submit_btn}
+                className={isMobile ? "mobile_button" : styles.action_submit_btn}
                 aria-controls="action-menu"
               >
-                Actions <ExpandMore />
+                {isMobile ? "" :  "Actions" } <ExpandMore/>
               </Button>
               <Menu
                 anchorEl={anchorEl}
@@ -132,6 +141,7 @@ function SalesOrderHeader(props) {
               </Menu>
             </>
           )}
+          </Grid>
         </Box>
       </Grid>
     </Grid>

@@ -348,15 +348,18 @@ const DeliveryTicket = () => {
                 <GiAbstract055 className="headerLogo" />
                 <span className="listingHeader">{routes.deliveryTicket.title} </span>
               </Grid>
-              <Grid xs={6} container className={styles.filter_side} >
+              <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side} >
                 <Box className={styles.filter_side_header} component="div" >
+                  <Grid style={{display: "flex", flex:1}}>
                   <SearchBox
                     onSearch={handleSearch}
                     searchbox={styles.search_box_input}
                     width="242px"
                     size="small"
                     value={search}
+                    style={isMobile ? {flex:1} : {}}
                   />
+                  </Grid>
                   {/* {deliveryPermissions?.isCreate &&
                     <Button className={styles.add_submit_btn}
                       onClick={() => setShowManageDeliveryTicket(true)}

@@ -66,12 +66,12 @@ const ProjectStrategyHeader = (props) => {
               searchbox={styles.search_box_input}
               size="small"
               placeholder="Search Project Sales"
-              width="242px"
+              width="200px"
               style={isMobile ? {flex:1} : {}}
             />
             </Grid>
           <Grid style={{display: "flex" , gap:"5px"}}>
-              {permissions?.isCreate && permissions?.isUpdate && !isMobile && (
+              {permissions?.isCreate && permissions?.isUpdate && (
                 <Button
                     variant={isMobile ? "text" : "contained"}
                   color="primary"
