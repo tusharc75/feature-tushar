@@ -85,7 +85,7 @@ const RepairJobReceivingTicket = ({ repairJobData }) => {
 
         axiosInstance().get(`${repairJob.repairJobApi}/${repairJobData._id}/get-assets`)
             .then(({ data }) => {
-                let tempProductInventory = data.data.map(u => ({ ...u, productName: u?.product?.optionLabel }))
+                let tempProductInventory = data.data.map(u => ({ ...u, _id: u?.id, productName: u?.product?.optionLabel }))
                 dispatch({ type: "loading", loading: true });
                 axiosInstance()
                     .get(`${repairJob.repairJobApi}/${repairJobData._id}/delivery-ticket`)
@@ -111,6 +111,7 @@ const RepairJobReceivingTicket = ({ repairJobData }) => {
                                 })
 
                                 tempProductInventory.forEach((d) => {
+                                    d["_id"] = d["id"];
                                     d["hideSelection"] = d.status === "In-Transit";
                                 })
 

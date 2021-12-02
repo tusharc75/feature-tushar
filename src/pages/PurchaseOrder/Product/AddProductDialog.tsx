@@ -19,6 +19,7 @@ import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
+import { camelCase } from "lodash";
 
 const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOrderClose, type, productInPurchaseOrder, isAddingProducts }) => {
     const toastConfig = useContext(CustomToastContext)
@@ -185,7 +186,7 @@ const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOr
                 aria-labelledby="customized-dialog-title"
                 open={true}
             >
-                <CustomDialogHeader title={`Add ${type}`} onClose={handleProductInPurchaseOrderClose} ></CustomDialogHeader>
+                <CustomDialogHeader title={`Add Product`} onClose={handleProductInPurchaseOrderClose} ></CustomDialogHeader>
                 <CustomDialogContent>
                     <div className="listing-grid p-3">
                         <Box mb={2}>

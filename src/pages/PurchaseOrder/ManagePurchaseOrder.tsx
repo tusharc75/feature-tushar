@@ -25,6 +25,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [formsData, setFormsData] = useState([]);
 
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -39,13 +40,13 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                         const { _id, createdBy, updatedBy, serialNumber, ...rest } = data
 
                         setInitialData({
-                            fields: setFieldsInAscendingOrder(fieldsDataForCreate),
+                            fields: fieldsDataForCreate,
                             values: getObjKeysWithValues(rest, fieldsDataForCreate),
                         });
                         setLoading(false)
                     } else {
                         setInitialData({
-                            fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
+                            fields: fieldsDataForUpdate,
                             values: getObjKeysWithValues(data, fieldsDataForUpdate),
                         });
                     }
@@ -68,7 +69,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     createValues["currency"] = currency
                 }
                 setInitialData({
-                    fields: setFieldsInAscendingOrder(fieldsDataForCreate),
+                    fields: fieldsDataForCreate,
                     values: createValues
                 });
             }
@@ -77,6 +78,10 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                 toastConfig.setToastConfig(error);
             });
     }, [purchaseOrderId]);
+
+    useEffect(() => {
+        setFormsData(setFieldsInAscendingOrder(initialData.fields));
+    }, [initialData.fields]);
 
     const handleSubmit = (values) => {
         setLoading(true)
@@ -114,10 +119,10 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
 
     const isFieldNotTouched = (initialData, values) => {
         return Object.values(
-            simplifyValues(initialData.values, initialData?.fields[0]?.sectionFields || [])
+            simplifyValues(initialData.values, formsData[0]?.sectionFields || [])
         ).toString() ===
             Object.values(
-                simplifyValues(values, initialData?.fields[0]?.sectionFields || [])
+                simplifyValues(values, formsData[0]?.sectionFields || [])
             ).toString()
     }
 
@@ -134,7 +139,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
         }}
         fullWidth
     >
-        {initialData && initialData.fields.length ?
+        {formsData && formsData.length ?
             <Formik
                 initialValues={initialData.values}
                 validationSchema={yupSchema(initialData.fields)}
@@ -160,8 +165,8 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                         ></CustomDialogHeader>
                         <CustomDialogContent>
                             <Form autoComplete="off" autoCorrect="off" noValidate >
-                                {initialData.fields.length > 0 &&
-                                    initialData.fields.map((form, i) => (
+                                {formsData.length > 0 &&
+                                    formsData.map((form, i) => (
                                         <div key={i}>
                                             <div className={"detail-box-content"}>
                                                 <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
@@ -234,6 +239,10 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                 color="primary"
                                 type="submit"
                                 onClick={submitForm}
+                                disabled={
+                                    loading ||
+                                    isFieldNotTouched(initialData, values)
+                                }
                             > Save</CustomButton>
                         </CustomDialogFooter>
 

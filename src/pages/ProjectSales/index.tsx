@@ -560,7 +560,7 @@ const ProjectSales: FC = () => {
                       field: "status",
                     }
                   ]}
-                  onCreate={handleCreate}
+                  onCreate={false}
                   showClone={true}
                   onClone={(data) => {
                     setIsOpen({ open: true, isClone: true, idToClone: data._id })

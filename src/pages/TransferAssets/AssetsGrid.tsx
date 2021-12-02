@@ -6,11 +6,14 @@ import routes from '../../components/Helpers/Routes';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import { isMobile } from 'react-device-detect';
-import { CommonRenderer, DateRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import AddAssetsDialog from './AddAssetsDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from '../../components/AgGridComponents/CustomAgGrid';
-
+import axiosInstance from '../../axios/axiosInstance';
+import { prepareDataForGrid } from "../../constants/helpers"
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 interface AssetsGridProps {
   permissions?: any;
   user?: any;
@@ -19,23 +22,64 @@ interface AssetsGridProps {
   setNextStep?: any;
   fetchAssets: any;
   transferAssetId: string | any;
+  ownerId: string | any;
 }
 
 const AssetsGrid: FC<AssetsGridProps> = (props) => {
-  const { permissions, user, plantId, fetchAssets, transferAssetId } = props
+  const { permissions, user, plantId, fetchAssets, transferAssetId, ownerId } = props
   const toastConfig = useContext(CustomToastContext);
 
 
+  const [isRemovingAssets, setRemovingAssets] = useState(false);
+  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [removeData, setRemoveData] = useState([])
+  const [columns, setColumns] = useState([])
   const [openAddNewAssets, setOpenAddNewAssets] = useState(false);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const [gridApi, setGridApi] = useState(null);
   const [agGridState, gridDispatch] = useReducer(gridReducer, gridState);
+  const { getColumnData } = useColumns();
   const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = agGridState;
-  const columns = [
-    { field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer' },
-    { field: 'serialNumber', headerName: 'Serial Number', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'product', headerName: 'Product Description', show: true, cellRenderer: 'productRenderer' },
-    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
-  ];
+  // const columns = [
+  //   { field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer' },
+  //   { field: 'serialNumber', headerName: 'Serial Number', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+  //   { field: 'product', headerName: 'Product Description', show: true, cellRenderer: 'productRenderer' },
+  //   { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
+  // ];
+
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get("/field?resource=Product Inventory")
+      .then(({ data: { data } }) => {
+        let columns = []
+        let rendererNames = []
+        data.forEach(o => {
+          if (o?.fieldData?.fieldName === "serialNumber") {
+            o.fieldData.primaryField = true
+          }
+          let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
+
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData]
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
+          }
+        })
+
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+          actionsRenderer: ActionsRenderer,
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        columns = [...columns, ...getStaticFields()]
+        setColumns([...columns])
+      })
+  }
 
   const AssetRenderer = (params) =>
     params.value ? (
@@ -59,21 +103,24 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     <>
       <GridDeleteIcon
         hasDeletePermission={permissions?.transferAsset?.isUpdate}
-        ownerId={user?.user?._id}
+        ownerId={ownerId}
         userId={user?.user?._id}
-        onDelete={() => { }}
+        onDelete={() => {
+          setShowConfirmBox(true);
+          setRemoveData([params.data._id])
+        }}
         entity=""
       />
     </>
   );
 
-  const frameworkComponents = {
-    productRenderer: ProductRenderer,
-    assetRenderer: AssetRenderer,
-    commonRenderer: CommonRenderer,
-    actionsRenderer: ActionsRenderer,
-    dateRenderer: DateRenderer
-  };
+  // const frameworkComponents = {
+  //   productRenderer: ProductRenderer,
+  //   assetRenderer: AssetRenderer,
+  //   commonRenderer: CommonRenderer,
+  //   actionsRenderer: ActionsRenderer,
+  //   dateRenderer: DateRenderer
+  // };
 
   useEffect(() => {
     if (transferAssetId) {
@@ -90,11 +137,10 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
 
     try {
       let data = await fetchAssets(forceRefresh)
-      data = data?.map((d: any) => ({
-        ...d,
-        product: d.product.optionLabel,
-        productId: d.product.optionValue,
-      }))
+      data = data?.map((d: any) => {
+        let finalObject = prepareDataForGrid(d);
+        return finalObject
+      })
       gridDispatch({ type: "initialize", data: data, count: data.length })
       gridDispatch({ type: "loading", loading: false });
     } catch (error) {
@@ -115,6 +161,30 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     //   })
   };
 
+  /**
+   * Handle Remove Assets
+   */
+  const handleRemoveAssets = async () => {
+    if (removeData.length > 0) {
+      setRemovingAssets(true)
+      try {
+        await axiosInstance().put(`${routes.transferAsset.path}/remove-asset/${transferAssetId}`, {
+          assets: removeData
+        })
+        setRemoveData([])
+        setShowConfirmBox(false);
+        setRemovingAssets(false)
+        fetchAssetsData(true)
+      } catch (error) {
+        setShowConfirmBox(false);
+        setRemovingAssets(false)
+        setRemoveData([])
+        toastConfig.setToastConfig(error);
+      }
+
+    }
+  }
+
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" mx="4px">
@@ -128,30 +198,40 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
         >
           {`Add ${routes.productInventory.title}`}
         </Button>
-        <Button variant="contained" size="small" color="primary" disabled={selectedRecords.length === 0}>
+        <Button
+          variant="contained"
+          size="small"
+          color="primary"
+          disabled={selectedRecords.length === 0}
+          onClick={() => {
+            setShowConfirmBox(true);
+            setRemoveData(selectedRecords.map((asset: any) => asset?._id))
+          }}
+        >
           Remove Assets
         </Button>
       </Box>
 
       <Box mt={1}>
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={gridDispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={true}
-          actionWidth={100}
-          allowSelection={true}
-          isClientSideGrid={true}
-          loading={gridLoading}
-          renderedFrom="transferAssetPage"
-          refreshGrid={() => fetchAssetsData(true)}
-        />
+        {Object.keys(frameWorkComponent).length > 0 ?
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameWorkComponent}
+            setGridApi={setGridApi}
+            dispatch={gridDispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            allowAction={true}
+            actionWidth={100}
+            allowSelection={true}
+            isClientSideGrid={true}
+            loading={gridLoading}
+            renderedFrom="transferAssetPage"
+            refreshGrid={() => fetchAssetsData(true)}
+          /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
       </Box>
 
       {/* Add Assets Dialog */}
@@ -164,7 +244,18 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           existingAssets={dataRows.map(asset => asset._id)}
         />
       }
-
+      {/* Confirm Delete Dialog */}
+      {showConfirmBox && (
+        <ConfirmationDialog
+          okBtnLoading={isRemovingAssets}
+          open={showConfirmBox}
+          message={`Are you sure you want to remove asset(s)?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={handleRemoveAssets}
+        />
+      )}
     </Fragment>
   )
 }
