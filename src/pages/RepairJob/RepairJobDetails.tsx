@@ -32,7 +32,6 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import RepairJobReceivingTicket from './RepairJobReceivingTicket';
 import RepairJobDeliveryTicket from './RepairJobDeliveryTicket';
 import ManageAssetDialog from './ManageAssetDialog';
-import CreateIcon from '@material-ui/icons/Create';
 
 const renderedFrom = "repairJobDetails"
 
@@ -48,7 +47,6 @@ function a11yProps(index: any) {
 const RepairJobDetails = () => {
   const toastConfig = useContext(CustomToastContext);
 
-  const { getColumnData } = useColumns();
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -70,12 +68,9 @@ const RepairJobDetails = () => {
   const [tabValue, setTabValue] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const [nextStep, setNextStep] = useState(true)
-  const [rows, setRows] = useState([]);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [okBtnLoading, setOkBtnLoading] = useState(false)
 
   const [step1FrameworkComponent, setStep1FrameworkComponent] = useState(null)
@@ -86,20 +81,24 @@ const RepairJobDetails = () => {
     selectedRecords: step1SelectedRecords } = step1State;
 
   const [step1Columns, setStep1Columns] = useState([
-    { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "assetNumberRenderer" },
-    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "product", headerName: "Product Description", show: true, cellRenderer: "commonRenderer" },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "assetNumberRenderer", required: false },
+    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer", required: false },
+    { field: "product", headerName: "Product Description", show: true, cellRenderer: "commonRenderer", required: false },
+    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer", required: false },
   ])
 
   const [showEditAssetDialog, setShowEditAssetDialog] = useState({ open: false, asset: null, selectedRecords: [] })
   const [serializedAssetFields, setSerializedAssetFields] = useState(null)
 
+  const [disableNextStep, setDisableNextStep] = useState(false)
+
+  const [unmodifiedColumns, setUnmodifiedColumns] = useState([]);
+
   useEffect(() => {
     if (id) {
       fetchAssignedSerializedAssetsFields();
       fetchRepairJobData();
-      fetchAssignedSerializedAssets();
+      // fetchAssignedSerializedAssets();
     }
     // eslint-disable-next-line
   }, [id]);
@@ -108,6 +107,10 @@ const RepairJobDetails = () => {
     step1Dispatch({ type: "loading", loading: true });
 
     axiosInstance().get(`/field/child?resource=Repair Job Asset`).then(({ data: { data } }) => {
+
+      const formBuilderColumns = [...step1Columns, ...data];
+      setUnmodifiedColumns([...formBuilderColumns]);
+
       setSerializedAssetFields(data)
       let rendererNames = [];
       genrateColoum(data, step1Columns, rendererNames, false);
@@ -121,11 +124,17 @@ const RepairJobDetails = () => {
       setStep1FrameworkComponent({ ...tempFrameworkComponent })
       setStep1Columns([...step1Columns])
 
+      fetchAssignedSerializedAssets([...formBuilderColumns])
     })
   }
 
 
-  const fetchAssignedSerializedAssets = () => {
+  const fetchAssignedSerializedAssets = (passedColumns = null) => {
+
+    if (passedColumns === null) {
+      passedColumns = [...unmodifiedColumns]
+    }
+
     axiosInstance().get(`${repairJob.repairJobApi}/${id}/get-assets`)
       .then(({ data: { data } }) => {
 
@@ -138,6 +147,29 @@ const RepairJobDetails = () => {
           u["index"] = `${index + 1}.0`;
           return prepareDataForGrid(u, user);
         });
+
+        let foundBlankValue = false;
+
+        if (passedColumns) {
+          const requiredFields = passedColumns.filter(u => u.required);
+          if (requiredFields.length > 0) {
+
+            rows.forEach(row => {
+              if (foundBlankValue === true) {
+                return;
+              }
+              requiredFields.forEach((d) => {
+                const fieldName = d.fieldName;
+                if (!row.hasOwnProperty(fieldName) || row[fieldName] === "" || row[fieldName] === null || row[fieldName] === undefined) {
+                  foundBlankValue = true;
+                  return;
+                }
+              })
+            })
+          }
+        }
+
+        setDisableNextStep(foundBlankValue);
 
         step1Dispatch({
           type: "initialize", data: [...rows], count: rows.length
@@ -292,6 +324,20 @@ const RepairJobDetails = () => {
       });
   }
 
+  // useEffect(() => {
+  //   if (currentStep === 0) {
+  //     if (step1DataRows.length === 0) {
+  //       setDisableNextStep(true)
+  //     }
+  //     console.log(step1Columns);
+
+  //   } else if (currentStep === 1) {
+
+  //   } else {
+  //     setDisableNextStep(false)
+  //   }
+  // }, [currentStep])
+
   return (
     <>
       <Grid container className="headerbox">
@@ -394,7 +440,7 @@ const RepairJobDetails = () => {
                   <>
                     <Paper>
                       <CustomCommonSteps
-                        disableNextStep={step1DataRows.length === 0}
+                        disableNextStep={disableNextStep}
                         nextStep={nextStep}
                         steps={repairJobProcessSteps.filter(f => f !== "End")}
                         currentStep={currentStep}
