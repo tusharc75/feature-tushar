@@ -7,6 +7,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import styles from '../Leads/Header.module.scss';
 import { isMobile } from 'react-device-detect';
+import {MdAdd} from "react-icons/all";
 
 function RepairJobHeader(props) {
   const {
@@ -63,34 +64,39 @@ function RepairJobHeader(props) {
         {children}
       </Grid>
       <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
-        <Box className={styles.filter_side_header} component="div">
-          <div className="d-flex gap-2">
+        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+
+            <Grid style={{display: "flex", flex:1}}>
             <SearchBox
               onSearch={onSearch}
               searchbox={styles.search_box_input}
               value={searchVal}
               size="small"
               placeholder="Search Repair Jobs"
-              width="300px"
+              style={isMobile ? {flex:1} : {}}
             />
-            <div className="d-flex gap-2">
-              {RepairJobPermissions?.isCreate && RepairJobPermissions?.isUpdate && !isMobile && (
-                <Button variant="contained" color="primary" size="small" className={styles.add_submit_btn} onClick={onCreate} startIcon={<AddOutlined />}>
-                  Add
+
+            </Grid>
+
+              <Grid style={{display: "flex" , gap:"5px"}}>
+              {RepairJobPermissions?.isCreate && RepairJobPermissions?.isUpdate &&  (
+                <Button variant={isMobile ? "text" : "contained"} color="primary" size="small" className={isMobile ? "mobile_button" : styles.add_submit_btn} onClick={onCreate} >
+                  {isMobile ? <MdAdd size={23}/> : "Add"}
                 </Button>
               )}
               {RepairJobPermissions?.isDelete && (
                 <>
                   <Button
                     disabled={canDelete}
-                    variant="outlined"
+                    variant={isMobile ? "text" : "contained"}
                     color="default"
                     size="small"
                     onClick={openActions}
                     //  className={styles.action_submit_btn}
                     aria-controls="action-menu"
+                    className={isMobile ? "mobile_button" : styles.action_submit_btn}
                   >
-                    Actions <ExpandMore />
+                    {isMobile ? "" :  "Actions" } <ExpandMore/>
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
@@ -135,8 +141,7 @@ function RepairJobHeader(props) {
                   </Menu>
                 </>
               )}
-            </div>
-          </div>
+              </Grid>
         </Box>
       </Grid>
     </Grid>

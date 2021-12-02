@@ -33,6 +33,9 @@
 .all-button{
     font-size: 0.7rem !important;
 }
+.help_icon{
+    padding: 5px 10px !important;
+}
 
 
 @media only screen and (max-width: 600px) {
@@ -51,7 +54,7 @@
         padding: 2px !important;
     }
     .MuiButton-outlinedSizeSmall {
-        padding: 2px 9px !important;
+        padding: 2px 9px ;
         font-size: 0.6rem;
     }
     .MuiMenuItem-root {
@@ -270,6 +273,13 @@
     }
 }
 
+@media only screen and (max-width: 380px){
+    .tab-font {
+        font-size: 12px;
+        line-height: 18px;
+    }
+}
+
 /* Small devices (portrait tablets and large phones, 600px and up) */
 // @media only screen and (min-width: 600px ) {}
 
@@ -318,7 +328,7 @@
 @media only screen and (max-width: 1300px) {
     .grid-with-activity {
         display: grid;
-        grid-template-rows: 1fr 1fr;
+        //grid-template-rows: 1fr 1fr;
         gap: 10px;
         grid-template-columns: none;
     }

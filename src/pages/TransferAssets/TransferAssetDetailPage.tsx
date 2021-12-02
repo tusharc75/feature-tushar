@@ -309,6 +309,7 @@ const TransferAssetDetailPage = () => {
             <TabPanel value={tabValue} index={1}>
               <Box my={2}>
                 <TransferStepper
+                  hasAssets={existingAssets.length > 0}
                   isTransferEnded={isTransferEnded}
                   isNextStep={isNextStep}
                   steps={transferSteps}
@@ -326,6 +327,7 @@ const TransferAssetDetailPage = () => {
                       permissions={permissions}
                       user={user}
                       setNextStep={setNextStep}
+                      ownerId={transferAssetData?.createdBy.user._id}
                     />
                   )}
                   {currentStep === 1 && (
@@ -364,6 +366,7 @@ const TransferAssetDetailPage = () => {
       {/* Manage Transfer Asset Data */}
       {openUpdateDialog && (
         <ManageTransferAsset
+          number={transferAssetData?.transferAssetNumber}
           isClone={false}
           transferAssetId={id}
           onClose={() => {

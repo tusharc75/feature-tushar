@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useReducer } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, IconButton, Tooltip } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory, Link } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -24,13 +24,14 @@ import TabPanel from '../../components/TabPanel';
 import CustomCommonSteps from '../../components/CustomCommonSteps/CustomCommonSteps';
 import AddSerializedAsset from '../RentalManagement/AddSerializedAsset';
 import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import { getFrameworkComponents } from '../../constants/columns';
+import { getFrameworkComponents, genrateColoum } from '../../constants/columns';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import useColumns from '../../constants/useColumns';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import RepairJobReceivingTicket from './RepairJobReceivingTicket';
 import RepairJobDeliveryTicket from './RepairJobDeliveryTicket';
+import ManageAssetDialog from './ManageAssetDialog';
 
 const renderedFrom = "repairJobDetails"
 
@@ -46,7 +47,6 @@ function a11yProps(index: any) {
 const RepairJobDetails = () => {
   const toastConfig = useContext(CustomToastContext);
 
-  const { getColumnData } = useColumns();
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -68,12 +68,9 @@ const RepairJobDetails = () => {
   const [tabValue, setTabValue] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const [nextStep, setNextStep] = useState(true)
-  const [rows, setRows] = useState([]);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [okBtnLoading, setOkBtnLoading] = useState(false)
 
   const [step1FrameworkComponent, setStep1FrameworkComponent] = useState(null)
@@ -83,13 +80,25 @@ const RepairJobDetails = () => {
     limit: step1Limit, pageSizes: step1PageSizes, search: step1Search, filters: step1Filters, sorting: step1Sorting,
     selectedRecords: step1SelectedRecords } = step1State;
 
-  const [step1Columns, setStep1Columns] = useState([])
+  const [step1Columns, setStep1Columns] = useState([
+    { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "assetNumberRenderer", required: false },
+    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer", required: false },
+    { field: "product", headerName: "Product Description", show: true, cellRenderer: "commonRenderer", required: false },
+    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer", required: false },
+  ])
+
+  const [showEditAssetDialog, setShowEditAssetDialog] = useState({ open: false, asset: null, selectedRecords: [] })
+  const [serializedAssetFields, setSerializedAssetFields] = useState(null)
+
+  const [disableNextStep, setDisableNextStep] = useState(false)
+
+  const [unmodifiedColumns, setUnmodifiedColumns] = useState([]);
 
   useEffect(() => {
     if (id) {
       fetchAssignedSerializedAssetsFields();
       fetchRepairJobData();
-      fetchAssignedSerializedAssets();
+      // fetchAssignedSerializedAssets();
     }
     // eslint-disable-next-line
   }, [id]);
@@ -97,58 +106,73 @@ const RepairJobDetails = () => {
   const fetchAssignedSerializedAssetsFields = () => {
     step1Dispatch({ type: "loading", loading: true });
 
-    axiosInstance().get(`/field/?resource=${sidebarResource.productInventory}`).then(({ data: { data } }) => {
+    axiosInstance().get(`/field/child?resource=Repair Job Asset`).then(({ data: { data } }) => {
 
-      let columns = []
-      let rendererNames = []
-      data.forEach(o => {
+      const formBuilderColumns = [...step1Columns, ...data];
+      setUnmodifiedColumns([...formBuilderColumns]);
 
-        if (o?.fieldData?.fieldName === "assetNumber") {
-          columns = [...columns, {
-            pivotIndex: 0,
-            field: o?.fieldData?.fieldName,
-            headerName: o?.fieldData?.fieldLabel,
-            show: true,
-            disabled: true,
-            primaryField: true,
-            cellRenderer: 'assetNumberRenderer'
-          }]
-        }
-        else {
-          let currentColumn = getColumnData(productInventory.permission, o?.fieldData, `/${routes.productInventoryDetail.path}`)
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData]
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName)
-            }
-          }
-        }
-        return o?.fieldData
-      })
-
+      setSerializedAssetFields(data)
+      let rendererNames = [];
+      genrateColoum(data, step1Columns, rendererNames, false);
       let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
       tempFrameworkComponent = {
-        commonRenderer: CommonRenderer,
         assetNumberRenderer: AssetNumberRenderer,
+        commonRenderer: CommonRenderer,
         actionsRenderer: ActionsRenderer,
         ...tempFrameworkComponent,
       }
       setStep1FrameworkComponent({ ...tempFrameworkComponent })
-      setStep1Columns([...columns])
+      setStep1Columns([...step1Columns])
+
+      fetchAssignedSerializedAssets([...formBuilderColumns])
     })
   }
 
 
-  const fetchAssignedSerializedAssets = () => {
+  const fetchAssignedSerializedAssets = (passedColumns = null) => {
+
+    if (passedColumns === null) {
+      passedColumns = [...unmodifiedColumns]
+    }
+
     axiosInstance().get(`${repairJob.repairJobApi}/${id}/get-assets`)
       .then(({ data: { data } }) => {
 
-        let rows = data.map((u) => {
+        step1Dispatch({
+          type: "initialize", data: [], count: 0
+        });
+
+        let rows = data.map((u, index) => {
+          u["_id"] = u["id"];
+          u["index"] = `${index + 1}.0`;
           return prepareDataForGrid(u, user);
         });
 
+        let foundBlankValue = false;
+
+        if (passedColumns) {
+          const requiredFields = passedColumns.filter(u => u.required);
+          if (requiredFields.length > 0) {
+
+            rows.forEach(row => {
+              if (foundBlankValue === true) {
+                return;
+              }
+              requiredFields.forEach((d) => {
+                const fieldName = d.fieldName;
+                if (!row.hasOwnProperty(fieldName) || row[fieldName] === "" || row[fieldName] === null || row[fieldName] === undefined) {
+                  foundBlankValue = true;
+                  return;
+                }
+              })
+            })
+          }
+        }
+
+        setDisableNextStep(foundBlankValue);
+
         step1Dispatch({
-          type: "initialize", data: rows, count: rows.length
+          type: "initialize", data: [...rows], count: rows.length
         });
 
         setTimeout(() => {
@@ -168,7 +192,7 @@ const RepairJobDetails = () => {
       ownerId={user?.user?._id}
       userId={user?.user?._id}
       onDelete={() => {
-        setShowAssetRemoveConfirmationDialog({ open: true, id: params.data._id, ids: [] });
+        setShowAssetRemoveConfirmationDialog({ open: true, id: params.data._id ?? params.data.id, ids: [] });
       }}
       entity={sidebarResource.productInventory}
     />
@@ -188,6 +212,8 @@ const RepairJobDetails = () => {
           message: data.message,
         });
 
+        localStorage.setItem(`${step1RenderedFrom}_selected`, JSON.stringify([]));
+
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -197,6 +223,10 @@ const RepairJobDetails = () => {
 
   const AssetNumberRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
+      <span className="link cursor-pointer" onClick={() => setShowEditAssetDialog({ open: true, asset: params.data, selectedRecords: [] })}>
+        {params.data.index}
+      </span>
+      -
       <Link className="link" to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
         <CustomRenderCell value={params.value} />
       </Link>
@@ -223,6 +253,7 @@ const RepairJobDetails = () => {
     axiosInstance()
       .get(`${routes.repairJob.path}/${id}`)
       .then(({ data: { data } }) => {
+
         setRepairJobData(data)
         if (data.processStatus) {
           const step = repairJobProcessSteps.findIndex(f => f === data.processStatus);
@@ -269,16 +300,6 @@ const RepairJobDetails = () => {
     setTabValue(newValue);
   };
 
-  const disableNextStep = () => {
-    if (currentStep === 0) {
-      return step1DataRows.length === 0;
-    } else {
-
-    }
-
-    return true;
-  }
-
   const onNextButtonClick = (oldStep, nextStep) => {
     axiosInstance()
       .put(`${repairJob.repairJobApi}/${id}/process-status`, {
@@ -302,6 +323,20 @@ const RepairJobDetails = () => {
         toastConfig.setToastConfig(error);
       });
   }
+
+  // useEffect(() => {
+  //   if (currentStep === 0) {
+  //     if (step1DataRows.length === 0) {
+  //       setDisableNextStep(true)
+  //     }
+  //     console.log(step1Columns);
+
+  //   } else if (currentStep === 1) {
+
+  //   } else {
+  //     setDisableNextStep(false)
+  //   }
+  // }, [currentStep])
 
   return (
     <>
@@ -405,7 +440,7 @@ const RepairJobDetails = () => {
                   <>
                     <Paper>
                       <CustomCommonSteps
-                        disableNextStep={disableNextStep()}
+                        disableNextStep={disableNextStep}
                         nextStep={nextStep}
                         steps={repairJobProcessSteps.filter(f => f !== "End")}
                         currentStep={currentStep}
@@ -429,6 +464,19 @@ const RepairJobDetails = () => {
                                   }}
                                 >
                                   {`Add ${routes.productInventory.title}`}
+                                </Button>
+
+                                <Button
+                                  variant="contained"
+                                  color="primary"
+                                  type="button"
+                                  size="small"
+                                  disabled={step1SelectedRecords.length === 0}
+                                  onClick={() => {
+                                    setShowEditAssetDialog({ open: true, asset: null, selectedRecords: step1SelectedRecords })
+                                  }}
+                                >
+                                  Bulk Edit
                                 </Button>
 
                                 <Button
@@ -566,7 +614,41 @@ const RepairJobDetails = () => {
         />
       }
 
+      {
+        showEditAssetDialog.open && (
+          <ManageAssetDialog
+            open={showEditAssetDialog.open}
+            repairJobId={id}
+            fields={serializedAssetFields}
+            asset={showEditAssetDialog.asset}
+            selectedRecords={showEditAssetDialog.selectedRecords}
+            onClose={() => {
+              setShowEditAssetDialog(prevState => {
+                return {
+                  ...prevState,
+                  open: false
+                }
+              });
+            }}
+            onSuccess={() => {
+              if (showEditAssetDialog.selectedRecords.length > 0) {
+                localStorage.setItem(`${step1RenderedFrom}_selected`, JSON.stringify([]));
+                step1Dispatch({
+                  type: "selection",
+                  selectedRecords: []
+                })
+              }
 
+              fetchAssignedSerializedAssets();
+              setShowEditAssetDialog({
+                open: false,
+                asset: null,
+                selectedRecords: [],
+              });
+            }}
+          />
+        )
+      }
 
     </>
   );

@@ -28,7 +28,7 @@ const CreateSerializedAsset = (props) => {
     const handleCreateSerializedAsset = (values) => {
         let tempArray = values.map(u => ({
             PurchaseOrderId: purchaseOrderID,
-            productMaster: u.product?._id,
+            productMaster: u.productId,
             wareHouse: u.warehouse?._id,
             quantity: parseInt(u?.quantity)
         }))
@@ -78,7 +78,7 @@ const CreateSerializedAsset = (props) => {
         <Dialog open fullWidth maxWidth="md" onClose={onClose}>
             <CustomDialogHeader title={title} onClose={onClose} />
             <Formik
-                initialValues={{ seriaizedAsset: productList.map(d => ({ "product": d.productId, "warehouse": "", "quantity": d.quantity - d.actualReceived, "row": d })) }}
+                initialValues={{ seriaizedAsset: productList.map(d => ({ "product": d.description, "productId": d.productId, "warehouse": "", "quantity": d.qty - d.actualReceived, "row": d })) }}
                 enableReinitialize={true}
                 onSubmit={() => { }}>
                 {({ values }) => (
@@ -139,7 +139,7 @@ const CreateSerializedAsset = (props) => {
                                                                                         value={userVal.product}
                                                                                         options={productList}
                                                                                         disabled
-                                                                                        getOptionLabel={(option: any) => option ? option.productName : ""}
+                                                                                        getOptionLabel={(option: any) => option ? option : ""}
                                                                                         onChange={(_, newValue) => {
                                                                                             arrayHelpers.replace(index, {
                                                                                                 ...values.seriaizedAsset[index],
@@ -162,7 +162,7 @@ const CreateSerializedAsset = (props) => {
                                                                                             style={{ minWidth: 200 }}
                                                                                             value={userVal.warehouse}
                                                                                             options={wareHouseList}
-                                                                                            getOptionLabel={(option: any) => option ? option?.warehouseID || option?.warehouseName : ""}
+                                                                                            getOptionLabel={(option: any) => option ? option?.warehouseID || option?.warehouseName || option?.address : ""}
                                                                                             onChange={(_, newValue) => {
                                                                                                 arrayHelpers.replace(index, {
                                                                                                     ...values.seriaizedAsset[index],

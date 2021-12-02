@@ -7,7 +7,7 @@ import { isMobile } from 'react-device-detect';
 
 function SearchBox({ onSearch, value, size, width, placeholder, style, searchbox }) {
     return isMobile ? <TextField
-        style={{ width: width || "200px", ...style }}
+        style={{ width: width || "242px", ...style }}
         variant= "standard"
         placeholder={placeholder || "Search"}
         type="search"

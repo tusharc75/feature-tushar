@@ -43,6 +43,7 @@ import CreateProjectSales from "./CreateProjectSales";
 import { isMobile, isTablet } from 'react-device-detect';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
+import {MdDelete, MdEdit} from "react-icons/md";
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -394,17 +395,18 @@ const ProjectSalesDetails = () => {
                   {(permissions?.projectStrategy?.isUpdate && isTeamMember) ||
                     isManager ? (
                     <Button
-                      variant="contained"
+                      variant={isMobile ? "outlined" : "contained"}
                       color="primary"
                       size="small"
+                      className="mobile_button_layout"
                       onClick={handleOpenUpdateDialog}
                     >
-                      Edit
+                      {isMobile ? <MdEdit/> : "Edit"}
                     </Button>
                   ) : null}
                   {permissions?.projectStrategy?.isDelete && isManager ? (
                     <DeleteButton
-                      text="Delete"
+                      text={isMobile ? <MdDelete/> : "Delete"}
                       onClick={() => {
                         handleDeleteProject(id);
                       }}
@@ -433,11 +435,13 @@ const ProjectSalesDetails = () => {
                       aria-label="icon tabs example"
                     >
                       <Tab
+                          className='tabLayout'
                         label="Project Sales"
                         aria-controls="a11y-tabpanel-0"
                         id="a11y-tab-0"
                       />
                       <Tab
+                          className='tabLayout'
                         label="OM-Neurons"
                         aria-controls="a11y-tabpanel-1"
                         id="a11y-tab-1"
@@ -451,7 +455,58 @@ const ProjectSalesDetails = () => {
                           data={copyOfProjectSalesData}
                           fields={fiteredFieldToShow}
                         />
+
+                        <div className="position-relative">
+                          {/* {showActivity ?
+              <Paper>
+                {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
+                  <IoIosArrowDropright className="icon" />
+                </span>}
+                <Activity
+                  resourceId={id}
+                  resource={projectSales.projectSalesRoute}
+                  relatedTo={[
+                    {
+                      type: projectSales.projectSalesResource,
+                      referenceId: id,
+                      access: true,
+                    }
+                  ]}
+                  handleActivityRefresh={() => { }}
+                  emails={[]}
+                />
+              </Paper>
+              :
+              !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
+                <IoIosArrowDropleft className="icon" />
+              </span>} */}
+
+                          <Paper>
+                            {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
+                {showActivity ? <IoIosArrowDropleft className="icon" /> : <IoIosArrowDropleft className="icon" />}
+              </span>}
+                            <div style={{ display: showActivity ? "block" : "none" }}>
+
+                              <Activity
+                                  resourceId={id}
+                                  resource={projectSales.projectSalesRoute}
+                                  relatedTo={[
+                                    {
+                                      type: projectSales.projectSalesResource,
+                                      referenceId: id,
+                                      access: true,
+                                    }
+                                  ]}
+                                  handleActivityRefresh={() => { }}
+                                  emails={[]}
+                              />
+                            </div>
+                          </Paper>
+                        </div>
+
                       </Box>
+
+
                     )}
 
                     {currentTabIndex === 1 && (
@@ -557,53 +612,6 @@ const ProjectSalesDetails = () => {
                 projectId={id}
                 users={teamUsers}
               />
-            </Paper>
-          </div>
-          <div className="position-relative">
-            {/* {showActivity ?
-              <Paper>
-                {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
-                  <IoIosArrowDropright className="icon" />
-                </span>}
-                <Activity
-                  resourceId={id}
-                  resource={projectSales.projectSalesRoute}
-                  relatedTo={[
-                    {
-                      type: projectSales.projectSalesResource,
-                      referenceId: id,
-                      access: true,
-                    }
-                  ]}
-                  handleActivityRefresh={() => { }}
-                  emails={[]}
-                />
-              </Paper>
-              :
-              !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
-                <IoIosArrowDropleft className="icon" />
-              </span>} */}
-
-            <Paper>
-              {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
-                {showActivity ? <IoIosArrowDropleft className="icon" /> : <IoIosArrowDropleft className="icon" />}
-              </span>}
-              <div style={{ display: showActivity ? "block" : "none" }}>
-
-                <Activity
-                  resourceId={id}
-                  resource={projectSales.projectSalesRoute}
-                  relatedTo={[
-                    {
-                      type: projectSales.projectSalesResource,
-                      referenceId: id,
-                      access: true,
-                    }
-                  ]}
-                  handleActivityRefresh={() => { }}
-                  emails={[]}
-                />
-              </div>
             </Paper>
           </div>
 
