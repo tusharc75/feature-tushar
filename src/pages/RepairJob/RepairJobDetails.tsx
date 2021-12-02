@@ -133,8 +133,9 @@ const RepairJobDetails = () => {
           type: "initialize", data: [], count: 0
         });
 
-        let rows = data.map((u) => {
-          u["_id"] = u["id"]
+        let rows = data.map((u, index) => {
+          u["_id"] = u["id"];
+          u["index"] = `${index + 1}.0`;
           return prepareDataForGrid(u, user);
         });
 
@@ -154,31 +155,15 @@ const RepairJobDetails = () => {
   }
 
   const ActionsRenderer = (params) => (
-    <>
-      <Tooltip
-        title="Edit"
-      >
-        <IconButton
-          size="small"
-          aria-label="Edit"
-          onClick={() => {
-            setShowEditAssetDialog({ open: true, asset: params.data, selectedRecords: [] })
-          }}
-        >
-          <CreateIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
-
-      <GridDeleteIcon
-        hasDeletePermission={permissions?.repairJob?.isUpdate}
-        ownerId={user?.user?._id}
-        userId={user?.user?._id}
-        onDelete={() => {
-          setShowAssetRemoveConfirmationDialog({ open: true, id: params.data._id ?? params.data.id, ids: [] });
-        }}
-        entity={sidebarResource.productInventory}
-      />
-    </>
+    <GridDeleteIcon
+      hasDeletePermission={permissions?.repairJob?.isUpdate}
+      ownerId={user?.user?._id}
+      userId={user?.user?._id}
+      onDelete={() => {
+        setShowAssetRemoveConfirmationDialog({ open: true, id: params.data._id ?? params.data.id, ids: [] });
+      }}
+      entity={sidebarResource.productInventory}
+    />
   );
 
   const deleteRepairJobAssets = () => {
@@ -206,6 +191,10 @@ const RepairJobDetails = () => {
 
   const AssetNumberRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
+      <span className="link cursor-pointer" onClick={() => setShowEditAssetDialog({ open: true, asset: params.data, selectedRecords: [] })}>
+        {params.data.index}
+      </span>
+      -
       <Link className="link" to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
         <CustomRenderCell value={params.value} />
       </Link>
