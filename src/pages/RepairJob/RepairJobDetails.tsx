@@ -240,7 +240,6 @@ const RepairJobDetails = () => {
       .then(({ data: { data } }) => {
         setRepairJobFields(data)
         setShowLoading(false);
-
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -576,7 +575,8 @@ const RepairJobDetails = () => {
             setOpenUpdateDialog(false);
           }}
           onSuccess={() => {
-            getResourceFields();
+            // getResourceFields();
+            fetchRepairJobData();
             setOpenUpdateDialog(false);
           }}
         />
