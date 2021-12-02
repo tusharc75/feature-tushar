@@ -89,6 +89,7 @@ const RepairJobDetails = () => {
     { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "assetNumberRenderer" },
     { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "product", headerName: "Product Description", show: true, cellRenderer: "commonRenderer" },
+    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
   ])
 
   const [showEditAssetDialog, setShowEditAssetDialog] = useState({ open: false, asset: null, selectedRecords: [] })
