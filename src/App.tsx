@@ -293,7 +293,7 @@ function App() {
             />
             <Route
               // exact
-              path="/login"
+              path="/logout"
               render={({ location }) => conditionalRedirect(Logout, location)}
             />
             <Route
