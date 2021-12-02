@@ -146,7 +146,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
         setAddingProducts(true)
         let tempProductArray = products.map(d => ({
             "productId": d.id || d.productId,
-            "qty": parseInt(d.quantity || d.qty) || 0,
+            "qty": parseInt(d.quantity) || 0,
             "expectedDelivery": purchaseOrderData?.deliveryDate
         }))
         axiosInstance().post(`${purchaseOrder.api}/product/${id}/add`, { "orderDetails": tempProductArray })
@@ -321,6 +321,8 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     }}
                     renderedFrom="purchaseOrderDetailsPageInventory"
                     refreshGrid={fetchPurchaseOrderProduct}
+                    fromPurchaseOrderGrid={true}
+                    currency={purchaseOrderData?.currency?.toLowerCase()}
                 />
                 : <Box
                     p={2}

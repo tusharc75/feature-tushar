@@ -211,7 +211,8 @@ export default function QuoteDetail() {
   const [showTotalSalesDialog, setShowTotalSalesDialog] = useState(false);
   const [isAddNewProduct, setIsAddNewProduct] = useState(false);
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
-
+  const [DOAlimit, setDOALimit] = useState(0);
+  const [DOAsetup, setDOAsetup] = useState(false);
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -238,6 +239,7 @@ export default function QuoteDetail() {
 
       fetchTermsAndConditions();
       fetchRelatedTo();
+      fetchDoaLimit();
     }
   }, [id]);
 
@@ -247,6 +249,21 @@ export default function QuoteDetail() {
       setColumnViewExcel(quoteData.versions[currentVersion]?.excelColumns);
     }
   }, [currentVersion]);
+
+  const fetchDoaLimit = () => {
+    if (quoteData) {
+      axiosInstance()
+        .post('doa-request/limit', { entity: selectedEntity })
+        .then(({ data: { data } }) => {
+          setDOAsetup(data.doasetup);
+          setDOALimit(data.limit ? data.limit : data.minLimit);
+          // setLastUser(data.lastUser);
+        })
+        .catch((err) => {
+          // toastConfig.setToastConfig(err);
+        });
+    }
+  };
 
   const fetchRelatedTo = () => {
     axiosInstance()
@@ -1019,6 +1036,8 @@ export default function QuoteDetail() {
                         isAddNewProduct={isAddNewProduct}
                         setIsAddExistingProduct={setIsAddExistingProduct}
                         isAddExistingProduct={isAddExistingProduct}
+                        DOAsetup={DOAsetup}
+                        DOAlimit={DOAlimit}
                       />
                     )}
                   </TabPanel>
