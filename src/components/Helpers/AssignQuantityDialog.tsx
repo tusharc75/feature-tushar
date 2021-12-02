@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, FC, Fragment } from 'react';
-import { Dialog, Button, Box, TextField, Grid, IconButton } from '@material-ui/core';
+import { Dialog, Button, Box, TextField, Grid, IconButton, CircularProgress } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { Add, Delete } from '@material-ui/icons';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -75,24 +75,32 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
 
   useEffect(() => {
     if (formData.length === 0) {
-      const initialData = [{
-        id: generateUniqueId(),
-        resource: null,
-        qty: 0
-      }];
+      const initialData = [
+        {
+          id: generateUniqueId(),
+          resource: null,
+          qty: 0
+        }
+      ];
 
       setFormData(initialData);
 
-      const customFormArr = initialData.map(fD => fD.resource?.id);
-      const filteredData = allResourceData.filter(d => !customFormArr.includes(d.id))
-      setResourceData(filteredData)
-
+      const customFormArr = initialData.map((fD) => fD.resource?.id && fD.resource.id).filter((x) => x);
+      const filteredData =
+        resourceData.length > 0
+          ? resourceData.filter((d) => !customFormArr.includes(d?.id))
+          : allResourceData.filter((d) => !customFormArr.includes(d?.id));
+      setResourceData(filteredData);
     } else {
-      const customFormArr = formData.map(fD => fD.resource?.id);
-      const filteredData = allResourceData.filter(d => !customFormArr.includes(d.id))
-      setResourceData(filteredData)
+      const customFormArr = formData.map((fD) => fD.resource?.id).filter((x) => x);
+      const filteredData =
+        allResourceData.length > 0
+          ? allResourceData.filter((d) => !customFormArr.includes(d?.id))
+          : resourceData.filter((d) => !customFormArr.includes(d?.id));
+      console.log(customFormArr, filteredData)
+      setResourceData(filteredData);
     }
-  }, [formData])
+  }, [formData]);
 
   useEffect(() => {
     (() => {
@@ -105,25 +113,27 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
               if (resource.includes('warehouse')) {
                 return r?.wareHouse?._id;
               } else {
-                return r?.product?._id;
+                return r?._id;
               }
             });
           }
 
+          console.log(existingData);
+
           let newData = [];
           if (resource.includes('warehouse')) {
             if (existingData.length > 0) {
-              data = data.map((_d) => ({ id: _d._id, name: _d.warehouseName }))
+              data = data.map((_d) => ({ id: _d._id, name: _d.warehouseName }));
 
-              setAllResourceData(data)
+              setAllResourceData(data);
               newData = data.filter((w: ResourceType) => !existingData.includes(w.id));
             } else {
               newData = data.map((_d) => ({ id: _d._id, name: _d.warehouseName }));
             }
           } else {
             if (existingData.length > 0) {
-              data = data.map((_d) => ({ id: _d._id, name: _d.productName }))
-              setAllResourceData(data)
+              data = data.map((_d) => ({ id: _d._id, name: _d.productName }));
+              setAllResourceData(data);
               newData = data.filter((p: ResourceType) => !existingData.includes(p.id));
             } else {
               newData = data.map((_d) => ({ id: _d._id, name: _d.productName }));
@@ -135,7 +145,7 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
           setToastConfig(err);
         });
     })();
-  }, []);
+  }, [existingResourceData]);
 
   const submitForm = () => {
     setSubmitting(true);
@@ -273,6 +283,7 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
           variant="contained"
           disabled={isSubmitting || !Boolean(formData[formData.length - 1]?.resource) || !Boolean(formData[formData.length - 1]?.qty)}
           color="primary"
+          endIcon={isSubmitting && <CircularProgress size={20} />}
         >
           Save
         </Button>

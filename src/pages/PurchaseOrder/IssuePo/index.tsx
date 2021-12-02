@@ -63,35 +63,46 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBas
     useEffect(() => {
         fetchEmailsData()
         dispatch({ type: "loading", loading: true });
+        let productData = []
+        let serviceData = []
         let productServiceData = []
         axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`).then(({ data: { data } }) => {
-            productServiceData = data;
-            productServiceData.forEach((e) => {
+            productData = data;
+            productData.forEach((e) => {
                 e.type = "Product";
                 e.productName = e.productDetail?.productName
                 e.productNumber = e.productDetail?.productNumber
             })
-            axiosInstance().get(`${purchaseOrder.api}/service/${purchaseOrderData._id}`).then(({ data: { data } }) => {
-                data.forEach((e) => {
-                    if (!e.type) {
-                        e.type = "Service";
-                    }
-                })
-                productServiceData = [...productServiceData, ...data];
-                let rows = productServiceData?.map((item) => {
-                    let res: any = {
-                        ...prepareDataForGrid(item),
-                    };
-                    return res;
-                });
-                dispatch({ type: "initialize", data: rows, count: rows.length });
-                setTimeout(() => {
-                    dispatch({ type: "loading", loading: false });
-                }, gridLoadingTimeout);
-            }).catch((error) => {
-                dispatch({ type: "loading", loading: false });
-                toastConfig.setToastConfig(error)
+            productServiceData = [...productData, ...serviceData];
+            let rows = productServiceData?.map((item) => {
+                let res: any = {
+                    ...prepareDataForGrid(item),
+                };
+                return res;
             });
+            dispatch({ type: "initialize", data: rows, count: rows.length });
+        }).catch((error) => {
+            dispatch({ type: "loading", loading: false });
+            toastConfig.setToastConfig(error)
+        });
+        axiosInstance().get(`${purchaseOrder.api}/service/${purchaseOrderData._id}`).then(({ data: { data } }) => {
+            data.forEach((e) => {
+                if (!e.type) {
+                    e.type = "Service";
+                }
+            })
+            serviceData = data
+            productServiceData = [...productData, ...serviceData];
+            let rows = productServiceData?.map((item) => {
+                let res: any = {
+                    ...prepareDataForGrid(item),
+                };
+                return res;
+            });
+            dispatch({ type: "initialize", data: rows, count: rows.length });
+            setTimeout(() => {
+                dispatch({ type: "loading", loading: false });
+            }, gridLoadingTimeout);
         }).catch((error) => {
             dispatch({ type: "loading", loading: false });
             toastConfig.setToastConfig(error)
