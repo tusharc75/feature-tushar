@@ -508,7 +508,10 @@ const RepairJobDetails = () => {
                           )}
 
                           {(currentStep === 2 || currentStep === 3) && (
-                            <RepairJobReceivingTicket repairJobData={repairJobData} />
+                            <RepairJobReceivingTicket
+                              repairJobData={repairJobData}
+                              setNextButtonDisabled={setDisableNextStep}
+                            />
                           )}
                         </Grid>
                       </Grid>
