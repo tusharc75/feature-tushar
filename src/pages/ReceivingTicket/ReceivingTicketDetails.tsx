@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import {Grid, Box, Button, Paper, Typography, IconButton, Tooltip, Tabs, Tab} from '@material-ui/core';
+import { Grid, Box, Button, Paper, Typography, IconButton, Tooltip, Tabs, Tab } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -26,8 +26,8 @@ import { isMobile, isTablet } from "react-device-detect";
 import AddSerializedAsset from '../RentalManagement/AddSerializedAsset';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
-import {FaWpforms} from "react-icons/fa";
-import {BiFoodMenu} from "react-icons/bi";
+import { FaWpforms } from "react-icons/fa";
+import { BiFoodMenu } from "react-icons/bi";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 interface TabPanelProps {
@@ -40,9 +40,9 @@ function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
   return (
-      <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-        {children}
-      </div>
+    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
+      {children}
+    </div>
   );
 }
 
@@ -120,11 +120,55 @@ const ReceivingTicketDetails = () => {
     setActivityShow(!showActivity)
   }
 
-  const getRessourceFields = () => {
+  const getRessourceFields = (record) => {
     setLoading(true);
     axiosInstance()
-      .get('/field?resource=Receiving Ticket')
-      .then(({ data: { data } }) => {
+      .get('/field?resource=Receiving Ticket&showHiddenFields=true')
+      .then(async ({ data: { data } }) => {
+
+        if (record?.type === "Transfer Asset") {
+
+          const { data: { data: transferData } } = await axiosInstance()
+            .get(`${routes.transferAsset.path}/${record.transferAsset?.optionValue}`)
+
+          data = data.filter((fields: any) => {
+            if (transferData?.transferType === "Internal") {
+              if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Supplier")) {
+                return false
+              }
+            }
+
+            if (transferData?.transferType.includes("External Supplier")) {
+              if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
+                return false
+              }
+            }
+            if (transferData?.transferType.includes("External Customer")) {
+              if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Plant")) {
+                return false
+              }
+            }
+            return true
+          })
+
+
+        } else if (record?.type === "Rental Job") {
+          data = data.filter((fields: any) => {
+            if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Plant")) {
+              return false
+            }
+            return true
+          })
+        } else {
+          data = data.filter((fields: any) => {
+            if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
+              return false
+            }
+            return true
+          })
+        }
+
+
         setReceivingTicketFields(data)
         setLoading(false)
       })
@@ -155,7 +199,7 @@ const ReceivingTicketDetails = () => {
         handleMainPoints(data)
         setHeadingLabel(data.receivingJobName);
         setCustomizedRoutes([routes.receivingTicket, { title: data.receivingJobName }]);
-        getRessourceFields();
+        getRessourceFields(data);
         if (data?.productInventory && data?.productInventory.length) {
           let ids = data?.productInventory.map(o => o?.optionValue)
           fetchProductInventory(ids)
@@ -383,42 +427,42 @@ const ReceivingTicketDetails = () => {
               ) : (
                 <>
                   <Tabs
-                      className="quote-tab"
-                      value={tabValue}
-                      onChange={handleMainTabChange}
-                      textColor="primary"
-                      TabIndicatorProps={{
-                        style: {
-                          display: 'none'
-                        }
-                      }}
+                    className="quote-tab"
+                    value={tabValue}
+                    onChange={handleMainTabChange}
+                    textColor="primary"
+                    TabIndicatorProps={{
+                      style: {
+                        display: 'none'
+                      }
+                    }}
                   >
 
                     <Tab
-                        className={'tabLayout'}
-                        style={{
-                          background: tabValue === 1 ? 'white' : '',
-                          color: tabValue === 1 ? '#163340' : '#163340'
-                        }}
-                        label={
-                          <div className="d-flex align-items-center tab-font">
-                            <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                          </div>
-                        }
-                        {...a11yProps(0)}
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 1 ? 'white' : '',
+                        color: tabValue === 1 ? '#163340' : '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                        </div>
+                      }
+                      {...a11yProps(0)}
                     />
                     <Tab
-                        className={'tabLayout'}
-                        style={{
-                          background: tabValue === 2 ? 'white' : '',
-                          color: tabValue === 2 ? 'blue' : '#163340'
-                        }}
-                        label={
-                          <div className="d-flex align-items-center tab-font">
-                            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                          </div>
-                        }
-                        {...a11yProps(1)}
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 2 ? 'white' : '',
+                        color: tabValue === 2 ? 'blue' : '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                        </div>
+                      }
+                      {...a11yProps(1)}
                     />
                     <div className={'uio'}> </div>
                   </Tabs>
@@ -434,104 +478,104 @@ const ReceivingTicketDetails = () => {
 
                     {
                       dataRows && dataRows.length ?
-                          <>
-                            <Grid container spacing={1} className="p-2">
-                              <Grid item xs={12} className="mt-2 d-flex gap-2">
-                                <Typography variant="subtitle1" className="font-weight-bold text-primary">
-                                  Serialized Assets
-                                </Typography>
+                        <>
+                          <Grid container spacing={1} className="p-2">
+                            <Grid item xs={12} className="mt-2 d-flex gap-2">
+                              <Typography variant="subtitle1" className="font-weight-bold text-primary">
+                                Serialized Assets
+                              </Typography>
 
-                                {
-                                  receivingTicketData.status === "New" && <IconButton
-                                      onClick={() => {
-                                        setAddSerializedAssetDialog(true)
-                                      }}
-                                      color='primary'
-                                      size="small"
-                                  >
-                                    <Tooltip
-                                        title="Add More Serialized Assets">
-                                      <AddBoxRoundedIcon />
-                                    </Tooltip>
-                                  </IconButton>
-                                }
+                              {
+                                receivingTicketData.status === "New" && <IconButton
+                                  onClick={() => {
+                                    setAddSerializedAssetDialog(true)
+                                  }}
+                                  color='primary'
+                                  size="small"
+                                >
+                                  <Tooltip
+                                    title="Add More Serialized Assets">
+                                    <AddBoxRoundedIcon />
+                                  </Tooltip>
+                                </IconButton>
+                              }
 
-                                {
-                                  receivingTicketData.status === "New" && <IconButton
-                                      disabled={selectedRecords.length === 0}
-                                      onClick={() => {
-                                        setShowRemoveAssetFromReceivingTicketDialog(true)
-                                      }}
-                                      color='primary'
-                                      size="small"
-                                  >
-                                    <Tooltip
-                                        title="Remove Serialized Assets">
-                                      <RemoveCircleRoundedIcon />
-                                    </Tooltip>
-                                  </IconButton>
-                                }
+                              {
+                                receivingTicketData.status === "New" && <IconButton
+                                  disabled={selectedRecords.length === 0}
+                                  onClick={() => {
+                                    setShowRemoveAssetFromReceivingTicketDialog(true)
+                                  }}
+                                  color='primary'
+                                  size="small"
+                                >
+                                  <Tooltip
+                                    title="Remove Serialized Assets">
+                                    <RemoveCircleRoundedIcon />
+                                  </Tooltip>
+                                </IconButton>
+                              }
 
-                              </Grid>
-                              <Grid item xs={12}>
-                                {isMobile ? <CustomSwipableList
-                                        allowSelection={true}
-                                        allowSwipe={true}
-                                        permissions={permissions}
-                                        primaryField={columns?.find(d => d.field === "assetNumber")}
-                                        onClick={(data) => {
-                                          history.push(`${routes.productInventoryDetail.path}/${data._id}`)
-                                        }}
-                                        dataRows={dataRows}
-                                        selectedRecords={selectedRecords}
-                                        dispatch={dispatch}
-                                        onEdit={() => {
-
-                                        }}
-                                        extraParamsToCheckDelete={true}
-                                        onDelete={() => {
-                                        }}
-                                        rowCount={rowCount}
-                                        page={page}
-                                        loading={loading}
-                                        chips={
-                                          [{
-                                            label: `Product Description: `,
-                                            field: "productName",
-                                            forceShow: true
-                                          }]
-                                        }
-                                        onCreate={null}
-                                        showClone={false}
-                                        fullHeight={true}
-                                        renderedFrom={"receivingTicketDetailInventoryPage"}
-                                        onClone={() => {
-                                        }}
-
-                                    /> :
-
-                                    <CustomAgGrid
-                                        allowSelection={receivingTicketData.status === "New"}
-                                        allowAction={false}
-                                        columns={columns}
-                                        dataRows={dataRows}
-                                        frameworkComponents={frameworkComponents}
-                                        setGridApi={setGridApi}
-                                        dispatch={dispatch}
-                                        rowCount={rowCount}
-                                        limit={limit}
-                                        pageSizes={pageSizes}
-                                        page={page}
-                                        actionWidth={150}
-                                        loading={false}
-                                        renderedFrom={renderedFrom}
-                                        refreshGrid={fetchProductInventory}
-                                    />
-                                }
-                              </Grid>
                             </Grid>
-                          </>
-                          : null
+                            <Grid item xs={12}>
+                              {isMobile ? <CustomSwipableList
+                                allowSelection={true}
+                                allowSwipe={true}
+                                permissions={permissions}
+                                primaryField={columns?.find(d => d.field === "assetNumber")}
+                                onClick={(data) => {
+                                  history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                                }}
+                                dataRows={dataRows}
+                                selectedRecords={selectedRecords}
+                                dispatch={dispatch}
+                                onEdit={() => {
+
+                                }}
+                                extraParamsToCheckDelete={true}
+                                onDelete={() => {
+                                }}
+                                rowCount={rowCount}
+                                page={page}
+                                loading={loading}
+                                chips={
+                                  [{
+                                    label: `Product Description: `,
+                                    field: "productName",
+                                    forceShow: true
+                                  }]
+                                }
+                                onCreate={null}
+                                showClone={false}
+                                fullHeight={true}
+                                renderedFrom={"receivingTicketDetailInventoryPage"}
+                                onClone={() => {
+                                }}
+
+                              /> :
+
+                                <CustomAgGrid
+                                  allowSelection={receivingTicketData.status === "New"}
+                                  allowAction={false}
+                                  columns={columns}
+                                  dataRows={dataRows}
+                                  frameworkComponents={frameworkComponents}
+                                  setGridApi={setGridApi}
+                                  dispatch={dispatch}
+                                  rowCount={rowCount}
+                                  limit={limit}
+                                  pageSizes={pageSizes}
+                                  page={page}
+                                  actionWidth={150}
+                                  loading={false}
+                                  renderedFrom={renderedFrom}
+                                  refreshGrid={fetchProductInventory}
+                                />
+                              }
+                            </Grid>
+                          </Grid>
+                        </>
+                        : null
                     }
 
 
