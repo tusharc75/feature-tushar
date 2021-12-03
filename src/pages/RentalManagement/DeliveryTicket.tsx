@@ -34,7 +34,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
   useEffect(() => {
     fetchRecords();
     // eslint-disable-next-line
-  }, [productInventory]);
+  }, []);
 
   const fetchRecords = () => {
     if (gridApi) {
