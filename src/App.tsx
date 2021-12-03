@@ -1,190 +1,192 @@
-import { useContext, useEffect, useState, lazy } from "react";
-import { ThemeProvider } from "@material-ui/core";
-import ReactGA from "react-ga";
-import { Redirect, Route, Switch, useHistory } from "react-router-dom";
-import { AnimatePresence } from "framer-motion";
-import { theme } from "./constants/AppConfig";
-import { CustomToastContext } from "./StateProvider/CustomToastContext/CustomToastContext";
-import { CustomNotificationCountContext } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
-import axiosInstance from "./axios/axiosInstance";
-import { CustomChatNotificationCountContext } from "./StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext";
-import queryString from "query-string";
-import {
-  SET_USER,
-  SET_SELECTED_ENTITY,
-} from "./StateProvider/actionTypes";
-import routes from "./components/Helpers/Routes";
-import {
-  termsAndCondition,
-  customerAccount,
-  customerContact,
-  supplierAccount,
-  supplierContact,
-} from "./constants/helpers";
-import CustomToaster from "./components/Helpers/CustomToast";
-import PrivateRoute from "./components/PrivateRoute";
-import { useData } from "./StateProvider/Provider";
-import ErrorBoundaryComponent from "./ErrorBoundary"
-import Login from "./pages/Auth/Login";
-import AzureLogin from "./pages/Auth/AzureLogin";
-import Leads from "./pages/Leads";
-import LeadDetailsPage from "./pages/Leads/LeadDetailsPage";
-import NewLead from "./pages/Leads/NewLead";
-import Opportunities from "./pages/Opportunities";
-import Doa from "./pages/DoaSetup";
-import Contact from "./pages/Contact";
-import Account from "./pages/Account/index";
-import AccountDetailPage from "./pages/Account/AccountDetailPage";
-import ContactDetailPage from "./pages/Contact/ContactDetailPage";
-import OpportunityDetailsPage from "./pages/Opportunities/OpportunityDetailsPage";
-import Activitydemo from "./pages/Activity/activitydemo";
-import Activity from "./pages/Activity";
-import Note from "./pages/Activity/Note";
-import Email from "./pages/Activity/Email";
-import Attachments from "./pages/Activity/Attachments";
-import Calender from "./pages/Activity/Calendar";
-import PasswordSetup from "./pages/Auth/PasswordSetup";
-import ForgetPassword from "./pages/Auth/ForgetPassword";
-import ProductCategory from "./pages/ProductCategory";
-import ProductTemplate from "./pages/ProductTemplate";
-import CreateProductTemplate from "./pages/ProductTemplate/CreateProductTemplate";
-import User from "./pages/User";
-import Entity from "./pages/Entity";
-import EntityDetailPage from "./pages/Entity/EntityDetailPage";
-import UserDetailsPage from "./pages/User/UserDetailsPage";
-import ProjectSalesDetails from "./pages/ProjectSales/ProjectSalesDetails";
-import ProjectSales from "./pages/ProjectSales";
-import Roles from "./pages/Role";
-import RoleDetailsPage from "./pages/Role/RoleDetailsPage";
-import Product from "./pages/Product";
-import TermsAndConditions from "./pages/TermsAndConditions";
-import PriceTemplate from "./pages/PriceTemplate";
-import CreatePriceTemplate from "./pages/PriceTemplate/CreatePriceTemplate";
-import ProductBuilder from "./pages/ProductBuilder";
-import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
-import BrandConfiguration from "./pages/BrandConfiguration";
-import QuoteApproval from "./pages/Quote-Approval";
-import QuoteDetail from "./pages/QuoteBuilderCombined/QuoteDetail/index";
-import DOARequest from "./pages/DOA";
-import CurrencyConverter from "./pages/CurrencyConverter";
-import Dashboard from "./pages/Dashboard";
-import KpiDashboards from "./pages/KpiDashboard/Dashboard";
-import FormBuilder from "./pages/FormBuilder";
-import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
-import UserProfilePage from "./pages/ProfilePage/index";
-import DOAapproval from "./pages/DOA/DOAApproval";
-import QuoteBuilderCombined from "./pages/QuoteBuilderCombined";
-import Reminder from "./pages/Reminder";
-import ResetPassword from "./pages/Auth/ResetPassword";
-import NotFound from "./pages/NotFound";
-import Products from "./pages/Products";
-import ProductDetails from "./pages/Products/ProductDetails";
-import MarketSegment from "./pages/MarketSegment";
-import Budget from "./pages/Budget";
-import CreateNewQuotePdfTemplate from "./pages/QuotePdfTemplate/NewCreateQuotePdfTemplate";
-import QuotePdfTemplate from "./pages/QuotePdfTemplate";
-import MyOwnCart from "./components/ProductList/MyCart/MyOwnCart";
-import Warehouse from "./pages/Warehouse";
-import WarehouseDetailsPage from "./pages/Warehouse/WarehouseDetailsPage"
-import ProductInventory from "./pages/ProductInventory";
-import EquipmentRentalMaster from "./pages/EquipmentRentalMaster";
-import ProductInventoryDetailsPage from "./pages/ProductInventory/ProductInventoryDetailsPage";
-import ProductDetailsPage from "./pages/Product/ProductDetailsPage";
-import RentalManagement from "./pages/RentalManagement";
-import RentalManagementDetailsPage from "./pages/RentalManagement/RentalManagementDetailsPage";
-import DeliveryTicket from "./pages/DeliveryTicket/index"
-import DeliveryTicketDetailsPage from "./pages/DeliveryTicket/DeliveryTicketDetailPage"
-import RecordDeletedDialog from "./components/Helpers/RecordDeletedDialog";
-import PricingConditions from "./pages/PricingConditions";
-import RepairJob from "./pages/RepairJob";
-import RepairJobDetails from "./pages/RepairJob/RepairJobDetails";
-import ReceivingTicket from "./pages/ReceivingTicket";
-import ReceivingTicketDetails from "./pages/ReceivingTicket/ReceivingTicketDetails";
-import PricingConditionsDetailsPage from "./pages/PricingConditions/PricingConditionsDetailsPage";
-import SalesOrder from "./pages/SalesOrderCreation";
-import SalesOrderDetails from "./pages/SalesOrderCreation/SalesOrderDetails";
-import PackageList from "./pages/Packages";
-import PackageDetails from "./pages/Packages/PackageDetails";
-import BOMTable from "./pages/BOM";
-import PurchaseOrder from "./pages/PurchaseOrder";
-import PurchaseOrderDetailsPage from "./pages/PurchaseOrder/PurchaseOrderDetailsPage";
-import { entity } from "./constants/helpers"
-import TransferAsset from "./pages/TransferAssets/Index";
-import TransferAssetDetailPage from "./pages/TransferAssets/TransferAssetDetailPage";
+import { useContext, useEffect, useState, lazy } from 'react';
+import { ThemeProvider } from '@material-ui/core';
+import ReactGA from 'react-ga';
+import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
+import { theme } from './constants/AppConfig';
+import { CustomToastContext } from './StateProvider/CustomToastContext/CustomToastContext';
+import { CustomNotificationCountContext } from './StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
+import axiosInstance from './axios/axiosInstance';
+import { CustomChatNotificationCountContext } from './StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
+import queryString from 'query-string';
+import { SET_USER, SET_SELECTED_ENTITY } from './StateProvider/actionTypes';
+import routes from './components/Helpers/Routes';
+import { termsAndCondition, customerAccount, customerContact, supplierAccount, supplierContact } from './constants/helpers';
+import CustomToaster from './components/Helpers/CustomToast';
+import PrivateRoute from './components/PrivateRoute';
+import { useData } from './StateProvider/Provider';
+import ErrorBoundaryComponent from './ErrorBoundary';
+import Login from './pages/Auth/Login';
+import AzureLogin from './pages/Auth/AzureLogin';
+import Leads from './pages/Leads';
+import LeadDetailsPage from './pages/Leads/LeadDetailsPage';
+import NewLead from './pages/Leads/NewLead';
+import Opportunities from './pages/Opportunities';
+import Doa from './pages/DoaSetup';
+import Contact from './pages/Contact';
+import Account from './pages/Account/index';
+import AccountDetailPage from './pages/Account/AccountDetailPage';
+import ContactDetailPage from './pages/Contact/ContactDetailPage';
+import OpportunityDetailsPage from './pages/Opportunities/OpportunityDetailsPage';
+import Activitydemo from './pages/Activity/activitydemo';
+import Activity from './pages/Activity';
+import Note from './pages/Activity/Note';
+import Email from './pages/Activity/Email';
+import Attachments from './pages/Activity/Attachments';
+import Calender from './pages/Activity/Calendar';
+import PasswordSetup from './pages/Auth/PasswordSetup';
+import ForgetPassword from './pages/Auth/ForgetPassword';
+import ProductCategory from './pages/ProductCategory';
+import ProductTemplate from './pages/ProductTemplate';
+import CreateProductTemplate from './pages/ProductTemplate/CreateProductTemplate';
+import User from './pages/User';
+import Entity from './pages/Entity';
+import EntityDetailPage from './pages/Entity/EntityDetailPage';
+import UserDetailsPage from './pages/User/UserDetailsPage';
+import ProjectSalesDetails from './pages/ProjectSales/ProjectSalesDetails';
+import ProjectSales from './pages/ProjectSales';
+import Roles from './pages/Role';
+import RoleDetailsPage from './pages/Role/RoleDetailsPage';
+import Product from './pages/Product';
+import TermsAndConditions from './pages/TermsAndConditions';
+import PriceTemplate from './pages/PriceTemplate';
+import CreatePriceTemplate from './pages/PriceTemplate/CreatePriceTemplate';
+import ProductBuilder from './pages/ProductBuilder';
+import CreateProductBuilder from './pages/ProductBuilder/CreateProductBuilder';
+import BrandConfiguration from './pages/BrandConfiguration';
+import QuoteApproval from './pages/Quote-Approval';
+import QuoteDetail from './pages/QuoteBuilderCombined/QuoteDetail/index';
+import DOARequest from './pages/DOA';
+import CurrencyConverter from './pages/CurrencyConverter';
+import Dashboard from './pages/Dashboard';
+import KpiDashboards from './pages/KpiDashboard/Dashboard';
+import FormBuilder from './pages/FormBuilder';
+import CreateFormBuilder from './pages/FormBuilder/CreateFormBuilder';
+import UserProfilePage from './pages/ProfilePage/index';
+import DOAapproval from './pages/DOA/DOAApproval';
+import QuoteBuilderCombined from './pages/QuoteBuilderCombined';
+import Reminder from './pages/Reminder';
+import ResetPassword from './pages/Auth/ResetPassword';
+import NotFound from './pages/NotFound';
+import Products from './pages/Products';
+import ProductDetails from './pages/Products/ProductDetails';
+import MarketSegment from './pages/MarketSegment';
+import Budget from './pages/Budget';
+import CreateNewQuotePdfTemplate from './pages/QuotePdfTemplate/NewCreateQuotePdfTemplate';
+import QuotePdfTemplate from './pages/QuotePdfTemplate';
+import MyOwnCart from './components/ProductList/MyCart/MyOwnCart';
+import Warehouse from './pages/Warehouse';
+import WarehouseDetailsPage from './pages/Warehouse/WarehouseDetailsPage';
+import ProductInventory from './pages/ProductInventory';
+import EquipmentRentalMaster from './pages/EquipmentRentalMaster';
+import ProductInventoryDetailsPage from './pages/ProductInventory/ProductInventoryDetailsPage';
+import ProductDetailsPage from './pages/Product/ProductDetailsPage';
+import RentalManagement from './pages/RentalManagement';
+import RentalManagementDetailsPage from './pages/RentalManagement/RentalManagementDetailsPage';
+import DeliveryTicket from './pages/DeliveryTicket/index';
+import DeliveryTicketDetailsPage from './pages/DeliveryTicket/DeliveryTicketDetailPage';
+import RecordDeletedDialog from './components/Helpers/RecordDeletedDialog';
+import PricingConditions from './pages/PricingConditions';
+import RepairJob from './pages/RepairJob';
+import RepairJobDetails from './pages/RepairJob/RepairJobDetails';
+import ReceivingTicket from './pages/ReceivingTicket';
+import ReceivingTicketDetails from './pages/ReceivingTicket/ReceivingTicketDetails';
+import PricingConditionsDetailsPage from './pages/PricingConditions/PricingConditionsDetailsPage';
+import SalesOrder from './pages/SalesOrderCreation';
+import SalesOrderDetails from './pages/SalesOrderCreation/SalesOrderDetails';
+import PackageList from './pages/Packages';
+import PackageDetails from './pages/Packages/PackageDetails';
+import BOMTable from './pages/BOM';
+import PurchaseOrder from './pages/PurchaseOrder';
+import PurchaseOrderDetailsPage from './pages/PurchaseOrder/PurchaseOrderDetailsPage';
+import { entity } from './constants/helpers';
+import TransferAsset from './pages/TransferAssets/Index';
+import TransferAssetDetailPage from './pages/TransferAssets/TransferAssetDetailPage';
+import Logout from './pages/Auth/Logout';
 
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
   const [isOffline, setIsOffline] = useState(false);
-  let mappedEntities = JSON.parse(localStorage.getItem("mappedEntities"))
+  let mappedEntities = JSON.parse(localStorage.getItem('mappedEntities'));
 
   const {
     state: { user },
-    dispatch,
+    dispatch
   }: any = useData();
-  const { entityApi } = entity
+  const { entityApi } = entity;
 
   const history = useHistory();
 
   history.listen(() => {
-    let isSlowInternetConnection = localStorage.getItem("slowInternetConnection")
-    if (isSlowInternetConnection == "true") {
+    let isSlowInternetConnection = localStorage.getItem('slowInternetConnection');
+    if (isSlowInternetConnection == 'true') {
       toast.setToastConfig({
-        open: true, type: "error", message: "Slow or no internet connection.",
+        open: true,
+        type: 'error',
+        message: 'Slow or no internet connection.',
         anchorOrigin: {
           vertical: 'bottom',
-          horizontal: 'right',
+          horizontal: 'right'
         }
       });
-      localStorage.setItem("slowInternetConnection", "false")
+      localStorage.setItem('slowInternetConnection', 'false');
     }
   });
   // ReactGA.initialize(TRACKING_ID);
 
-  window.addEventListener('load', function (e) {
-    //@ts-ignore
-    if (navigator.onLine) {
-      if (isOffline) setIsOffline(false)
-    }
-    else {
-      setIsOffline(true);
-    }
-  }, false);
+  window.addEventListener(
+    'load',
+    function (e) {
+      //@ts-ignore
+      if (navigator.onLine) {
+        if (isOffline) setIsOffline(false);
+      } else {
+        setIsOffline(true);
+      }
+    },
+    false
+  );
 
-  window.addEventListener('online', function (e) {
-    if (isOffline) setIsOffline(false)
-  }, false);
+  window.addEventListener(
+    'online',
+    function (e) {
+      if (isOffline) setIsOffline(false);
+    },
+    false
+  );
 
-  window.addEventListener('offline', function (e) {
-    const pathnames = history.location.pathname.split("/").filter((x) => x);
+  window.addEventListener(
+    'offline',
+    function (e) {
+      const pathnames = history.location.pathname.split('/').filter((x) => x);
 
-    if (!(history.location.pathname === "/" || [
-      "rental-management"
-    ].indexOf(pathnames[0]) >= 0)) {
-      setIsOffline(true);
-    }
-  }, false);
+      if (!(history.location.pathname === '/' || ['rental-management'].indexOf(pathnames[0]) >= 0)) {
+        setIsOffline(true);
+      }
+    },
+    false
+  );
 
   useEffect(() => {
     if (!mappedEntities) {
       axiosInstance()
         .get(`${entityApi}`)
         .then(({ data: { data } }) => {
-          let mappedEntities = []
+          let mappedEntities = [];
           if (data && data.length) {
-            data.forEach(o => {
-              mappedEntities = [...mappedEntities,
-              { optionLabel: o?.entityName, optionValue: o?._id }]
-            })
+            data.forEach((o) => {
+              mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
+            });
           }
-          localStorage.setItem("mappedEntities", JSON.stringify(mappedEntities))
-        })
+          localStorage.setItem('mappedEntities', JSON.stringify(mappedEntities));
+        });
     }
-  }, [mappedEntities])
+  }, [mappedEntities]);
 
   const getNotification = async () => {
-    if (localStorage.getItem("token")) {
+    if (localStorage.getItem('token')) {
       await axiosInstance()
         .get(`/user/notification/unseen`)
         .then(({ data: { frontendReloadRequired, count } }) => {
@@ -195,26 +197,26 @@ function App() {
           if (frontendReloadRequired) {
             // dispatch({ type: USER_LOADING, payload: true });
             axiosInstance()
-              .get("/user/me")
+              .get('/user/me')
               .then(({ data: response }) => {
                 const { data } = response;
                 dispatch({ type: SET_USER, payload: data });
-                let prevSelectedEntity = localStorage.getItem("selectedEntity");
-                if (prevSelectedEntity && prevSelectedEntity !== "null") {
+                let prevSelectedEntity = localStorage.getItem('selectedEntity');
+                if (prevSelectedEntity && prevSelectedEntity !== 'null') {
                   dispatch({
                     type: SET_SELECTED_ENTITY,
-                    payload: prevSelectedEntity,
+                    payload: prevSelectedEntity
                   });
                 } else if (data?.role?.selectedEntity?._id) {
                   dispatch({
                     type: SET_SELECTED_ENTITY,
-                    payload: data.role.selectedEntity._id,
+                    payload: data.role.selectedEntity._id
                   });
                 }
                 // dispatch({ type: USER_LOADING, payload: false });
               })
               .catch((err) => {
-                localStorage.setItem("token", "");
+                localStorage.setItem('token', '');
                 // dispatch({ type: USER_LOADING, payload: false });
               });
           }
@@ -226,7 +228,7 @@ function App() {
   };
 
   const getChatNotification = async () => {
-    if (localStorage.getItem("token")) {
+    if (localStorage.getItem('token')) {
       if (!isOffline) {
         await axiosInstance()
           .get(`/user/user-notification/unseen`)
@@ -252,8 +254,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
-
+    } catch (e) {}
   }, []);
 
   const conditionalRedirect = (Comp, location) => {
@@ -268,25 +269,23 @@ function App() {
     return !user ? (
       // <Suspense fallback={<div>Loading...</div>}>
       <Comp />
-      // </Suspense>
     ) : (
+      // </Suspense>
       <Redirect
         to={{
-          pathname: redirectToAnotherScreen ? redirectToAnotherScreen : "/",
-          state: { from: location },
+          pathname: redirectToAnotherScreen ? redirectToAnotherScreen : '/',
+          state: { from: location }
         }}
       />
     );
   };
 
   return (
-
     <ThemeProvider theme={theme}>
       <AnimatePresence initial={false} exitBeforeEnter>
         <ErrorBoundaryComponent>
           {/* <Switch location={location} key={location.key}> */}
           <Switch>
-
             <Route
               // exact
               path="/login"
@@ -297,29 +296,14 @@ function App() {
               path="/office365/login"
               render={({ location }) => conditionalRedirect(AzureLogin, location)}
             />
-            <Route
-              exact
-              path="/create-password"
-              render={({ location }) =>
-                conditionalRedirect(PasswordSetup, location)
-              }
-            />
-            <Route
-              exact
-              path="/forget-password"
-              render={({ location }) =>
-                conditionalRedirect(ForgetPassword, location)
-              }
-            />
-            <Route
-              exact
-              path="/reset-password"
-              render={({ location }) =>
-                conditionalRedirect(ResetPassword, location)
-              }
-            />
+            <Route exact path="/create-password" render={({ location }) => conditionalRedirect(PasswordSetup, location)} />
+            <Route exact path="/forget-password" render={({ location }) => conditionalRedirect(ForgetPassword, location)} />
+            <Route exact path="/reset-password" render={({ location }) => conditionalRedirect(ResetPassword, location)} />
             <PrivateRoute exact path="/">
               <Dashboard />
+            </PrivateRoute>
+            <PrivateRoute exact path="/logout">
+              <Logout />
             </PrivateRoute>
             <PrivateRoute exact path={routes.lead.path}>
               <Leads />
@@ -355,87 +339,33 @@ function App() {
               <CreateContact />
           </PrivateRoute> */}
             <PrivateRoute key="customer-account" exact path={routes.customerAccount.path}>
-              <Account
-                account={customerAccount}
-                accountBreadcrumb={routes.customerAccount}
-              />
+              <Account account={customerAccount} accountBreadcrumb={routes.customerAccount} />
             </PrivateRoute>
-            <PrivateRoute
-              key="customer-account-edit"
-              exact
-              path={`${routes.customerAccountDetail.path}/:id`}
-            >
-              <AccountDetailPage
-                account={customerAccount}
-                contact={customerContact}
-                accountBreadcrumb={routes.customerAccount}
-              />
+            <PrivateRoute key="customer-account-edit" exact path={`${routes.customerAccountDetail.path}/:id`}>
+              <AccountDetailPage account={customerAccount} contact={customerContact} accountBreadcrumb={routes.customerAccount} />
             </PrivateRoute>
             <PrivateRoute key="customer-contact" exact path={routes.customerContact.path}>
-              <Contact
-                contact={customerContact}
-                account={customerAccount}
-                contactBreadcrumb={routes.customerContact}
-              />
+              <Contact contact={customerContact} account={customerAccount} contactBreadcrumb={routes.customerContact} />
             </PrivateRoute>
-            <PrivateRoute
-              key="customer-contact-edit"
-              exact
-              path={`${routes.customerContactDetail.path}/:id`}
-            >
-              <ContactDetailPage
-                account={customerAccount}
-                contact={customerContact}
-                contactBreadcrumb={routes.customerContact}
-              />
+            <PrivateRoute key="customer-contact-edit" exact path={`${routes.customerContactDetail.path}/:id`}>
+              <ContactDetailPage account={customerAccount} contact={customerContact} contactBreadcrumb={routes.customerContact} />
             </PrivateRoute>
             <PrivateRoute key="supplier-account" exact path={routes.supplierAccount.path}>
-              <Account
-                account={supplierAccount}
-                accountBreadcrumb={routes.supplierAccount}
-              />
+              <Account account={supplierAccount} accountBreadcrumb={routes.supplierAccount} />
             </PrivateRoute>
-            <PrivateRoute
-              key="supplier-account-edit"
-              exact
-              path={`${routes.supplierAccountDetail.path}/:id`}
-            >
-              <AccountDetailPage
-                account={supplierAccount}
-                contact={supplierContact}
-                accountBreadcrumb={routes.supplierAccount}
-              />
+            <PrivateRoute key="supplier-account-edit" exact path={`${routes.supplierAccountDetail.path}/:id`}>
+              <AccountDetailPage account={supplierAccount} contact={supplierContact} accountBreadcrumb={routes.supplierAccount} />
             </PrivateRoute>
             <PrivateRoute key="supplier-contact" exact path={routes.supplierContact.path}>
-              <Contact
-                contact={supplierContact}
-                account={supplierAccount}
-                contactBreadcrumb={routes.supplierContact}
-              />
+              <Contact contact={supplierContact} account={supplierAccount} contactBreadcrumb={routes.supplierContact} />
             </PrivateRoute>
-            <PrivateRoute
-              key="supplier-contact-edit"
-              exact
-              path={`${routes.supplierContactDetail.path}/:id`}
-            >
-              <ContactDetailPage
-                account={supplierAccount}
-                contact={supplierContact}
-                contactBreadcrumb={routes.supplierContact}
-              />
+            <PrivateRoute key="supplier-contact-edit" exact path={`${routes.supplierContactDetail.path}/:id`}>
+              <ContactDetailPage account={supplierAccount} contact={supplierContact} contactBreadcrumb={routes.supplierContact} />
             </PrivateRoute>
-            <PrivateRoute
-              key="project-sales"
-              exact
-              path={routes.projectSales.path}
-            >
+            <PrivateRoute key="project-sales" exact path={routes.projectSales.path}>
               <ProjectSales />
             </PrivateRoute>
-            <PrivateRoute
-              key="project-sales-details"
-              exact
-              path={`${routes.projectSalesDetail.path}/:id`}
-            >
+            <PrivateRoute key="project-sales-details" exact path={`${routes.projectSalesDetail.path}/:id`}>
               <ProjectSalesDetails />
             </PrivateRoute>
             <PrivateRoute exact path="/user">
@@ -489,13 +419,13 @@ function App() {
             <PrivateRoute exact path={routes.product.path}>
               <Product />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.productDetail.path + "/:id"}>
+            <PrivateRoute exact path={routes.productDetail.path + '/:id'}>
               <ProductDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={routes.productInventory.path}>
               <ProductInventory />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.productInventoryDetail.path + "/:id"}>
+            <PrivateRoute exact path={routes.productInventoryDetail.path + '/:id'}>
               <ProductInventoryDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={routes.equiptmentRentalMaster.path}>
@@ -504,7 +434,7 @@ function App() {
             <PrivateRoute exact path={routes.rentalManagement.path}>
               <RentalManagement />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.rentalManagementDetail.path + "/:id"}>
+            <PrivateRoute exact path={routes.rentalManagementDetail.path + '/:id'}>
               <RentalManagementDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={routes.productCategory.path}>
@@ -513,7 +443,7 @@ function App() {
             <PrivateRoute exact path={routes.productTemplate.path}>
               <ProductTemplate />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.productTemplate.path + "/:id"}>
+            <PrivateRoute exact path={routes.productTemplate.path + '/:id'}>
               <CreateProductTemplate />
             </PrivateRoute>
             <PrivateRoute exact path={routes.quotePdfTemplate.path}>
@@ -525,27 +455,22 @@ function App() {
             <PrivateRoute exact path={routes.formBuilder.path}>
               <FormBuilder />
             </PrivateRoute>
-            <PrivateRoute
-              exact
-              path={`${routes.formBuilder.path}${routes.formBuilderResource.path}`}
-            >
+            <PrivateRoute exact path={`${routes.formBuilder.path}${routes.formBuilderResource.path}`}>
               <CreateFormBuilder />
             </PrivateRoute>
             <PrivateRoute exact path={termsAndCondition.route}>
-              <TermsAndConditions
-                termsAndConditionBreadcrumb={routes.termsAndConditions}
-              />
+              <TermsAndConditions termsAndConditionBreadcrumb={routes.termsAndConditions} />
             </PrivateRoute>
             <PrivateRoute exact path={routes.priceTemplate.path}>
               <PriceTemplate />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.priceTemplate.path + "/:id"}>
+            <PrivateRoute exact path={routes.priceTemplate.path + '/:id'}>
               <CreatePriceTemplate />
             </PrivateRoute>
             <PrivateRoute exact path={routes.productBuilder.path}>
               <ProductBuilder />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.productBuilder.path + "/:id"}>
+            <PrivateRoute exact path={routes.productBuilder.path + '/:id'}>
               <CreateProductBuilder />
             </PrivateRoute>
             <PrivateRoute exact path={routes.currencyConverter.path}>
@@ -554,13 +479,13 @@ function App() {
             <PrivateRoute exact path={routes.warehouse.path}>
               <Warehouse />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.warehouseDetail.path + "/:id"}>
+            <PrivateRoute exact path={routes.warehouseDetail.path + '/:id'}>
               <WarehouseDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>
               <QuoteDetail />
             </PrivateRoute>
-            <Route exact path={"/dashboards"}>
+            <Route exact path={'/dashboards'}>
               <KpiDashboards />
             </Route>
             {/* <Route exact path={"/dashboards"}>
@@ -573,7 +498,7 @@ function App() {
               <EditDashboard edit={false} />
             </Route> */}
             //Route available for customers to Accept Reject Quote
-            <Route exact path={"/quote-approval/:id"}>
+            <Route exact path={'/quote-approval/:id'}>
               <QuoteApproval />
             </Route>
             <PrivateRoute exact path={routes.DOARequest.path}>
@@ -612,43 +537,43 @@ function App() {
             <PrivateRoute exact path={routes.deliveryTicket.path}>
               <DeliveryTicket />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.deliveryTicket.path}/detail/:id`} >
+            <PrivateRoute exact path={`${routes.deliveryTicket.path}/detail/:id`}>
               <DeliveryTicketDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={routes.repairJob.path}>
               <RepairJob />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.repairJobDetail.path}/:id`} >
+            <PrivateRoute exact path={`${routes.repairJobDetail.path}/:id`}>
               <RepairJobDetails />
             </PrivateRoute>
             <PrivateRoute exact path={routes.receivingTicket.path}>
               <ReceivingTicket />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.receivingTicketDetail.path}/:id`} >
+            <PrivateRoute exact path={`${routes.receivingTicketDetail.path}/:id`}>
               <ReceivingTicketDetails />
             </PrivateRoute>
             <PrivateRoute exact path={routes.salesOrder.path}>
               <SalesOrder />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.salesOrderDetail.path}/:id`} >
+            <PrivateRoute exact path={`${routes.salesOrderDetail.path}/:id`}>
               <SalesOrderDetails />
             </PrivateRoute>
             <PrivateRoute exact path={routes.packages.path}>
               <PackageList />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.packagesDetail.path}/:id`} >
+            <PrivateRoute exact path={`${routes.packagesDetail.path}/:id`}>
               <PackageDetails />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.purchaseOrder.path} >
+            <PrivateRoute exact path={routes.purchaseOrder.path}>
               <PurchaseOrder />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.purchaseOrderDetail.path}/:id`} >
+            <PrivateRoute exact path={`${routes.purchaseOrderDetail.path}/:id`}>
               <PurchaseOrderDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.transferAsset.path} >
+            <PrivateRoute exact path={routes.transferAsset.path}>
               <TransferAsset />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.transferAssetDetail.path}/:id`} >
+            <PrivateRoute exact path={`${routes.transferAssetDetail.path}/:id`}>
               <TransferAssetDetailPage />
             </PrivateRoute>
             <Route path="*" component={NotFound} />
@@ -656,9 +581,9 @@ function App() {
           </Switch>
         </ErrorBoundaryComponent>
       </AnimatePresence>
-      {
-        toast?.toastConfig?.open && (
-          ["notFoundError"].some(s => s !== toast?.toastConfig?.type) ? <CustomToaster
+      {toast?.toastConfig?.open &&
+        (['notFoundError'].some((s) => s !== toast?.toastConfig?.type) ? (
+          <CustomToaster
             type={toast.toastConfig.type}
             message={toast.toastConfig.message}
             anchorOrigin={toast.toastConfig?.anchorOrigin || null}
@@ -666,9 +591,12 @@ function App() {
             close={() => {
               toast.setToastConfig({ open: false });
             }}
-          /> : (toast.toastConfig.type === "notFoundError" ? <RecordDeletedDialog /> : "")
-        )
-      }
+          />
+        ) : toast.toastConfig.type === 'notFoundError' ? (
+          <RecordDeletedDialog />
+        ) : (
+          ''
+        ))}
       {/* {
         isOffline ?
           <OfflineStatusDialog /> : null
