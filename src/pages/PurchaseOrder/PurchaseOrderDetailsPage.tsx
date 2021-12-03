@@ -32,15 +32,16 @@ import { FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms } from "react-icons/
 import { BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
 import queryString from 'query-string';
-
+import { isMobile } from "react-device-detect";
 import Product from "./Product";
 import Service from "./Service";
 import IssuePo from "./IssuePo";
 import ReceivingAsset from "./ReceivingAsset";
+import { GrStatusInfo } from "react-icons/all";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
-const purchaseOrderSteps = ["Add Product", "Add Services", "Issue PO", "Receiving Asset"]
+const purchaseOrderSteps = ["Add Product", "Add Services", "Issue PO", "Receiving Asset", "Ready to Invoice"]
 
 const PurchaseOrderDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -68,6 +69,7 @@ const PurchaseOrderDetailsPage = () => {
     const [currentStep, setCurrentStep] = useState(0);
     const [downlodingFile, setDownlodingFile] = useState(false)
     const [pdfFileBase64, setPdfFileBase64] = useState(null);
+    const [anchorEl, setAnchorEl] = useState(null);
 
     const [tabValue, setTabValue] = useState(0);
 
@@ -90,8 +92,9 @@ const PurchaseOrderDetailsPage = () => {
     }, [id]);
 
     useEffect(() => {
-        if (currentStep > -1) {
+        if (currentStep > -1 && purchaseOrderData && purchaseOrderData?.processStatus !== purchaseOrderSteps[currentStep]) {
             axiosInstance().put(`${purchaseOrder.api}/${id}/process-status`, { "processStatus": purchaseOrderSteps[currentStep] }).then(({ data }) => {
+                fetchPurchaseOrderData()
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
             });
@@ -119,8 +122,8 @@ const PurchaseOrderDetailsPage = () => {
                     setDownlodingFile(false);
                 })
         }
-        if (currentStep === 1 && purchaseOrderData?.status !== "In Process") { handleUpdateData({ "status": "In Process" }) }
-        if (currentStep === 3 && purchaseOrderData?.status !== "Issued") { handleUpdateData({ "status": "Issued" }) }
+        if (currentStep === 1 && purchaseOrderData?.status === "New") { handleUpdateData({ "status": "In Process" }) }
+        if (currentStep === 3 && purchaseOrderData?.status === "In Process") { handleUpdateData({ "status": "Issued" }) }
     }, [currentStep]);
 
     const handleMainPoints = (data) => {
@@ -197,12 +200,20 @@ const PurchaseOrderDetailsPage = () => {
         });
     }
 
+    const openActions = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const closeActions = () => {
+        setAnchorEl(null);
+    };
+
     const handleStatusChange = o => {
         handleUpdateData({ status: o.optionValue })
     }
 
     const handleUpdateData = (obj) => {
-        if (obj.status) {
+        if (obj.status && purchaseOrderData?.status !== obj.status) {
             const fieldsDataForUpdate = purchaseOrderFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             let values = getObjKeysWithValues(purchaseOrderData, fieldsDataForUpdate)
             values["status"] = obj.status
@@ -335,6 +346,44 @@ const PurchaseOrderDetailsPage = () => {
                                             </Button>
                                         </>
                                     )}
+                                    {permissions?.purchaseOrder?.isUpdate && purchaseOrderData?.status === "Ready to Invoice" && (
+                                        <>
+                                            <Button
+                                                variant="outlined"
+                                                color="default"
+                                                size="small"
+                                                onClick={openActions}
+                                                disabled={updateLoading}
+                                                aria-controls="action-menu"
+                                                endIcon={isMobile ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
+                                            >
+                                                {isMobile ? <GrStatusInfo size={20} /> : "Change Status"}
+                                            </Button>
+                                            <Menu
+                                                anchorEl={anchorEl}
+                                                keepMounted
+                                                getContentAnchorEl={null}
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'left'
+                                                }}
+                                                id="action-menu"
+                                                open={Boolean(anchorEl)}
+                                                onClose={closeActions}>
+                                                {
+                                                    statusOptions.map((o, index) => {
+                                                        return <MenuItem
+                                                            disabled={index <= statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice")}
+                                                            onClick={() => {
+                                                                closeActions()
+                                                                handleStatusChange(o)
+                                                            }}
+                                                            value={o}>{o?.optionLabel}</MenuItem>
+                                                    })
+                                                }
+                                            </Menu>
+                                        </>
+                                    )}
 
                                 </DetailsPageHeader>
                             )}
@@ -416,7 +465,7 @@ const PurchaseOrderDetailsPage = () => {
                                                 <Steps
                                                     // className={styles.steps_box}
                                                     isNextStep={!Boolean(purchaseOrderProduct.length) || currentStepDisable}
-                                                    steps={purchaseOrderSteps.slice(0, 5)}
+                                                    steps={purchaseOrderSteps.slice(0, 4)}
                                                     currentStep={currentStep}
                                                     setCurrentStep={setCurrentStep}
                                                 />
@@ -447,12 +496,14 @@ const PurchaseOrderDetailsPage = () => {
                                                         pdfFileBase64={pdfFileBase64}
                                                     />
                                                 }
-                                                {currentStep === 3 &&
+                                                {(currentStep === 3 || currentStep === 4) &&
                                                     <ReceivingAsset
                                                         currencySymbol={currencySymbol}
                                                         purchaseOrderData={purchaseOrderData}
-                                                        purchaseOrderProduct={purchaseOrderProduct}
-                                                        handleUpdateData={handleUpdateData} />
+                                                        setCurrentStep={setCurrentStep}
+                                                        handleUpdateData={handleUpdateData}
+                                                        statusOptions={statusOptions}
+                                                    />
                                                 }
                                             </Paper>
                                         </>
