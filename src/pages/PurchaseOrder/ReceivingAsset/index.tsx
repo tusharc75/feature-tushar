@@ -32,7 +32,7 @@ const useStyles = makeStyles(() => ({
 
 }));
 
-const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduct, handleUpdateData }) => {
+const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, handleUpdateData, statusOptions }) => {
     const toastConfig = useContext(CustomToastContext);
     const {
         state: { user, permissions }
@@ -78,7 +78,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
     },
     {
         accessor: 'actualDelivery',
-        Header: 'Actual Delivery',
+        Header: 'Actual Delivery Date',
         Cell: ({ row }) => (
             row.original.actualDelivery ? <h5 className="createBy text-truncate" title={`${moment(row.original.actualDelivery.slice(0, 10)).format(dateFormat)}`}>
                 <span className="">
@@ -161,8 +161,8 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                     })
                 }
             })
-            // genrateColoum(fields, columns, rendererNames, false);
-            setColumns(prevState => { return [...prevState, ...tempColumns] })
+            // columns length check with 2 because sometimes it call twice making double entry
+            if (columns.length === 2) setColumns(prevState => { return [...prevState, ...tempColumns] })
             setLoadingColumns(false)
         })
     }
@@ -178,11 +178,15 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                 };
                 return res;
             });
+            if (rows.every(d => d.qty === d.actualReceived) && statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice") >= statusOptions.findIndex(d => d.optionLabel === purchaseOrderData?.status)) {
+                handleUpdateData({ "status": "Ready to Invoice" })
+                setCurrentStep(4)
+            }
             axiosInstance().get(`${productInventory.api}?filterById=[{"field": "pONumber", "term": "${purchaseOrderData._id}"}]`)
                 .then(({ data }) => {
                     data.data = data.data.map((u) => {
                         let tempProduct = rows.find(obj => obj.treeId === u?.product?.optionValue)
-                        if (tempProduct) {
+                        if (tempProduct && !rows.some(obj => obj.treeId === u._id)) {
                             rows.push({
                                 ...u,
                                 description: u.assetNumber,
@@ -298,11 +302,11 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                 onClose={() => setShowCreateAssetDialog(false)}
                 onSuccess={() => {
                     setShowCreateAssetDialog(false)
-                    handleUpdateData({ status: "Received" })
                     fetchSerializedAsset()
                 }}
                 title="Create Asset"
                 productList={selectedProducts.filter(d => d.hasOwnProperty("productDetail"))}
+                handleUpdateData={handleUpdateData}
             />
         }
     </>

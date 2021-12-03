@@ -325,7 +325,7 @@ const TransferAssetDetailPage = () => {
                   isInternal={transferAssetData?.transferType === "Internal"}
                   hasAssets={existingAssets.length > 0}
                   isTransferEnded={isTransferEnded}
-                  isNextStep={isNextStep || !loading}
+                  isNextStep={isNextStep}
                   isPrevStep={isPrevStep}
                   steps={transferAssetData?.transferType === "Internal" ? transferSteps : transferSteps1}
                   currentStep={currentStep}
