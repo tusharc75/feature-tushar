@@ -593,7 +593,7 @@ const ReceivingTicket = () => {
                 field: "status",
               }
             ]}
-            onCreate={clickCreateNew}
+            onCreate={false}
             showClone={false}
             onClone={() => { }}
             renderedFrom='receivingTicketPage'

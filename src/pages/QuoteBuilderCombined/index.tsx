@@ -1015,7 +1015,7 @@ const QuoteBuilders = () => {
                   }
                 ]}
                 owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                onCreate={clickCreateNew}
+                onCreate={false}
                 showClone={false}
                 onClone={() => { }}
                 renderedFrom={quoteResource}

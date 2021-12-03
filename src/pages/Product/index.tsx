@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from "react";
+import React, { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -12,8 +12,8 @@ import CreateProduct from "../../components/Product/CreateProduct";
 import { RiShoppingBag3Fill } from 'react-icons/ri';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import { ExpandMore } from "@material-ui/icons";
-import { Box, Menu, MenuItem } from "@material-ui/core";
+import {AddOutlined, ExpandMore, Search} from "@material-ui/icons";
+import {Box, InputAdornment, Menu, MenuItem} from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
@@ -37,7 +37,7 @@ import useColumns, {
 import { prepareDataForGrid } from "../../constants/helpers";
 import Tooltip from '@material-ui/core/Tooltip'
 import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown } from "react-icons/all";
+import {AiFillCrown, MdAdd} from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 import { IoPricetagsSharp } from 'react-icons/io5';
@@ -497,7 +497,20 @@ const Product = () => {
                                 setProductCategory(val && val._id ? val._id : "")
                             }}
                             renderInput={(params) => (
-                                <TextField
+
+                                isMobile ?
+                                    <TextField
+                                        {...params}
+                                        margin="dense"
+                                        name="productCategory"
+                                        placeholder="Product Category"
+                                        variant="standard"
+                                        fullWidth
+                                        className= {isMobile ? "serchBox" : "" }
+
+
+                                    /> :
+                                    <TextField
                                     {...params}
                                     margin="dense"
                                     name="productCategory"
@@ -536,28 +549,42 @@ const Product = () => {
                     </Grid>
                     <Grid item xs={isMobile ? 12 : 6}>
                         <Grid container className={styles.filter_side} >
-                            <Box className={styles.filter_side_header} component="div" >
-                                <div className="d-flex gap-2">
+                            <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
+                                <Grid style={{display: "flex", flex:1}}>
                                     <SearchBox
                                         onSearch={handleSearch}
                                         searchbox={styles.search_box_input}
-                                        width="242px"
+                                        width={isMobile ? "200px" : "242px"}
+                                        style={isMobile ? {flex:1} : {}}
                                         size="small"
                                         value={search}
                                     />
-                                    <div className="d-flex gap-2">
-                                        {productPermissions.isCreate && !isMobile &&
-                                            <Button onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                </Grid>
+
+                                <Grid style={{display: "flex" , gap:"5px"}}>
+                                        {productPermissions.isCreate &&
+                                            <Button onClick={() => OpenProduct(null)}
+                                                    variant={isMobile ? "text" : "contained"}
+                                                    size="small"
+                                                    color="primary"
+                                                    className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                                                    startIcon={isMobile ? null : <AddOutlined />}>
+
+                                                {isMobile ? <MdAdd size={23}/> : "Add"}
+                                            </Button>
                                         }
                                         {productPermissions.isDelete &&
                                             <Button
-                                                variant="outlined"
+                                                variant={isMobile ? "text" : "contained"}
                                                 color="default"
                                                 size="small"
                                                 onClick={openActions}
                                                 disabled={selectedRecords.length ? false : true}
                                                 aria-controls="action-menu"
-                                            >Actions <ExpandMore />
+                                                className={isMobile ? "mobile_button" : styles.action_submit_btn}
+
+                                            >
+                                                {isMobile ? "" :  "Actions" } <ExpandMore/>
                                             </Button>
                                         }
                                         <Menu
@@ -574,8 +601,8 @@ const Product = () => {
                                         >
                                             <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
                                         </Menu>
-                                    </div>
-                                </div>
+                                </Grid>
+
                             </Box>
                         </Grid>
                     </Grid>
