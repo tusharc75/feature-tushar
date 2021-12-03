@@ -115,7 +115,6 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled }) => {
                                     d["hideSelection"] = d.status === "In-Transit";
                                 })
 
-                                // TODO: Uncomment below line before pushing
                                 setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))
 
                                 dispatch({
