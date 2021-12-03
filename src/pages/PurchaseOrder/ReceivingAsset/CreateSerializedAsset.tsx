@@ -12,7 +12,7 @@ import { Formik, Form, FieldArray, Field } from 'formik';
 import { useData } from '../../../StateProvider/Provider';
 
 const CreateSerializedAsset = (props) => {
-    const { purchaseOrderID, onClose, onSuccess, title, productList } = props;
+    const { purchaseOrderID, onClose, onSuccess, title, productList, handleUpdateData } = props;
     const [constProductList, setConstProductList] = useState(productList);
     const [wareHouseList, setwareHouseList] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,13 +53,11 @@ const CreateSerializedAsset = (props) => {
 
             axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderID}/update`, { products: tempProductArray })
                 .then(() => {
-
+                    handleUpdateData({ "status": "Received" })
+                    onSuccess()
                 }).catch((error) => {
                     toastConfig.setToastConfig(error)
                 });
-
-
-            onSuccess()
         }).catch((error) => {
             toastConfig.setToastConfig(error)
             setIsSubmitting(false);
