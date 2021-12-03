@@ -174,7 +174,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
     Promise.all(apiCalls).then(() => {
       toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged ${sidebarResource.deliveryTicket}(s)` });
-      fetchAssetsData(false);
+      fetchAssetsData(true);
       setRemovingTicket(false)
     }).catch((error) => {
       toastConfig.setToastConfig(error);
@@ -252,7 +252,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         <ConfirmationDialog
           okBtnLoading={isRemovingTicket}
           open={showConfirmBox}
-          message={`Are you sure you want to remove asset(s)?`}
+          message={`Are you sure you want to remove loading ticket(s)?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
