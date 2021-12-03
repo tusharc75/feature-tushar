@@ -334,7 +334,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled }) => {
       <ManageDeliveryTicket
         onClose={() => setShowDeliveryTicketDialog({ open: false, selectedAssets: [] })}
         productInventoryForDeliveryTicket={showDeliveryTicketDialog.selectedAssets}
-        // warehouseId={warehouseForDeliveryTicket}
+        warehouseId={repairJobData?.plant}
         repairJobData={repairJobData}
         onSuccess={() => {
           setShowDeliveryTicketDialog({ open: false, selectedAssets: [] })
