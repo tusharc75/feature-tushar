@@ -214,6 +214,10 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       setFieldValue={(name, value) => {
                                         // handleValuesChange({ [name]: value })
                                         setFieldValue(name, value);
+                                        if (field.fieldName === "transferToPlant") {
+                                          const address = field.option?.find((_d: any) => _d?.optionValue === value)?.address ?? ""
+                                          setFieldValue("plantShipTo", address)
+                                        }
                                       }}
                                       required={values?.transferType.includes('Internal')}
                                       fullWidth
@@ -294,14 +298,16 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                     tooltipMessage={field?.tooltipMessage}
                                     size="small"
                                     onChange={(e, val) => {
-                                      if (val && val.optionLabel === 'External Supplier') {
-                                        setErrors({ ...errors, "transferToSupplier": 'Transfer To Supplier is required' });
-                                      } else if (val && val.optionLabel === 'Internal') {
-                                        setErrors({ ...errors, "transferToPlant": 'Transfer To Plant is required' });
-                                      } else {
-                                        setErrors({ ...errors, "transferToCustomer": 'Transfer To Customer is required' });
-                                      }
                                       setFieldValue(field.fieldName, val?.optionValue ?? "");
+
+                                      // DO THIS WHEN CHANGING TYPE
+                                      setFieldValue("transferToCustomer", "");
+                                      setFieldValue("transferToSupplier", "");
+                                      setFieldValue("transferToPlant", "");
+                                      setFieldValue("customerShipTo", "");
+                                      setFieldValue("supplierShipTo", "");
+                                      setFieldValue("plantShipTo", "");
+
                                     }}
                                   />
                                 </Grid>
@@ -326,6 +332,9 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                     setFieldValue={(name, value) => {
                                       // handleValuesChange({ [name]: value })
                                       setFieldValue(name, value);
+                                      setFieldValue("transferToPlant", "");
+                                      setFieldValue("plantShipTo", "");
+
                                     }}
                                   />
                                 </Grid>
