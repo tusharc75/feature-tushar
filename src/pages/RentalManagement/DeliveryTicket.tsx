@@ -19,7 +19,7 @@ import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 
 const renderedFrom = "rentalManagementDetailsPageDeliveryTicket"
 
-const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDeliveryTicketDialog, rentalManagementId, rentalManagementData, fetchRentalData }) => {
+const DeliveryTicket = ({ currentStep, handleDeliveryTicketDialog, rentalManagementId, rentalManagementData, fetchRentalData }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [gridApi, setGridApi] = useState(null);
@@ -34,7 +34,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
   useEffect(() => {
     fetchRecords();
     // eslint-disable-next-line
-  }, [productInventory]);
+  }, []);
 
   const fetchRecords = () => {
     if (gridApi) {
@@ -63,7 +63,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
             tempProductInventory.forEach((d) => {
               d["hideSelection"] = d.status === "In-Transit";
             })
-            
+
             dispatch({
               type: "initialize", data: tempProductInventory, count: tempProductInventory.length
             });

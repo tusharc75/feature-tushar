@@ -23,7 +23,7 @@ import ViewSignsDialog from '../DeliveryTicket/ViewSignsDialog';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from "../../components/Activity";
 import { isMobile, isTablet } from "react-device-detect";
-import AddSerializedAsset from '../RentalManagement/AddSerializedAsset';
+import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import { FaWpforms } from "react-icons/fa";

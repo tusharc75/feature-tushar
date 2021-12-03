@@ -34,8 +34,6 @@ import HideWhenOffline from "../../components/HideWhenOffline";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import HtmlTooltip from '../../components/CustomTooltipTitle'
-
-import SerializedAssetStep from "./SerializedAssetStep";
 import moment from "moment";
 import { camelCase, startCase, orderBy, sum } from "lodash";
 import queryString from "query-string";
@@ -47,6 +45,7 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 
 import Productpackage from "./Productpackage";
 import AdditionalCost from "./AdditionalCost";
+import SerializedAsset from "./SerializedAsset";
 
 const rentalProcessSteps = ["New", "Additional Cost", "Serialized Asset", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
@@ -106,7 +105,7 @@ const RentalManagementDetailsPage = () => {
 
   const [dataForNewTabData, setDataForNewTabData] = useState([]);
 
- 
+
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -134,7 +133,6 @@ const RentalManagementDetailsPage = () => {
     if (id) {
       getRentalManagementFields();
       fetchRentalManagementData();
-      fetchProductInventory();
     }
     // eslint-disable-next-line
   }, [id]);
@@ -240,7 +238,6 @@ const RentalManagementDetailsPage = () => {
       } catch (ex) {
         console.error(`Rental Management: Error while removing data for Offline context. Error: ${ex.message}`)
       }
-
       setShowConfirmBox(false);
       history.goBack();
     }).catch((error) => {
@@ -259,131 +256,6 @@ const RentalManagementDetailsPage = () => {
     setProductInventoryForReceivingTicket(selectedProductInventory)
     // setWarehouseForReceivingTicket(warehouse)
     setShowReceivingTicketDialog(true)
-  }
-
-  //  This is copied method from helpers.ts as wee need some modification for this screen only
-  const translateDataToTreeForProducts = (data, parentProperty, childProperty, childrenPropertyToStore) => {
-    let parents = data.filter(value => value[parentProperty] == 'undefined' || value[parentProperty] == null)
-    let childrens = data.filter(value => value[parentProperty] !== 'undefined' && value[parentProperty] != null)
-
-    parents.forEach((current) => {
-      if (current.type === "Product" || current.type === "Package") {
-        current["qtyToDisplay"] = current?.qty ?? 0;
-        current["isValid"] = (!isNaN(current?.finalPrice) && current?.finalPrice !== 0)
-      }
-    })
-
-    let translator = (parents, childrens) => {
-      parents.forEach((parent) => {
-        childrens.forEach((current, index) => {
-          if (current.parent === parent[childProperty]) {
-            let temp = JSON.parse(JSON.stringify(childrens))
-            temp.splice(index, 1)
-            translator([current], temp)
-
-            //  Check validation for products in package - Start
-            current["qtyToDisplay"] = `${parent.qty} x ${current.qty} = ${current.qty * parent.qty}`
-
-            if (current?.finalPrice !== null && current?.finalPrice !== undefined && typeof current?.finalPrice !== "string" && current?.finalPrice !== 0) {
-              current["isValid"] = true;
-            } else {
-              current["isValid"] = parent["isValid"];
-            }
-            //  Check validation for products in package - End
-
-            if (typeof parent[childrenPropertyToStore] !== 'undefined') {
-              parent[childrenPropertyToStore].push(current)
-            } else {
-              parent[childrenPropertyToStore] = [current]
-            }
-          }
-        })
-      })
-    }
-    translator(parents, childrens)
-
-    return parents
-  }
-
-  const fetchProductInventory = () => {
-
-    let tempInventory = []
-    // dispatch({ type: "loading", loading: true });
-    // if (gridApi) {
-    //   gridApi.setRowData([]);
-    // }
-
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/products-packages`).then(({ data }) => {
-      data.data?.products.map((u: any, index) => (tempInventory.push({
-        ...u,
-        id: u._id,
-        productCategory: u.productCategory?.optionLabel,
-        isValid: true,
-        qtyToDisplay: u.qty
-        // package: u.hasOwnProperty("package") ? u.package.packageName : "",
-        // packageId: u.hasOwnProperty("package") ? u.package._id : ""
-      })));
-      data.data?.packages.map((u) => (tempInventory.push({
-        ...u,
-        id: u._id,
-        description: u.packageDescription,
-      })));
-      setProductInventory(tempInventory)
-      setSerializeAssets(data.data?.inventory || [])
-      tempInventory = restructureRowData(tempInventory)
-
-      let zeroPrice = tempInventory.filter(pkg => pkg.type !== "productInPackage" && pkg?.finalPrice === 0);
-
-      if (zeroPrice.length > 0) {
-        setNextStep(false)
-      } else {
-        setNextStep(true)
-      }
-
-      const newData = [];
-      tempInventory.forEach(({ _id, ...rest }) => {
-        newData.push(rest)
-      })
-
-      const newDataForReactTable = [...translateDataToTreeForProducts(newData ? [...newData] : [], "parent", "treeId", "subRows")];
-
-      setDataForNewTabData([...orderBy(newDataForReactTable, ["order"], ["asc"])]);
-
-      // dispatch({ type: "initialize", data: [], count: 0 })
-      // dispatch({ type: "initialize", data: [...orderBy(newDataForReactTable, ["order"], ["asc"])], count: newDataForReactTable.length });
-
-      // setTimeout(() => {
-      //   dispatch({ type: "loading", loading: false });
-      // }, gridLoadingTimeout);
-
-      setSelectedProducts([])
-
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-      // dispatch({ type: "loading", loading: false });
-    });
-  };
-
-  const restructureRowData = (rowData: any) => {
-    let extractedProducts = []
-    let newDataOfRow = [...rowData]
-
-    let packageProducts = newDataOfRow.filter(rd => rd.type === "productInPackage")
-    let packages = newDataOfRow.filter(rd => rd.type === "Package")
-    let products = newDataOfRow.filter(rd => rd.type === "Product")
-    let modifiedPkgProducts = [];
-
-    packages.forEach((pkg: any) => {
-      let currentPkgProducts = packageProducts.filter((p: any) => p.packageId === pkg.id);
-      currentPkgProducts.forEach((p: any) => {
-        let product = { ...p, pkgQty: pkg.qty, totalQty: pkg.qty * p.qty };
-        modifiedPkgProducts.push(product)
-      })
-    })
-
-    extractedProducts = [...products, ...packages, ...modifiedPkgProducts]
-
-    return extractedProducts
   }
 
   return (<>
@@ -638,22 +510,13 @@ const RentalManagementDetailsPage = () => {
                   />
                 )}
                 {(currentStep === 2) && (
-                  <SerializedAssetStep
-                    rentalManagementId={id}
-                    productInventory={[
-                      ...productInventory,
-                      ...serializeAssets
-                    ]}
-                    fetchProductsData={fetchProductInventory}
+                  <SerializedAsset
+                    rentalManagementData={rentalManagementData}
+                    setNextStep={setNextStep}
                     isSmallScreen={isSmallScreen}
                     isTabletScreen={isTabletScreen}
                     showActivity={showActivity}
-                    currentStep={currentStep}
                     currencySymbol={currencySymbol}
-                    currencyCode={rentalManagementData?.currency}
-                    loading={loading}
-                    serializeAssets={serializeAssets}
-                    setNextStep={setNextStep}
                   />
                 )}
                 {(currentStep === 3) && (
@@ -661,8 +524,6 @@ const RentalManagementDetailsPage = () => {
                     fetchRentalData={fetchRentalManagementData}
                     rentalManagementData={rentalManagementData}
                     rentalManagementId={id}
-                    warehouselist={warehouseList}
-                    productInventory={serializeAssets}
                     currentStep={currentStep}
                     handleDeliveryTicketDialog={handleDeliveryTicketDialog}
                   />
@@ -670,7 +531,6 @@ const RentalManagementDetailsPage = () => {
                 {(currentStep === 4 || currentStep === 5) && (
                   <ReceivingTicket
                     rentalManagementId={id}
-                    productInventory={productInventory}
                     currentStep={currentStep}
                     handleReceivingTicketDialog={handleReceivingTicketDialog}
                   />
@@ -715,7 +575,6 @@ const RentalManagementDetailsPage = () => {
         rentalData={rentalManagementData}
         onSuccess={() => {
           setShowDeliveryTicketDialog(false)
-          fetchProductInventory()
         }}
       />
     }
@@ -729,7 +588,6 @@ const RentalManagementDetailsPage = () => {
         onClose={() => setShowReceivingTicketDialog(false)}
         onSuccess={() => {
           setShowReceivingTicketDialog(false)
-          fetchProductInventory()
         }}
         isRedirectToDetailPage={false}
       />

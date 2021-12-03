@@ -1,0 +1,391 @@
+import { useState, useEffect, useContext, useMemo, Fragment } from "react";
+import Box from "@material-ui/core/Box/Box";
+import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
+import NoDataCell from "../../../components/Helpers/NoDataCell";
+import routes from "../../../components/Helpers/Routes";
+import Grid from "@material-ui/core/Grid/Grid";
+import { Button, Chip, IconButton } from "@material-ui/core";
+import { Delete } from "@material-ui/icons";
+import axiosInstance from "../../../axios/axiosInstance";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import AddSerializedAsset from "./AddSerializedAsset";
+import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray, generateUniqueId } from "../../../constants/helpers";
+import moment from "moment";
+import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
+import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
+import ManagePurchaseOrder from "../../PurchaseOrder/ManagePurchaseOrder";
+import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
+
+const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
+
+  const toastConfig = useContext(CustomToastContext);
+  const [deleting, setDeleting] = useState(false)
+  const [isAdding, setAdding] = useState(false)
+  const [showConfirmBox, setShowConfirmBox] = useState(false)
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
+  const [selectedProducts, setSelectedProducts] = useState([])
+  const [deleteData, setDeleteData] = useState([])
+
+  const [columns, setColumns] = useState(null);
+  const [rowsData, setRowsData] = useState(null);
+  const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, products: [] });
+
+  useEffect(() => {
+    axiosInstance().get("/field/child?resource=Rental Management Product").then(({ data: { data } }) => {
+      data = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
+      const coloum: any = [{
+        accessor: 'detail',
+        Header: 'Detail',
+        width: 300,
+        Cell: ({ row }) => (
+          <div className="d-flex gap-2 align-items-center">
+            <p className="text-truncate" title={row.original.detail}  >
+              {row.original.detail}
+            </p>
+            {row.original?.type === "asset" &&
+              <span className="d-flex align-items-center gap-2">
+                <IconButton size="small" onClick={() => {
+                  setShowConfirmBox(true)
+                  setDeleteData([row.original.inventory])
+                }}>
+                  <Delete color="error" />
+                </IconButton>
+                <Chip label="Asset" size="small" color="primary" />
+              </span>}
+          </div>)
+      },
+      {
+        accessor: 'assets',
+        Header: 'Assets Assigned',
+        Cell: ({ row }) => (
+          getAssetAssignedValues(row)
+        )
+      }]
+      data.forEach(element => {
+        if (element.type === "date") {
+          coloum.push({
+            accessor: element.fieldName,
+            Header: element.fieldLabel,
+            Cell: ({ row }) => (
+              row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+            )
+          })
+        }
+        else if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
+          if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+            element.displayUnits.forEach((_unit) => {
+              let fieldName = element.fieldName + "_" + _unit.toLowerCase()
+              let fieldLabel = element.fieldLabel + " " + _unit
+              coloum.push({
+                accessor: fieldName,
+                Header: fieldLabel,
+                Cell: ({ row }) => (
+                  row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />
+                )
+              })
+            })
+          }
+          else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+            element.displayUnits.forEach((_unit) => {
+              element.displayCurrency.forEach((_currency) => {
+                let fieldName = element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
+                let fieldLabel = element.fieldLabel + " " + _unit + "/" + _currency
+                coloum.push({
+                  accessor: fieldName,
+                  Header: fieldLabel,
+                  Cell: ({ row }) => (
+                    row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />
+                  )
+                })
+              })
+            })
+          }
+          else if (element.type === "currencyAmount") {
+            element.displayCurrency.forEach((_currency) => {
+              let fieldName = element.fieldName + "_" + _currency.toLowerCase()
+              let fieldLabel = element.fieldLabel + " " + _currency
+              coloum.push({
+                accessor: fieldName,
+                Header: fieldLabel,
+                Cell: ({ row }) => (
+                  row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />
+                )
+              })
+            })
+          }
+        }
+        else {
+          coloum.push({
+            accessor: element.fieldName,
+            Header: element.fieldLabel,
+            Cell: ({ row }) => (
+              row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />
+            )
+          })
+        }
+      });
+      coloum.forEach(element => {
+        if (element.accessor.includes("finalPrice")) {
+          element["Footer"] = (info) => {
+            const total = info.rows.filter(f => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor])).reduce((sum, row) => row.values[element.accessor] + sum, 0)
+            return <>{currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
+          }
+        }
+      });
+      setColumns(coloum)
+      fetchProductInventory();
+    })
+  }, []);
+
+  const fetchProductInventory = () => {
+    axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`).then(({ data: { data } }) => {
+      const rows = data.material.filter((e) => e.parentId === null)
+      rows.forEach((parent, i) => {
+        parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageDescription}`
+        const subRows = []
+        const inventory = data.inventory.filter((e) => e._id === parent._id);
+        inventory?.forEach((_inventory, k) => {
+          subRows.push({ ..._inventory, detail: `${(i + 1)}.${(k + 1)} - ${_inventory.inventoryDetail?.assetNumber}`, type: "asset", _id: _inventory.inventory, isValid: true })
+        })
+        parent.subRows = subRows;
+        if (parent.type === "product") {
+          parent.isValid = parent?.qty === subRows?.length ? true : false;
+        }
+        if (parent.type === "package") {
+          const child: any = [...data.material.filter((e) => e.parentId === parent._id)];
+          child.forEach((_child, j) => {
+            _child.detail = `${(i + 1)}.${(j + 1)} - ${_child.productDetail?.productName}`
+            const subRows = []
+            const inventory = data.inventory.filter((e) => e._id === _child._id);
+            inventory?.forEach((_inventory, l) => {
+              subRows.push({ ..._inventory, detail: `${(i + 1)}.${(j + 1)}.${(l + 1)} - ${_inventory.inventoryDetail?.assetNumber}`, type: "asset", _id: _inventory.inventory, isValid: true })
+            })
+            _child.subRows = subRows;
+            _child.isValid = _child?.qty === subRows?.length ? true : false;
+          })
+          if (child.filter(e => e.isValid === false).length > 0) {
+            parent.isValid = false
+          } else {
+            parent.isValid = true
+          }
+          parent.subRows = child;
+        }
+      });
+      if (rows.filter(_rows => _rows.isValid === false).length > 0) {
+        setNextStep(false)
+      } else {
+        setNextStep(true)
+      }
+      setRowsData(rows);
+      setSelectedProducts([])
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  };
+
+  const getAssetAssignedValues = (row) => {
+    if (row.original?.type === "product") {
+      if (row.subRows && row.subRows?.length > 0) {
+        return <p>{row.subRows.length} / {row.original.qty}</p>
+      }
+      return <p>0 / {row.original.qty}</p>;
+    }
+    else if (row.original?.type === "package") {
+      const qty = row.original?.subRows?.reduce((sum, row) => row.qty + sum, 0);
+      const flatData = treeToFlatArray([{ ...row.original }], "subRows")
+      const getAssetsOnly = flatData.filter(f => f.type === "asset");
+      return <p>{getAssetsOnly.length} / {qty}</p>;
+    }
+    return "";
+  }
+
+  const handleAddSerializedAsset = (assets) => {
+    let data = [];
+    assets.forEach(d => {
+      const result = selectedProducts.find(f => d.product?.optionValue === f.materialId);
+      if (result) {
+        let obj: any = {};
+        obj._id = result._id
+        obj.inventory = d.id;
+        obj.product = result.materialId
+        data.push(obj)
+      }
+    })
+    if (data.length) {
+      setAdding(true)
+      axiosInstance().post(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`, { "products": data })
+        .then(({ data }) => {
+          setAddSerializedAssetDialog(false)
+          fetchProductInventory()
+          setSelectedProducts([])
+          setAdding(false)
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+        }).catch((error) => {
+          setAddSerializedAssetDialog(false)
+          setAdding(false)
+          toastConfig.setToastConfig(error)
+        });
+    }
+  };
+
+  const handleRemoveInventory = () => {
+    if (deleteData.length >= 1) {
+      setDeleting(true)
+      axiosInstance().put(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory/remove`, { products: deleteData })
+        .then(() => {
+          setDeleting(false)
+          fetchProductInventory()
+          setDeleteData(null)
+          setShowConfirmBox(false);
+        }).catch((error) => {
+          setDeleting(false)
+          toastConfig.setToastConfig(error)
+          setDeleteData(null)
+        });
+    }
+  }
+
+  useEffect(() => {
+    const flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty !== f.subRows?.length);
+    setShowManagePurchaseOrderDialog(prevState => {
+      return {
+        ...prevState,
+        products: flatArray.map(m => { return { _id: m._id ?? m.id, assetsCount: m.qty - (m.subRows?.length ?? 0) } })
+      }
+    });
+  }, [selectedProducts])
+
+  const disableAssignSerializedAssets = () => {
+    if (selectedProducts.length === 0 || selectedProducts.some(s => s.type === "asset"))
+      return true;
+    const flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty !== f.subRows?.length);
+    return flatArray.length === 0;
+  }
+
+  return (<Fragment>
+    <Grid container spacing={2}>
+      <Grid item xs={12} sm={12} md={12} lg={12}>
+        <Box display="flex" mt={2} justifyContent="space-between" alignItems="center" padding={"4px"}>
+          <h3 className="form-label-style" title={"Products and Packages"}>
+            {"Products and Packages"}
+          </h3>
+          <div>
+            <Button
+              variant="contained"
+              color="primary"
+              type="button"
+              size="small"
+              disabled={disableAssignSerializedAssets()}
+              onClick={() => {
+                setAddSerializedAssetDialog(true)
+              }}
+            >
+              {`Assign ${routes.productInventory.title}`}
+            </Button>
+            <Box mx={1} component="span" />
+            <Button
+              variant="contained"
+              color="primary"
+              type="button"
+              size="small"
+              disabled={showManagePurchaseOrderDialog.products.length === 0}
+              onClick={() => {
+                setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: true }))
+              }}
+            >
+              {`Create ${routes.purchaseOrder.title}`}
+            </Button>
+            <Box mx={1} component="span" />
+            <Button
+              variant="contained"
+              color="primary"
+              type="button"
+              size="small"
+              disabled={(selectedProducts.filter(d => d.type === "asset").length === 0)}
+              onClick={() => {
+                setDeleteData(selectedProducts.filter(d => d.type === "asset").map(d => d?.inventory))
+                setShowConfirmBox(true)
+              }}
+            >
+              Delete Assets
+            </Button>
+          </div>
+        </Box>
+      </Grid>
+      <Grid item xs={12} md={12} sm={12} >
+        {columns && rowsData ?
+          <Box
+            zIndex={5}
+            width={
+              isTabletScreen
+                ? "calc(100vw - 20px)"
+                : isSmallScreen
+                  ? "calc(100vw - 78px)"
+                  : showActivity ? "100%" : "calc(100vw - 100px)"
+            }
+            height="calc(100vh - 350px)"
+          >
+            <CustomReactTable
+              height="calc(100vh - 365px)"
+              columns={columns}
+              data={rowsData}
+              isInValidCheck={(rowData) => !rowData.isValid}
+              onSelect={setSelectedProducts}
+              childrenProperty="subRows"
+              uniqueKey="_id"
+            />
+          </Box>
+          : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+        }
+      </Grid>
+    </Grid>
+    {addSerializedAssetDialog &&
+      <AddSerializedAsset
+        addSerializedAsset={handleAddSerializedAsset}
+        handleSerializedAssetClose={() => {
+          setAddSerializedAssetDialog(false);
+        }}
+        isAdding={isAdding}
+        selectedProducts={[...selectedProducts.filter(p => p.type === "product").map(m => { return { ...m, _id: m.materialId, productName: m.productDetail?.productName } })]}
+      />
+    }
+    {showConfirmBox && (
+      <ConfirmationDialog
+        open={showConfirmBox}
+        message={`Are you sure you want to remove?`}
+        onClose={() => {
+          setShowConfirmBox(false);
+          setDeleteData([])
+        }}
+        okBtnLoading={deleting}
+        onOk={handleRemoveInventory}
+      />
+    )
+    }
+    {showManagePurchaseOrderDialog.open &&
+      <ManagePurchaseOrder
+        isClone={false}
+        purchaseOrderId={null}
+        onClose={() => setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: false }))}
+        onSuccess={() => {
+          setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: false }))
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: `${sidebarResource.purchaseOrder} has been created successfully`,
+          });
+        }}
+        productsToSave={[...showManagePurchaseOrderDialog.products]}
+        isFromSerializedAssetStepFromRental={true}
+        currency={rentalManagementData.currencyCode}
+        rentalManagementId={rentalManagementData._id}
+      />
+    }
+  </Fragment>
+  );
+}
+export default SerializedAsset;
