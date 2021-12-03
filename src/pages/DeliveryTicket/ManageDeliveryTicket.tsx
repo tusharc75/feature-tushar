@@ -151,7 +151,6 @@ const ManageDeliveryTicket = (props) => {
                     setFormValues(tempInitialData)
                 }
                 else if (productInventoryForDeliveryTicket && repairJobData) {
-                    debugger;
                     const tempInitialData = getObjKeys("", fieldsDataForCreate)
                     tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
                     tempInitialData["deliveryJobName"] = `${repairJobData?.repairJobName}_${generateUniqueIdOnly()}`

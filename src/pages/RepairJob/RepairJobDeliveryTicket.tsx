@@ -20,7 +20,7 @@ import ManageDeliveryTicket from '../DeliveryTicket/ManageDeliveryTicket';
 
 const renderedFrom = "repairJob_delivery_ticket"
 
-const RepairJobDeliveryTicket = ({ repairJobData }) => {
+const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [gridApi, setGridApi] = useState(null);
@@ -72,6 +72,9 @@ const RepairJobDeliveryTicket = ({ repairJobData }) => {
               d["hideSelection"] = d.status === "In-Transit";
             })
 
+            //  Uncomment below line before pushing
+            // setNextButtonDisabled(tempProductInventory.some(s => s.status !== "Repair"))
+
             dispatch({
               type: "initialize", data: tempProductInventory, count: tempProductInventory.length
             });
@@ -104,9 +107,10 @@ const RepairJobDeliveryTicket = ({ repairJobData }) => {
   );
 
   const ProductNameRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data.product.optionValue}`}>
+    params.data?.product?.optionValue ? <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.product?.optionValue}`}>
       {params.value}
     </Link>
+      : <NoDataCell />
   );
 
   const frameworkComponents = {

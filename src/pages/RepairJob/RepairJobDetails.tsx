@@ -67,13 +67,12 @@ const RepairJobDetails = () => {
 
   const [tabValue, setTabValue] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
-  const [nextStep, setNextStep] = useState(true)
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
 
   const [okBtnLoading, setOkBtnLoading] = useState(false)
 
-  const [step1FrameworkComponent, setStep1FrameworkComponent] = useState(null)
+  const [step1FrameworkComponent, setStep1FrameworkComponent] = useState({})
   const [step1GridApi, setStep1GridApi] = useState(null);
   const [step1State, step1Dispatch] = useReducer(reducer, intialState);
   const { dataRows: step1DataRows, rowCount: step1RowCount, loading: step1Loading, page: step1Page,
@@ -127,7 +126,6 @@ const RepairJobDetails = () => {
       fetchAssignedSerializedAssets([...formBuilderColumns])
     })
   }
-
 
   const fetchAssignedSerializedAssets = (passedColumns = null) => {
 
@@ -317,25 +315,11 @@ const RepairJobDetails = () => {
         "processStatus": repairJobProcessSteps[previousStep]
       })
       .then(() => {
-
+        setDisableNextStep(false)
       }).catch((error) => {
         toastConfig.setToastConfig(error);
       });
   }
-
-  // useEffect(() => {
-  //   if (currentStep === 0) {
-  //     if (step1DataRows.length === 0) {
-  //       setDisableNextStep(true)
-  //     }
-  //     console.log(step1Columns);
-
-  //   } else if (currentStep === 1) {
-
-  //   } else {
-  //     setDisableNextStep(false)
-  //   }
-  // }, [currentStep])
 
   return (
     <>
@@ -440,7 +424,6 @@ const RepairJobDetails = () => {
                     <Paper>
                       <CustomCommonSteps
                         disableNextStep={disableNextStep}
-                        nextStep={nextStep}
                         steps={repairJobProcessSteps.filter(f => f !== "End")}
                         currentStep={currentStep}
                         setCurrentStep={setCurrentStep}
@@ -518,7 +501,10 @@ const RepairJobDetails = () => {
                           )}
 
                           {(currentStep === 1) && (
-                            <RepairJobDeliveryTicket repairJobData={repairJobData} />
+                            <RepairJobDeliveryTicket
+                              repairJobData={repairJobData}
+                              setNextButtonDisabled={setDisableNextStep}
+                            />
                           )}
 
                           {(currentStep === 2 || currentStep === 3) && (
