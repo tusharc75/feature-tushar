@@ -29,12 +29,14 @@ import CustomAgGrid, {
   reducer,
 } from "../../components/AgGridComponents/CustomAgGrid";
 import { Menu, MenuItem } from "@material-ui/core";
-import { ExpandMore } from "@material-ui/icons";
+import {AddOutlined, ExpandMore} from "@material-ui/icons";
 import { gridLoadingTimeout, prepareDataForGrid } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 import { useHistory } from "react-router-dom";
+import styles from "../Leads/Header.module.scss";
+import {MdAdd} from "react-icons/all";
 
 const ProductBuilder = () => {
   const {
@@ -235,26 +237,27 @@ const ProductBuilder = () => {
               {permission?.isCreate && (
                 <Button
                   onClick={() => setIsCreate(true)}
-                  variant="contained"
+                  variant={isMobile ? "text" : "contained"}
                   size="small"
                   color="primary"
-                  startIcon={<AddIcon />}
+                  className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                  startIcon={isMobile ? null : <AddOutlined />}
                 >
-                  Add
+                  {isMobile ? <MdAdd size={23}/> : "Add"}
                 </Button>
               )}
               {permission?.isDelete && (
                 <Button
-                  className="ml-2"
+                    className={isMobile ? "mobile_button ml-2" : `${styles.action_submit_btn} ${"ml-2"}`}
                   // className={styles.action_submit_btn}
-                  variant="outlined"
+                  variant={isMobile ? "text" : "contained"}
                   color="default"
                   size="small"
                   onClick={openActions}
                   aria-controls="action-menu"
                   disabled={selectedRecords.length > 0 ? false : true}
                 >
-                  Actions <ExpandMore />
+                  {isMobile ? "" :  "Actions" } <ExpandMore/>
                 </Button>
               )}
               <Menu
@@ -306,7 +309,7 @@ const ProductBuilder = () => {
           additionalDetails={[]}
           chips={[]}
           owerCollaboratorInitialsOrImages=""
-          onCreate={() => { }}
+          onCreate={false}
           showClone={false}
           onClone={() => { }}
           renderedFrom={routes.productBuilder.title} /> :

@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState, useReducer, Fragment } from "react";
 import { Box, Button, Menu, MenuItem, Grid } from "@material-ui/core";
 import { useData } from "../../StateProvider/Provider";
-import { ExpandMore } from "@material-ui/icons";
+import {AddOutlined, ExpandMore} from "@material-ui/icons";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import AddIcon from "@material-ui/icons/Add";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
@@ -28,6 +28,8 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { Link, useHistory } from "react-router-dom";
+import {isMobile} from "react-device-detect";
+import {MdAdd} from "react-icons/all";
 
 let timeout;
 const PricingConditions = () => {
@@ -275,36 +277,42 @@ const PricingConditions = () => {
                 {routes.pricingCondition.title}
               </span>
             </Grid>
-            <Grid className={styles.filter_side} item>
-              <Box className={styles.filter_side_header} component="div">
+            <Grid className={styles.filter_side} item xs={isMobile ? 12 : 6}>
+              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+
+                <Grid style={{display: "flex", flex:1}}>
                 <SearchBox
                   onSearch={onSearch}
                   searchbox={styles.search_box_input}
                   value={search}
                   size="small"
                   placeholder="Search PriceCondition"
-                  width="242px"
+                  width={isMobile ? "200px" : "242px"}
+                  style={isMobile ? {flex:1} : {}}
                 />
+                </Grid>
+
+                <Grid style={{display: "flex" , gap:"5px"}}>
                 <Button
-                  variant="contained"
+                    variant={isMobile ? "text" : "contained"}
                   color="primary"
                   size="small"
-                  startIcon={<AddIcon />}
-                  className={styles.add_submit_btn}
+                    className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                    startIcon={isMobile ? null : <AddOutlined />}
                   onClick={() => CreateNew("0", false)}
                 >
-                  Add
+                  {isMobile ? <MdAdd size={23}/> : "Add"}
                 </Button>
                 <Button
-                  variant="outlined"
+                    variant={isMobile ? "text" : "contained"}
                   color="default"
                   size="small"
-                  className={styles.action_submit_btn}
+                    className={isMobile ? "mobile_button" : styles.action_submit_btn}
                   onClick={openActions}
                   disabled={selectedRecords.length ? false : true}
                   aria-controls="action-menu"
                 >
-                  Actions <ExpandMore />
+                  {isMobile ? "" :  "Actions" } <ExpandMore/>
                 </Button>
                 <Menu
                   anchorEl={anchorEl}
@@ -320,6 +328,7 @@ const PricingConditions = () => {
                 >
                   <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
                 </Menu>
+                </Grid>
               </Box>
             </Grid>
           </Grid>

@@ -29,10 +29,10 @@ import CustomContainer from "../../components/CustomContainer";
 import DeleteIcon from '@material-ui/icons/Delete';
 import { ImInsertTemplate } from 'react-icons/im';
 import SearchBox from '../../components/Helpers/SearchBox'
-import { ExpandMore } from "@material-ui/icons";
+import {AddOutlined, ExpandMore} from "@material-ui/icons";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown } from "react-icons/all";
+import {AiFillCrown, MdAdd} from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 import { prepareDataForGrid } from "../../constants/helpers";
@@ -300,27 +300,37 @@ const ProductTemplate: FC = () => {
                             <ImInsertTemplate size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.productTemplate.title}</span>
                         </Grid>
                         <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
-                            <Box className={styles.filter_side_header} component="div" >
-                                <div className="d-flex gap-2">
+                            <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
+
+                                <Grid style={{display: "flex", flex:1}}>
                                     <SearchBox
                                         onSearch={handleSearch}
                                         searchbox={styles.search_box_input}
-                                        width="242px"
+                                        width={isMobile ? "200px" : "242px"}
+                                        style={isMobile ? {flex:1} : {}}
                                         value={search}
                                     />
-                                    <div className="d-flex gap-2">
-                                        {productTemplatePermissions.isCreate && !isMobile &&
-                                            <Button onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                </Grid>
+
+                                <Grid style={{display: "flex" , gap:"5px"}}>
+                                        {productTemplatePermissions.isCreate &&
+                                            <Button onClick={() => CreateNew("0", false)} variant={isMobile ? "text" : "contained"} size="small" color="primary" className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                                                    startIcon={isMobile ? null : <AddOutlined />}>
+                                                {isMobile ? <MdAdd size={23}/> : "Add"}
+                                            </Button>
                                         }
                                         {productTemplatePermissions.isDelete &&
                                             <Button
-                                                variant="outlined"
+                                                variant={isMobile ? "text" : "contained"}
                                                 color="default"
                                                 size="small"
                                                 onClick={openActions}
                                                 disabled={selectedRecords.length ? false : true}
                                                 aria-controls="action-menu"
-                                            >Actions <ExpandMore />
+                                                className={isMobile ? "mobile_button" : styles.action_submit_btn}
+
+
+                                            >{isMobile ? "" :  "Actions" } <ExpandMore/>
                                             </Button>
                                         }
                                         <Menu
@@ -337,8 +347,7 @@ const ProductTemplate: FC = () => {
                                         >
                                             <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
                                         </Menu>
-                                    </div>
-                                </div>
+                                </Grid>
                             </Box>
                         </Grid>
                     </Grid>
@@ -369,10 +378,7 @@ const ProductTemplate: FC = () => {
 
                     ]}
                     owerCollaboratorInitialsOrImages=""
-                    onCreate={() => {
-                        CreateNew(0, false)
-                    }
-                    }
+                    onCreate={false}
                     showClone={true}
                     onClone={(data) => {
                         CreateNew(data.id, true)
