@@ -179,7 +179,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                     _row.subRows = subRows
                 }
             });
-            if (rows.filter(_rows => _rows.isValid === false).length > 0) {
+            if (rows.filter(_rows => _rows.isValid === false).length > 0 || rows.length === 0) {
                 setNextStep(false)
             } else {
                 setNextStep(true)
