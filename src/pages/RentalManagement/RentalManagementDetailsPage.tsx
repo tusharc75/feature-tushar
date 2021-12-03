@@ -11,18 +11,11 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import {
-  getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow,
-  dateFormat, pricingCondition, generateUniqueId, treeToFlatArray, formatAmountWithCurrency
-} from "../../constants/helpers";
+import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow, } from "../../constants/helpers";
 import Steps from "./Steps";
-import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import IconButton from "@material-ui/core/IconButton/IconButton";
-import Add from "@material-ui/icons/Add";
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { MdEdit, MdDelete } from 'react-icons/md';
 import DeliveryTicket from "./DeliveryTicket";
-import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementDialog";
 import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
 import Activity from "../../components/Activity";
@@ -32,16 +25,10 @@ import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import HideWhenOffline from "../../components/HideWhenOffline";
 import DeleteButton from "../../components/Helpers/DeleteButton";
-import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import HtmlTooltip from '../../components/CustomTooltipTitle'
-import moment from "moment";
-import { camelCase, startCase, orderBy, sum } from "lodash";
 import queryString from "query-string";
 import { FaWpforms } from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
-import { AddOutlined } from '@material-ui/icons';
-import NoDataCell from "../../components/Helpers/NoDataCell";
 
 import Productpackage from "./Productpackage";
 import AdditionalCost from "./AdditionalCost";
@@ -65,53 +52,24 @@ const RentalManagementDetailsPage = () => {
   const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [headingLbl, setHeadingLbl] = useState("");
   const [loadingDetails, setLoadingDetails] = useState(true);
-  const [isUpdating, setUpdating] = useState(false);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, editType: null });
-  const [recordToUpdate, setRecordToUpdate] = useState(null)
   const [rentalManagementData, setRentalManagementData] = useState(null);
-  const [deleteData, setDeleteData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [isDeleting, setDeleting] = useState(false);
-  const [isAddingProducts, setAddingProducts] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: "" });
   const [rentalManagementFields, setRentalManagementFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
-  const [warehouseList, setWarehouseList] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
-  const [additionalCost, setAdditionalCost] = useState<any[]>([]);
-  const [productInventory, setProductInventory] = useState<any[]>([]);
-  const [serializeAssets, setSerializeAssets] = useState<any[]>([]);
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [currency, setCurrency] = useState("USD");
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [allowedToEdit, setAllowedToEdit] = useState(false)
   const [productInventoryForReceivingTicket, setProductInventoryForReceivingTicket] = useState<any[]>([]);
   const [showReceivingTicketDialog, setShowReceivingTicketDialog] = useState(false);
   const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false)
-  const [selectedProducts, setSelectedProducts] = useState([])
-  const [packageForProducts, setPackageForProducts] = useState(null)
   const [nextStep, setNextStep] = useState(true)
   const [tabValue, setTabValue] = useState(0);
-  const [showManageAdditionalCostDialog, setShowManageAdditionalCostDialog] = useState({
-    open: false,
-    isNew: false,
-    record: null,
-  })
-
-  const [dataForNewTabData, setDataForNewTabData] = useState([]);
-
-
-
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
-  const [pinnedBottomRowData, setPinnedBottomRowData] = useState([]);
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
@@ -161,32 +119,27 @@ const RentalManagementDetailsPage = () => {
   const fetchRentalManagementData = async () => {
     try {
       let data;
-
       if (!isOffline) {
         const response: any = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}`);
         data = response?.data?.data;
       } else {
         data = offlineGridData?.rentalManagement?.find(d => d._id === id)
       }
-
       if (localStorage.getItem("offlineDataToSave")) {
         const offlineDataToSave = JSON.parse(localStorage.getItem("offlineDataToSave"))
         if (offlineDataToSave["rentalManagement"]) {
           setIsInOfflineSaveQueue(offlineDataToSave["rentalManagement"].some(d => d.values._id === id));
         }
       }
-
       try {
         updateOfflineGridData("rentalManagement", [data], []);
       } catch (ex) {
         console.error(`Rental Management: Error while adding/updating data for Offline context. Error: ${ex.message}`)
       }
-
       handleMainPoints(data);
       setHeadingLbl(data.rentalJobName);
       setCustomizedRoutes([routes.rentalManagement, { title: `${data.rentalJobName}` }]);
       setRentalManagementData(data);
-      setAdditionalCost(data?.additionalCost?.map((d, index) => { return { "id": d?._id, rowIndex: index + 1, "type": d.type, "amount": d?.value, "description": d?.description, "uom": d.uom, "qty": d.qty } }) ?? [])
       setCurrentStep(rentalProcessSteps.indexOf(data?.processStatus) !== -1 ? rentalProcessSteps.indexOf(data?.processStatus) : 0)
       setLoadingDetails(false);
       setCurrencySymbol(
@@ -194,19 +147,14 @@ const RentalManagementDetailsPage = () => {
           (d) => d.currencyCode === data["currency"]
         )?.symbolNative
       );
-      setCurrency(data?.currency);
-
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-
       setAllowedToEdit(isAllowedToEdit);
-
       if (isAllowedToEdit && openEdit === "true") {
         setOpenUpdateDialog(true)
         const params = new URLSearchParams()
         params.delete("openEdit")
         history.push({ search: params.toString() })
       }
-
     } catch (error) {
       setLoadingDetails(false)
       toastConfig.setToastConfig(error);
@@ -221,7 +169,6 @@ const RentalManagementDetailsPage = () => {
       } else {
         setRentalManagementFields(offlineFieldsData?.rentalManagement);
       }
-
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -450,34 +397,34 @@ const RentalManagementDetailsPage = () => {
                 </span>} */}
                   <Paper>
                     {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
-              {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-            </span>}
+                      {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+                    </span>}
                     <div style={{ display: showActivity ? "block" : "none" }}>
                       <Grid container>
                         <Grid item xs={12}>
                           {rentalManagementData && (
-                              <div>
-                                <Activity
-                                    resourceId={rentalManagementData._id}
-                                    resource={rentalManagement.resource}
-                                    restrictedAddActivities={
-                                      permissions &&
-                                      permissions["rentalManagement"] &&
-                                      permissions["rentalManagement"].isUpdate
-                                          ? []
-                                          : ["Attachment", "Case"]
-                                    }
-                                    relatedTo={[
-                                      {
-                                        type: rentalManagement,
-                                        referenceId: rentalManagementData._id,
-                                        access: true,
-                                      },
-                                    ]}
-                                    handleActivityRefresh={() => { }}
-                                    emails={[]}
-                                />
-                              </div>
+                            <div>
+                              <Activity
+                                resourceId={rentalManagementData._id}
+                                resource={rentalManagement.resource}
+                                restrictedAddActivities={
+                                  permissions &&
+                                    permissions["rentalManagement"] &&
+                                    permissions["rentalManagement"].isUpdate
+                                    ? []
+                                    : ["Attachment", "Case"]
+                                }
+                                relatedTo={[
+                                  {
+                                    type: rentalManagement,
+                                    referenceId: rentalManagementData._id,
+                                    access: true,
+                                  },
+                                ]}
+                                handleActivityRefresh={() => { }}
+                                emails={[]}
+                              />
+                            </div>
                           )}
                         </Grid>
                       </Grid>
@@ -485,13 +432,12 @@ const RentalManagementDetailsPage = () => {
                   </Paper>
                 </HideWhenOffline>
               </div>
-
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
               <Paper>
                 <Steps
                   className={styles.steps_box}
-                  isNextStep={treeToFlatArray(dataForNewTabData, "subRows").some(f => f.isValid === false)}
+                  isNextStep={false}
                   nextStep={nextStep}
                   steps={rentalProcessSteps.slice(0, 5)}
                   currentStep={currentStep}

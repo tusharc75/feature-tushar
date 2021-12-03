@@ -254,7 +254,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     setShowManagePurchaseOrderDialog(prevState => {
       return {
         ...prevState,
-        products: flatArray.map(m => { return { _id: m._id ?? m.id, assetsCount: m.qty - (m.subRows?.length ?? 0) } })
+        products: flatArray.map(m => { return { _id: m.materialId, assetsCount: m.qty - (m.subRows?.length ?? 0) } })
       }
     });
   }, [selectedProducts])
