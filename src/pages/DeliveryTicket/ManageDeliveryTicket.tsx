@@ -153,6 +153,7 @@ const ManageDeliveryTicket = (props) => {
                 else if (productInventoryForDeliveryTicket && repairJobData) {
                     const tempInitialData = getObjKeys("", fieldsDataForCreate)
                     tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
+                    tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
                     tempInitialData["deliveryJobName"] = `${repairJobData?.repairJobName}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = "Repair Job";
                     tempInitialData["repairJob"] = repairJobData?._id
@@ -505,6 +506,28 @@ const ManageDeliveryTicket = (props) => {
                                                                                             values["owner"]
                                                                                         );
                                                                                     }}
+                                                                                />
+                                                                            ) : field.fieldName === "warehouse" ? (
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    disabled={(deliveryTicketId && field.disableOnEdit) || (repairJobData && warehouseId)}
+                                                                                    isNew={Boolean(deliveryTicketId)}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
                                                                                 />
                                                                             ) : <FormTypes
                                                                                 {...field}
