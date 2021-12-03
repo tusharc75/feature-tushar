@@ -43,7 +43,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     { field: 'serialNumber', headerName: 'Serial Number', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'deliveryTicket', headerName: 'Loading Ticket', show: true, disabled: true, cellRenderer: 'ticketRenderer' },
     { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, disabled: true, cellRenderer: 'ticketRenderer' },
+    { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, disabled: true, cellRenderer: 'receivingRenderer' },
     { field: 'receivingTicketStatus', headerName: 'Receiving Ticket Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'deliveryTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
   ];
@@ -57,9 +57,18 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       <NoDataCell />
     );
 
-  const TicketRenderer = (params) =>
+  const LoadingTicketRenderer = (params) =>
     params.value ? (
       <Link className="link cursor-pointer" to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
+        <p title={params.value}>{params.value}</p>
+      </Link>
+    ) : (
+      <NoDataCell />
+    );
+
+  const ReceivingTicketRenderer = (params) =>
+    params.value ? (
+      <Link className="link cursor-pointer" to={`${routes.receivingTicketDetail.path}/${params.data.receivingTicketId}`}>
         <p title={params.value}>{params.value}</p>
       </Link>
     ) : (
@@ -76,7 +85,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     );
 
   const frameworkComponents = {
-    ticketRenderer: TicketRenderer,
+    ticketRenderer: LoadingTicketRenderer,
+    receivingRenderer: ReceivingTicketRenderer,
     productRenderer: ProductRenderer,
     assetRenderer: AssetRenderer,
     commonRenderer: CommonRenderer,
