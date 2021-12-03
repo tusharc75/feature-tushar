@@ -23,7 +23,7 @@ const addSerializedAssetsRenderedFrom = "addSerializedAssets";
 const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected`;
 
 const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts,
-    rentalId = null, repairJobId = null, transferAssetId = null, notIn = null, queryString = null }) => {
+    rentalId = null, repairJobId = null, transferAssetId = null, notIn = null, queryString = null, filterByPlant = null }) => {
     const toastConfig = useContext(CustomToastContext)
 
     const [serializedProducts, setSerializedProducts] = useState([]);
@@ -179,7 +179,11 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         } else if (transferAssetId) {
             deepFilter = `${deepFilter}&transferAssetId=${transferAssetId}&notIn=${notIn}`;
         } else {
-            deepFilter = `${deepFilter}&entityWise=1`;
+            if (filterByPlant === null) {
+                deepFilter = `${deepFilter}&entityWise=1`;
+            } else {
+                deepFilter = `${deepFilter}&${filterByPlant}`;
+            }
 
             if (queryString) {
                 deepFilter = `${deepFilter}&${queryString}`;

@@ -167,7 +167,7 @@ const RepairJobDetails = () => {
           }
         }
 
-        setDisableNextStep(foundBlankValue);
+        setDisableNextStep(data.length === 0 ? true : foundBlankValue);
 
         step1Dispatch({
           type: "initialize", data: [...rows], count: rows.length
@@ -600,6 +600,7 @@ const RepairJobDetails = () => {
           isAdding={isAdding}
           selectedProducts={[]}
           queryString={`ignoreIds=${JSON.stringify(step1DataRows.map(m => m._id ?? m.id))}&repairable=true`}
+          filterByPlant={`filterById=[{"field":"warehouse", "term": "${repairJobData.plant?.optionValue}"}]`}
         />
       }
 
@@ -627,7 +628,6 @@ const RepairJobDetails = () => {
                   selectedRecords: []
                 })
               }
-
               fetchAssignedSerializedAssets();
               setShowEditAssetDialog({
                 open: false,
