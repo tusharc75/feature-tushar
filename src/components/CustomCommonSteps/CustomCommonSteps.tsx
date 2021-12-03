@@ -292,7 +292,7 @@ const CustomCommonSteps = (props) => {
                                                                             onNextButtonClick(currentStep, currentStep + 1);
                                                                         }}
                                                                         size="small"
-                                                                        disabled={(currentStep === 0 && disableNextStep) || currentStep < steps.length}
+                                                                        disabled={(currentStep === 0 && disableNextStep) || currentStep < steps.length || disableNextStep}
 
                                                                     >
                                                                         Next
@@ -343,7 +343,7 @@ const CustomCommonSteps = (props) => {
                                             setCurrentStep(currentStep + 1)
                                             onNextButtonClick(currentStep, currentStep + 1);
                                         }}
-                                        disabled={currentStep >= steps.length || (currentStep === 0 && disableNextStep)}
+                                        disabled={currentStep >= steps.length || (currentStep === 0 && disableNextStep) || disableNextStep}
                                         className="stepperButtonNext"
                                     >
                                         {currentStep < steps.length - 1 ? <RiShareForwardFill /> : <RiCheckboxCircleFill />}

@@ -268,7 +268,7 @@ const Details = (props: DetailProps) => {
                     //   )
                     // }
                     >
-                      <span className={`text-truncate ${classes.dataValue}`}>
+                      <span className={`text-truncate ${classes.dataValue} link`}>
                         {_val.optionLabel}
                         {i < data[fieldData.fieldName].length - 1 ? "," : ""}
                       </span>
@@ -290,7 +290,7 @@ const Details = (props: DetailProps) => {
               //   )
               // }
               >
-                <span className={`text-truncate ${classes.dataValue}`}>
+                <span className={`text-truncate ${classes.dataValue} link`}>
                   {data[fieldData.fieldName].optionLabel}
                   {data[fieldData.fieldName]?.staticData?.approved &&
                     data[fieldData.fieldName]?.staticData?.approved === true ? (

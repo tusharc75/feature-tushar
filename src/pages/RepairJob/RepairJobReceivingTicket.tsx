@@ -142,7 +142,7 @@ const RepairJobReceivingTicket = ({ repairJobData }) => {
     );
 
     const ProductNameRenderer = (params) => (
-        <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.product.optionValue}`}>
+        <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data?.product?.optionValue}`}>
             {params.value}
         </Link>
     );
