@@ -5,7 +5,10 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
 
 import ManageReceivingTicketDialog from './ManageReceivingTicket';
-import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, receivingTicket } from '../../constants/helpers';
+import {
+  isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout,
+  receivingTicket, sidebarResource, prepareDataForGrid
+} from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -23,8 +26,9 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import AddIcon from "@material-ui/icons/Add"
+import useColumns, { getFrameworkComponents, getStaticFields } from '../../constants/useColumns';
 
+const renderedFrom = 'receivingTicketPage';
 let receivingTicketTimeout;
 const ReceivingTicketType = [
   {
@@ -40,6 +44,7 @@ const ReceivingTicketType = [
 const ReceivingTicket = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
+  const { getColumnData } = useColumns();
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
@@ -65,76 +70,127 @@ const ReceivingTicket = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
 
-  const columns = [
-    {
-      field: 'receivingJobName',
-      headerName: 'Receiving Ticket Name',
-      show: true,
-      disabled: true,
-      cellRenderer: 'receivingJobNameRenderer',
-      primaryField: true
-    },
-    {
-      field: 'deliveryPerson',
-      headerName: 'Delivery Person',
-      show: true,
-      cellRenderer: 'deliveryPersonRenderer'
-    },
-    {
-      field: 'customerAccount',
-      headerName: 'Customer Account',
-      show: true,
-      cellRenderer: 'customerAccountRenderer'
-    },
-    {
-      field: 'productInventory',
-      headerName: 'Product Inventory',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer'
-    },
-    {
-      field: 'status',
-      headerName: 'Status',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer'
-    },
-    {
-      field: 'warehouse',
-      headerName: 'Plants',
-      show: true,
-      disabled: false,
-      cellRenderer: 'WarehouseRenderer'
-    },
-    {
-      field: 'pickupDate',
-      headerName: 'Pickup Date',
-      show: true,
-      disabled: true,
-      cellRenderer: 'dateRenderer'
-    },
-    {
-      field: 'pickupAddress',
-      headerName: 'Pickup Address',
-      show: true,
-      disabled: true,
-      cellRenderer: 'commonRenderer'
-    },
-    {
-      field: 'createdBy',
-      headerName: 'Created By',
-      show: true,
-      cellRenderer: 'createdByRenderer'
-    },
-    {
-      field: 'updatedBy',
-      headerName: 'Updated By',
-      show: true,
-      cellRenderer: 'updatedByRenderer'
-    }
-  ];
+  const [frameworkComponent, setFrameworkComponent] = useState({})
+  const [columns, setColumns] = useState([])
+
+  const { receivingTicketResource } = receivingTicket;
+
+  // const columns = [
+  //   {
+  //     field: 'receivingJobName',
+  //     headerName: 'Receiving Ticket Name',
+  //     show: true,
+  //     disabled: true,
+  //     cellRenderer: 'receivingJobNameRenderer',
+  //     primaryField: true
+  //   },
+  //   {
+  //     field: 'deliveryPerson',
+  //     headerName: 'Delivery Person',
+  //     show: true,
+  //     cellRenderer: 'deliveryPersonRenderer'
+  //   },
+  //   {
+  //     field: 'customerAccount',
+  //     headerName: 'Customer Account',
+  //     show: true,
+  //     cellRenderer: 'customerAccountRenderer'
+  //   },
+  //   {
+  //     field: 'productInventory',
+  //     headerName: 'Product Inventory',
+  //     show: true,
+  //     disabled: false,
+  //     cellRenderer: 'commonRenderer'
+  //   },
+  //   {
+  //     field: 'status',
+  //     headerName: 'Status',
+  //     show: true,
+  //     disabled: false,
+  //     cellRenderer: 'commonRenderer'
+  //   },
+  //   {
+  //     field: 'warehouse',
+  //     headerName: 'Plants',
+  //     show: true,
+  //     disabled: false,
+  //     cellRenderer: 'WarehouseRenderer'
+  //   },
+  //   {
+  //     field: 'pickupDate',
+  //     headerName: 'Pickup Date',
+  //     show: true,
+  //     disabled: true,
+  //     cellRenderer: 'dateRenderer'
+  //   },
+  //   {
+  //     field: 'pickupAddress',
+  //     headerName: 'Pickup Address',
+  //     show: true,
+  //     disabled: true,
+  //     cellRenderer: 'commonRenderer'
+  //   },
+  //   {
+  //     field: 'createdBy',
+  //     headerName: 'Created By',
+  //     show: true,
+  //     cellRenderer: 'createdByRenderer'
+  //   },
+  //   {
+  //     field: 'updatedBy',
+  //     headerName: 'Updated By',
+  //     show: true,
+  //     cellRenderer: 'updatedByRenderer'
+  //   }
+  // ];
   //  Grid Variables - End
+
+  // const frameworkComponents = {
+  //   receivingJobNameRenderer: ReceivingJobNameRenderer,
+  //   deliveryPersonRenderer: DeliveryPersonRenderer,
+  //   customerAccountRenderer: CustomerAccountRenderer,
+  //   warehouseRenderer: WarehouseRenderer,
+  //   productInventoryRenderer: ProductInventoryRenderer,
+  //   ownerRenderer: OwnerRenderer,
+  //   createdByRenderer: CreatedByRenderer,
+  //   updatedByRenderer: UpdatedByRenderer,
+  //   actionsRenderer: ActionsRenderer,
+  //   commonRenderer: CommonRenderer,
+  //   dateRenderer: DateRenderer
+  // };
+
+
+  const fetchGridMetadata = () => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource["receivingTicket"]}&entity=${selectedEntity}&view=true&showHiddenFields=true`)
+      .then(({ data: { data } }) => {
+        let columns = [];
+        let rendererNames = [];
+        data.forEach(o => {
+          let currentColumn = getColumnData(receivingTicketResource, o?.fieldData, `${routes.receivingTicket.path}/detail`)
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData]
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
+          }
+          return o?.fieldData
+        })
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+          actionsRenderer: ActionsRenderer
+        }
+        setFrameworkComponent({ ...tempFrameworkComponent })
+        columns = [...columns, ...getStaticFields()]
+        setColumns([...columns])
+      })
+  }
+
+  useEffect(() => {
+    fetchGridMetadata()
+  }, [])
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -282,19 +338,19 @@ const ReceivingTicket = () => {
     </>
   );
 
-  const frameworkComponents = {
-    receivingJobNameRenderer: ReceivingJobNameRenderer,
-    deliveryPersonRenderer: DeliveryPersonRenderer,
-    customerAccountRenderer: CustomerAccountRenderer,
-    warehouseRenderer: WarehouseRenderer,
-    // productInventoryRenderer: ProductInventoryRenderer,
-    ownerRenderer: OwnerRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-    commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer
-  };
+  // const frameworkComponents = {
+  //   receivingJobNameRenderer: ReceivingJobNameRenderer,
+  //   deliveryPersonRenderer: DeliveryPersonRenderer,
+  //   customerAccountRenderer: CustomerAccountRenderer,
+  //   warehouseRenderer: WarehouseRenderer,
+  //   // productInventoryRenderer: ProductInventoryRenderer,
+  //   ownerRenderer: OwnerRenderer,
+  //   createdByRenderer: CreatedByRenderer,
+  //   updatedByRenderer: UpdatedByRenderer,
+  //   actionsRenderer: ActionsRenderer,
+  //   commonRenderer: CommonRenderer,
+  //   dateRenderer: DateRenderer
+  // };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -388,33 +444,50 @@ const ReceivingTicket = () => {
     axiosInstance()
       .get(`${receivingTicket.receivingTicketApi}${queryString}`)
       .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
-          const { owner, collaborator, createdBy, updatedBy, customerAccount, ...restProperties } = u;
 
+        let rows = data.map((u) => {
           let res = {
-            ...restProperties,
-            id: u._id,
+            ...prepareDataForGrid(u, user),
+
             pickupDate: u['pick-UpDate'],
             productInventory: u.productInventory?.map((p) => p.optionLabel).join(', '),
-            deliveryPerson: u.deliveryPerson?.optionLabel,
-            deliveryPersonId: u.deliveryPerson?.optionValue,
-            warehouse: u.warehouse?.optionLabel,
-            warehouseId: u.warehouse?.optionValue,
-            customerAccount: u.customerAccount?.optionLabel,
-            customerAccountId: u.customerAccount?.optionValue,
-            owner: u.createdBy?.user?.concatedName,
-            ownerId: u.createdBy?.user?._id,
-            createdBy: u.createdBy?.user?.concatedName,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date,
-
             canDelete: u.createdBy?.user?._id === user?.user._id,
             isChecked: false,
             allowedToEdit: permissions?.receivingTicket?.isUpdate
+
+            //  Commenting canDelete because right now we are neither showing checkbox for multiple delete nor delete icon in row
+            //  canDelete: u?.createdBy?.user?._id === user?.user._id,
           };
           return res;
         });
+
+        // let rows = data.map((u) => {
+        //   const { owner, collaborator, createdBy, updatedBy, customerAccount, ...restProperties } = u;
+
+        //   let res = {
+        //     ...restProperties,
+        //     id: u._id,
+        //     pickupDate: u['pick-UpDate'],
+        //     productInventory: u.productInventory?.map((p) => p.optionLabel).join(', '),
+        //     deliveryPerson: u.deliveryPerson?.optionLabel,
+        //     deliveryPersonId: u.deliveryPerson?.optionValue,
+        //     warehouse: u.warehouse?.optionLabel,
+        //     warehouseId: u.warehouse?.optionValue,
+        //     customerAccount: u.customerAccount?.optionLabel,
+        //     customerAccountId: u.customerAccount?.optionValue,
+        //     owner: u.createdBy?.user?.concatedName,
+        //     ownerId: u.createdBy?.user?._id,
+        //     createdBy: u.createdBy?.user?.concatedName,
+        //     createdByDate: u.createdBy?.date,
+        //     updatedBy: u.updatedBy?.user?.concatedName,
+        //     updatedByDate: u.updatedBy?.date,
+
+        //     canDelete: u.createdBy?.user?._id === user?.user._id,
+        //     isChecked: false,
+        //     allowedToEdit: permissions?.receivingTicket?.isUpdate
+        //   };
+        //   return res;
+        // });
 
         if (appendRows) {
           dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
@@ -596,23 +669,23 @@ const ReceivingTicket = () => {
             onCreate={false}
             showClone={false}
             onClone={() => { }}
-            renderedFrom='receivingTicketPage'
-          /> :
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={100}
-            loading={loading}
-            renderedFrom='receivingTicketPage'
-            refreshGrid={fetchReceivingTickets}
-          />
+            renderedFrom={renderedFrom}
+          /> : Object.keys(frameworkComponent).length > 0 ?
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameworkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={100}
+              loading={loading}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchReceivingTickets}
+            /> : null
         }
 
         {showDeleteWarningConfirmBox ? (
