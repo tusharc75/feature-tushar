@@ -455,7 +455,58 @@ const ProjectSalesDetails = () => {
                           data={copyOfProjectSalesData}
                           fields={fiteredFieldToShow}
                         />
+
+                        <div className="position-relative">
+                          {/* {showActivity ?
+              <Paper>
+                {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
+                  <IoIosArrowDropright className="icon" />
+                </span>}
+                <Activity
+                  resourceId={id}
+                  resource={projectSales.projectSalesRoute}
+                  relatedTo={[
+                    {
+                      type: projectSales.projectSalesResource,
+                      referenceId: id,
+                      access: true,
+                    }
+                  ]}
+                  handleActivityRefresh={() => { }}
+                  emails={[]}
+                />
+              </Paper>
+              :
+              !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
+                <IoIosArrowDropleft className="icon" />
+              </span>} */}
+
+                          <Paper>
+                            {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
+                {showActivity ? <IoIosArrowDropleft className="icon" /> : <IoIosArrowDropleft className="icon" />}
+              </span>}
+                            <div style={{ display: showActivity ? "block" : "none" }}>
+
+                              <Activity
+                                  resourceId={id}
+                                  resource={projectSales.projectSalesRoute}
+                                  relatedTo={[
+                                    {
+                                      type: projectSales.projectSalesResource,
+                                      referenceId: id,
+                                      access: true,
+                                    }
+                                  ]}
+                                  handleActivityRefresh={() => { }}
+                                  emails={[]}
+                              />
+                            </div>
+                          </Paper>
+                        </div>
+
                       </Box>
+
+
                     )}
 
                     {currentTabIndex === 1 && (
@@ -561,53 +612,6 @@ const ProjectSalesDetails = () => {
                 projectId={id}
                 users={teamUsers}
               />
-            </Paper>
-          </div>
-          <div className="position-relative">
-            {/* {showActivity ?
-              <Paper>
-                {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
-                  <IoIosArrowDropright className="icon" />
-                </span>}
-                <Activity
-                  resourceId={id}
-                  resource={projectSales.projectSalesRoute}
-                  relatedTo={[
-                    {
-                      type: projectSales.projectSalesResource,
-                      referenceId: id,
-                      access: true,
-                    }
-                  ]}
-                  handleActivityRefresh={() => { }}
-                  emails={[]}
-                />
-              </Paper>
-              :
-              !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
-                <IoIosArrowDropleft className="icon" />
-              </span>} */}
-
-            <Paper>
-              {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
-                {showActivity ? <IoIosArrowDropleft className="icon" /> : <IoIosArrowDropleft className="icon" />}
-              </span>}
-              <div style={{ display: showActivity ? "block" : "none" }}>
-
-                <Activity
-                  resourceId={id}
-                  resource={projectSales.projectSalesRoute}
-                  relatedTo={[
-                    {
-                      type: projectSales.projectSalesResource,
-                      referenceId: id,
-                      access: true,
-                    }
-                  ]}
-                  handleActivityRefresh={() => { }}
-                  emails={[]}
-                />
-              </div>
             </Paper>
           </div>
 

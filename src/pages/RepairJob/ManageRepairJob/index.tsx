@@ -129,7 +129,7 @@ const ManageRepairJob = (props) => {
       axiosInstance()
         .post(`${repairJob.repairJobApi}`, values)
         .then(({ data: { data, message } }) => {
-          
+
           axiosInstance()
             .put(`${repairJob.repairJobApi}/${data._id}/process-status`, {
               "processStatus": repairJobProcessSteps[0]
@@ -254,67 +254,116 @@ const ManageRepairJob = (props) => {
                               <Box marginY={2}>
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field) => (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                      {field.fieldName === "productInventory"
-                                        ? <FormTypes
-                                          repairJobId={repairJobId}
-                                          {...field}
-                                          disabled={(!repairJobId && field.disableOnEdit) || (field.fieldName === "productInventory" && fromInventory)}
-                                          values={getValues(values)}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            handleValuesChange({ [name]: value });
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                              ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
-                                              : null
-                                          }
-                                        />
-                                        :
-                                        <FormTypes
-                                          repairJobId={repairJobId}
-                                          {...field}
-                                          disabled={(!repairJobId && field.disableOnEdit)}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            handleValuesChange({ [name]: value });
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                              ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
-                                              : null
-                                          }
-                                        />}
+                                    field.fieldName === "vendor" ?
+                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                        {
+                                          values["typeOfRepair"] === "External" ? <FormTypes
+                                            repairJobId={repairJobId}
+                                            {...field}
+                                            disabled={(!repairJobId && field.disableOnEdit)}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={field.option}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange({ [name]: value });
+                                              setFieldValue(name, value);
+                                            }}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+                                          /> : ""
+                                        }
+                                      </Grid> : <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                        {field.fieldName === "productInventory"
+                                          ? <FormTypes
+                                            repairJobId={repairJobId}
+                                            {...field}
+                                            disabled={(!repairJobId && field.disableOnEdit) || (field.fieldName === "productInventory" && fromInventory)}
+                                            values={getValues(values)}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={field.option}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange({ [name]: value });
+                                              setFieldValue(name, value);
+                                            }}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+                                            imageOrFileUploadCompletePercentage={
+                                              ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                                ? (completePercentage) => {
+                                                  setUploadingImageOrFileProgress(completePercentage);
+                                                }
+                                                : null
+                                            }
+                                          /> : field.fieldName === "typeOfRepair"
+                                            ? <FormTypes
+                                              repairJobId={repairJobId}
+                                              {...field}
+                                              disabled={!repairJobId && field.disableOnEdit}
+                                              values={getValues(values)}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={field.option}
+                                              setFieldValue={(name, value) => {
+                                                handleValuesChange({ [name]: value });
+                                                setFieldValue(name, value);
 
-                                    </Grid>
+                                                if (value !== "External") {
+                                                  handleValuesChange({ "vendor": "" });
+                                                  setFieldValue("vendor", "");
+                                                }
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              size="small"
+                                            /> : <FormTypes
+                                              repairJobId={repairJobId}
+                                              {...field}
+                                              disabled={(!repairJobId && field.disableOnEdit)}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={field.option}
+                                              setFieldValue={(name, value) => {
+                                                handleValuesChange({ [name]: value });
+                                                setFieldValue(name, value);
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              size="small"
+                                              imageOrFileUploadCompletePercentage={
+                                                ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                                  ? (completePercentage) => {
+                                                    setUploadingImageOrFileProgress(completePercentage);
+                                                  }
+                                                  : null
+                                              }
+                                            />}
+
+                                      </Grid>
                                   ))}
                                 </Grid>
                               </Box>

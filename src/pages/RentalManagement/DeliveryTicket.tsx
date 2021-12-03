@@ -94,7 +94,7 @@ const DeliveryTicket = ({ warehouselist, productInventory, currentStep, handleDe
     </Link>
   );
   const ProductNameRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data.product.optionValue}`}>
+    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.product?.optionValue}`}>
       {params.value}
     </Link>
   );

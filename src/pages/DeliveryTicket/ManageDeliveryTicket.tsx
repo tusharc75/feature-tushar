@@ -143,7 +143,7 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
                     tempInitialData["shippingAddress"] = rentalData.shippingAddress
                     tempInitialData["deliveryJobName"] = `${rentalData?.rentalJobName}_${generateUniqueIdOnly()}`
-                    tempInitialData["deliveryDate"] = moment(new Date()).add(1, 'day');
+                    tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
                         values: tempInitialData,
@@ -151,13 +151,12 @@ const ManageDeliveryTicket = (props) => {
                     setFormValues(tempInitialData)
                 }
                 else if (productInventoryForDeliveryTicket && repairJobData) {
-                    debugger;
                     const tempInitialData = getObjKeys("", fieldsDataForCreate)
                     tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
                     tempInitialData["deliveryJobName"] = `${repairJobData?.repairJobName}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = "Repair Job";
                     tempInitialData["repairJob"] = repairJobData?._id
-                    tempInitialData["deliveryDate"] = moment(new Date()).add(1, 'day');
+                    tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
                         values: tempInitialData,
@@ -170,15 +169,18 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["deliveryJobName"] = `${transferData?.transferAssetNumber}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = "Transfer Asset";
                     tempInitialData["transferAsset"] = transferData?._id;
-                    tempInitialData["deliveryDate"] = moment(new Date()).add(1, 'day');
+                    tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
                     if (transferData?.transferType === "Internal") {
                         tempInitialData["receivingPlant"] = transferData?.transferToPlant.optionValue;
+                        tempInitialData["shippingAddress"] = transferData?.plantShipTo;
                     }
                     if (transferData?.transferType === "External Customer") {
                         tempInitialData["customerAccount"] = transferData?.transferToCustomer.optionValue;
+                        tempInitialData["shippingAddress"] = transferData?.customerShipTo;
                     }
                     if (transferData?.transferType === "External Supplier") {
                         tempInitialData["supplierAccount"] = transferData?.transferToSupplier.optionValue;
+                        tempInitialData["shippingAddress"] = transferData?.supplierShipTo;
                     }
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
@@ -391,7 +393,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                     isTooltip={field?.isTooltip || false}
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
-                                                                                    minDate={moment(values["pick-UpDate"]).add(1, 'days')}
+                                                                                    minDate={moment(values["pick-UpDate"]).add(7, 'days')}
                                                                                 />
                                                                             ) : field.fieldName === "deliveryJobName" ? (
                                                                                 <FormTypes

@@ -4,7 +4,6 @@ import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
 import Button from "@material-ui/core/Button";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import clsx from "clsx";
 import { GiBackwardTime } from "react-icons/gi";
 import IconButton from '@material-ui/core/IconButton';
@@ -13,14 +12,12 @@ import {
     Grid,
 } from "@material-ui/core";
 import {
-    IoIosArrowDroprightCircle,
     IoIosArrowDropleftCircle,
 } from "react-icons/io";
 import { GoPencil } from "react-icons/go";
 import { BsCheckCircle } from "react-icons/bs";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import { FaHourglassHalf } from "react-icons/fa";
-
 import { isMobile } from "react-device-detect";
 import { TiArrowBack } from "react-icons/ti";
 import { RiCheckboxCircleFill, RiShareForwardFill } from "react-icons/ri";
@@ -131,9 +128,9 @@ const CustomCommonSteps = (props) => {
         onNextButtonClick,
         onPreviousButtonClick
     } = props;
+    console.log(disableNextStep)
     const classes = useStyles();
     let activeStep = currentStep;
-    const toastConfig = useContext(CustomToastContext);
     const ColorlibStepIcon = (props: StepIconProps) => {
         const classes = useColorlibStepIconStyles();
         var { active, completed } = props;
@@ -292,7 +289,7 @@ const CustomCommonSteps = (props) => {
                                                                             onNextButtonClick(currentStep, currentStep + 1);
                                                                         }}
                                                                         size="small"
-                                                                        disabled={(currentStep === 0 && disableNextStep) || currentStep < steps.length}
+                                                                        disabled={(currentStep === 0 && disableNextStep) || currentStep < steps.length || disableNextStep}
 
                                                                     >
                                                                         Next
@@ -343,7 +340,7 @@ const CustomCommonSteps = (props) => {
                                             setCurrentStep(currentStep + 1)
                                             onNextButtonClick(currentStep, currentStep + 1);
                                         }}
-                                        disabled={currentStep >= steps.length || (currentStep === 0 && disableNextStep)}
+                                        disabled={currentStep >= steps.length || (currentStep === 0 && disableNextStep) || disableNextStep}
                                         className="stepperButtonNext"
                                     >
                                         {currentStep < steps.length - 1 ? <RiShareForwardFill /> : <RiCheckboxCircleFill />}

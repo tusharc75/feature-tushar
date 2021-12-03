@@ -25,7 +25,7 @@ import { GiAbstract055 } from 'react-icons/gi';
 import SearchBox from '../../components/Helpers/SearchBox'
 import ManageDeliveryTicket from "./ManageDeliveryTicket"
 import { sidebarResource, prepareDataForGrid } from "../../constants/helpers"
-import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { isMobile } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
@@ -37,7 +37,7 @@ const DeliveryTicket = () => {
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
-  const {getColumnData} = useColumns();
+  const { getColumnData } = useColumns();
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -348,15 +348,18 @@ const DeliveryTicket = () => {
                 <GiAbstract055 className="headerLogo" />
                 <span className="listingHeader">{routes.deliveryTicket.title} </span>
               </Grid>
-              <Grid xs={6} container className={styles.filter_side} >
+              <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side} >
                 <Box className={styles.filter_side_header} component="div" >
-                  <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
-                    width="242px"
-                    size="small"
-                    value={search}
-                  />
+                  <Grid style={{ display: "flex", flex: 1 }}>
+                    <SearchBox
+                      onSearch={handleSearch}
+                      searchbox={styles.search_box_input}
+                      width="242px"
+                      size="small"
+                      value={search}
+                      style={isMobile ? { flex: 1 } : {}}
+                    />
+                  </Grid>
                   {/* {deliveryPermissions?.isCreate &&
                     <Button className={styles.add_submit_btn}
                       onClick={() => setShowManageDeliveryTicket(true)}

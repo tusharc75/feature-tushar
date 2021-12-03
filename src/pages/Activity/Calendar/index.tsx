@@ -31,6 +31,7 @@ import { BiTask } from "react-icons/bi";
 import { BsBriefcase } from "react-icons/bs";
 import { VscCalendar } from "react-icons/vsc";
 import routes from "../../../components/Helpers/Routes";
+import styles from "../../Leads/Header.module.scss";
 
 const BigCalendar = () => {
   const {
@@ -218,7 +219,7 @@ const BigCalendar = () => {
                 )}
               </Popper>
             </Grid>
-            <Grid item xs={12} sm={7}>
+            <Grid item xs={12} sm={7} className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
               <SearchFilter
                 handleChangeFilter={handleChangeFilter}
                 filter={filter}

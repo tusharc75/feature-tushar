@@ -650,7 +650,7 @@ const Leads = () => {
                 },
               ]}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={handleCreate}
+              onCreate={false}
               showClone={true}
               onClone={(data) => { setIsOpen({ open: true, isClone: true, idToClone: data._id }) }}
               renderedFrom={leadResource}

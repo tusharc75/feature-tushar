@@ -536,6 +536,83 @@ const RentalManagementDetailsPage = () => {
                   </>
                 )}
               </Box>
+              <div className="position-relative">
+                <HideWhenOffline>
+                  {/* {showActivity ?
+                <Paper>
+                  {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
+                    <IoIosArrowDropright className="icon" />
+                  </span>}
+                  <Grid container>
+                    <Grid item xs={12}>
+                      {rentalManagementData && (
+                        <div>
+                          <Activity
+                            resourceId={rentalManagementData._id}
+                            resource={rentalManagement.resource}
+                            restrictedAddActivities={
+                              permissions &&
+                                permissions["rentalManagement"] &&
+                                permissions["rentalManagement"].isUpdate
+                                ? []
+                                : ["Attachment", "Case"]
+                            }
+                            relatedTo={[
+                              {
+                                type: rentalManagement,
+                                referenceId: rentalManagementData._id,
+                                access: true,
+                              },
+                            ]}
+                            handleActivityRefresh={() => { }}
+                            emails={[]}
+                          />
+                        </div>
+                      )}
+                    </Grid>
+                  </Grid>
+                </Paper> :
+                !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
+                  <IoIosArrowDropleft className="icon" />
+                </span>} */}
+                  <Paper>
+                    {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
+              {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+            </span>}
+                    <div style={{ display: showActivity ? "block" : "none" }}>
+                      <Grid container>
+                        <Grid item xs={12}>
+                          {rentalManagementData && (
+                              <div>
+                                <Activity
+                                    resourceId={rentalManagementData._id}
+                                    resource={rentalManagement.resource}
+                                    restrictedAddActivities={
+                                      permissions &&
+                                      permissions["rentalManagement"] &&
+                                      permissions["rentalManagement"].isUpdate
+                                          ? []
+                                          : ["Attachment", "Case"]
+                                    }
+                                    relatedTo={[
+                                      {
+                                        type: rentalManagement,
+                                        referenceId: rentalManagementData._id,
+                                        access: true,
+                                      },
+                                    ]}
+                                    handleActivityRefresh={() => { }}
+                                    emails={[]}
+                                />
+                              </div>
+                          )}
+                        </Grid>
+                      </Grid>
+                    </div>
+                  </Paper>
+                </HideWhenOffline>
+              </div>
+
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
               <Paper>
@@ -593,82 +670,6 @@ const RentalManagementDetailsPage = () => {
           </Paper>
         </div>
         <Box my={1} />
-      </div>
-      <div className="position-relative">
-        <HideWhenOffline>
-          {/* {showActivity ?
-                <Paper>
-                  {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
-                    <IoIosArrowDropright className="icon" />
-                  </span>}
-                  <Grid container>
-                    <Grid item xs={12}>
-                      {rentalManagementData && (
-                        <div>
-                          <Activity
-                            resourceId={rentalManagementData._id}
-                            resource={rentalManagement.resource}
-                            restrictedAddActivities={
-                              permissions &&
-                                permissions["rentalManagement"] &&
-                                permissions["rentalManagement"].isUpdate
-                                ? []
-                                : ["Attachment", "Case"]
-                            }
-                            relatedTo={[
-                              {
-                                type: rentalManagement,
-                                referenceId: rentalManagementData._id,
-                                access: true,
-                              },
-                            ]}
-                            handleActivityRefresh={() => { }}
-                            emails={[]}
-                          />
-                        </div>
-                      )}
-                    </Grid>
-                  </Grid>
-                </Paper> :
-                !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
-                  <IoIosArrowDropleft className="icon" />
-                </span>} */}
-          <Paper>
-            {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
-              {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-            </span>}
-            <div style={{ display: showActivity ? "block" : "none" }}>
-              <Grid container>
-                <Grid item xs={12}>
-                  {rentalManagementData && (
-                    <div>
-                      <Activity
-                        resourceId={rentalManagementData._id}
-                        resource={rentalManagement.resource}
-                        restrictedAddActivities={
-                          permissions &&
-                            permissions["rentalManagement"] &&
-                            permissions["rentalManagement"].isUpdate
-                            ? []
-                            : ["Attachment", "Case"]
-                        }
-                        relatedTo={[
-                          {
-                            type: rentalManagement,
-                            referenceId: rentalManagementData._id,
-                            access: true,
-                          },
-                        ]}
-                        handleActivityRefresh={() => { }}
-                        emails={[]}
-                      />
-                    </div>
-                  )}
-                </Grid>
-              </Grid>
-            </div>
-          </Paper>
-        </HideWhenOffline>
       </div>
     </div>
     {showConfirmBox && (

@@ -27,6 +27,7 @@ import { GoArrowDown } from 'react-icons/go';
 import { ExpandMore } from '@material-ui/icons';
 import routes from '../../../components/Helpers/Routes';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
+import {MdAdd} from "react-icons/all";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -393,39 +394,43 @@ export default function Attachment() {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={5} className="d-flex align-items-center gap-1">
+            <Grid item xs={isMobile ? 12 : 6} className="d-flex align-items-center gap-1">
               <AiOutlinePaperClip className="headerLogo" /> <span className="listingHeader">{routes.attachment.title} ({rowCount})</span>
             </Grid>
-            <Grid item xs={7} className={styles.filter_side}>
-              <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>
-                <div className="d-flex gap-2">
+            <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side}>
+              <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
+                  <Grid style={{width:"100%" , display:"flex"}}>
                   <SearchFilter
                     handleChangeFilter={handleChangeFilter}
                     filter={filter}
                     chip={{ size: 'small' }}
                     activityName="attachment"
                   />
-                  
-                    {!isMobile && <Button
-                      variant="contained"
+                  </Grid>
+
+
+                <Grid style={{display: "flex" , gap:"5px"}}>
+                    {<Button
+                        variant={isMobile ? "text" : "contained"}
                       color="primary"
                       size="small"
                       onClick={() => setOpen(true)}
-                      startIcon={<AddOutlined />}
+                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                        startIcon={isMobile ? null : <AddOutlined />}
                     >
-                      Add
+                      {isMobile ? <MdAdd size={23}/> : "Add"}
                     </Button>
                     }
-                    <div className="d-flex gap-2">
                     <Button
-                      variant="outlined"
+                        variant={isMobile ? "text" : "contained"}
                       color="default"
                       size="small"
                       onClick={openActions}
                       aria-controls="action-menu"
                       disabled={selectedRecords.length > 0 ? false : true}
+                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
                     >
-                      Actions <ExpandMore />
+                      {isMobile ? "" :  "Actions" } <ExpandMore/>
                     </Button>
                     <Menu
                       anchorEl={anchorEl}
@@ -449,8 +454,8 @@ export default function Attachment() {
                         Delete
                       </MenuItem>
                     </Menu>
-                  </div>
-                </div>
+
+                </Grid>
               </Box>
             </Grid>
           </Grid>
@@ -481,9 +486,7 @@ export default function Attachment() {
             rowCount={rowCount}
             page={page}
             loading={loading}
-            onCreate={() => {
-              setOpen(true);
-            }}
+            onCreate={false}
             showClone={false}
             onClone={() => {}}
             renderedFrom={"attachmentPage"} /> :

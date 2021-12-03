@@ -66,19 +66,19 @@ const ProjectStrategyHeader = (props) => {
               searchbox={styles.search_box_input}
               size="small"
               placeholder="Search Project Sales"
-              width="242px"
+              width={isMobile ? "200px" : "242px"}
               style={isMobile ? {flex:1} : {}}
             />
             </Grid>
           <Grid style={{display: "flex" , gap:"5px"}}>
-              {permissions?.isCreate && permissions?.isUpdate && !isMobile && (
+              {permissions?.isCreate && permissions?.isUpdate && (
                 <Button
                     variant={isMobile ? "text" : "contained"}
                   color="primary"
                   size="small"
                   onClick={onCreate}
                     className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                  // startIcon={<AddOutlined />}
+                    startIcon={isMobile ? null : <AddOutlined />}
                 >
                   {isMobile ? <MdAdd size={23}/> : "Add"}
                 </Button>

@@ -15,6 +15,7 @@ import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import styles from "../Leads/Header.module.scss";
 import { isMobile } from "react-device-detect";
+import {MdAdd} from "react-icons/all";
 
 function OpportunitiesHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -74,42 +75,44 @@ function OpportunitiesHeader(props) {
         )}
         {children}
       </Grid>
-      <Grid item xs={6} className={styles.filter_side}>
-        <Box className={styles.filter_side_header} component="div">
-          <div className="d-flex gap-2">
+      <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side}>
+        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+            <Grid style={{display: "flex", flex:1}}>
             <SearchBox
               onSearch={onSearch}
               searchbox={styles.search_box_input}
               value={searchVal}
               size="small"
               placeholder="Search Opportunity"
-              width="242px"
+              width={isMobile ? "200px" : "242px"}
+              style={isMobile ? {flex:1} : {}}
             />
-            <div className="d-flex gap-2">
-              {opportunityPermissions.isCreate && opportunityPermissions.isUpdate && !isMobile && (
+            </Grid>
+            <Grid style={{display: "flex" , gap:"5px"}}>
+              {opportunityPermissions.isCreate && opportunityPermissions.isUpdate && (
                 <Button
-                  variant="contained"
+                    variant={isMobile ? "text" : "contained"}
                   color="primary"
                   size="small"
-                  // className={styles.add_submit_btn}
+                    className={isMobile ? "mobile_button" : styles.add_submit_btn}
                   onClick={onCreate}
-                  startIcon={<AddOutlined />}
+                  startIcon={isMobile ? null : <AddOutlined />}
                 >
-                  Add
+                  {isMobile ? <MdAdd size={23}/> : "Add"}
                 </Button>
               )}
               {opportunityPermissions.isDelete && (
                 <>
                   <Button
                     disabled={canDelete}
-                    variant="outlined"
+                    variant={isMobile ? "text" : "contained"}
                     color="default"
                     size="small"
                     onClick={openActions}
-                    // className={styles.action_submit_btn}
+                    className={isMobile ? "mobile_button" : styles.action_submit_btn}
                     aria-controls="action-menu"
                   >
-                    Actions <ExpandMore />
+                    {isMobile ? "" :  "Actions" } <ExpandMore/>
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
@@ -143,8 +146,7 @@ function OpportunitiesHeader(props) {
                   </Menu>
                 </>
               )}
-            </div>
-          </div>
+            </Grid>
         </Box>
       </Grid>
     </Grid>

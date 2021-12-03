@@ -9,7 +9,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import axiosInstance from "../../axios/axiosInstance";
 import { GiStockpiles } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import { ExpandMore } from "@material-ui/icons";
+import {AddOutlined, ExpandMore} from "@material-ui/icons";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
@@ -27,7 +27,7 @@ import { prepareDataForGrid } from "../../constants/helpers"
 import ManagePurchaseOrder from "./ManagePurchaseOrder";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown } from "react-icons/all";
+import {AiFillCrown, MdAdd} from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 
@@ -317,31 +317,40 @@ const PurchaseOrder = () => {
                         <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
                         <span className="listingHeader">{routes.purchaseOrder?.title} </span>
                     </Grid>
-                    <Grid xs={6} container className={styles.filter_side} >
-                        <Box className={styles.filter_side_header} component="div" >
-                            <div className="d-flex gap-2">
+                    <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side} >
+                        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
+                            <Grid style={{display: "flex", flex:1}}>
                                 <SearchBox
                                     onSearch={handleSearch}
                                     width="242px"
                                     size="small"
                                     value={search}
+                                    style={isMobile ? {flex:1} : {}}
                                 />
-                                {permissions?.purchaseOrder?.isCreate && !isMobile &&
-                                    <Button className={styles.add_submit_btn} onClick={() => {
+
+                            </Grid>
+
+                            <Grid style={{display: "flex" , gap:"5px"}}>
+                                {permissions?.purchaseOrder?.isCreate &&
+                                    <Button onClick={() => {
                                         setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: null })
-                                    }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                    }} variant={isMobile ? "text" : "contained"} size="small" color="primary"  className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                                            startIcon={isMobile ? null : <AddOutlined />}> {isMobile ? <MdAdd size={23}/> : "Add"}</Button>
                                 }
-                                <div className="d-flex gap-2">
+
                                     <HtmlTooltip title="Please select some purchase orders">
                                         <span>
                                             <Button
-                                                variant="outlined"
+                                                variant={isMobile ? "text" : "contained"}
                                                 color="default"
                                                 size="small"
                                                 onClick={openActions}
                                                 disabled={selectedRecords.length ? false : true}
                                                 aria-controls="action-menu"
-                                            >Actions <ExpandMore />
+                                                className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                                            >
+                                               {isMobile ? "" :  "Actions" } <ExpandMore />
+
                                             </Button>
                                         </span>
                                     </HtmlTooltip>
@@ -362,8 +371,7 @@ const PurchaseOrder = () => {
                                             setShowDeleteConfirmBox(true)
                                         }}>Delete</MenuItem>}
                                     </Menu>
-                                </div>
-                            </div>
+                            </Grid>
                         </Box>
                     </Grid>
                 </Grid>
@@ -405,9 +413,7 @@ const PurchaseOrder = () => {
                                     field: "status",
                                 }
                             ]}
-                            onCreate={(data) => {
-                                setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: null })
-                            }}
+                            onCreate={false}
                             showClone={true}
                             onClone={(data) => { setShowManagePurchaseOrderDialog({ open: true, isClone: true, idToClone: data._id }); }}
                             renderedFrom={routes.purchaseOrder?.title}

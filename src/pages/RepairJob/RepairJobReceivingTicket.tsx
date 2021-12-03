@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const RepairJobReceivingTicket = ({ repairJobData }) => {
+const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled }) => {
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
 
@@ -85,7 +85,7 @@ const RepairJobReceivingTicket = ({ repairJobData }) => {
 
         axiosInstance().get(`${repairJob.repairJobApi}/${repairJobData._id}/get-assets`)
             .then(({ data }) => {
-                let tempProductInventory = data.data.map(u => ({ ...u, productName: u?.product?.optionLabel }))
+                let tempProductInventory = data.data.map(u => ({ ...u, _id: u?.id, productName: u?.product?.optionLabel }))
                 dispatch({ type: "loading", loading: true });
                 axiosInstance()
                     .get(`${repairJob.repairJobApi}/${repairJobData._id}/delivery-ticket`)
@@ -111,8 +111,12 @@ const RepairJobReceivingTicket = ({ repairJobData }) => {
                                 })
 
                                 tempProductInventory.forEach((d) => {
+                                    d["_id"] = d["id"];
                                     d["hideSelection"] = d.status === "In-Transit";
                                 })
+
+                                // TODO: Uncomment below line before pushing
+                                setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))
 
                                 dispatch({
                                     type: "initialize", data: tempProductInventory, count: tempProductInventory.length
@@ -141,7 +145,7 @@ const RepairJobReceivingTicket = ({ repairJobData }) => {
     );
 
     const ProductNameRenderer = (params) => (
-        <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.product.optionValue}`}>
+        <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data?.product?.optionValue}`}>
             {params.value}
         </Link>
     );
@@ -237,7 +241,7 @@ const RepairJobReceivingTicket = ({ repairJobData }) => {
             </Button>
             <Box mx={1} /> */}
 
-            {/* <Button variant="outlined" color="primary" aria-controls="simple-menu"
+            <Button variant="outlined" color="primary" aria-controls="simple-menu"
                 aria-haspopup="true"
                 disabled={selectedRecords.length === 0}
                 size="small"
@@ -263,10 +267,6 @@ const RepairJobReceivingTicket = ({ repairJobData }) => {
             >
                 <MenuItem onClick={() => {
                     setAnchorEl(null)
-                    setStatusToUpdate({ open: true, isUpdating: false, status: "Repair", message: "" })
-                }}>Repair</MenuItem>
-                <MenuItem onClick={() => {
-                    setAnchorEl(null)
                     setStatusToUpdate({ open: true, isUpdating: false, status: "Scrap", message: "" })
                 }}>Scrap</MenuItem>
                 <MenuItem onClick={() => {
@@ -275,7 +275,7 @@ const RepairJobReceivingTicket = ({ repairJobData }) => {
                 }}>Lost</MenuItem>
             </Menu>
 
-            <Box mx={1} /> */}
+            <Box mx={1} />
 
             {
                 repairJobData?.processStatus !== "End" &&
@@ -422,7 +422,7 @@ const RepairJobReceivingTicket = ({ repairJobData }) => {
                                 status: statusToUpdate.status,
                                 reference: {
                                     _id: repairJobData._id,
-                                    type: "Repair Job"
+                                    type: "Repair"
                                 }
                             }).then(({ data }) => {
                                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message })

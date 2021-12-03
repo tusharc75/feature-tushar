@@ -24,7 +24,7 @@ import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
-import { ExpandMore } from "@material-ui/icons";
+import {AddOutlined, ExpandMore} from "@material-ui/icons";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useLocation } from "react-router-dom";
@@ -32,7 +32,7 @@ import queryString from "query-string";
 import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers"
 import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown } from "react-icons/all";
+import {AiFillCrown, MdAdd} from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
@@ -478,31 +478,41 @@ const ProductCategory = () => {
                         <FaThemeisle size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.productCategory.title}</span>
                     </Grid>
                     <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
-                        <Box className={styles.filter_side_header} component="div" >
-                            <div className="d-flex gap-2">
+                        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
+
+                                <Grid style={{width:"100%" , display:"flex"}}>
                                 <SearchBox
                                     onSearch={handleSearch}
                                     searchbox={styles.search_box_input}
-                                    width="242px"
+                                    width={isMobile ? "200px" : "242px"}
+                                    style={isMobile ? {flex:1} : {}}
                                     size="small"
                                     value={search}
                                 />
-                                <div className="d-flex gap-2">
-                                    {productCategoryPermissions.isCreate && !isMobile &&
-                                        <Button className={styles.add_submit_btn} onClick={() => {
+                                </Grid>
+
+
+                            <Grid style={{display: "flex" , gap:"5px"}}>
+                                    {productCategoryPermissions.isCreate &&
+                                        <Button className={isMobile ? "mobile_button" : styles.add_submit_btn} onClick={() => {
                                             setProductCategoryId(null);
                                             setOpen({ open: true, isClone: false });
-                                        }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                        }} variant={isMobile ? "text" : "contained"} size="small" color="primary"
+                                                startIcon={isMobile ? null : <AddOutlined />}>
+                                            {isMobile ? <MdAdd size={23}/> : "Add"}
+                                        </Button>
                                     }
                                     {productCategoryPermissions.isDelete &&
                                         <Button
-                                            variant="outlined"
+                                            variant={isMobile ? "text" : "contained"}
                                             color="default"
                                             size="small"
                                             onClick={openActions}
                                             disabled={selectedRecords.length ? false : true}
                                             aria-controls="action-menu"
-                                        >Actions <ExpandMore />
+                                            className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                                        >
+                                            {isMobile ? "" :  "Actions" } <ExpandMore/>
                                         </Button>
                                     }
                                     <Menu
@@ -523,8 +533,8 @@ const ProductCategory = () => {
                                             setShowDeleteConfirmBox(true)
                                         }}>Delete</MenuItem>
                                     </Menu>
-                                </div>
-                            </div>
+                            </Grid>
+
                         </Box>
                     </Grid>
                 </Grid>
@@ -562,10 +572,7 @@ const ProductCategory = () => {
                            
                         ]}
                         owerCollaboratorInitialsOrImages=""
-                        onCreate={() => {
-                            setProductCategoryId(null);
-                            setOpen({ open: true, isClone: false });
-                        }}
+                        onCreate={false}
                         showClone={true}
                         onClone={(data) => {
                             setProductCategoryId(data.id);

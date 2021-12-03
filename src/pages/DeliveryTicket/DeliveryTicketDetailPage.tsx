@@ -109,7 +109,7 @@ export default function DeliveryTicketDetail(props) {
   }
   useEffect(() => {
     fetchDeliveryTicketData();
-    getDeliveryTicketFields()
+
   }, [id]);
 
   const columns = [
@@ -140,13 +140,58 @@ export default function DeliveryTicketDetail(props) {
     });
   }
 
-  const getDeliveryTicketFields = () => {
+  const getDeliveryTicketFields = (ticket: any) => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource["deliveryTicket"]}&showHiddenFields=true`)
-      .then(({ data }) => {
-        setDeliveryTicketFields(data.data);
+      .then(async ({ data: { data } }) => {
+        if (ticket?.type === "Transfer Asset") {
+
+          const { data: { data: transferData } } = await axiosInstance()
+            .get(`${routes.transferAsset.path}/${ticket.transferAsset?.optionValue}`)
+
+          data = data.filter((fields: any) => {
+            if (transferData?.transferType === "Internal") {
+              if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Supplier")) {
+                return false
+              }
+            }
+
+            if (transferData?.transferType.includes("External Supplier")) {
+              if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
+                return false
+              }
+            }
+            if (transferData?.transferType.includes("External Customer")) {
+              if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Plant")) {
+                return false
+              }
+            }
+            return true
+          })
+
+
+        } else if (ticket?.type === "Rental Job") {
+          data = data.filter((fields: any) => {
+            if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Plant")) {
+              return false
+            }
+            return true
+          })
+        } else {
+          data = data.filter((fields: any) => {
+            if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
+              return false
+            }
+            return true
+          })
+        }
+
+
+        setDeliveryTicketFields(data);
+        setLoading(false);
       })
       .catch((err) => {
+        setLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -171,6 +216,7 @@ export default function DeliveryTicketDetail(props) {
       axiosInstance()
         .get(`${deliveryTicketApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
+          getDeliveryTicketFields(data)
           setDeliveryTicketData(data)
 
           const startDeliverySignatures = data?.signatures.filter(f => f.status === "Start Delivery" && f.date);
@@ -196,7 +242,7 @@ export default function DeliveryTicketDetail(props) {
           } else {
             dispatch({ type: "initialize", data: [], count: 0 });
           }
-          setLoading(false);
+
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -747,6 +793,7 @@ export default function DeliveryTicketDetail(props) {
             selectedProducts={[]}
             rentalId={deliveryTicketData.type === "Rental Job" ? deliveryTicketData?.rental?.optionValue : ""}
             repairJobId={deliveryTicketData.type === "Repair Job" ? deliveryTicketData?.repairJob?.optionValue : ""}
+            transferAssetId={deliveryTicketData.type === "Transfer Asset" ? deliveryTicketData?.transferAsset?.optionValue : ""}
             notIn="loadingTicket"
           // type={inventoryType}
           />

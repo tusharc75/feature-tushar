@@ -108,8 +108,8 @@ const PackageDetails = () => {
       .get(`${routes.packages.path}/${id}`)
       .then(({ data: { data } }) => {
         setPackageData(data);
-        setHeadingLabel(data.additionInformation);
-        setCustomizedRoutes([routes.packages, { title: data.additionInformation }]);
+        setHeadingLabel(data.packageName);
+        setCustomizedRoutes([routes.packages, { title: data.packageName }]);
         getRessourceFields();
       })
       .catch((err) => {

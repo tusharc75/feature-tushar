@@ -20,7 +20,7 @@ import ManageDeliveryTicket from '../DeliveryTicket/ManageDeliveryTicket';
 
 const renderedFrom = "repairJob_delivery_ticket"
 
-const RepairJobDeliveryTicket = ({ repairJobData }) => {
+const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [gridApi, setGridApi] = useState(null);
@@ -53,7 +53,7 @@ const RepairJobDeliveryTicket = ({ repairJobData }) => {
     axiosInstance().get(`${repairJob.repairJobApi}/${repairJobData._id}/get-assets`)
       .then(({ data }) => {
         setAssignedSerializedAsset(data.data)
-        let tempProductInventory = data.data.map(u => ({ ...u, productName: u?.product?.optionLabel }))
+        let tempProductInventory = data.data.map(u => ({ ...u, _id: u?.id, productName: u?.product?.optionLabel }))
         dispatch({ type: "loading", loading: true });
         axiosInstance()
           .get(`${repairJob.repairJobApi}/${repairJobData._id}/delivery-ticket`)
@@ -68,8 +68,12 @@ const RepairJobDeliveryTicket = ({ repairJobData }) => {
             })
 
             tempProductInventory.forEach((d) => {
+              d["_id"] = d["id"];
               d["hideSelection"] = d.status === "In-Transit";
             })
+
+            // TODO: Uncomment below line before pushing
+            // setNextButtonDisabled(tempProductInventory.some(s => s.status !== "Repair"))
 
             dispatch({
               type: "initialize", data: tempProductInventory, count: tempProductInventory.length
@@ -103,9 +107,10 @@ const RepairJobDeliveryTicket = ({ repairJobData }) => {
   );
 
   const ProductNameRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data.product.optionValue}`}>
+    params.data?.product?.optionValue ? <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.product?.optionValue}`}>
       {params.value}
     </Link>
+      : <NoDataCell />
   );
 
   const frameworkComponents = {
