@@ -58,7 +58,7 @@ const renderedFrom = "receivingTicketDetailInventoryPage";
 
 const mappedStatus = {
   "Sign-off - Dispatch": "In-Transit",
-  "Sign-off - Receive": "Delivered"
+  "Sign-off - Delivery": "Delivered"
 }
 
 const ReceivingTicketDetails = () => {

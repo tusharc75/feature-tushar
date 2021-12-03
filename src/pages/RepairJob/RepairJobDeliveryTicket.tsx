@@ -72,7 +72,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled }) => {
               d["hideSelection"] = d.status === "In-Transit";
             })
 
-            //  Uncomment below line before pushing
+            // TODO: Uncomment below line before pushing
             // setNextButtonDisabled(tempProductInventory.some(s => s.status !== "Repair"))
 
             dispatch({
