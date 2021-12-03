@@ -16,20 +16,18 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 
 interface LoadingGridProps {
   fetchAssets: any;
-  plantId: string;
   permissions: any;
-  warehouse: any;
   transferAssetData?: any;
   transferAssetId: string | any;
   setNextStep: any;
   setPrevStep: any;
-  setTransferIsEnded: any;
   currentStep: number;
-  setTickets: any;
+  setTickets?: any;
+  setExistingAssets?: any;
 }
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
-  const { fetchAssets, transferAssetId, warehouse, setPrevStep, transferAssetData, setTickets, setNextStep, setTransferIsEnded } = props;
+  const { fetchAssets, transferAssetId, setPrevStep, transferAssetData, setTickets, setNextStep, setExistingAssets } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [openLoadingTicketDialog, setOpenLoadingTicketDialog] = useState(false);
@@ -45,7 +43,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     { field: 'serialNumber', headerName: 'Serial Number', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'deliveryTicket', headerName: 'Loading Ticket', show: true, disabled: true, cellRenderer: 'ticketRenderer' },
     { field: 'product', headerName: 'Product Description', show: true, cellRenderer: 'productRenderer' },
-    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'deliveryTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
   ];
 
   const AssetRenderer = (params) =>
@@ -111,10 +110,12 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           ))) {
             assetData[j].deliveryTicket = ticketData[i].deliveryJobName
             assetData[j].deliveryTicketId = ticketData[i]._id
+            assetData[j].deliveryTicketStatus = ticketData[i].status
           }
         }
       }
 
+      setExistingAssets(assetData)
       dispatch({ type: 'initialize', data: assetData, count: assetData.length });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
@@ -143,25 +144,22 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       setAssetWithNoTicket(inventoryWithNoTicket)
     }
 
-    if (dataRows.length > 0) {
-      setNextStep(true)
-      const inventoryWithNoTicket = dataRows.filter((asset: any) => !asset?.hasOwnProperty("deliveryTicket"));
-      const inventoryWithTicket = dataRows.filter((asset: any) => asset?.hasOwnProperty("deliveryTicket"));
-      if (inventoryWithNoTicket.length > 0) {
-        setNextStep(false)
-      } else {
-        setNextStep(true)
-      }
+    setNextStep(true)
+    const inventoryWithNoTicket = dataRows.filter((asset: any) => !asset?.hasOwnProperty("deliveryTicket"));
+    const inventoryWithTicket = dataRows.filter((asset: any) => asset?.hasOwnProperty("deliveryTicket"));
+    const inventoryDelivered = dataRows.filter((asset: any) => asset["deliveryTicketStatus"] !== "Delivered");
 
-      if (inventoryWithTicket.length > 0) {
-        setPrevStep(false)
-      } else {
-        setPrevStep(true)
-      }
-    } else {
+    if (inventoryWithNoTicket.length > 0 || inventoryDelivered.length > 0) {
       setNextStep(false)
+    } else {
+      setNextStep(true)
     }
 
+    if (inventoryWithTicket.length > 0) {
+      setPrevStep(false)
+    } else {
+      setPrevStep(true)
+    }
 
   }, [dataRows, selectedRecords])
 
@@ -241,7 +239,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           <ManageDeliveryTicket
             onClose={() => setOpenLoadingTicketDialog(false)}
             productInventoryForDeliveryTicket={assetWithNoTicket}
-            warehouseId={warehouse}
             transferData={transferAssetData}
             onSuccess={() => {
               setOpenLoadingTicketDialog(false);

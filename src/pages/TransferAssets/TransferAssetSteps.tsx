@@ -190,7 +190,7 @@ const TransferSteps = (props) => {
                   )}
                 </Grid>
               </Grid>
-              <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={activeStep}>
+              <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={isTransferEnded ? steps.length + 1 : activeStep}>
                 {steps.map((label: string, i: number) => (
                   <Step
                     key={label}
