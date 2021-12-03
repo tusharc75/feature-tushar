@@ -14,6 +14,7 @@ import { SearchActivity } from "../../../axios/activity";
 import { useData } from "../../../StateProvider/Provider";
 import { resActivityColors } from "../Helpers/utils";
 import ActivityModelHandler from "../ActivityModelHandler";
+import {isMobile} from "react-device-detect";
 
 export const capitalize = (string) => {
   return string && typeof string === "string"
@@ -118,11 +119,32 @@ export const SearchFilter = ({
           ))
         }
         renderInput={(params) => (
-          <TextField
+            isMobile ?           <TextField
+                    {...params}
+                    size="small"
+                    variant="standard"
+                    placeholder="Search or Filter"
+                    className= {isMobile ? "serchBox" : "" }
+                    InputProps={{
+                      ...params.InputProps,
+                      disableUnderline: true,
+                      endAdornment: (
+                          <React.Fragment>
+                            {loading ? (
+                                <CircularProgress color="inherit" size={20} />
+                            ) : null}
+                            {params.InputProps.endAdornment}
+                          </React.Fragment>
+                      ),
+                    }}
+                /> :
+
+                <TextField
             {...params}
             size="small"
             variant="outlined"
             placeholder="Search or Filter"
+
             InputProps={{
               ...params.InputProps,
               endAdornment: (

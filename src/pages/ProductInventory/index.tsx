@@ -9,7 +9,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import axiosInstance from "../../axios/axiosInstance";
 import { GiStockpiles } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import { ExpandMore } from "@material-ui/icons";
+import {AddOutlined, ExpandMore} from "@material-ui/icons";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
@@ -27,7 +27,7 @@ import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers"
 import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown } from "react-icons/all";
+import {AiFillCrown, MdAdd} from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 
@@ -303,33 +303,48 @@ const ProductInventory = () => {
                             />
                         )}
                     </Grid>
-                    <Grid xs={6} container className={styles.filter_side} >
-                        <Box className={styles.filter_side_header} component="div" >
+                    <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side} >
+                        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
 
+                            <Grid style={{display: "flex", flex:1}}>
                             <SearchBox
                                 onSearch={handleSearch}
                                 searchbox={styles.search_box_input}
-                                width="242px"
+                                width={isMobile ? "200px" : "242px"}
+                                style={isMobile ? {flex:1} : {}}
                                 size="small"
                                 value={search}
                             />
+                            </Grid>
+
+                            <Grid style={{display: "flex" , gap:"5px"}}>
                             {permissions?.productInventory?.isCreate &&
-                                <Button className={styles.add_submit_btn} onClick={() => {
+                                <Button
+                                    onClick={() => {
                                     setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null })
-                                }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                }}
+                                    variant={isMobile ? "text" : "contained"}
+                                    size="small"
+                                    color="primary"
+                                    className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                                    startIcon={isMobile ? null : <AddOutlined />}
+                                >
+                                    {isMobile ? <MdAdd size={23}/> : "Add"}
+                                </Button>
                             }
 
                             <HtmlTooltip title="Please select some inventories">
                                 <span>
                                     <Button
-                                        className={styles.action_submit_btn}
-                                        variant="outlined"
+                                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                                        variant={isMobile ? "text" : "contained"}
                                         color="default"
                                         size="small"
                                         onClick={openActions}
                                         disabled={selectedRecords.length ? false : true}
                                         aria-controls="action-menu"
-                                    >Actions <ExpandMore />
+                                    >
+                                        {isMobile ? "" :  "Actions" } <ExpandMore/>
                                     </Button>
                                 </span>
                             </HtmlTooltip>
@@ -354,6 +369,7 @@ const ProductInventory = () => {
                                     setShowRepairJobDialog(true)
                                 }}>Create Repair Job</MenuItem>}
                             </Menu>
+                            </Grid>
                         </Box>
                     </Grid>
                 </Grid>
@@ -388,7 +404,7 @@ const ProductInventory = () => {
                     },
                 ]}
                 owerCollaboratorInitialsOrImages=""
-                onCreate={() => { }}
+                onCreate={false}
                 showClone={true}
                 onClone={(data) => { setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id }); }}
                 renderedFrom={routes.productInventory?.title} /> :

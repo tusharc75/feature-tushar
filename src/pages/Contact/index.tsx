@@ -2,7 +2,7 @@ import { useContext, useEffect, useState, useReducer, Fragment } from 'react';
 import { Box, Button, Menu, MenuItem, Grid } from '@material-ui/core';
 import { useData } from '../../StateProvider/Provider';
 import { Link, useLocation } from 'react-router-dom';
-import { ExpandMore } from '@material-ui/icons';
+import {AddOutlined, ExpandMore} from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
 import ManageContactDialog from './ManageContact/index';
@@ -41,6 +41,7 @@ import CustomSwipableList from "../../components/SwipableListComponents/CustomSw
 import { isMobile } from 'react-device-detect';
 import { MdEmail } from 'react-icons/md';
 import queryString from 'query-string';
+import {MdAdd} from "react-icons/all";
 
 const ContactTypes = [
   {
@@ -700,42 +701,46 @@ export default function Contact(props) {
               </Grid>
             </Grid>
             <Grid item md={6} sm={6} xs={12} className={styles.filter_side}>
-              <Box id="resourceOperations" className={styles.filter_side_header} component="div" style={{ flexGrow: 1 }}>
-                <Grid sm={12} className={styles.search_box_layout} style={{ display: 'flex', flexGrow: 1 }}>
+              <Box id="resourceOperations" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" style={{ flex: 1 }}>
+                <Grid style={{display: "flex", flex:1}}>
                   <SearchBox
-                    style={{ flexGrow: 1, maxWidth: '400px' }}
-                    onSearch={handleSearch}
+                      onSearch={handleSearch}
                     searchbox={styles.search_box_input}
                     value={search}
                     size="small"
+                    width={isMobile ? "200px" : "242px"}
+                    style={isMobile ? {flex:1} : {}}
                   />
                 </Grid>
+
+                <Grid style={{display: "flex" , gap:"5px"}}>
                 {contactPermissions.isCreate && (
                   <>
                     <Button
-                      variant="contained"
+                        variant={isMobile ? "text" : "contained"}
                       color="primary"
                       size="small"
                       onClick={clickCreateNew}
-                      startIcon={<AddIcon />}
-                      className={styles.add_submit_btn}
+                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                        startIcon={isMobile ? null : <AddOutlined />}
                     >
-                      Add
+                      {isMobile ? <MdAdd size={23}/> : "Add"}
                     </Button>
                   </>
                 )}
+
                 <>
                   <Button
                     // disabled={Boolean(!selectedBrand)}
                     disabled={selectedRecords.length === 0}
-                    variant="outlined"
+                    variant={isMobile ? "text" : "contained"}
                     color="default"
                     size="small"
                     onClick={openActions}
-                    className={styles.action_submit_btn}
+                    className={isMobile ? "mobile_button" : styles.action_submit_btn}
                     aria-controls="action-menu"
                   >
-                    Actions <ExpandMore />
+                    {isMobile ? "" :  "Actions" } <ExpandMore/>
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
@@ -797,6 +802,7 @@ export default function Contact(props) {
                     )}
                   </Menu>
                 </>
+                </Grid>
               </Box>
             </Grid>
           </Grid>
