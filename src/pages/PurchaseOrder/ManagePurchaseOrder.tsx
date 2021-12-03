@@ -17,10 +17,11 @@ import { Box, Grid } from '@material-ui/core';
 import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { FaDiceOne } from "react-icons/fa";
+import { useHistory } from "react-router-dom";
 
 const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, productId = null, productCategory = null,
     productsToSave = [], isFromSerializedAssetStepFromRental = false, currency = null, rentalManagementId = null }) => {
-
+    const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -107,7 +108,8 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
             } else {
                 axiosInstance().post(`${purchaseOrder.api}`, values).then(({ data: { data } }) => {
                     setLoading(false);
-                    onSuccess(data)
+                    // onSuccess(data)
+                    history.push(`${purchaseOrder.api}/detail/${data._id}`);
                 }).catch((error) => {
                     setLoading(false);
                     toastConfig.setToastConfig(error);

@@ -18,6 +18,7 @@ import queryString from 'query-string';
 import TransferStepper from './TransferAssetSteps';
 import AssetsGrid from './AssetsGrid';
 import LoadingTicketGrid from './LoadingTicketGrid';
+import ReceivingTicketGrid from './ReceivingTicketGrid';
 import HideWhenOffline from "../../components/HideWhenOffline";
 import { MdEdit, MdDelete } from 'react-icons/md';
 import TabPanel from "../../components/TabPanel";
@@ -25,6 +26,7 @@ import { FaWpforms } from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 
 const transferSteps = ['Add Assets', 'Loading Ticket'];
+const transferSteps1 = ['Add Assets', 'Loading Ticket', "Receiving Ticket"];
 
 const TransferAssetDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -44,9 +46,11 @@ const TransferAssetDetailPage = () => {
   const [transferAssetData, setTransferAssetData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [isNextStep, setNextStep] = useState(true);
+  const [isPrevStep, setPrevStep] = useState(true);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [transferAssetFields, setTransferAssetFields] = useState([]);
   const [existingAssets, setExistingAssets] = useState([]);
+  const [tickets, setTickets] = useState([])
   const [mainPoints, setMainPoints] = useState(null);
   const [plantId, setPlantId] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
@@ -56,6 +60,7 @@ const TransferAssetDetailPage = () => {
   useEffect(() => {
     if (id) {
       fetchTransferAssetData();
+      fetchAssets(true)
     }
     // eslint-disable-next-line
   }, [id]);
@@ -90,15 +95,18 @@ const TransferAssetDetailPage = () => {
         data.forEach((field: any) => {
 
           if (transferType === "Internal") {
-            if (field.fieldData.fieldName !== "transferToSupplier" && field.fieldData.fieldName !== "transferToCustomer") {
+            if (field.fieldData.fieldName !== "transferToSupplier" && field.fieldData.fieldName !== "transferToCustomer"
+              && field.fieldData.fieldName !== "supplierShipTo" && field.fieldData.fieldName !== "customerShipTo") {
               fields.push(field)
             }
           } else if (transferType === "External Supplier") {
-            if (field.fieldData.fieldName !== "transferToPlant" && field.fieldData.fieldName !== "transferToCustomer") {
+            if (field.fieldData.fieldName !== "transferToPlant" && field.fieldData.fieldName !== "transferToCustomer"
+              && field.fieldData.fieldName !== "plantShipTo" && field.fieldData.fieldName !== "customerShipTo") {
               fields.push(field)
             }
           } else if (transferType === "External Customer") {
-            if (field.fieldData.fieldName !== "transferToSupplier" && field.fieldData.fieldName !== "transferToPlant") {
+            if (field.fieldData.fieldName !== "transferToSupplier" && field.fieldData.fieldName !== "transferToPlant"
+              && field.fieldData.fieldName !== "plantShipTo" && field.fieldData.fieldName !== "supplierShipTo") {
               fields.push(field)
             }
           }
@@ -309,10 +317,12 @@ const TransferAssetDetailPage = () => {
             <TabPanel value={tabValue} index={1}>
               <Box my={2}>
                 <TransferStepper
+                  isInternal={transferAssetData?.transferType === "Internal"}
                   hasAssets={existingAssets.length > 0}
                   isTransferEnded={isTransferEnded}
                   isNextStep={isNextStep}
-                  steps={transferSteps}
+                  isPrevStep={isPrevStep}
+                  steps={transferAssetData?.transferType === "Internal" ? transferSteps : transferSteps1}
                   currentStep={currentStep}
                   setCurrentStep={setCurrentStep}
                 />
@@ -332,6 +342,24 @@ const TransferAssetDetailPage = () => {
                   )}
                   {currentStep === 1 && (
                     <LoadingTicketGrid
+                      setTickets={setTickets}
+                      currentStep={currentStep}
+                      setPrevStep={setPrevStep}
+                      transferAssetId={id}
+                      transferAssetData={transferAssetData}
+                      fetchAssets={fetchAssets}
+                      plantId={plantId}
+                      warehouse={transferAssetData?.transferFromPlant}
+                      permissions={permissions}
+                      setNextStep={setNextStep}
+                      setTransferIsEnded={setTransferIsEnded}
+                    />
+                  )}
+                  {currentStep === 2 && (
+                    <ReceivingTicketGrid
+                      setTickets={setTickets}
+                      currentStep={currentStep}
+                      setPrevStep={setPrevStep}
                       transferAssetId={id}
                       transferAssetData={transferAssetData}
                       fetchAssets={fetchAssets}
@@ -366,6 +394,8 @@ const TransferAssetDetailPage = () => {
       {/* Manage Transfer Asset Data */}
       {openUpdateDialog && (
         <ManageTransferAsset
+          isEditable={existingAssets.length > 0}
+          isMainInfoEditable={(currentStep >= 1 && tickets.length > 0)}
           number={transferAssetData?.transferAssetNumber}
           isClone={false}
           transferAssetId={id}

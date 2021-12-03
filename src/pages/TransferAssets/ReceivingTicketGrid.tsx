@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import { deliveryTicket, sidebarResource } from '../../constants/helpers';
+import { receivingTicket, sidebarResource } from '../../constants/helpers';
 import { isMobile } from 'react-device-detect';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { groupBy } from 'lodash';
@@ -14,7 +14,7 @@ import { CommonRenderer, DateRenderer } from '../../components/AgGridComponents/
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 
-interface LoadingGridProps {
+interface ReceivingGridProps {
   fetchAssets: any;
   plantId: string;
   permissions: any;
@@ -28,7 +28,7 @@ interface LoadingGridProps {
   setTickets: any;
 }
 
-const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
+const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   const { fetchAssets, transferAssetId, warehouse, setPrevStep, transferAssetData, setTickets, setNextStep, setTransferIsEnded } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -43,7 +43,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const columns = [
     { field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'deliveryTicket', headerName: 'Loading Ticket', show: true, disabled: true, cellRenderer: 'ticketRenderer' },
+    { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, disabled: true, cellRenderer: 'ticketRenderer' },
     { field: 'product', headerName: 'Product Description', show: true, cellRenderer: 'productRenderer' },
     { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
   ];
@@ -125,7 +125,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
 
   const fetchLoadingTickets = () => new Promise((resolve, reject) => {
-    axiosInstance().get(`${routes.transferAsset.path}/${transferAssetId}/loading-ticket?limit=0`)
+    axiosInstance().get(`${routes.transferAsset.path}/${transferAssetId}/receiving-ticket?limit=0`)
       .then(({ data: { data } }) => {
         resolve(data);
         setTickets(data)
@@ -139,14 +139,14 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
   useEffect(() => {
     if (selectedRecords.length > 0) {
-      const inventoryWithNoTicket = selectedRecords.filter((asset: any) => !asset?.hasOwnProperty("deliveryTicket"))
+      const inventoryWithNoTicket = selectedRecords.filter((asset: any) => !asset?.hasOwnProperty("receivingTicket"))
       setAssetWithNoTicket(inventoryWithNoTicket)
     }
 
     if (dataRows.length > 0) {
       setNextStep(true)
-      const inventoryWithNoTicket = dataRows.filter((asset: any) => !asset?.hasOwnProperty("deliveryTicket"));
-      const inventoryWithTicket = dataRows.filter((asset: any) => asset?.hasOwnProperty("deliveryTicket"));
+      const inventoryWithNoTicket = dataRows.filter((asset: any) => !asset?.hasOwnProperty("receivingTicket"));
+      const inventoryWithTicket = dataRows.filter((asset: any) => asset?.hasOwnProperty("receivingTicket"));
       if (inventoryWithNoTicket.length > 0) {
         setNextStep(false)
       } else {
@@ -171,7 +171,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     let apiCalls = [];
 
     Object.keys(groupByCalls).forEach((key) => {
-      apiCalls.push(axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
+      apiCalls.push(axiosInstance().put(`${receivingTicket.receivingTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
     })
 
     Promise.all(apiCalls).then(() => {
@@ -199,17 +199,17 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             disabled={selectedRecords.length === 0 || assetWithNoTicket.length === 0}
             onClick={() => setOpenLoadingTicketDialog(true)}
           >
-            Create Loading Ticket
+            Create Receiving Ticket
           </Button>
           <Box component="span" mx={1} />
           <Button
             variant="contained"
             size="small"
             color="primary"
-            disabled={selectedRecords.filter(asset => asset?.hasOwnProperty("deliveryTicket")).length === 0}
+            disabled={selectedRecords.filter(asset => asset?.hasOwnProperty("receivingTicket")).length === 0}
             onClick={() => setShowConfirmBox(true)}
           >
-            Remove Loading Ticket
+            Remove Receiving Ticket
           </Button>
         </Box>
       </Box>
@@ -267,4 +267,4 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   );
 };
 
-export default LoadingTicketGrid;
+export default ReceivingTicketGrid;
