@@ -22,7 +22,7 @@ import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import TabPanel from '../../components/TabPanel';
 import CustomCommonSteps from '../../components/CustomCommonSteps/CustomCommonSteps';
-import AddSerializedAsset from '../RentalManagement/AddSerializedAsset';
+import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
 import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { getFrameworkComponents, genrateColoum } from '../../constants/columns';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';

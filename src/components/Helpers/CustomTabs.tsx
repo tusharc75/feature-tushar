@@ -18,7 +18,7 @@ const AntTab = withStyles((theme: Theme) =>
     root: {
       textTransform: "none",
       minWidth: 72,
-      fontWeight: theme.typography.fontWeightRegular,
+      //fontWeight: theme.typography.fontWeightRegular,
       marginRight: theme.spacing(4),
 
       "&:hover": {

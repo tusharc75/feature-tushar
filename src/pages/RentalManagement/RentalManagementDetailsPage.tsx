@@ -34,8 +34,6 @@ import HideWhenOffline from "../../components/HideWhenOffline";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import HtmlTooltip from '../../components/CustomTooltipTitle'
-
-import SerializedAssetStep from "./SerializedAssetStep";
 import moment from "moment";
 import { camelCase, startCase, orderBy, sum } from "lodash";
 import queryString from "query-string";
@@ -47,6 +45,7 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 
 import Productpackage from "./Productpackage";
 import AdditionalCost from "./AdditionalCost";
+import SerializedAsset from "./SerializedAsset";
 
 const rentalProcessSteps = ["New", "Additional Cost", "Serialized Asset", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
@@ -106,7 +105,7 @@ const RentalManagementDetailsPage = () => {
 
   const [dataForNewTabData, setDataForNewTabData] = useState([]);
 
- 
+
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -346,7 +345,7 @@ const RentalManagementDetailsPage = () => {
       })
 
       const newDataForReactTable = [...translateDataToTreeForProducts(newData ? [...newData] : [], "parent", "treeId", "subRows")];
-
+      console.log(newDataForReactTable)
       setDataForNewTabData([...orderBy(newDataForReactTable, ["order"], ["asc"])]);
 
       // dispatch({ type: "initialize", data: [], count: 0 })
@@ -561,22 +560,13 @@ const RentalManagementDetailsPage = () => {
                   />
                 )}
                 {(currentStep === 2) && (
-                  <SerializedAssetStep
-                    rentalManagementId={id}
-                    productInventory={[
-                      ...productInventory,
-                      ...serializeAssets
-                    ]}
-                    fetchProductsData={fetchProductInventory}
+                  <SerializedAsset
+                    rentalManagementData={rentalManagementData}
+                    setNextStep={setNextStep}
                     isSmallScreen={isSmallScreen}
                     isTabletScreen={isTabletScreen}
                     showActivity={showActivity}
-                    currentStep={currentStep}
                     currencySymbol={currencySymbol}
-                    currencyCode={rentalManagementData?.currency}
-                    loading={loading}
-                    serializeAssets={serializeAssets}
-                    setNextStep={setNextStep}
                   />
                 )}
                 {(currentStep === 3) && (
