@@ -546,7 +546,7 @@ const RepairJob = () => {
                 field: "typeOfRepair",
               }
             ]}
-            onCreate={clickCreateNew}
+            onCreate={false}
             showClone={false}
             onClone={() => { }}
             renderedFrom='repairJobPage'

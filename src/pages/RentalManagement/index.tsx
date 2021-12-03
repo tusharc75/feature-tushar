@@ -630,7 +630,7 @@ const RentalManagement = () => {
                     },
                   ]}
                   owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                  onCreate={clickCreateNew}
+                  onCreate={false}
                   showClone={true}
                   onClone={(data) => { setShowManageRentalManagementDialog({ open: true, isClone: true, idToClone: data._id }) }}
                   renderedFrom={pageTitle}

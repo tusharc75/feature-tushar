@@ -16,6 +16,7 @@ import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import styles from "../Leads/Header.module.scss";
 import HideWhenOffline from "../../components/HideWhenOffline";
 import { isMobile } from "react-device-detect";
+import {MdAdd} from "react-icons/all";
 
 function PackageHeader(props) {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -82,8 +83,9 @@ function PackageHeader(props) {
                 {children}
             </Grid>
             <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
-                <Box className={styles.filter_side_header} component="div">
-                    <div className="d-flex gap-2">
+                <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+
+                    <Grid style={{display: "flex", flex:1}}>
                         <HideWhenOffline>
                             <SearchBox
                                 onSearch={onSearch}
@@ -91,19 +93,23 @@ function PackageHeader(props) {
                                 value={searchVal}
                                 size="small"
                                 placeholder="Search Packages"
-                                width="300px"
+                                width={isMobile ? "200px" : "242px"}
+                                style={isMobile ? {flex:1} : {}}
                             />
                         </HideWhenOffline>
-                        <div className="d-flex gap-2">
-                            {packagePermissions.isCreate && packagePermissions.isUpdate && !isMobile && (
+                    </Grid>
+
+                    <Grid style={{display: "flex" , gap:"5px"}}>
+                            {packagePermissions.isCreate && packagePermissions.isUpdate && (
                                 <Button
-                                    variant="contained"
+                                    variant={isMobile ? "text" : "contained"}
                                     color="primary"
                                     size="small"
                                     onClick={onCreate}
-                                    startIcon={<AddOutlined />}
+                                    className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                                    startIcon={isMobile ? null : <AddOutlined />}
                                 >
-                                    Add
+                                    {isMobile ? <MdAdd size={23}/> : "Add"}
                                 </Button>
                             )}
 
@@ -112,13 +118,14 @@ function PackageHeader(props) {
                                 <>
                                     <Button
                                         disabled={canDelete}
-                                        variant="outlined"
+                                        variant={isMobile ? "text" : "contained"}
                                         color="default"
                                         size="small"
                                         onClick={openActions}
                                         aria-controls="action-menu"
+                                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
                                     >
-                                        Actions <ExpandMore />
+                                        {isMobile ? "" :  "Actions" } <ExpandMore/>
                                     </Button>
                                     <Menu
                                         anchorEl={anchorEl}
@@ -152,8 +159,7 @@ function PackageHeader(props) {
                                 </>
 
                             </HideWhenOffline>
-                        </div>
-                    </div>
+                    </Grid>
                 </Box>
             </Grid>
         </Grid>

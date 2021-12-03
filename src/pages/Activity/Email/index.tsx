@@ -32,7 +32,7 @@ import { AddOutlined } from '@material-ui/icons';
 import { displayDate } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown } from "react-icons/all";
+import {AiFillCrown, MdAdd} from "react-icons/all";
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 
 const tabs = {
@@ -357,38 +357,44 @@ const Email = () => {
                 ))}
               </ToggleButtonGroup>
             </Grid>
-            <Grid item xs={6} className={styles.filter_side}>
-              <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>
-                <div className="d-flex gap-2">
+            <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side} >
+              <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
+                  <Grid style={{width:"100%" , display:"flex"}}>
                   <SearchFilter
                     handleChangeFilter={handleChangeFilter}
                     filter={filter}
-                    chip={{ size: 'small' }}
+                    chip={{ size: 'large' }}
                     activityName="email"
+
+
                   />
-                  <div className="d-flex gap-2">
-                    {!isMobile && <Button
-                      variant="contained"
+
+                  </Grid>
+                <Grid style={{display: "flex" , gap:"5px"}}>
+                    {<Button
+                        variant={isMobile ? "text" : "contained"}
                       color="primary"
                       size="small"
                       onClick={() => {
                         setOpen(true);
                       }}
-                      startIcon={<AddOutlined />}
+                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                        startIcon={isMobile ? null : <AddOutlined />}
                     >
-                      Add
+                      {isMobile ? <MdAdd size={23}/> : "Add"}
                     </Button>
                     }
                     {/* </Box> */}
                     <Button
-                      variant="outlined"
+                        variant={isMobile ? "text" : "contained"}
                       color="default"
                       size="small"
                       onClick={openActions}
                       aria-controls="action-menu"
                       disabled={selectedRecords.length > 0 ? false : true}
+                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
                     >
-                      Actions <ExpandMore />
+                      {isMobile ? "" :  "Actions" } <ExpandMore/>
                     </Button>
                     <Menu
                       anchorEl={anchorEl}
@@ -411,8 +417,7 @@ const Email = () => {
                         Delete
                       </MenuItem>
                     </Menu>
-                  </div>
-                </div>
+                </Grid>
               </Box>
             </Grid>
           </Grid>
@@ -438,9 +443,7 @@ const Email = () => {
               rowCount={rowCount}
               page={page}
               loading={loading}
-              onCreate={() => {
-                setOpen(true);
-              } }
+              onCreate={false}
               showClone={false}
               onClone={() => { } }
               renderedFrom={"emailPage"} chips={undefined}            />
