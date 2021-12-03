@@ -793,6 +793,7 @@ export default function DeliveryTicketDetail(props) {
             selectedProducts={[]}
             rentalId={deliveryTicketData.type === "Rental Job" ? deliveryTicketData?.rental?.optionValue : ""}
             repairJobId={deliveryTicketData.type === "Repair Job" ? deliveryTicketData?.repairJob?.optionValue : ""}
+            transferAssetId={deliveryTicketData.type === "Transfer Asset" ? deliveryTicketData?.transferAsset?.optionValue : ""}
             notIn="loadingTicket"
           // type={inventoryType}
           />
