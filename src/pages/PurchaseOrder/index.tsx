@@ -9,7 +9,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import axiosInstance from "../../axios/axiosInstance";
 import { GiStockpiles } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import { ExpandMore } from "@material-ui/icons";
+import {AddOutlined, ExpandMore} from "@material-ui/icons";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
@@ -27,7 +27,7 @@ import { prepareDataForGrid } from "../../constants/helpers"
 import ManagePurchaseOrder from "./ManagePurchaseOrder";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown } from "react-icons/all";
+import {AiFillCrown, MdAdd} from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 
@@ -331,10 +331,11 @@ const PurchaseOrder = () => {
                             </Grid>
 
                             <Grid style={{display: "flex" , gap:"5px"}}>
-                                {permissions?.purchaseOrder?.isCreate && !isMobile &&
-                                    <Button className={styles.add_submit_btn} onClick={() => {
+                                {permissions?.purchaseOrder?.isCreate &&
+                                    <Button onClick={() => {
                                         setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: null })
-                                    }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                    }} variant={isMobile ? "text" : "contained"} size="small" color="primary"  className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                                            startIcon={isMobile ? null : <AddOutlined />}> {isMobile ? <MdAdd size={23}/> : "Add"}</Button>
                                 }
 
                                     <HtmlTooltip title="Please select some purchase orders">
@@ -412,9 +413,7 @@ const PurchaseOrder = () => {
                                     field: "status",
                                 }
                             ]}
-                            onCreate={(data) => {
-                                setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: null })
-                            }}
+                            onCreate={false}
                             showClone={true}
                             onClone={(data) => { setShowManagePurchaseOrderDialog({ open: true, isClone: true, idToClone: data._id }); }}
                             renderedFrom={routes.purchaseOrder?.title}

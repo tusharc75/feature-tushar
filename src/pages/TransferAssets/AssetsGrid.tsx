@@ -26,7 +26,7 @@ interface AssetsGridProps {
 }
 
 const AssetsGrid: FC<AssetsGridProps> = (props) => {
-  const { permissions, user, plantId, fetchAssets, transferAssetId, ownerId } = props
+  const { permissions, user, plantId, fetchAssets, transferAssetId, ownerId, setNextStep } = props
   const toastConfig = useContext(CustomToastContext);
 
 
@@ -81,24 +81,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       })
   }
 
-  const AssetRenderer = (params) =>
-    params.value ? (
-      <Link className="link cursor-pointer" to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
-        <p title={params.value}>{params.value}</p>
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
-
-  const ProductRenderer = (params) =>
-    params.value ? (
-      <Link className="link cursor-pointer" to={`${routes.productDetail.path}/${params.data.productId}`}>
-        <p title={params.value}>{params.value}</p>
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
-
   const ActionsRenderer = (params) => (
     <>
       <GridDeleteIcon
@@ -113,14 +95,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       />
     </>
   );
-
-  // const frameworkComponents = {
-  //   productRenderer: ProductRenderer,
-  //   assetRenderer: AssetRenderer,
-  //   commonRenderer: CommonRenderer,
-  //   actionsRenderer: ActionsRenderer,
-  //   dateRenderer: DateRenderer
-  // };
 
   useEffect(() => {
     if (transferAssetId) {
@@ -147,18 +121,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       gridDispatch({ type: "loading", loading: false });
       toastConfig.setToastConfig(error)
     }
-    // axiosInstance().get(`${routes.transferAsset.path}/get-asset/${plantId}`)
-    //   .then(({ data: { data } }) => {
-    //     data = data?.map((d: any) => ({
-    //       ...d,
-    //       product: d.product.optionLabel,
-    //       productId: d.product.optionValue,
-    //     }))
-    //     gridDispatch({ type: "initialize", data: data, count: data.length })
-    //     gridDispatch({ type: "loading", loading: false });
-    //   }).catch(err => {
-
-    //   })
   };
 
   /**
@@ -184,6 +146,14 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
 
     }
   }
+
+  useEffect(() => {
+    if (dataRows.length > 0) {
+      setNextStep(true)
+    } else {
+      setNextStep(false)
+    }
+  }, [dataRows])
 
   return (
     <Fragment>

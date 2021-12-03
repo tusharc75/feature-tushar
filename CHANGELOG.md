@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.13.0](https://github.com/vebholic/oms_frontend/compare/v2.12.0...v2.13.0) (2021-12-03)
+
+
+### Features
+
+* - PO-439 - 1.0, 2.0 added before serial number in repair job ([7d4ea4c](https://github.com/vebholic/oms_frontend/commit/7d4ea4ccf8c869a17c734aea693bf0a87dca99a6))
+* - PO-440 - If any required field value is still blank in serialized step, then next disabled ([80abfa2](https://github.com/vebholic/oms_frontend/commit/80abfa2ded468ef98ff1d112de3f780816df5544))
+* - React table z-index issue fixed for rental management detail screen ([2b4e537](https://github.com/vebholic/oms_frontend/commit/2b4e537d99fe9729225172ad14b245f9c0db49e0))
+* **azureInstance:** azure sso env variable setup ([f1429e6](https://github.com/vebholic/oms_frontend/commit/f1429e6ac3fad7ce7ac99535b729ed060d60ff07))
+* **logout:** logout page setup ([4bdfbf1](https://github.com/vebholic/oms_frontend/commit/4bdfbf17f0431cdbc101394a3dc78f056854693f))
+* repair Job, If repair type is internal, then hide Supplier dropdown, else show it ([f4a13df](https://github.com/vebholic/oms_frontend/commit/f4a13df589e1b18e792b3af2e5780cbc1fb2392f))
+* **transferasset:** fix and changes ([6ff3cb1](https://github.com/vebholic/oms_frontend/commit/6ff3cb15da07d2663599f522f65a8755bf3e613a))
+
+
+### Bug Fixes
+
+* **all bugs:** accessibility queryparams in customer , supplier contact ([f8d8e59](https://github.com/vebholic/oms_frontend/commit/f8d8e59fb95fffa672f24d93d8f2dd032fec4af9))
+* **customer contact supplier contact accessibility query params:** accessibility of customercontact ([8dc7186](https://github.com/vebholic/oms_frontend/commit/8dc7186f60571cf53c4953e876404cfcf03fc87e))
+* doa changes ([49969fd](https://github.com/vebholic/oms_frontend/commit/49969fd67ef0ebd90f501081564542117c32d630))
+* **loadingticket:** conditional fields ([6eff273](https://github.com/vebholic/oms_frontend/commit/6eff273d26a48e425e310a85246db08b0cc42a91))
+* **logout:** logout route fixed ([376d9c2](https://github.com/vebholic/oms_frontend/commit/376d9c2c5bda2c63df7ed4af313763da24e84389))
+* **logout:** logout route fixed ([00324a7](https://github.com/vebholic/oms_frontend/commit/00324a76ab43d0af86320863473beb2685c4876a))
+* **logout:** route renamed ([4ffd1e0](https://github.com/vebholic/oms_frontend/commit/4ffd1e0c20cd387d0d176df4fdf41505d133b1b7))
+* **logout:** route renamed ([43937c3](https://github.com/vebholic/oms_frontend/commit/43937c38315593e801295230f8ea9207f1dc7271))
+* pO changes -- coloring row,total,actual received ([dfaf774](https://github.com/vebholic/oms_frontend/commit/dfaf774b666d965f170d408d35150113fef5d8bb))
+
 ## [2.12.0](https://github.com/vebholic/oms_frontend/compare/v2.11.0...v2.12.0) (2021-12-02)
 
 

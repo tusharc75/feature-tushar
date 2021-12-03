@@ -19,6 +19,7 @@ import { BiPurchaseTagAlt, MdEmail } from "react-icons/all";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "../../../constants/columns"
 import { prepareDataForGrid } from "../../../constants/helpers";
+import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 
 
 const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBase64, downlodingFile, setCurrentStep, currentStep, handleAttachments }) => {
@@ -227,7 +228,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBas
                     renderedFrom={routes.purchaseOrderDetail.title}
                     onClone={() => { }}
                 /> :
-                    <CustomAgGrid
+                    <CustomAgGridEditable
                         columns={columns}
                         dataRows={dataRows}
                         frameworkComponents={frameWorkComponent}
@@ -240,7 +241,12 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBas
                         allowAction={false}
                         loading={loading}
                         allowSelection={false}
+                        isClientSideGrid={true}
                         renderedFrom="purchaseOrderDetailsPageService"
+                        onCellValueChanged={(row) => {
+                        }}
+                        fromPurchaseOrderGrid={true}
+                        currency={purchaseOrderData?.currency?.toLowerCase()}
                     />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
             }

@@ -90,12 +90,13 @@ const useStyles = makeStyles((theme) => ({
 
 const TransferSteps = (props) => {
   const {
+    isPrevStep,
     isNextStep,
     steps,
     currentStep,
     isTransferEnded,
     setCurrentStep,
-    hasAssets
+    isInternal
   } = props;
   const classes = useStyles();
   let activeStep = currentStep;
@@ -117,7 +118,7 @@ const TransferSteps = (props) => {
                   {(
                     <div>
                       <IconButton
-                        disabled={currentStep === 0 || isTransferEnded}
+                        disabled={currentStep === 0 || !isPrevStep || isTransferEnded}
                         onClick={() => {
                           setCurrentStep(currentStep - 1)
                         }}
@@ -145,7 +146,7 @@ const TransferSteps = (props) => {
                           <div>
                             <IconButton
                               color="primary"
-                              disabled={currentStep === 1 || (currentStep === 0 && !isNextStep) || isTransferEnded}
+                              disabled={currentStep === 0 || !isPrevStep || isTransferEnded}
                               onClick={() => {
                                 setCurrentStep(currentStep + 1)
                               }}
@@ -176,7 +177,7 @@ const TransferSteps = (props) => {
                                   setCurrentStep(currentStep + 1)
                                 }}
                                 size="small"
-                                disabled={currentStep >= 1 || !hasAssets || isTransferEnded}
+                                disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
 
                               >
                                 Next
@@ -229,7 +230,7 @@ const TransferSteps = (props) => {
                           onClick={() => {
                             setCurrentStep(currentStep + 1)
                           }}
-                          disabled={currentStep >= 1 || !hasAssets || isTransferEnded}
+                          disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
                           className="stepperButtonNext"
                         >
                           <RiShareForwardFill />
