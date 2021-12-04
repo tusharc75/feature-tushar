@@ -14,6 +14,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomButton from '../../../components/Helpers/CustomButton'
 import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
@@ -49,6 +50,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const ref = useRef(null);
 
   useEffect(() => {
@@ -191,15 +193,44 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   const handleSubmit = (values) => {
     if (isBulkedit) {
       for (const x in values) {
-        if (values[x] === 0 || values[x] === "0" || values[x] === "" || (Array.isArray(values[x]) && values[x].length === 0)) {
+        if (values[x] === "" || (Array.isArray(values[x]) && values[x].length === 0)) {
           delete values[x]
         }
       }
-      const rows = []
+      let rows: any = []
       selectedProducts.forEach(element => {
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
-        rows.push({ ...element, ...calValues })
+        if (element.type === "product" && element.parentId === null) {
+          rows.push({ ...element, ...calValues })
+        }
+        else if (element.type === "package") {
+          rows.push({ ...element, ...calValues })
+          const product = material.filter((e) => e.parentId === element._id)
+          resetValueZero(product)
+          rows = [...rows, ...product]
+        }
       });
+      //Code for Bulk Update Only Product in Packages
+      let packageProducts = selectedProducts.filter((ele) => ele.parentId !== null && !selectedProducts.some(f => f._id === ele.parentId));
+      if (packageProducts.length) {
+        const packageIds = uniq(map(packageProducts, 'parentId'))
+        console.log(packageIds)
+        packageIds.forEach((_packageId) => {
+          const packages: any = material.filter((e) => e._id === _packageId)
+          const product: any = material.filter((e) => e.parentId === _packageId)
+          product.forEach((element) => {
+            if (packageProducts.filter((e) => element._id === e._id).length) {
+              const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
+              rows.push({ ...element, ...calValues })
+              for (var key in calValues) {
+                element[key] = calValues[key];
+              }
+            }
+          })
+          sumOnParent(packages, product)
+          rows = [...rows, ...packages]
+        })
+      }
       handleSaveData(rows)
     }
     else {
@@ -280,7 +311,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
             <CustomDialogHeader
               title={getTitle()}
               onClose={() => {
-                onClose()
+                if (!isEqual(ref?.current?.values, initialData.values)) {
+                  setShowConfirmDialog(true)
+                }
+                else {
+                  onClose()
+                }
               }}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
@@ -407,14 +443,21 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" color="primary"
+              <Button
+                size="small"
+                color="primary"
                 onClick={() => {
-                  onClose()
+                  if (!isEqual(ref.current.values, initialData.values)) {
+                    setShowConfirmDialog(true)
+                  }
+                  else {
+                    onClose()
+                  }
                 }}
               >{"Close"}</Button>
-
               <CustomButton
                 loading={loading}
+                disabled={isEqual(ref?.current?.values, initialData.values)}
                 variant="contained"
                 color="primary"
                 type="submit"
@@ -433,6 +476,20 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                   setShowConfirmationDialog(false)
                 }}
               />
+            }
+            {
+              showConfirmDialog ?
+                <ConfirmCancelDialog
+                  open={showConfirmDialog}
+                  onSave={() => {
+                    setShowConfirmDialog(false)
+                    submitForm()
+                  }}
+                  onClose={() => {
+                    setShowConfirmDialog(false)
+                    onClose()
+                  }}
+                /> : null
             }
           </Fragment>
         )}
