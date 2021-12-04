@@ -165,18 +165,18 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
         axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`).then(({ data: { data } }) => {
             setMaterial(JSON.parse(JSON.stringify(data.material)))
             const rows = data.material.filter((e) => e.parentId === null)
-            rows.forEach((_row, i) => {
-                _row.detail = `${(i + 1)} - ${_row.type === "product" ? _row.productDetail?.productName : _row.packageDetail?.packageDescription}`
-                _row.qtyDisplay = _row.qty;
-                _row.isValid = _row["finalPrice_" + rentalManagementData?.currency?.toLowerCase()] ? true : false;
-                if (_row.type === "package") {
-                    const subRows: any = data.material.filter((e) => e.parentId === _row._id);
+            rows.forEach((parent, i) => {
+                parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageDescription}`
+                parent.qtyDisplay = parent.qty;
+                parent.isValid = parent["finalPrice_" + rentalManagementData?.currency?.toLowerCase()] ? true : false;
+                if (parent.type === "package") {
+                    const subRows: any = data.material.filter((e) => e.parentId === parent._id);
                     subRows.forEach((_subRow, j) => {
                         _subRow.detail = (i + 1) + "." + (j + 1) + " - " + _subRow.productDetail?.productName
-                        _subRow.qtyDisplay = `${_row.qty} x ${_subRow.qty} = ${_row.qty * _subRow.qty}`
+                        _subRow.qtyDisplay = `${parent.qty} x ${_subRow.qty} = ${parent.qty * _subRow.qty}`
                         _subRow.isValid = _subRow["finalPrice_" + rentalManagementData?.currency?.toLowerCase()] ? true : false;
                     })
-                    _row.subRows = subRows
+                    parent.subRows = subRows
                 }
             });
             if (rows.filter(_rows => _rows.isValid === false).length > 0 || rows.length === 0) {
@@ -270,11 +270,11 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             const data: any = {}
             data.conditionType = ["Rent"]
             data.material = arr.map(ele => ({
-                materialId: ele?.id,
+                materialId: ele?.materialId,
                 materialType: ele?.type.includes("roduct") ? "product" : "packages",
                 qty: ele?.qty,
                 pricingMethod: ele?.pricingMethod,
-                unit: ele?.UOM,
+                unit: ele?.unit,
                 currency: rentalManagementData?.currency
             }))
             data.supplier = [];
