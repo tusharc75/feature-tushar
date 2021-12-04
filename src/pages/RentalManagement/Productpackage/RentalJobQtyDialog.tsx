@@ -1,26 +1,8 @@
-import { ChangeEvent, FC, FormEvent, useEffect, useState, Fragment } from 'react';
-import {
-  Button,
-  Dialog,
-  TextField,
-  Grid,
-  Box,
-  CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  InputAdornment,
-  FormHelperText
-} from '@material-ui/core';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import DateUtils from '@date-io/date-fns';
-import moment from 'moment';
-import { dateFormatForInputControl } from '../../../constants/helpers';
+import { FC, useEffect, useState, Fragment, useRef } from 'react';
+import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { startCase } from 'lodash';
 import axiosInstance from "../../../axios/axiosInstance";
 import { groupBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -34,7 +16,7 @@ import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
-import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
+import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -46,6 +28,8 @@ interface EditDialogProps {
   selectedProducts: any[]
   isBulkedit: any
 }
+
+const rateChangeFields = ["unit", "pricingMethod"]
 
 const RentalJobQtyDialog: FC<EditDialogProps> = (
   {
@@ -65,6 +49,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
+  const ref = useRef(null);
 
   useEffect(() => {
     axiosInstance().get("/field/child?resource=Rental Management Product").then(({ data: { data } }) => {
@@ -197,7 +182,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           row[ele.fieldName] = sumValues[ele.fieldName];
         }
         else {
-          row[ele.fieldName] = sumValues[ele.fieldName] / product.length;
+          row[ele.fieldName] = parseFloat((sumValues[ele.fieldName] / product.length).toFixed(2));
         }
       })
     })
@@ -247,6 +232,28 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     }
   };
 
+  const getPricing = async (values: any) => {
+    if (rowData) {
+      if (values?.qty > 0 && values?.pricingMethod !== '' && values?.unit !== '') {
+        const priceData = await calculatePrice([{
+          materialId: rowData.materialId,
+          type: rowData.type,
+          qty: values.qty,
+          pricingMethod: values.pricingMethod,
+          unit: values.unit
+        }]);
+        if (priceData && priceData.length && priceData[0].mrp) {
+          let price: any = priceData[0].mrp;
+          return price;
+        }
+        return 0;
+      }
+      else {
+        return 0;
+      }
+    }
+  };
+
   return (<Dialog
     maxWidth="md"
     fullScreen={fullScreen || (isMobile || isTablet)}
@@ -257,6 +264,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   >
     {initialData && initialData.fields.length ?
       <Formik
+        innerRef={ref}
         enableReinitialize={true}
         initialValues={initialData.values}
         validationSchema={yupSchema(initialData.fields)}
@@ -315,32 +323,82 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                               tooltipMessage={field.tooltipMessage}
                               size="small"
                             /> :
-                            <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                              <Box display="flex" >
-                                <Box flexGrow={1}  >
-                                  <FormTypes
-                                    {...field}
-                                    fields={initialData.fields}
-                                    fieldData={field}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value)
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field.isTooltip}
-                                    tooltipMessage={field.tooltipMessage}
-                                    size="small"
-                                  />
+                            (rateChangeFields.includes(field.fieldName) && !isBulkedit) ?
+                              <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                <Box display="flex" >
+                                  <Box flexGrow={1}  >
+                                    <FormTypes
+                                      {...field}
+                                      fields={initialData.fields}
+                                      fieldData={field}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value)
+                                      }}
+                                      onChange={(e, val) => {
+                                        const value = val && val.optionValue ? val.optionValue : '';
+                                        getPricing({ ...values, [field.fieldName]: value }).then((price: any) => {
+                                          if (price) {
+                                            let priceFieldName = "price_" + rentalManagementData?.currency?.toLowerCase()
+                                            const result = autoCalculateSpecificFields({ [priceFieldName]: price, [field.fieldName]: value }, values, initialData.fields)
+                                            if (Object.keys(result).length >= 1) {
+                                              for (var x in result) {
+                                                setFieldValue(x, result[x]);
+                                              }
+                                            }
+                                          }
+                                          else {
+                                            const result = handleAutoCalculation(field, initialData.fields, values, field.fieldName, '', '', value);
+                                            if (Object.keys(result).length >= 1) {
+                                              for (var x in result) {
+                                                setFieldValue(x, result[x]);
+                                              }
+                                            }
+                                          }
+                                        });
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field.isTooltip}
+                                      tooltipMessage={field.tooltipMessage}
+                                      size="small"
+                                    />
+                                  </Box>
                                 </Box>
-                              </Box>
-                            </Grid>
+                              </Grid>
+                              :
+                              <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                <Box display="flex" >
+                                  <Box flexGrow={1}  >
+                                    <FormTypes
+                                      {...field}
+                                      fields={initialData.fields}
+                                      fieldData={field}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value)
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field.isTooltip}
+                                      tooltipMessage={field.tooltipMessage}
+                                      size="small"
+                                    />
+                                  </Box>
+                                </Box>
+                              </Grid>
                         ))}
                       </Grid>
                     </Box>
