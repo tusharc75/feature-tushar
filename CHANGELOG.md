@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.14.1](https://github.com/vebholic/oms_frontend/compare/v2.14.0...v2.14.1) (2021-12-05)
+
+
+### Bug Fixes
+
+* renal bug fix ([f6a49f4](https://github.com/vebholic/oms_frontend/commit/f6a49f47651723d6fe3405dcc480ecd6aabcdfac))
+* renal product price condition ([d166a1b](https://github.com/vebholic/oms_frontend/commit/d166a1b3a613a80eb8714ae8f79a539a9f380600))
+
 ## [2.14.0](https://github.com/vebholic/oms_frontend/compare/v2.13.0...v2.14.0) (2021-12-04)
 
 
