@@ -370,16 +370,16 @@ const QuoteBuilders = () => {
       .then(({ data: { data } }) => {
         let doaData = [];
 
-        data.doa.forEach((item) => {
+        data.users?.forEach((item) => {
           if (!isObjectEmpty(item)) {
             doaData.push({
-              optionValue: item.user?._id,
-              optionLabel: [item.user?.firstName, item.user?.lastName].filter(f => f).join(" "),
+              optionValue: item._id,
+              optionLabel: [item?.firstName, item?.lastName].filter(f => f).join(" "),
             });
           }
         });
 
-        setDoa(doaData);
+        setDoa((prevState) => [...prevState,...doaData]);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
