@@ -66,6 +66,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
             .catch((error) => {
               toastConfig.setToastConfig(error);
             });
+          setAllFields(fieldsDataForUpdate);
         } else {
           let createValues = getObjKeys('', fieldsDataForCreate);
           setAllFields(fieldsDataForCreate);

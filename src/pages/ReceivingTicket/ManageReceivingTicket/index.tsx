@@ -216,7 +216,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
             }
             if (transferData?.transferType === "External Supplier") {
               tempInitialData["supplierAccount"] = transferData?.transferToSupplier.optionValue;
-              tempInitialData["pickupAddress"] = transferData?.supplierShipTo;
+              tempInitialData["supplierShippingAddress"] = transferData?.supplierShipTo;
             }
             setReceivingTicketData({
               fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "transferAsset"),
