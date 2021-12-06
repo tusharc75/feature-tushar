@@ -96,10 +96,27 @@ const TransferSteps = (props) => {
     currentStep,
     isTransferEnded,
     setCurrentStep,
-    isInternal
+    isInternal,
+    updateStatus
   } = props;
   const classes = useStyles();
   let activeStep = currentStep;
+
+  const goNext = () => {
+    setCurrentStep(prevStep => {
+      const newStep = prevStep + 1
+      updateStatus(newStep)
+      return newStep
+    })
+  }
+
+  const goPrev = () => {
+    setCurrentStep(prevStep => {
+      const newStep = prevStep - 1
+      updateStatus(newStep)
+      return newStep
+    })
+  }
 
   return (
     <div>
@@ -119,9 +136,7 @@ const TransferSteps = (props) => {
                     <div>
                       <IconButton
                         disabled={currentStep === 0 || !isPrevStep || isTransferEnded}
-                        onClick={() => {
-                          setCurrentStep(currentStep - 1)
-                        }}
+                        onClick={goPrev}
                         className="stepperButton"
                       >
                         <TiArrowBack size={30} />
@@ -147,9 +162,7 @@ const TransferSteps = (props) => {
                             <IconButton
                               color="primary"
                               disabled={currentStep === 0 || !isPrevStep || isTransferEnded}
-                              onClick={() => {
-                                setCurrentStep(currentStep + 1)
-                              }}
+                              onClick={goPrev}
                               size="small"
                             >
                               <IoIosArrowDropleftCircle />
@@ -173,9 +186,7 @@ const TransferSteps = (props) => {
                             {(
                               <IconButton
                                 color="primary"
-                                onClick={() => {
-                                  setCurrentStep(currentStep + 1)
-                                }}
+                                onClick={goNext}
                                 size="small"
                                 disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
 
@@ -226,10 +237,7 @@ const TransferSteps = (props) => {
                     <div>
                       {(
                         <IconButton
-
-                          onClick={() => {
-                            setCurrentStep(currentStep + 1)
-                          }}
+                          onClick={goNext}
                           disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
                           className="stepperButtonNext"
                         >
