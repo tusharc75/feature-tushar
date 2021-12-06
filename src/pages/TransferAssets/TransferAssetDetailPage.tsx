@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment, useRef } from 'react';
+import React, {useState, useEffect, useContext, Fragment, useRef, useReducer} from 'react';
 import { Grid, Box, Button, Paper, Tab, Tabs } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
@@ -22,8 +22,11 @@ import ReceivingTicketGrid from './ReceivingTicketGrid';
 import HideWhenOffline from "../../components/HideWhenOffline";
 import { MdEdit, MdDelete } from 'react-icons/md';
 import TabPanel from "../../components/TabPanel";
-import { FaWpforms } from "react-icons/fa";
+import {FaSuitcase, FaWpforms} from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
+import {isMobile} from "react-device-detect";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import {intialState, reducer} from "../../components/AgGridComponents/CustomAgGrid";
 
 const transferSteps = ['Add Assets', 'Loading Ticket'];
 const transferSteps1 = ['Add Assets', 'Loading Ticket', "Receiving Ticket"];
@@ -55,7 +58,25 @@ const TransferAssetDetailPage = () => {
   const [plantId, setPlantId] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const [columns, setColumns] = useState([])
+
   const [isTransferEnded, setTransferIsEnded] = useState(false);
+
+
+  const {
+    dataRows,
+    rowCount,
+    page,
+    limit,
+    pageSizes,
+    search,
+    filters,
+    sorting,
+    selectedRecords,
+    appendRows,
+    showFilteredRecordsOnly
+  } = state;
 
   useEffect(() => {
     if (id) {
@@ -316,16 +337,19 @@ const TransferAssetDetailPage = () => {
 
             <TabPanel value={tabValue} index={1}>
               <Box my={2}>
-                <TransferStepper
-                  isInternal={transferAssetData?.transferType === "Internal"}
-                  hasAssets={existingAssets.length > 0}
-                  isTransferEnded={isTransferEnded}
-                  isNextStep={isNextStep}
-                  isPrevStep={isPrevStep}
-                  steps={transferAssetData?.transferType === "Internal" ? transferSteps : transferSteps1}
-                  currentStep={currentStep}
-                  setCurrentStep={setCurrentStep}
-                />
+
+                    <TransferStepper
+                        isInternal={transferAssetData?.transferType === "Internal"}
+                        hasAssets={existingAssets.length > 0}
+                        isTransferEnded={isTransferEnded}
+                        isNextStep={isNextStep}
+                        isPrevStep={isPrevStep}
+                        steps={transferAssetData?.transferType === "Internal" ? transferSteps : transferSteps1}
+                        currentStep={currentStep}
+                        setCurrentStep={setCurrentStep}
+                    />
+
+
 
                 <Box my={1}>
                   {currentStep === 0 && (

@@ -15,6 +15,12 @@ import {
 import { isMobile } from "react-device-detect";
 import { TiArrowBack } from "react-icons/ti";
 import { RiShareForwardFill } from "react-icons/ri";
+import MobileStepper from "@material-ui/core/MobileStepper";
+import Button from "@material-ui/core/Button";
+import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
+import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
+import React from "react";
+import {doc} from "prettier";
 
 const useStyles = makeStyles((theme) => ({
 
@@ -103,147 +109,196 @@ const TransferSteps = (props) => {
 
   return (
     <div>
-      <div className="position-relative">
-        <Grid container xs={12}>
-          <Grid
-            item
-            xs={12}
-            sm={2}
-            md={1}
-            className="d-flex align-items-center justify-content-center mt-2"
-          >
-            {!isMobile && (
-              <>
-                <div>
-                  {(
-                    <div>
-                      <IconButton
-                        disabled={currentStep === 0 || !isPrevStep || isTransferEnded}
-                        onClick={() => {
-                          setCurrentStep(currentStep - 1)
-                        }}
-                        className="stepperButton"
-                      >
-                        <TiArrowBack size={30} />
-                      </IconButton>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </Grid>
-          <Grid item xs={12} sm={8} md={10}>
-            <div className={classes.pStepper}>
-              <Grid container>
-                <Grid
+      { isMobile ? <div>
+        <MobileStepper
+            style={{ background: "#dee2e6" }}
+            variant="dots"
+            steps={steps.length}
+            position="bottom"
+            activeStep={activeStep}
+            nextButton={
+              <Button size="small"
+                      color="primary"
+                      variant="contained"
+                      hidden={currentStep >= 3 || (currentStep === 0 && isNextStep)}
+                      disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
+                      onClick={() => {
+                        setCurrentStep(currentStep + 1)
+                      }}
+                      endIcon={<KeyboardArrowRight/> }
+
+              >
+                {steps[currentStep + 1] ?? "Reciving Ticket"}
+              </Button>
+              // : <Button size="small" disabled={loading} color="primary" onClick={handleNext} variant="contained" endIcon={<KeyboardArrowRight />}>
+              //   {steps[activeStep + 1]?.label ?? ""}
+              // </Button>
+            }
+            backButton={
+              <Button size="small"
+                      disabled={currentStep === 0 || !isPrevStep || isTransferEnded}
+                      variant="contained"
+                      color="primary"
+                      hidden={currentStep <= 0 || (currentStep === 0 && isPrevStep)}
+                      onClick={() => {
+                        setCurrentStep(currentStep - 1)
+                      }}
+                      startIcon={<KeyboardArrowLeft />}
+              >
+                {steps[activeStep - 1] ?? "Assets"}
+              </Button>
+              // <Button size="small" disabled={loading} color="primary" onClick={handleBack} variant="contained" startIcon={<KeyboardArrowLeft />}>
+              //   {steps[activeStep - 1]?.label ?? ""}
+              // </Button>
+            }
+        />
+      </div> :
+
+          <div className="position-relative">
+            <Grid container xs={12}>
+              <Grid
                   item
-                  xs={6}
-                >
-                  {isMobile && (
+                  xs={12}
+                  sm={2}
+                  md={1}
+                  className="d-flex align-items-center justify-content-center mt-2"
+              >
+                {!isMobile && (
                     <>
                       <div>
                         {(
-                          <div>
-                            <IconButton
-                              color="primary"
-                              disabled={currentStep === 0 || !isPrevStep || isTransferEnded}
-                              onClick={() => {
-                                setCurrentStep(currentStep + 1)
-                              }}
-                              size="small"
-                            >
-                              <IoIosArrowDropleftCircle />
-                            </IconButton>
-                          </div>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </Grid>
-                <Grid
-                  item
-                  xs={6}
-                  className="d-flex align-items-center justify-content-end mt-1 mb-1"
-                >
-                  {isMobile && (
-                    <>
-                      <div>
-                        {(
-                          <div>
-                            {(
+                            <div>
                               <IconButton
-                                color="primary"
-                                onClick={() => {
-                                  setCurrentStep(currentStep + 1)
-                                }}
-                                size="small"
-                                disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
-
+                                  disabled={currentStep === 0 || !isPrevStep || isTransferEnded}
+                                  onClick={() => {
+                                    setCurrentStep(currentStep - 1)
+                                  }}
+                                  className="stepperButton"
                               >
-                                Next
+                                <TiArrowBack size={30} />
                               </IconButton>
-                            )}
-                          </div>
+                            </div>
                         )}
                       </div>
                     </>
-                  )}
-                </Grid>
+                )}
               </Grid>
-              <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={activeStep}>
-                {steps.map((label: string, i: number) => (
-                  <Step
-                    key={label}
-                    className={clsx(classes.step, {
-                      [classes.active]: currentStep > i || isTransferEnded,
-                      [classes.currentStep]: currentStep === i,
-                      [classes.inActive]: currentStep !== i,
-
-                    })}
-                  >
-                    <StepLabel
-                      style={{ color: "#555" }}
-                      className="currentStepColor"
+              <Grid item xs={12} sm={8} md={10}>
+                <div className={classes.pStepper}>
+                  <Grid container>
+                    <Grid
+                        item
+                        xs={6}
                     >
-                      {label}
-                    </StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
-            </div>
-          </Grid>
-          <Grid
-            item
-            xs={12}
-            sm={2}
-            md={1}
-            className="d-flex align-items-center justify-content-center mt-2 "
-          >
-            {!isMobile && (
-              <>
-                <div>
-                  {(
-                    <div>
-                      {(
-                        <IconButton
-
-                          onClick={() => {
-                            setCurrentStep(currentStep + 1)
-                          }}
-                          disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
-                          className="stepperButtonNext"
-                        >
-                          <RiShareForwardFill />
-                        </IconButton>
+                      {isMobile && (
+                          <>
+                            <div>
+                              {(
+                                  <div>
+                                    <IconButton
+                                        color="primary"
+                                        disabled={currentStep === 0 || !isPrevStep || isTransferEnded}
+                                        onClick={() => {
+                                          setCurrentStep(currentStep + 1)
+                                        }}
+                                        size="small"
+                                    >
+                                      <IoIosArrowDropleftCircle />
+                                    </IconButton>
+                                  </div>
+                              )}
+                            </div>
+                          </>
                       )}
-                    </div>
-                  )}
+                    </Grid>
+                    <Grid
+                        item
+                        xs={6}
+                        className="d-flex align-items-center justify-content-end mt-1 mb-1"
+                    >
+                      {isMobile && (
+                          <>
+                            <div>
+                              {(
+                                  <div>
+                                    {(
+                                        <IconButton
+                                            color="primary"
+                                            onClick={() => {
+                                              setCurrentStep(currentStep + 1)
+                                            }}
+                                            size="small"
+                                            disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
+
+                                        >
+                                          Next
+                                        </IconButton>
+                                    )}
+                                  </div>
+                              )}
+                            </div>
+                          </>
+                      )}
+                    </Grid>
+                  </Grid>
+                  <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={activeStep}>
+                    {steps.map((label: string, i: number) => (
+                        <Step
+                            key={label}
+                            className={clsx(classes.step, {
+                              [classes.active]: currentStep > i || isTransferEnded,
+                              [classes.currentStep]: currentStep === i,
+                              [classes.inActive]: currentStep !== i,
+
+                            })}
+                        >
+                          <StepLabel
+                              style={{ color: "#555" }}
+                              className="currentStepColor"
+                          >
+                            {label}
+                          </StepLabel>
+                        </Step>
+                    ))}
+                  </Stepper>
                 </div>
-              </>
-            )}
-          </Grid>
-        </Grid>
-      </div>
+              </Grid>
+              <Grid
+                  item
+                  xs={12}
+                  sm={2}
+                  md={1}
+                  className="d-flex align-items-center justify-content-center mt-2 "
+              >
+                {!isMobile && (
+                    <>
+                      <div>
+                        {(
+                            <div>
+                              {(
+                                  <IconButton
+
+                                      onClick={() => {
+                                        setCurrentStep(currentStep + 1)
+                                      }}
+                                      disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
+                                      className="stepperButtonNext"
+                                  >
+                                    <RiShareForwardFill />
+                                  </IconButton>
+                              )}
+                            </div>
+                        )}
+                      </div>
+                    </>
+                )}
+              </Grid>
+            </Grid>
+          </div>
+
+      }
+
+
 
     </div>
   );
