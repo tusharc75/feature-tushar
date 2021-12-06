@@ -1,6 +1,6 @@
-import { useState, useReducer, Fragment, useContext, useEffect, FC } from 'react';
+import React, { useState, useReducer, Fragment, useContext, useEffect, FC } from 'react';
 import { Button, Box } from '@material-ui/core';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
@@ -13,6 +13,8 @@ import ManageReceivingTicket from '../ReceivingTicket/ManageReceivingTicket';
 import { CommonRenderer, DateRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+
 
 interface ReceivingGridProps {
   fetchAssets: any;
@@ -27,7 +29,7 @@ interface ReceivingGridProps {
 }
 
 const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
-  const { fetchAssets, transferAssetId, setPrevStep, transferAssetData, setTickets, setNextStep, setTransferIsEnded } = props;
+  const {permissions, fetchAssets, transferAssetId, setPrevStep, transferAssetData, setTickets, setNextStep, setTransferIsEnded } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [openReceivingTicketDialog, setOpenReceivingTicketDialog] = useState(false);
@@ -47,6 +49,9 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     { field: 'receivingTicketStatus', headerName: 'Receiving Ticket Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'deliveryTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
   ];
+
+  const history = useHistory();
+
 
   const AssetRenderer = (params) =>
     params.value ? (
@@ -252,24 +257,60 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       </Box>
 
       <Box mt={1}>
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={false}
-          actionWidth={100}
-          allowSelection={true}
-          isClientSideGrid={true}
-          loading={loading}
-          renderedFrom="transferAssetPage"
-          refreshGrid={() => fetchAssetsData(true)}
-        />
+        {isMobile ? <CustomSwipableList
+                allowSelection={true}
+                allowSwipe={true}
+                permissions={permissions}
+                primaryField={columns?.find(d => d.field)}
+                onClick={(data) => {
+                  history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                }}
+                dataRows={dataRows}
+                selectedRecords={selectedRecords}
+                dispatch={dispatch}
+                onEdit={(data) => {
+                  // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
+                }}
+                extraParamsToCheckDelete={true}
+                onDelete={(data) => {
+
+                }}
+                rowCount={rowCount}
+                page={page}
+                loading={loading}
+                chips={[
+                  {
+                    label: "Status : ",
+                    field: "status",
+                  }
+                ]}
+                additionalDetails={[]}
+                owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                onCreate={false}
+                showClone={false}
+                onClone={(data) => {
+                }}
+                renderedFrom="transferAssetPage"
+            /> :
+            <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameworkComponents}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                allowAction={false}
+                actionWidth={100}
+                allowSelection={true}
+                isClientSideGrid={true}
+                loading={loading}
+                renderedFrom="transferAssetPage"
+                refreshGrid={() => fetchAssetsData(true)}
+            />
+        }
       </Box>
 
       {/* Receiving ticket create dialog */}
