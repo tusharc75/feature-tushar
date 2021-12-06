@@ -906,7 +906,7 @@ const FormTypes = (props) => {
             {...rest}
             options={fieldData && fieldData.isDependentDropdown ?
               option.filter((_f) => _f[fieldData.dropdowDependentOn] === values[fieldData.dropdowDependentOn]) :
-              option}
+              option.filter(f => f.optionLabel)}
             freeSolo={type === 'dropDown' && !lookup}
             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
             getOptionSelected={(option: any, val) => option.optionValue === val}

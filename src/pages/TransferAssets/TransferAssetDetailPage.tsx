@@ -43,6 +43,7 @@ const TransferAssetDetailPage = () => {
     state: { user, permissions }
   }: any = useData();
   const [headingLabel, setHeadingLabel] = useState('');
+  const [transferType, setType] = useState('');
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isDeleting, setDeleting] = useState(false);
@@ -53,7 +54,8 @@ const TransferAssetDetailPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [transferAssetFields, setTransferAssetFields] = useState([]);
   const [existingAssets, setExistingAssets] = useState([]);
-  const [tickets, setTickets] = useState([])
+  const [loadingTickets, setLoadingTickets] = useState([])
+  const [receivingTickets, setReceivingTickets] = useState([])
   const [mainPoints, setMainPoints] = useState(null);
   const [plantId, setPlantId] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
@@ -91,15 +93,16 @@ const TransferAssetDetailPage = () => {
       firstRender.current = false
     } else {
 
-      if (currentStep >= 0 && currentStep <= 1) {
+      if (transferType && currentStep >= 0 && currentStep <= 2) {
+        const processStatus = transferType === "Internal" ? transferSteps[currentStep] : transferSteps1[currentStep]
         axiosInstance()
-          .put(`${routes.transferAsset.path}/${id}/process-status`, { processStatus: transferSteps[currentStep] })
+          .put(`${routes.transferAsset.path}/${id}/process-status`, { processStatus })
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
       }
     }
-  }, [currentStep]);
+  }, [currentStep, transferType]);
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
@@ -148,11 +151,13 @@ const TransferAssetDetailPage = () => {
       .get(`${routes.transferAsset.path}/${id}`)
       .then(({ data: { data } }) => {
         getRessourceFields(data?.transferType);
+        setType(data?.transferType);
         setTransferAssetData(data);
         handleMainPoints(data);
         setPlantId(data?.transferFromPlant.optionValue);
         setHeadingLabel(data.transferAssetNumber);
-        setCurrentStep(transferSteps.indexOf(data?.processStatus) !== -1 ? transferSteps.indexOf(data?.processStatus) : 0);
+        const steps = data?.transferType === "Internal" ? transferSteps : transferSteps1
+        setCurrentStep(steps.indexOf(data?.processStatus) !== -1 ? steps.indexOf(data?.processStatus) : 0);
         setCustomizedRoutes([routes.transferAsset, { title: data.transferAssetNumber }]);
 
         if (permissions?.transferAsset?.isUpdate && openEdit === 'true') {
@@ -366,29 +371,25 @@ const TransferAssetDetailPage = () => {
                   )}
                   {currentStep === 1 && (
                     <LoadingTicketGrid
-                      setTickets={setTickets}
+                      setTickets={setLoadingTickets}
                       currentStep={currentStep}
                       setPrevStep={setPrevStep}
                       transferAssetId={id}
                       transferAssetData={transferAssetData}
                       fetchAssets={fetchAssets}
-                      plantId={plantId}
-                      warehouse={transferAssetData?.transferFromPlant}
                       permissions={permissions}
                       setNextStep={setNextStep}
-                      setTransferIsEnded={setTransferIsEnded}
+                      setExistingAssets={setExistingAssets}
                     />
                   )}
                   {currentStep === 2 && (
                     <ReceivingTicketGrid
-                      setTickets={setTickets}
+                      setTickets={setReceivingTickets}
                       currentStep={currentStep}
                       setPrevStep={setPrevStep}
                       transferAssetId={id}
                       transferAssetData={transferAssetData}
                       fetchAssets={fetchAssets}
-                      plantId={plantId}
-                      warehouse={transferAssetData?.transferFromPlant}
                       permissions={permissions}
                       setNextStep={setNextStep}
                       setTransferIsEnded={setTransferIsEnded}
@@ -419,7 +420,7 @@ const TransferAssetDetailPage = () => {
       {openUpdateDialog && (
         <ManageTransferAsset
           isEditable={existingAssets.length > 0}
-          isMainInfoEditable={(currentStep >= 1 && tickets.length > 0)}
+          isMainInfoEditable={(currentStep >= 1 && loadingTickets.length > 0)}
           number={transferAssetData?.transferAssetNumber}
           isClone={false}
           transferAssetId={id}

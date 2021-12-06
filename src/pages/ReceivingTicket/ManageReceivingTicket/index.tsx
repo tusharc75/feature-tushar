@@ -27,9 +27,10 @@ import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../../StateProvider/Provider';
 import routes from '../../../components/Helpers/Routes';
+import moment from "moment";
 import { FaDiceOne } from "react-icons/fa";
 
-const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryForReceivingTicket = null, rentalData = null, repairJobData = null, isRedirectToDetailPage = true, onClose, onSuccess, open }) => {
+const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryForReceivingTicket = null, rentalData = null, repairJobData = null, transferData = null, isRedirectToDetailPage = true, onClose, onSuccess, open }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -78,6 +79,26 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
 
     const modifiedData = setFieldsInAscendingOrder(fields)
     const newFilteredData = modifiedData.filter((formData) => {
+      if (transferData) {
+        if (transferData?.transferType === "Internal") {
+          if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
+            return false
+          }
+        }
+
+        if (transferData?.transferType.includes("External Supplier")) {
+          if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
+            return false
+          }
+        }
+        if (transferData?.transferType.includes("External Customer")) {
+          if (formData.name.includes("Supplier") || formData.name.includes("Plant")) {
+            return false
+          }
+        }
+      }
+
+
       if (repairJobData) {
         if (formData.name.includes("Customer")) {
           return false
@@ -177,8 +198,33 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
             });
             setFormValues(tempInitialData)
 
-          }
-          else {
+          } else if (productInventoryForReceivingTicket && transferData) {
+            setDisableReceivingJobName(true);
+            const tempInitialData = getObjKeys("", fieldsDataForCreate)
+            tempInitialData["productInventory"] = productInventoryForReceivingTicket.map(d => d._id)
+            tempInitialData["transferAsset"] = transferData._id
+            tempInitialData["type"] = "Transfer Asset"
+            tempInitialData["expectedDeliveryDate"] = moment(new Date()).add(7, 'days');
+            tempInitialData["receivingJobName"] = `${transferData?.transferAssetNumber}_${generateUniqueIdOnly()}`
+            if (transferData?.transferType === "Internal") {
+              tempInitialData["receivingPlant"] = transferData?.transferToPlant.optionValue;
+              tempInitialData["pickupAddress"] = transferData?.plantShipTo;
+            }
+            if (transferData?.transferType === "External Customer") {
+              tempInitialData["customerAccount"] = transferData?.transferToCustomer.optionValue;
+              tempInitialData["pickupAddress"] = transferData?.customerShipTo;
+            }
+            if (transferData?.transferType === "External Supplier") {
+              tempInitialData["supplierAccount"] = transferData?.transferToSupplier.optionValue;
+              tempInitialData["pickupAddress"] = transferData?.supplierShipTo;
+            }
+            setReceivingTicketData({
+              fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "transferAsset"),
+              initialValues: tempInitialData,
+            });
+            setFormValues(tempInitialData)
+
+          } else {
             let initialData = getObjKeys('', fieldsDataForCreate);
             setReceivingTicketData({
               fields: fieldsDataForCreate,

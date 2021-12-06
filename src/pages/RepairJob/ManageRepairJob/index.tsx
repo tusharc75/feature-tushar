@@ -146,7 +146,14 @@ const ManageRepairJob = (props) => {
                 message: message
               });
             }).catch((error) => {
-              toastConfig.setToastConfig(error);
+              // toastConfig.setToastConfig(error);
+              setSubmitting(false);
+              onSuccess();
+              toastConfig.setToastConfig({
+                open: true,
+                type: 'success',
+                message: message
+              });
             });
         })
         .catch((error) => {

@@ -2,28 +2,28 @@ import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom'
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "../../axios/axiosInstance";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "../../../axios/axiosInstance";
 import { Box, CircularProgress } from "@material-ui/core";
-import SearchBox from '../../components/Helpers/SearchBox'
-import routes from "../../components/Helpers/Routes";
-import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData } from '../../constants/helpers';
+import SearchBox from '../../../components/Helpers/SearchBox'
+import routes from "../../../components/Helpers/Routes";
+import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
+import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData } from '../../../constants/helpers';
 import {
     CreatedByRenderer,
     UpdatedByRenderer
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { useData } from "../../StateProvider/Provider";
+} from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
+import { useData } from "../../../StateProvider/Provider";
 import Dialog from "@material-ui/core/Dialog/Dialog";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 
 const addSerializedAssetsRenderedFrom = "addSerializedAssets";
 const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected`;
 
 const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts,
-    rentalId = null, repairJobId = null, notIn = null, queryString = null }) => {
+    rentalId = null, repairJobId = null, transferAssetId = null, notIn = null, queryString = null, filterByPlant = null }) => {
     const toastConfig = useContext(CustomToastContext)
 
     const [serializedProducts, setSerializedProducts] = useState([]);
@@ -176,8 +176,14 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
             deepFilter = `${deepFilter}&rental=${rentalId}&notIn=${notIn}`;
         } else if (repairJobId) {
             deepFilter = `${deepFilter}&repairJobId=${repairJobId}&notIn=${notIn}`;
+        } else if (transferAssetId) {
+            deepFilter = `${deepFilter}&transferAssetId=${transferAssetId}&notIn=${notIn}`;
         } else {
-            deepFilter = `${deepFilter}&entityWise=1`;
+            if (filterByPlant === null) {
+                deepFilter = `${deepFilter}&entityWise=1`;
+            } else {
+                deepFilter = `${deepFilter}&${filterByPlant}`;
+            }
 
             if (queryString) {
                 deepFilter = `${deepFilter}&${queryString}`;

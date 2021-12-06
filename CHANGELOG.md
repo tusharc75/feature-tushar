@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.14.2](https://github.com/vebholic/oms_frontend/compare/v2.14.1...v2.14.2) (2021-12-06)
+
+### [2.14.1](https://github.com/vebholic/oms_frontend/compare/v2.14.0...v2.14.1) (2021-12-05)
+
+
+### Bug Fixes
+
+* renal bug fix ([f6a49f4](https://github.com/vebholic/oms_frontend/commit/f6a49f47651723d6fe3405dcc480ecd6aabcdfac))
+* renal product price condition ([d166a1b](https://github.com/vebholic/oms_frontend/commit/d166a1b3a613a80eb8714ae8f79a539a9f380600))
+
+## [2.14.0](https://github.com/vebholic/oms_frontend/compare/v2.13.0...v2.14.0) (2021-12-04)
+
+
+### Features
+
+* - Issue in receiving ticket delivery signature ([16d5f0b](https://github.com/vebholic/oms_frontend/commit/16d5f0b5f105f1f83ecdd9fa61a3f6bbeb11dc39))
+* - PO-456 - Receiving Ticket > Show Repair Job, Rental Type, Transfer Asset in receiving ticket ([c001c4b](https://github.com/vebholic/oms_frontend/commit/c001c4b042267a9a64493f29a1588e61b8eea424))
+* - PO-469 - Repair job changes done ([4650bb0](https://github.com/vebholic/oms_frontend/commit/4650bb0174dfcfe934d7e00ed88c6aa3efefe101))
+* - PO-475 - Change status dropdown added in receiving ticket step ([7681000](https://github.com/vebholic/oms_frontend/commit/768100087ea84aeb6edd17c5d7bdae7af51e5cdd))
+* - Repair job changes done ([d834b3f](https://github.com/vebholic/oms_frontend/commit/d834b3f8db546d52b0d7b2ebe58705aa9c759ab7))
+* - Repair job changes finished ([64ff264](https://github.com/vebholic/oms_frontend/commit/64ff26453ee44edee8496c214a7f86e9623d4e2e))
+* **loadingticket:** data change ([444c4d6](https://github.com/vebholic/oms_frontend/commit/444c4d6caad4fd42dd13faa8104ee87e21f4b72b))
+* rental managment ([38a4590](https://github.com/vebholic/oms_frontend/commit/38a459035052e25972613e518417d6cf558b0649))
+* rental manament ([3b76354](https://github.com/vebholic/oms_frontend/commit/3b76354aec1baae2a4dedf1d9bd24c030f2b13be))
+* **transferasset:** added receiving step ([1c77f71](https://github.com/vebholic/oms_frontend/commit/1c77f719f6c0d96f43212176d3df94d5b3b54496))
+* **transferasset:** step fix ([67eb5d3](https://github.com/vebholic/oms_frontend/commit/67eb5d3ba48904ee05ca2ea16f3614f5b5db5ffc))
+
+
+### Bug Fixes
+
+* bug fix ([73a1686](https://github.com/vebholic/oms_frontend/commit/73a16869f9a38ed7d409431d258129d54b70e95f))
+* bug fix ([4c3cc83](https://github.com/vebholic/oms_frontend/commit/4c3cc8314b4cb7910f49e309a402218fc75f59a8))
+* bug fix ([84a7131](https://github.com/vebholic/oms_frontend/commit/84a7131560094f5c6ac32595187105074b33e0a2))
+* gid fix ([dabd32a](https://github.com/vebholic/oms_frontend/commit/dabd32ab9ada050222697f771e5a4eb1e4961923))
+* **homepage:** removed product list link from homepage ([225105c](https://github.com/vebholic/oms_frontend/commit/225105c8b3f3143af601d691a37e2339a7f1317b))
+* pO status changes and quantity check ([852abea](https://github.com/vebholic/oms_frontend/commit/852abea45664314b51481205605f7412cace4272))
+* **transferasset:** fix routing ([b2f4706](https://github.com/vebholic/oms_frontend/commit/b2f4706ff0b621e578e31d06825d676c419d38dc))
+
 ## [2.13.0](https://github.com/vebholic/oms_frontend/compare/v2.12.0...v2.13.0) (2021-12-03)
 
 

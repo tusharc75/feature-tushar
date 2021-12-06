@@ -29,7 +29,7 @@ import ViewSignsDialog from './ViewSignsDialog'
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import moment from 'moment';
-import AddSerializedAsset from '../RentalManagement/AddSerializedAsset';
+import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
 import { FaWpforms } from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
@@ -793,6 +793,7 @@ export default function DeliveryTicketDetail(props) {
             selectedProducts={[]}
             rentalId={deliveryTicketData.type === "Rental Job" ? deliveryTicketData?.rental?.optionValue : ""}
             repairJobId={deliveryTicketData.type === "Repair Job" ? deliveryTicketData?.repairJob?.optionValue : ""}
+            transferAssetId={deliveryTicketData.type === "Transfer Asset" ? deliveryTicketData?.transferAsset?.optionValue : ""}
             notIn="loadingTicket"
           // type={inventoryType}
           />

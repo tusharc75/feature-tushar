@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketDialog, rentalManagementId }) => {
+const ReceivingTicket = ({ currentStep, handleReceivingTicketDialog, rentalManagementId }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -67,7 +67,7 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
   useEffect(() => {
     fetchRecords();
     // eslint-disable-next-line
-  }, [productInventory]);
+  }, []);
 
   const fetchRecords = () => {
     if (gridApi) {
@@ -133,7 +133,7 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
     </Link>
   );
   const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.product.optionValue}`}>
+    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data?.product?.optionValue}`}>
       {params.value}
     </Link>
   );
