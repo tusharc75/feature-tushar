@@ -13,13 +13,6 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import ManageDeliveryTicket from "./ManageDeliveryTicket"
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import {
-  CreatedByRenderer,
-  UpdatedByRenderer,
-  CommonRenderer,
-  DateRenderer
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import { Link } from "react-router-dom";
 import { productInventory, gridLoadingTimeout } from "../../constants/helpers"
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from "../../components/Activity";
@@ -32,8 +25,10 @@ import moment from 'moment';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
 import { FaWpforms } from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
+import { prepareDataForGrid } from "../../constants/helpers"
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -90,6 +85,9 @@ export default function DeliveryTicketDetail(props) {
   const [okBtnLoading, setOkBtnLoading] = useState(false)
   const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false)
   const { dataRows, rowCount, page, limit, pageSizes, selectedRecords } = state;
+  const { getColumnData } = useColumns();
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [columns, setColumns] = useState([])
   const [canEdit, setCanEdit] = useState(false)
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
 
@@ -112,22 +110,40 @@ export default function DeliveryTicketDetail(props) {
 
   }, [id]);
 
-  const columns = [
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "nameRenderer" },
-    { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
-    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "bornOnDate", headerName: "Born on Date", show: true, cellRenderer: "dateRenderer" },
-    { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "dateRenderer" },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
-    { field: "inventoryNumber", headerName: "Inventory Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "warehouse", headerName: "Plants", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
-  ];
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get("/field?resource=Product Inventory")
+      .then(({ data: { data } }) => {
+        let columns = []
+        let rendererNames = []
+        data.forEach(o => {
+          if (o?.fieldData?.fieldName === "serialNumber") {
+            o.fieldData.primaryField = true
+          }
+          let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
+
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData]
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
+          }
+        })
+
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        columns = [...columns, ...getStaticFields()]
+        setColumns([...columns])
+      })
+  }
+
+
 
   const columnState = JSON.parse(localStorage.getItem("deliveryTicketDetailInventoryPage"));
   if (columnState) {
@@ -265,22 +281,10 @@ export default function DeliveryTicketDetail(props) {
     const queryString = `?getById=${ids}`
     axiosInstance().get(`${productInventory.api}${queryString} `).then(({ data }) => {
       data.data = data.data.filter((u) => productInventories.indexOf(u?._id) >= 0)
-        ?.map((u) => ({
-          ...u,
-          id: u._id,
-          inServiceDate: u.inServiceDate,
-          bornInDate: u.bornInDate,
-          status: u.status,
-          warehouse: u.warehouse?.optionLabel,
-          warehouseId: u.warehouse?.optionValue,
-          productCategory: u.productCategory?.optionLabel,
-          productName: u.product?.optionLabel,
-          productId: u.product?.optionValue,
-          createdBy: u.createdBy?.user?.concatedName,
-          createdByDate: u.createdBy?.date,
-          updatedBy: u.updatedBy?.user?.concatedName,
-          updatedByDate: u.updatedBy?.date,
-        }));
+        ?.map((u) => {
+          let finalObject = prepareDataForGrid(u);
+          return finalObject
+        });
 
       dispatch({ type: "initialize", data: data.data, count: data.count });
       setTimeout(() => {
@@ -321,26 +325,6 @@ export default function DeliveryTicketDetail(props) {
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
-  };
-
-  const NameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
-
-  const ProductRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.product.path}/detail/${params.data.productId}`}>
-      {params.value}
-    </Link>
-  );
-  const frameworkComponents = {
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    nameRenderer: NameRenderer,
-    commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer,
-    productRenderer: ProductRenderer
   };
 
   const handleChangeStatus = (label) => {
@@ -624,12 +608,12 @@ export default function DeliveryTicketDetail(props) {
 
                               /> :
 
-                                <CustomAgGrid
+                                Object.keys(frameWorkComponent).length > 0 ? <CustomAgGrid
                                   allowSelection={deliveryTicketData.status === "New"}
                                   allowAction={false}
                                   columns={columns}
                                   dataRows={dataRows}
-                                  frameworkComponents={frameworkComponents}
+                                  frameworkComponents={frameWorkComponent}
                                   setGridApi={setGridApi}
                                   dispatch={dispatch}
                                   rowCount={rowCount}
@@ -640,7 +624,7 @@ export default function DeliveryTicketDetail(props) {
                                   loading={false}
                                   renderedFrom={renderedFrom}
                                   refreshGrid={fetchProductInventory}
-                                />
+                                /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                               }
                             </Grid>
                           </Grid>

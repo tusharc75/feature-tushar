@@ -198,28 +198,47 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                 isTooltip={field?.isTooltip || false}
                                                                 tooltipMessage={field?.tooltipMessage}
                                                                 size="small"
-                                                            /> : <FormTypes
-                                                                isNew={Boolean(purchaseOrderId)}
-                                                                {...field}
-                                                                disabled={Boolean(purchaseOrderId) && field.disableOnEdit && !isClone}
-                                                                values={values}
-                                                                errors={errors}
-                                                                touched={touched}
-                                                                label={field.fieldLabel}
-                                                                name={field.fieldName}
-                                                                type={field.type}
-                                                                options={field.option}
-                                                                setFieldValue={(name, value) => {
-                                                                    // handleValuesChange({ [name]: value })
-                                                                    setFieldValue(name, value)
-                                                                }}
-                                                                required={field.required}
-                                                                fullWidth
-                                                                isTooltip={field?.isTooltip || false}
-                                                                tooltipMessage={field?.tooltipMessage}
-                                                                size="small"
+                                                            /> :
+                                                                field.fieldName === "supplierContact" ? <FormTypes
+                                                                    isNew={Boolean(purchaseOrderId)}
+                                                                    {...field}
+                                                                    values={values}
+                                                                    errors={errors}
+                                                                    touched={touched}
+                                                                    label={field.fieldLabel}
+                                                                    name={field.fieldName}
+                                                                    type={field.type}
+                                                                    options={field.option.filter(d => d.parentAccount === values["supplier"])}
+                                                                    setFieldValue={(name, value) => {
+                                                                        setFieldValue(name, value)
+                                                                    }}
+                                                                    required={field.required}
+                                                                    fullWidth
+                                                                    isTooltip={field?.isTooltip || false}
+                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                    size="small"
+                                                                /> : <FormTypes
+                                                                    isNew={Boolean(purchaseOrderId)}
+                                                                    {...field}
+                                                                    disabled={Boolean(purchaseOrderId) && field.disableOnEdit && !isClone}
+                                                                    values={values}
+                                                                    errors={errors}
+                                                                    touched={touched}
+                                                                    label={field.fieldLabel}
+                                                                    name={field.fieldName}
+                                                                    type={field.type}
+                                                                    options={field.option}
+                                                                    setFieldValue={(name, value) => {
+                                                                        // handleValuesChange({ [name]: value })
+                                                                        setFieldValue(name, value)
+                                                                    }}
+                                                                    required={field.required}
+                                                                    fullWidth
+                                                                    isTooltip={field?.isTooltip || false}
+                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                    size="small"
 
-                                                            />}
+                                                                />}
                                                         </Grid>
                                                     ))}
                                                 </Grid>

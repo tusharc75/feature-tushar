@@ -1,10 +1,9 @@
-import { useReducer, useState, useEffect, Fragment, FC, useContext } from 'react'
+import React, { useReducer, useState, useEffect, Fragment, FC, useContext } from 'react'
 import { Button, Box, } from '@material-ui/core'
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 
 import routes from '../../components/Helpers/Routes';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import NoDataCell from '../../components/Helpers/NoDataCell';
 import { isMobile } from 'react-device-detect';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import AddAssetsDialog from './AddAssetsDialog';
@@ -14,6 +13,8 @@ import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from '
 import axiosInstance from '../../axios/axiosInstance';
 import { prepareDataForGrid } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { FaSuitcase } from "react-icons/fa";
 interface AssetsGridProps {
   permissions?: any;
   user?: any;
@@ -40,12 +41,8 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   const [agGridState, gridDispatch] = useReducer(gridReducer, gridState);
   const { getColumnData } = useColumns();
   const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = agGridState;
-  // const columns = [
-  //   { field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer' },
-  //   { field: 'serialNumber', headerName: 'Serial Number', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-  //   { field: 'product', headerName: 'Product Description', show: true, cellRenderer: 'productRenderer' },
-  //   { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
-  // ];
+
+  const history = useHistory();
 
   useEffect(() => {
     fetchGridColumns()
@@ -178,30 +175,72 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
             setRemoveData(selectedRecords.map((asset: any) => asset?._id))
           }}
         >
+
           Remove Assets
+
         </Button>
       </Box>
 
       <Box mt={1}>
         {Object.keys(frameWorkComponent).length > 0 ?
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
-            dispatch={gridDispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={true}
-            actionWidth={100}
-            allowSelection={true}
-            isClientSideGrid={true}
-            loading={gridLoading}
-            renderedFrom="transferAssetPage"
-            refreshGrid={() => fetchAssetsData(true)}
-          /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+          isMobile ?
+            <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={permissions.transferAsset}
+              primaryField={columns?.find(d => d.primaryField)}
+              onClick={(data) => {
+                history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={gridDispatch}
+              onEdit={(data) => {
+                // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
+              }}
+              extraParamsToCheckDelete={true}
+              onDelete={(data) => {
+
+              }}
+              rowCount={rowCount}
+              page={page}
+              loading={gridLoading}
+              chips={[
+                {
+                  label: "Product Desc : ",
+                  field: "productCategory",
+                }
+              ]}
+              additionalDetails={[
+                {
+                  icon: <FaSuitcase size={18} />,
+                  field: "customerAccount"
+                },
+              ]}
+              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+              onCreate={false}
+              showClone={false}
+              onClone={(data) => { }}
+              renderedFrom="transferAssetPage"
+            /> :
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={gridDispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              allowAction={true}
+              actionWidth={100}
+              allowSelection={true}
+              isClientSideGrid={true}
+              loading={gridLoading}
+              renderedFrom="transferAssetPage"
+              refreshGrid={() => fetchAssetsData(true)}
+            /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
       </Box>
 
       {/* Add Assets Dialog */}
