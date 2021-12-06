@@ -84,8 +84,16 @@ const ManageDeliveryTicket = (props) => {
                 }
 
                 if (repairJobData) {
-                    if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
-                        return false
+                    if (repairJobData?.typeOfRepair === "Internal") {
+                        if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
+                            return false
+                        }
+                    }
+
+                    if (repairJobData?.typeOfRepair === "External") {
+                        if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
+                            return false
+                        }
                     }
                 }
 
@@ -151,13 +159,23 @@ const ManageDeliveryTicket = (props) => {
                     setFormValues(tempInitialData)
                 }
                 else if (productInventoryForDeliveryTicket && repairJobData) {
-                    debugger;
                     const tempInitialData = getObjKeys("", fieldsDataForCreate)
                     tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
+                    tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
                     tempInitialData["deliveryJobName"] = `${repairJobData?.repairJobName}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = "Repair Job";
                     tempInitialData["repairJob"] = repairJobData?._id
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
+
+                    if (repairJobData?.typeOfRepair === "Internal") {
+                        tempInitialData["receivingPlant"] = repairJobData?.repairPlant?.optionValue;
+                        tempInitialData["plantShipTo"] = repairJobData?.plantShipTo;
+                    }
+                    if (repairJobData?.typeOfRepair === "External") {
+                        tempInitialData["supplierAccount"] = repairJobData?.vendor?.optionValue;
+                        tempInitialData["supplierShippingAddress"] = repairJobData?.supplierShipTo;
+                    }
+
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
                         values: tempInitialData,
@@ -173,7 +191,7 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
                     if (transferData?.transferType === "Internal") {
                         tempInitialData["receivingPlant"] = transferData?.transferToPlant.optionValue;
-                        tempInitialData["shippingAddress"] = transferData?.plantShipTo;
+                        tempInitialData["plantShipTo"] = transferData?.plantShipTo;
                     }
                     if (transferData?.transferType === "External Customer") {
                         tempInitialData["customerAccount"] = transferData?.transferToCustomer.optionValue;
@@ -181,7 +199,7 @@ const ManageDeliveryTicket = (props) => {
                     }
                     if (transferData?.transferType === "External Supplier") {
                         tempInitialData["supplierAccount"] = transferData?.transferToSupplier.optionValue;
-                        tempInitialData["shippingAddress"] = transferData?.supplierShipTo;
+                        tempInitialData["supplierShippingAddress"] = transferData?.supplierShipTo;
                     }
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
@@ -506,6 +524,28 @@ const ManageDeliveryTicket = (props) => {
                                                                                             values["owner"]
                                                                                         );
                                                                                     }}
+                                                                                />
+                                                                            ) : field.fieldName === "warehouse" ? (
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    disabled={(deliveryTicketId && field.disableOnEdit) || (repairJobData && warehouseId)}
+                                                                                    isNew={Boolean(deliveryTicketId)}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
                                                                                 />
                                                                             ) : <FormTypes
                                                                                 {...field}

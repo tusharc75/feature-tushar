@@ -11,18 +11,11 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import {
-  getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow,
-  dateFormat, pricingCondition, generateUniqueId, treeToFlatArray, formatAmountWithCurrency
-} from "../../constants/helpers";
+import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow, } from "../../constants/helpers";
 import Steps from "./Steps";
-import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import IconButton from "@material-ui/core/IconButton/IconButton";
-import Add from "@material-ui/icons/Add";
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { MdEdit, MdDelete } from 'react-icons/md';
 import DeliveryTicket from "./DeliveryTicket";
-import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementDialog";
 import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
 import Activity from "../../components/Activity";
@@ -32,21 +25,14 @@ import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import HideWhenOffline from "../../components/HideWhenOffline";
 import DeleteButton from "../../components/Helpers/DeleteButton";
-import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import HtmlTooltip from '../../components/CustomTooltipTitle'
-
-import SerializedAssetStep from "./SerializedAssetStep";
-import moment from "moment";
-import { camelCase, startCase, orderBy, sum } from "lodash";
 import queryString from "query-string";
 import { FaWpforms } from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
-import { AddOutlined } from '@material-ui/icons';
-import NoDataCell from "../../components/Helpers/NoDataCell";
 
 import Productpackage from "./Productpackage";
 import AdditionalCost from "./AdditionalCost";
+import SerializedAsset from "./SerializedAsset";
 
 const rentalProcessSteps = ["New", "Additional Cost", "Serialized Asset", "Loading Ticket", "Receiving Ticket", "Ready To Ship"]
 
@@ -66,53 +52,24 @@ const RentalManagementDetailsPage = () => {
   const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [headingLbl, setHeadingLbl] = useState("");
   const [loadingDetails, setLoadingDetails] = useState(true);
-  const [isUpdating, setUpdating] = useState(false);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, editType: null });
-  const [recordToUpdate, setRecordToUpdate] = useState(null)
   const [rentalManagementData, setRentalManagementData] = useState(null);
-  const [deleteData, setDeleteData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [isDeleting, setDeleting] = useState(false);
-  const [isAddingProducts, setAddingProducts] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: "" });
   const [rentalManagementFields, setRentalManagementFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
-  const [warehouseList, setWarehouseList] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
-  const [additionalCost, setAdditionalCost] = useState<any[]>([]);
-  const [productInventory, setProductInventory] = useState<any[]>([]);
-  const [serializeAssets, setSerializeAssets] = useState<any[]>([]);
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
   const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [currency, setCurrency] = useState("USD");
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [allowedToEdit, setAllowedToEdit] = useState(false)
   const [productInventoryForReceivingTicket, setProductInventoryForReceivingTicket] = useState<any[]>([]);
   const [showReceivingTicketDialog, setShowReceivingTicketDialog] = useState(false);
   const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false)
-  const [selectedProducts, setSelectedProducts] = useState([])
-  const [packageForProducts, setPackageForProducts] = useState(null)
   const [nextStep, setNextStep] = useState(true)
   const [tabValue, setTabValue] = useState(0);
-  const [showManageAdditionalCostDialog, setShowManageAdditionalCostDialog] = useState({
-    open: false,
-    isNew: false,
-    record: null,
-  })
-
-  const [dataForNewTabData, setDataForNewTabData] = useState([]);
-
- 
-
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
-  const [pinnedBottomRowData, setPinnedBottomRowData] = useState([]);
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
@@ -134,7 +91,6 @@ const RentalManagementDetailsPage = () => {
     if (id) {
       getRentalManagementFields();
       fetchRentalManagementData();
-      fetchProductInventory();
     }
     // eslint-disable-next-line
   }, [id]);
@@ -163,32 +119,27 @@ const RentalManagementDetailsPage = () => {
   const fetchRentalManagementData = async () => {
     try {
       let data;
-
       if (!isOffline) {
         const response: any = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}`);
         data = response?.data?.data;
       } else {
         data = offlineGridData?.rentalManagement?.find(d => d._id === id)
       }
-
       if (localStorage.getItem("offlineDataToSave")) {
         const offlineDataToSave = JSON.parse(localStorage.getItem("offlineDataToSave"))
         if (offlineDataToSave["rentalManagement"]) {
           setIsInOfflineSaveQueue(offlineDataToSave["rentalManagement"].some(d => d.values._id === id));
         }
       }
-
       try {
         updateOfflineGridData("rentalManagement", [data], []);
       } catch (ex) {
         console.error(`Rental Management: Error while adding/updating data for Offline context. Error: ${ex.message}`)
       }
-
       handleMainPoints(data);
       setHeadingLbl(data.rentalJobName);
       setCustomizedRoutes([routes.rentalManagement, { title: `${data.rentalJobName}` }]);
       setRentalManagementData(data);
-      setAdditionalCost(data?.additionalCost?.map((d, index) => { return { "id": d?._id, rowIndex: index + 1, "type": d.type, "amount": d?.value, "description": d?.description, "uom": d.uom, "qty": d.qty } }) ?? [])
       setCurrentStep(rentalProcessSteps.indexOf(data?.processStatus) !== -1 ? rentalProcessSteps.indexOf(data?.processStatus) : 0)
       setLoadingDetails(false);
       setCurrencySymbol(
@@ -196,19 +147,14 @@ const RentalManagementDetailsPage = () => {
           (d) => d.currencyCode === data["currency"]
         )?.symbolNative
       );
-      setCurrency(data?.currency);
-
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-
       setAllowedToEdit(isAllowedToEdit);
-
       if (isAllowedToEdit && openEdit === "true") {
         setOpenUpdateDialog(true)
         const params = new URLSearchParams()
         params.delete("openEdit")
         history.push({ search: params.toString() })
       }
-
     } catch (error) {
       setLoadingDetails(false)
       toastConfig.setToastConfig(error);
@@ -223,7 +169,6 @@ const RentalManagementDetailsPage = () => {
       } else {
         setRentalManagementFields(offlineFieldsData?.rentalManagement);
       }
-
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -240,7 +185,6 @@ const RentalManagementDetailsPage = () => {
       } catch (ex) {
         console.error(`Rental Management: Error while removing data for Offline context. Error: ${ex.message}`)
       }
-
       setShowConfirmBox(false);
       history.goBack();
     }).catch((error) => {
@@ -259,131 +203,6 @@ const RentalManagementDetailsPage = () => {
     setProductInventoryForReceivingTicket(selectedProductInventory)
     // setWarehouseForReceivingTicket(warehouse)
     setShowReceivingTicketDialog(true)
-  }
-
-  //  This is copied method from helpers.ts as wee need some modification for this screen only
-  const translateDataToTreeForProducts = (data, parentProperty, childProperty, childrenPropertyToStore) => {
-    let parents = data.filter(value => value[parentProperty] == 'undefined' || value[parentProperty] == null)
-    let childrens = data.filter(value => value[parentProperty] !== 'undefined' && value[parentProperty] != null)
-
-    parents.forEach((current) => {
-      if (current.type === "Product" || current.type === "Package") {
-        current["qtyToDisplay"] = current?.qty ?? 0;
-        current["isValid"] = (!isNaN(current?.finalPrice) && current?.finalPrice !== 0)
-      }
-    })
-
-    let translator = (parents, childrens) => {
-      parents.forEach((parent) => {
-        childrens.forEach((current, index) => {
-          if (current.parent === parent[childProperty]) {
-            let temp = JSON.parse(JSON.stringify(childrens))
-            temp.splice(index, 1)
-            translator([current], temp)
-
-            //  Check validation for products in package - Start
-            current["qtyToDisplay"] = `${parent.qty} x ${current.qty} = ${current.qty * parent.qty}`
-
-            if (current?.finalPrice !== null && current?.finalPrice !== undefined && typeof current?.finalPrice !== "string" && current?.finalPrice !== 0) {
-              current["isValid"] = true;
-            } else {
-              current["isValid"] = parent["isValid"];
-            }
-            //  Check validation for products in package - End
-
-            if (typeof parent[childrenPropertyToStore] !== 'undefined') {
-              parent[childrenPropertyToStore].push(current)
-            } else {
-              parent[childrenPropertyToStore] = [current]
-            }
-          }
-        })
-      })
-    }
-    translator(parents, childrens)
-
-    return parents
-  }
-
-  const fetchProductInventory = () => {
-
-    let tempInventory = []
-    // dispatch({ type: "loading", loading: true });
-    // if (gridApi) {
-    //   gridApi.setRowData([]);
-    // }
-
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}/products-packages`).then(({ data }) => {
-      data.data?.products.map((u: any, index) => (tempInventory.push({
-        ...u,
-        id: u._id,
-        productCategory: u.productCategory?.optionLabel,
-        isValid: true,
-        qtyToDisplay: u.qty
-        // package: u.hasOwnProperty("package") ? u.package.packageName : "",
-        // packageId: u.hasOwnProperty("package") ? u.package._id : ""
-      })));
-      data.data?.packages.map((u) => (tempInventory.push({
-        ...u,
-        id: u._id,
-        description: u.packageDescription,
-      })));
-      setProductInventory(tempInventory)
-      setSerializeAssets(data.data?.inventory || [])
-      tempInventory = restructureRowData(tempInventory)
-
-      let zeroPrice = tempInventory.filter(pkg => pkg.type !== "productInPackage" && pkg?.finalPrice === 0);
-
-      if (zeroPrice.length > 0) {
-        setNextStep(false)
-      } else {
-        setNextStep(true)
-      }
-
-      const newData = [];
-      tempInventory.forEach(({ _id, ...rest }) => {
-        newData.push(rest)
-      })
-
-      const newDataForReactTable = [...translateDataToTreeForProducts(newData ? [...newData] : [], "parent", "treeId", "subRows")];
-
-      setDataForNewTabData([...orderBy(newDataForReactTable, ["order"], ["asc"])]);
-
-      // dispatch({ type: "initialize", data: [], count: 0 })
-      // dispatch({ type: "initialize", data: [...orderBy(newDataForReactTable, ["order"], ["asc"])], count: newDataForReactTable.length });
-
-      // setTimeout(() => {
-      //   dispatch({ type: "loading", loading: false });
-      // }, gridLoadingTimeout);
-
-      setSelectedProducts([])
-
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-      // dispatch({ type: "loading", loading: false });
-    });
-  };
-
-  const restructureRowData = (rowData: any) => {
-    let extractedProducts = []
-    let newDataOfRow = [...rowData]
-
-    let packageProducts = newDataOfRow.filter(rd => rd.type === "productInPackage")
-    let packages = newDataOfRow.filter(rd => rd.type === "Package")
-    let products = newDataOfRow.filter(rd => rd.type === "Product")
-    let modifiedPkgProducts = [];
-
-    packages.forEach((pkg: any) => {
-      let currentPkgProducts = packageProducts.filter((p: any) => p.packageId === pkg.id);
-      currentPkgProducts.forEach((p: any) => {
-        let product = { ...p, pkgQty: pkg.qty, totalQty: pkg.qty * p.qty };
-        modifiedPkgProducts.push(product)
-      })
-    })
-
-    extractedProducts = [...products, ...packages, ...modifiedPkgProducts]
-
-    return extractedProducts
   }
 
   return (<>
@@ -578,34 +397,34 @@ const RentalManagementDetailsPage = () => {
                 </span>} */}
                   <Paper>
                     {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
-              {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-            </span>}
+                      {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+                    </span>}
                     <div style={{ display: showActivity ? "block" : "none" }}>
                       <Grid container>
                         <Grid item xs={12}>
                           {rentalManagementData && (
-                              <div>
-                                <Activity
-                                    resourceId={rentalManagementData._id}
-                                    resource={rentalManagement.resource}
-                                    restrictedAddActivities={
-                                      permissions &&
-                                      permissions["rentalManagement"] &&
-                                      permissions["rentalManagement"].isUpdate
-                                          ? []
-                                          : ["Attachment", "Case"]
-                                    }
-                                    relatedTo={[
-                                      {
-                                        type: rentalManagement,
-                                        referenceId: rentalManagementData._id,
-                                        access: true,
-                                      },
-                                    ]}
-                                    handleActivityRefresh={() => { }}
-                                    emails={[]}
-                                />
-                              </div>
+                            <div>
+                              <Activity
+                                resourceId={rentalManagementData._id}
+                                resource={rentalManagement.resource}
+                                restrictedAddActivities={
+                                  permissions &&
+                                    permissions["rentalManagement"] &&
+                                    permissions["rentalManagement"].isUpdate
+                                    ? []
+                                    : ["Attachment", "Case"]
+                                }
+                                relatedTo={[
+                                  {
+                                    type: rentalManagement,
+                                    referenceId: rentalManagementData._id,
+                                    access: true,
+                                  },
+                                ]}
+                                handleActivityRefresh={() => { }}
+                                emails={[]}
+                              />
+                            </div>
                           )}
                         </Grid>
                       </Grid>
@@ -613,13 +432,12 @@ const RentalManagementDetailsPage = () => {
                   </Paper>
                 </HideWhenOffline>
               </div>
-
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
               <Paper>
                 <Steps
                   className={styles.steps_box}
-                  isNextStep={treeToFlatArray(dataForNewTabData, "subRows").some(f => f.isValid === false)}
+                  isNextStep={false}
                   nextStep={nextStep}
                   steps={rentalProcessSteps.slice(0, 5)}
                   currentStep={currentStep}
@@ -638,22 +456,13 @@ const RentalManagementDetailsPage = () => {
                   />
                 )}
                 {(currentStep === 2) && (
-                  <SerializedAssetStep
-                    rentalManagementId={id}
-                    productInventory={[
-                      ...productInventory,
-                      ...serializeAssets
-                    ]}
-                    fetchProductsData={fetchProductInventory}
+                  <SerializedAsset
+                    rentalManagementData={rentalManagementData}
+                    setNextStep={setNextStep}
                     isSmallScreen={isSmallScreen}
                     isTabletScreen={isTabletScreen}
                     showActivity={showActivity}
-                    currentStep={currentStep}
                     currencySymbol={currencySymbol}
-                    currencyCode={rentalManagementData?.currency}
-                    loading={loading}
-                    serializeAssets={serializeAssets}
-                    setNextStep={setNextStep}
                   />
                 )}
                 {(currentStep === 3) && (
@@ -661,8 +470,6 @@ const RentalManagementDetailsPage = () => {
                     fetchRentalData={fetchRentalManagementData}
                     rentalManagementData={rentalManagementData}
                     rentalManagementId={id}
-                    warehouselist={warehouseList}
-                    productInventory={serializeAssets}
                     currentStep={currentStep}
                     handleDeliveryTicketDialog={handleDeliveryTicketDialog}
                   />
@@ -670,7 +477,6 @@ const RentalManagementDetailsPage = () => {
                 {(currentStep === 4 || currentStep === 5) && (
                   <ReceivingTicket
                     rentalManagementId={id}
-                    productInventory={productInventory}
                     currentStep={currentStep}
                     handleReceivingTicketDialog={handleReceivingTicketDialog}
                   />
@@ -715,7 +521,6 @@ const RentalManagementDetailsPage = () => {
         rentalData={rentalManagementData}
         onSuccess={() => {
           setShowDeliveryTicketDialog(false)
-          fetchProductInventory()
         }}
       />
     }
@@ -729,7 +534,6 @@ const RentalManagementDetailsPage = () => {
         onClose={() => setShowReceivingTicketDialog(false)}
         onSuccess={() => {
           setShowReceivingTicketDialog(false)
-          fetchProductInventory()
         }}
         isRedirectToDetailPage={false}
       />

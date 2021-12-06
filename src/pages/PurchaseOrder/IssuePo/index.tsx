@@ -20,6 +20,7 @@ import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "../../../constants/columns"
 import { prepareDataForGrid } from "../../../constants/helpers";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
+import { Link } from "react-router-dom";
 
 
 const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBase64, downlodingFile, setCurrentStep, currentStep, handleAttachments }) => {
@@ -37,11 +38,21 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBas
     const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
     const [columns, setColumns] = useState([
         { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
         { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
         { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" }
     ])
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
+
+    const NameRenderer = (params) => (
+        <Link
+            className="link"
+            title={params.value}
+            to={`${routes.productDetail.path}/${params.data.productId}`}
+        >
+            {params.value}
+        </Link>
+    );
 
     useEffect(() => {
         axiosInstance().get("/field/child?resource=Purchase Order Product").then(({ data: { data } }) => {
@@ -53,6 +64,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBas
                 let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
                 tempFrameworkComponent = {
                     commonRenderer: CommonRenderer,
+                    nameRenderer: NameRenderer,
                     ...tempFrameworkComponent,
                 }
                 setFrameWorkComponent({ ...tempFrameworkComponent })

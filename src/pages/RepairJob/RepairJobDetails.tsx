@@ -22,7 +22,7 @@ import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import TabPanel from '../../components/TabPanel';
 import CustomCommonSteps from '../../components/CustomCommonSteps/CustomCommonSteps';
-import AddSerializedAsset from '../RentalManagement/AddSerializedAsset';
+import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
 import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { getFrameworkComponents, genrateColoum } from '../../constants/columns';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
@@ -33,8 +33,8 @@ import RepairJobReceivingTicket from './RepairJobReceivingTicket';
 import RepairJobDeliveryTicket from './RepairJobDeliveryTicket';
 import ManageAssetDialog from './ManageAssetDialog';
 
+const reservedStatus = "Reserved";
 const renderedFrom = "repairJobDetails"
-
 const step1RenderedFrom = `${renderedFrom}_assets`
 
 function a11yProps(index: any) {
@@ -67,13 +67,12 @@ const RepairJobDetails = () => {
 
   const [tabValue, setTabValue] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
-  const [nextStep, setNextStep] = useState(true)
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
 
   const [okBtnLoading, setOkBtnLoading] = useState(false)
 
-  const [step1FrameworkComponent, setStep1FrameworkComponent] = useState(null)
+  const [step1FrameworkComponent, setStep1FrameworkComponent] = useState({})
   const [step1GridApi, setStep1GridApi] = useState(null);
   const [step1State, step1Dispatch] = useReducer(reducer, intialState);
   const { dataRows: step1DataRows, rowCount: step1RowCount, loading: step1Loading, page: step1Page,
@@ -91,6 +90,7 @@ const RepairJobDetails = () => {
   const [serializedAssetFields, setSerializedAssetFields] = useState(null)
 
   const [disableNextStep, setDisableNextStep] = useState(false)
+  const [disablePreviousStep, setDisablePreviousStep] = useState(false)
 
   const [unmodifiedColumns, setUnmodifiedColumns] = useState([]);
 
@@ -128,7 +128,6 @@ const RepairJobDetails = () => {
     })
   }
 
-
   const fetchAssignedSerializedAssets = (passedColumns = null) => {
 
     if (passedColumns === null) {
@@ -142,9 +141,11 @@ const RepairJobDetails = () => {
           type: "initialize", data: [], count: 0
         });
 
+
         let rows = data.map((u, index) => {
           u["_id"] = u["id"];
           u["index"] = `${index + 1}.0`;
+
           return prepareDataForGrid(u, user);
         });
 
@@ -169,7 +170,7 @@ const RepairJobDetails = () => {
           }
         }
 
-        setDisableNextStep(foundBlankValue);
+        setDisableNextStep(data.length === 0 ? true : foundBlankValue);
 
         step1Dispatch({
           type: "initialize", data: [...rows], count: rows.length
@@ -187,7 +188,7 @@ const RepairJobDetails = () => {
   }
 
   const ActionsRenderer = (params) => (
-    <GridDeleteIcon
+    params.data?.status === reservedStatus ? <GridDeleteIcon
       hasDeletePermission={permissions?.repairJob?.isUpdate}
       ownerId={user?.user?._id}
       userId={user?.user?._id}
@@ -195,7 +196,7 @@ const RepairJobDetails = () => {
         setShowAssetRemoveConfirmationDialog({ open: true, id: params.data._id ?? params.data.id, ids: [] });
       }}
       entity={sidebarResource.productInventory}
-    />
+    /> : ""
   );
 
   const deleteRepairJobAssets = () => {
@@ -317,25 +318,15 @@ const RepairJobDetails = () => {
         "processStatus": repairJobProcessSteps[previousStep]
       })
       .then(() => {
+        setDisableNextStep(false)
+        if (previousStep === 0) {
+          fetchAssignedSerializedAssets();
+        }
 
       }).catch((error) => {
         toastConfig.setToastConfig(error);
       });
   }
-
-  // useEffect(() => {
-  //   if (currentStep === 0) {
-  //     if (step1DataRows.length === 0) {
-  //       setDisableNextStep(true)
-  //     }
-  //     console.log(step1Columns);
-
-  //   } else if (currentStep === 1) {
-
-  //   } else {
-  //     setDisableNextStep(false)
-  //   }
-  // }, [currentStep])
 
   return (
     <>
@@ -440,7 +431,7 @@ const RepairJobDetails = () => {
                     <Paper>
                       <CustomCommonSteps
                         disableNextStep={disableNextStep}
-                        nextStep={nextStep}
+                        disablePreviousStep={disablePreviousStep}
                         steps={repairJobProcessSteps.filter(f => f !== "End")}
                         currentStep={currentStep}
                         setCurrentStep={setCurrentStep}
@@ -483,7 +474,7 @@ const RepairJobDetails = () => {
                                   color="primary"
                                   type="button"
                                   size="small"
-                                  disabled={step1SelectedRecords.length === 0}
+                                  disabled={step1SelectedRecords.length === 0 || step1SelectedRecords.some(s => s.status !== reservedStatus)}
                                   onClick={() => {
                                     setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: step1SelectedRecords.map(m => m._id ?? m.id) });
                                   }}
@@ -518,11 +509,18 @@ const RepairJobDetails = () => {
                           )}
 
                           {(currentStep === 1) && (
-                            <RepairJobDeliveryTicket repairJobData={repairJobData} />
+                            <RepairJobDeliveryTicket
+                              repairJobData={repairJobData}
+                              setNextButtonDisabled={setDisableNextStep}
+                              setPreviousButtonDisabled={setDisablePreviousStep}
+                            />
                           )}
 
                           {(currentStep === 2 || currentStep === 3) && (
-                            <RepairJobReceivingTicket repairJobData={repairJobData} />
+                            <RepairJobReceivingTicket
+                              repairJobData={repairJobData}
+                              setNextButtonDisabled={setDisableNextStep}
+                            />
                           )}
                         </Grid>
                       </Grid>
@@ -611,6 +609,7 @@ const RepairJobDetails = () => {
           isAdding={isAdding}
           selectedProducts={[]}
           queryString={`ignoreIds=${JSON.stringify(step1DataRows.map(m => m._id ?? m.id))}&repairable=true`}
+          filterByPlant={`filterById=[{"field":"warehouse", "term": "${repairJobData.plant?.optionValue}"}]`}
         />
       }
 
@@ -638,7 +637,6 @@ const RepairJobDetails = () => {
                   selectedRecords: []
                 })
               }
-
               fetchAssignedSerializedAssets();
               setShowEditAssetDialog({
                 open: false,

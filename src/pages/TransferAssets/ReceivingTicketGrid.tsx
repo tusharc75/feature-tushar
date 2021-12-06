@@ -1,6 +1,6 @@
-import { useState, useReducer, Fragment, useContext, useEffect, FC } from 'react';
+import React, { useState, useReducer, Fragment, useContext, useEffect, FC } from 'react';
 import { Button, Box } from '@material-ui/core';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
@@ -9,30 +9,30 @@ import { receivingTicket, sidebarResource } from '../../constants/helpers';
 import { isMobile } from 'react-device-detect';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { groupBy } from 'lodash';
-import ManageDeliveryTicket from '../DeliveryTicket/ManageDeliveryTicket';
+import ManageReceivingTicket from '../ReceivingTicket/ManageReceivingTicket';
 import { CommonRenderer, DateRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+
 
 interface ReceivingGridProps {
   fetchAssets: any;
-  plantId: string;
   permissions: any;
-  warehouse: any;
-  transferAssetData?: any;
+  transferAssetData: any;
   transferAssetId: string | any;
   setNextStep: any;
   setPrevStep: any;
-  setTransferIsEnded: any;
+  setTransferIsEnded?: any;
   currentStep: number;
   setTickets: any;
 }
 
 const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
-  const { fetchAssets, transferAssetId, warehouse, setPrevStep, transferAssetData, setTickets, setNextStep, setTransferIsEnded } = props;
+  const { permissions, fetchAssets, transferAssetId, setPrevStep, transferAssetData, setTickets, setNextStep, setTransferIsEnded } = props;
   const toastConfig = useContext(CustomToastContext);
 
-  const [openLoadingTicketDialog, setOpenLoadingTicketDialog] = useState(false);
+  const [openReceivingTicketDialog, setOpenReceivingTicketDialog] = useState(false);
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -43,10 +43,15 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   const columns = [
     { field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, disabled: true, cellRenderer: 'ticketRenderer' },
-    { field: 'product', headerName: 'Product Description', show: true, cellRenderer: 'productRenderer' },
-    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'deliveryTicket', headerName: 'Loading Ticket', show: true, disabled: true, cellRenderer: 'ticketRenderer' },
+    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, disabled: true, cellRenderer: 'receivingRenderer' },
+    { field: 'receivingTicketStatus', headerName: 'Receiving Ticket Status', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'deliveryTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
   ];
+
+  const history = useHistory();
+
 
   const AssetRenderer = (params) =>
     params.value ? (
@@ -57,9 +62,18 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       <NoDataCell />
     );
 
-  const TicketRenderer = (params) =>
+  const LoadingTicketRenderer = (params) =>
     params.value ? (
       <Link className="link cursor-pointer" to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
+        <p title={params.value}>{params.value}</p>
+      </Link>
+    ) : (
+      <NoDataCell />
+    );
+
+  const ReceivingTicketRenderer = (params) =>
+    params.value ? (
+      <Link className="link cursor-pointer" to={`${routes.receivingTicketDetail.path}/${params.data.receivingTicketId}`}>
         <p title={params.value}>{params.value}</p>
       </Link>
     ) : (
@@ -76,7 +90,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     );
 
   const frameworkComponents = {
-    ticketRenderer: TicketRenderer,
+    ticketRenderer: LoadingTicketRenderer,
+    receivingRenderer: ReceivingTicketRenderer,
     productRenderer: ProductRenderer,
     assetRenderer: AssetRenderer,
     commonRenderer: CommonRenderer,
@@ -97,7 +112,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
     try {
       let assetData = await fetchAssets(forceRefresh);
-      let ticketData: any = await fetchLoadingTickets()
+      let ticketData: any = await fetchReceivingTickets()
+      let loadingTicketData: any = await fetchLoadingTickets()
       assetData = [...assetData?.map((d: any) => ({
         ...d,
         product: d.product.optionLabel,
@@ -109,8 +125,21 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           if (ticketData[i]?.productInventory.some((asset: any) => (
             assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset)
           ))) {
-            assetData[j].deliveryTicket = ticketData[i].deliveryJobName
-            assetData[j].deliveryTicketId = ticketData[i]._id
+            assetData[j].receivingTicket = ticketData[i].receivingJobName
+            assetData[j].receivingTicketId = ticketData[i]._id
+            assetData[j].receivingTicketStatus = ticketData[i].status
+          }
+        }
+      }
+
+      for (let i = 0; i < loadingTicketData.length; i++) {
+        for (let j = 0; j < assetData.length; j++) {
+          if (loadingTicketData[i]?.productInventory.some((asset: any) => (
+            assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset)
+          ))) {
+            assetData[j].deliveryTicket = loadingTicketData[i].deliveryJobName
+            assetData[j].deliveryTicketId = loadingTicketData[i]._id
+            assetData[j].deliveryTicketStatus = loadingTicketData[i].status
           }
         }
       }
@@ -124,11 +153,22 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   };
 
 
-  const fetchLoadingTickets = () => new Promise((resolve, reject) => {
-    axiosInstance().get(`${routes.transferAsset.path}/${transferAssetId}/receiving-ticket?limit=0`)
+  const fetchReceivingTickets = () => new Promise((resolve, reject) => {
+    axiosInstance().get(`${routes.transferAsset.path}/${transferAssetId}/receiving-ticket`)
       .then(({ data: { data } }) => {
         resolve(data);
         setTickets(data)
+      })
+      .catch(err => {
+        reject(err);
+      })
+
+  })
+  const fetchLoadingTickets = () => new Promise((resolve, reject) => {
+    axiosInstance().get(`${routes.transferAsset.path}/${transferAssetId}/loading-ticket`)
+      .then(({ data: { data } }) => {
+        resolve(data);
+
       })
       .catch(err => {
         reject(err);
@@ -142,32 +182,36 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       const inventoryWithNoTicket = selectedRecords.filter((asset: any) => !asset?.hasOwnProperty("receivingTicket"))
       setAssetWithNoTicket(inventoryWithNoTicket)
     }
+    setNextStep(true)
+    const inventoryWithNoTicket = dataRows.filter((asset: any) => !asset?.hasOwnProperty("receivingTicket"));
+    const inventoryWithTicket = dataRows.filter((asset: any) => asset?.hasOwnProperty("receivingTicket"));
 
-    if (dataRows.length > 0) {
-      setNextStep(true)
-      const inventoryWithNoTicket = dataRows.filter((asset: any) => !asset?.hasOwnProperty("receivingTicket"));
-      const inventoryWithTicket = dataRows.filter((asset: any) => asset?.hasOwnProperty("receivingTicket"));
-      if (inventoryWithNoTicket.length > 0) {
-        setNextStep(false)
-      } else {
-        setNextStep(true)
-      }
-
-      if (inventoryWithTicket.length > 0) {
-        setPrevStep(false)
-      } else {
-        setPrevStep(true)
-      }
-    } else {
+    if (inventoryWithNoTicket.length > 0) {
       setNextStep(false)
+    } else {
+      setNextStep(true)
     }
 
+    if (inventoryWithTicket.length > 0) {
+      setPrevStep(false)
+    } else {
+      setPrevStep(true)
+    }
+
+    if (transferAssetData?.transferType.includes("External")) {
+      if (inventoryWithTicket.length === dataRows.length) {
+        setTransferIsEnded(true)
+      } else {
+        setTransferIsEnded(false)
+      }
+
+    }
 
   }, [dataRows, selectedRecords])
 
   const handleRemoveTicket = () => {
     setRemovingTicket(true)
-    const groupByCalls = groupBy(selectedRecords, "deliveryTicketId");
+    const groupByCalls = groupBy(selectedRecords, "receivingTicketId");
     let apiCalls = [];
 
     Object.keys(groupByCalls).forEach((key) => {
@@ -197,7 +241,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             size="small"
             color="primary"
             disabled={selectedRecords.length === 0 || assetWithNoTicket.length === 0}
-            onClick={() => setOpenLoadingTicketDialog(true)}
+            onClick={() => setOpenReceivingTicketDialog(true)}
           >
             Create Receiving Ticket
           </Button>
@@ -215,36 +259,75 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       </Box>
 
       <Box mt={1}>
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={false}
-          actionWidth={100}
+        {isMobile ? <CustomSwipableList
           allowSelection={true}
-          isClientSideGrid={true}
+          allowSwipe={true}
+          permissions={permissions}
+          primaryField={columns?.find(d => d.field)}
+          onClick={(data) => {
+            history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+          }}
+          dataRows={dataRows}
+          selectedRecords={selectedRecords}
+          dispatch={dispatch}
+          onEdit={(data) => {
+            // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
+          }}
+          extraParamsToCheckDelete={true}
+          onDelete={(data) => {
+
+          }}
+          rowCount={rowCount}
+          page={page}
           loading={loading}
+          chips={[
+            {
+              label: "Status : ",
+              field: "status",
+            }
+          ]}
+          additionalDetails={[]}
+          owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+          onCreate={false}
+          showClone={false}
+          onClone={(data) => {
+          }}
           renderedFrom="transferAssetPage"
-          refreshGrid={() => fetchAssetsData(true)}
-        />
+        /> :
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            allowAction={false}
+            actionWidth={100}
+            allowSelection={true}
+            isClientSideGrid={true}
+            loading={loading}
+            renderedFrom="transferAssetPage"
+            refreshGrid={() => fetchAssetsData(true)}
+          />
+        }
       </Box>
 
-      {/* Loading ticket create dialog */}
+      {/* Receiving ticket create dialog */}
       {
-        openLoadingTicketDialog && (
-          <ManageDeliveryTicket
-            onClose={() => setOpenLoadingTicketDialog(false)}
-            productInventoryForDeliveryTicket={assetWithNoTicket}
-            warehouseId={warehouse}
+        openReceivingTicketDialog && (
+          <ManageReceivingTicket
+            receivingTicketId={null}
+            open={true}
+            isClone={false}
+            isRedirectToDetailPage={false}
+            onClose={() => setOpenReceivingTicketDialog(false)}
+            productInventoryForReceivingTicket={assetWithNoTicket}
             transferData={transferAssetData}
             onSuccess={() => {
-              setOpenLoadingTicketDialog(false);
+              setOpenReceivingTicketDialog(false);
               fetchAssetsData(true)
             }}
           />

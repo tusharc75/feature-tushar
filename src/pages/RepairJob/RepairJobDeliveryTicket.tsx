@@ -20,7 +20,7 @@ import ManageDeliveryTicket from '../DeliveryTicket/ManageDeliveryTicket';
 
 const renderedFrom = "repairJob_delivery_ticket"
 
-const RepairJobDeliveryTicket = ({ repairJobData }) => {
+const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPreviousButtonDisabled }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [gridApi, setGridApi] = useState(null);
@@ -72,6 +72,9 @@ const RepairJobDeliveryTicket = ({ repairJobData }) => {
               d["hideSelection"] = d.status === "In-Transit";
             })
 
+            setNextButtonDisabled(tempProductInventory.some(s => s.status !== "Repair"))
+            // setPreviousButtonDisabled(tempProductInventory.some(s => s["deliveryTicketId"]));
+
             dispatch({
               type: "initialize", data: tempProductInventory, count: tempProductInventory.length
             });
@@ -104,9 +107,10 @@ const RepairJobDeliveryTicket = ({ repairJobData }) => {
   );
 
   const ProductNameRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data.product.optionValue}`}>
+    params.data?.product?.optionValue ? <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.product?.optionValue}`}>
       {params.value}
     </Link>
+      : <NoDataCell />
   );
 
   const frameworkComponents = {
@@ -331,7 +335,7 @@ const RepairJobDeliveryTicket = ({ repairJobData }) => {
       <ManageDeliveryTicket
         onClose={() => setShowDeliveryTicketDialog({ open: false, selectedAssets: [] })}
         productInventoryForDeliveryTicket={showDeliveryTicketDialog.selectedAssets}
-        // warehouseId={warehouseForDeliveryTicket}
+        warehouseId={repairJobData?.plant}
         repairJobData={repairJobData}
         onSuccess={() => {
           setShowDeliveryTicketDialog({ open: false, selectedAssets: [] })
