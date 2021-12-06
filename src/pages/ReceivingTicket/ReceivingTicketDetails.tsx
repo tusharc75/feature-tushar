@@ -541,7 +541,7 @@ const ReceivingTicketDetails = () => {
 
                               /> :
 
-                                <CustomAgGrid
+                                Object.keys(frameWorkComponent).length > 0 ? <CustomAgGrid
                                   allowSelection={receivingTicketData.status === "New"}
                                   allowAction={false}
                                   columns={columns}
@@ -557,7 +557,7 @@ const ReceivingTicketDetails = () => {
                                   loading={false}
                                   renderedFrom={renderedFrom}
                                   refreshGrid={fetchProductInventory}
-                                />
+                                /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                               }
                             </Grid>
                           </Grid>
