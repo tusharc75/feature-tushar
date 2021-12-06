@@ -13,13 +13,6 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import ManageDeliveryTicket from "./ManageDeliveryTicket"
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import {
-  CreatedByRenderer,
-  UpdatedByRenderer,
-  CommonRenderer,
-  DateRenderer
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import { Link } from "react-router-dom";
 import { productInventory, gridLoadingTimeout } from "../../constants/helpers"
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from "../../components/Activity";
@@ -35,7 +28,7 @@ import { BiFoodMenu } from "react-icons/bi";
 import { prepareDataForGrid } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -615,7 +608,7 @@ export default function DeliveryTicketDetail(props) {
 
                               /> :
 
-                                <CustomAgGrid
+                                Object.keys(frameWorkComponent).length > 0 ? <CustomAgGrid
                                   allowSelection={deliveryTicketData.status === "New"}
                                   allowAction={false}
                                   columns={columns}
@@ -631,7 +624,7 @@ export default function DeliveryTicketDetail(props) {
                                   loading={false}
                                   renderedFrom={renderedFrom}
                                   refreshGrid={fetchProductInventory}
-                                />
+                                /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                               }
                             </Grid>
                           </Grid>
