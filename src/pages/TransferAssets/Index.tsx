@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from "react";
+import React, { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -26,6 +26,10 @@ import useColumns, { getStaticFields, getFrameworkComponents } from "../../const
 import { prepareDataForGrid } from "../../constants/helpers"
 import ManageTransferAsset from "./ManageTransferAsset";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
+import {isMobile} from "react-device-detect";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import {FaSuitcase} from "react-icons/fa";
+import {MdAdd} from "react-icons/all";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -94,11 +98,31 @@ const TransferAsset = () => {
 
     const queryString = getQueryString();
     axiosInstance().get(`${transferAsset.api}${queryString}`).then(({ data }) => {
+      let rows = data.data?.map((u) => {
+
+        let finalObject = prepareDataForGrid(u,user);
+
+        finalObject["canDelete"] = permissions?.transferAsset?.isDelete;
+
+        finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+
+        finalObject["allowedToEdit"] = permissions?.transferAsset?.isUpdate;
+
+
+
+        return finalObject
+
+      });
+
       data.data = data.data?.map((u, i) => ({
+
         ...prepareDataForGrid(u, user)
+
       }));
 
-      dispatch({ type: "initialize", data: data.data, count: data.count });
+
+
+      dispatch({ type: "initialize", data: rows, count: data.count });
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
       }, gridLoadingTimeout);
@@ -258,33 +282,49 @@ const TransferAsset = () => {
             <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
             <span className="listingHeader">{routes.transferAsset?.title} </span>
           </Grid>
-          <Grid xs={6} container className={styles.filter_side} >
-            <Box className={styles.filter_side_header} component="div" >
+          <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side} >
+            <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
 
+              <Grid style={{display: "flex", flex:1}}>
               <SearchBox
                 onSearch={handleSearch}
                 searchbox={styles.search_box_input}
-                width="242px"
+                width='242px'
+                style={isMobile ? {flex:1} : {}}
                 size="small"
                 value={search}
               />
+
+              </Grid>
+
+              <Grid style={{display: "flex" , gap:"5px"}}>
               {permissions?.transferAsset?.isCreate &&
-                <Button className={styles.add_submit_btn} onClick={() => {
+                <Button
+                        onClick={() => {
                   setShowManageTransferAssetDialog({ open: true, isClone: false, idToClone: null })
-                }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                }}
+                        variant={isMobile ? "text" : "contained"}
+                        size="small"
+                        color="primary"
+                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                        startIcon={isMobile ? null : <AddIcon />}
+                >
+                  {isMobile ? <MdAdd size={23}/> : "Add"}
+                </Button>
               }
 
               <HtmlTooltip title={selectedRecords.length > 0 ? "" : "Please select some records"}>
                 <span>
                   <Button
-                    className={styles.action_submit_btn}
-                    variant="outlined"
+                      className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                    variant={isMobile ? "text" : "contained"}
                     color="default"
                     size="small"
                     onClick={openActions}
                     disabled={selectedRecords.length ? false : true}
                     aria-controls="action-menu"
-                  >Actions <ExpandMore />
+                  >
+                    {isMobile ? "" :  "Actions" } <ExpandMore/>
                   </Button>
                 </span>
               </HtmlTooltip>
@@ -305,12 +345,47 @@ const TransferAsset = () => {
                   setShowDeleteConfirmBox(true)
                 }}>Delete</MenuItem>}
               </Menu>
+              </Grid>
             </Box>
           </Grid>
         </Grid>
       </div>
       {columns ?
         Object.keys(frameWorkComponent).length > 0 ?
+            isMobile ?
+                <CustomSwipableList
+                    allowSelection={true}
+                    allowSwipe={true}
+                    permissions={permissions.transferAsset}
+                    primaryField={columns?.find(d => d.primaryField)}
+                    onClick={(data) => {
+                      history.push(`${routes.transferAssetDetail.path}/${data._id}`)
+                    }}
+                    dataRows={dataRows}
+                    selectedRecords={selectedRecords}
+                    dispatch={dispatch}
+
+                    onEdit={() => {}}
+                    extraParamsToCheckDelete={true}
+                    onDelete={(data) => {
+                      setDeleteRecord(data);
+                      setShowDeleteConfirmBox(true)
+                    }}
+                    rowCount={rowCount}
+                    page={page}
+                    loading={loading}
+                    chips={[
+                    ]}
+                    additionalDetails={[
+                    ]}
+                    owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                    onCreate={false}
+                    showClone={true}
+                    onClone={(data) => {
+                      setShowManageTransferAssetDialog({ open: true, isClone: true, idToClone: data._id })
+                    }}
+                    renderedFrom={routes.transferAsset?.title}
+                /> :
           <CustomAgGrid
             columns={columns}
             dataRows={dataRows}
