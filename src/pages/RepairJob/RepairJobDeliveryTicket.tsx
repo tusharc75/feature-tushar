@@ -185,11 +185,11 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
   return (<>
 
     <Box display="flex" justifyContent="flex-end" p="4px">
-      {/* <Button
+      <Button
         onClick={() => {
           setDownlodingFile(true);
 
-          axiosInstance().get(`/rental-management/${repairJobData._id}/pdf`)
+          axiosInstance().get(`/repair-job/${repairJobData._id}/pdf`)
             .then(({ data }) => {
               axiosInstance()
                 .get(`user/download?fileName=${data.data.fileName}`, {
@@ -221,7 +221,6 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
       >
         {downlodingFile ? "Please wait..." : "Preview"}
       </Button>
-      <Box mx={1} /> */}
 
       {
         repairJobData?.processStatus !== "End" &&

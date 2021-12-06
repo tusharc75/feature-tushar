@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled }) => {
+const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPreviousButtonDisabled }) => {
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
 
@@ -116,6 +116,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled }) => {
                                 })
 
                                 setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))
+                                setPreviousButtonDisabled(tempProductInventory.some(s => s["receivingTicketId"]));
 
                                 dispatch({
                                     type: "initialize", data: tempProductInventory, count: tempProductInventory.length
@@ -202,11 +203,11 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled }) => {
     return (<>
 
         <Box display="flex" justifyContent="flex-end" className="gap-1">
-            {/* <Button
+            <Button
                 onClick={() => {
                     setDownlodingFile(true);
 
-                    axiosInstance().get(`/rental-management/${repairJobData._id}/pdf`)
+                    axiosInstance().get(`/repair-job/${repairJobData._id}/pdf`)
                         .then(({ data }) => {
                             axiosInstance()
                                 .get(`user/download?fileName=${data.data.fileName}`, {
@@ -238,7 +239,6 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled }) => {
             >
                 {downlodingFile ? "Please wait..." : "Preview"}
             </Button>
-            <Box mx={1} /> */}
 
             <Button variant="outlined" color="primary" aria-controls="simple-menu"
                 aria-haspopup="true"

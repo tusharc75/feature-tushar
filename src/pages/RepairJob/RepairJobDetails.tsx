@@ -520,6 +520,7 @@ const RepairJobDetails = () => {
                             <RepairJobReceivingTicket
                               repairJobData={repairJobData}
                               setNextButtonDisabled={setDisableNextStep}
+                              setPreviousButtonDisabled={setDisablePreviousStep}
                             />
                           )}
                         </Grid>
