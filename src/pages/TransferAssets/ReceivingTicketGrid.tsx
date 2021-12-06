@@ -29,7 +29,7 @@ interface ReceivingGridProps {
 }
 
 const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
-  const {permissions, fetchAssets, transferAssetId, setPrevStep, transferAssetData, setTickets, setNextStep, setTransferIsEnded } = props;
+  const { permissions, fetchAssets, transferAssetId, setPrevStep, transferAssetData, setTickets, setNextStep, setTransferIsEnded } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [openReceivingTicketDialog, setOpenReceivingTicketDialog] = useState(false);
@@ -198,12 +198,14 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       setPrevStep(true)
     }
 
-    if (inventoryWithTicket.length === dataRows.length) {
-      setTransferIsEnded(true)
-    } else {
-      setTransferIsEnded(false)
-    }
+    if (transferAssetData?.transferType.includes("External")) {
+      if (inventoryWithTicket.length === dataRows.length) {
+        setTransferIsEnded(true)
+      } else {
+        setTransferIsEnded(false)
+      }
 
+    }
 
   }, [dataRows, selectedRecords])
 
@@ -258,58 +260,58 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
       <Box mt={1}>
         {isMobile ? <CustomSwipableList
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={permissions}
-                primaryField={columns?.find(d => d.field)}
-                onClick={(data) => {
-                  history.push(`${routes.productInventoryDetail.path}/${data._id}`)
-                }}
-                dataRows={dataRows}
-                selectedRecords={selectedRecords}
-                dispatch={dispatch}
-                onEdit={(data) => {
-                  // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
-                }}
-                extraParamsToCheckDelete={true}
-                onDelete={(data) => {
+          allowSelection={true}
+          allowSwipe={true}
+          permissions={permissions}
+          primaryField={columns?.find(d => d.field)}
+          onClick={(data) => {
+            history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+          }}
+          dataRows={dataRows}
+          selectedRecords={selectedRecords}
+          dispatch={dispatch}
+          onEdit={(data) => {
+            // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
+          }}
+          extraParamsToCheckDelete={true}
+          onDelete={(data) => {
 
-                }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                chips={[
-                  {
-                    label: "Status : ",
-                    field: "status",
-                  }
-                ]}
-                additionalDetails={[]}
-                owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                onCreate={false}
-                showClone={false}
-                onClone={(data) => {
-                }}
-                renderedFrom="transferAssetPage"
-            /> :
-            <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameworkComponents}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                allowAction={false}
-                actionWidth={100}
-                allowSelection={true}
-                isClientSideGrid={true}
-                loading={loading}
-                renderedFrom="transferAssetPage"
-                refreshGrid={() => fetchAssetsData(true)}
-            />
+          }}
+          rowCount={rowCount}
+          page={page}
+          loading={loading}
+          chips={[
+            {
+              label: "Status : ",
+              field: "status",
+            }
+          ]}
+          additionalDetails={[]}
+          owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+          onCreate={false}
+          showClone={false}
+          onClone={(data) => {
+          }}
+          renderedFrom="transferAssetPage"
+        /> :
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            allowAction={false}
+            actionWidth={100}
+            allowSelection={true}
+            isClientSideGrid={true}
+            loading={loading}
+            renderedFrom="transferAssetPage"
+            refreshGrid={() => fetchAssetsData(true)}
+          />
         }
       </Box>
 

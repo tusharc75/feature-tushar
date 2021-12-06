@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext, Fragment, useRef, useReducer} from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Grid, Box, Button, Paper, Tab, Tabs } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
@@ -19,22 +19,18 @@ import TransferStepper from './TransferAssetSteps';
 import AssetsGrid from './AssetsGrid';
 import LoadingTicketGrid from './LoadingTicketGrid';
 import ReceivingTicketGrid from './ReceivingTicketGrid';
-import HideWhenOffline from "../../components/HideWhenOffline";
+import HideWhenOffline from '../../components/HideWhenOffline';
 import { MdEdit, MdDelete } from 'react-icons/md';
-import TabPanel from "../../components/TabPanel";
-import {FaSuitcase, FaWpforms} from "react-icons/fa";
-import { BiFoodMenu } from "react-icons/bi";
-import {isMobile} from "react-device-detect";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import {intialState, reducer} from "../../components/AgGridComponents/CustomAgGrid";
+import TabPanel from '../../components/TabPanel';
+import { BiFoodMenu } from 'react-icons/bi';
+import { FaWpforms } from "react-icons/fa";
+
 
 const transferSteps = ['Add Assets', 'Loading Ticket'];
-const transferSteps1 = ['Add Assets', 'Loading Ticket', "Receiving Ticket"];
+const transferSteps1 = ['Add Assets', 'Loading Ticket', 'Receiving Ticket'];
 
 const TransferAssetDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
-  const firstRender = useRef(true)
-
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -43,7 +39,7 @@ const TransferAssetDetailPage = () => {
     state: { user, permissions }
   }: any = useData();
   const [headingLabel, setHeadingLabel] = useState('');
-  const [transferType, setType] = useState('');
+  const [transferType, setType] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isDeleting, setDeleting] = useState(false);
@@ -54,55 +50,30 @@ const TransferAssetDetailPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [transferAssetFields, setTransferAssetFields] = useState([]);
   const [existingAssets, setExistingAssets] = useState([]);
-  const [loadingTickets, setLoadingTickets] = useState([])
-  const [receivingTickets, setReceivingTickets] = useState([])
+  const [loadingTickets, setLoadingTickets] = useState([]);
+  const [receivingTickets, setReceivingTickets] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [plantId, setPlantId] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const [columns, setColumns] = useState([])
-
-  const [isTransferEnded, setTransferIsEnded] = useState(false);
-
-
-  const {
-    dataRows,
-    rowCount,
-    page,
-    limit,
-    pageSizes,
-    search,
-    filters,
-    sorting,
-    selectedRecords,
-    appendRows,
-    showFilteredRecordsOnly
-  } = state;
+  const [isTransferEnded, setTransferIsEnded] = useState(false)
 
   useEffect(() => {
     if (id) {
       fetchTransferAssetData();
-      fetchAssets(true)
+      fetchAssets(true);
     }
     // eslint-disable-next-line
   }, [id]);
 
-  useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false
-    } else {
-
-      if (transferType && currentStep >= 0 && currentStep <= 2) {
-        const processStatus = transferType === "Internal" ? transferSteps[currentStep] : transferSteps1[currentStep]
-        axiosInstance()
-          .put(`${routes.transferAsset.path}/${id}/process-status`, { processStatus })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
-      }
-    }
-  }, [currentStep, transferType]);
+  const updateStatus = (step) => {
+    const processStatus = transferType === 'Internal' ? transferSteps[step] : transferSteps1[step];
+    axiosInstance()
+      .put(`${routes.transferAsset.path}/${id}/process-status`, { processStatus })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
@@ -115,26 +86,37 @@ const TransferAssetDetailPage = () => {
     axiosInstance()
       .get('/field?resource=Transfer Asset')
       .then(({ data: { data } }) => {
-        let fields = []
+        let fields = [];
         data.forEach((field: any) => {
-
-          if (transferType === "Internal") {
-            if (field.fieldData.fieldName !== "transferToSupplier" && field.fieldData.fieldName !== "transferToCustomer"
-              && field.fieldData.fieldName !== "supplierShipTo" && field.fieldData.fieldName !== "customerShipTo") {
-              fields.push(field)
+          if (transferType === 'Internal') {
+            if (
+              field.fieldData.fieldName !== 'transferToSupplier' &&
+              field.fieldData.fieldName !== 'transferToCustomer' &&
+              field.fieldData.fieldName !== 'supplierShipTo' &&
+              field.fieldData.fieldName !== 'customerShipTo'
+            ) {
+              fields.push(field);
             }
-          } else if (transferType === "External Supplier") {
-            if (field.fieldData.fieldName !== "transferToPlant" && field.fieldData.fieldName !== "transferToCustomer"
-              && field.fieldData.fieldName !== "plantShipTo" && field.fieldData.fieldName !== "customerShipTo") {
-              fields.push(field)
+          } else if (transferType === 'External Supplier') {
+            if (
+              field.fieldData.fieldName !== 'transferToPlant' &&
+              field.fieldData.fieldName !== 'transferToCustomer' &&
+              field.fieldData.fieldName !== 'plantShipTo' &&
+              field.fieldData.fieldName !== 'customerShipTo'
+            ) {
+              fields.push(field);
             }
-          } else if (transferType === "External Customer") {
-            if (field.fieldData.fieldName !== "transferToSupplier" && field.fieldData.fieldName !== "transferToPlant"
-              && field.fieldData.fieldName !== "plantShipTo" && field.fieldData.fieldName !== "supplierShipTo") {
-              fields.push(field)
+          } else if (transferType === 'External Customer') {
+            if (
+              field.fieldData.fieldName !== 'transferToSupplier' &&
+              field.fieldData.fieldName !== 'transferToPlant' &&
+              field.fieldData.fieldName !== 'plantShipTo' &&
+              field.fieldData.fieldName !== 'supplierShipTo'
+            ) {
+              fields.push(field);
             }
           }
-        })
+        });
 
         setTransferAssetFields(fields);
         setLoading(false);
@@ -156,7 +138,7 @@ const TransferAssetDetailPage = () => {
         handleMainPoints(data);
         setPlantId(data?.transferFromPlant.optionValue);
         setHeadingLabel(data.transferAssetNumber);
-        const steps = data?.transferType === "Internal" ? transferSteps : transferSteps1
+        const steps = data?.transferType === 'Internal' ? transferSteps : transferSteps1;
         setCurrentStep(steps.indexOf(data?.processStatus) !== -1 ? steps.indexOf(data?.processStatus) : 0);
         setCustomizedRoutes([routes.transferAsset, { title: data.transferAssetNumber }]);
 
@@ -229,7 +211,6 @@ const TransferAssetDetailPage = () => {
     };
   }
 
-
   return (
     <>
       <Fragment>
@@ -265,11 +246,7 @@ const TransferAssetDetailPage = () => {
                     transferAssetData?.owner?.optionValue &&
                     user?.user?._id &&
                     transferAssetData?.owner.optionValue === user.user._id ? (
-                    <DeleteButton
-                      text="Delete"
-                      className="buttonDeleteBigScreen"
-                      onClick={() => setShowConfirmBox(true)}
-                    />
+                    <DeleteButton text="Delete" className="buttonDeleteBigScreen" onClick={() => setShowConfirmBox(true)} />
                   ) : null}
                 </HideWhenOffline>
                 <HideWhenOffline>
@@ -277,10 +254,7 @@ const TransferAssetDetailPage = () => {
                     transferAssetData?.owner?.optionValue &&
                     user?.user?._id &&
                     transferAssetData?.owner.optionValue === user.user._id ? (
-                    <Button
-                      className="buttonDeleteSmallScreen"
-                      onClick={() => setShowConfirmBox(true)}
-                    >
+                    <Button className="buttonDeleteSmallScreen" onClick={() => setShowConfirmBox(true)}>
                       <MdDelete size={24} />
                     </Button>
                   ) : null}
@@ -342,19 +316,17 @@ const TransferAssetDetailPage = () => {
 
             <TabPanel value={tabValue} index={1}>
               <Box my={2}>
-
-                    <TransferStepper
-                        isInternal={transferAssetData?.transferType === "Internal"}
-                        hasAssets={existingAssets.length > 0}
-                        isTransferEnded={isTransferEnded}
-                        isNextStep={isNextStep}
-                        isPrevStep={isPrevStep}
-                        steps={transferAssetData?.transferType === "Internal" ? transferSteps : transferSteps1}
-                        currentStep={currentStep}
-                        setCurrentStep={setCurrentStep}
-                    />
-
-
+                <TransferStepper
+                  isInternal={transferAssetData?.transferType === 'Internal'}
+                  hasAssets={existingAssets.length > 0}
+                  isTransferEnded={isTransferEnded}
+                  isNextStep={isNextStep}
+                  isPrevStep={isPrevStep}
+                  steps={transferAssetData?.transferType === 'Internal' ? transferSteps : transferSteps1}
+                  currentStep={currentStep}
+                  setCurrentStep={setCurrentStep}
+                  updateStatus={updateStatus}
+                />
 
                 <Box my={1}>
                   {currentStep === 0 && (
@@ -380,6 +352,7 @@ const TransferAssetDetailPage = () => {
                       permissions={permissions}
                       setNextStep={setNextStep}
                       setExistingAssets={setExistingAssets}
+                      setTransferIsEnded={setTransferIsEnded}
                     />
                   )}
                   {currentStep === 2 && (
@@ -396,43 +369,44 @@ const TransferAssetDetailPage = () => {
                     />
                   )}
                 </Box>
-              </Box>
-            </TabPanel>
-
-
-
-          </Paper>
-        </div>
-      </Fragment>
+              </Box >
+            </TabPanel >
+          </Paper >
+        </div >
+      </Fragment >
       {/* Confirm Delete Dialog */}
-      {showConfirmBox && (
-        <ConfirmationDialog
-          okBtnLoading={isDeleting}
-          open={showConfirmBox}
-          message={`Are you sure you want to delete this transfer asset: ${headingLabel} ?`}
-          onClose={() => {
-            setShowConfirmBox(false);
-          }}
-          onOk={handleDelete}
-        />
-      )}
+      {
+        showConfirmBox && (
+          <ConfirmationDialog
+            okBtnLoading={isDeleting}
+            open={showConfirmBox}
+            message={`Are you sure you want to delete this transfer asset: ${headingLabel} ?`}
+            onClose={() => {
+              setShowConfirmBox(false);
+            }}
+            onOk={handleDelete}
+          />
+        )
+      }
       {/* Manage Transfer Asset Data */}
-      {openUpdateDialog && (
-        <ManageTransferAsset
-          isEditable={existingAssets.length > 0}
-          isMainInfoEditable={(currentStep >= 1 && loadingTickets.length > 0)}
-          number={transferAssetData?.transferAssetNumber}
-          isClone={false}
-          transferAssetId={id}
-          onClose={() => {
-            setOpenUpdateDialog(false);
-          }}
-          onSuccess={() => {
-            fetchTransferAssetData();
-            setOpenUpdateDialog(false);
-          }}
-        />
-      )}
+      {
+        openUpdateDialog && (
+          <ManageTransferAsset
+            isEditable={existingAssets.length > 0}
+            isMainInfoEditable={currentStep >= 1 && loadingTickets.length > 0}
+            number={transferAssetData?.transferAssetNumber}
+            isClone={false}
+            transferAssetId={id}
+            onClose={() => {
+              setOpenUpdateDialog(false);
+            }}
+            onSuccess={() => {
+              fetchTransferAssetData();
+              setOpenUpdateDialog(false);
+            }}
+          />
+        )
+      }
     </>
   );
 };

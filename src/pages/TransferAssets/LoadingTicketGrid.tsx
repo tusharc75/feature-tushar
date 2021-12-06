@@ -14,7 +14,7 @@ import { CommonRenderer, DateRenderer } from '../../components/AgGridComponents/
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import {FaSuitcase} from "react-icons/fa";
+import { FaSuitcase } from "react-icons/fa";
 
 interface LoadingGridProps {
   fetchAssets: any;
@@ -26,11 +26,12 @@ interface LoadingGridProps {
   currentStep: number;
   setTickets?: any;
   setExistingAssets?: any;
+  setTransferIsEnded?: any
 }
 
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
-  const {permissions, fetchAssets, transferAssetId, setPrevStep, transferAssetData, setTickets, setNextStep, setExistingAssets } = props;
+  const { permissions, fetchAssets, transferAssetId, setPrevStep, transferAssetData, setTickets, setNextStep, setExistingAssets, setTransferIsEnded } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [openLoadingTicketDialog, setOpenLoadingTicketDialog] = useState(false);
@@ -165,6 +166,14 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       setPrevStep(true)
     }
 
+    if (transferAssetData?.transferType === "Internal") {
+      if (inventoryWithTicket.length === dataRows.length) {
+        setTransferIsEnded(true)
+      } else {
+        setTransferIsEnded(false)
+      }
+    }
+
   }, [dataRows, selectedRecords])
 
   const handleRemoveTicket = () => {
@@ -218,58 +227,58 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
       <Box mt={1}>
         {isMobile ? <CustomSwipableList
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={permissions.transferAsset}
-                primaryField={columns?.find(d => d.field)}
-                onClick={(data) => {
-                  history.push(`${routes.productInventoryDetail.path}/${data._id}`)
-                }}
-                dataRows={dataRows}
-                selectedRecords={selectedRecords}
-                dispatch={dispatch}
-                onEdit={(data) => {
-                  // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
-                }}
-                extraParamsToCheckDelete={true}
-                onDelete={(data) => {
+          allowSelection={true}
+          allowSwipe={true}
+          permissions={permissions.transferAsset}
+          primaryField={columns?.find(d => d.field)}
+          onClick={(data) => {
+            history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+          }}
+          dataRows={dataRows}
+          selectedRecords={selectedRecords}
+          dispatch={dispatch}
+          onEdit={(data) => {
+            // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
+          }}
+          extraParamsToCheckDelete={true}
+          onDelete={(data) => {
 
-                }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                chips={[
-                  {
-                    label: "Delivery Ticket : ",
-                    field: "deliveryTicket",
-                  }
-                ]}
-                additionalDetails={[]}
-                owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                onCreate={false}
-                showClone={false}
-                onClone={(data) => {
-                }}
-                renderedFrom="transferAssetPage"
-            /> :
-            <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameworkComponents}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                allowAction={false}
-                actionWidth={100}
-                allowSelection={true}
-                isClientSideGrid={true}
-                loading={loading}
-                renderedFrom="transferAssetPage"
-                refreshGrid={() => fetchAssetsData(true)}
-            />
+          }}
+          rowCount={rowCount}
+          page={page}
+          loading={loading}
+          chips={[
+            {
+              label: "Delivery Ticket : ",
+              field: "deliveryTicket",
+            }
+          ]}
+          additionalDetails={[]}
+          owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+          onCreate={false}
+          showClone={false}
+          onClone={(data) => {
+          }}
+          renderedFrom="transferAssetPage"
+        /> :
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            allowAction={false}
+            actionWidth={100}
+            allowSelection={true}
+            isClientSideGrid={true}
+            loading={loading}
+            renderedFrom="transferAssetPage"
+            refreshGrid={() => fetchAssetsData(true)}
+          />
         }
       </Box>
 
