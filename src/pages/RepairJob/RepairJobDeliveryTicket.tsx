@@ -20,7 +20,7 @@ import ManageDeliveryTicket from '../DeliveryTicket/ManageDeliveryTicket';
 
 const renderedFrom = "repairJob_delivery_ticket"
 
-const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled }) => {
+const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPreviousButtonDisabled }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [gridApi, setGridApi] = useState(null);
@@ -73,6 +73,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled }) => {
             })
 
             setNextButtonDisabled(tempProductInventory.some(s => s.status !== "Repair"))
+            // setPreviousButtonDisabled(tempProductInventory.some(s => s["deliveryTicketId"]));
 
             dispatch({
               type: "initialize", data: tempProductInventory, count: tempProductInventory.length

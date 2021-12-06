@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment, useRef } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Grid, Box, Button, Paper, Tab, Tabs } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
@@ -22,16 +22,15 @@ import ReceivingTicketGrid from './ReceivingTicketGrid';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import { MdEdit, MdDelete } from 'react-icons/md';
 import TabPanel from '../../components/TabPanel';
-import { FaWpforms } from 'react-icons/fa';
 import { BiFoodMenu } from 'react-icons/bi';
+import { FaWpforms } from "react-icons/fa";
+
 
 const transferSteps = ['Add Assets', 'Loading Ticket'];
 const transferSteps1 = ['Add Assets', 'Loading Ticket', 'Receiving Ticket'];
 
 const TransferAssetDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
-  const firstRender = useRef(true);
-
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -57,7 +56,7 @@ const TransferAssetDetailPage = () => {
   const [plantId, setPlantId] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
-  const [isTransferEnded, setTransferIsEnded] = useState(false);
+  const [isTransferEnded, setTransferIsEnded] = useState(false)
 
   useEffect(() => {
     if (id) {
@@ -66,13 +65,6 @@ const TransferAssetDetailPage = () => {
     }
     // eslint-disable-next-line
   }, [id]);
-
-  // useEffect(() => {
-  //   if (firstRender.current) {
-  //     firstRender.current = false;
-  //   } else if (transferType) {
-  //   }
-  // }, [currentStep]);
 
   const updateStatus = (step) => {
     const processStatus = transferType === 'Internal' ? transferSteps[step] : transferSteps1[step];
@@ -360,6 +352,7 @@ const TransferAssetDetailPage = () => {
                       permissions={permissions}
                       setNextStep={setNextStep}
                       setExistingAssets={setExistingAssets}
+                      setTransferIsEnded={setTransferIsEnded}
                     />
                   )}
                   {currentStep === 2 && (
@@ -376,40 +369,44 @@ const TransferAssetDetailPage = () => {
                     />
                   )}
                 </Box>
-              </Box>
-            </TabPanel>
-          </Paper>
-        </div>
-      </Fragment>
+              </Box >
+            </TabPanel >
+          </Paper >
+        </div >
+      </Fragment >
       {/* Confirm Delete Dialog */}
-      {showConfirmBox && (
-        <ConfirmationDialog
-          okBtnLoading={isDeleting}
-          open={showConfirmBox}
-          message={`Are you sure you want to delete this transfer asset: ${headingLabel} ?`}
-          onClose={() => {
-            setShowConfirmBox(false);
-          }}
-          onOk={handleDelete}
-        />
-      )}
+      {
+        showConfirmBox && (
+          <ConfirmationDialog
+            okBtnLoading={isDeleting}
+            open={showConfirmBox}
+            message={`Are you sure you want to delete this transfer asset: ${headingLabel} ?`}
+            onClose={() => {
+              setShowConfirmBox(false);
+            }}
+            onOk={handleDelete}
+          />
+        )
+      }
       {/* Manage Transfer Asset Data */}
-      {openUpdateDialog && (
-        <ManageTransferAsset
-          isEditable={existingAssets.length > 0}
-          isMainInfoEditable={currentStep >= 1 && loadingTickets.length > 0}
-          number={transferAssetData?.transferAssetNumber}
-          isClone={false}
-          transferAssetId={id}
-          onClose={() => {
-            setOpenUpdateDialog(false);
-          }}
-          onSuccess={() => {
-            fetchTransferAssetData();
-            setOpenUpdateDialog(false);
-          }}
-        />
-      )}
+      {
+        openUpdateDialog && (
+          <ManageTransferAsset
+            isEditable={existingAssets.length > 0}
+            isMainInfoEditable={currentStep >= 1 && loadingTickets.length > 0}
+            number={transferAssetData?.transferAssetNumber}
+            isClone={false}
+            transferAssetId={id}
+            onClose={() => {
+              setOpenUpdateDialog(false);
+            }}
+            onSuccess={() => {
+              fetchTransferAssetData();
+              setOpenUpdateDialog(false);
+            }}
+          />
+        )
+      }
     </>
   );
 };

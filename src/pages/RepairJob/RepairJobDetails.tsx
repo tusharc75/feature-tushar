@@ -33,8 +33,8 @@ import RepairJobReceivingTicket from './RepairJobReceivingTicket';
 import RepairJobDeliveryTicket from './RepairJobDeliveryTicket';
 import ManageAssetDialog from './ManageAssetDialog';
 
+const reservedStatus = "Reserved";
 const renderedFrom = "repairJobDetails"
-
 const step1RenderedFrom = `${renderedFrom}_assets`
 
 function a11yProps(index: any) {
@@ -90,6 +90,7 @@ const RepairJobDetails = () => {
   const [serializedAssetFields, setSerializedAssetFields] = useState(null)
 
   const [disableNextStep, setDisableNextStep] = useState(false)
+  const [disablePreviousStep, setDisablePreviousStep] = useState(false)
 
   const [unmodifiedColumns, setUnmodifiedColumns] = useState([]);
 
@@ -140,9 +141,11 @@ const RepairJobDetails = () => {
           type: "initialize", data: [], count: 0
         });
 
+
         let rows = data.map((u, index) => {
           u["_id"] = u["id"];
           u["index"] = `${index + 1}.0`;
+
           return prepareDataForGrid(u, user);
         });
 
@@ -185,7 +188,7 @@ const RepairJobDetails = () => {
   }
 
   const ActionsRenderer = (params) => (
-    <GridDeleteIcon
+    params.data?.status === reservedStatus ? <GridDeleteIcon
       hasDeletePermission={permissions?.repairJob?.isUpdate}
       ownerId={user?.user?._id}
       userId={user?.user?._id}
@@ -193,7 +196,7 @@ const RepairJobDetails = () => {
         setShowAssetRemoveConfirmationDialog({ open: true, id: params.data._id ?? params.data.id, ids: [] });
       }}
       entity={sidebarResource.productInventory}
-    />
+    /> : ""
   );
 
   const deleteRepairJobAssets = () => {
@@ -316,6 +319,10 @@ const RepairJobDetails = () => {
       })
       .then(() => {
         setDisableNextStep(false)
+        if (previousStep === 0) {
+          fetchAssignedSerializedAssets();
+        }
+
       }).catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -424,6 +431,7 @@ const RepairJobDetails = () => {
                     <Paper>
                       <CustomCommonSteps
                         disableNextStep={disableNextStep}
+                        disablePreviousStep={disablePreviousStep}
                         steps={repairJobProcessSteps.filter(f => f !== "End")}
                         currentStep={currentStep}
                         setCurrentStep={setCurrentStep}
@@ -466,7 +474,7 @@ const RepairJobDetails = () => {
                                   color="primary"
                                   type="button"
                                   size="small"
-                                  disabled={step1SelectedRecords.length === 0}
+                                  disabled={step1SelectedRecords.length === 0 || step1SelectedRecords.some(s => s.status !== reservedStatus)}
                                   onClick={() => {
                                     setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: step1SelectedRecords.map(m => m._id ?? m.id) });
                                   }}
@@ -504,6 +512,7 @@ const RepairJobDetails = () => {
                             <RepairJobDeliveryTicket
                               repairJobData={repairJobData}
                               setNextButtonDisabled={setDisableNextStep}
+                              setPreviousButtonDisabled={setDisablePreviousStep}
                             />
                           )}
 
