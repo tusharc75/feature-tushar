@@ -111,17 +111,18 @@ const ManageRepairJob = (props) => {
 
           const sectionFields = field.sectionFields.map(_f => {
 
-
+if (formValues && formValues["typeOfRepair"] === "Internal") {
             if (_f.fieldName === "repairPlant" || _f.fieldName === "plantShipTo") {
-              if (formValues && formValues["typeOfRepair"] === "Internal") {
+
                 _f.required = true
               } else {
                 _f.required = false
               }
             }
 
+            if (formValues && formValues["typeOfRepair"] === "External") {
             if (_f.fieldName === "vendor" || _f.fieldName === "supplierShipTo") {
-              if (formValues && formValues["typeOfRepair"] === "External") {
+              
                 _f.required = true
               } else {
                 _f.required = false
