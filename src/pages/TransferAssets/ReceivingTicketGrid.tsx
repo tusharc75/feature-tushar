@@ -34,6 +34,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   const [openReceivingTicketDialog, setOpenReceivingTicketDialog] = useState(false);
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
+  const [assetsDelivered, setAssetsDelivered] = useState([]);
+
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
 
@@ -185,6 +187,9 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     setNextStep(true)
     const inventoryWithNoTicket = dataRows.filter((asset: any) => !asset?.hasOwnProperty("receivingTicket"));
     const inventoryWithTicket = dataRows.filter((asset: any) => asset?.hasOwnProperty("receivingTicket"));
+    const inventoryDelivered = selectedRecords.filter((asset: any) => asset?.receivingTicketStatus === "Delivered" || asset?.receivingTicketStatus === "In-Transit");
+
+    setAssetsDelivered(inventoryDelivered)
 
     if (inventoryWithNoTicket.length > 0) {
       setNextStep(false)
@@ -250,7 +255,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             variant="contained"
             size="small"
             color="primary"
-            disabled={selectedRecords.filter(asset => asset?.hasOwnProperty("receivingTicket")).length === 0}
+            disabled={assetsDelivered.length > 0 || selectedRecords.filter(asset => asset?.hasOwnProperty("receivingTicket")).length === 0}
             onClick={() => setShowConfirmBox(true)}
           >
             Remove Receiving Ticket
