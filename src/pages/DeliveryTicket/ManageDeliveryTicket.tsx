@@ -177,7 +177,7 @@ const ManageDeliveryTicket = (props) => {
                     }
 
                     setInitialData({
-                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
+                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "repairJob"),
                         values: tempInitialData,
                     });
                     setFormValues(tempInitialData)
@@ -190,15 +190,15 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["transferAsset"] = transferData?._id;
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
                     if (transferData?.transferType === "Internal") {
-                        tempInitialData["receivingPlant"] = transferData?.transferToPlant.optionValue;
+                        tempInitialData["receivingPlant"] = transferData?.transferToPlant?.optionValue;
                         tempInitialData["plantShipTo"] = transferData?.plantShipTo;
                     }
                     if (transferData?.transferType === "External Customer") {
-                        tempInitialData["customerAccount"] = transferData?.transferToCustomer.optionValue;
+                        tempInitialData["customerAccount"] = transferData?.transferToCustomer?.optionValue;
                         tempInitialData["shippingAddress"] = transferData?.customerShipTo;
                     }
                     if (transferData?.transferType === "External Supplier") {
-                        tempInitialData["supplierAccount"] = transferData?.transferToSupplier.optionValue;
+                        tempInitialData["supplierAccount"] = transferData?.transferToSupplier?.optionValue;
                         tempInitialData["supplierShippingAddress"] = transferData?.supplierShipTo;
                     }
                     setInitialData({
