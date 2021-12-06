@@ -239,7 +239,6 @@ export default function QuoteDetail() {
 
       fetchTermsAndConditions();
       fetchRelatedTo();
-      fetchDoaLimit();
     }
   }, [id]);
 
@@ -419,7 +418,7 @@ export default function QuoteDetail() {
               params.delete('openEdit');
               history.push({ search: params.toString() });
             }
-
+            fetchDoaLimit();
             setLoading(false);
           });
         })
