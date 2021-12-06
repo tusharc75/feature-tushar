@@ -84,8 +84,16 @@ const ManageDeliveryTicket = (props) => {
                 }
 
                 if (repairJobData) {
-                    if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
-                        return false
+                    if (repairJobData?.typeOfRepair === "Internal") {
+                        if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
+                            return false
+                        }
+                    }
+
+                    if (repairJobData?.typeOfRepair === "External") {
+                        if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
+                            return false
+                        }
                     }
                 }
 
@@ -158,6 +166,16 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["type"] = "Repair Job";
                     tempInitialData["repairJob"] = repairJobData?._id
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
+
+                    if (repairJobData?.typeOfRepair === "Internal") {
+                        tempInitialData["receivingPlant"] = repairJobData?.repairPlant?.optionValue;
+                        tempInitialData["plantShipTo"] = repairJobData?.plantShipTo;
+                    }
+                    if (repairJobData?.typeOfRepair === "External") {
+                        tempInitialData["supplierAccount"] = repairJobData?.vendor?.optionValue;
+                        tempInitialData["supplierShippingAddress"] = repairJobData?.supplierShipTo;
+                    }
+
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
                         values: tempInitialData,
