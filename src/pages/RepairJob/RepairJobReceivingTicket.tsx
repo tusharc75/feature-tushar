@@ -28,6 +28,9 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { makeStyles } from '@material-ui/core/styles';
 import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import {FaSuitcase} from "react-icons/fa";
+import {isMobile} from "react-device-detect";
 
 const renderedFrom = "repairJob_receiving_ticket"
 
@@ -314,7 +317,42 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled }) => {
         <Grid item xs={12} md={12} sm={12} className="mt-3">
 
             {columns ?
-                <CustomAgGrid
+               isMobile ? <CustomSwipableList
+                    allowSelection={true}
+                    allowSwipe={true}
+                    permissions={true}
+                    primaryField={columns?.find(d => d.field)}
+                    onClick={() => {
+                        // history.push(`${routes.rentalManagementDetail.path}/${data._id}`)
+                    }}
+                    dataRows={dataRows}
+                    selectedRecords={selectedRecords}
+                    dispatch={dispatch}
+                    onEdit={() => {
+
+                    }}
+                    extraParamsToCheckDelete={true}
+                    onDelete={() => {
+
+                    }}
+                    rowCount={rowCount}
+                    page={page}
+                    loading={loading}
+                    chips={[
+                        {
+                            label: "Status: ",
+                            field: "status",
+                        }
+                    ]}
+                    additionalDetails={[
+
+                    ]}
+                    owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                    onCreate={false}
+                    showClone={false}
+                    onClone={() => { }}
+                    renderedFrom={renderedFrom}
+                /> : <CustomAgGrid
                     columns={columns}
                     dataRows={dataRows}
                     frameworkComponents={frameworkComponents}
