@@ -16,6 +16,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
+import { useData } from "../../StateProvider/Provider";
 
 interface Props {
   isClone?: boolean;
@@ -28,6 +29,9 @@ interface Props {
 }
 
 const ManageTransferAsset: FC<Props> = (props) => {
+  const {
+    state: { selectedEntity },
+  }: any = useData();
   const { isClone = false, transferAssetId = null, onClose, onSuccess, number = '', isEditable = false, isMainInfoEditable = false } = props;
   const toastConfig = useContext(CustomToastContext);
   const initialRender = useRef(true);
@@ -347,7 +351,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                     label={field.fieldLabel}
                                     name={field.fieldName}
                                     type={field.type}
-                                    options={field.option}
+                                    options={field.option.filter((o: any) => o?.entity.includes(selectedEntity)) ?? []}
                                     required={field.required}
                                     fullWidth
                                     isTooltip={field?.isTooltip || false}
