@@ -60,11 +60,15 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
         axiosInstance()
           .get(`${repairJob.repairJobApi}/${repairJobData._id}/delivery-ticket`)
           .then(({ data }) => {
+
+            // let disableNextButtonIfNonDeliveredFound = true;
+
             data.data.map(obj => {
               tempProductInventory.map((d, index) => {
                 if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
                   tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
-                  tempProductInventory[index]["deliveryTicketId"] = obj?._id
+                  tempProductInventory[index]["deliveryTicketId"] = obj?._id;
+                  tempProductInventory[index]["isDelivered"] = obj?.status === "Delivered";
                 }
               })
             })
@@ -74,7 +78,9 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
               d["hideSelection"] = d.status === "In-Transit";
             })
 
-            setNextButtonDisabled(tempProductInventory.some(s => ["Repair", "Scrap", "Lost"].indexOf(s.status) === -1));
+            setNextButtonDisabled(!tempProductInventory.every(e => e.hasOwnProperty("isDelivered") && e.isDelivered === true));
+
+            // setNextButtonDisabled(tempProductInventory.some(s => ["Repair", "Scrap", "Lost"].indexOf(s.status) === -1));
             // setPreviousButtonDisabled(tempProductInventory.some(s => s["deliveryTicketId"]));
 
             dispatch({
