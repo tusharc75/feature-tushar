@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, transferAsset, setFieldsInAscendingOrder } from '../../constants/helpers';
+import { CustomDialogTransition, transferAsset, setFieldsInAscendingOrder, generateUniqueIdOnly } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues, RESOURCE_LABEL } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
@@ -50,7 +50,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
             .get(`${transferAsset.api}/` + transferAssetId)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, createdBy, updatedBy, serialNumber, ...rest } = data;
+                const { _id, createdBy, updatedBy, entity, ...rest } = data;
 
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -68,8 +68,9 @@ const ManageTransferAsset: FC<Props> = (props) => {
             });
           setAllFields(fieldsDataForUpdate);
         } else {
-          let createValues = getObjKeys('', fieldsDataForCreate);
+          let createValues: any = getObjKeys('', fieldsDataForCreate);
           setAllFields(fieldsDataForCreate);
+          createValues.transferAssetNumber = `TA_${generateUniqueIdOnly()}`
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
             values: createValues

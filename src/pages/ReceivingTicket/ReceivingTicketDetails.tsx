@@ -278,7 +278,7 @@ const ReceivingTicketDetails = () => {
       const fieldsDataForUpdate = receivingTicketFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
       let values = getObjKeysWithValues(receivingTicketData, fieldsDataForUpdate)
       values["status"] = mappedStatus[label]
-      values["_id"] = receivingTicketData._id
+      values["_id"] = receivingTicketData?._id
       axiosInstance().put(`${receivingTicket.receivingTicketApi}`, values).then(({ data: { data } }) => {
         fetchReceivingTicketData()
       }).catch((error) => {
@@ -461,116 +461,105 @@ const ReceivingTicketDetails = () => {
                   </TabPanel>
 
                   <TabPanel value={tabValue} index={1}>
+                    <>
+                      <Grid container spacing={1} className="p-2">
+                        <Grid item xs={12} className="mt-2 d-flex gap-2">
+                          <Typography variant="subtitle1" className="font-weight-bold text-primary">
+                            Serialized Assets
+                          </Typography>
 
+                          {
+                            receivingTicketData?.status === "New" && <IconButton
+                              onClick={() => {
+                                setAddSerializedAssetDialog(true)
+                              }}
+                              color='primary'
+                              size="small"
+                            >
+                              <Tooltip
+                                title="Add More Serialized Assets">
+                                <AddBoxRoundedIcon />
+                              </Tooltip>
+                            </IconButton>
+                          }
 
-                    {
-                      dataRows && dataRows.length ?
-                        <>
-                          <Grid container spacing={1} className="p-2">
-                            <Grid item xs={12} className="mt-2 d-flex gap-2">
-                              <Typography variant="subtitle1" className="font-weight-bold text-primary">
-                                Serialized Assets
-                              </Typography>
+                          {
+                            receivingTicketData?.status === "New" && <IconButton
+                              disabled={selectedRecords.length === 0}
+                              onClick={() => {
+                                setShowRemoveAssetFromReceivingTicketDialog(true)
+                              }}
+                              color='primary'
+                              size="small"
+                            >
+                              <Tooltip
+                                title="Remove Serialized Assets">
+                                <RemoveCircleRoundedIcon />
+                              </Tooltip>
+                            </IconButton>
+                          }
 
-                              {
-                                receivingTicketData.status === "New" && <IconButton
-                                  onClick={() => {
-                                    setAddSerializedAssetDialog(true)
-                                  }}
-                                  color='primary'
-                                  size="small"
-                                >
-                                  <Tooltip
-                                    title="Add More Serialized Assets">
-                                    <AddBoxRoundedIcon />
-                                  </Tooltip>
-                                </IconButton>
-                              }
+                        </Grid>
+                        <Grid item xs={12}>
+                          {isMobile ? <CustomSwipableList
+                            allowSelection={true}
+                            allowSwipe={true}
+                            permissions={permissions}
+                            primaryField={columns?.find(d => d.field === "assetNumber")}
+                            onClick={(data) => {
+                              history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                            }}
+                            dataRows={dataRows}
+                            selectedRecords={selectedRecords}
+                            dispatch={dispatch}
+                            onEdit={() => {
 
-                              {
-                                receivingTicketData.status === "New" && <IconButton
-                                  disabled={selectedRecords.length === 0}
-                                  onClick={() => {
-                                    setShowRemoveAssetFromReceivingTicketDialog(true)
-                                  }}
-                                  color='primary'
-                                  size="small"
-                                >
-                                  <Tooltip
-                                    title="Remove Serialized Assets">
-                                    <RemoveCircleRoundedIcon />
-                                  </Tooltip>
-                                </IconButton>
-                              }
+                            }}
+                            extraParamsToCheckDelete={true}
+                            onDelete={() => {
+                            }}
+                            rowCount={rowCount}
+                            page={page}
+                            loading={loading}
+                            chips={
+                              [{
+                                label: `Product Description: `,
+                                field: "productName",
+                                forceShow: true
+                              }]
+                            }
+                            onCreate={null}
+                            showClone={false}
+                            fullHeight={true}
+                            renderedFrom={"receivingTicketDetailInventoryPage"}
+                            onClone={() => {
+                            }}
 
-                            </Grid>
-                            <Grid item xs={12}>
-                              {isMobile ? <CustomSwipableList
-                                allowSelection={true}
-                                allowSwipe={true}
-                                permissions={permissions}
-                                primaryField={columns?.find(d => d.field === "assetNumber")}
-                                onClick={(data) => {
-                                  history.push(`${routes.productInventoryDetail.path}/${data._id}`)
-                                }}
-                                dataRows={dataRows}
-                                selectedRecords={selectedRecords}
-                                dispatch={dispatch}
-                                onEdit={() => {
+                          /> :
 
-                                }}
-                                extraParamsToCheckDelete={true}
-                                onDelete={() => {
-                                }}
-                                rowCount={rowCount}
-                                page={page}
-                                loading={loading}
-                                chips={
-                                  [{
-                                    label: `Product Description: `,
-                                    field: "productName",
-                                    forceShow: true
-                                  }]
-                                }
-                                onCreate={null}
-                                showClone={false}
-                                fullHeight={true}
-                                renderedFrom={"receivingTicketDetailInventoryPage"}
-                                onClone={() => {
-                                }}
-
-                              /> :
-
-                                Object.keys(frameWorkComponent).length > 0 ? <CustomAgGrid
-                                  allowSelection={receivingTicketData.status === "New"}
-                                  allowAction={false}
-                                  columns={columns}
-                                  dataRows={dataRows}
-                                  frameworkComponents={frameWorkComponent}
-                                  setGridApi={setGridApi}
-                                  dispatch={dispatch}
-                                  rowCount={rowCount}
-                                  limit={limit}
-                                  pageSizes={pageSizes}
-                                  page={page}
-                                  actionWidth={150}
-                                  loading={false}
-                                  renderedFrom={renderedFrom}
-                                  refreshGrid={fetchProductInventory}
-                                /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-                              }
-                            </Grid>
-                          </Grid>
-                        </>
-                        : null
-                    }
-
+                            Object.keys(frameWorkComponent).length > 0 ? <CustomAgGrid
+                              allowSelection={receivingTicketData?.status === "New"}
+                              allowAction={false}
+                              columns={columns}
+                              dataRows={dataRows}
+                              frameworkComponents={frameWorkComponent}
+                              setGridApi={setGridApi}
+                              dispatch={dispatch}
+                              rowCount={rowCount}
+                              limit={limit}
+                              pageSizes={pageSizes}
+                              page={page}
+                              actionWidth={150}
+                              loading={false}
+                              renderedFrom={renderedFrom}
+                              refreshGrid={fetchProductInventory}
+                            /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+                          }
+                        </Grid>
+                      </Grid>
+                    </>
 
                   </TabPanel>
-
-
-
-
                 </>
               )}
             </Paper>
@@ -715,9 +704,9 @@ const ReceivingTicketDetails = () => {
           }}
           isAdding={isAdding}
           selectedProducts={[]}
-          rentalId={receivingTicketData.type === "Rental Job" ? receivingTicketData?.rentalJob?.optionValue : ""}
-          repairJobId={receivingTicketData.type === "Repair Job" ? receivingTicketData?.repairJob?.optionValue : ""}
-          transferAssetId={receivingTicketData.type === "Transfer Asset" ? receivingTicketData?.transferAsset?.optionValue : ""}
+          rentalId={receivingTicketData?.type === "Rental Job" ? receivingTicketData?.rentalJob?.optionValue : ""}
+          repairJobId={receivingTicketData?.type === "Repair Job" ? receivingTicketData?.repairJob?.optionValue : ""}
+          transferAssetId={receivingTicketData?.type === "Transfer Asset" ? receivingTicketData?.transferAsset?.optionValue : ""}
           notIn="receivingTicket"
         // type={inventoryType}
         />

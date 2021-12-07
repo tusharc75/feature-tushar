@@ -26,6 +26,7 @@ interface LoadingGridProps {
   setTickets?: any;
   setExistingAssets?: any;
   setTransferIsEnded?: any;
+  updateTransferStatus?: any;
 }
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
@@ -38,13 +39,15 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     setTickets,
     setNextStep,
     setExistingAssets,
-    setTransferIsEnded
+    setTransferIsEnded,
+    updateTransferStatus
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [openLoadingTicketDialog, setOpenLoadingTicketDialog] = useState(false);
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
   const [assetsDelivered, setAssetsDelivered] = useState([]);
+  const [assetsIntransit, setAssetsIntransit] = useState([]);
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const history = useHistory();
@@ -56,7 +59,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     { field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'deliveryTicket', headerName: 'Loading Ticket', show: true, disabled: true, cellRenderer: 'ticketRenderer' },
-    { field: 'product', headerName: 'Product Description', show: true, cellRenderer: 'productRenderer' },
+    { field: 'productDescription', headerName: 'Product Description', show: true, cellRenderer: 'productRenderer' },
     { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'deliveryTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
   ];
@@ -98,7 +101,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
   useEffect(() => {
     if (transferAssetId) {
-      fetchAssetsData(false);
+      fetchAssetsData(true);
     }
   }, [transferAssetId]);
 
@@ -111,15 +114,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     try {
       let assetData = await fetchAssets(forceRefresh);
       let ticketData: any = await fetchLoadingTickets();
-      assetData = [
-        ...assetData?.map((d: any) => ({
-          ...d,
-          product: d.product.optionLabel,
-          productId: d.product.optionValue
-        }))
-      ];
 
       for (let i = 0; i < ticketData.length; i++) {
+        assetData[i].assetNumber = `${i + 1}. ${assetData[i].assetNumber}`;
         for (let j = 0; j < assetData.length; j++) {
           if (ticketData[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
             assetData[j].deliveryTicket = ticketData[i].deliveryJobName;
@@ -129,7 +126,13 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         }
       }
 
+      assetData = assetData?.map((d: any, index) => ({
+        ...d,
+        assetNumber: `${index + 1}. ${d.assetNumber}`
+      }));
+
       setExistingAssets(assetData);
+
       dispatch({ type: 'initialize', data: assetData, count: assetData.length });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
@@ -160,25 +163,28 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     setNextStep(true);
     const inventoryWithNoTicket = dataRows.filter((asset: any) => !asset?.hasOwnProperty('deliveryTicket'));
     const inventoryWithTicket = dataRows.filter((asset: any) => asset?.hasOwnProperty('deliveryTicket'));
-    const inventoryNotDelivered = dataRows.filter((asset: any) => asset['deliveryTicketStatus'] !== 'Delivered');
-    const inventoryDelivered = selectedRecords.filter((asset: any) => asset['deliveryTicketStatus'] === 'Delivered' || asset['deliveryTicketStatus'] === 'In-Transit');
-    setAssetsDelivered(inventoryDelivered);
+    const inventoryDelivered = dataRows.filter((asset: any) => asset['deliveryTicketStatus'] === 'Delivered');
+    const selectedInventoryIntransit = selectedRecords.filter((asset: any) => asset['deliveryTicketStatus'] === 'In-Transit');
+    const selectedInventoryDelivered = selectedRecords.filter((asset: any) => asset['deliveryTicketStatus'] === 'Delivered');
+    setAssetsDelivered(selectedInventoryDelivered);
+    setAssetsIntransit(selectedInventoryIntransit);
 
-    if (inventoryWithNoTicket.length > 0 || inventoryNotDelivered.length > 0) {
-      setNextStep(false);
-    } else {
+    if (inventoryDelivered.length > 0) {
       setNextStep(true);
+    } else {
+      setNextStep(false);
     }
 
-    if (inventoryWithTicket.length > 0) {
-      setPrevStep(false);
-    } else {
-      setPrevStep(true);
-    }
+    // if (inventoryWithTicket.length > 0) {
+    //   setPrevStep(false);
+    // } else {
+    //   setPrevStep(true);
+    // }
 
     if (transferAssetData?.transferType === 'Internal') {
-      if (inventoryWithTicket.length === dataRows.length) {
+      if (inventoryDelivered.length === dataRows.length) {
         setTransferIsEnded(true);
+        updateTransferStatus('Completed');
       } else {
         setTransferIsEnded(false);
       }
@@ -233,7 +239,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             size="small"
             color="primary"
             disabled={
-              assetsDelivered.length > 0 || selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length === 0
+              assetsDelivered.length > 0 ||
+              assetsIntransit.length > 0 ||
+              selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length === 0
             }
             onClick={() => setShowConfirmBox(true)}
           >
