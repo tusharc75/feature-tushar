@@ -25,6 +25,7 @@ import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne } from "react-icons/fa";
+import moment from 'moment';
 
 const ManageRepairJob = (props) => {
   const initialRender = useRef(true)
@@ -84,7 +85,7 @@ const ManageRepairJob = (props) => {
               toastConfig.setToastConfig(error);
             });
         } else {
-          let initialData = getObjKeys('', fieldsDataForCreate);
+          let initialData = { ...getObjKeys('', fieldsDataForCreate), expectedCompletionDate: "" };
 
           setAllFields(fieldsDataForCreate);
           setRepairJobData({
@@ -423,33 +424,76 @@ const ManageRepairJob = (props) => {
                                             isTooltip={field?.isTooltip || false}
                                             tooltipMessage={field?.tooltipMessage}
                                             size="small"
-                                          /> : <FormTypes
-                                            repairJobId={repairJobId}
-                                            {...field}
-                                            disabled={(!repairJobId && field.disableOnEdit)}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={field.option}
-                                            setFieldValue={(name, value) => {
-                                              setFieldValue(name, value);
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                            imageOrFileUploadCompletePercentage={
-                                              ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                                ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
+                                          /> : field.fieldName === "startDate"
+                                            ? <FormTypes
+                                              repairJobId={repairJobId}
+                                              {...field}
+                                              disabled={(!repairJobId && field.disableOnEdit)}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={field.option}
+                                              setFieldValue={(name, value) => {
+                                                setFieldValue(name, value);
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              size="small"
+                                              minDate={new Date()}
+                                              maxDate={values["expectedCompletionDate"] ? moment(values["expectedCompletionDate"]) : moment().add(5, "years")}
+                                            /> : field.fieldName === "expectedCompletionDate"
+                                              ? <FormTypes
+                                                repairJobId={repairJobId}
+                                                {...field}
+                                                disabled={(!repairJobId && field.disableOnEdit)}
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                options={field.option}
+                                                setFieldValue={(name, value) => {
+                                                  setFieldValue(name, value);
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field?.isTooltip || false}
+                                                tooltipMessage={field?.tooltipMessage}
+                                                size="small"
+                                                minDate={values["startDate"]}
+                                              /> : <FormTypes
+                                                repairJobId={repairJobId}
+                                                {...field}
+                                                disabled={(!repairJobId && field.disableOnEdit)}
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                options={field.option}
+                                                setFieldValue={(name, value) => {
+                                                  setFieldValue(name, value);
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field?.isTooltip || false}
+                                                tooltipMessage={field?.tooltipMessage}
+                                                size="small"
+                                                imageOrFileUploadCompletePercentage={
+                                                  ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                                    ? (completePercentage) => {
+                                                      setUploadingImageOrFileProgress(completePercentage);
+                                                    }
+                                                    : null
                                                 }
-                                                : null
-                                            }
-                                          />}
+                                              />}
 
                                     </Grid>
                                   )}
