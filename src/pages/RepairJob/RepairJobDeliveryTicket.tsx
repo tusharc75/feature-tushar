@@ -17,6 +17,8 @@ import { groupBy } from 'lodash';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import ManageDeliveryTicket from '../DeliveryTicket/ManageDeliveryTicket';
+import {isMobile} from "react-device-detect";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 const renderedFrom = "repairJob_delivery_ticket"
 
@@ -275,6 +277,50 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
     <Grid item xs={12} md={12} sm={12} className="mt-3">
 
       {columns ?
+          isMobile ?
+              <CustomSwipableList
+                  allowSelection={true}
+                  allowSwipe={true}
+                  permissions={true}
+                  primaryField={columns?.find(d => d.field)}
+                  onClick={() => {
+                    // history.push(`${routes.rentalManagementDetail.path}/${data._id}`)
+                  }}
+                  dataRows={dataRows}
+                  selectedRecords={true}
+                  dispatch={dispatch}
+                  onEdit={() => {
+                    // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
+                  }}
+                  extraParamsToCheckDelete={true}
+                  onDelete={() => {
+                    // setSingleRentalManagementDelete({
+                    //   show: true,
+                    //   id: data._id,
+                    //   rentalJobName: `${data.rentalJobName}`,
+                    // })
+                  }}
+                  rowCount={rowCount}
+                  page={page}
+                  loading={loading}
+                  chips={[
+                    {
+                      label: "Product Desc. : ",
+                      field: "productName",
+                    }
+                  ]}
+                  additionalDetails={[
+                    // {
+                    //   icon: <FaSuitcase size={18} />,
+                    //   field: "customerAccount"
+                    // },
+                  ]}
+                  owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                  onCreate={false}
+                  showClone={false}
+                  onClone={() => {} }
+                  renderedFrom={renderedFrom}
+              /> :
         <CustomAgGrid
           columns={columns}
           dataRows={dataRows}
