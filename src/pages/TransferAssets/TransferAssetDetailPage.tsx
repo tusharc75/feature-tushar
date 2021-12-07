@@ -28,6 +28,7 @@ import { FaWpforms } from "react-icons/fa";
 
 const transferSteps = ['Add Assets', 'Loading Ticket'];
 const transferSteps1 = ['Add Assets', 'Loading Ticket', 'Receiving Ticket'];
+const status = ["New", "In Progress", "Completed"]
 
 const TransferAssetDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -189,6 +190,13 @@ const TransferAssetDetailPage = () => {
         axiosInstance()
           .get(`${routes.transferAsset.path}/get-asset/${id}`)
           .then(({ data: { data } }) => {
+            data = [
+              ...data?.map((d: any) => ({
+                ...d,
+                productDescription: d.product.optionLabel,
+                productId: d.product.optionValue
+              }))
+            ];
             setExistingAssets(data);
             resolve(data);
           })
@@ -209,6 +217,17 @@ const TransferAssetDetailPage = () => {
       id: `main-tab-${index}`,
       'aria-controls': `main-tabpanel-${index}`
     };
+  }
+
+  const updateTransferStatus = (status) => {
+    axiosInstance()
+      .put(`${routes.transferAsset.path}/${id}`, {
+        ...transferAssetData,
+        status
+      }).then(({ data }) => console.log(data))
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   }
 
   return (
@@ -339,6 +358,7 @@ const TransferAssetDetailPage = () => {
                       user={user}
                       setNextStep={setNextStep}
                       ownerId={transferAssetData?.createdBy.user._id}
+                      updateTransferStatus={updateTransferStatus}
                     />
                   )}
                   {currentStep === 1 && (
@@ -353,6 +373,7 @@ const TransferAssetDetailPage = () => {
                       setNextStep={setNextStep}
                       setExistingAssets={setExistingAssets}
                       setTransferIsEnded={setTransferIsEnded}
+                      updateTransferStatus={updateTransferStatus}
                     />
                   )}
                   {currentStep === 2 && (
@@ -366,6 +387,7 @@ const TransferAssetDetailPage = () => {
                       permissions={permissions}
                       setNextStep={setNextStep}
                       setTransferIsEnded={setTransferIsEnded}
+                      updateTransferStatus={updateTransferStatus}
                     />
                   )}
                 </Box>

@@ -24,10 +24,11 @@ interface AssetsGridProps {
   fetchAssets: any;
   transferAssetId: string | any;
   ownerId: string | any;
+  updateTransferStatus?: any;
 }
 
 const AssetsGrid: FC<AssetsGridProps> = (props) => {
-  const { permissions, user, plantId, fetchAssets, transferAssetId, ownerId, setNextStep } = props
+  const { permissions, user, plantId, fetchAssets, transferAssetId, ownerId, setNextStep, updateTransferStatus } = props
   const toastConfig = useContext(CustomToastContext);
 
 
@@ -79,7 +80,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   }
 
   const ActionsRenderer = (params) => (
-    <>
+    !params.data.hasOwnProperty("deliveryTicket") && <>
       <GridDeleteIcon
         hasDeletePermission={permissions?.transferAsset?.isUpdate}
         ownerId={ownerId}
@@ -98,7 +99,20 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       fetchAssetsData(true);
     }
     // eslint-disable-next-line
-  }, [transferAssetId]);
+  }, [transferAssetId])
+
+  const fetchLoadingTickets = () =>
+    new Promise((resolve, reject) => {
+      axiosInstance()
+        .get(`${routes.transferAsset.path}/${transferAssetId}/loading-ticket?limit=0`)
+        .then(({ data: { data } }) => {
+          resolve(data);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  ;
 
   const fetchAssetsData = async (forceRefresh) => {
     gridDispatch({ type: "loading", loading: true });
@@ -108,10 +122,24 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
 
     try {
       let data = await fetchAssets(forceRefresh)
+      let ticketData: any = await fetchLoadingTickets();
+
+      for (let i = 0; i < ticketData.length; i++) {
+        for (let j = 0; j < data.length; j++) {
+          if (ticketData[i]?.productInventory.some((asset: any) => data[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
+            data[j].deliveryTicket = ticketData[i].deliveryJobName;
+            data[j].deliveryTicketId = ticketData[i]._id;
+            data[j].deliveryTicketStatus = ticketData[i].status;
+          }
+        }
+      }
       data = data?.map((d: any) => {
         let finalObject = prepareDataForGrid(d);
         return finalObject
       })
+
+
+
       gridDispatch({ type: "initialize", data: data, count: data.length })
       gridDispatch({ type: "loading", loading: false });
     } catch (error) {
@@ -169,7 +197,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           variant="contained"
           size="small"
           color="primary"
-          disabled={selectedRecords.length === 0}
+          disabled={selectedRecords.length === 0 || selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0}
           onClick={() => {
             setShowConfirmBox(true);
             setRemoveData(selectedRecords.map((asset: any) => asset?._id))
@@ -251,6 +279,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           closeDialog={() => setOpenAddNewAssets(false)}
           fetchAssets={() => fetchAssetsData(true)}
           existingAssets={dataRows.map(asset => asset._id)}
+          updateTransferStatus={updateTransferStatus}
         />
       }
       {/* Confirm Delete Dialog */}
