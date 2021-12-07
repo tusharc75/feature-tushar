@@ -19,7 +19,7 @@ import ManageRepairJob from './ManageRepairJob';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import queryString from "query-string";
 import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
+import {FaSuitcase, FaWpforms} from 'react-icons/fa';
 import TabPanel from '../../components/TabPanel';
 import CustomCommonSteps from '../../components/CustomCommonSteps/CustomCommonSteps';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
@@ -32,6 +32,8 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import RepairJobReceivingTicket from './RepairJobReceivingTicket';
 import RepairJobDeliveryTicket from './RepairJobDeliveryTicket';
 import ManageAssetDialog from './ManageAssetDialog';
+import {isMobile} from "react-device-detect";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 const reservedStatus = "Reserved";
 const renderedFrom = "repairJobDetails"
@@ -69,6 +71,7 @@ const RepairJobDetails = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
+  const [columns, setColumns] = useState([])
 
   const [okBtnLoading, setOkBtnLoading] = useState(false)
 
@@ -143,15 +146,25 @@ const RepairJobDetails = () => {
 
 
         let rows = data.map((u, index) => {
+
+          // let finalObject = prepareDataForGrid(u);
+          // finalObject["canDelete"] = permissions.rentalJob.isDelete;
+          // finalObject["isChecked"] = step1SelectedRecords.some(s => s._id === u._id);
+          // finalObject["allowedToEdit"] = permissions.rentalJob.isUpdate;
+
+
           u["_id"] = u["id"];
           u["index"] = `${index + 1}.0`;
 
-          return prepareDataForGrid(u, user);
+          return prepareDataForGrid(u, user) ;
         });
 
         let foundBlankValue = false;
 
+
+
         if (passedColumns) {
+
           const requiredFields = passedColumns.filter(u => u.required);
           if (requiredFields.length > 0) {
 
@@ -486,6 +499,47 @@ const RepairJobDetails = () => {
                               <Grid item xs={12} md={12} sm={12} className="mt-3">
 
                                 {step1Columns ?
+                                    isMobile ?
+                                        <CustomSwipableList
+                                            allowSelection={true}
+                                            allowSwipe={true}
+                                            permissions={permissions}
+                                            primaryField={step1Columns?.find(d => d.field)}
+                                            onClick={(data) => {
+                                              history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                                            }}
+                                            dataRows={step1DataRows}
+                                            selectedRecords={true}
+                                            dispatch={step1Dispatch}
+                                            onEdit={(data) => {
+                                              history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
+                                            }}
+                                            extraParamsToCheckDelete={true}
+                                            onDelete={(data) => {
+                                              setShowAssetRemoveConfirmationDialog({ open: true, id: data._id ?? data.id, ids: [] });
+
+                                            }}
+                                            rowCount={step1RowCount}
+                                            page={step1Page}
+                                            loading={step1Loading}
+                                            chips={[
+                                              {
+                                                label: "Product Desc. : ",
+                                                field: "product",
+                                              }
+                                            ]}
+                                            additionalDetails={[
+                                              // {
+                                              //   icon: <FaSuitcase size={18} />,
+                                              //   field: "customerAccount"
+                                              // },
+                                            ]}
+                                            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                                            onCreate={false}
+                                            showClone={false}
+                                            onClone={() => {} }
+                                            renderedFrom={step1RenderedFrom}
+                                        /> :
                                   <CustomAgGrid
                                     columns={step1Columns}
                                     dataRows={step1DataRows}

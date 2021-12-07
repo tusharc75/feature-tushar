@@ -188,7 +188,7 @@ const CustomCommonSteps = (props) => {
                             <Button size="small"
                                 color="primary"
                                 hidden={currentStep >= 3 || (currentStep === 0 && disableNextStep)}
-                                disabled={currentStep >= 3 || (currentStep === 0 && disableNextStep)}
+                                disabled={currentStep >= steps.length || (currentStep === 0 && disableNextStep) || disableNextStep}
                                 variant="contained" endIcon={<KeyboardArrowRight />}
                                 onClick={() => {
                                     setCurrentStep(currentStep + 1)
@@ -205,7 +205,7 @@ const CustomCommonSteps = (props) => {
                         backButton={
 
                             <Button size="small" variant="contained" color={"primary"} startIcon={<KeyboardArrowLeft />}
-                                disabled={currentStep === 0 || currentStep > steps.length - 1 || disablePreviousStep}
+                                disabled={currentStep > steps.length - 1 || currentStep === 0 || disablePreviousStep}
                                 onClick={() => {
                                     setCurrentStep(currentStep - 1)
                                     onPreviousButtonClick(currentStep, currentStep - 1)
