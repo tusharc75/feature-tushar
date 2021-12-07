@@ -212,7 +212,7 @@ export const RESOURCE_LABEL = {
   eCommerce: 'e-Commerce',
   packages: 'Packages',
   purchaseOrder: 'Purchase Order',
-  transferAsset: 'Transfer Asset',
+  transferAsset: 'Transfer Assets',
   address: 'Address'
 };
 
