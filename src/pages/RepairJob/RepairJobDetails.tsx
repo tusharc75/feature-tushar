@@ -672,7 +672,7 @@ const RepairJobDetails = () => {
         showEditAssetDialog.open && (
           <ManageAssetDialog
             open={showEditAssetDialog.open}
-            repairJobId={id}
+            repairJobData={repairJobData}
             fields={serializedAssetFields}
             asset={showEditAssetDialog.asset}
             selectedRecords={showEditAssetDialog.selectedRecords}

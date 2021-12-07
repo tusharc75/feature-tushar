@@ -335,6 +335,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
           allowAction={false}
           loading={loading}
           renderedFrom={renderedFrom}
+          isClientSideGrid={true}
         />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
 
