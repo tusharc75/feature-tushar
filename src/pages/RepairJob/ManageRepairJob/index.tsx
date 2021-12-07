@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { Formik, Form } from 'formik';
 import { Box, Button, CircularProgress, Grid } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -25,8 +25,10 @@ import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne } from "react-icons/fa";
+import moment from 'moment';
 
 const ManageRepairJob = (props) => {
+  const initialRender = useRef(true)
   const { isClone, repairJobId, onClose, onSuccess, open, inventories, fromInventory } = props
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -38,6 +40,7 @@ const ManageRepairJob = (props) => {
   const [formsData, setFormsData] = useState([]);
   const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [allFields, setAllFields] = useState([]);
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(repairJobData.fields));
@@ -60,17 +63,21 @@ const ManageRepairJob = (props) => {
                 const { _id, brand, createdBy, history, repairJobName, updatedBy, ...rest } = data;
 
                 setRepairJobData({
-                  fields: fieldsDataForCreate,
+                  fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                   initialValues: getObjKeysWithValues(rest, fieldsDataForCreate)
                 });
-                setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
+                setAllFields(fieldsDataForCreate);
+
+                // setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
                 setLoading(false);
               } else {
                 setRepairJobData({
-                  fields: fieldsDataForUpdate,
+                  fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
                   initialValues: getObjKeysWithValues(data, fieldsDataForUpdate)
                 });
-                setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
+                setAllFields(fieldsDataForUpdate);
+
+                // setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
                 setLoading(false);
               }
             })
@@ -78,13 +85,14 @@ const ManageRepairJob = (props) => {
               toastConfig.setToastConfig(error);
             });
         } else {
-          let initialData = getObjKeys('', fieldsDataForCreate);
+          let initialData = { ...getObjKeys('', fieldsDataForCreate), expectedCompletionDate: "" };
 
+          setAllFields(fieldsDataForCreate);
           setRepairJobData({
-            fields: fieldsDataForCreate,
+            fields: setFieldsInAscendingOrder(fieldsDataForCreate),
             initialValues: initialData
           });
-          setFormValues(initialData);
+          // setFormValues(initialData);
           setLoading(false);
         }
       })
@@ -93,17 +101,63 @@ const ManageRepairJob = (props) => {
       });
   }, [repairJobId]);
 
-  const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
-    if (Object.keys(errors).length) {
-      repairJobData.fields.forEach((input) => {
-        if (input.required || values[input.fieldName]) {
-          setTouched(input.fieldName, true);
-        }
-      });
-      setErrors({ ...errors });
+  useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false
     } else {
-      handleUpdateRepairJorepairJob(values);
+      let fields = repairJobData.fields;
+
+      if (fields.length > 0) {
+        fields = fields.map(field => {
+
+          const sectionFields = field.sectionFields.map(_f => {
+
+
+            if (_f.fieldName === "repairPlant" || _f.fieldName === "plantShipTo") {
+              if (formValues && formValues["typeOfRepair"] === "Internal") {
+                _f.required = true
+              } else {
+                _f.required = false
+              }
+            }
+
+
+            if (_f.fieldName === "vendor" || _f.fieldName === "supplierShipTo") {
+              if (formValues && formValues["typeOfRepair"] === "External") {
+                _f.required = true
+              } else {
+                _f.required = false
+              }
+            }
+
+            return _f
+          })
+          return {
+            ...field,
+            sectionFields
+          }
+
+        })
+      }
+      setRepairJobData({ ...repairJobData, fields })
     }
+  }, [formValues])
+
+  // const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
+  //   if (Object.keys(errors).length) {
+  //     repairJobData.fields.forEach((input) => {
+  //       if (input.required || values[input.fieldName]) {
+  //         setTouched(input.fieldName, true);
+  //       }
+  //     });
+  //     setErrors({ ...errors });
+  //   } else {
+  //     handleUpdateRepairJorepairJob(values);
+  //   }
+  // };
+
+  const handleSubmit = (values) => {
+    handleUpdateRepairJorepairJob(values);
   };
 
   const handleUpdateRepairJorepairJob = (values) => {
@@ -176,12 +230,12 @@ const ManageRepairJob = (props) => {
     }
   };
 
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
+  // const handleValuesChange = (data) => {
+  //   setFormValues((prevState) => ({
+  //     ...prevState,
+  //     ...data
+  //   }));
+  // };
 
 
   const getValues = (values) => {
@@ -241,16 +295,14 @@ const ManageRepairJob = (props) => {
             </CustomDialogFooter>
           </>
         ) : (
-          <Formik initialValues={repairJobData.initialValues} validationSchema={yupSchema(repairJobData.fields)} validateOnMount onSubmit={() => { }}>
-            {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
+          <Formik innerRef={(ref) => { if (ref) { setFormValues(ref.values) } }} initialValues={repairJobData.initialValues} validationSchema={yupSchema(allFields)} validateOnMount onSubmit={handleSubmit}>
+            {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues, submitForm }) => (
               <>
                 <CustomDialogContent>
                   <Form>
-                    {/*<h2 className="form-label-style" style={{ borderBottom: 'none' }}>*/}
-                    {/*  * Required Fields*/}
-                    {/*</h2>*/}
-                    {formsData &&
-                      formsData.map((form, i) => {
+
+                    {repairJobData.fields.length > 0 &&
+                      repairJobData.fields.map((form, i) => {
                         return (
                           form.name && (
                             <div key={i}>
@@ -260,11 +312,11 @@ const ManageRepairJob = (props) => {
                               </div>
                               <Box marginY={2}>
                                 <Grid spacing={3} container>
-                                  {form.sectionFields.map((field) => (
-                                    field.fieldName === "vendor" ?
-                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                        {
-                                          values["typeOfRepair"] === "External" ? <FormTypes
+                                  {form.sectionFields.map((field) =>
+                                    field.fieldName === 'vendor' || field.fieldName === 'supplierShipTo' ? (
+                                      values["typeOfRepair"] === "External" && (
+                                        <Grid item xs={12} sm={6} md={6}>
+                                          <FormTypes
                                             repairJobId={repairJobId}
                                             {...field}
                                             disabled={(!repairJobId && field.disableOnEdit)}
@@ -276,22 +328,82 @@ const ManageRepairJob = (props) => {
                                             type={field.type}
                                             options={field.option}
                                             setFieldValue={(name, value) => {
-                                              handleValuesChange({ [name]: value });
                                               setFieldValue(name, value);
                                             }}
-                                            required={field.required}
+                                            required={values["typeOfRepair"] === "External"}
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}
                                             tooltipMessage={field?.tooltipMessage}
                                             size="small"
-                                          /> : ""
-                                        }
-                                      </Grid> : <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                        {field.fieldName === "productInventory"
+                                          />
+                                        </Grid>
+                                      )
+                                    ) : field.fieldName === 'repairPlant' || field.fieldName === 'plantShipTo' ? (
+                                      values["typeOfRepair"] === "Internal" && (
+                                        <Grid item xs={12} sm={6} md={6}>
+                                          <FormTypes
+                                            repairJobId={repairJobId}
+                                            {...field}
+                                            disabled={(!repairJobId && field.disableOnEdit)}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={field.option}
+                                            setFieldValue={(name, value) => {
+                                              setFieldValue(name, value);
+
+                                              if (field.fieldName === 'repairPlant') {
+                                                if (value) {
+                                                  setFieldValue("plantShipTo", field.option.find(d => d.optionValue === value)?.address ?? "");
+                                                } else {
+                                                  setFieldValue("plantShipTo", "");
+                                                }
+                                              }
+                                            }}
+                                            required={values["typeOfRepair"] === "Internal"}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+                                          />
+                                        </Grid>
+                                      )
+                                    ) : <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      {field.fieldName === "productInventory"
+                                        ? <FormTypes
+                                          repairJobId={repairJobId}
+                                          {...field}
+                                          disabled={(!repairJobId && field.disableOnEdit) || (field.fieldName === "productInventory" && fromInventory)}
+                                          values={getValues(values)}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          imageOrFileUploadCompletePercentage={
+                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                              ? (completePercentage) => {
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
+                                              : null
+                                          }
+                                        /> : field.fieldName === "typeOfRepair"
                                           ? <FormTypes
                                             repairJobId={repairJobId}
                                             {...field}
-                                            disabled={(!repairJobId && field.disableOnEdit) || (field.fieldName === "productInventory" && fromInventory)}
+                                            disabled={!repairJobId && field.disableOnEdit}
                                             values={getValues(values)}
                                             errors={errors}
                                             touched={touched}
@@ -300,48 +412,20 @@ const ManageRepairJob = (props) => {
                                             type={field.type}
                                             options={field.option}
                                             setFieldValue={(name, value) => {
-                                              handleValuesChange({ [name]: value });
                                               setFieldValue(name, value);
+
+                                              setFieldValue("vendor", "");
+                                              setFieldValue("supplierShipTo", "");
+                                              setFieldValue("repairPlant", "");
+                                              setFieldValue("plantShipTo", "");
                                             }}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}
                                             tooltipMessage={field?.tooltipMessage}
                                             size="small"
-                                            imageOrFileUploadCompletePercentage={
-                                              ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                                ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
-                                                : null
-                                            }
-                                          /> : field.fieldName === "typeOfRepair"
+                                          /> : field.fieldName === "startDate"
                                             ? <FormTypes
-                                              repairJobId={repairJobId}
-                                              {...field}
-                                              disabled={!repairJobId && field.disableOnEdit}
-                                              values={getValues(values)}
-                                              errors={errors}
-                                              touched={touched}
-                                              label={field.fieldLabel}
-                                              name={field.fieldName}
-                                              type={field.type}
-                                              options={field.option}
-                                              setFieldValue={(name, value) => {
-                                                handleValuesChange({ [name]: value });
-                                                setFieldValue(name, value);
-
-                                                if (value !== "External") {
-                                                  handleValuesChange({ "vendor": "" });
-                                                  setFieldValue("vendor", "");
-                                                }
-                                              }}
-                                              required={field.required}
-                                              fullWidth
-                                              isTooltip={field?.isTooltip || false}
-                                              tooltipMessage={field?.tooltipMessage}
-                                              size="small"
-                                            /> : <FormTypes
                                               repairJobId={repairJobId}
                                               {...field}
                                               disabled={(!repairJobId && field.disableOnEdit)}
@@ -353,7 +437,6 @@ const ManageRepairJob = (props) => {
                                               type={field.type}
                                               options={field.option}
                                               setFieldValue={(name, value) => {
-                                                handleValuesChange({ [name]: value });
                                                 setFieldValue(name, value);
                                               }}
                                               required={field.required}
@@ -361,17 +444,59 @@ const ManageRepairJob = (props) => {
                                               isTooltip={field?.isTooltip || false}
                                               tooltipMessage={field?.tooltipMessage}
                                               size="small"
-                                              imageOrFileUploadCompletePercentage={
-                                                ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                                  ? (completePercentage) => {
-                                                    setUploadingImageOrFileProgress(completePercentage);
-                                                  }
-                                                  : null
-                                              }
-                                            />}
+                                              minDate={new Date()}
+                                              maxDate={values["expectedCompletionDate"] ? moment(values["expectedCompletionDate"]) : moment().add(5, "years")}
+                                            /> : field.fieldName === "expectedCompletionDate"
+                                              ? <FormTypes
+                                                repairJobId={repairJobId}
+                                                {...field}
+                                                disabled={(!repairJobId && field.disableOnEdit)}
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                options={field.option}
+                                                setFieldValue={(name, value) => {
+                                                  setFieldValue(name, value);
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field?.isTooltip || false}
+                                                tooltipMessage={field?.tooltipMessage}
+                                                size="small"
+                                                minDate={values["startDate"]}
+                                              /> : <FormTypes
+                                                repairJobId={repairJobId}
+                                                {...field}
+                                                disabled={(!repairJobId && field.disableOnEdit)}
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                options={field.option}
+                                                setFieldValue={(name, value) => {
+                                                  setFieldValue(name, value);
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field?.isTooltip || false}
+                                                tooltipMessage={field?.tooltipMessage}
+                                                size="small"
+                                                imageOrFileUploadCompletePercentage={
+                                                  ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                                    ? (completePercentage) => {
+                                                      setUploadingImageOrFileProgress(completePercentage);
+                                                    }
+                                                    : null
+                                                }
+                                              />}
 
-                                      </Grid>
-                                  ))}
+                                    </Grid>
+                                  )}
                                 </Grid>
                               </Box>
                             </div>
@@ -401,14 +526,12 @@ const ManageRepairJob = (props) => {
                     variant="contained"
                     color="primary"
                     startIcon={submitting && <CircularProgress size={20} color='inherit' />}
-                    disabled={
-                      // loading || Object.keys(errors).length > 0 ? true : false
-                      uploadingImageOrFileProgress > 0 || isFieldNotTouched(repairJobData, values) || submitting || loading
-                    }
+                    disabled={submitting}
                     onClick={(e) => {
-                      e.preventDefault();
-                      handleScroll(errors);
-                      handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
+                      submitForm();
+                      // e.preventDefault();
+                      // handleScroll(errors);
+                      // handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
                     }}
                   >
                     Save
@@ -420,8 +543,8 @@ const ManageRepairJob = (props) => {
                     onSave={() => {
                       setShowConfirmDialog(false);
                       handleScroll(errors);
-
-                      handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
+                      submitForm();
+                      // handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
                     }}
                     onClose={() => {
                       setShowConfirmDialog(false);

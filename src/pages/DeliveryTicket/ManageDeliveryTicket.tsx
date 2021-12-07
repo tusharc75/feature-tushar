@@ -84,8 +84,16 @@ const ManageDeliveryTicket = (props) => {
                 }
 
                 if (repairJobData) {
-                    if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
-                        return false
+                    if (repairJobData?.typeOfRepair === "Internal") {
+                        if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
+                            return false
+                        }
+                    }
+
+                    if (repairJobData?.typeOfRepair === "External") {
+                        if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
+                            return false
+                        }
                     }
                 }
 
@@ -158,8 +166,18 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["type"] = "Repair Job";
                     tempInitialData["repairJob"] = repairJobData?._id
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
+
+                    if (repairJobData?.typeOfRepair === "Internal") {
+                        tempInitialData["receivingPlant"] = repairJobData?.repairPlant?.optionValue;
+                        tempInitialData["plantShipTo"] = repairJobData?.plantShipTo;
+                    }
+                    if (repairJobData?.typeOfRepair === "External") {
+                        tempInitialData["supplierAccount"] = repairJobData?.vendor?.optionValue;
+                        tempInitialData["supplierShippingAddress"] = repairJobData?.supplierShipTo;
+                    }
+
                     setInitialData({
-                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
+                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "repairJob"),
                         values: tempInitialData,
                     });
                     setFormValues(tempInitialData)
@@ -172,16 +190,16 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["transferAsset"] = transferData?._id;
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
                     if (transferData?.transferType === "Internal") {
-                        tempInitialData["receivingPlant"] = transferData?.transferToPlant.optionValue;
-                        tempInitialData["shippingAddress"] = transferData?.plantShipTo;
+                        tempInitialData["receivingPlant"] = transferData?.transferToPlant?.optionValue;
+                        tempInitialData["plantShipTo"] = transferData?.plantShipTo;
                     }
                     if (transferData?.transferType === "External Customer") {
-                        tempInitialData["customerAccount"] = transferData?.transferToCustomer.optionValue;
+                        tempInitialData["customerAccount"] = transferData?.transferToCustomer?.optionValue;
                         tempInitialData["shippingAddress"] = transferData?.customerShipTo;
                     }
                     if (transferData?.transferType === "External Supplier") {
-                        tempInitialData["supplierAccount"] = transferData?.transferToSupplier.optionValue;
-                        tempInitialData["shippingAddress"] = transferData?.supplierShipTo;
+                        tempInitialData["supplierAccount"] = transferData?.transferToSupplier?.optionValue;
+                        tempInitialData["supplierShippingAddress"] = transferData?.supplierShipTo;
                     }
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),

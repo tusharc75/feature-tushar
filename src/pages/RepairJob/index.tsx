@@ -611,7 +611,6 @@ const RepairJob = () => {
           repairJobId={showManageRepairJobDialog.idToClone}
           onClose={() => setShowManageRepairJobDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {
-            fetchRepairJobs();
             setShowManageRepairJobDialog({ open: false, isClone: false, idToClone: null });
           }}
         />

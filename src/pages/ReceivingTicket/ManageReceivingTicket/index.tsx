@@ -98,12 +98,20 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
         }
       }
 
-
       if (repairJobData) {
-        if (formData.name.includes("Customer")) {
-          return false
+        if (repairJobData?.typeOfRepair === "Internal") {
+          if (formData.name.includes("Supplier")) {
+            return false
+          }
+        }
+
+        if (repairJobData?.typeOfRepair === "External") {
+          if (formData.name.includes("Customer")) {
+            return false
+          }
         }
       }
+
       if (rentalData) {
         if (formData.name.includes("Supplier")) {
           return false
@@ -192,6 +200,16 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
             tempInitialData["repairJob"] = repairJobData._id
             tempInitialData["type"] = "Repair Job"
             tempInitialData["receivingJobName"] = `${repairJobData?.repairJobName}_${generateUniqueIdOnly()}`
+
+            if (repairJobData?.typeOfRepair === "Internal") {
+              // tempInitialData["customerAccount"] = repairJobData?.repairPlant?.optionValue;
+              tempInitialData["pickupAddress"] = repairJobData?.plantShipTo;
+            }
+            if (repairJobData?.typeOfRepair === "External") {
+              tempInitialData["supplierAccount"] = repairJobData?.vendor?.optionValue;
+              tempInitialData["supplierShippingAddress"] = repairJobData?.supplierShipTo;
+            }
+
             setReceivingTicketData({
               fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "repairJob"),
               initialValues: tempInitialData,
@@ -207,16 +225,16 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
             tempInitialData["expectedDeliveryDate"] = moment(new Date()).add(7, 'days');
             tempInitialData["receivingJobName"] = `${transferData?.transferAssetNumber}_${generateUniqueIdOnly()}`
             if (transferData?.transferType === "Internal") {
-              tempInitialData["receivingPlant"] = transferData?.transferToPlant.optionValue;
+              tempInitialData["receivingPlant"] = transferData?.transferToPlant?.optionValue;
               tempInitialData["pickupAddress"] = transferData?.plantShipTo;
             }
             if (transferData?.transferType === "External Customer") {
-              tempInitialData["customerAccount"] = transferData?.transferToCustomer.optionValue;
+              tempInitialData["customerAccount"] = transferData?.transferToCustomer?.optionValue;
               tempInitialData["pickupAddress"] = transferData?.customerShipTo;
             }
             if (transferData?.transferType === "External Supplier") {
-              tempInitialData["supplierAccount"] = transferData?.transferToSupplier.optionValue;
-              tempInitialData["pickupAddress"] = transferData?.supplierShipTo;
+              tempInitialData["supplierAccount"] = transferData?.transferToSupplier?.optionValue;
+              tempInitialData["supplierShippingAddress"] = transferData?.supplierShipTo;
             }
             setReceivingTicketData({
               fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "transferAsset"),
