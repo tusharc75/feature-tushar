@@ -26,10 +26,11 @@ interface AssetDialogProps {
   fetchAssets?: VoidFunction;
   existingAssets: any[];
   transferAssetId: string | any;
+  updateTransferStatus?: any;
 }
 
 const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
-  const { plantId, closeDialog, fetchAssets, existingAssets, transferAssetId } = props
+  const { plantId, closeDialog, fetchAssets, existingAssets, transferAssetId, updateTransferStatus } = props
   const toastConfig = useContext(CustomToastContext);
 
   const [isAdding, setAdding] = useState(false)
@@ -97,6 +98,10 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
 
           });
 
+        if (data.length === 0) {
+          updateTransferStatus("New")
+        }
+
         dispatch({ type: 'initialize', data: data, count: data.length });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -139,6 +144,7 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
           setAdding(false)
           fetchAssets()
           closeDialog()
+          updateTransferStatus("In Progress")
         }).catch(err => {
           setAdding(false)
           toastConfig.setToastConfig(err)

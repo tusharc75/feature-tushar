@@ -203,7 +203,7 @@ export const RESOURCE_LABEL = {
   budget: 'Budgets',
   marketSegment: 'Market Segments',
   quotePdfTemplate: 'Quote PDF Templates',
-  rentalManagement: 'Rental Job',
+  rentalManagement: 'Rental Jobs',
   deliveryTicket: 'Loading Tickets',
   pricingCondition: 'Pricing Conditions',
   repairJob: 'Repair Jobs',

@@ -87,6 +87,8 @@ export default function NewCreateQuotePdfTemplate() {
     const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
     const [isPreview, setIsPreview] = useState(false)
     const typeOptions = [routes.quoteBuilder.title, routes.rentalManagement.title, routes.repairJob.title, routes.purchaseOrder.title, routes.deliveryTicket.title, routes.receivingTicket.title, routes.transferAsset.title].filter(d => d)
+    const [variables, setVariables] = useState([])
+    const [formValues, setFormValues] = useState(null)
     const onBackButtonEvent = (e) => {
         if (hasPermissionToUpdate) {
             e.preventDefault();
@@ -102,6 +104,36 @@ export default function NewCreateQuotePdfTemplate() {
             window.removeEventListener('popstate', onBackButtonEvent);
         };
     }, []);
+
+
+    useEffect(() => {
+        if (formValues && formValues.type) {
+            let type: any = formValues.type;
+            type = type.split("")
+
+            if (type[type.length - 1] === "s") {
+                type.pop();
+            }
+
+            type = type.join("")
+            let resource: string = ""
+            if (type === "Rental Job") {
+                resource = "Rental Management"
+            } else {
+                resource = type
+            }
+
+            if (resource) {
+                axiosInstance().get(`/field?resource=${resource}`)
+                    .then(({ data: { data } }) => {
+                        const vars = data.map(field => field.fieldData.fieldName)
+                        setVariables(vars)
+                    }).catch(err => {
+                        toastConfig.setToastConfig(err)
+                    })
+            }
+        }
+    }, [formValues])
 
     useEffect(() => {
 
@@ -347,6 +379,7 @@ export default function NewCreateQuotePdfTemplate() {
             <Paper className={classes.paper}>
                 {initialValues ? (
                     <Formik
+                        innerRef={ref => ref && setFormValues(ref.values)}
                         initialValues={initialValues}
                         validationSchema={PdfTemplateSchema} onSubmit={handleSubmit}>
                         {({ submitForm, touched, errors, setFieldValue, values }) => (
@@ -628,10 +661,7 @@ export default function NewCreateQuotePdfTemplate() {
                                 completePercentage
                             ) => null}
                             showVariableDropdown={true}
-                            variables={['entity', 'customerAccountName', 'quoteDate', 'quoteName',
-                                'version', 'quoteId', "currency", "expiryDate", "collaborator",
-                                "customerContactName", "currentDate", "owner", "incoTerms"
-                            ]}
+                            variables={variables}
                             isCheckHeight={true}
                         />
                     </Box>
