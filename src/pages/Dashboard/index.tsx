@@ -13,9 +13,13 @@ import { FaRegistered } from 'react-icons/fa';
 import { AiFillAccountBook, AiFillSetting, AiOutlineTransaction } from 'react-icons/ai';
 import { TextField, InputAdornment } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
+import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
+import axiosInstance from '../../axios/axiosInstance';
+import { SET_GRID_METADATA, SET_SELECTED_ENTITY, SET_USER } from '../../StateProvider/actionTypes';
 
 function Dashboard() {
   const history = useHistory();
+  const { dispatch }: any = useData();
   const {
     state: { user }
   } = useData();
