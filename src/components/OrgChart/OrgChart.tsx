@@ -4,8 +4,9 @@ const OrgChart = ({
     positions,
     getOrgChart,
     chartId,
-    // update,
-    // edit,
+    update = null,
+    updateChart = null,
+    edit = null,
     onClickNode,
     google,
 }) => {
@@ -40,64 +41,66 @@ const OrgChart = ({
         }
     };
 
-    // const dragLeave = event => {
-    //     const element = event.target;
-    //     setTimeout(() => {
-    //         element.classList.remove("do-not-drop");
-    //         element.classList.remove("do-drop");
-    //     }, 250);
-    // };
+    const dragLeave = event => {
+        const element = event.target;
+        setTimeout(() => {
+            element.classList.remove("do-not-drop");
+            element.classList.remove("do-drop");
+        }, 250);
+    };
 
-    // const dragStart = event => {
-    //     const element = event.target;
-    //     const currentNode = getIds(element);
-    //     if (currentNode) {
-    //         draggedNode = currentNode;
-    //     }
-    // };
+    const dragStart = event => {
+        const element = event.target;
+        const currentNode = getIds(element);
+        if (currentNode) {
+            draggedNode = currentNode;
+        }
+    };
 
-    // const drop = event => {
+    const drop = event => {
 
-    //     let element = event.target;
-    //     if (element.tagName !== "TD") {
-    //         while (element.parentElement) {
-    //             element = element.parentElement;
-    //             if (element.tagName === "TD") {
-    //                 break;
-    //             }
-    //         }
-    //     }
-    //     const dropNode = getIds(element);
-    //     if (dropNode && draggedNode) {
-    //         if (
-    //             draggedNode.id !== dropNode.id &&
-    //             draggedNode.id !== dropNode.parentId
-    //         ) {
-    //             // update(
-    //             //     draggedNode.id,
-    //             //     dropNode.id,
-    //             // );
-    //         }
-    //     }
-    // };
+        let element = event.target;
+        if (element.tagName !== "TD") {
+            while (element.parentElement) {
+                element = element.parentElement;
+                if (element.tagName === "TD") {
+                    break;
+                }
+            }
+        }
+        const dropNode = getIds(element);
+        if (dropNode && draggedNode) {
+            if (
+                draggedNode.id !== dropNode.id &&
+                draggedNode.id !== dropNode.parentId
+            ) {
+                if (updateChart) {
+                    updateChart(
+                        draggedNode,
+                        dropNode,
+                    );
+                }
+            }
+        }
+    };
 
-    // const dragEnter = event => {
-    //     event.preventDefault();
-    //     const element = event.target;
-    //     if (element.tagName === "TD") {
-    //         const dropNode = getIds(element);
-    //         if (dropNode && draggedNode) {
-    //             if (
-    //                 draggedNode.id === dropNode.id ||
-    //                 draggedNode.id === dropNode.parentId
-    //             ) {
-    //                 element.classList.add("do-not-drop");
-    //             } else {
-    //                 element.classList.add("do-drop");
-    //             }
-    //         }
-    //     }
-    // };
+    const dragEnter = event => {
+        event.preventDefault();
+        const element = event.target;
+        if (element.tagName === "TD") {
+            const dropNode = getIds(element);
+            if (dropNode && draggedNode) {
+                if (
+                    draggedNode.id === dropNode.id ||
+                    draggedNode.id === dropNode.parentId
+                ) {
+                    element.classList.add("do-not-drop");
+                } else {
+                    element.classList.add("do-drop");
+                }
+            }
+        }
+    };
 
     // const editNode = event => {
     //     let element = event.target.parentElement;
@@ -159,18 +162,18 @@ const OrgChart = ({
                         "google-visualization-orgchart-node",
                     );
                     Array.from(nodes).forEach(node => {
-                        // const iconElement = document.createElement('i');
-                        // iconElement.className = 'edit outline icon node-icon';
-                        // iconElement.addEventListener('click', onClick)
-                        // node.appendChild(iconElement);
+                        const iconElement = document.createElement('i');
+                        iconElement.className = 'edit outline icon node-icon';
+                        iconElement.addEventListener('click', onClick)
+                        node.appendChild(iconElement);
                         node.addEventListener('click', onClick)
-                        // node.setAttribute("draggable", "true");
-                        // node.addEventListener("dragstart", dragStart);
-                        // node.addEventListener("dragenter", dragEnter);
-                        // node.addEventListener("dragover", dragEnter);
-                        // node.addEventListener("dragexit", () => (draggedNode = null));
-                        // node.addEventListener("dragleave", dragLeave);
-                        // node.addEventListener("drop", drop);
+                        node.setAttribute("draggable", "true");
+                        node.addEventListener("dragstart", dragStart);
+                        node.addEventListener("dragenter", dragEnter);
+                        node.addEventListener("dragover", dragEnter);
+                        node.addEventListener("dragexit", () => (draggedNode = null));
+                        node.addEventListener("dragleave", dragLeave);
+                        node.addEventListener("drop", drop);
                     });
                 },
             );

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import { useRef, useState, useContext } from 'react'
 import { Button, Box, Dialog, Stepper, Step, StepLabel, Typography, Divider } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../constants/helpers';
@@ -6,9 +6,12 @@ import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import SignaturePad from 'react-signature-canvas';
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 export default function SignatureDialog(props) {
     const { open, onClose, onSigned, forDelivery, steps, label, submitting } = props;
+    const { setToastConfig } = useContext(CustomToastContext);
+
     const [activeStep, setActiveStep] = useState(0)
     const signCanvas: any = useRef(null);
     const [loading, setLoading] = useState(false);
@@ -17,25 +20,32 @@ export default function SignatureDialog(props) {
 
 
     const handleClickNext = () => {
-        let signedData: any = {};
+        const isEmpty = signCanvas.current?.isEmpty();
 
-        if (label === "Sign-off - Dispatch") {
-            signedData = {
-                type: activeStep === 0 ? "supervisor" : "deliveryPerson",
-                sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png")
+
+        if (!isEmpty) {
+            let signedData: any = {};
+
+            if (label === "Sign-off - Dispatch") {
+                signedData = {
+                    type: activeStep === 0 ? "supervisor" : "deliveryPerson",
+                    sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png")
+                }
+            } else if (label === "Sign-off - Delivery") {
+                signedData = {
+                    type: activeStep === 0 ? "deliveryPerson" : "receiver",
+                    sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png")
+                }
             }
-        } else if (label === "Sign-off - Receive") {
-            signedData = {
-                type: activeStep === 0 ? "deliveryPerson" : "receiver",
-                sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png")
+
+            onSigned(signedData)
+
+            if (activeStep === 0) {
+                setActiveStep(prevStep => prevStep + 1)
+                clear()
             }
-        }
-
-        onSigned(signedData)
-
-        if (activeStep === 0) {
-            setActiveStep(prevStep => prevStep + 1)
-            clear()
+        } else {
+            setToastConfig({ open: true, type: "warning", message: "Signature pad cannot be empty!" })
         }
     }
 
@@ -76,7 +86,7 @@ export default function SignatureDialog(props) {
                 }
                 <SignaturePad
                     ref={signCanvas}
-                    canvasProps={{ minWidth: 500, width: 500, height: 500 }}
+                    canvasProps={{ minWidth: 500, width: 500, height: 400 }}
                 />
                 <Button
                     variant="outlined"

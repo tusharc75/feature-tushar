@@ -42,7 +42,6 @@ import Badge from '@material-ui/core/Badge';
 import { makeStyles } from '@material-ui/core/styles';
 import { FaDiceOne } from "react-icons/fa";
 
-const rentType = ["perHour", "perDay", "perWeek", "perFortnight", "perMonth", "perYear"]
 
 const useStyles = makeStyles(() => ({
     screenHeightAuto: {
@@ -65,7 +64,10 @@ function PricingConditionsDetailsPage() {
     const [loading, setLoading] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [isProductMasterUnit, setIsProductMasterUnit] = React.useState(false);
+
     const [units, setUnits] = React.useState([]);
+    const [pricingMethod, setPricingMethod] = React.useState(["perHour", "perDay", "perWeek", "perFortnight", "perMonth", "perYear"]);
+
     const [discount, setDiscount] = useState([]);
     const [tax, setTax] = useState([]);
     const [charge, setCharge] = useState([]);
@@ -83,13 +85,20 @@ function PricingConditionsDetailsPage() {
         getPricingConditionsFields();
     }, [])
 
-
     useEffect(() => {
         axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
-            const unitField = data.filter((e) => e.fieldData.fieldName.toLowerCase().includes("unit") && e.fieldData.type === "dropDown");
+            const unitField = data.filter((e) => ["unit", "umo"].includes(e.fieldData.fieldName.toLowerCase()));
             if (unitField.length) {
                 setUnits(unitField[0].fieldData.option);
                 setIsProductMasterUnit(true);
+            }
+            const pricingMethodField = data.filter((e) => e.fieldData.fieldName === "pricingMethod");
+            if (pricingMethodField.length) {
+                let _pricingMethod=[]
+                pricingMethodField[0].fieldData.option.forEach(e =>{
+                    _pricingMethod.push(e.optionValue)
+                })
+                setPricingMethod(_pricingMethod);
             }
         })
     }, []);
@@ -97,7 +106,6 @@ function PricingConditionsDetailsPage() {
     useEffect(() => {
         setFormsData(setFieldsInAscendingOrder(initialData.fields));
     }, [initialData.fields]);
-
 
     // useEffect(() => {
     //     //materialType can be =["product","packages","productCategory"]
@@ -108,14 +116,14 @@ function PricingConditionsDetailsPage() {
     //         materialId: "6189410150203b247444ff55",
     //         materialType: "product",
     //         qty: 5,
-    //         rentType: "perHour",
+    //         pricingMethod: "perHour",
     //         unit: "well",
     //         currency: "USD"
     //     }, {
     //         materialId: "6189410150203b247444ff55",
     //         materialType: "product",
     //         qty: 50,
-    //         rentType: "perDay",
+    //         pricingMethod: "perDay",
     //         unit: "Two Well Pad",
     //         currency: "USD"
     //     }]
@@ -520,27 +528,27 @@ function PricingConditionsDetailsPage() {
                                                             multiple
                                                             id="tags-filled"
                                                             disableCloseOnSelect={true}
-                                                            options={rentType}
+                                                            options={pricingMethod}
                                                             getOptionLabel={(option: any) => (startCase(option))}
                                                             renderTags={(value: string[], getTagProps) =>
                                                                 value.map((option: string, index: number) => (
                                                                     <Chip variant="outlined" label={startCase(option)} {...getTagProps({ index })} />
                                                                 ))
                                                             }
-                                                            value={values["rentType"]}
+                                                            value={values["pricingMethod"]}
                                                             onChange={(e, value) => {
-                                                                setFieldValue("rentType", value)
+                                                                setFieldValue("pricingMethod", value)
                                                             }}
                                                             renderInput={(params) => (
                                                                 <TextField
                                                                     {...params}
                                                                     margin="dense"
                                                                     variant="outlined"
-                                                                    name="rentType"
-                                                                    label="Rent Type"
-                                                                    placeholder="Rent Type"
-                                                                    error={touched['rentType'] && Boolean(errors['rentType'])}
-                                                                    helperText={touched['rentType'] && errors['rentType']}
+                                                                    name="pricingMethod"
+                                                                    label="Pricing Method"
+                                                                    placeholder="Pricing Method"
+                                                                    error={touched['pricingMethod'] && Boolean(errors['pricingMethod'])}
+                                                                    helperText={touched['pricingMethod'] && errors['pricingMethod']}
                                                                 />
                                                             )}
                                                         />
@@ -560,23 +568,23 @@ function PricingConditionsDetailsPage() {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {values['rentType'] && values['rentType'].map((_rentType, i) => (
+                                                            {values['pricingMethod'] && values['pricingMethod'].map((_pricingMethod, i) => (
                                                                 <tr key={i}>
                                                                     <th style={{ paddingRight: 10, minWidth: 50 }}>
-                                                                        {startCase(_rentType)}
+                                                                        {startCase(_pricingMethod)}
                                                                     </th>
                                                                     {values["currency"] && values["currency"].map((_currency, j) =>
                                                                         values['units'] && values['units'].map((_unit, k) => (
                                                                             <td key={j}>
                                                                                 <TextField
-                                                                                    name={"rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + camelCase(_unit.toLowerCase())}
+                                                                                    name={"rent_" + _pricingMethod + "_" + _currency.toLowerCase() + "_" + camelCase(_unit.toLowerCase())}
                                                                                     variant="outlined"
                                                                                     margin="dense"
                                                                                     fullWidth
                                                                                     type="number"
                                                                                     style={{ margin: 0 }}
-                                                                                    value={values["rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + camelCase(_unit.toLowerCase())]}
-                                                                                    onChange={(e) => setFieldValue("rent_" + _rentType + "_" + _currency.toLowerCase() + "_" + camelCase(_unit.toLowerCase()), parseFloat(e.target.value))}
+                                                                                    value={values["rent_" + _pricingMethod + "_" + _currency.toLowerCase() + "_" + camelCase(_unit.toLowerCase())]}
+                                                                                    onChange={(e) => setFieldValue("rent_" + _pricingMethod + "_" + _currency.toLowerCase() + "_" + camelCase(_unit.toLowerCase()), parseFloat(e.target.value))}
                                                                                 />
                                                                             </td>
                                                                         )))}

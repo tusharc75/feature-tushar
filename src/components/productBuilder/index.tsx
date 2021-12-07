@@ -31,7 +31,7 @@ import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
 import CustomButton from "../Helpers/CustomButton";
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns } from "../../constants/columns"
 import { prepareDataForGrid } from "../../constants/helpers";
 
 let levalOrderBy = [
@@ -58,6 +58,7 @@ const ProductBuilder = (props) => {
     hasPermission,
     permissions,
     fromQuote,
+    setColumnForPDFExcel,
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
@@ -139,6 +140,7 @@ const ProductBuilder = (props) => {
       }
       setFrameWorkComponent({ ...tempFrameworkComponent })
       setColumns([...columns])
+      setColumnForPDFExcel([...columns].filter(d => d.field !== "srno").map(d => d.headerName))
       dispatch({ type: "initialize", data: rows, count: rows.length });
       setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
       refreshProducts(data);
@@ -626,7 +628,8 @@ const ProductBuilder = (props) => {
                   }
                 })
                 ] : [{
-                  label: `Product Description: `,
+
+                  label: `Product description: `,
                   field: "productName",
                   forceShow: true
                 }] : []

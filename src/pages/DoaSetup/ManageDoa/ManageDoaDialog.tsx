@@ -9,7 +9,8 @@ import {
     IconButton,
     ButtonGroup,
     makeStyles,
-    InputAdornment
+    InputAdornment,
+    Chip
 } from "@material-ui/core";
 import { Autocomplete, ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { Formik, Form, Field, FieldArray, FormikProps } from 'formik';
@@ -19,6 +20,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { getUniqueCurrencies, removeEmptyKeys } from "../../../constants/helpers";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
+import React from "react";
 
 const DOAType = [
     {
@@ -63,12 +65,13 @@ const useStyles = makeStyles((theme) => ({
         padding: "4px !important"
     }
 }));
-const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, doaType = null, open, onClose, from = "EntityDetailPage", isRenderedFromUserSetUp = false }) => {
+const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, doaMinLimit = 0, doaType = null, open, onClose, from = "EntityDetailPage", isRenderedFromUserSetUp = false }) => {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState<any[]>([]);
     const [check, setCheck] = useState(false);
+    const [doaLowerLimit, setDoaLowerLimit] = useState(doaMinLimit);
     const [currencyData, setCurrencyData] = useState<any[]>([]);
     const [currency, setCurrency] = useState(doaCurrency ? doaCurrency : "");
     const [currencySymbol, setCurrencySymbol] = useState(
@@ -81,8 +84,8 @@ const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, doaT
     const tempUserList = from === "EntityDetailPage" ? userList.filter(v => v.id !== selectedEntity[0]) : userList.filter(v => v.id !== "self")
     const fetchDoa = useCallback(() => {
         doa.length > 0 ?
-            setUsers(doa) :
-            setUsers(([{ id: tempUserList ? tempUserList[0]?.id : "", name: tempUserList ? tempUserList[0]?.name : "", amount: 0 }]))
+            setUsers(doa.map(d => ({ ...d, user: d.user.map(e => e._id).toString() }))) :
+            setUsers(([{ user: tempUserList ? tempUserList[0]?.name : "", amount: 0 }]))
     }, []);
 
     useEffect(() => {
@@ -92,9 +95,9 @@ const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, doaT
     const handleSubmit = async (values) => {
         let doaArray;
         if (selectedType === 2) {
-            doaArray = values.sort((a, b) => a.amount - b.amount).filter(item => item.name !== "" && item.name !== undefined && item.id !== "" && item.id !== undefined).map(item => {
+            doaArray = values.sort((a, b) => a.amount - b.amount).filter(item => item.user !== "" && item.user !== undefined).map(item => {
                 return {
-                    user: item.id,
+                    user: item.user.split(","),
                     amount: item.amount ? Number(item.amount) : 0
                 };
             })
@@ -106,15 +109,15 @@ const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, doaT
             }
         }
         else {
-            doaArray = values.filter(item => item.name !== "" && item.name !== undefined && item.id !== "" && item.id !== undefined).map(item => {
+            doaArray = values.filter(item => item.user !== "" && item.user !== undefined).map(item => {
                 return {
-                    user: item.id,
+                    user: item.user.split(","),
                 };
             });
         }
 
 
-        const userDoa = { _ids: selectedEntity, doaCurrency: selectedType === 2 ? currency : "", doa: doaArray, doaType: selectedType };
+        const userDoa = { _ids: selectedEntity, doaCurrency: selectedType === 2 ? currency : "", doa: doaArray, doaType: selectedType, doaMinLimit: selectedType === 2 ? doaLowerLimit : 0 };
         setLoading(true)
         axiosInstance().put('/doa/setups', removeEmptyKeys(userDoa))
             .then(({ data }) => {
@@ -137,13 +140,13 @@ const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, doaT
             setSelectedType(DOAType.find((d) => d.key === newFilter).value);
             if (newFilter === "Sequence") {
                 doa.length > 0 ?
-                    setUsers(doa.filter(v => v.id !== selectedEntity[0] && v.id !== "self")) :
-                    setUsers(([{ id: tempUserList ? tempUserList[0]?.id : "", name: tempUserList ? tempUserList[0]?.name : "", amount: 0 }]))
+                    setUsers(doa.map(d => ({ ...d, user: d.user.map(e => e._id).toString() }))) :
+                    setUsers(([{ user: tempUserList ? tempUserList[0]?.id : "", amount: 0 }]))
             }
             else {
                 doa.length > 0 ?
-                    setUsers(doa) :
-                    setUsers(([{ id: tempUserList ? tempUserList[0]?.id : "", name: tempUserList ? tempUserList[0]?.name : "", amount: 0 }]))
+                    setUsers(doa.map(d => ({ ...d, user: d.user.map(e => e._id).toString() }))) :
+                    setUsers(([{ user: tempUserList ? tempUserList[0]?.id : "", amount: 0 }]))
 
             }
             formikRef.current?.resetForm()
@@ -163,13 +166,16 @@ const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, doaT
 
     const validate = (values) => {
         let errors = null;
-        let minTemp = values.users.reduce(function (previous, current) {
-            return previous.amount < current.amount ? previous : current;
-        });
 
-        if (values.users.length > 0) {
+        if (values?.users?.length > 0) {
+            let minTemp = values?.users?.reduce(function (previous, current) {
+                return previous?.amount < current?.amount ? previous : current;
+            });
             let tempUser = values.users.find(item => item.id === selectedEntity[0] || item.id === "self")
             if (tempUser && tempUser.amount !== minTemp.amount) {
+                errors = "Too many characters!";
+            }
+            if (doaLowerLimit > minTemp.amount) {
                 errors = "Too many characters!";
             }
 
@@ -206,41 +212,67 @@ const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, doaT
                         </Grid>
                         <Grid item xs={6} md={6} sm={6} className="d-flex justify-content-end">
                             {(selectedType === 2) &&
-                                <Autocomplete className={classes.currencyStyle}
-                                    fullWidth
-                                    size="small"
-                                    value={
-                                        currencyData.filter((data) => data?.currencyCode === currency)
-                                            .length
-                                            ? currencyData.filter(
-                                                (data) => data?.currencyCode === currency
-                                            )[0]
-                                            : ""
-                                    }
-                                    options={currencyData}
-                                    getOptionLabel={(option: any) =>
-                                        option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : ""
-                                    }
-                                    getOptionSelected={(option: any, val) => option?.currencyCode === val}
-                                    onChange={(e, val) => {
-                                        setCurrency(val?.currencyCode ? val?.currencyCode : "")
-                                        setCurrencySymbol(val?.symbolNative)
-                                    }
-                                    }
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            variant="outlined"
-                                            name={"currency"}
-                                            label={"Currency"}
+                                <>
+                                    <TextField
+                                        fullWidth
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    {currencySymbol ? currencySymbol : ""}
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        variant="outlined"
+                                        type="text"
+                                        size="small"
+                                        name="amount"
+                                        placeholder="Enter minimum DOA amount"
+                                        label="Enter minimum DOA amount"
+                                        value={doaLowerLimit}
+                                        onChange={(e) => {
+                                            setDoaLowerLimit(Number(e.target.value.replace(/[^0-9]/g, '')))
+                                        }}
+                                        required
+                                        error={formikRef?.current?.values ? validate(formikRef?.current?.values) : false}
+                                        helperText={formikRef?.current?.values ? validate(formikRef?.current?.values) ? "should have minimum amount" : "" : ""}
 
-                                        />
-                                    )}
-                                    renderOption={(option) => {
-                                        const { currencyCode, currencyName, symbolNative } = option;
-                                        return `${currencyCode} - ${currencyName} - (${symbolNative})`
-                                    }}
-                                />
+                                    />
+                                    <Autocomplete className={classes.currencyStyle}
+                                        fullWidth
+                                        size="small"
+                                        value={
+                                            currencyData.filter((data) => data?.currencyCode === currency)
+                                                .length
+                                                ? currencyData.filter(
+                                                    (data) => data?.currencyCode === currency
+                                                )[0]
+                                                : ""
+                                        }
+                                        options={currencyData}
+                                        getOptionLabel={(option: any) =>
+                                            option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : ""
+                                        }
+                                        getOptionSelected={(option: any, val) => option?.currencyCode === val}
+                                        onChange={(e, val) => {
+                                            setCurrency(val?.currencyCode ? val?.currencyCode : "")
+                                            setCurrencySymbol(val?.symbolNative)
+                                        }
+                                        }
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                variant="outlined"
+                                                name={"currency"}
+                                                label={"Currency"}
+
+                                            />
+                                        )}
+                                        renderOption={(option) => {
+                                            const { currencyCode, currencyName, symbolNative } = option;
+                                            return `${currencyCode} - ${currencyName} - (${symbolNative})`
+                                        }}
+                                    />
+                                </>
                             }
                         </Grid>
                     </Grid>
@@ -302,23 +334,28 @@ const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, doaT
                                                                                             id="combo-box-demo"
                                                                                             size="small"
                                                                                             style={{ minWidth: 200 }}
-                                                                                            value={userList.find(v => v.name === userVal.name) ? userList.find(v => v.name === userVal.name) : ""}
-                                                                                            options={(selectedType === 2) ? userList.filter(element => !values.users.map(e => e.name).includes(element.name)) : tempUserList.filter(element => !values.users.map(e => e.name).includes(element.name))}
+                                                                                            // options={userList}
+                                                                                            options={(selectedType === 2) ? userList?.filter(element => !values?.users?.some(e => e?.user?.split(",").some(d => d === element.id))) : tempUserList?.filter(element => !values?.users?.some(e => e?.user?.split(",").some(d => d === element.id)))}
                                                                                             getOptionLabel={(option: any) => option?.name ? option?.name : ""}
                                                                                             onChange={(event, newValue) => {
                                                                                                 arrayHelpers.replace(index, {
                                                                                                     ...values.users[index],
-                                                                                                    ["name"]: newValue?.name,
-                                                                                                    ["id"]: newValue?.id,
+                                                                                                    ["user"]: newValue?.map(d => d.id).toString(),
                                                                                                 });
                                                                                             }}
-
+                                                                                            multiple
+                                                                                            value={userList?.filter(element => userVal?.user?.split(",")?.some(d => d === element?.id))}
+                                                                                            renderOption={(option) => (
+                                                                                                <React.Fragment>
+                                                                                                    {option?.name}
+                                                                                                </React.Fragment>
+                                                                                            )}
                                                                                             renderInput={(params) => <TextField
                                                                                                 {...params}
                                                                                                 variant="outlined"
-                                                                                                name="nameField"
-                                                                                                error={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined}
-                                                                                                helperText={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined ? " User is Required" : ""}
+                                                                                                name="userField"
+                                                                                                error={userVal?.user?.length <= 0}
+                                                                                                helperText={userVal?.user?.length <= 0 ? " User is Required" : ""}
                                                                                                 required
                                                                                             />}
                                                                                         />
@@ -365,7 +402,7 @@ const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, doaT
                                                                                                 aria-label="add"
                                                                                                 disabled={values.users.length === userList.length}
                                                                                                 onClick={() => {
-                                                                                                    arrayHelpers.push({ "id": "", "name": "", "amount": 0 })
+                                                                                                    arrayHelpers.push({ "user": "", "amount": 0 })
                                                                                                 }
                                                                                                 } >
                                                                                                 <Add />
@@ -384,7 +421,7 @@ const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, doaT
                                                                                     color="primary"
                                                                                     size="large"
                                                                                     onClick={() => {
-                                                                                        arrayHelpers.push({ "id": "", "name": "", "amount": 0 })
+                                                                                        arrayHelpers.push({ "user": "", "amount": 0 })
                                                                                     }}
                                                                                 >
                                                                                     Add Users
@@ -418,8 +455,8 @@ const DoaDialog = ({ selectedEntity, onSuccess, userList, doa, doaCurrency, doaT
                                             type="submit"
                                             size="small"
                                             disabled={
-                                                currency === "" && selectedType === 2 ||
-                                                values.users.filter(item => item.name === "" || item.name === undefined || item.id === "" || item.id === undefined).length > 0
+                                                currency === "" && selectedType === 2
+                                                // ||values.users.filter(item => item.name === "" || item.name === undefined || item.id === "" || item.id === undefined).length > 0
                                             }
                                             onClick={() => {
                                                 if (values.users.length === 0) {

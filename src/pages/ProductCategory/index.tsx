@@ -24,13 +24,19 @@ import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
-import { ExpandMore } from "@material-ui/icons";
+import {AddOutlined, ExpandMore} from "@material-ui/icons";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useLocation } from "react-router-dom";
 import queryString from "query-string";
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers"
+import { MdAccountCircle } from "react-icons/md";
+import {AiFillCrown, MdAdd} from "react-icons/all";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile } from 'react-device-detect';
+import { useHistory } from 'react-router-dom';
+import { FaSuitcase } from 'react-icons/fa';
 
 function reducer(state, action) {
     switch (action.type) {
@@ -123,12 +129,13 @@ const intialState = {
 }
 
 const ProductCategory = () => {
-
+    const history = useHistory();
     const location = useLocation()
     const toastConfig = useContext(CustomToastContext)
     const {
         state: { permissions, user, selectedEntity },
     }: any = useData();
+    const {getColumnData} = useColumns();
 
     const [productCategoryPermissions, setProductCategoryPermissions] = useState({
         isCreate: permissions.productCategory?.isCreate,
@@ -150,10 +157,14 @@ const ProductCategory = () => {
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
 
     // const [showGridFilters, setShowGridFilters] = useState(true)
     const columnState = JSON.parse(localStorage.getItem("productCategoryPage"));
+    const [isAllChecked, setIsAllChecked] = useState(false);
+    const [clonedData, setClonedData] = useState([])
+    const localStorageSelectedRecords = `${routes.productCategory.title}_selected`;
+
 
     const [anchorEl, setAnchorEl] = useState(null);
     if (columnState) {
@@ -196,17 +207,30 @@ const ProductCategory = () => {
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    if (o?.fieldData?.primaryField === true) {
-                        columns = [...columns,
-                        { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" }]
+                    if (["name"].find(d => d === o?.fieldData?.fieldName)) {
+                        columns = [...columns, {
+                            disabled: true,
+                            field: "name",
+                            headerName: "Category Name",
+                            pivotIndex: 0,
+                            show: true,
+                            cellRenderer: "nameRenderer",
+                            primaryField: true
+                        }]
                     }
                     else {
-                        let currentColumn = getColumnData(routes.productCategory.title, o?.fieldData, routes.productCategory.path)
+                        if (o?.fieldData?.primaryField === true) {
+                            columns = [...columns,
+                            { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" }]
+                        }
+                        else {
+                            let currentColumn = getColumnData(routes.productCategory.title, o?.fieldData, routes.productCategory.path)
 
-                        if (currentColumn !== null) {
-                            columns = [...columns, currentColumn?.columnData]
-                            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                                rendererNames.push(currentColumn?.rendererName)
+                            if (currentColumn !== null) {
+                                columns = [...columns, currentColumn?.columnData]
+                                if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                                    rendererNames.push(currentColumn?.rendererName)
+                                }
                             }
                         }
                     }
@@ -224,15 +248,23 @@ const ProductCategory = () => {
     }
 
     const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
-        <Chip
-            className="ml-3 link"
-            style={{ backgroundColor: `${params.data.chipColour}` }}
-            label={`${params.value}`}
-            onClick={() => {
-                setProductCategoryId(params.data.id);
-                setOpen({ open: true, isClone: false });
-            }}
-        />
+        {
+            productCategoryPermissions.isUpdate ?
+                <Chip
+                    className="ml-3 link"
+                    style={{ backgroundColor: `${params.data.chipColour}` }}
+                    label={`${params.value}`}
+                    onClick={() => {
+                        setProductCategoryId(params.data.id);
+                        setOpen({ open: true, isClone: false });
+                    }}
+                /> :
+                <Chip
+                    className="ml-3"
+                    style={{ backgroundColor: `${params.data.chipColour}` }}
+                    label={`${params.value}`}
+                />
+        }
     </span>
 
     const ActionsRenderer = params => <Fragment>
@@ -337,9 +369,42 @@ const ProductCategory = () => {
         axiosInstance().get(`/product-category${queryString}`).then(({ data: { data, count } }) => {
 
             let rows = data.map((u) => {
-                return prepareDataForGrid(u)
+                let finalObject = prepareDataForGrid(u);
+                finalObject["canDelete"] = permissions.productCategory.isDelete;
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                finalObject["allowedToEdit"] = permissions.productCategory.isUpdate;
+                return {
+                    ...finalObject,
+                };
             });
+            setIsAllChecked(false);
+            setClonedData(data)
+            if (appendRows) {
+                dispatch({
+                    type: "initialize", data: [...dataRows, ...rows],
+                    count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+                });
+            } else {
+                dispatch({
+                    type: "initialize", data: rows, count: count,
+                    selectedRecords: rows.filter(f => f.isChecked === true)
+                });
+            }
 
+            if (gridApi) {
+                try {
+                    let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
+                    if (oldSelectedRecords.length > 0) {
+                        gridApi.forEachNode(function (node) {
+                            node.setSelected(
+                                oldSelectedRecords.some((o) => o === node.data._id)
+                            );
+                        });
+                    }
+                } catch (ex) {
+                    console.error("Error in getting selected records from local storage")
+                }
+            }
             dispatch({ type: "initialize", data: rows, count: count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
@@ -413,50 +478,63 @@ const ProductCategory = () => {
                         <FaThemeisle size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.productCategory.title}</span>
                     </Grid>
                     <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
-                        <Box className={styles.filter_side_header} component="div" >
-                            <SearchBox
-                                onSearch={handleSearch}
-                                searchbox={styles.search_box_input}
-                                width="242px"
-                                size="small"
-                                value={search}
-                            />
-                            {productCategoryPermissions.isCreate &&
-                                <Button className={styles.add_submit_btn} onClick={() => {
-                                    setProductCategoryId(null);
-                                    setOpen({ open: true, isClone: false });
-                                }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                            }
-                            {productCategoryPermissions.isDelete &&
-                                <Button
-                                    className={styles.action_submit_btn}
-                                    variant="outlined"
-                                    color="default"
+                        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
+
+                                <Grid style={{width:"100%" , display:"flex"}}>
+                                <SearchBox
+                                    onSearch={handleSearch}
+                                    searchbox={styles.search_box_input}
+                                    width={isMobile ? "200px" : "242px"}
+                                    style={isMobile ? {flex:1} : {}}
                                     size="small"
-                                    onClick={openActions}
-                                    disabled={selectedRecords.length ? false : true}
-                                    aria-controls="action-menu"
-                                >Actions <ExpandMore />
-                                </Button>
-                            }
-                            <Menu
-                                anchorEl={anchorEl}
-                                keepMounted
-                                getContentAnchorEl={null}
-                                anchorOrigin={{
-                                    vertical: "bottom",
-                                    horizontal: "left",
-                                }}
-                                id="action-menu"
-                                open={Boolean(anchorEl)}
-                                onClose={closeActions}
-                            >
-                                <MenuItem onClick={() => {
-                                    closeActions()
-                                    { selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]) }
-                                    setShowDeleteConfirmBox(true)
-                                }}>Delete</MenuItem>
-                            </Menu>
+                                    value={search}
+                                />
+                                </Grid>
+
+
+                            <Grid style={{display: "flex" , gap:"5px"}}>
+                                    {productCategoryPermissions.isCreate &&
+                                        <Button className={isMobile ? "mobile_button" : styles.add_submit_btn} onClick={() => {
+                                            setProductCategoryId(null);
+                                            setOpen({ open: true, isClone: false });
+                                        }} variant={isMobile ? "text" : "contained"} size="small" color="primary"
+                                                startIcon={isMobile ? null : <AddOutlined />}>
+                                            {isMobile ? <MdAdd size={23}/> : "Add"}
+                                        </Button>
+                                    }
+                                    {productCategoryPermissions.isDelete &&
+                                        <Button
+                                            variant={isMobile ? "text" : "contained"}
+                                            color="default"
+                                            size="small"
+                                            onClick={openActions}
+                                            disabled={selectedRecords.length ? false : true}
+                                            aria-controls="action-menu"
+                                            className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                                        >
+                                            {isMobile ? "" :  "Actions" } <ExpandMore/>
+                                        </Button>
+                                    }
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        keepMounted
+                                        getContentAnchorEl={null}
+                                        anchorOrigin={{
+                                            vertical: "bottom",
+                                            horizontal: "left",
+                                        }}
+                                        id="action-menu"
+                                        open={Boolean(anchorEl)}
+                                        onClose={closeActions}
+                                    >
+                                        <MenuItem onClick={() => {
+                                            closeActions()
+                                            { selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]) }
+                                            setShowDeleteConfirmBox(true)
+                                        }}>Delete</MenuItem>
+                                    </Menu>
+                            </Grid>
+
                         </Box>
                     </Grid>
                 </Grid>
@@ -464,16 +542,54 @@ const ProductCategory = () => {
 
             {
                 Object.keys(frameWorkComponent).length > 0 ?
-                    <CustomAgGrid columns={columns}
+                    isMobile ? <CustomSwipableList
+                        allowSelection={true}
+                        allowSwipe={true}
+                        permissions={permissions.productCategory}
+                        primaryField={columns?.find(d => d.primaryField)}
+                        onClick={(data) => {
+                            setProductCategoryId(data.id);
+                            setOpen({ open: true, isClone: false });
+                        }}
                         dataRows={dataRows}
-                        frameworkComponents={frameWorkComponent}
-                        setGridApi={setGridApi}
+                        selectedRecords={selectedRecords}
                         dispatch={dispatch}
-                        rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={true}
+                        onEdit={(data) => {
+                            setProductCategoryId(data.id);
+                            setOpen({ open: true, isClone: false });
+                        }}
+                        extraParamsToCheckDelete={true}
+                        onDelete={(data) => {
+                            setDeleteRecord(data);
+                            setShowDeleteConfirmBox(true)
+                        }}
+                        rowCount={rowCount}
+                        page={page}
                         loading={loading}
+                        additionalDetails={[
+                        ]}
+                        chips={[
+                           
+                        ]}
+                        owerCollaboratorInitialsOrImages=""
+                        onCreate={false}
+                        showClone={true}
+                        onClone={(data) => {
+                            setProductCategoryId(data.id);
+                            setOpen({ open: true, isClone: true })
+                        }}
                         renderedFrom={routes.productCategory.title}
-                        refreshGrid={fetchProductCategory}
-                    /> : null
+                    /> :
+                        <CustomAgGrid columns={columns}
+                            dataRows={dataRows}
+                            frameworkComponents={frameWorkComponent}
+                            setGridApi={setGridApi}
+                            dispatch={dispatch}
+                            rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={true}
+                            loading={loading}
+                            renderedFrom={routes.productCategory.title}
+                            refreshGrid={fetchProductCategory}
+                        /> : null
             }
 
             {showDeleteConfirmBox &&

@@ -15,6 +15,8 @@ import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import styles from "../Leads/Header.module.scss";
 import HideWhenOffline from "../../components/HideWhenOffline";
+import { isMobile } from "react-device-detect";
+import {MdAdd} from "react-icons/all";
 
 function PackageHeader(props) {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -81,77 +83,83 @@ function PackageHeader(props) {
                 {children}
             </Grid>
             <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
-                <Box className={styles.filter_side_header} component="div">
-                    <HideWhenOffline>
-                        <SearchBox
-                            onSearch={onSearch}
-                            searchbox={styles.search_box_input}
-                            value={searchVal}
-                            size="small"
-                            placeholder="Search Packages"
-                            width="300px"
-                        />
-                    </HideWhenOffline>
+                <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
 
-                    {packagePermissions.isCreate && packagePermissions.isUpdate && (
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            className={styles.add_submit_btn}
-                            onClick={onCreate}
-                            startIcon={<AddOutlined />}
-                        >
-                            Add
-                        </Button>
-                    )}
-
-                    <HideWhenOffline>
-
-                        <>
-                            <Button
-                                disabled={canDelete}
-                                variant="outlined"
-                                color="default"
+                    <Grid style={{display: "flex", flex:1}}>
+                        <HideWhenOffline>
+                            <SearchBox
+                                onSearch={onSearch}
+                                searchbox={styles.search_box_input}
+                                value={searchVal}
                                 size="small"
-                                onClick={openActions}
-                                className={styles.action_submit_btn}
-                                aria-controls="action-menu"
-                            >
-                                Actions <ExpandMore />
-                            </Button>
-                            <Menu
-                                anchorEl={anchorEl}
-                                keepMounted
-                                getContentAnchorEl={null}
-                                anchorOrigin={{
-                                    vertical: "bottom",
-                                    horizontal: "left",
-                                }}
-                                id="action-menu"
-                                open={Boolean(anchorEl)}
-                                onClose={closeActions}
-                            >
-                                {packagePermissions.isDelete && <MenuItem
-                                    onClick={() => {
-                                        closeActions();
-                                        showConfirmBox(null);
-                                    }}
-                                >
-                                    Delete
-                                </MenuItem>}
-                                {packagePermissions.isUpdate && <MenuItem
-                                    onClick={() => {
-                                        openAssingToProduct()
-                                        closeActions();
-                                    }}
-                                >
-                                    Assign Products
-                                </MenuItem>}
-                            </Menu>
-                        </>
+                                placeholder="Search Packages"
+                                width={isMobile ? "200px" : "242px"}
+                                style={isMobile ? {flex:1} : {}}
+                            />
+                        </HideWhenOffline>
+                    </Grid>
 
-                    </HideWhenOffline>
+                    <Grid style={{display: "flex" , gap:"5px"}}>
+                            {packagePermissions.isCreate && packagePermissions.isUpdate && (
+                                <Button
+                                    variant={isMobile ? "text" : "contained"}
+                                    color="primary"
+                                    size="small"
+                                    onClick={onCreate}
+                                    className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                                    startIcon={isMobile ? null : <AddOutlined />}
+                                >
+                                    {isMobile ? <MdAdd size={23}/> : "Add"}
+                                </Button>
+                            )}
+
+                            <HideWhenOffline>
+
+                                <>
+                                    <Button
+                                        disabled={canDelete}
+                                        variant={isMobile ? "text" : "contained"}
+                                        color="default"
+                                        size="small"
+                                        onClick={openActions}
+                                        aria-controls="action-menu"
+                                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                                    >
+                                        {isMobile ? "" :  "Actions" } <ExpandMore/>
+                                    </Button>
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        keepMounted
+                                        getContentAnchorEl={null}
+                                        anchorOrigin={{
+                                            vertical: "bottom",
+                                            horizontal: "left",
+                                        }}
+                                        id="action-menu"
+                                        open={Boolean(anchorEl)}
+                                        onClose={closeActions}
+                                    >
+                                        {packagePermissions.isDelete && <MenuItem
+                                            onClick={() => {
+                                                closeActions();
+                                                showConfirmBox(null);
+                                            }}
+                                        >
+                                            Delete
+                                        </MenuItem>}
+                                        {packagePermissions.isUpdate && <MenuItem
+                                            onClick={() => {
+                                                openAssingToProduct()
+                                                closeActions();
+                                            }}
+                                        >
+                                            Assign Products
+                                        </MenuItem>}
+                                    </Menu>
+                                </>
+
+                            </HideWhenOffline>
+                    </Grid>
                 </Box>
             </Grid>
         </Grid>

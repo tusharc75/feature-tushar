@@ -268,7 +268,7 @@ const Details = (props: DetailProps) => {
                     //   )
                     // }
                     >
-                      <span className={`text-truncate ${classes.dataValue}`}>
+                      <span className={`text-truncate ${classes.dataValue} link`}>
                         {_val.optionLabel}
                         {i < data[fieldData.fieldName].length - 1 ? "," : ""}
                       </span>
@@ -290,7 +290,7 @@ const Details = (props: DetailProps) => {
               //   )
               // }
               >
-                <span className={`text-truncate ${classes.dataValue}`}>
+                <span className={`text-truncate ${classes.dataValue} link`}>
                   {data[fieldData.fieldName].optionLabel}
                   {data[fieldData.fieldName]?.staticData?.approved &&
                     data[fieldData.fieldName]?.staticData?.approved === true ? (
@@ -376,7 +376,7 @@ const Details = (props: DetailProps) => {
                 <div className={"detail-box-content"}>
                 <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
                 <h3 className="form-label-style" title={form.name}>
-                   {"Asset Information"}
+                   {form.name}
                 </h3>
                 </div>
                 <Grid container style={{paddingTop:"6px"}}>

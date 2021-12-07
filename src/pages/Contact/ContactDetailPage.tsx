@@ -35,6 +35,9 @@ import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import routes from '../../components/Helpers/Routes';
+import queryString from 'query-string';
+import AddReportsToContact from './AddReportsToContact';
+import {MdDelete, MdEdit} from "react-icons/md";
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -44,6 +47,8 @@ const ContactDetailsPage = (props) => {
     contactBreadcrumb
   } = props;
   const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit } = parsed;
   const {
     state: { user, permissions, selectedEntity, tour }, dispatch
   }: any = useData();
@@ -54,7 +59,7 @@ const ContactDetailsPage = (props) => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [contactFields, setContactFields] = useState([]);
   const [mainPoints, setMainPoints] = useState({});
-  const [, setAllowedToEdit] = useState(false);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
@@ -78,6 +83,10 @@ const ContactDetailsPage = (props) => {
   const [opportunities, setOpportunities] = useState([]);
   const [projectSales, setProjectSales] = useState([]);
   const [quotes, setQuotes] = useState([]);
+  const [contactsList, setContactsList] = useState([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const [showAddContact, setShowAddContact] = useState(false)
 
   let { id } = useParams();
 
@@ -140,6 +149,9 @@ const ContactDetailsPage = (props) => {
     axiosInstance()
       .get(`/${contactApi}/${id}`)
       .then(({ data: { data } }) => {
+
+        
+
         handleMainPoints(data);
         let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
 
@@ -160,8 +172,10 @@ const ContactDetailsPage = (props) => {
 
         let orgChartData = [];
 
+        let excludeContacts = []
         if (data.parentHierarchy && data.parentHierarchy.length > 0) {
           data.parentHierarchy.map((d) => {
+            excludeContacts.push(d._id)
             orgChartData.push({
               id: d._id,
               name: [d.firstName, d.middleName, d.lastName].filter((d) => d).join(' '),
@@ -173,6 +187,8 @@ const ContactDetailsPage = (props) => {
             });
           });
         }
+        excludeContacts.push(data._id)
+        getContacts(excludeContacts)
 
         orgChartData.push({
           id: data._id,
@@ -184,12 +200,91 @@ const ContactDetailsPage = (props) => {
           current: true
         });
 
+        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        setAllowedToEdit(isAllowedToEdit);
+        
+        if (isAllowedToEdit && openEdit === 'true') {
+          setOpenUpdateDialog(true);
+          const params = new URLSearchParams();
+          params.delete('openEdit');
+          history.push({ search: params.toString() });
+        }
         setOrgChartData(orgChartData);
       })
       .catch((err) => {
         setLoading(false);
       });
   };
+
+  const getContacts = (excludeContacts = []) => {
+    axiosInstance()
+      .get(`${contactApi}?entity=${selectedEntity}`)
+      .then(({ data: { data } }) => {
+
+        let rows = data.map(u => {
+          if (excludeContacts.indexOf(u._id) >= 0) {
+            u.isExclude = true
+          }
+          else {
+            u.isExclude = false
+          }
+          return u
+        })
+        let name = [contactData.firstName, contactData.middleName, contactData.lastName].filter((d) => d).join(' ');
+
+        if (contactData?.salutation?.optionLabel) {
+          name = contactData.salutation.optionLabel + name;
+        }
+        let currentContact = {
+          ...contactData, isExclude: true,
+          concatedName: name
+        }
+        setContactsList([currentContact, ...rows])
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const handleUpdateOrgData = ({ addContact, reportsToContact }) => {
+
+    if (addContact?._id && reportsToContact?._id) {
+      const contactFieldData = contactFields.map((f) => {
+        return f.fieldData;
+      });
+      const updatedData = {
+        ...getObjKeysWithValues(addContact, contactFieldData),
+        reportsTo: reportsToContact?._id,
+        _id: addContact?._id
+      };
+      handleUpdateContact(updatedData, true)
+    }
+  }
+
+  const handleUpdateChart = (draggedNode, dropNode) => {
+    let draggedNodeData = {}
+    contactsList.forEach(o => {
+      if (draggedNode.id === o._id) {
+        draggedNodeData = {
+          ...o,
+          reportsTo: dropNode.id
+        }
+      }
+    })
+
+    const contactFieldData = contactFields.map((f) => {
+      return f.fieldData;
+    });
+
+    const updatedData = {
+      ...getObjKeysWithValues(draggedNodeData, contactFieldData),
+      _id: draggedNodeData["_id"]
+    };
+    if (updatedData && updatedData["reportsTo"] && updatedData["reportsTo"] === "0") {
+      delete updatedData["reportsTo"]
+    }
+    handleUpdateContact(updatedData, true)
+  }
 
   const fetchRelatedData = () => {
     axiosInstance()
@@ -445,27 +540,34 @@ const ContactDetailsPage = (props) => {
     }
   };
 
-  const handleUpdateContact = (values) => {
+  const handleUpdateContact = (values, isUpdateReportsTo = false, isFetch = true) => {
     if (values.employees) {
       values.employees = parseInt(values.employees);
     }
-    const updatedData = {
-      ...values,
-      _id: contactData._id
-    };
+    let updatedData = { ...values, };
 
+    if (!isUpdateReportsTo) {
+      updatedData = {
+        ...updatedData,
+        _id: contactData._id
+      };
+    }
+    setIsSubmitting(true)
     axiosInstance()
       .put(`/${contactApi}`, updatedData)
       .then(({ data }) => {
-        fetchContactData();
+        if (isFetch) fetchContactData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
+        if (showAddContact) setShowAddContact(false)
         setOpenUpdateDialog(false);
+        setIsSubmitting(false)
       })
       .catch((error) => {
+        setIsSubmitting(false)
         toastConfig.setToastConfig(error);
       });
   };
@@ -486,6 +588,17 @@ const ContactDetailsPage = (props) => {
 
   return (
     <>
+      {
+        showAddContact ?
+          <AddReportsToContact
+            onClose={() => { setShowAddContact(false) }}
+            open={showAddContact}
+            contactsList={contactsList}
+            isSubmitting={isSubmitting}
+            onSubmit={handleUpdateOrgData}
+          />
+          : null
+      }
       {openUpdateDialog && showAtLast ? (
         // <UpdateDetailsDialog
         //     title={`Editing  ${contactData.firstName}`}
@@ -569,8 +682,8 @@ const ContactDetailsPage = (props) => {
               showHeading={true}
             >
               {contactPermissions.isUpdate && canEdit ? (
-                <Button id="detailEditButton" variant="contained" color="primary" size="small" onClick={handleOpneUpdateDialog}>
-                  Edit
+                <Button id="detailEditButton" variant={isMobile ? "outlined" : "contained"} color="primary" size="small" onClick={handleOpneUpdateDialog} className={contactClass.mobile_button_layout}>
+                  {isMobile ? <MdEdit/> : "Edit"}
                 </Button>
               ) : null}
 
@@ -578,7 +691,7 @@ const ContactDetailsPage = (props) => {
                 contactData?.owner?.optionValue &&
                 user?.user?._id &&
                 contactData.owner.optionValue === user.user._id ? (
-                <DeleteButton id="detailDeleteButton" text="Delete" size="small" onClick={() => setShowConfirmBox(true)} />
+                <DeleteButton id="detailDeleteButton" text={isMobile ? <MdDelete/> : "Delete"} size="small" onClick={() => setShowConfirmBox(true)}  />
               ) : null}
             </DetailsPageHeader>
             <ProcessFlow
@@ -610,8 +723,8 @@ const ContactDetailsPage = (props) => {
                     textColor="primary"
                     aria-label="icon tabs example"
                   >
-                    <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-                    <Tab label="Org Chart" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
+                    <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className='tabLayout' />
+                    <Tab label="Org Chart" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className='tabLayout'/>
                   </Tabs>
                   <Box hidden={currentTabIndex !== 0}>
                     {showAtLast ? (
@@ -622,11 +735,14 @@ const ContactDetailsPage = (props) => {
                     {/* <DetailsPage data={contactData} fields={contactFields} /> */}
                   </Box>
                   <Box hidden={currentTabIndex !== 1}>
+
                     <OrgChartContainer
                       data={orgChartData}
                       onClick={(id) => {
                         history.push(`/${contactApi}/detail/${id}`);
                       }}
+                      updateChart={handleUpdateChart}
+                      setShowAddContact={setShowAddContact}
                     />
                   </Box>
                 </>
@@ -910,6 +1026,7 @@ const ContactDetailsPage = (props) => {
           </Paper>
         </div>
       </div>
+
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -927,15 +1044,18 @@ const ContactDetailsPage = (props) => {
             setOrgChartInFullScreenDialog(false);
           }}
         >
+
           <OrgChartContainer
             data={orgChartData}
             onClick={(id) => {
-              setOrgChartInFullScreenDialog(false);
               history.push(`/${contactApi}/detail/${id}`);
             }}
+            setShowAddContact={setShowAddContact}
+            updateChart={handleUpdateChart}
           />
         </FullScreenDialog>
       )}
+
       {openAdditionalDialog && (
         // <Dialog
         //   disableBackdropClick={true}
@@ -974,6 +1094,7 @@ const ContactDetailsPage = (props) => {
           title="Additional Information"
           fieldData={sectionFields}
         />
+
       )}
     </>
   );

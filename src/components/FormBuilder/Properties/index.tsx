@@ -68,7 +68,9 @@ const LookupResource = [
   { name: 'Pricing Condition', value: 'Pricing Condition' },
   { name: 'Receiving Ticket', value: 'Receiving Ticket' },
   { name: 'Repair Job', value: 'Repair Job' },
-  { name: 'Sales Order', value: 'Sales Order' }
+  { name: 'Sales Order', value: 'Sales Order' },
+  { name: 'Transfer Asset', value: 'Transfer Asset' },
+  { name: 'Address', value: 'Address' }
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields }) => {
@@ -410,7 +412,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
   return (
     <Dialog
       maxWidth="md"
-      fullScreen={fullScreen || (isMobile || isTablet)}
+      fullScreen={fullScreen || isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       className="properties_dialog_height"
@@ -434,7 +436,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               }}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
-                setFullScreen(prevState => !prevState)
+                setFullScreen((prevState) => !prevState);
               }}
               showManimizeMaximize={true}
             ></CustomDialogHeader>
@@ -503,45 +505,45 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'formula' ||
                     values['type'] === 'converter' ||
                     values['type'] === 'currencyAmount') && (
-                      <Grid spacing={3} container>
-                        {values['type'] === 'formula' && (
-                          <Grid item xs={12} sm={6} md={6}>
-                            <FormControl fullWidth margin="dense" variant="outlined">
-                              <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
-                              <Select
-                                labelId="demo-simple-select-outlined-label"
-                                id="demo-simple-select-outlined"
-                                value={values['returnType']}
-                                onChange={(e) => {
-                                  setFieldValue('returnType', e.target.value);
-                                  handleValuesChange({ returnType: e.target.value });
-                                }}
-                                label="Return Type"
-                                name="returnType"
-                              >
-                                <MenuItem value="decimal">Decimal</MenuItem>
-                                <MenuItem value="string">String</MenuItem>
-                                <MenuItem value="boolean">Boolean</MenuItem>
-                              </Select>
-                            </FormControl>
-                          </Grid>
-                        )}
-                        {(values['type'] === 'decimal' ||
-                          values['type'] === 'converter' ||
-                          values['type'] === 'currencyAmount' ||
-                          values['returnType'] === 'decimal') && (
-                            <Grid item xs={12} sm={6} md={6}>
-                              <DecimalPlaces
-                                values={values}
-                                setFieldValue={(name, value) => {
-                                  handleValuesChange({ [name]: value });
-                                  setFieldValue(name, value);
-                                }}
-                              />
-                            </Grid>
-                          )}
-                      </Grid>
-                    )}
+                    <Grid spacing={3} container>
+                      {values['type'] === 'formula' && (
+                        <Grid item xs={12} sm={6} md={6}>
+                          <FormControl fullWidth margin="dense" variant="outlined">
+                            <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
+                            <Select
+                              labelId="demo-simple-select-outlined-label"
+                              id="demo-simple-select-outlined"
+                              value={values['returnType']}
+                              onChange={(e) => {
+                                setFieldValue('returnType', e.target.value);
+                                handleValuesChange({ returnType: e.target.value });
+                              }}
+                              label="Return Type"
+                              name="returnType"
+                            >
+                              <MenuItem value="decimal">Decimal</MenuItem>
+                              <MenuItem value="string">String</MenuItem>
+                              <MenuItem value="boolean">Boolean</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                      )}
+                      {(values['type'] === 'decimal' ||
+                        values['type'] === 'converter' ||
+                        values['type'] === 'currencyAmount' ||
+                        values['returnType'] === 'decimal') && (
+                        <Grid item xs={12} sm={6} md={6}>
+                          <DecimalPlaces
+                            values={values}
+                            setFieldValue={(name, value) => {
+                              handleValuesChange({ [name]: value });
+                              setFieldValue(name, value);
+                            }}
+                          />
+                        </Grid>
+                      )}
+                    </Grid>
+                  )}
                   {(values['type'] === 'dropDown' || values['type'] === 'multiSelect') && (
                     <Fragment>
                       <FormControlLabel

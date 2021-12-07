@@ -42,6 +42,8 @@ export const termsAndConditionDocumentUploadMaxSize = {
   text: '2 MB'
 };
 
+export const repairJobProcessSteps = ["Serialized Assets", "Loading Ticket", "Receiving Ticket", "End"];
+
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
 
@@ -156,7 +158,8 @@ export const sidebarResource = {
   priceBuilder: 'Price Builder',
   flags: 'Flags',
   projectSales: 'Project Sales',
-  purchaseOrder: 'Purchase Order'
+  purchaseOrder: 'Purchase Order',
+  transferAsset: 'Transfer Asset'
 
 };
 
@@ -208,8 +211,20 @@ export const RESOURCE_LABEL = {
   salesOrder: 'Sales Order',
   eCommerce: 'e-Commerce',
   packages: 'Packages',
-  purchaseOrder: 'Purchase Order'
+  purchaseOrder: 'Purchase Order',
+  transferAsset: 'Transfer Asset'
 };
+
+export const sidebarResourceObjectFromValues = () => {
+
+  let obj: any = {};
+
+  Object.keys(sidebarResource).forEach((key) => {
+    obj[sidebarResource[key]] = key
+  })
+  obj['Project Sales'] = "projectStrategy"
+  return obj
+}
 
 export const lead = {
   leadResource: 'lead', //  Key of sidebar object
@@ -246,6 +261,7 @@ export const quoteBuilder = {
 };
 
 export const rentalManagement = {
+  api: '/rental-management',
   rentalManagementResource: 'rentalManagement',
   rentalManagementApi: '/rental-management',
   resource: "rental-management"
@@ -375,6 +391,13 @@ export const purchaseOrder = {
   route: '/purchase-order',
   permission: 'purchaseOrder',
   resource: 'purchaseOrder'
+};
+
+export const transferAsset = {
+  api: '/transfer-asset',
+  route: '/transfer-asset',
+  permission: 'transferAsset',
+  resource: 'transferAsset'
 };
 
 export const profileMenuItems = {
@@ -647,7 +670,7 @@ export const initializeDropdownById = (field, fieldName, id) => {
 };
 export const dateFormat = localStorage.getItem("dateFormat") ?? "MM/DD/YYYY";
 export const dateTimeFormat = localStorage.getItem("dateTimeFormat") ?? "MM/DD/YYYY hh:mm A";
-export const cardDateFormat = localStorage.getItem("cardDateFormat") ?? "MMM,DD YYYY";
+export const cardDateFormat = localStorage.getItem("cardDateFormat") ?? "MMM DD, YYYY";
 
 export const dateFormatForInputControl = localStorage.getItem("dateFormatForInputControl") ?? "MM/dd/yyyy";
 // export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
@@ -1203,7 +1226,7 @@ export const prepareDataForGrid = (data, user = {}) => {
   });
 
   if (data?.collaborator) {
-    finalObject["isAllowedToUpdate"] = [...(data?.collaborator ?? []), data?.owner].some(
+    finalObject["isAllowedToUpdate"] = [...(data?.collaborator ?? []), data?.owner ?? {}].some(
       (obj) => obj.optionValue === user["user"]?._id
     )
   }

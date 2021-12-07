@@ -43,14 +43,13 @@ import CustomDialogComponent from "../../components/CustomDialog/CustomDialogCom
 import VersionStatus from "./VersionStatus";
 import TransferEntityDialog from "../../components/AssignRolesDialog/TransferEntityDialog";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 import { quoteStepColors } from '../../constants/helpers';
 import InfiniteScroll from "react-infinite-scroll-component";
-import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown } from "react-icons/all";
 import { FaSuitcase } from "react-icons/fa";
+import { AiFillCrown } from "react-icons/all";
 import IconButton from "@material-ui/core/IconButton";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 
@@ -73,6 +72,7 @@ const QuoteBuilders = () => {
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
+  const {getColumnData} = useColumns();
   const { quoteResource } = quote;
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
@@ -272,7 +272,7 @@ const QuoteBuilders = () => {
   const fetchGridColumns = async () => {
 
     const response = await axiosInstance()
-      .get(`/field?resource=Quotes&entity=${selectedEntity}`)
+      .get(`/field?resource=Quotes&entity=${selectedEntity}&view=true`)
 
     let data = response?.data?.data
 
@@ -283,7 +283,7 @@ const QuoteBuilders = () => {
         columns = [...columns, {
           disabled: true,
           field: "quoteName",
-          headerName: "Quote Name",
+          headerName: "Quote Number",
           pivotIndex: 0,
           show: true,
           cellRenderer: "quoteNameRenderer",
@@ -1015,7 +1015,7 @@ const QuoteBuilders = () => {
                   }
                 ]}
                 owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                onCreate={clickCreateNew}
+                onCreate={false}
                 showClone={false}
                 onClone={() => { }}
                 renderedFrom={quoteResource}

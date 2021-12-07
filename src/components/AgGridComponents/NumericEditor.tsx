@@ -5,6 +5,9 @@ import React, {
     useRef,
     useState,
 } from 'react';
+import IconButton from '@material-ui/core/IconButton';
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 
 const KEY_BACKSPACE = 8;
 const KEY_DELETE = 46;
@@ -144,6 +147,12 @@ export default forwardRef((props: any, ref) => {
             //onKeyDown={(event) => onKeyDown(event)}
             style={{ width: '100%' }}
         />
+        <IconButton size="small" color="primary" onClick={() => props.stopEditing()} >
+            <CheckCircleOutlineIcon fontSize="small" />
+        </IconButton>
+        <IconButton size="small" color="primary" onClick={() => props.stopEditing()} >
+            <HighlightOffIcon fontSize="small" />
+        </IconButton>
     </React.Fragment>
     );
 });

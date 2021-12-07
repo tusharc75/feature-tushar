@@ -1,79 +1,54 @@
-import { ChangeEvent, FC, FormEvent, useEffect, useState, Fragment } from 'react';
-import {
-  Button,
-  Dialog,
-  TextField,
-  Grid,
-  Box,
-  CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  InputAdornment,
-  FormHelperText
-} from '@material-ui/core';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import DateUtils from '@date-io/date-fns';
-import moment from 'moment';
-import { dateFormatForInputControl } from '../../constants/helpers';
-import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import { startCase } from 'lodash';
-import axiosInstance from "../../axios/axiosInstance";
-import { groupBy } from 'lodash';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/helpers";
+import { ChangeEvent, FC, FormEvent, useEffect, useState, Fragment, useRef } from 'react';
+import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import axiosInstance from "../../../axios/axiosInstance";
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
+import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, isFieldNotTouched } from "./../../constants/helpers";
+import { CustomDialogTransition, isFieldNotTouched } from "../../../constants/helpers";
 import { Formik, Form } from "formik";
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
-import CustomButton from '../../components/Helpers/CustomButton'
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
+import CustomButton from '../../../components/Helpers/CustomButton'
 import { FaDiceOne } from "react-icons/fa";
-import FormTypes from "../../components/Helpers/FormTypes";
+import FormTypes from "../../../components/Helpers/FormTypes";
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import { CURReplaceByCurrencySingle } from "../../constants/formulaUtility";
+import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 
-interface EditDialogProps {
+interface AdditionalCostDialogProps {
   onClose: VoidFunction | any;
-  isSaving: boolean;
-  submitBulkEdit: VoidFunction | any;
   currency: string;
-  data?: object | any;
-  calculatePrice?: VoidFunction | any;
-  endDate: any;
-  startDate: any;
-  selectedProducts: any[]
+  handleAddCost: VoidFunction | any;
+  handleUpdateCost: VoidFunction | any;
+  costData?: object | any;
 }
 
-const RentalJobQtyDialog: FC<EditDialogProps> = (
-  {
-    calculatePrice,
-    onClose,
-    isSaving,
-    submitBulkEdit,
-    currency,
-    data,
-    startDate,
-    endDate,
-    selectedProducts
-  }) => {
+const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency, handleAddCost, handleUpdateCost, costData }) => {
 
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const ref = useRef(null);
 
   useEffect(() => {
-    axiosInstance().get("/field/child?resource=Rental Management Product").then(({ data: { data } }) => {
-      data = CURReplaceByCurrencySingle(data, currency)
-      setInitialData({
-        fields: data,
-        values: getObjKeys("", data),
-      });
-      EvaluteproductFields(data);
+    axiosInstance().get("/field/child?resource=Rental Management Cost").then(({ data: { data } }) => {
+      const poFields = CURReplaceByCurrencySingle(data, currency);
+      if (costData) {
+        setInitialData({
+          fields: poFields,
+          values: getObjKeysWithValues(costData, poFields),
+        });
+      }
+      else {
+        setInitialData({
+          fields: poFields,
+          values: getObjKeys("", poFields),
+        });
+      }
+      EvaluteproductFields(poFields);
     })
   }, []);
 
@@ -87,41 +62,17 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     setFields(customData)
   }
 
-  const getTitle = () => {
-    if (data) {
-      let editTitle = `Edit - [${data.detail}]`;
-
-      if (data.subRows && data.subRows?.length > 0) {
-        editTitle = `Edit - [${data.detail} (${data.subRows.length})]`;
-      }
-      return editTitle;
-    } else {
-      let bulkEdit = "Bulk Edit -";
-      const groupByProducts = groupBy(selectedProducts, "type");
-      const edits = [];
-      if (groupByProducts["Product"]) {
-        edits.push(`${groupByProducts["Product"].length} - Products`)
-      }
-      if (groupByProducts["Package"]) {
-        edits.push(`${groupByProducts["Package"].length} - Package`)
-      }
-      if (groupByProducts["productInPackage"]) {
-        edits.push(`${groupByProducts["productInPackage"].length} - Product In Package`)
-      }
-
-      return `${bulkEdit} (${edits.join(", ")})`;
-    }
-  }
-
-  const handleClose = () => {
-    if (isSaving === false) {
-      onClose();
-    }
-  };
-
   const handleSubmit = (values) => {
-    console.log(values)
-    submitBulkEdit({ ...data, ...values })
+    if (!costData) {
+      let returnData = []
+      returnData = [{ ...values }]
+      handleAddCost(returnData)
+    }
+    else {
+      let returnData = []
+      returnData = [{ ...values, _id: costData._id }]
+      handleUpdateCost(returnData)
+    }
   };
 
   return (<Dialog
@@ -134,6 +85,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   >
     {initialData && initialData.fields.length ?
       <Formik
+        innerRef={ref}
         enableReinitialize={true}
         initialValues={initialData.values}
         validationSchema={yupSchema(initialData.fields)}
@@ -147,9 +99,14 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         }) => (
           <Fragment>
             <CustomDialogHeader
-              title={getTitle()}
+              title={"Edit"}
               onClose={() => {
-                onClose()
+                if (!isEqual(ref?.current?.values, initialData.values)) {
+                  setShowConfirmDialog(true)
+                }
+                else {
+                  onClose()
+                }
               }}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
@@ -226,14 +183,21 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" color="primary"
+              <Button
+                size="small"
+                color="primary"
                 onClick={() => {
-                  onClose()
+                  if (!isEqual(ref.current.values, initialData.values)) {
+                    setShowConfirmDialog(true)
+                  }
+                  else {
+                    onClose()
+                  }
                 }}
               >{"Close"}</Button>
-
               <CustomButton
                 loading={loading}
+                disabled={isEqual(ref?.current?.values, initialData.values)}
                 variant="contained"
                 color="primary"
                 type="submit"
@@ -241,6 +205,19 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
               > Save
               </CustomButton>
             </CustomDialogFooter>
+            {showConfirmDialog ?
+              <ConfirmCancelDialog
+                open={showConfirmDialog}
+                onSave={() => {
+                  setShowConfirmDialog(false)
+                  submitForm()
+                }}
+                onClose={() => {
+                  setShowConfirmDialog(false)
+                  onClose()
+                }}
+              /> : null
+            }
           </Fragment>
         )}
       </Formik>
@@ -248,19 +225,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       <Box p={2} height={500} bgcolor="white">
         <CommonSkeleton lenArray={[...Array(10).keys()]} />
       </Box>}
-    {
-      showConfirmationDialog && <ConfirmationDialog
-        open={showConfirmationDialog}
-        message="Price configured at the product level will be override, would you like to override it ?"
-        onOk={() => {
-          setShowConfirmationDialog(false);
-        }}
-        onClose={() => {
-          setShowConfirmationDialog(false)
-        }}
-      />
-    }
   </Dialog>);
 };
 
-export default RentalJobQtyDialog;
+export default AdditionalCostDialog;

@@ -1,0 +1,437 @@
+import React, { useState, useEffect, useContext, useReducer, Fragment } from "react";
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import AddIcon from "@material-ui/icons/Add";
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "../../axios/axiosInstance";
+import { GiStockpiles } from 'react-icons/gi';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
+import { ExpandMore } from "@material-ui/icons";
+import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
+import SearchBox from '../../components/Helpers/SearchBox'
+import styles from "../Leads/Header.module.scss";
+import routes from "../../components/Helpers/Routes";
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
+import { transferAsset, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
+import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
+import { useData } from "../../StateProvider/Provider";
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { useHistory } from "react-router-dom";
+import HtmlTooltip from "../../components/CustomTooltipTitle";
+import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
+import { prepareDataForGrid } from "../../constants/helpers"
+import ManageTransferAsset from "./ManageTransferAsset";
+import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
+import {isMobile} from "react-device-detect";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import {FaSuitcase} from "react-icons/fa";
+import {MdAdd} from "react-icons/all";
+
+const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
+
+const TransferAsset = () => {
+
+  const toastConfig = useContext(CustomToastContext)
+  const [showManageTransferAssetDialog, setShowManageTransferAssetDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
+  const [isDeleting, setDeleting] = useState(false)
+  const [deleteRecord, setDeleteRecord] = useState(null)
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [gridApi, setGridApi] = useState(null);
+  const [columns, setColumns] = useState([])
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+  const {
+    state: { user, permissions },
+  }: any = useData();
+  const { getColumnData } = useColumns();
+  const history = useHistory();
+
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+
+  useEffect(() => {
+    fetchTransferAsset()
+  }, [page, limit, filters, sorting, search]);
+
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get("/field?resource=Transfer Asset")
+      .then(({ data: { data } }) => {
+        let columns = []
+        let rendererNames = []
+        data.forEach(o => {
+          let currentColumn = getColumnData(routes.transferAsset?.title, o?.fieldData, routes.transferAssetDetail.path)
+
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData]
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
+          }
+
+        })
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+          actionsRenderer: ActionsRenderer
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        columns = [...columns, ...getStaticFields()]
+        setColumns([...columns])
+      })
+  }
+
+  const fetchTransferAsset = () => {
+    dispatch({ type: "loading", loading: true });
+
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+
+    const queryString = getQueryString();
+    axiosInstance().get(`${transferAsset.api}${queryString}`).then(({ data }) => {
+      let rows = data.data?.map((u) => {
+
+        let finalObject = prepareDataForGrid(u,user);
+
+        finalObject["canDelete"] = permissions?.transferAsset?.isDelete;
+
+        finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+
+        finalObject["allowedToEdit"] = permissions?.transferAsset?.isUpdate;
+
+
+
+        return finalObject
+
+      });
+
+      data.data = data.data?.map((u, i) => ({
+
+        ...prepareDataForGrid(u, user)
+
+      }));
+
+
+
+      dispatch({ type: "initialize", data: rows, count: data.count });
+      setTimeout(() => {
+        dispatch({ type: "loading", loading: false });
+      }, gridLoadingTimeout);
+
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      dispatch({ type: "loading", loading: false });
+    });
+  };
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+
+      Object.keys(filters).forEach(field => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter
+        })
+      });
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+
+    return deepFilter;
+  };
+
+  const columnState = JSON.parse(localStorage.getItem(routes.transferAsset?.title));
+
+
+  if (columnState) {
+    columns.map((item) => {
+      columnState.map((d) => {
+        if (d.colId == item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
+
+
+
+  const handleDelete = () => {
+    let ids = []
+    if (deleteRecord) {
+      ids.push(deleteRecord._id)
+    }
+    else {
+      ids = selectedRecords.map(d => d._id);
+    }
+    setDeleting(true)
+    axiosInstance().put(`${transferAsset.api}/remove`, { "ids": ids }).then(() => {
+      fetchTransferAsset();
+      setShowDeleteConfirmBox(false)
+      setDeleteRecord(null)
+      setAnchorEl(null)
+      setDeleting(false)
+    }).catch((error) => {
+      setDeleting(false)
+      toastConfig.setToastConfig(error)
+    });
+  }
+
+
+
+  const ActionsRenderer = params => (
+    <>
+      {
+        permissions?.transferAsset?.isCreate &&
+        <HtmlTooltip title="Clone">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setShowManageTransferAssetDialog({ open: true, isClone: true, idToClone: params.data._id });
+            }}
+          >
+            <FileCopyIcon color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+      }
+      {permissions?.transferAsset?.isDelete &&
+        <HtmlTooltip title="Delete">
+          <IconButton size="small" aria-label="Delete" onClick={() => {
+            setDeleteRecord(params.data);
+            setShowDeleteConfirmBox(true)
+          }} >
+            <DeleteIcon color="error" />
+          </IconButton>
+        </HtmlTooltip >
+      }
+    </>
+  )
+
+  const handleSearch = (e) => {
+    dispatch({ type: "search", search: e.target.value });
+  };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const replaceFieldName = (field) => {
+    switch (field) {
+      case "createdBy":
+        return "createdBy.user.concatedName";
+
+      case "updatedBy":
+        return "updatedBy.user.concatedName";
+
+      default:
+        return field;
+    }
+  };
+
+  return (<Fragment>
+    <Grid container className="headerbox">
+      <Grid item md={4} sm={11} xs={10}>
+        <CustomBreadCrumbs routes={[routes.transferAsset]} />
+      </Grid>
+      <Grid item md={8} sm={1} xs={2}>
+        <ImportExportLinks
+          permissions={permissions?.transferAsset}
+          module="purchase order"
+          api={transferAsset.api}
+          afterImportCompleted={() => {
+            fetchTransferAsset();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={selectedRecords.length}
+          ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll()
+            else fetchTransferAsset()
+          }}
+        />
+      </Grid>
+
+    </Grid>
+    <div className="main-container">
+      <div className="header-panel">
+        <Grid container className={styles.filter_side_container}>
+          <Grid item xs={6} className="d-flex align-items-center gap-1">
+            <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
+            <span className="listingHeader">{routes.transferAsset?.title} </span>
+          </Grid>
+          <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side} >
+            <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
+
+              <Grid style={{display: "flex", flex:1}}>
+              <SearchBox
+                onSearch={handleSearch}
+                searchbox={styles.search_box_input}
+                width='242px'
+                style={isMobile ? {flex:1} : {}}
+                size="small"
+                value={search}
+              />
+
+              </Grid>
+
+              <Grid style={{display: "flex" , gap:"5px"}}>
+              {permissions?.transferAsset?.isCreate &&
+                <Button
+                        onClick={() => {
+                  setShowManageTransferAssetDialog({ open: true, isClone: false, idToClone: null })
+                }}
+                        variant={isMobile ? "text" : "contained"}
+                        size="small"
+                        color="primary"
+                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                        startIcon={isMobile ? null : <AddIcon />}
+                >
+                  {isMobile ? <MdAdd size={23}/> : "Add"}
+                </Button>
+              }
+
+              <HtmlTooltip title={selectedRecords.length > 0 ? "" : "Please select some records"}>
+                <span>
+                  <Button
+                      className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                    variant={isMobile ? "text" : "contained"}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    disabled={selectedRecords.length ? false : true}
+                    aria-controls="action-menu"
+                  >
+                    {isMobile ? "" :  "Actions" } <ExpandMore/>
+                  </Button>
+                </span>
+              </HtmlTooltip>
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                {permissions?.transferAsset?.isDelete && <MenuItem onClick={() => {
+                  closeActions()
+                  setShowDeleteConfirmBox(true)
+                }}>Delete</MenuItem>}
+              </Menu>
+              </Grid>
+            </Box>
+          </Grid>
+        </Grid>
+      </div>
+      {columns ?
+        Object.keys(frameWorkComponent).length > 0 ?
+            isMobile ?
+                <CustomSwipableList
+                    allowSelection={true}
+                    allowSwipe={true}
+                    permissions={permissions.transferAsset}
+                    primaryField={columns?.find(d => d.primaryField)}
+                    onClick={(data) => {
+                      history.push(`${routes.transferAssetDetail.path}/${data._id}`)
+                    }}
+                    dataRows={dataRows}
+                    selectedRecords={selectedRecords}
+                    dispatch={dispatch}
+
+                    onEdit={() => {}}
+                    extraParamsToCheckDelete={true}
+                    onDelete={(data) => {
+                      setDeleteRecord(data);
+                      setShowDeleteConfirmBox(true)
+                    }}
+                    rowCount={rowCount}
+                    page={page}
+                    loading={loading}
+                    chips={[
+                    ]}
+                    additionalDetails={[
+                    ]}
+                    owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                    onCreate={false}
+                    showClone={true}
+                    onClone={(data) => {
+                      setShowManageTransferAssetDialog({ open: true, isClone: true, idToClone: data._id })
+                    }}
+                    renderedFrom={routes.transferAsset?.title}
+                /> :
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameWorkComponent}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={150}
+            loading={loading}
+            isClientSideGrid={true}
+            renderedFrom={routes.transferAsset?.title}
+            refreshGrid={fetchTransferAsset}
+          /> : null
+        : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+    </div>
+    {
+      showManageTransferAssetDialog.open &&
+      <ManageTransferAsset
+        isClone={showManageTransferAssetDialog.isClone}
+        transferAssetId={showManageTransferAssetDialog.idToClone}
+        onClose={() => setShowManageTransferAssetDialog({ open: false, isClone: false, idToClone: null })}
+        onSuccess={(data) => {
+          setShowManageTransferAssetDialog({ open: false, isClone: false, idToClone: null });
+          fetchTransferAsset()
+          history.push(`${routes.transferAssetDetail.path}/${data._id}`)
+        }}
+      />
+    }
+    {
+      showDeleteConfirmBox &&
+      <ConfirmationDialog
+        open={showDeleteConfirmBox}
+        message={`Are you sure you want to delete the ${storedRoutes ? storedRoutes.transferAsset?.title?.toLowerCase() : RESOURCE_LABEL.transferAsset?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ""} ? `}
+        onClose={() => {
+          setShowDeleteConfirmBox(false)
+          setDeleteRecord(null)
+        }}
+        onOk={handleDelete}
+        okBtnLoading={isDeleting}
+      />
+    }
+  </Fragment >
+  );
+}
+
+export default TransferAsset;

@@ -18,17 +18,17 @@ import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 const ManageWarehouse = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { addressResource, close, onSuccess, isClone=false,open } = props;
-    
+    const { addressResource, close, onSuccess, isClone = false, open } = props;
+
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
- 
+
     useEffect(() => {
         axiosInstance().get("/field?resource=Warehouse").then(({ data: { data } }) => {
             const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-          
+
             const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
             if (addressResource) {
@@ -64,7 +64,7 @@ const ManageWarehouse = (props) => {
     const handleSubmit = (values) => {
         if (addressResource?.id && !isClone) {
             values._id = addressResource?.id
-            axiosInstance().put(`/warehouse`, values).then(({ data: { data } }) => {
+            axiosInstance().put(`/warehouse`, values).then(({ data }) => {
                 setLoading(false);
                 onSuccess()
                 toastConfig.setToastConfig({
@@ -78,9 +78,9 @@ const ManageWarehouse = (props) => {
             });
         }
         else {
-            axiosInstance().post(`/warehouse`, values).then(({ data: { data } }) => {
+            axiosInstance().post(`/warehouse`, values).then(({ data }) => {
                 setLoading(false);
-                onSuccess(data)
+                onSuccess(data.data)
                 toastConfig.setToastConfig({
                     open: true,
                     type: "success",

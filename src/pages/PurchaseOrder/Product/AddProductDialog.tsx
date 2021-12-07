@@ -1,24 +1,25 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "../../axios/axiosInstance";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "../../../axios/axiosInstance";
 import { Box, CircularProgress, IconButton, TextField, Tooltip } from "@material-ui/core";
-import SearchBox from '../../components/Helpers/SearchBox'
-import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { gridLoadingTimeout, CustomDialogTransition, product, packages, isObjectEmpty } from '../../constants/helpers';
+import SearchBox from '../../../components/Helpers/SearchBox'
+import { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
+import { gridLoadingTimeout, CustomDialogTransition, product, packages, isObjectEmpty } from '../../../constants/helpers';
 import {
     CommonRenderer,
     CreatedByRenderer,
     UpdatedByRenderer
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { useData } from "../../StateProvider/Provider";
+} from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
+import { useData } from "../../../StateProvider/Provider";
 import Dialog from "@material-ui/core/Dialog/Dialog";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
-import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
+import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
+import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
+import { camelCase } from "lodash";
 
 const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOrderClose, type, productInPurchaseOrder, isAddingProducts }) => {
     const toastConfig = useContext(CustomToastContext)
@@ -185,7 +186,7 @@ const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOr
                 aria-labelledby="customized-dialog-title"
                 open={true}
             >
-                <CustomDialogHeader title={`Add ${type}`} onClose={handleProductInPurchaseOrderClose} ></CustomDialogHeader>
+                <CustomDialogHeader title={`Add Product`} onClose={handleProductInPurchaseOrderClose} ></CustomDialogHeader>
                 <CustomDialogContent>
                     <div className="listing-grid p-3">
                         <Box mb={2}>

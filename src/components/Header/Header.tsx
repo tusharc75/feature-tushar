@@ -38,7 +38,7 @@ import ChatIcon from '@material-ui/icons/Chat';
 import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { backendApi } from '../../config';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import { SET_CART_COUNT } from "../../StateProvider/actionTypes"
+import { SET_CART_COUNT } from '../../StateProvider/actionTypes';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 
 const useStyles = makeStyles((theme) => ({
@@ -102,6 +102,7 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('sm')]: {
       display: 'flex',
       alignItems: 'center'
+      // gap: '5px'
     }
   },
   sectionMobile: {
@@ -119,7 +120,8 @@ const useStyles = makeStyles((theme) => ({
   brandLogo: {
     maxWidth: '10%',
     height: '45px',
-    borderRadius: '4px'
+    borderRadius: '4px',
+    marginRight: '5px'
   },
   entitySelect: {
     fontSize: '16px',
@@ -476,8 +478,8 @@ const Header = ({ toggleDrawer }) => {
     id === selectedEntity
       ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
       : hasAccessToEntity(id)
-        ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-        : '';
+      ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+      : '';
 
   function handleListKeyDown(event) {
     if (event.key === 'Tab') {
@@ -571,7 +573,7 @@ const Header = ({ toggleDrawer }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => { })
+                      .then(() => {})
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -664,7 +666,7 @@ const Header = ({ toggleDrawer }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => { })
+                      .then(() => {})
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -725,20 +727,20 @@ const Header = ({ toggleDrawer }) => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-          <MenuItem
-            title={curEntity.entityName}
-            key={curEntity._id}
-            selected={selectedEntity === curEntity._id}
-            onClick={() => {
-              handleSelectedEnity(curEntity._id);
-              closeEntitiesMenu();
-            }}
-          >
-            <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
-            <Box component="span" marginX={1} />
-            {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
-          </MenuItem>
-        ))
+            <MenuItem
+              title={curEntity.entityName}
+              key={curEntity._id}
+              selected={selectedEntity === curEntity._id}
+              onClick={() => {
+                handleSelectedEnity(curEntity._id);
+                closeEntitiesMenu();
+              }}
+            >
+              <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
+              <Box component="span" marginX={1} />
+              {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
+            </MenuItem>
+          ))
         : null}
     </Menu>
   );
@@ -769,7 +771,7 @@ const Header = ({ toggleDrawer }) => {
 
       {/* Remove below false to show chat notification icon */}
 
-      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => { }}>
+      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => {}}>
         <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary" aria-describedby={mobileScreenChatNotificationId}>
           <ChatIcon />
         </Badge>
@@ -800,7 +802,7 @@ const Header = ({ toggleDrawer }) => {
         </Popover>
       </MenuItem>
 
-      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => { }}>
+      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => {}}>
         <Badge badgeContent={notification ? notification.count : 0} color="secondary" aria-describedby={mobileScreenNotificationId}>
           <Notifications />
         </Badge>
@@ -836,6 +838,21 @@ const Header = ({ toggleDrawer }) => {
         <Box component="span" mx={1} my={2} />
         <p>Help</p>
       </MenuItem>
+
+      <MenuItem
+        id="shoppingCartButton"
+        onClick={() => {
+          history.push({
+            pathname: '/product/my-cart'
+          });
+        }}
+      >
+        <Badge color="secondary" badgeContent={cartCount}>
+          <ShoppingCartIcon className="setIcon" />
+        </Badge>
+        <Box component="span" mx={1} />
+        <p>Cart</p>
+      </MenuItem>
     </Menu>
   );
 
@@ -869,38 +886,36 @@ const Header = ({ toggleDrawer }) => {
       history.push({ pathname: routes.product.path });
     }
     if (history.location.pathname.includes(`${routes.productTemplate.path}/`)) {
-      history.push({ pathname: routes.productTemplate.path })
+      history.push({ pathname: routes.productTemplate.path });
     }
     if (history.location.pathname.includes(`${routes.priceTemplate.path}/`)) {
-      history.push({ pathname: routes.priceTemplate.path })
+      history.push({ pathname: routes.priceTemplate.path });
     }
     if (history.location.pathname.includes(routes.quotePdfTemplateDetail.path)) {
-      history.push({ pathname: routes.quotePdfTemplate.path })
+      history.push({ pathname: routes.quotePdfTemplate.path });
     }
   }
 
-
   const startTour = () => {
     if (['local', 'development'].includes(process.env.REACT_APP_ENV)) {
-
-      const paths = pathname.split("/").filter((x: string) => x)
+      const paths = pathname.split('/').filter((x: string) => x);
       let path: string;
 
-      if (paths.includes("detail")) {
-        paths.splice(paths.length - 1, 1)
-        path = paths.join("/")
+      if (paths.includes('detail')) {
+        paths.splice(paths.length - 1, 1);
+        path = paths.join('/');
       }
 
       dispatch({
         type: SET_START_TOUR,
         payload: {
-          path: paths.includes("detail") ? `/${path}` : pathname,
+          path: paths.includes('detail') ? `/${path}` : pathname,
           start: true,
           stepIndex: 0
         }
-      })
+      });
     }
-  }
+  };
 
   return (
     <div>
@@ -1001,18 +1016,19 @@ const Header = ({ toggleDrawer }) => {
 
           <div className={classes.sectionDesktop}>
             <div>
-              {
-                isOffline && <IconButton>
+              {isOffline && (
+                <IconButton>
                   <Tooltip title="You are working offline right now">
                     <Brightness1 color="error" className="blink" />
                   </Tooltip>
                 </IconButton>
-              }
+              )}
 
               {/*Only show cart icon if environment is local || development*/}
               {['local', 'development'].includes(process.env.REACT_APP_ENV) && (
                 <IconButton
                   id="shoppingCartButton"
+                  title={'My Cart'}
                   aria-describedby={fullScreenNotificationId}
                   aria-label="settings"
                   color="inherit"
@@ -1021,9 +1037,10 @@ const Header = ({ toggleDrawer }) => {
                       pathname: '/product/my-cart'
                     });
                   }}
+                  className="showIconLayout"
                 >
                   <Badge color="secondary" badgeContent={cartCount}>
-                    <ShoppingCartIcon />
+                    <ShoppingCartIcon className="setIcon" />
                   </Badge>
                 </IconButton>
               )}
@@ -1033,10 +1050,12 @@ const Header = ({ toggleDrawer }) => {
                 aria-describedby={fullScreenNotificationId}
                 aria-label="settings"
                 color="inherit"
+                title="Notifications"
                 onClick={handleFullScreenNotificationClick}
+                className="showIconLayout"
               >
                 <Badge badgeContent={notification ? notification.count : 0} color="secondary">
-                  <Notifications />
+                  <Notifications className="setIcon" />
                 </Badge>
               </IconButton>
 
@@ -1073,10 +1092,12 @@ const Header = ({ toggleDrawer }) => {
                 aria-describedby={fullScreenChatNotificationId}
                 aria-label="settings"
                 color="inherit"
+                title="Chats"
                 onClick={handleFullScreenChatNotificationClick}
+                className="showIconLayout"
               >
                 <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary">
-                  <ChatIcon />
+                  <ChatIcon className="setIcon" />
                 </Badge>
               </IconButton>
 
@@ -1111,8 +1132,8 @@ const Header = ({ toggleDrawer }) => {
               </Badge>
             </IconButton> */}
 
-            <IconButton id="helpButton" aria-label="help" color="inherit" onClick={startTour}>
-              <HelpOutline />
+            <IconButton id="helpButton" aria-label="help" color="inherit" onClick={startTour} className="showIconLayout" title="Help">
+              <HelpOutline className="setIcon" />
             </IconButton>
           </div>
 

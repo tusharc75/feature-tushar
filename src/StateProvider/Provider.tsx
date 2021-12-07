@@ -41,14 +41,14 @@ export const Provider = ({ children }) => {
 
     localStorage.setItem("dateFormat", "DD/MM/YYYY")
     localStorage.setItem("dateTimeFormat", "DD/MM/YYYY hh:mm A")
-    localStorage.setItem("cardDateFormat", "DDD,MM YYYY")
+    localStorage.setItem("cardDateFormat", "MMM DD, YYYY")
 
     localStorage.setItem("dateFormatForInputControl", "dd/MM/yyyy")
 
     if (Intl.DateTimeFormat().resolvedOptions().timeZone?.indexOf("America/") === 0) {
       localStorage.setItem("dateFormat", "MM/DD/YYYY")
       localStorage.setItem("dateTimeFormat", "MM/DD/YYYY hh:mm A")
-      localStorage.setItem("cardDateFormat", "MMM,DD YYYY")
+      localStorage.setItem("cardDateFormat", "MMM DD, YYYY")
 
       localStorage.setItem("dateFormatForInputControl", "MM/dd/yyyy")
     }

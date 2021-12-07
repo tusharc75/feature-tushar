@@ -81,7 +81,6 @@ export default function ManageContact(props) {
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showContactDialog, setShowContactDialog] = useState(false);
-
   useEffect(() => {
 
     if (contactData.fields.length > 0) {

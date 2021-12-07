@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import {Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs} from "@material-ui/core";
+import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
@@ -24,9 +24,15 @@ import { Link } from 'react-router-dom'
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import ProductHierarchy from "../Product/ProductHierarchy";
-import {FaDiceOne, FaWpforms} from "react-icons/fa";
-import {isMobile} from "react-device-detect";
-import {BiFoodMenu} from "react-icons/bi";
+import { FaDiceOne, FaWpforms } from "react-icons/fa";
+import { isMobile } from "react-device-detect";
+import { BiFoodMenu } from "react-icons/bi";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import CustomTimeline from "../../components/CustomTimeline";
+import { GiAutoRepair, GrStatusInfo } from "react-icons/all";
+import { MdEdit } from "react-icons/md";
+
+
 
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
@@ -41,9 +47,9 @@ function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
   return (
-      <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-        {children}
-      </div>
+    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
+      {children}
+    </div>
   );
 }
 
@@ -80,6 +86,7 @@ const ProductInventoryDetailsPage = () => {
       sectionName: "Product Inventory"
     }
   })
+  const [productInventoryHistoryData, setProductInventoryHistoryData] = useState(null)
   const [BOMData, setBOMData] = useState([])
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -172,12 +179,14 @@ const ProductInventoryDetailsPage = () => {
       gridApi.setRowData([]);
     }
     axiosInstance().get(`/history/inventory/${id}`).then(({ data: { data } }) => {
-      data = data?.map((u) => ({
+      data = data?.map((u, index) => ({
         ...u,
-        id: u.inventory?._id,
+        _id: (index + 1),
+        id: (index + 1),
         reference: u.reference?.optionLabel,
         referenceId: u.reference?.optionValue
       }));
+      setProductInventoryHistoryData(data)
       dispatch({ type: "initialize", data: data, count: data.length });
       dispatch({ type: "loading", loading: false });
     }).catch((error) => {
@@ -296,7 +305,6 @@ const ProductInventoryDetailsPage = () => {
   return (
     <>
       <Fragment>
-
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
@@ -335,7 +343,8 @@ const ProductInventoryDetailsPage = () => {
                         size="small"
                         onClick={() => setShowRepairJobDialog(true)}
                       >
-                        Create Repair Job
+                        {isMobile ? <GiAutoRepair size={20} /> : "Create Repair Job"}
+
                       </Button>
                       <Button
                         variant="outlined"
@@ -344,9 +353,9 @@ const ProductInventoryDetailsPage = () => {
                         onClick={openActions}
                         disabled={updateLoading}
                         aria-controls="action-menu"
-                        endIcon={<ExpandMore />}
+                        endIcon={isMobile ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
                       >
-                        Change Status
+                        {isMobile ? <GrStatusInfo size={20} /> : "Change Status"}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -371,12 +380,12 @@ const ProductInventoryDetailsPage = () => {
                         }
                       </Menu>
                       <Button
-                        variant="contained"
+                        variant={isMobile ? "text" : "outlined"}
                         color="primary"
                         size="small"
                         onClick={handleOpenUpdateDialog}
                       >
-                        Edit
+                        {isMobile ? <MdEdit size={22} /> : "Edit"}
                       </Button>
                     </>
                   )}
@@ -384,7 +393,7 @@ const ProductInventoryDetailsPage = () => {
                 </DetailsPageHeader>
               )}
 
-               {/*For Desktop*/}
+              {/*For Desktop*/}
               <Box display={isMobile ? "none" : ""}>
                 {loadingProductInventory || !productInventoryFields.length ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
@@ -400,7 +409,7 @@ const ProductInventoryDetailsPage = () => {
                   </>
                 )}
               </Box>
-              <Grid container spacing={2} style={isMobile ? {display:"none"} : {display: ""}}>
+              <Grid container spacing={2} style={isMobile ? { display: "none" } : { display: "" }}>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
                   <div className="detail-box">
                     <div className="detail-box-content">
@@ -449,16 +458,16 @@ const ProductInventoryDetailsPage = () => {
 
 
               <Tabs
-                  className="quote-tab"
-                  value={tabValue}
-                  style={isMobile ? {display: ""} : {display: "none"}}
-                  onChange={handleMainTabChange}
-                  textColor="primary"
-                  TabIndicatorProps={{
-                    style: {
-                      display: 'none'
-                    }
-                  }}
+                className="quote-tab"
+                value={tabValue}
+                style={isMobile ? { display: "" } : { display: "none" }}
+                onChange={handleMainTabChange}
+                textColor="primary"
+                TabIndicatorProps={{
+                  style: {
+                    display: 'none'
+                  }
+                }}
               >
                 {/* <Tab
                         className={"tabLayout"}
@@ -475,31 +484,31 @@ const ProductInventoryDetailsPage = () => {
                       {...a11yProps(0)}
                     /> */}
                 <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 1 ? 'white' : '',
-                      color: tabValue === 1 ? '#163340' : '#163340'
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <FaWpforms className="mr-1" fontSize="inherit" /> Details
-                      </div>
-                    }
-                    {...a11yProps(0)}
+                  className={'tabLayout'}
+                  style={{
+                    background: tabValue === 1 ? 'white' : '',
+                    color: tabValue === 1 ? '#163340' : '#163340'
+                  }}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                    </div>
+                  }
+                  {...a11yProps(0)}
                 />
                 <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 2 ? 'white' : '',
-                      color: tabValue === 2 ? 'blue' : '#163340',
-                      display: "flex !important"
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <BiFoodMenu className="mr-1" fontSize="inherit" /> Quote Versions
-                      </div>
-                    }
-                    {...a11yProps(1)}
+                  className={'tabLayout'}
+                  style={{
+                    background: tabValue === 2 ? 'white' : '',
+                    color: tabValue === 2 ? 'blue' : '#163340',
+                    display: "flex !important"
+                  }}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                    </div>
+                  }
+                  {...a11yProps(1)}
                 />
                 <div className={'uio'}> </div>
               </Tabs>
@@ -509,19 +518,81 @@ const ProductInventoryDetailsPage = () => {
 
                 <Box display={isMobile ? "flex" : "none"}>
                   {loadingProductInventory || !productInventoryFields.length ? (
-                      <Grid container spacing={2} style={{ padding: "8px" }}>
-                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                      </Grid>
+                    <Grid container spacing={2} style={{ padding: "8px" }}>
+                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                    </Grid>
                   ) : (
-                      <>
-                        <DetailsPage data={productInventoryData}
-                                     fields={productInventoryData?.status &&
-                                     productInventoryData?.status === "Scrap" ?
-                                         [...productInventoryFields, customField] :
-                                         productInventoryFields} />
-                      </>
+                    <>
+                      <DetailsPage data={productInventoryData}
+                        fields={productInventoryData?.status &&
+                          productInventoryData?.status === "Scrap" ?
+                          [...productInventoryFields, customField] :
+                          productInventoryFields} />
+                    </>
                   )}
                 </Box>
+
+
+                <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+                  <Paper style={{ overflow: 'hidden' }}>
+                    <Box
+                        padding={1}
+                        bgcolor="grey.200"
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                    >
+                      <Typography variant="subtitle2">
+                        BOM - Product
+                      </Typography>
+                    </Box>
+                    {(
+                        <Box>
+                          {loading || loadingBOMData ? (
+                              [1].map((i) => (
+                                  <BoxWithBorder
+                                      key={i}
+                                      style={{
+                                        margin: "8px",
+                                      }}
+                                  >
+                                    <Box padding={1}>
+                                      <Skeleton
+                                          variant="text"
+                                          width="100px"
+                                          height="20px"
+                                      />
+                                      <Box marginTop={1} />
+                                      <Skeleton variant="text" width="100%" height="15px" />
+                                    </Box>
+                                  </BoxWithBorder>
+                              ))
+                          ) : BOMData.length ? (
+                              <>
+                                <ProductHierarchy
+                                    data={BOMData}
+                                    permissions={permissions?.product}
+                                    unassignProduct={() => { }}
+                                />
+                                <Box px={1} my={1} >
+                                  <Button
+                                      fullWidth
+                                      variant="outlined"
+                                      color='primary'
+                                      onClick={() => history.push(`${routes.productDetail.path}/${productId}/bom`, { productName: productInventoryData?.product?.optionLabel })}>
+                                    View All
+                                  </Button>
+                                </Box>
+                              </>
+                          ) : (
+                              <Box textAlign="center" padding={2} minHeight={150}>
+                                <Typography>No Product has been added </Typography>
+                              </Box>
+                          )}
+                        </Box>
+                    )}
+                  </Paper>
+                </Grid>
 
 
               </TabPanel>
@@ -537,32 +608,35 @@ const ProductInventoryDetailsPage = () => {
                           Asset History
                         </h3>
                       </div>
+                      {isMobile && <div>
+                        <CustomTimeline dataRows={productInventoryHistoryData} />
+                      </div>}
 
                       <Grid item xs={12} sm={12} md={12} lg={12} className="mt-1">
-                        {columns ?
-                            <CustomAgGrid
-                                columns={columns}
-                                dataRows={dataRows}
-                                frameworkComponents={frameworkComponents}
-                                setGridApi={setGridApi}
-                                dispatch={dispatch}
-                                rowCount={rowCount}
-                                limit={limit}
-                                pageSizes={pageSizes}
-                                page={page}
-                                allowAction={false}
-                                allowSelection={false}
-                                isClientSideGrid={true}
-                                loading={loading}
-                                renderedFrom="rentalManagementDetailsPageInventory"
-                                refreshGrid={fetchProductInventoryHistory}
-                            />
-                            : <Box
-                                p={2}
-                                height={500}
-                                bgcolor="white">
-                              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                            </Box>
+                        {!isMobile && columns ?
+                          <CustomAgGrid
+                            columns={columns}
+                            dataRows={dataRows}
+                            frameworkComponents={frameworkComponents}
+                            setGridApi={setGridApi}
+                            dispatch={dispatch}
+                            rowCount={rowCount}
+                            limit={limit}
+                            pageSizes={pageSizes}
+                            page={page}
+                            allowAction={false}
+                            allowSelection={false}
+                            isClientSideGrid={true}
+                            loading={loading}
+                            renderedFrom="rentalManagementDetailsPageInventory"
+                            refreshGrid={fetchProductInventoryHistory}
+                          />
+                          : <Box
+                            p={2}
+                            height={500}
+                            bgcolor="white">
+                            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                          </Box>
                         }
                       </Grid>
 
@@ -570,6 +644,8 @@ const ProductInventoryDetailsPage = () => {
                   </Grid>
 
                 </Grid>
+
+
 
               </TabPanel>
 
@@ -581,66 +657,6 @@ const ProductInventoryDetailsPage = () => {
 
 
 
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
-            <Paper style={{ overflow: 'hidden' }}>
-              <Box
-                padding={1}
-                bgcolor="grey.200"
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Typography variant="subtitle2">
-                  BOM - Product
-                </Typography>
-              </Box>
-              {(
-                <Box>
-                  {loading || loadingBOMData ? (
-                    [1].map((i) => (
-                      <BoxWithBorder
-                        key={i}
-                        style={{
-                          margin: "8px",
-                        }}
-                      >
-                        <Box padding={1}>
-                          <Skeleton
-                            variant="text"
-                            width="100px"
-                            height="20px"
-                          />
-                          <Box marginTop={1} />
-                          <Skeleton variant="text" width="100%" height="15px" />
-                        </Box>
-                      </BoxWithBorder>
-                    ))
-                  ) : BOMData.length ? (
-                    <>
-                      <ProductHierarchy
-                        data={BOMData}
-                        permissions={permissions?.product}
-                        unassignProduct={() => { }}
-                      />
-                      <Box px={1} my={1} >
-                        <Button
-                          fullWidth
-                          variant="outlined"
-                          color='primary'
-                          onClick={() => history.push(`${routes.productDetail.path}/${productId}/bom`, { productName: productInventoryData?.product?.optionLabel })}>
-                          View All
-                        </Button>
-                      </Box>
-                    </>
-                  ) : (
-                    <Box textAlign="center" padding={2} minHeight={150}>
-                      <Typography>No Product has been added </Typography>
-                    </Box>
-                  )}
-                </Box>
-              )}
             </Paper>
           </Grid>
         </Grid>

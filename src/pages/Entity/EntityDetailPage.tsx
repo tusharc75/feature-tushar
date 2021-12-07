@@ -57,6 +57,8 @@ const EntityDetailsPage = () => {
   const [doa, setDoa] = useState<any[]>([]);
   const [doaCurrency, setDoaCurrency] = useState("");
   const [doaType, setDoaType] = useState(null);
+  const [doaMinLimit, setDoaMinLimit] = useState(null);
+
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
   const [userList, setUserList] = useState<any[]>([]);
   const [showDeleteEntityDialog, setShowDeleteEntityDialog] = useState(false)
@@ -65,7 +67,6 @@ const EntityDetailsPage = () => {
       getEntityFields();
       fetchEntityData();
       fetchEntityUser();
-      fetchUsers();
       fetchDoa();
     }
   }, [id]);
@@ -93,6 +94,7 @@ const EntityDetailsPage = () => {
       .get(`/user?filterById=[{"field": "entities.entity", "term": "${id}"}]`)
       .then(({ data: { data } }) => {
         setUsers(data);
+        getRows(data)
         setUsersLoading(false);
       })
       .catch((err) => {
@@ -240,23 +242,24 @@ const EntityDetailsPage = () => {
       .then(({ data: { data } }) => {
         let doaData = [];
 
-        data.doa.forEach((item) => {
-          //  When the user set in doa was deleted, we are getting {} in array like this [{}]
-          //  So added this check
-          if (!isObjectEmpty(item)) {
-            doaData.push({
-              id: item.user?._id,
-              name: [item.user?.firstName, item.user?.lastName].filter(f => f).join(" "),
-              firstName: item.user?.firstName,
-              lastName: item.user?.lastName,
-              amount: item.amount,
-            });
-          }
-        });
+        // data.doa.forEach((item) => {
+        //   //  When the user set in doa was deleted, we are getting {} in array like this [{}]
+        //   //  So added this check
+        //   if (!isObjectEmpty(item)) {
+        //     doaData.push({
+        //       id: item.user?._id,
+        //       name: [item.user?.firstName, item.user?.lastName].filter(f => f).join(" "),
+        //       firstName: item.user?.firstName,
+        //       lastName: item.user?.lastName,
+        //       amount: item.amount,
+        //     });
+        //   }
+        // });
 
-        setDoa(doaData);
+        setDoa(data.doa);
         setDoaCurrency(data.doaCurrency)
         setDoaType(data.doaType)
+        setDoaMinLimit(data.doaMinLimit)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -264,17 +267,6 @@ const EntityDetailsPage = () => {
         setDoa([]);
       });
   };
-
-  const fetchUsers = () => {
-    axiosInstance()
-      .get("/user")
-      .then(({ data: { data, count } }) => {
-        getRows(data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  }
 
   const getRows = (data: []) => {
     const rows = data.length
@@ -593,6 +585,7 @@ const EntityDetailsPage = () => {
               setDoaDialogOpen(false);
             }}
             doaType={doaType}
+            doaMinLimit={doaMinLimit}
           />
         </Dialog>
 

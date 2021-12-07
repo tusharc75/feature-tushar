@@ -1,18 +1,21 @@
 
 import Box from "@material-ui/core/Box/Box";
 import { useState, useEffect, useReducer, useContext } from "react";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
+import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
+import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { Button, Chip, IconButton, makeStyles, useMediaQuery } from "@material-ui/core";
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import NoDataCell from "../../components/Helpers/NoDataCell";
-import { dateFormat, defaultActivityShow, gridLoadingTimeout, productInventory, purchaseOrder, rentalManagement, translateDataToTree } from "../../constants/helpers";
-import { useData } from "../../StateProvider/Provider";
+import axiosInstance from "../../../axios/axiosInstance";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import NoDataCell from "../../../components/Helpers/NoDataCell";
+import { dateFormat, defaultActivityShow, gridLoadingTimeout, productInventory, purchaseOrder, rentalManagement, translateDataToTree } from "../../../constants/helpers";
+import { useData } from "../../../StateProvider/Provider";
 import moment from "moment";
 import { startCase } from "lodash";
 import CreateSeriaizedAsset from "./CreateSerializedAsset";
-import CustomReactTable from "../../components/CustomReactTable/CustomReactTable";
+import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
+import {isMobile} from "react-device-detect";
+import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
+import routes from "../../../components/Helpers/Routes";
 
 const useStyles = makeStyles(() => ({
     equal: {
@@ -189,17 +192,47 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                     }
                     height={"calc(100vh - 330px)"}
                 >
-                    <CustomReactTable
+                    {isMobile ? <CustomSwipableList
+                        allowSelection={true}
+                        allowSwipe={true}
+                        permissions={permissions}
+                        primaryField={columns?.find(d => d.Header === "productDescription")}
+                        onClick={() => {
+                        }}
+                        dataRows={dataRows}
+                        selectedRecords={selectedRecords}
+                        dispatch={dispatch}
+                        onEdit={() => {
+                        }}
+                        extraParamsToCheckDelete={true}
+                        onDelete={() => {
+                        }}
+                        rowCount={rowCount}
+                        page={page}
+                        loading={loading}
+                        chips={
+                            [{
+                                label: `Product Description: `,
+                                field: "productName",
+                                forceShow: true
+                            }]
+                        }
+                        onCreate={null}
+                        showClone={false}
+                        fullHeight={true}
+                        renderedFrom={routes.purchaseOrderDetail.title}
+                        onClone={() => { }}
+
+                    /> : <CustomReactTable
                         columns={columns}
                         data={dataRows}
-                        rowStyle={(rowData) => ({
-                            color: "black",
-                            backgroundColor: rowData?.type?.includes("roduct") && (isNaN(rowData?.finalPrice) || rowData?.finalPrice === 0) ? "#EFCCCC" : "white"
-                        })}
+                        isInValidCheck={(rowData) => rowData?.type?.includes("roduct") && (isNaN(rowData?.finalPrice) || rowData?.finalPrice === 0)}
                         onSelect={setSelectedProducts}
                         childrenProperty="subRows"
                         uniqueKey="_id"
                     />
+                    }
+
                 </Box>
 
             </>

@@ -1,37 +1,65 @@
 import { useContext, useEffect, useMemo, useState, useReducer, Fragment } from 'react'
 import { useHistory, useParams } from "react-router-dom";
-import { Paper, Box, Grid, Button, Typography } from "@material-ui/core";
+import { Paper, Box, Grid, Button, Typography, IconButton, Tooltip, Tabs, Tab } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
-import { yyyyMMDD, deliveryTicket, sidebarResource, getObjKeysWithValues, defaultActivityShow } from "../../constants/helpers";
+import { yyyyMMDD, deliveryTicket, sidebarResource, getObjKeysWithValues, defaultActivityShow, dateTimeFormat } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import routes from "../../components/Helpers/Routes";
 import axiosInstance from "../../axios/axiosInstance";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import DetailsPage from "../../components/Shared/DetailsPage";
-import ManageDeliveryTicketDialog from "./ManageDeliveryTicket"
+import ManageDeliveryTicket from "./ManageDeliveryTicket"
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import {
-  CreatedByRenderer,
-  UpdatedByRenderer,
-  CommonRenderer,
-  DateRenderer
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import { Link } from "react-router-dom";
 import { productInventory, gridLoadingTimeout } from "../../constants/helpers"
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from "../../components/Activity";
 import { isMobile, isTablet } from "react-device-detect";
 import SignatureDialog from '../../components/Helpers/SignatureDialog';
 import ViewSignsDialog from './ViewSignsDialog'
+import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
+import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
+import moment from 'moment';
+import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
+import { FaWpforms } from "react-icons/fa";
+import { BiFoodMenu } from "react-icons/bi";
+import { prepareDataForGrid } from "../../constants/helpers"
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: any;
+  value: any;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
+      {children}
+    </div>
+  );
+}
+
+
+function a11yProps(index: any) {
+  return {
+    id: `main-tab-${index}`,
+    'aria-controls': `main-tabpanel-${index}`
+  };
+}
+
 
 const renderedFrom = "deliveryTicketDetailInventoryPage"
 
 const mappedStatus = {
   "Sign-off - Dispatch": "In-Transit",
-  "Sign-off - Receive": "Delivered"
+  "Sign-off - Delivery": "Delivered"
 }
 
 export default function DeliveryTicketDetail(props) {
@@ -57,31 +85,65 @@ export default function DeliveryTicketDetail(props) {
   const [okBtnLoading, setOkBtnLoading] = useState(false)
   const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false)
   const { dataRows, rowCount, page, limit, pageSizes, selectedRecords } = state;
+  const { getColumnData } = useColumns();
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [columns, setColumns] = useState([])
+  const [canEdit, setCanEdit] = useState(false)
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
+
+  const [startDeliveryDate, setStartDeliveryDate] = useState(null);
+  const [signOffDate, setSignOffDate] = useState(null);
+  const [isAdding, setIsAdding] = useState(false);
+
+  const [tabValue, setTabValue] = useState(0);
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
   }
   useEffect(() => {
     fetchDeliveryTicketData();
-    getDeliveryTicketFields()
+
   }, [id]);
 
-  const columns = [
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "nameRenderer" },
-    { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productRenderer" },
-    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "equipmentNumber", headerName: "Equipment Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "batchNumber", headerName: "Batch Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "bornOnDate", headerName: "Born on Date", show: true, cellRenderer: "dateRenderer" },
-    { field: "inServiceDate", headerName: "In Service Date", show: true, cellRenderer: "dateRenderer" },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
-    { field: "inventoryNumber", headerName: "Inventory Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "warehouse", headerName: "Plants", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
-  ];
+  useEffect(() => {
+    fetchGridColumns()
+  }, [])
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get("/field?resource=Product Inventory")
+      .then(({ data: { data } }) => {
+        let columns = []
+        let rendererNames = []
+        data.forEach(o => {
+          if (o?.fieldData?.fieldName === "serialNumber") {
+            o.fieldData.primaryField = true
+          }
+          let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
+
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData]
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
+          }
+        })
+
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        columns = [...columns, ...getStaticFields()]
+        setColumns([...columns])
+      })
+  }
+
+
 
   const columnState = JSON.parse(localStorage.getItem("deliveryTicketDetailInventoryPage"));
   if (columnState) {
@@ -94,13 +156,58 @@ export default function DeliveryTicketDetail(props) {
     });
   }
 
-  const getDeliveryTicketFields = () => {
+  const getDeliveryTicketFields = (ticket: any) => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource["deliveryTicket"]}`)
-      .then(({ data }) => {
-        setDeliveryTicketFields(data.data);
+      .get(`/field?resource=${sidebarResource["deliveryTicket"]}&showHiddenFields=true`)
+      .then(async ({ data: { data } }) => {
+        if (ticket?.type === "Transfer Asset") {
+
+          const { data: { data: transferData } } = await axiosInstance()
+            .get(`${routes.transferAsset.path}/${ticket.transferAsset?.optionValue}`)
+
+          data = data.filter((fields: any) => {
+            if (transferData?.transferType === "Internal") {
+              if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Supplier")) {
+                return false
+              }
+            }
+
+            if (transferData?.transferType.includes("External Supplier")) {
+              if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
+                return false
+              }
+            }
+            if (transferData?.transferType.includes("External Customer")) {
+              if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Plant")) {
+                return false
+              }
+            }
+            return true
+          })
+
+
+        } else if (ticket?.type === "Rental Job") {
+          data = data.filter((fields: any) => {
+            if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Plant")) {
+              return false
+            }
+            return true
+          })
+        } else {
+          data = data.filter((fields: any) => {
+            if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
+              return false
+            }
+            return true
+          })
+        }
+
+
+        setDeliveryTicketFields(data);
+        setLoading(false);
       })
       .catch((err) => {
+        setLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -125,13 +232,33 @@ export default function DeliveryTicketDetail(props) {
       axiosInstance()
         .get(`${deliveryTicketApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
+          getDeliveryTicketFields(data)
           setDeliveryTicketData(data)
+
+          const startDeliverySignatures = data?.signatures.filter(f => f.status === "Start Delivery" && f.date);
+          if (startDeliverySignatures && startDeliverySignatures.length > 0) {
+            setStartDeliveryDate(moment(startDeliverySignatures[startDeliverySignatures.length - 1].date).format(dateTimeFormat));
+          }
+
+          const signOffSignatures = data?.signatures.filter(f => f.status === "Sign-Off" && f.date);
+          if (signOffSignatures && signOffSignatures.length > 0) {
+            setSignOffDate(moment(signOffSignatures[signOffSignatures.length - 1].date).format(dateTimeFormat));
+          }
+
+          setCanEdit(
+            [...(data?.collaborator ?? []), data?.owner ?? {}].some(
+              (obj) => obj.optionValue === user.user._id
+            )
+          );
+
           setSignatures(data?.signatures || []);
           if (data?.productInventory && data?.productInventory.length) {
             let ids = data?.productInventory.map(o => o?.optionValue)
             fetchProductInventory(ids)
+          } else {
+            dispatch({ type: "initialize", data: [], count: 0 });
           }
-          setLoading(false);
+
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -154,22 +281,10 @@ export default function DeliveryTicketDetail(props) {
     const queryString = `?getById=${ids}`
     axiosInstance().get(`${productInventory.api}${queryString} `).then(({ data }) => {
       data.data = data.data.filter((u) => productInventories.indexOf(u?._id) >= 0)
-        ?.map((u) => ({
-          ...u,
-          id: u._id,
-          inServiceDate: u.inServiceDate,
-          bornInDate: u.bornInDate,
-          status: u.status,
-          warehouse: u.warehouse?.optionLabel,
-          warehouseId: u.warehouse?.optionValue,
-          productCategory: u.productCategory?.optionLabel,
-          productName: u.product?.optionLabel,
-          productId: u.product?.optionValue,
-          createdBy: u.createdBy?.user?.concatedName,
-          createdByDate: u.createdBy?.date,
-          updatedBy: u.updatedBy?.user?.concatedName,
-          updatedByDate: u.updatedBy?.date,
-        }));
+        ?.map((u) => {
+          let finalObject = prepareDataForGrid(u);
+          return finalObject
+        });
 
       dispatch({ type: "initialize", data: data.data, count: data.count });
       setTimeout(() => {
@@ -212,26 +327,6 @@ export default function DeliveryTicketDetail(props) {
     setOpenUpdateDialog(true);
   };
 
-  const NameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
-
-  const ProductRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.product.path}/detail/${params.data.productId}`}>
-      {params.value}
-    </Link>
-  );
-  const frameworkComponents = {
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    nameRenderer: NameRenderer,
-    commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer,
-    productRenderer: ProductRenderer
-  };
-
   const handleChangeStatus = (label) => {
     if (mappedStatus[label]) {
       const fieldsDataForUpdate = deliveryTicketFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -247,7 +342,7 @@ export default function DeliveryTicketDetail(props) {
   }
 
   let label = deliveryTicketData ? deliveryTicketData?.status === "New" ? "Sign-off - Dispatch" :
-    (deliveryTicketData?.status === "In-Transit") ? "Sign-off - Receive" : "" : ""
+    (deliveryTicketData?.status === "In-Transit") ? "Sign-off - Delivery" : "" : ""
 
   const handleSignature = (signedData) => {
     const { type, sign: newSign } = signedData;
@@ -306,7 +401,7 @@ export default function DeliveryTicketDetail(props) {
                   mainPoints={deliveryTicketData ? getMainPoints : ""}
                   showHeading={true}
                 >
-                  {permissions?.deliveryTicket?.isUpdate && deliveryTicketData.status === "New" && (
+                  {permissions?.deliveryTicket?.isUpdate && canEdit && deliveryTicketData.status !== "Delivered" && (
                     <Button
                       variant="contained"
                       color="primary"
@@ -329,7 +424,7 @@ export default function DeliveryTicketDetail(props) {
                       </Button>
                     )} */}
                   {
-                    deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id ?
+                    deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id || canEdit ?
                       label !== "" ?
                         <Button
                           variant="contained"
@@ -370,57 +465,175 @@ export default function DeliveryTicketDetail(props) {
                 </Box>
               ) : (
                 <>
-                  {(deliveryTicketData && deliveryTicketFields.length > 0 ?
-                    <DetailsPage
-                      data={deliveryTicketData}
-                      fields={deliveryTicketFields} /> : null
-                  )}
-                  {
-                    dataRows && dataRows.length ?
-                      <>
-                        <Grid container spacing={1} className="p-2">
-                          <Grid item xs={12} className="mt-2 d-flex gap-2">
-                            <Typography variant="subtitle1" className="font-weight-bold text-primary">
-                              Serialized Assets
-                            </Typography>
+                  <Tabs
+                    className="quote-tab"
+                    value={tabValue}
+                    onChange={handleMainTabChange}
+                    textColor="primary"
+                    TabIndicatorProps={{
+                      style: {
+                        display: 'none'
+                      }
+                    }}
+                  >
 
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              type="button"
-                              size="small"
-                              disabled={selectedRecords.length === 0}
-                              onClick={() => {
-                                setShowRemoveAssetFromLoadingTicketDialog(true)
-                              }}
-                            >
-                              Remove Serialized Assets
-                            </Button>
+                    <Tab
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 1 ? 'white' : '',
+                        color: tabValue === 1 ? '#163340' : '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                        </div>
+                      }
+                      {...a11yProps(0)}
+                    />
+                    <Tab
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 2 ? 'white' : '',
+                        color: tabValue === 2 ? 'blue' : '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                        </div>
+                      }
+                      {...a11yProps(1)}
+                    />
+                    <div className={'uio'}> </div>
+                  </Tabs>
 
+                  <TabPanel value={tabValue} index={0}>
+                    {(deliveryTicketData && deliveryTicketFields.length > 0 ?
+                      <DetailsPage
+                        data={{ ...deliveryTicketData, actualDispatchedDate: startDeliveryDate, actualDeliveredDate: signOffDate }}
+                        fields={[...deliveryTicketFields, {
+                          fieldData: {
+                            fieldLabel: "Actual Dispatched Date",
+                            fieldName: "actualDispatchedDate",
+                            sectionName: "Sign-off Information"
+                          }
+                        }, {
+                          fieldData: {
+                            fieldLabel: "Actual Delivered Date",
+                            fieldName: "actualDeliveredDate",
+                            sectionName: "Sign-off Information"
+                          }
+                        }
+                        ]} /> : null
+                    )}
+
+
+                  </TabPanel>
+
+                  <TabPanel value={tabValue} index={1}>
+                    {
+                      dataRows && dataRows.length ?
+                        <>
+                          <Grid container spacing={1} className="p-2">
+                            <Grid item xs={12} className="mt-2 d-flex gap-2">
+                              <Typography variant="subtitle1" className="font-weight-bold text-primary">
+                                Serialized Assets
+                              </Typography>
+
+                              {
+                                deliveryTicketData.status === "New" && <IconButton
+                                  onClick={() => {
+                                    setAddSerializedAssetDialog(true)
+                                  }}
+                                  color='primary'
+                                  size="small"
+                                >
+                                  <Tooltip
+                                    title="Add More Serialized Assets">
+                                    <AddBoxRoundedIcon />
+                                  </Tooltip>
+                                </IconButton>
+                              }
+
+                              {
+                                deliveryTicketData.status === "New" && <IconButton
+                                  disabled={selectedRecords.length === 0}
+                                  onClick={() => {
+                                    setShowRemoveAssetFromLoadingTicketDialog(true)
+                                  }}
+                                  color='primary'
+                                  size="small"
+                                >
+                                  <Tooltip
+                                    title="Remove Serialized Assets">
+                                    <RemoveCircleRoundedIcon />
+                                  </Tooltip>
+                                </IconButton>
+                              }
+
+                            </Grid>
+                            <Grid item xs={12}>
+                              {isMobile ? <CustomSwipableList
+                                allowSelection={true}
+                                allowSwipe={true}
+                                permissions={permissions}
+                                primaryField={columns?.find(d => d.field === "assetNumber")}
+                                onClick={(data) => {
+                                  history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                                }}
+                                dataRows={dataRows}
+                                selectedRecords={selectedRecords}
+                                dispatch={dispatch}
+                                onEdit={() => {
+
+                                }}
+                                extraParamsToCheckDelete={true}
+                                onDelete={() => {
+                                }}
+                                rowCount={rowCount}
+                                page={page}
+                                loading={loading}
+                                chips={
+                                  [{
+                                    label: `Product Description: `,
+                                    field: "productName",
+                                    forceShow: true
+                                  }]
+                                }
+                                onCreate={null}
+                                showClone={false}
+                                fullHeight={true}
+                                renderedFrom={"receivingTicketDetailInventoryPage"}
+                                onClone={() => {
+                                }}
+
+                              /> :
+
+                                Object.keys(frameWorkComponent).length > 0 ? <CustomAgGrid
+                                  allowSelection={deliveryTicketData.status === "New"}
+                                  allowAction={false}
+                                  columns={columns}
+                                  dataRows={dataRows}
+                                  frameworkComponents={frameWorkComponent}
+                                  setGridApi={setGridApi}
+                                  dispatch={dispatch}
+                                  rowCount={rowCount}
+                                  limit={limit}
+                                  pageSizes={pageSizes}
+                                  page={page}
+                                  actionWidth={150}
+                                  loading={false}
+                                  renderedFrom={renderedFrom}
+                                  refreshGrid={fetchProductInventory}
+                                /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+                              }
+                            </Grid>
                           </Grid>
-                          <Grid item xs={12}>
-                            <CustomAgGrid
-                              allowSelection={true}
-                              allowAction={false}
-                              columns={columns}
-                              dataRows={dataRows}
-                              frameworkComponents={frameworkComponents}
-                              setGridApi={setGridApi}
-                              dispatch={dispatch}
-                              rowCount={rowCount}
-                              limit={limit}
-                              pageSizes={pageSizes}
-                              page={page}
-                              actionWidth={150}
-                              loading={false}
-                              renderedFrom={renderedFrom}
-                              refreshGrid={fetchProductInventory}
-                            />
-                          </Grid>
-                        </Grid>
-                      </>
-                      : null
-                  }
+                        </>
+                        : null
+                    }
+
+                  </TabPanel>
+
                 </>
               )}
             </Paper>
@@ -476,7 +689,7 @@ export default function DeliveryTicketDetail(props) {
           />
         ) : null}
         {openUpdateDialog && (
-          <ManageDeliveryTicketDialog
+          <ManageDeliveryTicket
             deliveryTicketId={deliveryTicketData?._id}
             open={openUpdateDialog}
             onClose={() => setOpenUpdateDialog(false)}
@@ -534,6 +747,41 @@ export default function DeliveryTicketDetail(props) {
             okBtnLoading={okBtnLoading}
           />
         )}
+
+        {addSerializedAssetDialog &&
+          <AddSerializedAsset
+            addSerializedAsset={(newRecordsToAdd) => {
+
+              axiosInstance().post(`${deliveryTicket.deliveryTicketApi}/${id}/add-assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })
+                .then(({ data }) => {
+                  setAddSerializedAssetDialog(false)
+                  fetchDeliveryTicketData()
+                  setIsAdding(false)
+                  toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: data.message,
+                  });
+                }).catch((error) => {
+                  setAddSerializedAssetDialog(false)
+                  setIsAdding(false)
+                  toastConfig.setToastConfig(error)
+                });
+
+            }}
+            handleSerializedAssetClose={() => {
+              setAddSerializedAssetDialog(false);
+              // setSelectedProducts([])
+            }}
+            isAdding={isAdding}
+            selectedProducts={[]}
+            rentalId={deliveryTicketData.type === "Rental Job" ? deliveryTicketData?.rental?.optionValue : ""}
+            repairJobId={deliveryTicketData.type === "Repair Job" ? deliveryTicketData?.repairJob?.optionValue : ""}
+            transferAssetId={deliveryTicketData.type === "Transfer Asset" ? deliveryTicketData?.transferAsset?.optionValue : ""}
+            notIn="loadingTicket"
+          // type={inventoryType}
+          />
+        }
       </Fragment>
     </>
   );

@@ -2,22 +2,48 @@ import Box from "@material-ui/core/Box/Box";
 import { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer, } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import { Link } from 'react-router-dom'
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button } from "@material-ui/core";
+import {
+  Button, Tooltip, IconButton, Menu, MenuItem,
+  Dialog, TextField, CircularProgress
+} from "@material-ui/core";
 import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import { gridLoadingTimeout, receivingTicket, rentalManagement, sidebarResource } from "../../constants/helpers";
+import {
+  gridLoadingTimeout, receivingTicket, rentalManagement,
+  sidebarResource, productInventory as productInventoryHelperObject
+} from "../../constants/helpers";
 import { groupBy } from "lodash";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
+import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import { makeStyles } from '@material-ui/core/styles';
 
 const renderedFrom = "rentalManagementDetailsPageReceivingTicket"
 
-const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketDialog, rentalManagementId }) => {
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: theme.palette.background.paper,
+  },
+  paper: {
+    width: '80%',
+    maxHeight: 435,
+  },
+}));
+
+const ReceivingTicket = ({ currentStep, handleReceivingTicketDialog, rentalManagementId }) => {
+  const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
   const [gridApi, setGridApi] = useState(null);
@@ -27,10 +53,21 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false)
   const [okBtnLoading, setOkBtnLoading] = useState(false)
 
+  const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: "", message: "" })
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   useEffect(() => {
     fetchRecords();
     // eslint-disable-next-line
-  }, [productInventory]);
+  }, []);
 
   const fetchRecords = () => {
     if (gridApi) {
@@ -96,7 +133,7 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
     </Link>
   );
   const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.product.optionValue}`}>
+    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data?.product?.optionValue}`}>
       {params.value}
     </Link>
   );
@@ -148,6 +185,10 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
     });
   }
 
+  const updateStatusOfSelectedAssets = (status) => {
+
+  }
+
   return (<>
 
     <Box display="flex" justifyContent="flex-end">
@@ -188,31 +229,77 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
         {downlodingFile ? "Please wait..." : "Preview"}
       </Button>
       <Box mx={1} />
-      <Button
-        variant="contained"
-        color="primary"
-        type="button"
+
+      <Button variant="outlined" color="primary" aria-controls="simple-menu"
+        aria-haspopup="true"
+        disabled={selectedRecords.length === 0}
         size="small"
+        onClick={handleClick}
+        endIcon={<ArrowDropDownIcon />}>
+        Change Status
+      </Button>
+      <Menu
+        id="simple-menu"
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={() => {
+          setAnchorEl(null)
+          setStatusToUpdate({ open: true, isUpdating: false, status: "Repair", message: "" })
+        }}>Repair</MenuItem>
+        <MenuItem onClick={() => {
+          setAnchorEl(null)
+          setStatusToUpdate({ open: true, isUpdating: false, status: "Scrap", message: "" })
+        }}>Scrap</MenuItem>
+        <MenuItem onClick={() => {
+          setAnchorEl(null)
+          setStatusToUpdate({ open: true, isUpdating: false, status: "Lost", message: "" })
+        }}>Lost</MenuItem>
+      </Menu>
+
+      <Box mx={1} />
+      <IconButton
         disabled={(selectedRecords.length === 0) || currentStep === 5 || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId")))}
         onClick={() => {
           handleReceivingTicketDialog(selectedRecords)
         }}
-      >
-        Create Receiving Ticket
-      </Button>
-      <Box mx={1} />
-      <Button
-        variant="contained"
-        color="primary"
-        type="button"
+        color='primary'
         size="small"
+      >
+        <Tooltip
+          title="Create Receiving Ticket">
+          <AddBoxRoundedIcon />
+        </Tooltip>
+      </IconButton>
+
+      <Box mx={1} />
+
+      <IconButton
         disabled={(selectedRecords.length === 0) || currentStep === 5 || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId")))}
         onClick={() => {
           setShowRemoveAssetFromReceivingTicketDialog(true)
         }}
+        color='primary'
+        size="small"
       >
-        Remove From Assigned Receiving Tickets
-      </Button>
+        <Tooltip
+          title="Remove Assets From Receiving Ticket(s)">
+          <RemoveCircleRoundedIcon />
+        </Tooltip>
+      </IconButton>
+
+      <Box mx={1} />
     </Box>
 
     <Grid item xs={12} md={12} sm={12} className="mt-3">
@@ -231,6 +318,12 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
           allowAction={false}
           loading={loading}
           renderedFrom={renderedFrom}
+          rowClassRules={{
+            "red-data-row":
+              function (params) {
+                return ["Scrap", "Lost"].some(s => s === params.data.status);
+              },
+          }}
         />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
 
@@ -268,6 +361,82 @@ const ReceivingTicket = ({ productInventory, currentStep, handleReceivingTicketD
         okBtnLoading={okBtnLoading}
       />
     )}
+
+    {
+      statusToUpdate.open && <Dialog open
+        classes={{
+          paper: classes.paper,
+        }}
+        onClose={() => setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false, open: false }))}
+      >
+        <CustomDialogHeader title="Are you sure ?"
+          showRequiredLabel={false}
+          onClose={() => setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false, open: false }))} />
+
+        <CustomDialogContent>
+          <Box className="my-2">
+
+            {
+              statusToUpdate.status === "Repair" ? <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
+                : <TextField
+                  id="outlined-multiline-static"
+                  label={`Please enter the reason for ${statusToUpdate.status}`}
+                  multiline
+                  fullWidth
+                  rows={4}
+                  value={statusToUpdate.message}
+                  variant="outlined"
+                  onChange={(e) => {
+                    setStatusToUpdate(prevState => ({ ...prevState, message: e.target.value }))
+                  }}
+                />
+            }
+
+          </Box>
+        </CustomDialogContent>
+
+        <CustomDialogFooter>
+          <Button
+            size="small"
+            variant="outlined" color="primary" onClick={() => setStatusToUpdate(prevState => ({ ...prevState, open: false }))}>
+            Cancel
+          </Button>
+          <Button
+            size="small"
+            onClick={() => {
+              setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
+              axiosInstance().put(`${productInventoryHelperObject.api}/update-status`, {
+                comment: statusToUpdate.message,
+                assets: selectedRecords.map(m => m?._id ?? m?.id),
+                status: statusToUpdate.status,
+                reference: {
+                  _id: rentalManagementId,
+                  type: "Rental"
+                }
+              }).then(({ data }) => {
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
+                setStatusToUpdate({ open: false, isUpdating: false, status: "", message: "" });
+                fetchRecords();
+              }).catch((error) => {
+                setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false }));
+                toastConfig.setToastConfig(error)
+              })
+            }}
+            disabled={statusToUpdate.isUpdating}
+            variant="contained"
+            color="primary"
+          >
+            {
+              statusToUpdate.isUpdating ? <CircularProgress
+                style={{ marginRight: "8px" }}
+                size={20} color="inherit" /> : null
+            }
+            Change Status
+          </Button>
+        </CustomDialogFooter>
+      </Dialog>
+    }
+
   </>
   );
 }

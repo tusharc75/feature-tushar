@@ -13,6 +13,11 @@ import {
     CheckboxRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
 
+import { sidebarResourceObjectFromValues } from './helpers';
+
+const permissions: any = {}
+
+const permissionForLinks = sidebarResourceObjectFromValues();
 
 export const staticFrameworkRender = {
     "createdByRenderer": CreatedByRenderer,
@@ -108,6 +113,7 @@ export const getStaticFields = () => {
         { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
         { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }]
 }
+
 export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
     let data = localStorage.getItem("gridMetaData")
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
@@ -120,7 +126,7 @@ export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
 export const checkStaticField = (renderedFrom, fieldData) => {
     let data = localStorage.getItem("gridMetaData")
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
-    if (gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom].hide.length) {
+    if (gridMetaData && gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom].hide.length) {
         return {
             ...fieldData,
             show: gridMetaData[renderedFrom].hide.indexOf(fieldData?.field) >= 0 ? false : true
@@ -129,7 +135,21 @@ export const checkStaticField = (renderedFrom, fieldData) => {
     return fieldData
 }
 
+export const getSortedColumns = (columns = []) => {
+    return columns.sort(function (a, b) {
+        let columnNameA = a.headerName.toUpperCase(); // ignore upper and lowercase
+        let columnNameB = b.headerName.toUpperCase(); // ignore upper and lowercase
+        if (columnNameA < columnNameB) {
+            return -1;
+        }
+        if (columnNameA > columnNameB) {
+            return 1;
+        }
+        return 0;
+    })
+}
 export const staticColumns = ["createdBy", "updatedBy"]
+
 export const getColumnData = (title, field, detailScreenRoute = null, hasPopup = false) => {
     let data = localStorage.getItem("gridMetaData")
 
@@ -177,10 +197,10 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
                     ...commonFieldData,
                     disabled: true,
                     field: field?.fieldName === "firstName" ? "concatedName" : field.fieldName,
-                    cellRenderer: "linkRenderer",
+                    cellRenderer: permissions[permissionForLinks[field?.lookupResource]]?.isRead ? "linkRenderer" : "commonRenderer",
                     cellRendererParams: { "pathName": detailScreenRoute, "property": "_id", isForPopup: hasPopup }
                 },
-                rendererName: 'linkRenderer',
+                rendererName: permissions[permissionForLinks[field?.lookupResource]]?.isRead ? "linkRenderer" : "commonRenderer",
             }
         }
         else if (field?.lookup) {
@@ -207,13 +227,13 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
             return {
                 columnData: {
                     ...commonFieldData,
-                    cellRenderer: "linkRenderer",
+                    cellRenderer: permissions[permissionForLinks[field?.lookupResource]]?.isRead ? "linkRenderer" : "commonRenderer",
                     cellRendererParams: {
                         "pathName": pathName, "property": joinedFieldName + 'Id',
                         isForPopup: isForPopup, "more": `rest${joinedFieldName}`
                     }
                 },
-                rendererName: 'linkRenderer',
+                rendererName: permissions[permissionForLinks[field?.lookupResource]]?.isRead ? "linkRenderer" : "commonRenderer",
             }
         }
         else if (isRenderWithCopy(field?.type)) {
@@ -265,4 +285,97 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
             }
         }
     }
+}
+
+export const genrateColoum = (fields, column, rendererNames, editable) => {
+    let _fields = fields;
+    _fields.forEach((ele) => {
+        if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
+            if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+                ele.displayUnits.forEach((_unit) => {
+                    let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
+                    let fieldLabel = ele.fieldLabel + " " + _unit
+                    if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                        let col: any = {}
+                        col.field = fieldName
+                        col.headerName = fieldLabel
+                        col.width = 180
+                        col.show = true
+                        col.leval = ele.leval
+                        if (!ele.isFormula && !ele.isUneditable && editable) {
+                            col.cellRenderer = "commonRenderer";
+                            col.cellEditor = "numericCellEditor";
+                            col.editable = true;
+                        } else {
+                            col.cellRenderer = "commonRenderer";
+                        }
+                        column.push(col)
+                    }
+                })
+            }
+            else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+                ele.displayUnits.forEach((_unit) => {
+                    ele.displayCurrency.forEach((_currency) => {
+                        let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
+                        let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
+                        if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                            let col: any = {}
+                            col.field = fieldName
+                            col.headerName = fieldLabel
+                            col.width = 180
+                            col.show = true
+                            col.leval = ele.leval
+                            if (!ele.isFormula && !ele.isUneditable && editable) {
+                                col.cellRenderer = "commonRenderer";
+                                col.cellEditor = "numericCellEditor";
+                                col.editable = true;
+                            } else {
+                                col.cellRenderer = "commonRenderer";
+                            }
+                            column.push(col)
+                        }
+                    })
+                })
+            }
+            else if (ele.type === "currencyAmount") {
+                ele.displayCurrency.forEach((_currency) => {
+                    let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
+                    let fieldLabel = ele.fieldLabel + " " + _currency
+                    if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                        let col: any = {}
+                        col.field = fieldName
+                        col.headerName = fieldLabel
+                        col.width = 180
+                        col.show = true
+                        col.leval = ele.leval
+                        if (!ele.isFormula && !ele.isUneditable && editable) {
+                            col.cellRenderer = "commonRenderer";
+                            col.cellEditor = "numericCellEditor";
+                            col.editable = true;
+                        } else {
+                            col.cellRenderer = "commonRenderer";
+                        }
+                        column.push(col)
+                    }
+                })
+            }
+        }
+        else {
+            if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
+                let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path, true)
+                if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
+                    if (!ele.isFormula && !ele.isUneditable && editable) {
+                        if (ele.type === "decimal" || ele.type === "percent") {
+                            currentColumn.columnData.cellEditor = "numericCellEditor";
+                        }
+                        currentColumn.columnData.editable = true;
+                    }
+                }
+                column.push({ ...currentColumn.columnData, leval: ele.leval });
+                if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                    rendererNames.push(currentColumn?.rendererName)
+                }
+            }
+        }
+    })
 }

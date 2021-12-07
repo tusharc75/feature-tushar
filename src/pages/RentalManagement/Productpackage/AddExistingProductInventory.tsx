@@ -1,24 +1,24 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "../../axios/axiosInstance";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "../../../axios/axiosInstance";
 import { Box, CircularProgress, IconButton, TextField, Tooltip } from "@material-ui/core";
-import SearchBox from '../../components/Helpers/SearchBox'
-import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { gridLoadingTimeout, CustomDialogTransition, product, packages } from '../../constants/helpers';
+import SearchBox from '../../../components/Helpers/SearchBox'
+import { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
+import { gridLoadingTimeout, CustomDialogTransition, product, packages } from '../../../constants/helpers';
 import {
     CommonRenderer,
     CreatedByRenderer,
     UpdatedByRenderer
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { useData } from "../../StateProvider/Provider";
+} from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
+import { useData } from "../../../StateProvider/Provider";
 import Dialog from "@material-ui/core/Dialog/Dialog";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
-import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable";
+import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
+import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 
 const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts }) => {
     const toastConfig = useContext(CustomToastContext)
@@ -32,13 +32,9 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
     const [disableSaveButton, setDisableSaveButton] = useState(false);
-
-    const {
-        state: { permissions },
-    }: any = useData();
+    const { state: { permissions } }: any = useData();
 
     useEffect(() => {
-        // fetchProductInventory();
         if (type === "product") fetchProductInventory();
         else if (type === "package") fetchPackage();
     }, []);

@@ -63,7 +63,7 @@ const useStyles = makeStyles((theme) => ({
   },
   pbStepper: {
     overflow: "none",
-    gap:"2px",
+    gap: "2px",
     [theme.breakpoints.down("xs")]: {
       overflow: "auto"
     },
@@ -103,6 +103,12 @@ const useStyles = makeStyles((theme) => ({
 
 
   },
+  rejected: {
+    background: "var(--skin)",
+    borderBottom: "0px solid var(--productRed)",
+    color: "var(--error) !important",
+    borderLeft: "6px solid var(--error)",
+  },
   sent: {
     color: "#00acc1",
     fontWeight: "bold",
@@ -111,7 +117,7 @@ const useStyles = makeStyles((theme) => ({
     color: "#6ca826",
     fontWeight: "bold",
   },
-  rejected: {
+  rejectedByDoa: {
     color: "#d60f0f",
     fontWeight: "bold",
   },
@@ -407,7 +413,7 @@ const Steps = (props) => {
                   className={classes.rejected}
                   variant="body1"
                   style={{ fontWeight: "normal" }}
-                >
+                >+
                   User doesn't have DOA setup for this amount
                 </Typography>
               </div>
@@ -443,7 +449,7 @@ const Steps = (props) => {
 
                     <div className="d-flex align-items-center justify-content-center flex-column m-3">
                       <FcCancel size={30} />
-                      <Typography className={classes.rejected}>
+                      <Typography className={classes.rejectedByDoa}>
                         Rejected by DOA
                       </Typography>
                     </div>
@@ -670,11 +676,16 @@ const Steps = (props) => {
                               steps[currentStep]?.key === "End" || approvedQuote.approved,
                             [classes.currentStep]: currentStep === i,
                             [classes.inActive]: currentStep !== i,
+                            [classes.rejected]: (versionStatus.includes("Rejected by DOA") && i > 2) ||
+                              ((versionStatus.includes("Rejected by Customer") ||
+                                versionStatus.includes("Not Booked by Customer") ||
+                                versionStatus.includes("Invalid by Customer")) && ((steps.length === 5 && i > 2) || (steps.length === 6 && i > 3)))
+
                           })}
                         >
                           <StepLabel
                             style={{ color: "#555" }}
-                            // StepIconComponent={ColorlibStepIcon}
+                            StepIconComponent={ColorlibStepIcon}
                             className={
                               currentStep === i || approvedQuote.approved
                                 ? "currentStepColor"

@@ -7,19 +7,28 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, setFieldsInAscendingOrder, generateUniqueIdOnly } from "./../../constants/helpers";
+import {
+    getOwnerDropdownDataSource,
+    getCollaboratorDropdownDataSource,
+    CustomDialogTransition, setFieldsInAscendingOrder, generateUniqueIdOnly
+} from "./../../constants/helpers";
 import { getObjKeysWithValues, getObjKeys, yupSchema, deliveryTicket, isFieldNotTouched, sidebarResource } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import Skeleton from "@material-ui/lab/Skeleton/Skeleton";
 import FormTypes from "../../components/Helpers/FormTypes";
 import { FaDiceOne } from "react-icons/fa";
 import moment from "moment";
+import { useData } from "../../StateProvider/Provider";
 
 const ManageDeliveryTicket = (props) => {
 
+    const {
+        state: { user },
+    }: any = useData();
+
     const toastConfig = useContext(CustomToastContext)
     const { deliveryTicketApi } = deliveryTicket;
-    const { deliveryTicketId, onClose, onSuccess, warehouseId = null, productInventoryForDeliveryTicket = null, rentalData = null } = props;
+    const { deliveryTicketId, onClose, onSuccess, warehouseId = null, productInventoryForDeliveryTicket = null, rentalData = null, transferData = null, repairJobData = null } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -28,11 +37,91 @@ const ManageDeliveryTicket = (props) => {
     const [formValues, setFormValues] = useState({})
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
+    const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
+    const [ownerData, setOwnerData] = useState([]);
+    const [collaboratorData, setCollaboratorData] = useState([]);
+    const [
+        ownerCollaboratorCommonDataSource,
+        setOwnerCollaboratorCommonDataSource,
+    ] = useState([]);
+    const [ownerDataSource, setOwnerDataSource] = useState([]);
+    const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
+    const [disableOwnerSelection, setDisableOwnerSelection] = useState(false);
+
     useEffect(() => {
-        if (initialData.fields.length > 0) {
-            setFormsData(setFieldsInAscendingOrder(initialData.fields));
+        const fields = initialData.fields
+        if (fields.length > 0) {
+
+            const ownerCollabOptions = fields.filter(
+                (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
+            );
+            if (ownerCollabOptions.length > 0) {
+                setOwnerCollaboratorData(ownerCollabOptions[0].option);
+                setOwnerData(ownerCollabOptions[0].option);
+                setCollaboratorData(ownerCollabOptions[0].option);
+            }
+
+            const modifiedData = setFieldsInAscendingOrder(fields)
+
+            const newFilteredData = modifiedData.filter((formData) => {
+                if (transferData) {
+                    if (transferData?.transferType === "Internal") {
+                        if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
+                            return false
+                        }
+                    }
+
+                    if (transferData?.transferType.includes("External Supplier")) {
+                        if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
+                            return false
+                        }
+                    }
+                    if (transferData?.transferType.includes("External Customer")) {
+                        if (formData.name.includes("Supplier") || formData.name.includes("Plant")) {
+                            return false
+                        }
+                    }
+                }
+
+                if (repairJobData) {
+                    if (repairJobData?.typeOfRepair === "Internal") {
+                        if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
+                            return false
+                        }
+                    }
+
+                    if (repairJobData?.typeOfRepair === "External") {
+                        if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
+                            return false
+                        }
+                    }
+                }
+
+                if (rentalData) {
+                    if (formData.name.includes("Supplier") || formData.name.includes("Plant")) {
+                        return false
+                    }
+                }
+
+                return true
+
+            })
+
+            setFormsData(newFilteredData);
         }
-    }, [initialData.fields]);
+    }, [initialData.fields, transferData, repairJobData, rentalData]);
+
+    const onOwnerDropdownOpen = (selectedCollaborator) => {
+        setOwnerData(
+            getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData)
+        );
+    };
+
+    const onCollabOwnerMultiselectOpen = (selectedOwnerId) => {
+        setCollaboratorData(
+            getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData)
+        );
+    };
 
     useEffect(() => {
         axiosInstance().get(`/field?resource=${sidebarResource["deliveryTicket"]}`).then(({ data: { data } }) => {
@@ -41,6 +130,8 @@ const ManageDeliveryTicket = (props) => {
 
             if (deliveryTicketId) {
                 axiosInstance().get(`${deliveryTicketApi}/` + deliveryTicketId).then(({ data: { data } }) => {
+                    setDisableOwnerSelection(deliveryTicketId && user.user._id !== data?.owner?.optionValue);
+
                     setInitialData({
                         fields: fieldsDataForUpdate,
                         values: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -55,11 +146,61 @@ const ManageDeliveryTicket = (props) => {
                     const tempInitialData = getObjKeys("", fieldsDataForCreate)
                     tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
                     tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
+                    tempInitialData["type"] = "Rental Job";
                     tempInitialData["rental"] = rentalData?._id
                     tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
                     tempInitialData["shippingAddress"] = rentalData.shippingAddress
                     tempInitialData["deliveryJobName"] = `${rentalData?.rentalJobName}_${generateUniqueIdOnly()}`
-                    tempInitialData["deliveryDate"] = "";
+                    tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
+                    setInitialData({
+                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
+                        values: tempInitialData,
+                    });
+                    setFormValues(tempInitialData)
+                }
+                else if (productInventoryForDeliveryTicket && repairJobData) {
+                    const tempInitialData = getObjKeys("", fieldsDataForCreate)
+                    tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
+                    tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
+                    tempInitialData["deliveryJobName"] = `${repairJobData?.repairJobName}_${generateUniqueIdOnly()}`
+                    tempInitialData["type"] = "Repair Job";
+                    tempInitialData["repairJob"] = repairJobData?._id
+                    tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
+
+                    if (repairJobData?.typeOfRepair === "Internal") {
+                        tempInitialData["receivingPlant"] = repairJobData?.repairPlant?.optionValue;
+                        tempInitialData["plantShipTo"] = repairJobData?.plantShipTo;
+                    }
+                    if (repairJobData?.typeOfRepair === "External") {
+                        tempInitialData["supplierAccount"] = repairJobData?.vendor?.optionValue;
+                        tempInitialData["supplierShippingAddress"] = repairJobData?.supplierShipTo;
+                    }
+
+                    setInitialData({
+                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "repairJob"),
+                        values: tempInitialData,
+                    });
+                    setFormValues(tempInitialData)
+                }
+                if (productInventoryForDeliveryTicket && transferData) {
+                    const tempInitialData = getObjKeys("", fieldsDataForCreate)
+                    tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
+                    tempInitialData["deliveryJobName"] = `${transferData?.transferAssetNumber}_${generateUniqueIdOnly()}`
+                    tempInitialData["type"] = "Transfer Asset";
+                    tempInitialData["transferAsset"] = transferData?._id;
+                    tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
+                    if (transferData?.transferType === "Internal") {
+                        tempInitialData["receivingPlant"] = transferData?.transferToPlant?.optionValue;
+                        tempInitialData["plantShipTo"] = transferData?.plantShipTo;
+                    }
+                    if (transferData?.transferType === "External Customer") {
+                        tempInitialData["customerAccount"] = transferData?.transferToCustomer?.optionValue;
+                        tempInitialData["shippingAddress"] = transferData?.customerShipTo;
+                    }
+                    if (transferData?.transferType === "External Supplier") {
+                        tempInitialData["supplierAccount"] = transferData?.transferToSupplier?.optionValue;
+                        tempInitialData["supplierShippingAddress"] = transferData?.supplierShipTo;
+                    }
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
                         values: tempInitialData,
@@ -78,7 +219,7 @@ const ManageDeliveryTicket = (props) => {
             .catch((error) => {
                 toastConfig.setToastConfig(error);
             });
-    }, [deliveryTicketId]);
+    }, [deliveryTicketId, transferData]);
 
 
     const handleSubmit = (values) => {
@@ -149,7 +290,7 @@ const ManageDeliveryTicket = (props) => {
                 }, formValues)) onClose()
                 else setShowConfirmDialog(true)
             }}
-            title={`${deliveryTicketId ? `Update  ` : "Create Loading Ticket"}`}
+            title={`${deliveryTicketId ? `Update ` : "Create Loading Ticket"}`}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
                 setFullScreen(prevState => !prevState)
@@ -202,118 +343,234 @@ const ManageDeliveryTicket = (props) => {
                                                 <Box marginY={2}>
                                                     <Grid spacing={3} container>
                                                         {form.sectionFields.map((field, index2) => (
-                                                            <Grid key={index2} item xs={12} sm={6} md={6}>
-                                                                {field.fieldName === "customerAccount" || field.fieldName === "deliveryType" ? (
-                                                                    <FormTypes
-                                                                        {...field}
-                                                                        disabled={true}
-                                                                        isNew={Boolean(deliveryTicketId)}
-                                                                        values={values}
-                                                                        errors={errors}
-                                                                        touched={touched}
-                                                                        label={field.fieldLabel}
-                                                                        name={field.fieldName}
-                                                                        type={field.type}
-                                                                        options={field.option}
-                                                                        setFieldValue={(name, value) => {
-                                                                            handleValuesChange({ [name]: value })
-                                                                            setFieldValue(name, value)
-                                                                        }}
-                                                                        required={field.required}
-                                                                        fullWidth
-                                                                        isTooltip={field?.isTooltip || false}
-                                                                        tooltipMessage={field?.tooltipMessage}
-                                                                        size="small"
-                                                                        imageOrFileUploadCompletePercentage={null}
-                                                                    />
-                                                                ) : field.fieldName === "pick-UpDate" ? (
-                                                                    <FormTypes
-                                                                        {...field}
-                                                                        values={values}
-                                                                        errors={errors}
-                                                                        touched={touched}
-                                                                        label={field.fieldLabel}
-                                                                        name={field.fieldName}
-                                                                        type={field.type}
-                                                                        options={field.option}
-                                                                        setFieldValue={(name, value) => {
-                                                                            handleValuesChange({ [name]: value })
-                                                                            setFieldValue(name, value)
-                                                                        }}
-                                                                        required={field.required}
-                                                                        fullWidth
-                                                                        isTooltip={field?.isTooltip || false}
-                                                                        tooltipMessage={field?.tooltipMessage}
-                                                                        size="small"
-                                                                        minDate={new Date()}
-                                                                        maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
-                                                                    />
-                                                                ) : field.fieldName === "deliveryDate" ? (
-                                                                    <FormTypes
-                                                                        {...field}
-                                                                        values={values}
-                                                                        errors={errors}
-                                                                        touched={touched}
-                                                                        label={field.fieldLabel}
-                                                                        name={field.fieldName}
-                                                                        type={field.type}
-                                                                        options={field.option}
-                                                                        setFieldValue={(name, value) => {
-                                                                            handleValuesChange({ [name]: value })
-                                                                            setFieldValue(name, value)
-                                                                        }}
-                                                                        required={field.required}
-                                                                        fullWidth
-                                                                        isTooltip={field?.isTooltip || false}
-                                                                        tooltipMessage={field?.tooltipMessage}
-                                                                        size="small"
-                                                                        minDate={moment(values["pick-UpDate"])}
-                                                                    />
-                                                                ) : field.fieldName === "deliveryJobName" ? (
-                                                                    <FormTypes
-                                                                        {...field}
-                                                                        disabled={true}
-                                                                        values={values}
-                                                                        errors={errors}
-                                                                        touched={touched}
-                                                                        label={field.fieldLabel}
-                                                                        name={field.fieldName}
-                                                                        type={field.type}
-                                                                        options={field.option}
-                                                                        setFieldValue={(name, value) => {
-                                                                            handleValuesChange({ [name]: value })
-                                                                            setFieldValue(name, value)
-                                                                        }}
-                                                                        required={field.required}
-                                                                        fullWidth
-                                                                        isTooltip={field?.isTooltip || false}
-                                                                        tooltipMessage={field?.tooltipMessage}
-                                                                        size="small"
-                                                                    />
-                                                                ) : <FormTypes
-                                                                    {...field}
-                                                                    isNew={Boolean(deliveryTicketId)}
-                                                                    values={values}
-                                                                    errors={errors}
-                                                                    touched={touched}
-                                                                    label={field.fieldLabel}
-                                                                    name={field.fieldName}
-                                                                    type={field.type}
-                                                                    options={field.option}
-                                                                    setFieldValue={(name, value) => {
-                                                                        handleValuesChange({ [name]: value })
-                                                                        setFieldValue(name, value)
-                                                                    }}
-                                                                    required={field.required}
-                                                                    fullWidth
-                                                                    isTooltip={field?.isTooltip || false}
-                                                                    tooltipMessage={field?.tooltipMessage}
-                                                                    size="small"
-                                                                    imageOrFileUploadCompletePercentage={null}
-                                                                    disabled={(!deliveryTicketId && field.disableOnEdit)}
-                                                                />
-                                                                }
-                                                            </Grid>
+                                                            field.fieldName === "repairJob" && Boolean(repairJobData) ? null :
+                                                                field.fieldName === "transferAsset" && Boolean(transferData) ? null :
+                                                                    field.fieldName === "rentalJob" && Boolean(rentalData) ? null :
+                                                                        <Grid key={index2} item xs={12} sm={6} md={6}>
+                                                                            {(field.fieldName === "rentalJob" && field.fieldName === "customerAccount") || field.fieldName === "deliveryType" ||
+                                                                                field.fieldName === "status" || field.fieldName === "actualDeliveredDate" || field.fieldName === "actualDispatchedDate" ? (
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    disabled={transferData && false || rentalData && true || repairJobData && true}
+                                                                                    isNew={Boolean(deliveryTicketId)}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    imageOrFileUploadCompletePercentage={null}
+                                                                                />
+                                                                            ) : field.fieldName === "pick-UpDate" ? (
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    minDate={new Date()}
+                                                                                    maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
+                                                                                />
+                                                                            ) : field.fieldName === "deliveryDate" ? (
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    minDate={moment(values["pick-UpDate"]).add(7, 'days')}
+                                                                                />
+                                                                            ) : field.fieldName === "deliveryJobName" ? (
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    disabled={true}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                />
+                                                                            ) : field.fieldName === "owner" ? (
+                                                                                <FormTypes
+                                                                                    isNew={!deliveryTicketId}
+                                                                                    {...field}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={ownerData}
+                                                                                    onChange={(e, val) => {
+                                                                                        handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
+                                                                                        setFieldValue(
+                                                                                            field.fieldName,
+                                                                                            val && val.optionValue
+                                                                                                ? val.optionValue
+                                                                                                : ""
+                                                                                        );
+
+                                                                                        if (
+                                                                                            val &&
+                                                                                            val.optionValue !== user?.user?._id
+                                                                                        ) {
+                                                                                            const checkOwnerAddedInCollaborator =
+                                                                                                values["collaborator"].find(
+                                                                                                    (d) =>
+                                                                                                        d?.optionValue ===
+                                                                                                        user?.user?._id
+                                                                                                );
+                                                                                            if (
+                                                                                                !checkOwnerAddedInCollaborator
+                                                                                            ) {
+                                                                                                setFieldValue("collaborator", [
+                                                                                                    ...values["collaborator"],
+                                                                                                    collaboratorData.find(
+                                                                                                        (d) =>
+                                                                                                            d?.optionValue ===
+                                                                                                            user?.user?._id
+                                                                                                    ).optionValue,
+                                                                                                ]);
+                                                                                                handleValuesChange({
+                                                                                                    "collaborator": collaboratorData.find(
+                                                                                                        (d) =>
+                                                                                                            d?.optionValue ===
+                                                                                                            user?.user?._id
+                                                                                                    ).optionValue
+                                                                                                })
+                                                                                            }
+                                                                                        }
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    disabled={disableOwnerSelection || (deliveryTicketId && field.disableOnEdit)}
+                                                                                    onOpen={() => {
+                                                                                        onOwnerDropdownOpen(
+                                                                                            values["collaborator"]
+                                                                                        );
+                                                                                    }}
+                                                                                />
+                                                                            ) : field.fieldName === "collaborator" ? (
+                                                                                <FormTypes
+                                                                                    isNew={!deliveryTicketId}
+                                                                                    {...field}
+                                                                                    disabled={deliveryTicketId && field.disableOnEdit}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={collaboratorData}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value });
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    onOpen={() => {
+                                                                                        onCollabOwnerMultiselectOpen(
+                                                                                            values["owner"]
+                                                                                        );
+                                                                                    }}
+                                                                                />
+                                                                            ) : field.fieldName === "warehouse" ? (
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    disabled={(deliveryTicketId && field.disableOnEdit) || (repairJobData && warehouseId)}
+                                                                                    isNew={Boolean(deliveryTicketId)}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                />
+                                                                            ) : <FormTypes
+                                                                                {...field}
+                                                                                isNew={Boolean(deliveryTicketId)}
+                                                                                values={values}
+                                                                                errors={errors}
+                                                                                touched={touched}
+                                                                                label={field.fieldLabel}
+                                                                                name={field.fieldName}
+                                                                                type={field.type}
+                                                                                options={field.option}
+                                                                                setFieldValue={(name, value) => {
+                                                                                    handleValuesChange({ [name]: value })
+                                                                                    setFieldValue(name, value)
+                                                                                }}
+                                                                                required={field.required}
+                                                                                fullWidth
+                                                                                isTooltip={field?.isTooltip || false}
+                                                                                tooltipMessage={field?.tooltipMessage}
+                                                                                size="small"
+                                                                                imageOrFileUploadCompletePercentage={null}
+                                                                                disabled={(!deliveryTicketId && field.disableOnEdit) || ((field.fieldName === "type" || field.fieldName === "transferAsset") && Boolean(transferData))}
+                                                                            />
+                                                                            }
+                                                                        </Grid>
                                                         ))}
                                                     </Grid>
                                                 </Box>

@@ -20,7 +20,7 @@ import CustomContainer from "../../components/CustomContainer";
 import { FaUser } from "react-icons/fa";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { prepareDataForGrid } from "../../constants/helpers"
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
+import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ResourceTransferDialog from "../../components/ResourceTransferDialog"
 import { isMobile } from 'react-device-detect';
@@ -37,6 +37,7 @@ const Entity: FC = () => {
   const {
     state: { permissions, user },
   }: any = useData();
+  const {getColumnData} = useColumns();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, entityId: null });
   const [renderCount, setRenderCount] = useState(0);
   const [usersDialogOpen, setUsersDialogOpen] = useState(false);
