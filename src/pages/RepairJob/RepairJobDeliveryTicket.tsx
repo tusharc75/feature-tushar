@@ -75,7 +75,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
 
             tempProductInventory.forEach((d) => {
               d["_id"] = d["id"];
-              d["hideSelection"] = d.hasOwnProperty("isDelivered") && d["isDelivered"] === true;
+              d["hideSelection"] = d.status === "In-Transit" || (d.hasOwnProperty("isDelivered") && d["isDelivered"] === true);
             })
 
             setNextButtonDisabled(!tempProductInventory.every(e => e.hasOwnProperty("isDelivered") && e.isDelivered === true));
