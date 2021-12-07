@@ -312,6 +312,10 @@ const routes = {
   transferAssetDetail: {
     title: storedRoutes ? storedRoutes.transferAsset?.title : RESOURCE_LABEL.transferAsset,
     path: "/transfer-asset/detail",
+  },
+  address: {
+    title: storedRoutes ? storedRoutes.address?.title : RESOURCE_LABEL.address,
+    path: "/address",
   }
 };
 

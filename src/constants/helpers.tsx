@@ -212,7 +212,8 @@ export const RESOURCE_LABEL = {
   eCommerce: 'e-Commerce',
   packages: 'Packages',
   purchaseOrder: 'Purchase Order',
-  transferAsset: 'Transfer Asset'
+  transferAsset: 'Transfer Asset',
+  address: 'Address'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -384,6 +385,11 @@ export const quotePdfTemplate = {
 export const marketSegment = {
   marketSegmentApi: '/market-segment',
   marketSegmentResource: 'marketSegment'
+};
+
+export const address = {
+  addressApi: '/address',
+  addressResource: 'address'
 };
 
 export const purchaseOrder = {
