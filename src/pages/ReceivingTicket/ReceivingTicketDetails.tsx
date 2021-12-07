@@ -278,7 +278,7 @@ const ReceivingTicketDetails = () => {
       const fieldsDataForUpdate = receivingTicketFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
       let values = getObjKeysWithValues(receivingTicketData, fieldsDataForUpdate)
       values["status"] = mappedStatus[label]
-      values["_id"] = receivingTicketData._id
+      values["_id"] = receivingTicketData?._id
       axiosInstance().put(`${receivingTicket.receivingTicketApi}`, values).then(({ data: { data } }) => {
         fetchReceivingTicketData()
       }).catch((error) => {
@@ -469,7 +469,7 @@ const ReceivingTicketDetails = () => {
                           </Typography>
 
                           {
-                            receivingTicketData.status === "New" && <IconButton
+                            receivingTicketData?.status === "New" && <IconButton
                               onClick={() => {
                                 setAddSerializedAssetDialog(true)
                               }}
@@ -484,7 +484,7 @@ const ReceivingTicketDetails = () => {
                           }
 
                           {
-                            receivingTicketData.status === "New" && <IconButton
+                            receivingTicketData?.status === "New" && <IconButton
                               disabled={selectedRecords.length === 0}
                               onClick={() => {
                                 setShowRemoveAssetFromReceivingTicketDialog(true)
@@ -538,7 +538,7 @@ const ReceivingTicketDetails = () => {
                           /> :
 
                             Object.keys(frameWorkComponent).length > 0 ? <CustomAgGrid
-                              allowSelection={receivingTicketData.status === "New"}
+                              allowSelection={receivingTicketData?.status === "New"}
                               allowAction={false}
                               columns={columns}
                               dataRows={dataRows}
@@ -704,9 +704,9 @@ const ReceivingTicketDetails = () => {
           }}
           isAdding={isAdding}
           selectedProducts={[]}
-          rentalId={receivingTicketData.type === "Rental Job" ? receivingTicketData?.rentalJob?.optionValue : ""}
-          repairJobId={receivingTicketData.type === "Repair Job" ? receivingTicketData?.repairJob?.optionValue : ""}
-          transferAssetId={receivingTicketData.type === "Transfer Asset" ? receivingTicketData?.transferAsset?.optionValue : ""}
+          rentalId={receivingTicketData?.type === "Rental Job" ? receivingTicketData?.rentalJob?.optionValue : ""}
+          repairJobId={receivingTicketData?.type === "Repair Job" ? receivingTicketData?.repairJob?.optionValue : ""}
+          transferAssetId={receivingTicketData?.type === "Transfer Asset" ? receivingTicketData?.transferAsset?.optionValue : ""}
           notIn="receivingTicket"
         // type={inventoryType}
         />

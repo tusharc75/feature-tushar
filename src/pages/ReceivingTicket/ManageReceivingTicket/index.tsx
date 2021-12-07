@@ -40,7 +40,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
 
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [receivingTicketData, setReceivingTicketData] = useState({ fields: [], initialValues: {} });
+  const [receivingTicketData, setReceivingTicketData] = useState<any>({ fields: [], initialValues: {} });
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
@@ -137,7 +137,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
 
   useEffect(() => {
     if (receivingTicketId) {
-      setTitle(`${isClone ? "Clone" : "Editing - "}`);
+      setTitle(isClone ? "Clone" : `Update ${receivingTicketData.initialValues?.receivingJobName ? `(${receivingTicketData.initialValues?.receivingJobName})` : ""}`);
     }
 
     setLoading(true);

@@ -30,7 +30,7 @@ const ManageDeliveryTicket = (props) => {
     const { deliveryTicketApi } = deliveryTicket;
     const { deliveryTicketId, onClose, onSuccess, warehouseId = null, productInventoryForDeliveryTicket = null, rentalData = null, transferData = null, repairJobData = null } = props;
     const [loading, setLoading] = useState(false);
-    const [initialData, setInitialData] = useState({ fields: [], values: {} });
+    const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [formsData, setFormsData] = useState([]);
     const [isSubmitting, setSubmitting] = useState(false);
@@ -284,7 +284,7 @@ const ManageDeliveryTicket = (props) => {
                 }, formValues)) onClose()
                 else setShowConfirmDialog(true)
             }}
-            title={`${deliveryTicketId ? `Update ` : "Create Loading Ticket"}`}
+            title={`${deliveryTicketId ? `Update ${initialData.values?.deliveryJobName ? `(${initialData.values?.deliveryJobName})` : ""}` : "Create Loading Ticket"}`}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
                 setFullScreen(prevState => !prevState)

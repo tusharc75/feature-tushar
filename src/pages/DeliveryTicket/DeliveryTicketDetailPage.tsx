@@ -401,7 +401,7 @@ export default function DeliveryTicketDetail(props) {
                   mainPoints={deliveryTicketData ? getMainPoints : ""}
                   showHeading={true}
                 >
-                  {permissions?.deliveryTicket?.isUpdate && canEdit && deliveryTicketData.status !== "Delivered" && (
+                  {permissions?.deliveryTicket?.isUpdate && canEdit && deliveryTicketData?.status !== "Delivered" && (
                     <Button
                       variant="contained"
                       color="primary"
@@ -537,7 +537,7 @@ export default function DeliveryTicketDetail(props) {
                         </Typography>
 
                         {
-                          deliveryTicketData.status === "New" && <IconButton
+                          deliveryTicketData?.status === "New" && <IconButton
                             onClick={() => {
                               setAddSerializedAssetDialog(true)
                             }}
@@ -552,7 +552,7 @@ export default function DeliveryTicketDetail(props) {
                         }
 
                         {
-                          deliveryTicketData.status === "New" && <IconButton
+                          deliveryTicketData?.status === "New" && <IconButton
                             disabled={selectedRecords.length === 0}
                             onClick={() => {
                               setShowRemoveAssetFromLoadingTicketDialog(true)
@@ -606,7 +606,7 @@ export default function DeliveryTicketDetail(props) {
                         /> :
 
                           Object.keys(frameWorkComponent).length > 0 ? <CustomAgGrid
-                            allowSelection={deliveryTicketData.status === "New"}
+                            allowSelection={deliveryTicketData?.status === "New"}
                             allowAction={false}
                             columns={columns}
                             dataRows={dataRows}
@@ -768,9 +768,9 @@ export default function DeliveryTicketDetail(props) {
             }}
             isAdding={isAdding}
             selectedProducts={[]}
-            rentalId={deliveryTicketData.type === "Rental Job" ? deliveryTicketData?.rental?.optionValue : ""}
-            repairJobId={deliveryTicketData.type === "Repair Job" ? deliveryTicketData?.repairJob?.optionValue : ""}
-            transferAssetId={deliveryTicketData.type === "Transfer Asset" ? deliveryTicketData?.transferAsset?.optionValue : ""}
+            rentalId={deliveryTicketData?.type === "Rental Job" ? deliveryTicketData?.rental?.optionValue : ""}
+            repairJobId={deliveryTicketData?.type === "Repair Job" ? deliveryTicketData?.repairJob?.optionValue : ""}
+            transferAssetId={deliveryTicketData?.type === "Transfer Asset" ? deliveryTicketData?.transferAsset?.optionValue : ""}
             notIn="loadingTicket"
           // type={inventoryType}
           />
