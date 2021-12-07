@@ -133,12 +133,13 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           }
         }
       }
-      data = data?.map((d: any) => {
-        let finalObject = prepareDataForGrid(d);
-        return finalObject
+      data = data?.map((d: any, index) => {
+        let finalObject: any = prepareDataForGrid(d);
+        return {
+          ...finalObject,
+          assetNumber: `${index + 1}. ${finalObject.assetNumber}`
+        }
       })
-
-
 
       gridDispatch({ type: "initialize", data: data, count: data.length })
       gridDispatch({ type: "loading", loading: false });

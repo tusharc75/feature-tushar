@@ -26,7 +26,7 @@ interface LoadingGridProps {
   setTickets?: any;
   setExistingAssets?: any;
   setTransferIsEnded?: any;
-  updateTransferStatus?: any
+  updateTransferStatus?: any;
 }
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
@@ -116,6 +116,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       let ticketData: any = await fetchLoadingTickets();
 
       for (let i = 0; i < ticketData.length; i++) {
+        assetData[i].assetNumber = `${i + 1}. ${assetData[i].assetNumber}`;
         for (let j = 0; j < assetData.length; j++) {
           if (ticketData[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
             assetData[j].deliveryTicket = ticketData[i].deliveryJobName;
@@ -125,7 +126,13 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         }
       }
 
+      assetData = assetData?.map((d: any, index) => ({
+        ...d,
+        assetNumber: `${index + 1}. ${d.assetNumber}`
+      }));
+
       setExistingAssets(assetData);
+
       dispatch({ type: 'initialize', data: assetData, count: assetData.length });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
@@ -160,7 +167,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     const selectedInventoryIntransit = selectedRecords.filter((asset: any) => asset['deliveryTicketStatus'] === 'In-Transit');
     const selectedInventoryDelivered = selectedRecords.filter((asset: any) => asset['deliveryTicketStatus'] === 'Delivered');
     setAssetsDelivered(selectedInventoryDelivered);
-    setAssetsIntransit(selectedInventoryIntransit)
+    setAssetsIntransit(selectedInventoryIntransit);
 
     if (inventoryDelivered.length > 0) {
       setNextStep(true);
@@ -177,7 +184,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     if (transferAssetData?.transferType === 'Internal') {
       if (inventoryDelivered.length === dataRows.length) {
         setTransferIsEnded(true);
-        updateTransferStatus("Completed")
+        updateTransferStatus('Completed');
       } else {
         setTransferIsEnded(false);
       }
@@ -232,7 +239,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             size="small"
             color="primary"
             disabled={
-              assetsDelivered.length > 0 || assetsIntransit.length > 0 || selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length === 0
+              assetsDelivered.length > 0 ||
+              assetsIntransit.length > 0 ||
+              selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length === 0
             }
             onClick={() => setShowConfirmBox(true)}
           >

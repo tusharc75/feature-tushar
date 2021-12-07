@@ -127,6 +127,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       let loadingTicketData: any = await fetchLoadingTickets();
 
       for (let i = 0; i < ticketData.length; i++) {
+        assetData[i].assetNumber = `${i + 1}. ${assetData[i].assetNumber}`
         for (let j = 0; j < assetData.length; j++) {
           if (ticketData[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
             assetData[j].receivingTicket = ticketData[i].receivingJobName;
@@ -135,8 +136,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           }
         }
       }
-
-      alert('Receiving Done');
 
       for (let i = 0; i < loadingTicketData.length; i++) {
         for (let j = 0; j < assetData.length; j++) {
@@ -149,7 +148,11 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           }
         }
       }
-      alert('Loading Done');
+
+      assetData = assetData?.map((d: any, index) => ({
+        ...d,
+        assetNumber: `${index + 1}. ${d.assetNumber}`
+      }));
 
       dispatch({ type: 'initialize', data: assetData, count: assetData.length });
       dispatch({ type: 'loading', loading: false });
@@ -236,7 +239,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           type: 'success',
           message: `Selected records removed from assiged ${sidebarResource.deliveryTicket}(s)`
         });
-        fetchAssetsData(false);
+        fetchAssetsData(true);
         setRemovingTicket(false);
       })
       .catch((error) => {
