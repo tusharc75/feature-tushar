@@ -120,7 +120,7 @@ const ManageRepairJob = (props) => {
               }
             }
 
-            
+
             if (_f.fieldName === "vendor" || _f.fieldName === "supplierShipTo") {
               if (formValues && formValues["typeOfRepair"] === "External") {
                 _f.required = true
@@ -327,7 +327,6 @@ const ManageRepairJob = (props) => {
                                             type={field.type}
                                             options={field.option}
                                             setFieldValue={(name, value) => {
-                                              // handleValuesChange({ [name]: value });
                                               setFieldValue(name, value);
                                             }}
                                             required={values["typeOfRepair"] === "External"}
@@ -353,8 +352,15 @@ const ManageRepairJob = (props) => {
                                             type={field.type}
                                             options={field.option}
                                             setFieldValue={(name, value) => {
-                                              // handleValuesChange({ [name]: value });
                                               setFieldValue(name, value);
+
+                                              if (field.fieldName === 'repairPlant') {
+                                                if (value) {
+                                                  setFieldValue("plantShipTo", field.option.find(d => d.optionValue === value)?.address ?? "");
+                                                } else {
+                                                  setFieldValue("plantShipTo", "");
+                                                }
+                                              }
                                             }}
                                             required={values["typeOfRepair"] === "Internal"}
                                             fullWidth
@@ -378,7 +384,6 @@ const ManageRepairJob = (props) => {
                                           type={field.type}
                                           options={field.option}
                                           setFieldValue={(name, value) => {
-                                            // handleValuesChange({ [name]: value });
                                             setFieldValue(name, value);
                                           }}
                                           required={field.required}
@@ -406,19 +411,11 @@ const ManageRepairJob = (props) => {
                                             type={field.type}
                                             options={field.option}
                                             setFieldValue={(name, value) => {
-                                              // handleValuesChange({ [name]: value });
                                               setFieldValue(name, value);
 
-                                              // handleValuesChange({ "vendor": "" });
                                               setFieldValue("vendor", "");
-
-                                              // handleValuesChange({ "supplierShipTo": "" });
                                               setFieldValue("supplierShipTo", "");
-
-                                              // handleValuesChange({ "repairPlant": "" });
                                               setFieldValue("repairPlant", "");
-
-                                              // handleValuesChange({ "plantShipTo": "" });
                                               setFieldValue("plantShipTo", "");
                                             }}
                                             required={field.required}
@@ -438,7 +435,6 @@ const ManageRepairJob = (props) => {
                                             type={field.type}
                                             options={field.option}
                                             setFieldValue={(name, value) => {
-                                              // handleValuesChange({ [name]: value });
                                               setFieldValue(name, value);
                                             }}
                                             required={field.required}
