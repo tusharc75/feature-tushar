@@ -179,9 +179,10 @@ const ProductInventoryDetailsPage = () => {
       gridApi.setRowData([]);
     }
     axiosInstance().get(`/history/inventory/${id}`).then(({ data: { data } }) => {
-      data = data?.map((u) => ({
+      data = data?.map((u, index) => ({
         ...u,
-        id: u.inventory?._id,
+        _id: (index + 1),
+        id: (index + 1),
         reference: u.reference?.optionLabel,
         referenceId: u.reference?.optionValue
       }));

@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.15.0](https://github.com/vebholic/oms_frontend/compare/v2.14.2...v2.15.0) (2021-12-07)
+
+
+### Features
+
+* - PO-482 - Instead of restricting back button, we are not allowing delete operation ([acd9d6f](https://github.com/vebholic/oms_frontend/commit/acd9d6fbcc2be5cba83419a6012e7b7f8437c6b2))
+* - Repair job changes done ([465fb96](https://github.com/vebholic/oms_frontend/commit/465fb96db15b7f9a6a50fdda7394ef6e344d23bf))
+* dynamic fields should be visible while creating a loading ticket from repair job ([6201df2](https://github.com/vebholic/oms_frontend/commit/6201df2e2ac45b51ecf1ed681d2ae7d25ed9eeb0))
+* **formbuilder:** added address lookup field option ([36283c8](https://github.com/vebholic/oms_frontend/commit/36283c8dec2ae0d036888c9881f1a0f6613b5ac6))
+
+
+### Bug Fixes
+
+* **customaggrid:** dynamic grid changes ([a636c44](https://github.com/vebholic/oms_frontend/commit/a636c44d3d334f5c5e8f3a178fee777aebbd9d58))
+* doa fixes ([509448d](https://github.com/vebholic/oms_frontend/commit/509448d8a722081cd8f67c2506627deeec0bacc2))
+* issu po linkable ([1f92e0e](https://github.com/vebholic/oms_frontend/commit/1f92e0e40be89eacc8884a664220bd2812c611f0))
+* **tranferasset:** fix ([b160cc9](https://github.com/vebholic/oms_frontend/commit/b160cc93519a826ac218764ac51604cfbb88038a))
+* **transferasset:** bug fix ([850f8fe](https://github.com/vebholic/oms_frontend/commit/850f8fe3e2ca1f0b2dc0d545a94aa083cd4a8756))
+* **transferasset:** bug fix ([e1c6db4](https://github.com/vebholic/oms_frontend/commit/e1c6db4f2ce801241ea444f1f67e0c5f99568bc4))
+* **transferasset:** bug fix ([3e6e925](https://github.com/vebholic/oms_frontend/commit/3e6e92566a4c4b10da45369f027aaa93c3025d6a))
+
 ### [2.14.2](https://github.com/vebholic/oms_frontend/compare/v2.14.1...v2.14.2) (2021-12-06)
 
 ### [2.14.1](https://github.com/vebholic/oms_frontend/compare/v2.14.0...v2.14.1) (2021-12-05)

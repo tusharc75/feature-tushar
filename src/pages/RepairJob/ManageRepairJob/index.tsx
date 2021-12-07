@@ -25,6 +25,7 @@ import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne } from "react-icons/fa";
+import moment from 'moment';
 
 const ManageRepairJob = (props) => {
   const initialRender = useRef(true)
@@ -40,6 +41,8 @@ const ManageRepairJob = (props) => {
   const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [allFields, setAllFields] = useState([]);
+
+  const [disableFieldsIfLoadingTicketIsCreated, setDisableFieldsIfLoadingTicketIsCreated] = useState(false)
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(repairJobData.fields));
@@ -78,13 +81,34 @@ const ManageRepairJob = (props) => {
 
                 // setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
                 setLoading(false);
+
+
+                //  If loading ticket is created, then we need to disable some controls in update dialog
+                axiosInstance().get(`${repairJob.repairJobApi}/${repairJobId}/get-assets`)
+                  .then(({ data: { data } }) => {
+                    let tempProductInventory = data.map(u => ({ ...u, _id: u?.id, productName: u?.product?.optionLabel }))
+
+                    axiosInstance()
+                      .get(`${repairJob.repairJobApi}/${repairJobId}/delivery-ticket`)
+                      .then(({ data }) => {
+                        data.data.map(obj => {
+                          tempProductInventory.map((d, index) => {
+                            if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
+                              tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
+                              tempProductInventory[index]["deliveryTicketId"] = obj?._id
+                            }
+                          })
+                        })
+
+                        setDisableFieldsIfLoadingTicketIsCreated(tempProductInventory.some(s => s["deliveryTicketId"]))
+                      });
+                  });
               }
-            })
-            .catch((error) => {
+            }).catch((error) => {
               toastConfig.setToastConfig(error);
             });
         } else {
-          let initialData = getObjKeys('', fieldsDataForCreate);
+          let initialData = { ...getObjKeys('', fieldsDataForCreate), expectedCompletionDate: "" };
 
           setAllFields(fieldsDataForCreate);
           setRepairJobData({
@@ -119,6 +143,7 @@ const ManageRepairJob = (props) => {
                 _f.required = false
               }
             }
+
 
             if (_f.fieldName === "vendor" || _f.fieldName === "supplierShipTo") {
               if (formValues && formValues["typeOfRepair"] === "External") {
@@ -326,7 +351,6 @@ const ManageRepairJob = (props) => {
                                             type={field.type}
                                             options={field.option}
                                             setFieldValue={(name, value) => {
-                                              // handleValuesChange({ [name]: value });
                                               setFieldValue(name, value);
                                             }}
                                             required={values["typeOfRepair"] === "External"}
@@ -343,7 +367,7 @@ const ManageRepairJob = (props) => {
                                           <FormTypes
                                             repairJobId={repairJobId}
                                             {...field}
-                                            disabled={(!repairJobId && field.disableOnEdit)}
+                                            disabled={disableFieldsIfLoadingTicketIsCreated || (!repairJobId && field.disableOnEdit)}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -352,8 +376,15 @@ const ManageRepairJob = (props) => {
                                             type={field.type}
                                             options={field.option}
                                             setFieldValue={(name, value) => {
-                                              // handleValuesChange({ [name]: value });
                                               setFieldValue(name, value);
+
+                                              if (field.fieldName === 'repairPlant') {
+                                                if (value) {
+                                                  setFieldValue("plantShipTo", field.option.find(d => d.optionValue === value)?.address ?? "");
+                                                } else {
+                                                  setFieldValue("plantShipTo", "");
+                                                }
+                                              }
                                             }}
                                             required={values["typeOfRepair"] === "Internal"}
                                             fullWidth
@@ -377,7 +408,6 @@ const ManageRepairJob = (props) => {
                                           type={field.type}
                                           options={field.option}
                                           setFieldValue={(name, value) => {
-                                            // handleValuesChange({ [name]: value });
                                             setFieldValue(name, value);
                                           }}
                                           required={field.required}
@@ -396,7 +426,7 @@ const ManageRepairJob = (props) => {
                                           ? <FormTypes
                                             repairJobId={repairJobId}
                                             {...field}
-                                            disabled={!repairJobId && field.disableOnEdit}
+                                            disabled={disableFieldsIfLoadingTicketIsCreated || (!repairJobId && field.disableOnEdit)}
                                             values={getValues(values)}
                                             errors={errors}
                                             touched={touched}
@@ -405,19 +435,11 @@ const ManageRepairJob = (props) => {
                                             type={field.type}
                                             options={field.option}
                                             setFieldValue={(name, value) => {
-                                              // handleValuesChange({ [name]: value });
                                               setFieldValue(name, value);
 
-                                              // handleValuesChange({ "vendor": "" });
                                               setFieldValue("vendor", "");
-
-                                              // handleValuesChange({ "supplierShipTo": "" });
                                               setFieldValue("supplierShipTo", "");
-
-                                              // handleValuesChange({ "repairPlant": "" });
                                               setFieldValue("repairPlant", "");
-
-                                              // handleValuesChange({ "plantShipTo": "" });
                                               setFieldValue("plantShipTo", "");
                                             }}
                                             required={field.required}
@@ -425,34 +447,116 @@ const ManageRepairJob = (props) => {
                                             isTooltip={field?.isTooltip || false}
                                             tooltipMessage={field?.tooltipMessage}
                                             size="small"
-                                          /> : <FormTypes
-                                            repairJobId={repairJobId}
-                                            {...field}
-                                            disabled={(!repairJobId && field.disableOnEdit)}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={field.option}
-                                            setFieldValue={(name, value) => {
-                                              // handleValuesChange({ [name]: value });
-                                              setFieldValue(name, value);
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                            imageOrFileUploadCompletePercentage={
-                                              ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                                ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
-                                                : null
-                                            }
-                                          />}
+                                          /> : field.fieldName === "startDate"
+                                            ? <FormTypes
+                                              repairJobId={repairJobId}
+                                              {...field}
+                                              disabled={(!repairJobId && field.disableOnEdit)}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={field.option}
+                                              setFieldValue={(name, value) => {
+                                                setFieldValue(name, value);
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              size="small"
+                                              minDate={new Date()}
+                                              maxDate={values["expectedCompletionDate"] ? moment(values["expectedCompletionDate"]) : moment().add(5, "years")}
+                                            /> : field.fieldName === "expectedCompletionDate"
+                                              ? <FormTypes
+                                                repairJobId={repairJobId}
+                                                {...field}
+                                                disabled={(!repairJobId && field.disableOnEdit)}
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                options={field.option}
+                                                setFieldValue={(name, value) => {
+                                                  setFieldValue(name, value);
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field?.isTooltip || false}
+                                                tooltipMessage={field?.tooltipMessage}
+                                                size="small"
+                                                minDate={values["startDate"]}
+                                              /> : field.fieldName === "plant"
+                                                ? <FormTypes
+                                                  repairJobId={repairJobId}
+                                                  {...field}
+                                                  disabled={disableFieldsIfLoadingTicketIsCreated || (!repairJobId && field.disableOnEdit)}
+                                                  values={values}
+                                                  errors={errors}
+                                                  touched={touched}
+                                                  label={field.fieldLabel}
+                                                  name={field.fieldName}
+                                                  type={field.type}
+                                                  options={field.option}
+                                                  setFieldValue={(name, value) => {
+                                                    setFieldValue(name, value);
+                                                  }}
+                                                  required={field.required}
+                                                  fullWidth
+                                                  isTooltip={field?.isTooltip || false}
+                                                  tooltipMessage={field?.tooltipMessage}
+                                                  size="small"
+                                                /> : field.fieldName === "repairPerson"
+                                                  ? <FormTypes
+                                                    repairJobId={repairJobId}
+                                                    {...field}
+                                                    disabled={disableFieldsIfLoadingTicketIsCreated || (!repairJobId && field.disableOnEdit)}
+                                                    values={values}
+                                                    errors={errors}
+                                                    touched={touched}
+                                                    label={field.fieldLabel}
+                                                    name={field.fieldName}
+                                                    type={field.type}
+                                                    options={field.option}
+                                                    setFieldValue={(name, value) => {
+                                                      setFieldValue(name, value);
+                                                    }}
+                                                    required={field.required}
+                                                    fullWidth
+                                                    isTooltip={field?.isTooltip || false}
+                                                    tooltipMessage={field?.tooltipMessage}
+                                                    size="small"
+                                                  /> : <FormTypes
+                                                    repairJobId={repairJobId}
+                                                    {...field}
+                                                    disabled={(!repairJobId && field.disableOnEdit)}
+                                                    values={values}
+                                                    errors={errors}
+                                                    touched={touched}
+                                                    label={field.fieldLabel}
+                                                    name={field.fieldName}
+                                                    type={field.type}
+                                                    options={field.option}
+                                                    setFieldValue={(name, value) => {
+                                                      setFieldValue(name, value);
+                                                    }}
+                                                    required={field.required}
+                                                    fullWidth
+                                                    isTooltip={field?.isTooltip || false}
+                                                    tooltipMessage={field?.tooltipMessage}
+                                                    size="small"
+                                                    imageOrFileUploadCompletePercentage={
+                                                      ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                                        ? (completePercentage) => {
+                                                          setUploadingImageOrFileProgress(completePercentage);
+                                                        }
+                                                        : null
+                                                    }
+                                                  />}
 
                                     </Grid>
                                   )}
