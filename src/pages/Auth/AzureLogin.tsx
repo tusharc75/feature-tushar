@@ -1,20 +1,13 @@
-import { useState, useContext, useEffect } from "react";
-import { useData } from "../../StateProvider/Provider";
-import { SET_USER, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
-import axiosInstance from "./../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { useState, useContext, useEffect } from 'react';
+import { useData } from '../../StateProvider/Provider';
+import { SET_USER, SET_SELECTED_ENTITY, SET_GRID_METADATA } from '../../StateProvider/actionTypes';
+import axiosInstance from './../../axios/axiosInstance';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
-import {
-  AuthenticatedTemplate,
-  UnauthenticatedTemplate,
-  useAccount,
-  useMsal,
-} from "@azure/msal-react";
-import { isEmpty } from "lodash";
-import getAzureAcessToken from "../../components/Azure/getAzureAccessToken";
-import LogIn from "../../components/Azure/LogIn";
-
-
+import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
+import { isEmpty } from 'lodash';
+import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
+import LogIn from '../../components/Azure/LogIn';
 
 const AzureLogin = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -24,23 +17,28 @@ const AzureLogin = () => {
   const [counter, setCounter] = useState(0);
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
   useEffect(() => {
-
     if (!isEmpty(account)) {
       (async () => {
         try {
           const graphToken = await getAzureAcessToken(instance);
-          const res = await axiosInstance().post("/user/login/azure", {
-            "graph-token": graphToken,
+          const res = await axiosInstance().post('/user/login/azure', {
+            'graph-token': graphToken
           });
-          const { data } = res.data;
-          localStorage.setItem("token", data.token);
-          dispatch({ type: SET_USER, payload: data });
-          if (data?.role?.selectedEntity?._id) {
-            dispatch({
-              type: SET_SELECTED_ENTITY,
-              payload: data.role.selectedEntity._id,
+          axiosInstance()
+            .get(`user/meta-grid/${res.data.data?.user?._id}`)
+            .then(({ data: { data } }) => {
+              let tempMetaData = JSON.stringify(data?.gridMetaData);
+              localStorage.setItem('gridMetaData', tempMetaData);
+              dispatch({ type: SET_GRID_METADATA, payload: data?.gridMetaData });
+              localStorage.setItem('token', res.data.data.token);
+              dispatch({ type: SET_USER, payload: res.data.data });
+              if (res.data.data?.role?.selectedEntity?._id) {
+                dispatch({
+                  type: SET_SELECTED_ENTITY,
+                  payload: res.data.data.role.selectedEntity._id
+                });
+              }
             });
-          }
         } catch (e) {
           setCounter(10);
           setInvalidAzureLogin(true);
@@ -62,19 +60,12 @@ const AzureLogin = () => {
 
   return (
     <div>
-        <AuthenticatedTemplate>
-            {invalidAzureLogin ? (
-                <span>
-                 Not authorized loging out in {counter}
-                </span>
-            ) : (
-                <span>Logging In ... </span>
-            )}
-        </AuthenticatedTemplate>
-        <UnauthenticatedTemplate>
-              <LogIn></LogIn>
-        </UnauthenticatedTemplate>
-     
+      <AuthenticatedTemplate>
+        {invalidAzureLogin ? <span>Not authorized loging out in {counter}</span> : <span>Logging In ... </span>}
+      </AuthenticatedTemplate>
+      <UnauthenticatedTemplate>
+        <LogIn></LogIn>
+      </UnauthenticatedTemplate>
     </div>
   );
 };
