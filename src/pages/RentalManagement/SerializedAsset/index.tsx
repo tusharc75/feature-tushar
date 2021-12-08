@@ -155,10 +155,17 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           const child: any = [...data.material.filter((e) => e.parentId === parent._id)];
           child.forEach((_child, j) => {
             _child.detail = `${(i + 1)}.${(j + 1)} - ${_child.productDetail?.productName}`
+            _child.qty = _child.qty * parent.qty
             const subRows = []
             const inventory = data.inventory.filter((e) => e._id === _child._id);
             inventory?.forEach((_inventory, l) => {
-              subRows.push({ ..._inventory, detail: `${(i + 1)}.${(j + 1)}.${(l + 1)} - ${_inventory.inventoryDetail?.assetNumber}`, type: "asset", _id: _inventory.inventory, isValid: true })
+              subRows.push({
+                ..._inventory,
+                detail: `${(i + 1)}.${(j + 1)}.${(l + 1)} - ${_inventory.inventoryDetail?.assetNumber}`,
+                type: "asset",
+                _id: _inventory.inventory,
+                isValid: true
+              })
             })
             _child.subRows = subRows;
             _child.isValid = _child?.qty === subRows?.length ? true : false;
@@ -201,16 +208,33 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
 
   const handleAddSerializedAsset = (assets) => {
     let data = [];
-    assets.forEach(d => {
-      const result = selectedProducts.find(f => d.product?.optionValue === f.id);
-      if (result) {
-        let obj: any = {};
-        obj._id = result._id
-        obj.inventory = d.id;
-        obj.product = result.materialId
-        data.push(obj)
+    selectedProducts?.forEach((e: any) => {
+      if (e.type === "product") {
+        let qty = e.qty - e.subRows.length;
+        while (qty) {
+          const result = assets.filter(f => f.productId === e.materialId && !f.isCounted);
+          if (result.length) {
+            let obj: any = {};
+            obj._id = e._id
+            obj.inventory = result[0].id;
+            obj.product = e.materialId
+            data.push(obj)
+            result[0].isCounted = true;
+          }
+          qty--;
+        }
       }
     })
+    // assets.forEach(d => {
+    //   const result = selectedProducts.find(f => d.productId === f.id);
+    //   if (result) {
+    //     let obj: any = {};
+    //     obj._id = result._id
+    //     obj.inventory = d.id;
+    //     obj.product = result.materialId
+    //     data.push(obj)
+    //   }
+    // })
     if (data.length) {
       setAdding(true)
       axiosInstance().post(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`, { "products": data })
@@ -350,7 +374,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           setAddSerializedAssetDialog(false);
         }}
         isAdding={isAdding}
-        selectedProducts={[...selectedProducts.filter(p => p.type === "product").map(m => { return { ...m, _id: m.materialId, productName: m.productDetail?.productName } })]}
+        selectedProducts={[...selectedProducts.filter(p => p.type === "product").map(m => { return { ...m, _id: m.materialId, id: m.materialId, productName: m.productDetail?.productName } })]}
       />
     }
     {showConfirmBox && (
