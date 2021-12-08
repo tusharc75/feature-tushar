@@ -42,7 +42,7 @@ const TransferAssetDetailPage = () => {
   const [headingLabel, setHeadingLabel] = useState('');
   const [transferType, setType] = useState(null);
   const [tabValue, setTabValue] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isDeleting, setDeleting] = useState(false);
   const [transferAssetData, setTransferAssetData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -129,7 +129,6 @@ const TransferAssetDetailPage = () => {
   };
 
   const fetchTransferAssetData = () => {
-    setLoading(true);
     axiosInstance()
       .get(`${routes.transferAsset.path}/${id}`)
       .then(({ data: { data } }) => {
@@ -221,10 +220,9 @@ const TransferAssetDetailPage = () => {
 
   const updateTransferStatus = (status) => {
     axiosInstance()
-      .put(`${routes.transferAsset.path}/${id}`, {
-        ...transferAssetData,
+      .put(`${routes.transferAsset.path}/${id}/status`, {
         status
-      }).then(({ data }) => console.log(data))
+      }).then(() => fetchTransferAssetData())
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -359,6 +357,7 @@ const TransferAssetDetailPage = () => {
                       setNextStep={setNextStep}
                       ownerId={transferAssetData?.createdBy.user._id}
                       updateTransferStatus={updateTransferStatus}
+                      transferAssetData={transferAssetData}
                     />
                   )}
                   {currentStep === 1 && (

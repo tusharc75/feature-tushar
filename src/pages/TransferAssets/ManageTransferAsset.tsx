@@ -372,7 +372,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   <FormTypes
                                     isNew={Boolean(transferAssetId)}
                                     {...field}
-                                    disabled={(Boolean(transferAssetId) && field.disableOnEdit) || (field.fieldName === 'status' && true)}
+                                    disabled={(Boolean(transferAssetId) && field.disableOnEdit) || (field.fieldName === 'status' && true) || (field.fieldName === 'transferAssetNumber' && true)}
                                     values={values}
                                     errors={errors}
                                     touched={touched}

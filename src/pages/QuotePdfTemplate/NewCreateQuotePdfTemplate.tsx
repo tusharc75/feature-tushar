@@ -111,7 +111,7 @@ export default function NewCreateQuotePdfTemplate() {
             let type: any = formValues.type;
             type = type.split("")
 
-            if (type[type.length - 1] === "s") {
+            if (type[type.length - 1] === "s" && type.join("") !== "Quotes") {
                 type.pop();
             }
 
@@ -686,6 +686,7 @@ export default function NewCreateQuotePdfTemplate() {
                             imageOrFileUploadCompletePercentage={(
                                 completePercentage
                             ) => null}
+                            variables={variables}
                             showVariableDropdown={true}
                         />
                     </Box>
@@ -708,6 +709,7 @@ export default function NewCreateQuotePdfTemplate() {
                             imageOrFileUploadCompletePercentage={(
                                 completePercentage
                             ) => null}
+                            variables={variables}
                             showVariableDropdown={true}
                         />
                     </Box>
@@ -732,6 +734,7 @@ export default function NewCreateQuotePdfTemplate() {
                                 completePercentage
                             ) => null}
                             showVariableDropdown={true}
+                            variables={variables}
                             isCheckHeight={true}
                         />
                     </Box>
