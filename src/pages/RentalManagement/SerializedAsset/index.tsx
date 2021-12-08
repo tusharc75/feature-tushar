@@ -202,7 +202,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const handleAddSerializedAsset = (assets) => {
     let data = [];
     assets.forEach(d => {
-      const result = selectedProducts.find(f => d.product?.optionValue === f.materialId);
+      const result = selectedProducts.find(f => d.product?.optionValue === f.id);
       if (result) {
         let obj: any = {};
         obj._id = result._id
