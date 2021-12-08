@@ -13,7 +13,8 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import {
   gridLoadingTimeout, prepareDataForGrid, productInventory, repairJob, sidebarResource,
-  repairJobProcessSteps
+  repairJobProcessSteps,
+  repairJobStatus
 } from '../../constants/helpers';
 import ManageRepairJob from './ManageRepairJob';
 import DeleteButton from '../../components/Helpers/DeleteButton';
@@ -144,14 +145,12 @@ const RepairJobDetails = () => {
           type: "initialize", data: [], count: 0
         });
 
-
         let rows = data.map((u, index) => {
 
           // let finalObject = prepareDataForGrid(u);
           // finalObject["canDelete"] = permissions.rentalJob.isDelete;
           // finalObject["isChecked"] = step1SelectedRecords.some(s => s._id === u._id);
           // finalObject["allowedToEdit"] = permissions.rentalJob.isUpdate;
-
 
           u["_id"] = u["id"];
           u["index"] = `${index + 1}.0`;
@@ -160,8 +159,6 @@ const RepairJobDetails = () => {
         });
 
         let foundBlankValue = false;
-
-
 
         if (passedColumns) {
 
@@ -268,6 +265,7 @@ const RepairJobDetails = () => {
 
   const fetchRepairJobData = () => {
     setShowLoading(true);
+
     axiosInstance()
       .get(`${routes.repairJob.path}/${id}`)
       .then(({ data: { data } }) => {
@@ -316,6 +314,10 @@ const RepairJobDetails = () => {
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
+
+    if (newValue === 0) {
+      fetchRepairJobData();
+    }
   };
 
   const onNextButtonClick = (oldStep, nextStep) => {
@@ -324,7 +326,10 @@ const RepairJobDetails = () => {
         "processStatus": repairJobProcessSteps[nextStep]
       })
       .then(() => {
-
+        //  Update status to Complete when finished steps
+        if (repairJobProcessSteps[nextStep] === repairJobProcessSteps[repairJobProcessSteps.length - 1]) {
+          axiosInstance().put(`${repairJob.repairJobApi}/${id}/status`, { "status": repairJobStatus[2] })
+        }
       }).catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -623,7 +628,6 @@ const RepairJobDetails = () => {
         )
       }
 
-
       {openUpdateDialog && (
         <ManageRepairJob
           open={openUpdateDialog}
@@ -656,6 +660,12 @@ const RepairJobDetails = () => {
                   type: "success",
                   message: data.message,
                 });
+
+                //  Update status from new to In Progress when assets are created
+                if (repairJobData.status === repairJobStatus[0]) {
+                  axiosInstance().put(`${repairJob.repairJobApi}/${id}/status`, { "status": repairJobStatus[1] })
+                }
+
               }).catch((error) => {
                 setAddSerializedAssetDialog(false)
                 setIsAdding(false)
