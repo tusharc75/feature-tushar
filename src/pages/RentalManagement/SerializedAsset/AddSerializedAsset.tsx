@@ -32,7 +32,6 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     const [columns, setColumns] = useState([])
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-
     const { state: { permissions } }: any = useData();
 
     useEffect(() => {
@@ -44,31 +43,29 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     }, [])
 
     const fetchGridColumns = () => {
-        axiosInstance()
-            .get("/field?resource=Product Inventory")
-            .then(({ data: { data } }) => {
-                let columns = []
-                let rendererNames = []
-                data.forEach(o => {
-                    if (o?.fieldData?.fieldName === "serialNumber") {
-                        o.fieldData.primaryField = true
-                    }
-                    let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
-                    if (currentColumn !== null) {
-                        columns = [...columns, currentColumn?.columnData]
-                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                            rendererNames.push(currentColumn?.rendererName)
-                        }
-                    }
-                })
-                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-                tempFrameworkComponent = {
-                    ...tempFrameworkComponent,
+        axiosInstance().get("/field?resource=Product Inventory").then(({ data: { data } }) => {
+            let columns = []
+            let rendererNames = []
+            data.forEach(o => {
+                if (o?.fieldData?.fieldName === "serialNumber") {
+                    o.fieldData.primaryField = true
                 }
-                setFrameWorkComponent({ ...tempFrameworkComponent })
-                columns = [...columns, ...getStaticFields()]
-                setColumns([...columns])
+                let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
+                if (currentColumn !== null) {
+                    columns = [...columns, currentColumn?.columnData]
+                    if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                        rendererNames.push(currentColumn?.rendererName)
+                    }
+                }
             })
+            let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+            tempFrameworkComponent = {
+                ...tempFrameworkComponent,
+            }
+            setFrameWorkComponent({ ...tempFrameworkComponent })
+            columns = [...columns, ...getStaticFields()]
+            setColumns([...columns])
+        })
     }
 
     useEffect(() => {
@@ -100,15 +97,15 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
             tempProducts = []
             selectedProducts.map(d => {
                 if (d.productName) {
-                    tempProducts.push({ "id": d._id, "name": d.productName, "qty": d?.qty - alreadyStoredSelectedRecords.filter(obj => obj.product.optionValue === d._id).length })
+                    tempProducts.push({ "id": d._id, "name": d.productName, "qty": d?.qty - alreadyStoredSelectedRecords.filter(obj => obj.productId === d._id).length })
                 }
                 if (d.packageName && d?.products?.length > 0) {
                     d.products.map(u => {
                         if (tempProducts.find(obj => obj.id === d?.productDetail?._id)) {
-                            tempProducts.find(obj => obj.id === d?.productDetail?._id).qty = u?.qty * d?.qty + tempProducts.find(obj => obj.id === d?.productDetail?._id).qty - alreadyStoredSelectedRecords.filter(obj => obj.product.optionValue === u?.productDetail?._id).length
+                            tempProducts.find(obj => obj.id === d?.productDetail?._id).qty = u?.qty * d?.qty + tempProducts.find(obj => obj.id === d?.productDetail?._id).qty - alreadyStoredSelectedRecords.filter(obj => obj.productId === u?.productDetail?._id).length
                         }
                         else {
-                            tempProducts.push({ "id": u?.productDetail?._id, "name": u?.productDetail?.productName || "", "qty": u?.qty * d?.qty - alreadyStoredSelectedRecords.filter(obj => obj.product.optionValue === u?.productDetail?._id).length })
+                            tempProducts.push({ "id": u?.productDetail?._id, "name": u?.productDetail?.productName || "", "qty": u?.qty * d?.qty - alreadyStoredSelectedRecords.filter(obj => obj.productId === u?.productDetail?._id).length })
                         }
                     })
                 }
@@ -129,16 +126,13 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
 
     const fetchProductInventory = () => {
         dispatch({ type: "loading", loading: true });
-
         if (gridApi) {
             gridApi.setRowData([]);
         }
-
         let queryString = getQueryString();
         if (selectedProducts.length > 0) {
             queryString = `${queryString}&filterById=${JSON.stringify(selectedProducts.map(m => { return { "field": "product", "term": m?._id ?? "" } }))}&filterByIdType=or`
         }
-
         axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
             data.data = data.data
                 // ?.filter(u => (u?.status === "Available" || u?.status === "New")
@@ -148,13 +142,10 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                     let finalObject = prepareDataForGrid(u);
                     return finalObject
                 });
-
-
             dispatch({ type: "initialize", data: data.data, count: data.count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
-
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
@@ -237,8 +228,8 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         }
         return null;
     };
-    console.log(selectedProducts)
-    console.log(serializedProducts)
+
+    console.log([...getLocalStorageArrayData(localStorageSelectedRecords)])
     return (<Fragment>
         {(<Dialog
             fullScreen={true}
@@ -301,10 +292,8 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                             allowAction={false}
                             loading={loading}
                             customGridOptions={{ getRowStyle: getRowStyleScheduled }}
-                            // selectedRecords={selectedRecords}
                             renderedFrom={addSerializedAssetsRenderedFrom}
                             showOnlyShowFilteredRecordSwitch={true}
-                        // allowHeaderSelection={false}
                         />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </div>
