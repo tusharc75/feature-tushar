@@ -31,22 +31,27 @@ import Steps from "./Steps";
 import { FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms } from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
-
+import queryString from 'query-string';
+import { isMobile } from "react-device-detect";
 import Product from "./Product";
 import Service from "./Service";
 import IssuePo from "./IssuePo";
 import ReceivingAsset from "./ReceivingAsset";
+import { GrStatusInfo } from "react-icons/all";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
-const purchaseOrderSteps = ["Add Product", "Add Services", "Issue PO", "Receiving Asset"]
+const purchaseOrderSteps = ["Add Product", "Add Services", "Issue PO", "Receiving Asset", "Ready to Invoice"]
 
 const PurchaseOrderDetailsPage = () => {
-
     const toastConfig = useContext(CustomToastContext);
     const { id } = useParams();
     const history = useHistory();
-    const { state: { user, permissions } }: any = useData();
+    const parsed = queryString.parse(history.location.search);
+    const { openEdit } = parsed;
+    const {
+        state: { user, permissions }
+    }: any = useData();
     const [headingLbl, setHeadingLbl] = useState("");
     const [loadingPurchaseOrder, setLoadingPurchaseOrder] = useState(false);
     const [purchaseOrderData, setPurchaseOrderData] = useState(null);
@@ -57,13 +62,14 @@ const PurchaseOrderDetailsPage = () => {
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
     const [currencySymbol, setCurrencySymbol] = useState(null);
     const [updateLoading, setUpdateLoading] = useState(false)
-    const [anchorEl, setAnchorEl] = useState(null);
     const [statusOptions, setStatusOptions] = useState([])
     const [purchaseOrderProduct, setPurchaseOrderProduct] = useState([])
+    const [allowedToEdit, setAllowedToEdit] = useState(false);
     const [currentStepDisable, setCurrentStepDisable] = useState(false)
     const [currentStep, setCurrentStep] = useState(0);
     const [downlodingFile, setDownlodingFile] = useState(false)
     const [pdfFileBase64, setPdfFileBase64] = useState(null);
+    const [anchorEl, setAnchorEl] = useState(null);
 
     const [tabValue, setTabValue] = useState(0);
 
@@ -86,8 +92,9 @@ const PurchaseOrderDetailsPage = () => {
     }, [id]);
 
     useEffect(() => {
-        if (currentStep > -1) {
+        if (currentStep > -1 && purchaseOrderData && purchaseOrderData?.processStatus !== purchaseOrderSteps[currentStep]) {
             axiosInstance().put(`${purchaseOrder.api}/${id}/process-status`, { "processStatus": purchaseOrderSteps[currentStep] }).then(({ data }) => {
+                fetchPurchaseOrderData()
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
             });
@@ -115,8 +122,8 @@ const PurchaseOrderDetailsPage = () => {
                     setDownlodingFile(false);
                 })
         }
-        if (currentStep === 1 && purchaseOrderData?.status !== "In Process") { handleUpdateData({ "status": "In Process" }) }
-        if (currentStep === 3 && purchaseOrderData?.status !== "Issued") { handleUpdateData({ "status": "Issued" }) }
+        if (currentStep === 1 && purchaseOrderData?.status === "New") { handleUpdateData({ "status": "In Process" }) }
+        if (currentStep === 3 && purchaseOrderData?.status === "In Process") { handleUpdateData({ "status": "Issued" }) }
     }, [currentStep]);
 
     const handleMainPoints = (data) => {
@@ -132,6 +139,9 @@ const PurchaseOrderDetailsPage = () => {
                 data: { data },
             } = await axiosInstance().get(`${purchaseOrder.api}/${id}`);
 
+            const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+            setAllowedToEdit(isAllowedToEdit);
+
             handleMainPoints(data);
             setHeadingLbl(`${data?.purchaseOrderNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
             setCustomizedRoutes([routes.purchaseOrder,
@@ -143,6 +153,14 @@ const PurchaseOrderDetailsPage = () => {
                     (d) => d.currencyCode === data["currency"]
                 )?.symbolNative
             );
+
+            if (isAllowedToEdit && openEdit === 'true') {
+                setOpenUpdateDialog(true);
+                const params = new URLSearchParams();
+                params.delete('openEdit');
+                history.push({ search: params.toString() });
+            }
+
             setLoadingPurchaseOrder(false);
         } catch (error) {
             toastConfig.setToastConfig(error);
@@ -189,12 +207,13 @@ const PurchaseOrderDetailsPage = () => {
     const closeActions = () => {
         setAnchorEl(null);
     };
+
     const handleStatusChange = o => {
         handleUpdateData({ status: o.optionValue })
     }
 
     const handleUpdateData = (obj) => {
-        if (obj.status) {
+        if (obj.status && purchaseOrderData?.status !== obj.status) {
             const fieldsDataForUpdate = purchaseOrderFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             let values = getObjKeysWithValues(purchaseOrderData, fieldsDataForUpdate)
             values["status"] = obj.status
@@ -315,18 +334,30 @@ const PurchaseOrderDetailsPage = () => {
                                     mainPoints={mainPoints}
                                     showHeading={true}
                                 >
-                                    {(permissions?.purchaseOrder?.isUpdate &&
+                                    {permissions?.purchaseOrder?.isUpdate && (
+                                        <>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                size="small"
+                                                onClick={handleOpenUpdateDialog}
+                                            >
+                                                Edit
+                                            </Button>
+                                        </>
+                                    )}
+                                    {permissions?.purchaseOrder?.isUpdate && purchaseOrderData?.status === "Ready to Invoice" && (
                                         <>
                                             <Button
                                                 variant="outlined"
                                                 color="default"
                                                 size="small"
                                                 onClick={openActions}
-                                                disabled={updateLoading || purchaseOrderData?.status === "Received"}
+                                                disabled={updateLoading}
                                                 aria-controls="action-menu"
-                                                endIcon={<ExpandMore />}
+                                                endIcon={isMobile ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
                                             >
-                                                Change Status
+                                                {isMobile ? <GrStatusInfo size={20} /> : "Change Status"}
                                             </Button>
                                             <Menu
                                                 anchorEl={anchorEl}
@@ -340,30 +371,17 @@ const PurchaseOrderDetailsPage = () => {
                                                 open={Boolean(anchorEl)}
                                                 onClose={closeActions}>
                                                 {
-                                                    statusOptions.map(o => {
+                                                    statusOptions.map((o, index) => {
                                                         return <MenuItem
+                                                            disabled={index <= statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice")}
                                                             onClick={() => {
                                                                 closeActions()
                                                                 handleStatusChange(o)
                                                             }}
-                                                            value={o}
-                                                            disabled={o.optionValue !== "Issued"}
-                                                        >{o?.optionLabel}</MenuItem>
+                                                            value={o}>{o?.optionLabel}</MenuItem>
                                                     })
                                                 }
                                             </Menu>
-                                        </>
-                                    )}
-                                    {permissions?.purchaseOrder?.isUpdate && (
-                                        <>
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                size="small"
-                                                onClick={handleOpenUpdateDialog}
-                                            >
-                                                Edit
-                                            </Button>
                                         </>
                                     )}
 
@@ -447,7 +465,7 @@ const PurchaseOrderDetailsPage = () => {
                                                 <Steps
                                                     // className={styles.steps_box}
                                                     isNextStep={!Boolean(purchaseOrderProduct.length) || currentStepDisable}
-                                                    steps={purchaseOrderSteps.slice(0, 5)}
+                                                    steps={purchaseOrderSteps.slice(0, 4)}
                                                     currentStep={currentStep}
                                                     setCurrentStep={setCurrentStep}
                                                 />
@@ -478,12 +496,14 @@ const PurchaseOrderDetailsPage = () => {
                                                         pdfFileBase64={pdfFileBase64}
                                                     />
                                                 }
-                                                {currentStep === 3 &&
+                                                {(currentStep === 3 || currentStep === 4) &&
                                                     <ReceivingAsset
                                                         currencySymbol={currencySymbol}
                                                         purchaseOrderData={purchaseOrderData}
-                                                        purchaseOrderProduct={purchaseOrderProduct}
-                                                        handleUpdateData={handleUpdateData} />
+                                                        setCurrentStep={setCurrentStep}
+                                                        handleUpdateData={handleUpdateData}
+                                                        statusOptions={statusOptions}
+                                                    />
                                                 }
                                             </Paper>
                                         </>

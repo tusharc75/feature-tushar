@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Fragment, useContext, useReducer } from 'react';
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
@@ -16,7 +16,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomContainer from '../../components/CustomContainer';
 import ManageWarehouse from './ManageWarehouse';
 import routes from '../../components/Helpers/Routes';
-import { ExpandMore } from '@material-ui/icons';
+import {AddOutlined, ExpandMore} from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../constants/helpers';
@@ -32,9 +32,15 @@ import useColumns, {getStaticFields, getFrameworkComponents } from "../../consta
 import { prepareDataForGrid } from "../../constants/helpers"
 import { useLocation } from "react-router-dom";
 import queryString from "query-string";
+import { MdAccountCircle } from "react-icons/md";
+import {AiFillCrown, MdAdd} from "react-icons/all";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile } from 'react-device-detect';
+import { useHistory } from 'react-router-dom';
 
 const AddressResource = () => {
-  const location = useLocation()
+  const location = useLocation();
+  const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, user, selectedEntity }
@@ -57,7 +63,9 @@ const AddressResource = () => {
   const [warehouseId, setWarehouseId] = useState("")
   const [entities, setEntities] = useState([])
   const [showUpdateWarningConfirmBox, setShowUpdateWarningConfirmBox] = useState(false)
-  const [columns, setColumns] = useState([])
+  const [columns, setColumns] = useState([
+
+  ])
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
 
 
@@ -65,7 +73,11 @@ const AddressResource = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+  const [isAllChecked, setIsAllChecked] = useState(false);
+  const [clonedData, setClonedData] = useState([])
+  const localStorageSelectedRecords = "warehouse_selected";
+
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('addressResourcePage'));
@@ -109,7 +121,7 @@ const AddressResource = () => {
         data.forEach(o => {
           if (o?.fieldData?.primaryField === true) {
             columns = [...columns,
-            { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }]
+            { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, primaryField: true, show: true, disabled: true, cellRenderer: 'nameRenderer' }]
           }
           else {
             let currentColumn = getColumnData(routes.warehouse.title, o?.fieldData, routes.warehouse.path)
@@ -147,8 +159,27 @@ const AddressResource = () => {
       .get(`/warehouse${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          return prepareDataForGrid(u, user);
+          let finalObject = prepareDataForGrid(u,user);
+          finalObject["canDelete"] = warehousePermissions.isDelete;
+          finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+          finalObject["allowedToEdit"] = warehousePermissions.isUpdate;
+
+          return finalObject
         });
+
+        setIsAllChecked(false);
+        setClonedData(data);
+        if (appendRows) {
+          dispatch({
+            type: "initialize", data: [...dataRows, ...rows],
+            count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+          });
+        } else {
+          dispatch({
+            type: "initialize", data: rows, count: count,
+            selectedRecords: rows.filter(f => f.isChecked === true)
+          });
+        }
 
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
@@ -168,22 +199,22 @@ const AddressResource = () => {
   const NameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
       <Link to={`${routes.warehouseDetail.path}/${params.data._id}`} title={params.value}>
-      <span
-        className="link"
-        onClick={() => {
-          if (params.data?.isAllowedToUpdate) {
-            setAddressResource(params.data);
-            setOpen({ open: true, isClone: false });
-          }
-        }}
-      >
-        <CustomRenderCell value={params.value} />
-      </span>
+        <span
+          className="link"
+          onClick={() => {
+            if (params.data?.isAllowedToUpdate) {
+              setAddressResource(params.data);
+              setOpen({ open: true, isClone: false });
+            }
+          }}
+        >
+          <CustomRenderCell value={params.value} />
+        </span>
       </Link>
     </span>
   );
 
- 
+
 
   const ActionsRenderer = (params) => (
     <>
@@ -358,82 +389,98 @@ const AddressResource = () => {
               <FaWarehouse size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.warehouse.title}</span>
             </Grid>
             <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
-              <Box className={styles.filter_side_header} component="div">
-                <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} placeholder={`Search ${routes.warehouse.title}`} />
-                {warehousePermissions.isCreate && (
-                  <Button
-                    className={styles.add_submit_btn}
-                    onClick={() => {
-                      setAddressResource(null);
-                      setOpen({ open: true, isClone: false });
-                    }}
-                    variant="contained"
-                    size="small"
-                    color="primary"
-                    startIcon={<AddIcon />}
-                  >
-                    Add
-                  </Button>
-                )}
-                <Button
-                  className={styles.action_submit_btn}
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  disabled={selectedRecords.length ? false : true}
-                  aria-controls="action-menu"
-                >
-                  Actions <ExpandMore />
-                </Button>
+              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
 
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  {warehousePermissions.isDelete ?
-                    <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                    : null}
-                  {warehousePermissions.isUpdate && (
-                    <MenuItem
-                      disabled={selectedRecords.length === 0}
+                <Grid style={{display: "flex", flex:1}}>
+                  <SearchBox
+                      onSearch={handleSearch}
+                      searchbox={styles.search_box_input}
+                      width={isMobile ? "200px" : "242px"}
+                      style={isMobile ? {flex:1} : {}}
+                      size="small"
+                      value={search}
+                      placeholder={`Search ${routes.warehouse.title}`}
+                  />
+                </Grid>
+
+                <Grid style={{display: "flex" , gap:"5px"}}>
+                  {warehousePermissions.isCreate && (
+                    <Button
                       onClick={() => {
-                        if (selectedRecords.some((d) => d.isUpdate === false)) {
-                          closeActions();
-                          setShowUpdateWarningConfirmBox(true)
-                        } else {
-                          closeActions();
-                          if (selectedRecords.length) {
-                            let entities = []
-                            selectedRecords.map(current => {
-                              if (current?.entity) {
-                                if (current?.entityId) {
-                                  entities.push(current?.entityId)
-                                }
-                                if (current?.restentity) {
-                                  let restEntities = current?.restentity.map(o => o.optionValue)
-                                  entities = [...entities, ...restEntities]
-                                }
-                              }
-                            })
-                            setEntities([...entities])
-                          }
-                          setShowEntityDialog(true)
-                        }
+                        setAddressResource(null);
+                        setOpen({ open: true, isClone: false });
                       }}
+                      variant={isMobile ? "text" : "contained"}
+                      size="small"
+                      color="primary"
+                      className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                      startIcon={isMobile ? null : <AddOutlined />}
                     >
-                      Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
-                    </MenuItem>
+                      {isMobile ? <MdAdd size={23}/> : "Add"}
+                    </Button>
                   )}
-                </Menu>
+
+
+                    <Button
+                        variant={isMobile ? "text" : "contained"}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      disabled={selectedRecords.length ? false : true}
+                      aria-controls="action-menu"
+                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                    >
+                      {isMobile ? "" :  "Actions" } <ExpandMore/>
+                    </Button>
+
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      {warehousePermissions.isDelete ?
+                        <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                        : null}
+                      {warehousePermissions.isUpdate && (
+                        <MenuItem
+                          disabled={selectedRecords.length === 0}
+                          onClick={() => {
+                            if (selectedRecords.some((d) => d.isUpdate === false)) {
+                              closeActions();
+                              setShowUpdateWarningConfirmBox(true)
+                            } else {
+                              closeActions();
+                              if (selectedRecords.length) {
+                                let entities = []
+                                selectedRecords.map(current => {
+                                  if (current?.entity) {
+                                    if (current?.entityId) {
+                                      entities.push(current?.entityId)
+                                    }
+                                    if (current?.restentity) {
+                                      let restEntities = current?.restentity.map(o => o.optionValue)
+                                      entities = [...entities, ...restEntities]
+                                    }
+                                  }
+                                })
+                                setEntities([...entities])
+                              }
+                              setShowEntityDialog(true)
+                            }
+                          }}
+                        >
+                          Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
+                        </MenuItem>
+                      )}
+                    </Menu>
+                </Grid>
               </Box>
             </Grid>
           </Grid>
@@ -441,7 +488,44 @@ const AddressResource = () => {
 
         {
           Object.keys(frameWorkComponent).length > 0 ?
-            <CustomAgGrid
+            isMobile ? <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={permissions.warehouse}
+              primaryField={columns?.find(d => d.field)}
+              onClick={(data) => {
+                history.push(`${routes.warehouseDetail.path}/${data._id}`)
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(data) => {
+                history.push(`${routes.warehouseDetail.path}/${data._id}?openEdit=true`)
+              }}
+              extraParamsToCheckDelete={true}
+              onDelete={(data) => {
+                setDeleteRecord(data);
+                setShowDeleteConfirmBox(true);
+              }}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              additionalDetails={[
+
+              ]}
+              chips={[
+                {
+                  label: "Storage Type",
+                  field: "storageType",
+                },
+
+              ]}
+              owerCollaboratorInitialsOrImages=""
+              onCreate={false}
+              showClone={false}
+              onClone={() => { }}
+              renderedFrom={"warehouse"}
+            /> : <CustomAgGrid
               columns={columns}
               dataRows={dataRows}
               frameworkComponents={frameWorkComponent}

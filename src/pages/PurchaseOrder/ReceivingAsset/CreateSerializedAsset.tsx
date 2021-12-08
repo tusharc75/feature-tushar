@@ -9,17 +9,20 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { generateUniqueId, packages, product, purchaseOrder } from '../../../constants/helpers';
 import { Formik, Form, FieldArray, Field } from 'formik';
+import { useData } from '../../../StateProvider/Provider';
 
 const CreateSerializedAsset = (props) => {
-    const { purchaseOrderID, onClose, onSuccess, title, productList } = props;
-    const [currencySymbol, setCurrencySymbol] = useState(null);
+    const { purchaseOrderID, onClose, onSuccess, title, productList, handleUpdateData } = props;
+    const [constProductList, setConstProductList] = useState(productList);
     const [wareHouseList, setwareHouseList] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const toastConfig = useContext(CustomToastContext);
-
+    const {
+        state: { selectedEntity },
+    }: any = useData();
     useEffect(() => {
         axiosInstance()
-            .get(`/warehouse?limit=0`)
+            .get(`/warehouse?filterById=[{"field": "entity", "term": "${selectedEntity}"}]`)
             .then(({ data: { data, count } }) => {
                 setwareHouseList(data)
             })
@@ -28,7 +31,7 @@ const CreateSerializedAsset = (props) => {
     const handleCreateSerializedAsset = (values) => {
         let tempArray = values.map(u => ({
             PurchaseOrderId: purchaseOrderID,
-            productMaster: u.product?._id,
+            productMaster: u.productId,
             wareHouse: u.warehouse?._id,
             quantity: parseInt(u?.quantity)
         }))
@@ -41,32 +44,20 @@ const CreateSerializedAsset = (props) => {
                 message: data.message
             });
 
-            values.map(d => {
-                let tempProductArray = {
-                    "qty": parseInt(d.row?.quantity || d.row?.qty) || 0,
-                    "value": parseInt(d.row?.price || d.row?.value) || 0,
-                    "expectedDelivery": d.row?.expectedDelivery || "",
-                    "uom": d.row?.uom || "",
-                    "price": d.row?.price || 0,
-                    "finalPrice": d.row?.finalPrice || 0,
-                    "actualReceived": d.quantity || 0,
-                    "billed": d.row?.billed || 0,
-                    "taxSchedule": d.row?.taxSchedule || "",
-                    "tax": d.row?.tax || 0,
-                    "taxPerUnit": d.row?.taxPerUnit || 0,
-                    "totalTax": d.row?.totalTax || 0
-                }
-
-                axiosInstance().post(`${purchaseOrder.api}/${purchaseOrderID}/order-details/update?orderId=${d.row?._id}`, tempProductArray)
-                    .then(() => {
-
-                    }).catch((error) => {
-                        toastConfig.setToastConfig(error)
-                    });
-
+            let tempProductArray = values.map(d => {
+                let res;
+                res = d.row
+                res["actualReceived"] = parseInt(d.quantity || 0) + parseInt(constProductList.find(u => u?._id === d?.row?._id)?.actualReceived || 0)
+                return res
             })
 
-            onSuccess()
+            axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderID}/update`, { products: tempProductArray })
+                .then(() => {
+                    handleUpdateData({ "status": "Received" })
+                    onSuccess()
+                }).catch((error) => {
+                    toastConfig.setToastConfig(error)
+                });
         }).catch((error) => {
             toastConfig.setToastConfig(error)
             setIsSubmitting(false);
@@ -74,11 +65,26 @@ const CreateSerializedAsset = (props) => {
         });
     }
 
+    const validate = (values) => {
+        let errors = null;
+
+        if (values.length > 0) {
+            values.map(d => {
+                let tempProduct = productList.find(u => u.productId === d.productId)
+                if (tempProduct && d.quantity > (tempProduct.qty - tempProduct.actualReceived)) {
+                    errors = "should be greater"
+                }
+            })
+        }
+
+        return errors;
+    };
+
     return (
         <Dialog open fullWidth maxWidth="md" onClose={onClose}>
             <CustomDialogHeader title={title} onClose={onClose} />
             <Formik
-                initialValues={{ seriaizedAsset: productList.map(d => ({ "product": d.productId, "warehouse": "", "quantity": d.quantity - d.actualReceived, "row": d })) }}
+                initialValues={{ seriaizedAsset: productList.map(d => ({ "product": d.description, "productId": d.productId, "warehouse": "", "quantity": d.qty - d.actualReceived, "row": d })) }}
                 enableReinitialize={true}
                 onSubmit={() => { }}>
                 {({ values }) => (
@@ -109,8 +115,7 @@ const CreateSerializedAsset = (props) => {
                                                                 <Grid item md={1}> # </Grid>
                                                                 <Grid item md={4}> Product </Grid>
                                                                 <Grid item md={4}> Plants </Grid>
-                                                                <Grid item md={2}> Quantity </Grid>
-                                                                <Grid item md={1}></Grid>
+                                                                <Grid item md={3}> Quantity </Grid>
 
                                                             </Grid>
                                                         </Box>
@@ -139,7 +144,7 @@ const CreateSerializedAsset = (props) => {
                                                                                         value={userVal.product}
                                                                                         options={productList}
                                                                                         disabled
-                                                                                        getOptionLabel={(option: any) => option ? option.productName : ""}
+                                                                                        getOptionLabel={(option: any) => option ? option : ""}
                                                                                         onChange={(_, newValue) => {
                                                                                             arrayHelpers.replace(index, {
                                                                                                 ...values.seriaizedAsset[index],
@@ -162,7 +167,7 @@ const CreateSerializedAsset = (props) => {
                                                                                             style={{ minWidth: 200 }}
                                                                                             value={userVal.warehouse}
                                                                                             options={wareHouseList}
-                                                                                            getOptionLabel={(option: any) => option ? option?.warehouseID || option?.warehouseName : ""}
+                                                                                            getOptionLabel={(option: any) => option ? option?.warehouseID || option?.warehouseName || option?.address : ""}
                                                                                             onChange={(_, newValue) => {
                                                                                                 arrayHelpers.replace(index, {
                                                                                                     ...values.seriaizedAsset[index],
@@ -182,7 +187,7 @@ const CreateSerializedAsset = (props) => {
                                                                                     </Grid>
 
                                                                                 }
-                                                                                <Grid item md={2}>
+                                                                                <Grid item md={3}>
                                                                                     <Field
                                                                                         fullWidth
                                                                                         variant="outlined"
@@ -199,6 +204,9 @@ const CreateSerializedAsset = (props) => {
                                                                                             })
                                                                                         }}
                                                                                     />
+                                                                                    {validate([userVal]) && (
+                                                                                        <span style={{ color: 'red' }}>{`quantity is high`}</span>
+                                                                                    )}
                                                                                 </Grid>
                                                                             </Grid>
                                                                         ))
@@ -223,7 +231,7 @@ const CreateSerializedAsset = (props) => {
                                 Cancel
                             </Button>
                             <Button
-                                onClick={() => { handleCreateSerializedAsset(values.seriaizedAsset) }}
+                                onClick={() => { if (!validate(values.seriaizedAsset)) handleCreateSerializedAsset(values.seriaizedAsset) }}
                                 variant="contained"
                                 disabled={isSubmitting}
                                 color="primary"

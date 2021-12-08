@@ -20,7 +20,10 @@ import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { sidebarResource, prepareDataForGrid } from "../../constants/helpers"
-import useColumns, {getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
+import { isMobile } from "react-device-detect";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { useHistory } from 'react-router-dom';
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
 
 function reducer(state, action) {
   switch (action.type) {
@@ -115,6 +118,7 @@ const intialState = {
 let projectSalesTimeout;
 const ProjectSales: FC = () => {
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
   const {
     state: { user, permissions, selectedEntity },
   }: any = useData();
@@ -146,8 +150,12 @@ const ProjectSales: FC = () => {
     filters,
     sorting,
     selectedRecords,
+    appendRows
   } = state;
   const columnState = JSON.parse(localStorage.getItem("projectSalesPage"));
+  const [isAllChecked, setIsAllChecked] = useState(false);
+  const [clonedData, setClonedData] = useState([])
+  const localStorageSelectedRecords = `${routes.projectSales.title}_selected`;
 
   useEffect(() => {
     fetchGridColumns()
@@ -344,11 +352,48 @@ const ProjectSales: FC = () => {
       axiosInstance()
         .get(`/project-sales${queryString}`)
         .then(({ data: { data, count } }) => {
-          let rows = data.map((project) => ({
-            ...prepareDataForGrid(project, user),
-            isManager: user.user._id === project?.projectManager?.optionValue,
-            isTeamMember: Boolean(data.staticData?.user.find((u) => u._id === user.user._id))
-          }));
+          let rows = data.map((project) => {
+
+            let finalObject = prepareDataForGrid(project, user);
+            finalObject["canDelete"] = finalObject["projectManagerId"] === user?.user._id;
+            finalObject["isChecked"] = selectedRecords.some(s => s._id === project._id);
+            finalObject["allowedToEdit"] = finalObject["projectManagerId"] === user?.user._id;
+
+            finalObject["owerCollaboratorInitialsOrImages"] = [{initials:finalObject["projectManager"]}];
+            return {
+              ...finalObject,
+              isManager: user.user._id === project?.projectManager?.optionValue,
+              isTeamMember: Boolean(data.staticData?.user.find((u) => u._id === user.user._id)),
+            };
+          });
+          setIsAllChecked(false);
+          setClonedData(data)
+          if (appendRows) {
+            dispatch({
+              type: "initialize", data: [...dataRows, ...rows],
+              count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+            });
+          } else {
+            dispatch({
+              type: "initialize", data: rows, count: count,
+              selectedRecords: rows.filter(f => f.isChecked === true)
+            });
+          }
+
+          if (gridApi) {
+            try {
+              let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
+              if (oldSelectedRecords.length > 0) {
+                gridApi.forEachNode(function (node) {
+                  node.setSelected(
+                    oldSelectedRecords.some((o) => o === node.data._id)
+                  );
+                });
+              }
+            } catch (ex) {
+              console.error("Error in getting selected records from local storage")
+            }
+          }
 
           dispatch({ type: "initialize", data: rows, count: count });
           setTimeout(() => {
@@ -487,21 +532,56 @@ const ProjectSales: FC = () => {
 
           {
             Object.keys(frameWorkComponent).length > 0 ?
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                actionWidth={150}
-                page={page}
-                loading={loading}
-                renderedFrom={routes.projectSales.title}
-                refreshGrid={fetchProjects}
-              /> : null
+              isMobile ?
+                <CustomSwipableList
+                  allowSelection={true}
+                  allowSwipe={true}
+                  permissions={permissions?.projectStrategy}
+                  primaryField={columns?.find(d => d.primaryField)}
+                  onClick={(data) => {
+                    history.push(`${routes.projectSalesDetail.path}/${data._id}`)
+                  }}
+                  dataRows={dataRows}
+                  selectedRecords={selectedRecords}
+                  dispatch={dispatch}
+                  onEdit={(data) => {
+                    history.push(`${routes.projectSalesDetail.path}/${data._id}?openEdit=true`)
+                  }}
+                  extraParamsToCheckDelete={true}
+                  onDelete={(data) => {
+                    showConfirmBox(data)
+                  }}
+                  rowCount={rowCount}
+                  page={page}
+                  loading={loading}
+                  chips={[
+                    {
+                      label: "Status: ",
+                      field: "status",
+                    }
+                  ]}
+                  onCreate={false}
+                  showClone={true}
+                  onClone={(data) => {
+                    setIsOpen({ open: true, isClone: true, idToClone: data._id })
+                   }}
+                  renderedFrom={routes.projectSales.title}
+                /> :
+                <CustomAgGrid
+                  columns={columns}
+                  dataRows={dataRows}
+                  frameworkComponents={frameWorkComponent}
+                  setGridApi={setGridApi}
+                  dispatch={dispatch}
+                  rowCount={rowCount}
+                  limit={limit}
+                  pageSizes={pageSizes}
+                  actionWidth={150}
+                  page={page}
+                  loading={loading}
+                  renderedFrom={routes.projectSales.title}
+                  refreshGrid={fetchProjects}
+                /> : null
           }
         </div>
 

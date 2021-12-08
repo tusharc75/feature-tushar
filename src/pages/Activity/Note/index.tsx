@@ -25,6 +25,8 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
+import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
+import {MdAdd} from "react-icons/all";
 
 const Note = () => {
   const {
@@ -49,13 +51,16 @@ const Note = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords, appendRows } = state;
+  const [isAllChecked, setIsAllChecked] = useState(false);
+  const [clonedData, setClonedData] = useState([])
+  const localStorageSelectedRecords = "notesPage";
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('notesPage'));
 
   const columns = [
-    { field: 'name', headerName: 'Title', show: true, disabled: true, cellRenderer: 'nameRenderer' },
+    { field: 'name', headerName: 'Title', show: true, disabled: true, primaryField: true, cellRenderer: 'nameRenderer' },
     { field: 'createdByDate', headerName: 'Created At', filter: false, sortable: false, show: true, cellRenderer: 'createdAtDateRenderer' },
     { field: 'updatedByDate', headerName: 'Updated At', filter: false, sortable: false, show: true, cellRenderer: 'updatedAtDateRenderer' }
   ];
@@ -164,6 +169,34 @@ const Note = () => {
           };
           return res;
         });
+        setIsAllChecked(false);
+        setClonedData(data)
+        if (appendRows) {
+          dispatch({
+            type: "initialize", data: [...dataRows, ...rows],
+            count: data.count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+          });
+        } else {
+          dispatch({
+            type: "initialize", data: rows, count: data.count,
+            selectedRecords: rows.filter(f => f.isChecked === true)
+          });
+        }
+
+        if (gridApi) {
+          try {
+            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
+            if (oldSelectedRecords.length > 0) {
+              gridApi.forEachNode(function (node) {
+                node.setSelected(
+                  oldSelectedRecords.some((o) => o === node.data._id)
+                );
+              });
+            }
+          } catch (ex) {
+            console.error("Error in getting selected records from local storage")
+          }
+        }
 
         dispatch({ type: 'initialize', data: rows, count: data.length });
         setTimeout(() => {
@@ -245,79 +278,120 @@ const Note = () => {
             <Grid item xs={6} className="d-flex align-items-center gap-1">
               <GoNote className="headerLogo" /> <span className="listingHeader">{routes.activityNote.title} ({dataRows.length})</span>
             </Grid>
-            <Grid item xs={6} className={styles.filter_side}>
-              <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>
+            <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side}>
+              <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
+
+                <Grid style={{width:"100%" , display:"flex"}}>
                 <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="note" />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  className={styles.add_submit_btn}
-                  onClick={() => {
-                    setIsNew(true);
-                    setShowCreateDialog(true);
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
-                {/* </Box> */}
-                <Button
-                  className={styles.action_submit_btn}
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords.length > 0 ? false : true}
-                >
-                  Actions <ExpandMore />
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
+                </Grid>
+
+                <Grid style={{display: "flex" , gap:"5px"}}>
+                  {<Button
+                      variant={isMobile ? "text" : "contained"}
+                    color="primary"
+                    size="small"
                     onClick={() => {
-                      showConfirmBox(selectedRecords);
-                      closeActions();
+                      setIsNew(true);
+                      setShowCreateDialog(true);
                     }}
+                    className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                    startIcon={isMobile ? null : <AddOutlined />}
                   >
-                    Delete
-                  </MenuItem>
-                </Menu>
+                    {isMobile ? <MdAdd size={23}/> : "Add"}
+                  </Button>
+                  }
+                  <div className="d-flex gap-2">
+                    {/* </Box> */}
+                    <Button
+                        variant={isMobile ? "text" : "contained"}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      aria-controls="action-menu"
+                      disabled={selectedRecords.length > 0 ? false : true}
+                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                    >
+                      {isMobile ? "" :  "Actions" } <ExpandMore/>
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          showConfirmBox(selectedRecords);
+                          closeActions();
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                    </Menu>
+                </div>
+                </Grid>
               </Box>
             </Grid>
           </Grid>
         </div>
-
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={true}
-          allowSelection={true}
-          actionWidth={100}
-          isClientSideGrid={true}
-          loading={loading}
-          renderedFrom="notesPage"
-          refreshGrid={fetchNotes}
-        />
-
+        {isMobile ?
+          <CustomSwipableList
+            allowSelection={true}
+            allowSwipe={true}
+            permissions={permissions.note}
+            primaryField={columns?.find(d => d.primaryField)}
+            onClick={(data) => {
+            }}
+            dataRows={dataRows}
+            selectedRecords={selectedRecords}
+            dispatch={dispatch}
+            onEdit={(data) => {
+             
+            }}
+            extraParamsToCheckDelete={true}
+            onDelete={(data) => {
+              showConfirmBox(selectedRecords);
+              closeActions();
+            }}
+            rowCount={rowCount}
+            page={page}
+            loading={loading}
+            chips={[
+              {
+                label: "Status: ",
+                field: "status",
+              }
+            ]}
+            onCreate={false}
+            showClone={false}
+            onClone={() => { }}
+            renderedFrom={"notesPage"}
+          /> :
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            allowAction={true}
+            allowSelection={true}
+            actionWidth={100}
+            isClientSideGrid={true}
+            loading={loading}
+            renderedFrom="notesPage"
+            refreshGrid={fetchNotes}
+          />
+        }
         {noteId !== undefined && <ActivityModelHandler activityType="note" activityId={noteId} onClose={() => setNoteId(undefined)} />}
       </CustomContainer>
       {isConfirmDialogVisible ? (

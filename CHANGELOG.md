@@ -2,6 +2,194 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.16.0](https://github.com/vebholic/oms_frontend/compare/v2.15.0...v2.16.0) (2021-12-08)
+
+
+### Features
+
+* - Customer Account dropdown removed ([f1c7eb7](https://github.com/vebholic/oms_frontend/commit/f1c7eb7d32c9ba9fe4a71d1be1ae14394619470b))
+* - PO-496 - Start date and expected completion date > disabled dates of both calendar based on ([7caf76e](https://github.com/vebholic/oms_frontend/commit/7caf76ea09d9248a9ac1f98c1986a1ae4d8f273f))
+* - PO-498 - Bulk Edit or single edit, Expected Completion date should be prefilled ([87e3b3b](https://github.com/vebholic/oms_frontend/commit/87e3b3bb5c1e6afc238782ab2735c623893097f6))
+* - PO-512 - Disable plant and repair related fields in repair job update dialog if any loading ([22d1449](https://github.com/vebholic/oms_frontend/commit/22d1449416283b1c6a95d96b227bf3cff4fa565f))
+* - PO-518 - If any asset have status of either Scrap, Repair, Lost, user can go receiving page ([bdfb9c8](https://github.com/vebholic/oms_frontend/commit/bdfb9c8e4ab4195a17e6ff4e6bbf7ac279dbb20f))
+* - PO-518 - Instead of status of asset, now we are checking status of loading ticket ([72e9258](https://github.com/vebholic/oms_frontend/commit/72e92582b8fc82e9da3209cece831bd6895841fd))
+* - PO-518 - Instead of status of asset, now we are checking status of loading ticket ([a9af976](https://github.com/vebholic/oms_frontend/commit/a9af9760c8f26e2b204e264d9414785e7da4e34c))
+* - PO-518 - Instead of status of asset, now we are checking status of loading ticket ([625f418](https://github.com/vebholic/oms_frontend/commit/625f41860956d4f3369a120b6b1ac89069af1713))
+* address changes ([9061bc5](https://github.com/vebholic/oms_frontend/commit/9061bc5e105229fcd71fd17c787d9f067a2e93e4))
+* auto fill plant ship to when repair plant get selected ([31cae85](https://github.com/vebholic/oms_frontend/commit/31cae85d39b5c9d8470703b35e5e2c7f6f73c87a))
+* merge to master ([568c8e7](https://github.com/vebholic/oms_frontend/commit/568c8e7b57abd00a981cb5863b8d1646ddda9f6d))
+
+
+### Bug Fixes
+
+* **azure instance:** Bug fix while login with azure ([b0abba4](https://github.com/vebholic/oms_frontend/commit/b0abba48a7b4ab2105ea82cfbfd3d130e564754f))
+* **azure instance:** Grid Bug fixed while login with azure ([0132cac](https://github.com/vebholic/oms_frontend/commit/0132cac0691294f63e564da7aecd3d5515fcf72f))
+* **fix:** fix and changes ([4ad81fa](https://github.com/vebholic/oms_frontend/commit/4ad81fab6cd643e3e215261d3a208005660fd45e))
+* **loadingticket:** error fic ([b03d977](https://github.com/vebholic/oms_frontend/commit/b03d9773c2dbd812766808be4b5d1fbeab0c7e11))
+* merge confict resolved ([8fbc17c](https://github.com/vebholic/oms_frontend/commit/8fbc17c5bcc7a8b8aece6f82b8b6c7313cfc2d55))
+* rental job string fix PUAT-37 ([137e4e7](https://github.com/vebholic/oms_frontend/commit/137e4e763722509253ab5a87e00ab2e8809cc015))
+* **transferasset:** grid has sr no ([ad0ef76](https://github.com/vebholic/oms_frontend/commit/ad0ef76de85ea133d168de52e2d5e4f54c0fe8da))
+
+## [2.15.0](https://github.com/vebholic/oms_frontend/compare/v2.14.2...v2.15.0) (2021-12-07)
+
+
+### Features
+
+* - PO-482 - Instead of restricting back button, we are not allowing delete operation ([acd9d6f](https://github.com/vebholic/oms_frontend/commit/acd9d6fbcc2be5cba83419a6012e7b7f8437c6b2))
+* - Repair job changes done ([465fb96](https://github.com/vebholic/oms_frontend/commit/465fb96db15b7f9a6a50fdda7394ef6e344d23bf))
+* dynamic fields should be visible while creating a loading ticket from repair job ([6201df2](https://github.com/vebholic/oms_frontend/commit/6201df2e2ac45b51ecf1ed681d2ae7d25ed9eeb0))
+* **formbuilder:** added address lookup field option ([36283c8](https://github.com/vebholic/oms_frontend/commit/36283c8dec2ae0d036888c9881f1a0f6613b5ac6))
+
+
+### Bug Fixes
+
+* **customaggrid:** dynamic grid changes ([a636c44](https://github.com/vebholic/oms_frontend/commit/a636c44d3d334f5c5e8f3a178fee777aebbd9d58))
+* doa fixes ([509448d](https://github.com/vebholic/oms_frontend/commit/509448d8a722081cd8f67c2506627deeec0bacc2))
+* issu po linkable ([1f92e0e](https://github.com/vebholic/oms_frontend/commit/1f92e0e40be89eacc8884a664220bd2812c611f0))
+* **tranferasset:** fix ([b160cc9](https://github.com/vebholic/oms_frontend/commit/b160cc93519a826ac218764ac51604cfbb88038a))
+* **transferasset:** bug fix ([850f8fe](https://github.com/vebholic/oms_frontend/commit/850f8fe3e2ca1f0b2dc0d545a94aa083cd4a8756))
+* **transferasset:** bug fix ([e1c6db4](https://github.com/vebholic/oms_frontend/commit/e1c6db4f2ce801241ea444f1f67e0c5f99568bc4))
+* **transferasset:** bug fix ([3e6e925](https://github.com/vebholic/oms_frontend/commit/3e6e92566a4c4b10da45369f027aaa93c3025d6a))
+
+### [2.14.2](https://github.com/vebholic/oms_frontend/compare/v2.14.1...v2.14.2) (2021-12-06)
+
+### [2.14.1](https://github.com/vebholic/oms_frontend/compare/v2.14.0...v2.14.1) (2021-12-05)
+
+
+### Bug Fixes
+
+* renal bug fix ([f6a49f4](https://github.com/vebholic/oms_frontend/commit/f6a49f47651723d6fe3405dcc480ecd6aabcdfac))
+* renal product price condition ([d166a1b](https://github.com/vebholic/oms_frontend/commit/d166a1b3a613a80eb8714ae8f79a539a9f380600))
+
+## [2.14.0](https://github.com/vebholic/oms_frontend/compare/v2.13.0...v2.14.0) (2021-12-04)
+
+
+### Features
+
+* - Issue in receiving ticket delivery signature ([16d5f0b](https://github.com/vebholic/oms_frontend/commit/16d5f0b5f105f1f83ecdd9fa61a3f6bbeb11dc39))
+* - PO-456 - Receiving Ticket > Show Repair Job, Rental Type, Transfer Asset in receiving ticket ([c001c4b](https://github.com/vebholic/oms_frontend/commit/c001c4b042267a9a64493f29a1588e61b8eea424))
+* - PO-469 - Repair job changes done ([4650bb0](https://github.com/vebholic/oms_frontend/commit/4650bb0174dfcfe934d7e00ed88c6aa3efefe101))
+* - PO-475 - Change status dropdown added in receiving ticket step ([7681000](https://github.com/vebholic/oms_frontend/commit/768100087ea84aeb6edd17c5d7bdae7af51e5cdd))
+* - Repair job changes done ([d834b3f](https://github.com/vebholic/oms_frontend/commit/d834b3f8db546d52b0d7b2ebe58705aa9c759ab7))
+* - Repair job changes finished ([64ff264](https://github.com/vebholic/oms_frontend/commit/64ff26453ee44edee8496c214a7f86e9623d4e2e))
+* **loadingticket:** data change ([444c4d6](https://github.com/vebholic/oms_frontend/commit/444c4d6caad4fd42dd13faa8104ee87e21f4b72b))
+* rental managment ([38a4590](https://github.com/vebholic/oms_frontend/commit/38a459035052e25972613e518417d6cf558b0649))
+* rental manament ([3b76354](https://github.com/vebholic/oms_frontend/commit/3b76354aec1baae2a4dedf1d9bd24c030f2b13be))
+* **transferasset:** added receiving step ([1c77f71](https://github.com/vebholic/oms_frontend/commit/1c77f719f6c0d96f43212176d3df94d5b3b54496))
+* **transferasset:** step fix ([67eb5d3](https://github.com/vebholic/oms_frontend/commit/67eb5d3ba48904ee05ca2ea16f3614f5b5db5ffc))
+
+
+### Bug Fixes
+
+* bug fix ([73a1686](https://github.com/vebholic/oms_frontend/commit/73a16869f9a38ed7d409431d258129d54b70e95f))
+* bug fix ([4c3cc83](https://github.com/vebholic/oms_frontend/commit/4c3cc8314b4cb7910f49e309a402218fc75f59a8))
+* bug fix ([84a7131](https://github.com/vebholic/oms_frontend/commit/84a7131560094f5c6ac32595187105074b33e0a2))
+* gid fix ([dabd32a](https://github.com/vebholic/oms_frontend/commit/dabd32ab9ada050222697f771e5a4eb1e4961923))
+* **homepage:** removed product list link from homepage ([225105c](https://github.com/vebholic/oms_frontend/commit/225105c8b3f3143af601d691a37e2339a7f1317b))
+* pO status changes and quantity check ([852abea](https://github.com/vebholic/oms_frontend/commit/852abea45664314b51481205605f7412cace4272))
+* **transferasset:** fix routing ([b2f4706](https://github.com/vebholic/oms_frontend/commit/b2f4706ff0b621e578e31d06825d676c419d38dc))
+
+## [2.13.0](https://github.com/vebholic/oms_frontend/compare/v2.12.0...v2.13.0) (2021-12-03)
+
+
+### Features
+
+* - PO-439 - 1.0, 2.0 added before serial number in repair job ([7d4ea4c](https://github.com/vebholic/oms_frontend/commit/7d4ea4ccf8c869a17c734aea693bf0a87dca99a6))
+* - PO-440 - If any required field value is still blank in serialized step, then next disabled ([80abfa2](https://github.com/vebholic/oms_frontend/commit/80abfa2ded468ef98ff1d112de3f780816df5544))
+* - React table z-index issue fixed for rental management detail screen ([2b4e537](https://github.com/vebholic/oms_frontend/commit/2b4e537d99fe9729225172ad14b245f9c0db49e0))
+* **azureInstance:** azure sso env variable setup ([f1429e6](https://github.com/vebholic/oms_frontend/commit/f1429e6ac3fad7ce7ac99535b729ed060d60ff07))
+* **logout:** logout page setup ([4bdfbf1](https://github.com/vebholic/oms_frontend/commit/4bdfbf17f0431cdbc101394a3dc78f056854693f))
+* repair Job, If repair type is internal, then hide Supplier dropdown, else show it ([f4a13df](https://github.com/vebholic/oms_frontend/commit/f4a13df589e1b18e792b3af2e5780cbc1fb2392f))
+* **transferasset:** fix and changes ([6ff3cb1](https://github.com/vebholic/oms_frontend/commit/6ff3cb15da07d2663599f522f65a8755bf3e613a))
+
+
+### Bug Fixes
+
+* **all bugs:** accessibility queryparams in customer , supplier contact ([f8d8e59](https://github.com/vebholic/oms_frontend/commit/f8d8e59fb95fffa672f24d93d8f2dd032fec4af9))
+* **customer contact supplier contact accessibility query params:** accessibility of customercontact ([8dc7186](https://github.com/vebholic/oms_frontend/commit/8dc7186f60571cf53c4953e876404cfcf03fc87e))
+* doa changes ([49969fd](https://github.com/vebholic/oms_frontend/commit/49969fd67ef0ebd90f501081564542117c32d630))
+* **loadingticket:** conditional fields ([6eff273](https://github.com/vebholic/oms_frontend/commit/6eff273d26a48e425e310a85246db08b0cc42a91))
+* **logout:** logout route fixed ([376d9c2](https://github.com/vebholic/oms_frontend/commit/376d9c2c5bda2c63df7ed4af313763da24e84389))
+* **logout:** logout route fixed ([00324a7](https://github.com/vebholic/oms_frontend/commit/00324a76ab43d0af86320863473beb2685c4876a))
+* **logout:** route renamed ([4ffd1e0](https://github.com/vebholic/oms_frontend/commit/4ffd1e0c20cd387d0d176df4fdf41505d133b1b7))
+* **logout:** route renamed ([43937c3](https://github.com/vebholic/oms_frontend/commit/43937c38315593e801295230f8ea9207f1dc7271))
+* pO changes -- coloring row,total,actual received ([dfaf774](https://github.com/vebholic/oms_frontend/commit/dfaf774b666d965f170d408d35150113fef5d8bb))
+
+## [2.12.0](https://github.com/vebholic/oms_frontend/compare/v2.11.0...v2.12.0) (2021-12-02)
+
+
+### Features
+
+* - Loading Ticket, Receiving Ticket Not Coming Issue Fixed In Rental Management ([2cfa143](https://github.com/vebholic/oms_frontend/commit/2cfa1438ad446d882a2575c4c1fe37eb8da3abcf))
+* - PO-405 - Bulk/Single Edit Serialized Asset Done in repair job ([a107df3](https://github.com/vebholic/oms_frontend/commit/a107df38e51e02a015f59b8def84eb3b2e177195))
+
+
+### Bug Fixes
+
+* **loadingticket:** date issue ([70eb653](https://github.com/vebholic/oms_frontend/commit/70eb65305f50d9de4f25a2e491770ce0a610a4b8))
+* **loadingticket:** sign validation ([ef5c8d3](https://github.com/vebholic/oms_frontend/commit/ef5c8d30628a572e29d5fdb41da849746a79eacc))
+* **loadintticket:** date fix ([2dc1d5e](https://github.com/vebholic/oms_frontend/commit/2dc1d5e48e1e6ce16490bc46932538a6be3a6e44))
+* **packagedetail:** fix filter ([eb8c9b1](https://github.com/vebholic/oms_frontend/commit/eb8c9b101b89b1d0c435fb393fb545531b09df19))
+* **packagedetails:** fix filter ([55d5378](https://github.com/vebholic/oms_frontend/commit/55d537880137c0806157d14edd5b654cd895755f))
+* pO-352 ([e2a3b31](https://github.com/vebholic/oms_frontend/commit/e2a3b31f7572ebf642a0f3f0d0c34f6cbae6910b))
+* **transferasset:** disable next ([28902e9](https://github.com/vebholic/oms_frontend/commit/28902e9aa5d6e3629858db9300dd5e214a918710))
+
+## [2.11.0](https://github.com/vebholic/oms_frontend/compare/v2.10.0...v2.11.0) (2021-12-01)
+
+
+### Features
+
+* - Serialized assets columns fetching done from form builder ([ea71106](https://github.com/vebholic/oms_frontend/commit/ea71106039354e59cffbd8ef1beb6f22082d124a))
+* **dynamicform:** loading and receiving ticket ([8e6b1e3](https://github.com/vebholic/oms_frontend/commit/8e6b1e3eecab04ef090f8af4b3450baf25fd2a46))
+
+
+### Bug Fixes
+
+* pO bug fixes ([f591b07](https://github.com/vebholic/oms_frontend/commit/f591b0777da38cfb51b91e5397a05a272c390fcd))
+* **transferasset:** add title for update ([fca67b3](https://github.com/vebholic/oms_frontend/commit/fca67b3d26050e79cbf69ce3caf9f88b76647735))
+* **transferasset:** fix remove not working ([36aaf5c](https://github.com/vebholic/oms_frontend/commit/36aaf5c8a8ec152e5b743f97706798f3ff914fbf))
+* **transferasset:** plant info in add assets ([1234459](https://github.com/vebholic/oms_frontend/commit/12344592098d790a10134695a055d5e3f35dcd6b))
+* **transferasset:** transfer asset grid filter ([c1e005d](https://github.com/vebholic/oms_frontend/commit/c1e005db06e3a590cd72830be58988a829a1c579))
+
+## [2.10.0](https://github.com/vebholic/oms_frontend/compare/v2.9.1...v2.10.0) (2021-11-30)
+
+
+### Features
+
+* - Rental end date issue fixed ([2d1d1f9](https://github.com/vebholic/oms_frontend/commit/2d1d1f9f9300d652f07ba5d02c12547692746c5f))
+* card ([07a7c67](https://github.com/vebholic/oms_frontend/commit/07a7c67842d60f62504d681db6bfda0e6cadfc9a))
+* grid added for mobile ([1d10e8f](https://github.com/vebholic/oms_frontend/commit/1d10e8f39c3ecd397b0f5084a885eb80ddb5db13))
+* **loadingticket:** dynamic form for transfer asset ([4aa3eaf](https://github.com/vebholic/oms_frontend/commit/4aa3eaf6876d1886c4245e2f497993000896bd04))
+* mobile ui changes and timeline changes ([e88af3d](https://github.com/vebholic/oms_frontend/commit/e88af3d8d86b46886fdb51b051546d26c79b07f6))
+* rental Management ([fc040d0](https://github.com/vebholic/oms_frontend/commit/fc040d03ae6e50332915424a3feeac9764282b78))
+* resolved ([0f54f53](https://github.com/vebholic/oms_frontend/commit/0f54f539d5c465c1527b4b4c33216c40284a3a18))
+* ui change for Mobile ([bc22408](https://github.com/vebholic/oms_frontend/commit/bc22408a18180d613e2b842ca82a08a42598d360))
+
+
+### Bug Fixes
+
+* jhon changes ([308d25c](https://github.com/vebholic/oms_frontend/commit/308d25c17f730b1c67a83b71795baf810c81d296))
+* jhon changes ([5503d6d](https://github.com/vebholic/oms_frontend/commit/5503d6db73545ba6cb460072d3feb558c58a4081))
+* pO-330 ([8b8c91d](https://github.com/vebholic/oms_frontend/commit/8b8c91d7426d6bd749eb25012d3c3967b601a9d2))
+* quote changes stepper color ([3e67dcc](https://github.com/vebholic/oms_frontend/commit/3e67dcc02eb3ac9478e17036e9e3417c237e3092))
+* **transferassetdetail:** header style change ([d8357e0](https://github.com/vebholic/oms_frontend/commit/d8357e05b66ecbc8dcd54be50d1b5ec8392adb7b))
+
+### [2.9.1](https://github.com/vebholic/oms_frontend/compare/v2.9.0...v2.9.1) (2021-11-29)
+
+
+### Bug Fixes
+
+* bulkedit issue fixed ([7face50](https://github.com/vebholic/oms_frontend/commit/7face504189d33e80a6c4f169911a2484527bd9c))
+
+## [2.9.0](https://github.com/vebholic/oms_frontend/compare/v2.8.0...v2.9.0) (2021-11-28)
+
+
+### Features
+
+* - Rental Id passed as a reference when status changed from rental > receiving ticket" ([5206217](https://github.com/vebholic/oms_frontend/commit/52062179f3a9d88b0f5604ab707207b10fe01778))
+* - Repair job changes done ([433fad0](https://github.com/vebholic/oms_frontend/commit/433fad035130ab2b8f974fd7dab5c6397c5b8329))
+* - Repair job screen initially finished ([0c91b8c](https://github.com/vebholic/oms_frontend/commit/0c91b8cfb98b3ecce7117cd95fc1502ef781cd83))
+
 ## [2.8.0](https://github.com/vebholic/oms_frontend/compare/v2.7.0...v2.8.0) (2021-11-27)
 
 

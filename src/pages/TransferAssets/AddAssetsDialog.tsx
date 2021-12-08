@@ -9,8 +9,9 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData } from '../../constants/helpers';
-import { CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import { prepareDataForGrid } from "../../constants/helpers"
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { useData } from '../../StateProvider/Provider';
 import Dialog from '@material-ui/core/Dialog/Dialog';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -25,15 +26,20 @@ interface AssetDialogProps {
   fetchAssets?: VoidFunction;
   existingAssets: any[];
   transferAssetId: string | any;
+  updateTransferStatus?: any;
 }
 
 const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
-  const { plantId, closeDialog, fetchAssets, existingAssets, transferAssetId } = props
+  const { plantId, closeDialog, fetchAssets, existingAssets, transferAssetId, updateTransferStatus } = props
   const toastConfig = useContext(CustomToastContext);
 
   const [isAdding, setAdding] = useState(false)
 
   const [gridApi, setGridApi] = useState(null);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [columns, setColumns] = useState([])
+
+  const { getColumnData } = useColumns();
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
@@ -42,30 +48,37 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
   }: any = useData();
 
   useEffect(() => {
-    fetchProductInventory();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+    fetchGridColumns()
+  }, [])
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get("/field?resource=Product Inventory")
+      .then(({ data: { data } }) => {
+        let columns = []
+        let rendererNames = []
+        data.forEach(o => {
+          if (o?.fieldData?.fieldName === "serialNumber") {
+            o.fieldData.primaryField = true
+          }
+          let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
 
-  const columns = [
-    { field: 'assetNumber', headerName: 'Asset Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'productName', headerName: 'Product Description', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'plant', headerName: 'Plant', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'productCategory', headerName: 'Product Category', show: true, disabled: true, cellRenderer: 'commonRenderer' }
-  ];
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData]
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
+          }
+        })
 
-  const NameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
-
-  const frameworkComponents = {
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    nameRenderer: NameRenderer
-  };
-
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        columns = [...columns, ...getStaticFields()]
+        setColumns([...columns])
+      })
+  }
   const fetchProductInventory = () => {
     dispatch({ type: 'loading', loading: true });
 
@@ -73,20 +86,21 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
       gridApi.setRowData([]);
     }
 
-    let queryString = getQueryString();
-    queryString = `${queryString}&filterById=${JSON.stringify([{ field: 'warehouse', term: plantId }])}&repairable=true&filterByIdType=or`;
+    let queryString = `?&filterById=${JSON.stringify([{ field: 'warehouse', term: plantId }])}&repairable=true&filterByIdType=or`;
 
     axiosInstance()
       .get(`${productInventory.api}${queryString}`)
       .then(({ data: { data } }) => {
         data = data.filter((asset: any) => !existingAssets.includes(asset._id))
-          .map((u: any) => ({
-            ...u,
-            id: u._id,
-            productName: u.product?.optionLabel,
-            productCategory: u?.productCategory?.optionLabel,
-            warehouse: u?.warehouse?.optionLabel,
-          }));
+          .map((u: any) => {
+            let finalObject = prepareDataForGrid(u);
+            return finalObject
+
+          });
+
+        if (data.length === 0) {
+          updateTransferStatus("New")
+        }
 
         dispatch({ type: 'initialize', data: data, count: data.length });
         setTimeout(() => {
@@ -99,54 +113,13 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
       });
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
-
-    if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id))}`;
-    }
-
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
-    }
-
-    if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-    }
-
-    if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
-    }
-    return deepFilter;
-  };
-
+  useEffect(() => {
+    fetchProductInventory();
+  }, []);
 
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-
-
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
   };
 
   const getRowStyleScheduled = (params) => {
@@ -171,6 +144,7 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
           setAdding(false)
           fetchAssets()
           closeDialog()
+          updateTransferStatus("In Progress")
         }).catch(err => {
           setAdding(false)
           toastConfig.setToastConfig(err)
@@ -199,20 +173,17 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
                         disabled={selectedRecords.length === 0 || isAdding}
                         endIcon={isAdding && <CircularProgress size={20} />}
                       >
-                        {getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length
-                          ? '(' + getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length + ')  '
-                          : ''}
-                        Add
+                        {selectedRecords.length > 0 ? `(${selectedRecords.length}) ` : ""}Add
                       </Button>
                     </Box>
                   </Grid>
                 </Grid>
               </Box>
-              {columns ? (
+              {Object.keys(frameWorkComponent).length > 0 ? (
                 <CustomAgGrid
                   columns={columns}
                   dataRows={dataRows}
-                  frameworkComponents={frameworkComponents}
+                  frameworkComponents={frameWorkComponent}
                   setGridApi={setGridApi}
                   dispatch={dispatch}
                   rowCount={rowCount}
@@ -222,10 +193,8 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
                   allowAction={false}
                   loading={loading}
                   customGridOptions={{ getRowStyle: getRowStyleScheduled }}
-                  // selectedRecords={selectedRecords}
+                  isClientSideGrid={true}
                   renderedFrom={addSerializedAssetsRenderedFrom}
-                  showOnlyShowFilteredRecordSwitch={true}
-                // allowHeaderSelection={false}
                 />
               ) : (
                 <Box p={2} height={500} bgcolor="white">

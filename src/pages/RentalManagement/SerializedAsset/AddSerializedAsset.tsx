@@ -1,32 +1,35 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { Link } from 'react-router-dom'
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "../../axios/axiosInstance";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "../../../axios/axiosInstance";
 import { Box, CircularProgress } from "@material-ui/core";
-import SearchBox from '../../components/Helpers/SearchBox'
-import routes from "../../components/Helpers/Routes";
-import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData } from '../../constants/helpers';
-import {
-    CreatedByRenderer,
-    UpdatedByRenderer
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { useData } from "../../StateProvider/Provider";
+import SearchBox from '../../../components/Helpers/SearchBox'
+import routes from "../../../components/Helpers/Routes";
+import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
+import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData } from '../../../constants/helpers';
+import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
+import { useData } from "../../../StateProvider/Provider";
 import Dialog from "@material-ui/core/Dialog/Dialog";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
+import { prepareDataForGrid } from "../../../constants/helpers"
+
+
 
 const addSerializedAssetsRenderedFrom = "addSerializedAssets";
 const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected`;
 
-const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, rentalId = null, notIn = null }) => {
+const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts,
+    rentalId = null, repairJobId = null, transferAssetId = null, notIn = null, queryString = null, filterByPlant = null }) => {
     const toastConfig = useContext(CustomToastContext)
 
     const [serializedProducts, setSerializedProducts] = useState([]);
     const [gridApi, setGridApi] = useState(null);
+    const { getColumnData } = useColumns();
+    const [frameWorkComponent, setFrameWorkComponent] = useState({})
+    const [columns, setColumns] = useState([])
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
@@ -37,6 +40,40 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     useEffect(() => {
         fetchProductInventory()
     }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+
+    useEffect(() => {
+        fetchGridColumns()
+    }, [])
+    const fetchGridColumns = () => {
+        axiosInstance()
+            .get("/field?resource=Product Inventory")
+            .then(({ data: { data } }) => {
+                let columns = []
+                let rendererNames = []
+                data.forEach(o => {
+                    if (o?.fieldData?.fieldName === "serialNumber") {
+                        o.fieldData.primaryField = true
+                    }
+                    let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
+
+                    if (currentColumn !== null) {
+                        columns = [...columns, currentColumn?.columnData]
+                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                            rendererNames.push(currentColumn?.rendererName)
+                        }
+                    }
+                })
+
+                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+                tempFrameworkComponent = {
+                    ...tempFrameworkComponent,
+                }
+                setFrameWorkComponent({ ...tempFrameworkComponent })
+                columns = [...columns, ...getStaticFields()]
+                setColumns([...columns])
+            })
+    }
+
 
     useEffect(() => {
         let tempProducts = serializedProducts
@@ -95,16 +132,6 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         setSerializedProducts(tempProducts)
     }, [selectedRecords]);
 
-    const columns = [
-        { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "commonRenderer" },
-        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
-        { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
-        { field: "poNumber", headerName: "Purchase Order", show: true, cellRenderer: "commonRenderer" },
-        { field: "plant", headerName: "Plant", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    ];
-
     const fetchProductInventory = () => {
         dispatch({ type: "loading", loading: true });
 
@@ -122,14 +149,10 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                 // ?.filter(u => (u?.status === "Available" || u?.status === "New")
                 // && selectedProducts.some(d => d._id === u?.product?.optionValue || d.products?.some(obj => obj?.productId === u?.product?.optionValue))
                 // )
-                .map((u) => ({
-                    ...u,
-                    id: u._id,
-                    productName: u.product?.optionLabel,
-                    productCategory: u?.productCategory?.optionLabel,
-                    warehouse: u?.warehouse?.optionLabel,
-                    poNumber: u?.pONumber?.optionLabel
-                }));
+                .map((u) => {
+                    let finalObject = prepareDataForGrid(u);
+                    return finalObject
+                });
 
 
             dispatch({ type: "initialize", data: data.data, count: data.count });
@@ -173,29 +196,29 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         //  To fetch the remaining unassigned assets of that rental management
         if (rentalId) {
             deepFilter = `${deepFilter}&rental=${rentalId}&notIn=${notIn}`;
+        } else if (repairJobId) {
+            deepFilter = `${deepFilter}&repairJobId=${repairJobId}&notIn=${notIn}`;
+        } else if (transferAssetId) {
+            deepFilter = `${deepFilter}&transferAssetId=${transferAssetId}&notIn=${notIn}`;
         } else {
-            deepFilter = `${deepFilter}&entityWise=1&availableAssets=true`;
+            if (filterByPlant === null) {
+                deepFilter = `${deepFilter}&entityWise=1`;
+            } else {
+                deepFilter = `${deepFilter}&${filterByPlant}`;
+            }
+
+            if (queryString) {
+                deepFilter = `${deepFilter}&${queryString}`;
+            } else {
+                deepFilter = `${deepFilter}&availableAssets=true`;
+            }
         }
 
         return deepFilter;
     };
 
-
-    const NameRenderer = (params) => (
-        <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
-            {params.value}
-        </Link>
-    );
-
-
     const handleSearch = (e) => {
         dispatch({ type: "search", search: e.target.value });
-    };
-
-    const frameworkComponents = {
-        createdByRenderer: CreatedByRenderer,
-        updatedByRenderer: UpdatedByRenderer,
-        nameRenderer: NameRenderer,
     };
 
     const replaceFieldName = (field) => {
@@ -269,11 +292,11 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                             </Grid>
                         </Grid>
                     </Box>
-                    {columns ?
+                    {Object.keys(frameWorkComponent).length > 0 ?
                         <CustomAgGrid
                             columns={columns}
                             dataRows={dataRows}
-                            frameworkComponents={frameworkComponents}
+                            frameworkComponents={frameWorkComponent}
                             setGridApi={setGridApi}
                             dispatch={dispatch}
                             rowCount={rowCount}

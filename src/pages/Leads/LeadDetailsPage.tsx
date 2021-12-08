@@ -21,10 +21,15 @@ import ProcessFlow from '../../components/ProcessFlow';
 import { isMobile, isTablet } from 'react-device-detect';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import queryString from 'query-string';
+import {MdDelete, MdEdit} from "react-icons/md";
+import {FaFunnelDollar} from "react-icons/all";
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit } = parsed;
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
@@ -51,7 +56,6 @@ const LeadDetailsPage = () => {
     isRead: false,
     isDelete: false
   });
-
   const [hasPermissionToConvertToOpportunity, setHasPermissionToConvertToOpportunity] = useState(false);
   const [isLeadAlreadyConvertedToOpportunity, setIsLeadAlreadyConvertedToOpportunity] = useState(false);
 
@@ -117,7 +121,8 @@ const LeadDetailsPage = () => {
           const userId = user?.user?._id;
           handleMainPoints(data);
           let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
-
+          const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+          setAllowedToEdit(isAllowedToEdit);
           let dontHavePermissions = [];
 
           if (!permissions['customerAccount'].isCreate) {
@@ -153,6 +158,13 @@ const LeadDetailsPage = () => {
           setLeadData(data);
           getLeadFields();
           setCustomizedRoutes([routes.lead, { title: name }]);
+
+          if (isAllowedToEdit && openEdit === 'true') {
+            setOpenUpdateDialog(true);
+            const params = new URLSearchParams();
+            params.delete('openEdit');
+            history.push({ search: params.toString() });
+          }
         });
     }
   };
@@ -377,16 +389,18 @@ const LeadDetailsPage = () => {
                   showHeading={true}
                 >
                   {leadsPermissions.isUpdate && allowedToEdit && (
-                    <Button variant="contained" color="primary" size="small" onClick={handleOpneUpdateDialog}>
-                      Edit
+                    <Button variant={isMobile ? "outlined" : "contained"} color="primary" size="small" onClick={handleOpneUpdateDialog}>
+                      {isMobile ? <MdEdit/> : "Edit"}
                     </Button>
                   )}
                   {!isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && (
                     <>
                       <Button
-                        variant="contained"
+                          variant={isMobile ? "outlined" : "contained"}
                         color="primary"
                         size="small"
+                          className="mobile_button_layout"
+                          style={isMobile ? {color:"var(--warning-light)" , borderColor:"var(--warning-light)"} : {}}
                         onClick={() => {
                           const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter((d) => d).join(' ');
                           setConvertLeadToOpportunityConfirmationDialog({
@@ -397,7 +411,7 @@ const LeadDetailsPage = () => {
                           });
                         }}
                       >
-                        Convert Lead To Opportunity
+                        {isMobile ? <FaFunnelDollar/> : "Convert Lead To Opportunity"}
                       </Button>
                     </>
                   )}

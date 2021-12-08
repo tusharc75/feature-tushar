@@ -42,6 +42,8 @@ export const termsAndConditionDocumentUploadMaxSize = {
   text: '2 MB'
 };
 
+export const repairJobProcessSteps = ["Serialized Assets", "Loading Ticket", "Receiving Ticket", "End"];
+
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
 
@@ -201,7 +203,7 @@ export const RESOURCE_LABEL = {
   budget: 'Budgets',
   marketSegment: 'Market Segments',
   quotePdfTemplate: 'Quote PDF Templates',
-  rentalManagement: 'Rental Job',
+  rentalManagement: 'Rental Jobs',
   deliveryTicket: 'Loading Tickets',
   pricingCondition: 'Pricing Conditions',
   repairJob: 'Repair Jobs',
@@ -210,7 +212,8 @@ export const RESOURCE_LABEL = {
   eCommerce: 'e-Commerce',
   packages: 'Packages',
   purchaseOrder: 'Purchase Order',
-  transferAsset: 'Transfer Asset'
+  transferAsset: 'Transfer Assets',
+  address: 'Address'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -382,6 +385,11 @@ export const quotePdfTemplate = {
 export const marketSegment = {
   marketSegmentApi: '/market-segment',
   marketSegmentResource: 'marketSegment'
+};
+
+export const address = {
+  addressApi: '/address',
+  addressResource: 'address'
 };
 
 export const purchaseOrder = {

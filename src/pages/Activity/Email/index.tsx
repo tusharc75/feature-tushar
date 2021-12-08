@@ -31,6 +31,9 @@ import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridCo
 import { AddOutlined } from '@material-ui/icons';
 import { displayDate } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
+import { MdAccountCircle } from "react-icons/md";
+import {AiFillCrown, MdAdd} from "react-icons/all";
+import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 
 const tabs = {
   Inbox: 1,
@@ -61,10 +64,13 @@ const Email = () => {
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
   const columnState = JSON.parse(localStorage.getItem('emailPage'));
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [isAllChecked, setIsAllChecked] = useState(false);
+  const [clonedData, setClonedData] = useState([])
+  const localStorageSelectedRecords = "emailPage_selected";
 
   const [columns,] = useState([
     { field: 'to', headerName: 'Recipient', show: true, disabled: true, cellRenderer: 'recipentRenderer' },
@@ -72,6 +78,7 @@ const Email = () => {
       field: 'subject',
       headerName: 'Subject',
       show: true,
+      primaryField: true,
       cellRenderer: 'subjectRenderer'
     },
     {
@@ -350,81 +357,113 @@ const Email = () => {
                 ))}
               </ToggleButtonGroup>
             </Grid>
-            <Grid item xs={6} className={styles.filter_side}>
-              <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>
-                {/* <Box style={{ width: '70%' }}> */}
-                <SearchFilter
-                  handleChangeFilter={handleChangeFilter}
-                  filter={filter}
-                  chip={{ size: 'small' }}
-                  activityName="email"
-                />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  className={styles.add_submit_btn}
-                  onClick={() => {
-                    setOpen(true);
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
+            <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side} >
+              <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
+                  <Grid style={{width:"100%" , display:"flex"}}>
+                  <SearchFilter
+                    handleChangeFilter={handleChangeFilter}
+                    filter={filter}
+                    chip={{ size: 'large' }}
+                    activityName="email"
 
-                {/* </Box> */}
-                <Button
-                  className={styles.action_submit_btn}
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords.length > 0 ? false : true}
-                >
-                  Actions <ExpandMore />
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      showConfirmBox(null);
-                      closeActions();
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
+
+                  />
+
+                  </Grid>
+                <Grid style={{display: "flex" , gap:"5px"}}>
+                    {<Button
+                        variant={isMobile ? "text" : "contained"}
+                      color="primary"
+                      size="small"
+                      onClick={() => {
+                        setOpen(true);
+                      }}
+                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                        startIcon={isMobile ? null : <AddOutlined />}
+                    >
+                      {isMobile ? <MdAdd size={23}/> : "Add"}
+                    </Button>
+                    }
+                    {/* </Box> */}
+                    <Button
+                        variant={isMobile ? "text" : "contained"}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      aria-controls="action-menu"
+                      disabled={selectedRecords.length > 0 ? false : true}
+                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                    >
+                      {isMobile ? "" :  "Actions" } <ExpandMore/>
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          showConfirmBox(null);
+                          closeActions();
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                    </Menu>
+                </Grid>
               </Box>
             </Grid>
           </Grid>
         </div>
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={150}
-          loading={loading}
-          renderedFrom="emailPage"
-          refreshGrid={fetchEmails}
-        />
-
+        {
+          isMobile ?
+            <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={permissions.note}
+              primaryField={columns?.find(d => d.primaryField)}
+              onClick={(data) => {
+              } }
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(data) => {
+              } }
+              extraParamsToCheckDelete={true}
+              onDelete={(data) => {
+                showConfirmBox(data);
+              } }
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              onCreate={false}
+              showClone={false}
+              onClone={() => { } }
+              renderedFrom={"emailPage"} chips={undefined}            />
+            :
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameworkComponents}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={150}
+              loading={loading}
+              renderedFrom="emailPage"
+              refreshGrid={fetchEmails}
+            />
+        }
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}

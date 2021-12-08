@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs, ButtonGroup, Container, InputAdornment, TextField } from "@material-ui/core";
+import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs, ButtonGroup, Container, InputAdornment, TextField, Menu, MenuItem } from "@material-ui/core";
 import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -22,6 +22,8 @@ import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { prepareDataForGrid } from "../../../constants/helpers";
 import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "../../../constants/columns"
 import { GrBusinessService } from "react-icons/all";
+import { ExpandMore } from "@material-ui/icons";
+import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 
 
 const Product = ({ purchaseOrderData, id }) => {
@@ -37,6 +39,9 @@ const Product = ({ purchaseOrderData, id }) => {
 
     const [showServiceDialog, setShowServiceDialog] = useState(false)
     const [selectedServiceData, setSelectedServiceData] = useState(null)
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [deletePurchaseOrderService, setDeletePurchaseOrderService] = useState([])
+    const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
 
     useEffect(() => {
         fetchPurchaseOrderService();
@@ -97,12 +102,21 @@ const Product = ({ purchaseOrderData, id }) => {
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
                 onDelete={() => {
-                    deletePurchaseOrderService([params.data._id])
+                    setShowDeleteConfirmBox(true)
+                    setDeletePurchaseOrderService([params.data._id])
                 }}
                 entity="rentalManagement"
             />
         </>
     );
+
+    const openActions = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const closeActions = () => {
+        setAnchorEl(null);
+    };
 
     const handleAddService = (rows) => {
         axiosInstance().post(`${purchaseOrder.api}/service/${id}/add`, { services: rows })
@@ -124,10 +138,12 @@ const Product = ({ purchaseOrderData, id }) => {
             });
     }
 
-    const deletePurchaseOrderService = (ids) => {
-        axiosInstance().post(`${purchaseOrder.api}/service/${id}/delete`, { ids })
+    const handleDelete = () => {
+        axiosInstance().post(`${purchaseOrder.api}/service/${id}/delete`, { ids: deletePurchaseOrderService })
             .then(() => {
                 fetchPurchaseOrderService()
+                setShowDeleteConfirmBox(false)
+                setDeletePurchaseOrderService([])
             }).catch((error) => {
                 toastConfig.setToastConfig(error)
             });
@@ -149,6 +165,39 @@ const Product = ({ purchaseOrderData, id }) => {
                         {isMobile ? <GrBusinessService size={20} /> : "Add Service"}
                     </Button>
                 </Box>
+                <div className="d-flex gap-2">
+                    <HtmlTooltip title="Please select some product">
+                        <span>
+                            <Button
+                                variant="outlined"
+                                color="default"
+                                size="small"
+                                onClick={openActions}
+                                disabled={selectedRecords.length ? false : true}
+                                aria-controls="action-menu"
+                            >Actions <ExpandMore />
+                            </Button>
+                        </span>
+                    </HtmlTooltip>
+                    <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "left",
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                    >
+                        {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
+                            closeActions()
+                            setShowDeleteConfirmBox(true)
+                            setDeletePurchaseOrderService(selectedRecords.map(d => d._id))
+                        }}>Delete</MenuItem>}
+                    </Menu>
+                </div>
             </Box>
             {columns && frameWorkComponent ? isMobile ?
                 <CustomSwipableList
@@ -169,7 +218,8 @@ const Product = ({ purchaseOrderData, id }) => {
                     }}
                     extraParamsToCheckDelete={true}
                     onDelete={(data) => {
-                        deletePurchaseOrderService([data._id])
+                        setShowDeleteConfirmBox(true)
+                        setDeletePurchaseOrderService([data._id])
                     }}
                     rowCount={rowCount}
                     page={page}
@@ -208,6 +258,8 @@ const Product = ({ purchaseOrderData, id }) => {
                     }}
                     renderedFrom="purchaseOrderDetailsPageInventory"
                     refreshGrid={fetchPurchaseOrderService}
+                    fromPurchaseOrderGrid={true}
+                    currency={purchaseOrderData?.currency?.toLowerCase()}
                 />
                 : <Box
                     p={2}
@@ -226,6 +278,15 @@ const Product = ({ purchaseOrderData, id }) => {
                     handleUpdateService={handleUpdateService}
                     currency={purchaseOrderData?.currency}
                     serviceData={selectedServiceData}
+                />
+            }
+            {
+                showDeleteConfirmBox &&
+                <ConfirmationDialog
+                    open={showDeleteConfirmBox}
+                    message={`Are you sure you want to delete  ? `}
+                    onClose={() => setShowDeleteConfirmBox(false)}
+                    onOk={handleDelete}
                 />
             }
         </Fragment>

@@ -17,6 +17,7 @@ import styles from "../Leads/Header.module.scss";
 import HideWhenOffline from "../../components/HideWhenOffline";
 import routes from "../../components/Helpers/Routes";
 import { isMobile } from 'react-device-detect';
+import {MdAdd} from "react-icons/all";
 
 function RentalManagementHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -82,8 +83,8 @@ function RentalManagementHeader(props) {
         {children}
       </Grid>
       <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
-        <Box className={styles.filter_side_header} component="div">
-          <div className="d-flex gap-2">
+        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+          <Grid style={{display: "flex", flex:1}}>
             <HideWhenOffline>
               <SearchBox
                 onSearch={onSearch}
@@ -91,20 +92,25 @@ function RentalManagementHeader(props) {
                 value={searchVal}
                 size="small"
                 placeholder={`Search ${routes.rentalManagement.title}`}
-                width="300px"
+                style={isMobile ? {flex:1} : {}}
               />
             </HideWhenOffline>
-            <div className="d-flex gap-2">
-              {RentalManagementPermissions.isCreate && RentalManagementPermissions.isUpdate && !isMobile && (
+
+          </Grid>
+
+
+          <Grid style={{display: "flex" , gap:"5px"}}>
+              {RentalManagementPermissions.isCreate && RentalManagementPermissions.isUpdate && (
                 <Button
-                  variant="contained"
+                    variant={isMobile ? "text" : "contained"}
                   color="primary"
                   size="small"
                  // className={styles.add_submit_btn}
                   onClick={onCreate}
-                  startIcon={<AddOutlined />}
+                    className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                    startIcon={isMobile ? null : <AddOutlined />}
                 >
-                  Add
+                  {isMobile ? <MdAdd size={23}/> : "Add"}
                 </Button>
               )}
 
@@ -117,7 +123,7 @@ function RentalManagementHeader(props) {
                         variant={isMobile ? "text" : "outlined"}
                         color="default"
                         size="small"
-                        className={isMobile ? "mobile-action-view" : "Des-action"}
+                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
                         onClick={openActions}
                         // className={styles.action_submit_btn}
                         aria-controls="action-menu"
@@ -167,8 +173,8 @@ function RentalManagementHeader(props) {
                   )
                 }
               </HideWhenOffline>
-            </div>
-          </div>
+          </Grid>
+
         </Box>
       </Grid>
     </Grid>

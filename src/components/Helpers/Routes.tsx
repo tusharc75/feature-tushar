@@ -157,6 +157,10 @@ const routes = {
     title: storedRoutes ? storedRoutes.productCategory?.title : RESOURCE_LABEL.productCategory,
     path: "/product-category",
   },
+  productCategoryDetail: {
+    title: storedRoutes ? storedRoutes.productCategory?.title : RESOURCE_LABEL.productCategory,
+    path: "/product-category/detail",
+  },
   productTemplate: {
     title: storedRoutes ? storedRoutes.productTemplate?.title : RESOURCE_LABEL.productTemplate,
     path: "/product-template",
@@ -308,6 +312,10 @@ const routes = {
   transferAssetDetail: {
     title: storedRoutes ? storedRoutes.transferAsset?.title : RESOURCE_LABEL.transferAsset,
     path: "/transfer-asset/detail",
+  },
+  address: {
+    title: storedRoutes ? storedRoutes.address?.title : RESOURCE_LABEL.address,
+    path: "/address",
   }
 };
 

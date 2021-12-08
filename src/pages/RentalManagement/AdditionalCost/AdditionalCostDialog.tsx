@@ -1,26 +1,10 @@
-import { ChangeEvent, FC, FormEvent, useEffect, useState, Fragment } from 'react';
-import {
-  Button,
-  Dialog,
-  TextField,
-  Grid,
-  Box,
-  CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  InputAdornment,
-  FormHelperText
-} from '@material-ui/core';
-import { dateFormatForInputControl } from '../../../constants/helpers';
+import { ChangeEvent, FC, FormEvent, useEffect, useState, Fragment, useRef } from 'react';
+import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { startCase } from 'lodash';
 import axiosInstance from "../../../axios/axiosInstance";
-import { groupBy } from 'lodash';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, isFieldNotTouched } from "../../../constants/helpers";
@@ -46,6 +30,8 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const ref = useRef(null);
 
   useEffect(() => {
     axiosInstance().get("/field/child?resource=Rental Management Cost").then(({ data: { data } }) => {
@@ -99,6 +85,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
   >
     {initialData && initialData.fields.length ?
       <Formik
+        innerRef={ref}
         enableReinitialize={true}
         initialValues={initialData.values}
         validationSchema={yupSchema(initialData.fields)}
@@ -114,7 +101,12 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
             <CustomDialogHeader
               title={"Edit"}
               onClose={() => {
-                onClose()
+                if (!isEqual(ref?.current?.values, initialData.values)) {
+                  setShowConfirmDialog(true)
+                }
+                else {
+                  onClose()
+                }
               }}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
@@ -191,13 +183,21 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" color="primary"
+              <Button
+                size="small"
+                color="primary"
                 onClick={() => {
-                  onClose()
+                  if (!isEqual(ref.current.values, initialData.values)) {
+                    setShowConfirmDialog(true)
+                  }
+                  else {
+                    onClose()
+                  }
                 }}
               >{"Close"}</Button>
               <CustomButton
                 loading={loading}
+                disabled={isEqual(ref?.current?.values, initialData.values)}
                 variant="contained"
                 color="primary"
                 type="submit"
@@ -205,6 +205,19 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
               > Save
               </CustomButton>
             </CustomDialogFooter>
+            {showConfirmDialog ?
+              <ConfirmCancelDialog
+                open={showConfirmDialog}
+                onSave={() => {
+                  setShowConfirmDialog(false)
+                  submitForm()
+                }}
+                onClose={() => {
+                  setShowConfirmDialog(false)
+                  onClose()
+                }}
+              /> : null
+            }
           </Fragment>
         )}
       </Formik>

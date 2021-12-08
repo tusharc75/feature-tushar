@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Box, Button, Grid, Paper, useMediaQuery } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useHistory, useParams } from 'react-router-dom';
@@ -38,6 +38,8 @@ import ProcessFlow from '../../components/ProcessFlow';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { SVG } from '../../assets';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import queryString from 'query-string';
+import {MdDelete, MdEdit} from "react-icons/md";
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -68,6 +70,8 @@ function OpportunityDetailsPage() {
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false);
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
   const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' })
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit } = parsed;
 
   const [messageDialog, setMessageDialog] = useState({
     open: false,
@@ -87,7 +91,6 @@ function OpportunityDetailsPage() {
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [, setShowAtLast] = useState(false);
   const [, setAdditionalFieldName] = useState('');
-
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
   }
@@ -159,7 +162,8 @@ function OpportunityDetailsPage() {
           Object.assign(modifiedData, data);
           modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).fullFormatAmount;
           setCopyOfOpportunityData(modifiedData);
-
+          const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+          setAllowedToEdit(isAllowedToEdit);
           handleMainPoints(data);
           setHeadingLbl(data.opportunityName);
 
@@ -203,7 +207,12 @@ function OpportunityDetailsPage() {
             tempExpanded.customerContacts = false;
           }
           setExpanded(tempExpanded);
-
+          if (isAllowedToEdit && openEdit === 'true') {
+            setOpenUpdateDialog(true);
+            const params = new URLSearchParams();
+            params.delete('openEdit');
+            history.push({ search: params.toString() });
+          }
           getOpportunityFields(data);
           setCustomizedRoutes([routes.opportunity, { title: `${data.opportunityName}` }]);
         })
@@ -578,15 +587,15 @@ function OpportunityDetailsPage() {
                 showHeading={true}
               >
                 {allowedToEdit ? (
-                  <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                    Edit
+                  <Button variant={isMobile ? "outlined" : "contained"} color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                    {isMobile ? <MdEdit/> : "Edit"}
                   </Button>
                 ) : null}
                 {opportunityPermissions.isDelete &&
                   opportunityData?.owner.optionValue &&
                   user?.user?._id &&
                   opportunityData.owner.optionValue === user.user._id ? (
-                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                  <DeleteButton text={isMobile ? <MdDelete/> : "Delete"} onClick={() => setShowConfirmBox(true)} />
                 ) : null}
               </DetailsPageHeader>
             )}

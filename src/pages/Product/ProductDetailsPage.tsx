@@ -37,6 +37,7 @@ import {
     UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import queryString from 'query-string';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -68,6 +69,8 @@ const ProductDetailsPage = () => {
     const {
         state: { user, permissions }
     }: any = useData();
+    const parsed = queryString.parse(history.location.search);
+    const { openEdit } = parsed;
     const [headingLabel, setHeadingLabel] = useState("");
     const [loading, setLoading] = useState(false);
     const [loadingWarehouse, setLoadingWarehouse] = useState(false);
@@ -174,6 +177,12 @@ const ProductDetailsPage = () => {
                     }
                     setProductData(data.productData);
                     setLoading(false);
+                    if (openEdit === 'true') {
+                        setOpenUpdateDialog(true);
+                        const params = new URLSearchParams();
+                        params.delete('openEdit');
+                        history.push({ search: params.toString() });
+                    }
                 }).catch((error) => {
                     toastConfig.setToastConfig(error);
                     setLoading(false);
@@ -701,11 +710,11 @@ const ProductDetailsPage = () => {
                                                                                 variant="outlined"
                                                                                 color='primary'
                                                                                 onClick={() => {
-                                                                                            history.push(`${routes.productInventory.path}`, {
-                                                                                                warehouse: productWarehouseData.find(d => d?.warehouse?.optionLabel === selectedWarehouse).warehouse,
-                                                                                                product: { "id": id, "name": headingLabel },
-                                                                                            })
-                                                                                        }}>
+                                                                                    history.push(`${routes.productInventory.path}`, {
+                                                                                        warehouse: productWarehouseData.find(d => d?.warehouse?.optionLabel === selectedWarehouse).warehouse,
+                                                                                        product: { "id": id, "name": headingLabel },
+                                                                                    })
+                                                                                }}>
                                                                                 View All
                                                                             </Button>
                                                                             // <Chip

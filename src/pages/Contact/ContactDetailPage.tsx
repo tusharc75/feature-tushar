@@ -35,7 +35,9 @@ import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import routes from '../../components/Helpers/Routes';
+import queryString from 'query-string';
 import AddReportsToContact from './AddReportsToContact';
+import {MdDelete, MdEdit} from "react-icons/md";
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -45,6 +47,8 @@ const ContactDetailsPage = (props) => {
     contactBreadcrumb
   } = props;
   const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit } = parsed;
   const {
     state: { user, permissions, selectedEntity, tour }, dispatch
   }: any = useData();
@@ -55,7 +59,7 @@ const ContactDetailsPage = (props) => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [contactFields, setContactFields] = useState([]);
   const [mainPoints, setMainPoints] = useState({});
-  const [, setAllowedToEdit] = useState(false);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
@@ -145,6 +149,9 @@ const ContactDetailsPage = (props) => {
     axiosInstance()
       .get(`/${contactApi}/${id}`)
       .then(({ data: { data } }) => {
+
+        
+
         handleMainPoints(data);
         let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
 
@@ -193,6 +200,15 @@ const ContactDetailsPage = (props) => {
           current: true
         });
 
+        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        setAllowedToEdit(isAllowedToEdit);
+        
+        if (isAllowedToEdit && openEdit === 'true') {
+          setOpenUpdateDialog(true);
+          const params = new URLSearchParams();
+          params.delete('openEdit');
+          history.push({ search: params.toString() });
+        }
         setOrgChartData(orgChartData);
       })
       .catch((err) => {
@@ -666,8 +682,8 @@ const ContactDetailsPage = (props) => {
               showHeading={true}
             >
               {contactPermissions.isUpdate && canEdit ? (
-                <Button id="detailEditButton" variant="contained" color="primary" size="small" onClick={handleOpneUpdateDialog}>
-                  Edit
+                <Button id="detailEditButton" variant={isMobile ? "outlined" : "contained"} color="primary" size="small" onClick={handleOpneUpdateDialog} className={contactClass.mobile_button_layout}>
+                  {isMobile ? <MdEdit/> : "Edit"}
                 </Button>
               ) : null}
 
@@ -675,7 +691,7 @@ const ContactDetailsPage = (props) => {
                 contactData?.owner?.optionValue &&
                 user?.user?._id &&
                 contactData.owner.optionValue === user.user._id ? (
-                <DeleteButton id="detailDeleteButton" text="Delete" size="small" onClick={() => setShowConfirmBox(true)} />
+                <DeleteButton id="detailDeleteButton" text={isMobile ? <MdDelete/> : "Delete"} size="small" onClick={() => setShowConfirmBox(true)}  />
               ) : null}
             </DetailsPageHeader>
             <ProcessFlow
@@ -707,8 +723,8 @@ const ContactDetailsPage = (props) => {
                     textColor="primary"
                     aria-label="icon tabs example"
                   >
-                    <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-                    <Tab label="Org Chart" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
+                    <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className='tabLayout' />
+                    <Tab label="Org Chart" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className='tabLayout'/>
                   </Tabs>
                   <Box hidden={currentTabIndex !== 0}>
                     {showAtLast ? (

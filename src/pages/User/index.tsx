@@ -20,7 +20,7 @@ import { FaUserCheck, FaUserAltSlash } from "react-icons/fa";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import { userType, isObjectEmpty, gridLoadingTimeout } from './../../constants/helpers'
+import { userType, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid } from './../../constants/helpers'
 import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
 import { uniqBy } from "lodash";
@@ -345,22 +345,21 @@ const User: FC = () => {
       .get(`/user${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          const { createdBy, updatedBy, role, entities, permissions, ...restProperties } = u;
+          const { createdBy, updatedBy, role, entities,  ...restProperties } = u;
 
           const [firstCompanyWideRole, ...restCompanyWideRoles] = role;
           const allRegionalWideRoles = uniqBy(entities.map(d => d.role).flat(), "_id") as any[];
 
           const [firstRegionalWideRole, ...restRegionalWideRoles] = allRegionalWideRoles;
 
+
+          let finalObject = prepareDataForGrid(u);
+          finalObject["canDelete"] = permissions.user.isDelete;
+          finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+          finalObject["allowedToEdit"] = permissions.user.isUpdate;
+
           let res = {
-            ...restProperties,
-            id: u._id,
-            concatedName: u.concatedName,
-            email: u.email,
-            createdByDate: u.createdBy?.date,
-            createdBy: u.createdBy?.user?.concatedName,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date,
+            ...finalObject,
             status: u.blocked ? u.blocked : false,
             isBrandAdmin: u.userType === userType.brandAdmin,
             companyWideRoleId: firstCompanyWideRole?._id ?? "",
@@ -669,9 +668,10 @@ const User: FC = () => {
             onEdit={(d) => {
               history.push(`${routes.userDetail.path}/${d._id}`)
             }}
-            extraParamsToCheckDelete={false}
+            extraParamsToCheckDelete={true}
             onDelete={(d) => {
-
+              setDeleteUser(d)
+              setShowDeleteDialog(true)
             }}
             rowCount={rowCount}
             page={page}

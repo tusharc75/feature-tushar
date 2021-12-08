@@ -40,9 +40,10 @@ interface PurchaseOrderQtyDialogProps {
   currency: string;
   onSubmit: VoidFunction | any;
   productData?: object | any;
+  bulkEdit?: boolean | any;
 }
 
-const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, currency, onSubmit, productData }) => {
+const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, currency, onSubmit, productData, bulkEdit }) => {
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
@@ -55,7 +56,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
       //Update Unit As Product Start
       poFields.filter((_f) => {
         if (["unit", "umo"].includes(_f.fieldName.toLowerCase())) {
-          if (productData?.productDetail?.unit || productData?.productDetail?.umo) {
+          if (!bulkEdit && (productData?.productDetail?.unit || productData?.productDetail?.umo)) {
             let unitOption = productData?.productDetail?.unit || productData?.productDetail?.umo
             if (unitOption) {
               let newUnitOptions = unitOption?.map((item, index) => {
@@ -73,7 +74,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
       //End
       setInitialData({
         fields: poFields,
-        values: getObjKeysWithValues(productData, poFields),
+        values: getObjKeysWithValues(!bulkEdit ? productData : productData[0], poFields),
       });
       EvaluteproductFields(poFields);
     })
@@ -91,9 +92,21 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
 
   const handleSubmit = (values) => {
     let returnData = []
-    returnData = [{ ...values, _id: productData._id, productId: productData.productId }]
+    if (bulkEdit) {
+      returnData = productData.map(d => { return ({ ...values, _id: d._id || d.productDetail._id, productId: d.productId }) })
+    }
+    else {
+      returnData = [{ ...values, _id: productData._id || productData.productDetail._id, productId: productData.productId }]
+    }
     onSubmit(returnData)
   };
+  function validate(values) {
+    const errors = {};
+    if (values?.qty < values?.actualReceived) {
+      errors['qty'] = 'Quantity should be greater than Actual Received';
+    }
+    return errors;
+  }
 
   return (<Dialog
     maxWidth="md"
@@ -108,7 +121,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
         enableReinitialize={true}
         initialValues={initialData.values}
         validationSchema={yupSchema(initialData.fields)}
-        validateOnMount
+        validate={validate}
         onSubmit={handleSubmit}>
         {({ values,
           errors,
@@ -118,7 +131,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
         }) => (
           <Fragment>
             <CustomDialogHeader
-              title={"Edit"}
+              title={bulkEdit ? "Bulk Edit" : `Edit ${productData.productName || ""}`}
               onClose={() => {
                 onClose()
               }}

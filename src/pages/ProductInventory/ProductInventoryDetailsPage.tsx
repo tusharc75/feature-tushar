@@ -29,8 +29,8 @@ import { isMobile } from "react-device-detect";
 import { BiFoodMenu } from "react-icons/bi";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import CustomTimeline from "../../components/CustomTimeline";
-import {GiAutoRepair, GrStatusInfo} from "react-icons/all";
-import {MdEdit} from "react-icons/md";
+import { GiAutoRepair, GrStatusInfo } from "react-icons/all";
+import { MdEdit } from "react-icons/md";
 
 
 
@@ -179,13 +179,14 @@ const ProductInventoryDetailsPage = () => {
       gridApi.setRowData([]);
     }
     axiosInstance().get(`/history/inventory/${id}`).then(({ data: { data } }) => {
-      setProductInventoryHistoryData(data)
-      data = data?.map((u) => ({
+      data = data?.map((u, index) => ({
         ...u,
-        id: u.inventory?._id,
+        _id: (index + 1),
+        id: (index + 1),
         reference: u.reference?.optionLabel,
         referenceId: u.reference?.optionValue
       }));
+      setProductInventoryHistoryData(data)
       dispatch({ type: "initialize", data: data, count: data.length });
       dispatch({ type: "loading", loading: false });
     }).catch((error) => {
@@ -301,6 +302,8 @@ const ProductInventoryDetailsPage = () => {
     }
   }
 
+  const manualStatus = ["Available", "Repair", "Scrap", "Lost"]
+
   return (
     <>
       <Fragment>
@@ -342,7 +345,7 @@ const ProductInventoryDetailsPage = () => {
                         size="small"
                         onClick={() => setShowRepairJobDialog(true)}
                       >
-                        {isMobile ? <GiAutoRepair size={20}/> : "Create Repair Job"}
+                        {isMobile ? <GiAutoRepair size={20} /> : "Create Repair Job"}
 
                       </Button>
                       <Button
@@ -352,9 +355,9 @@ const ProductInventoryDetailsPage = () => {
                         onClick={openActions}
                         disabled={updateLoading}
                         aria-controls="action-menu"
-                        endIcon={isMobile ? <ExpandMore style={{width: "12px" , height:"12px"}}/> : <ExpandMore />}
+                        endIcon={isMobile ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
                       >
-                        {isMobile ? <GrStatusInfo size={20}/> : "Change Status"}
+                        {isMobile ? <GrStatusInfo size={20} /> : "Change Status"}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -370,6 +373,7 @@ const ProductInventoryDetailsPage = () => {
                         {
                           statusOptions.map(o => {
                             return <MenuItem
+                              disabled={!manualStatus.includes(o?.optionLabel)}
                               onClick={() => {
                                 closeActions()
                                 handleStatusChange(o)
@@ -379,12 +383,12 @@ const ProductInventoryDetailsPage = () => {
                         }
                       </Menu>
                       <Button
-                        variant= {isMobile ? "text" : "outlined"}
+                        variant={isMobile ? "text" : "outlined"}
                         color="primary"
                         size="small"
                         onClick={handleOpenUpdateDialog}
                       >
-                        {isMobile ? <MdEdit size={22}/> : "Edit"}
+                        {isMobile ? <MdEdit size={22} /> : "Edit"}
                       </Button>
                     </>
                   )}
@@ -532,6 +536,68 @@ const ProductInventoryDetailsPage = () => {
                 </Box>
 
 
+                <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+                  <Paper style={{ overflow: 'hidden' }}>
+                    <Box
+                      padding={1}
+                      bgcolor="grey.200"
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Typography variant="subtitle2">
+                        BOM - Product
+                      </Typography>
+                    </Box>
+                    {(
+                      <Box>
+                        {loading || loadingBOMData ? (
+                          [1].map((i) => (
+                            <BoxWithBorder
+                              key={i}
+                              style={{
+                                margin: "8px",
+                              }}
+                            >
+                              <Box padding={1}>
+                                <Skeleton
+                                  variant="text"
+                                  width="100px"
+                                  height="20px"
+                                />
+                                <Box marginTop={1} />
+                                <Skeleton variant="text" width="100%" height="15px" />
+                              </Box>
+                            </BoxWithBorder>
+                          ))
+                        ) : BOMData.length ? (
+                          <>
+                            <ProductHierarchy
+                              data={BOMData}
+                              permissions={permissions?.product}
+                              unassignProduct={() => { }}
+                            />
+                            <Box px={1} my={1} >
+                              <Button
+                                fullWidth
+                                variant="outlined"
+                                color='primary'
+                                onClick={() => history.push(`${routes.productDetail.path}/${productId}/bom`, { productName: productInventoryData?.product?.optionLabel })}>
+                                View All
+                              </Button>
+                            </Box>
+                          </>
+                        ) : (
+                          <Box textAlign="center" padding={2} minHeight={150}>
+                            <Typography>No Product has been added </Typography>
+                          </Box>
+                        )}
+                      </Box>
+                    )}
+                  </Paper>
+                </Grid>
+
+
               </TabPanel>
 
 
@@ -545,55 +611,29 @@ const ProductInventoryDetailsPage = () => {
                           Asset History
                         </h3>
                       </div>
-                      <div>
-                        <CustomTimeline dataRows= {productInventoryHistoryData}/>
-                      </div>
+                      {isMobile && <div>
+                        <CustomTimeline dataRows={productInventoryHistoryData} />
+                      </div>}
 
                       <Grid item xs={12} sm={12} md={12} lg={12} className="mt-1">
-                        {columns ?
-
-
-
-                          isMobile ? <CustomSwipableList
-                            allowSelection={false}
-                            allowSwipe={false}
-                            permissions={permissions.productInventory}
-                            primaryField={columns?.find((d: any) => d?.field === "reference")}
-                            onClick={(data) => { console.log(data) }}
+                        {!isMobile && columns ?
+                          <CustomAgGrid
+                            columns={columns}
                             dataRows={dataRows}
+                            frameworkComponents={frameworkComponents}
+                            setGridApi={setGridApi}
                             dispatch={dispatch}
-                            onClone={() => { }}
-                            selectedRecords={selectedRecords}
-                            showClone={false}
-                            onEdit={() => { }}
-                            extraParamsToCheckDelete={false}
-                            onDelete={() => { }}
                             rowCount={rowCount}
+                            limit={limit}
+                            pageSizes={pageSizes}
                             page={page}
+                            allowAction={false}
+                            allowSelection={false}
+                            isClientSideGrid={true}
                             loading={loading}
-                            additionalDetails={[]}
-                            chips={[]}
-                            owerCollaboratorInitialsOrImages=""
-                            onCreate={() => { }}
-                            renderedFrom={productInventory.route}
-                          /> :
-                            <CustomAgGrid
-                              columns={columns}
-                              dataRows={dataRows}
-                              frameworkComponents={frameworkComponents}
-                              setGridApi={setGridApi}
-                              dispatch={dispatch}
-                              rowCount={rowCount}
-                              limit={limit}
-                              pageSizes={pageSizes}
-                              page={page}
-                              allowAction={false}
-                              allowSelection={false}
-                              isClientSideGrid={true}
-                              loading={loading}
-                              renderedFrom="rentalManagementDetailsPageInventory"
-                              refreshGrid={fetchProductInventoryHistory}
-                            />
+                            renderedFrom="rentalManagementDetailsPageInventory"
+                            refreshGrid={fetchProductInventoryHistory}
+                          />
                           : <Box
                             p={2}
                             height={500}
@@ -608,6 +648,8 @@ const ProductInventoryDetailsPage = () => {
 
                 </Grid>
 
+
+
               </TabPanel>
 
 
@@ -618,66 +660,6 @@ const ProductInventoryDetailsPage = () => {
 
 
 
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
-            <Paper style={{ overflow: 'hidden' }}>
-              <Box
-                padding={1}
-                bgcolor="grey.200"
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Typography variant="subtitle2">
-                  BOM - Product
-                </Typography>
-              </Box>
-              {(
-                <Box>
-                  {loading || loadingBOMData ? (
-                    [1].map((i) => (
-                      <BoxWithBorder
-                        key={i}
-                        style={{
-                          margin: "8px",
-                        }}
-                      >
-                        <Box padding={1}>
-                          <Skeleton
-                            variant="text"
-                            width="100px"
-                            height="20px"
-                          />
-                          <Box marginTop={1} />
-                          <Skeleton variant="text" width="100%" height="15px" />
-                        </Box>
-                      </BoxWithBorder>
-                    ))
-                  ) : BOMData.length ? (
-                    <>
-                      <ProductHierarchy
-                        data={BOMData}
-                        permissions={permissions?.product}
-                        unassignProduct={() => { }}
-                      />
-                      <Box px={1} my={1} >
-                        <Button
-                          fullWidth
-                          variant="outlined"
-                          color='primary'
-                          onClick={() => history.push(`${routes.productDetail.path}/${productId}/bom`, { productName: productInventoryData?.product?.optionLabel })}>
-                          View All
-                        </Button>
-                      </Box>
-                    </>
-                  ) : (
-                    <Box textAlign="center" padding={2} minHeight={150}>
-                      <Typography>No Product has been added </Typography>
-                    </Box>
-                  )}
-                </Box>
-              )}
             </Paper>
           </Grid>
         </Grid>

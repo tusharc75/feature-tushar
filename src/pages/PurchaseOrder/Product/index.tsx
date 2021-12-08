@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs, ButtonGroup, Container, InputAdornment, TextField } from "@material-ui/core";
+import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs, ButtonGroup, Container, InputAdornment, TextField, MenuItem, Menu } from "@material-ui/core";
 import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -23,6 +23,8 @@ import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { prepareDataForGrid } from "../../../constants/helpers";
 import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "../../../constants/columns"
+import { ExpandMore } from "@material-ui/icons";
+import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 
 
 const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable, id, setPurchaseOrderProduct }) => {
@@ -41,11 +43,15 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     const [productList, setProductList] = useState([]);
     const [showProductDialog, setShowProductDialog] = useState(false)
     const [selectedProductData, setSelectedProductData] = useState(null)
+    const [isBulkEdit, setIsBulkEdit] = useState(false)
 
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
+    const [deletePurchaseOrderProduct, setDeletePurchaseOrderProduct] = useState([]);
 
 
     useEffect(() => {
@@ -67,19 +73,6 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
             setColumns([...columns])
         })
     }, []);
-
-    // [
-    //     { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    //     { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
-    //     { field: "expectedDelivery", headerName: "Expected Delivery", show: true, disabled: true, cellRenderer: "dateRenderer", cellEditor: "dateEditor", editable: true },
-    //     { field: "quantity", headerName: "Quantity", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    //     { field: "baseUOM", headerName: "Base UOM", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "agSelectCellEditor", cellEditorParams: { cellRenderer: "commonRenderer", values: ["Hour", "Day", "Week", "Month"] }, editable: true },
-    //     { field: "price", headerName: "Price", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    //     { field: "tax", headerName: "Tax Percent", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    //     { field: "taxPerUnit", headerName: "Tax Per Unit", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    //     { field: "totalTax", headerName: "Total Tax", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    //     { field: "finalPrice", headerName: "Final Price", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    // ]
 
     const fetchPurchaseOrderProduct = () => {
         dispatch({ type: "loading", loading: true });
@@ -131,7 +124,8 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
                 onDelete={() => {
-                    deletePurchaseOrderProduct([params.data._id])
+                    setShowDeleteConfirmBox(true)
+                    setDeletePurchaseOrderProduct([params.data._id])
                 }
                 }
                 entity="rentalManagement"
@@ -139,11 +133,20 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
         </>
     );
 
+
+    const openActions = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const closeActions = () => {
+        setAnchorEl(null);
+    };
+
     const handleAddProduct = (products) => {
         setAddingProducts(true)
         let tempProductArray = products.map(d => ({
             "productId": d.id || d.productId,
-            "qty": parseInt(d.quantity || d.qty) || 0,
+            "qty": parseInt(d.quantity) || 0,
             "expectedDelivery": purchaseOrderData?.deliveryDate
         }))
         axiosInstance().post(`${purchaseOrder.api}/product/${id}/add`, { "orderDetails": tempProductArray })
@@ -172,10 +175,12 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
             });
     }
 
-    const deletePurchaseOrderProduct = (ids) => {
-        axiosInstance().post(`${purchaseOrder.api}/product/${id}/delete`, { ids })
+    const handleDelete = () => {
+        axiosInstance().post(`${purchaseOrder.api}/product/${id}/delete`, { ids: deletePurchaseOrderProduct })
             .then(() => {
                 fetchPurchaseOrderProduct()
+                setShowDeleteConfirmBox(false)
+                setDeletePurchaseOrderProduct([])
             }).catch((error) => {
                 toastConfig.setToastConfig(error)
             });
@@ -207,6 +212,55 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                         {isMobile ? <FaCartArrowDown size={22} /> : `Add Existing ${routes.product.title}`}
                     </Button>
                 </Box>
+
+                <div className="d-flex gap-2">
+                    <Box display="flex" justifyContent="flex-end" p="4px">
+                        <Box mx={1} />
+                        <Button
+                            variant={isMobile ? "outlined" : "contained"}
+                            color="primary"
+                            size="small"
+                            disabled={selectedRecords.length === 0}
+                            onClick={() => {
+                                setIsBulkEdit(true)
+                                setShowProductDialog(true)
+                            }}
+                        >
+                            {isMobile ? <EditIcon color="primary" /> : `Bulk Edit`}
+                        </Button>
+                    </Box>
+                    <HtmlTooltip title="Please select some product">
+                        <span>
+                            <Button
+                                variant="outlined"
+                                color="default"
+                                size="small"
+                                onClick={openActions}
+                                disabled={selectedRecords.length ? false : true}
+                                aria-controls="action-menu"
+                            >Actions <ExpandMore />
+                            </Button>
+                        </span>
+                    </HtmlTooltip>
+                    <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "left",
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                    >
+                        {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
+                            closeActions()
+                            setShowDeleteConfirmBox(true)
+                            setDeletePurchaseOrderProduct(selectedRecords.map(d => d._id))
+                        }}>Delete</MenuItem>}
+                    </Menu>
+                </div>
             </Box>
             {columns && frameWorkComponent ? isMobile ?
                 <CustomSwipableList
@@ -227,7 +281,8 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     }}
                     extraParamsToCheckDelete={true}
                     onDelete={(data) => {
-                        deletePurchaseOrderProduct([data._id])
+                        setShowDeleteConfirmBox(true)
+                        setDeletePurchaseOrderProduct([data._id])
                     }}
                     rowCount={rowCount}
                     page={page}
@@ -266,6 +321,8 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     }}
                     renderedFrom="purchaseOrderDetailsPageInventory"
                     refreshGrid={fetchPurchaseOrderProduct}
+                    fromPurchaseOrderGrid={true}
+                    currency={purchaseOrderData?.currency?.toLowerCase()}
                 />
                 : <Box
                     p={2}
@@ -302,7 +359,17 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     }}
                     onSubmit={handleUpdateQty}
                     currency={purchaseOrderData?.currency}
-                    productData={selectedProductData}
+                    productData={!isBulkEdit ? selectedProductData : selectedRecords}
+                    bulkEdit={isBulkEdit}
+                />
+            }
+            {
+                showDeleteConfirmBox &&
+                <ConfirmationDialog
+                    open={showDeleteConfirmBox}
+                    message={`Are you sure you want to delete  ? `}
+                    onClose={() => setShowDeleteConfirmBox(false)}
+                    onOk={handleDelete}
                 />
             }
         </Fragment>
