@@ -32,6 +32,7 @@ import useColumns, { getFrameworkComponents, getStaticFields } from '../../const
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { prepareDataForGrid } from "../../constants/helpers"
 import { startCase } from 'lodash';
+import EditIcon from "@material-ui/icons/Edit";
 
 let timeout;
 
@@ -117,15 +118,28 @@ const PricingConditions = () => {
   };
 
   const ActionsRenderer = params => (
-    permissions.pricingCondition.isDelete &&
-    <Tooltip title="Delete">
-      <IconButton size="small" aria-label="Delete" onClick={() => {
-        setDeleteRecord(params.data)
-        setShowDeleteConfirmBox(true)
-      }} >
-        <DeleteIcon color="error" />
+    <>
+      <IconButton
+        size="small"
+        aria-label="Edit"
+        onClick={() => {
+          history.push(routes.pricingCondition.path + "/detail/" + params.data._id)
+        }}
+      >
+        <EditIcon color="primary" />
       </IconButton>
-    </Tooltip >
+      {
+        permissions.pricingCondition.isDelete &&
+        <Tooltip title="Delete">
+          <IconButton size="small" aria-label="Delete" onClick={() => {
+            setDeleteRecord(params.data)
+            setShowDeleteConfirmBox(true)
+          }} >
+            <DeleteIcon color="error" />
+          </IconButton>
+        </Tooltip >
+      }
+    </>
   )
 
   const replaceFieldName = (field) => {
