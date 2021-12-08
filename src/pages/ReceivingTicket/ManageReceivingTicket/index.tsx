@@ -79,7 +79,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
 
     const modifiedData = setFieldsInAscendingOrder(fields)
     const newFilteredData = modifiedData.filter((formData) => {
-      if (transferData) {
+      if (transferData && transferData?.transferType) {
         if (transferData?.transferType === "Internal") {
           if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
             return false

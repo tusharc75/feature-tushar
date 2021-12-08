@@ -91,6 +91,7 @@ export default function DeliveryTicketDetail(props) {
   const [canEdit, setCanEdit] = useState(false)
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
 
+  const [transferData, setTransferData] = useState(null);
   const [startDeliveryDate, setStartDeliveryDate] = useState(null);
   const [signOffDate, setSignOffDate] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -164,6 +165,8 @@ export default function DeliveryTicketDetail(props) {
 
           const { data: { data: transferData } } = await axiosInstance()
             .get(`${routes.transferAsset.path}/${ticket.transferAsset?.optionValue}`)
+
+          setTransferData(transferData)
 
           data = data.filter((fields: any) => {
             if (transferData?.transferType === "Internal") {
@@ -683,6 +686,9 @@ export default function DeliveryTicketDetail(props) {
         ) : null}
         {openUpdateDialog && (
           <ManageDeliveryTicket
+            rentalData={deliveryTicketData?.type === "Rental Job" ? deliveryTicketData?.rental?.optionValue : null}
+            repairJobData={deliveryTicketData?.type === "Repair Job" ? deliveryTicketData?.repairJob?.optionValue : null}
+            transferData={deliveryTicketData?.type === "Transfer Asset" ? transferData : null}
             deliveryTicketId={deliveryTicketData?._id}
             open={openUpdateDialog}
             onClose={() => setOpenUpdateDialog(false)}

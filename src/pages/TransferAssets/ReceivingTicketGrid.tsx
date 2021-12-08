@@ -127,7 +127,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       let loadingTicketData: any = await fetchLoadingTickets();
 
       for (let i = 0; i < ticketData.length; i++) {
-        assetData[i].assetNumber = `${i + 1}. ${assetData[i].assetNumber}`
         for (let j = 0; j < assetData.length; j++) {
           if (ticketData[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
             assetData[j].receivingTicket = ticketData[i].receivingJobName;
@@ -189,36 +188,30 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   useEffect(() => {
     if (selectedRecords.length > 0) {
       const inventoryWithNoTicket = selectedRecords.filter((asset: any) => !asset?.hasOwnProperty('receivingTicket'));
+      const selectedInventoryDelivered = selectedRecords.filter(
+        (asset: any) => asset?.receivingTicketStatus === 'Delivered' || asset?.receivingTicketStatus === 'In-Transit'
+      );
+
+      setAssetsDelivered(selectedInventoryDelivered);
       setAssetWithNoTicket(inventoryWithNoTicket);
     }
-    setNextStep(true);
-    const inventoryWithNoTicket = dataRows.filter((asset: any) => !asset?.hasOwnProperty('receivingTicket'));
-    const inventoryWithTicket = dataRows.filter((asset: any) => asset?.hasOwnProperty('receivingTicket'));
-    const inventoryDelivered = dataRows.filter((asset: any) => asset?.receivingTicketStatus === 'Delivered');
-    const selectedInventoryDelivered = selectedRecords.filter(
-      (asset: any) => asset?.receivingTicketStatus === 'Delivered' || asset?.receivingTicketStatus === 'In-Transit'
-    );
 
-    setAssetsDelivered(selectedInventoryDelivered);
+    if (dataRows.length > 0) {
 
-    if (inventoryWithNoTicket.length > 0) {
-      setNextStep(false);
-    } else {
-      setNextStep(true);
-    }
-
-    // if (inventoryWithTicket.length > 0) {
-    //   setPrevStep(false)
-    // } else {
-    //   setPrevStep(true)
-    // }
-
-    if (transferAssetData?.transferType.includes('External')) {
-      if (inventoryDelivered.length === dataRows.length) {
-        setTransferIsEnded(true);
-        updateTransferStatus("Completed")
+      const inventoryWithNoTicket = dataRows.filter((asset: any) => !asset?.hasOwnProperty('receivingTicket'));
+      const inventoryDelivered = dataRows.filter((asset: any) => asset?.receivingTicketStatus === 'Delivered');
+      if (inventoryWithNoTicket.length > 0) {
+        setNextStep(false);
       } else {
-        setTransferIsEnded(false);
+        setNextStep(true);
+      }
+      if (transferAssetData?.transferType.includes('External')) {
+        if (inventoryDelivered.length === dataRows.length) {
+          setTransferIsEnded(true);
+          updateTransferStatus("Completed")
+        } else {
+          setTransferIsEnded(false);
+        }
       }
     }
   }, [dataRows, selectedRecords]);
