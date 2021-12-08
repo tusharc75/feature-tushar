@@ -140,7 +140,8 @@ export default function ManageQuoteDialog({
   const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
-
+  const [finalDestinationDropDown, setFinalDestinationDropDown] = useState([]);
+  const [finalDestinationMainData, setFinalDestinationMainData] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
@@ -266,6 +267,12 @@ export default function ManageQuoteDialog({
               entityData.initialValues["customerAccountName"]
           )
         );
+      }
+      const finalDestinationDropdownData = entityData.fields.find(
+        (d) => d.fieldName === "finalDestination"
+      );
+      if (finalDestinationDropdownData) {
+        setFinalDestinationMainData(finalDestinationDropdownData.option)
       }
     }
 
@@ -702,6 +709,19 @@ export default function ManageQuoteDialog({
       );
       setCustomerContactDataSource((prevState) => [...prevState, newCustomer]);
     }
+  };
+
+  const onFinalDestinatioDropDownOpen = (selectedAccount) => {
+    let shippingAddress = accountData.find(d => d.optionValue === selectedAccount)?.shippingAddress
+    if (shippingAddress) {
+      setFinalDestinationDropDown(
+        finalDestinationMainData.filter((d) => shippingAddress?.some(u => u === d.optionValue))
+      );
+    }
+    else {
+      setFinalDestinationDropDown([])
+    }
+
   };
 
   const handleErrors = (values) => {
@@ -1259,164 +1279,156 @@ export default function ManageQuoteDialog({
                                           </Grid>
                                         ) : null}
                                       </Grid>
-                                    ) : field.fieldName === "owner" ? (
+                                    ) : field.fieldName === "finalDestination" ? (
                                       <FormTypes
+                                        isNew={isNew}
                                         {...field}
+                                        disabled={!isNew && field.disableOnEdit}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
-                                        options={ownerData}
-                                        onChange={(e, val) => {
-                                          setFieldValue(
-                                            field.fieldName,
-                                            val && val.optionValue
-                                              ? val.optionValue
-                                              : ""
-                                          );
-                                          handleValuesChange({
-                                            [field.fieldName]: val && val.optionValue ? val.optionValue : ""
-                                          })
+                                        options={finalDestinationDropDown}
+                                        setFieldValue={(name, value) => {
+                                          // handleValuesChange(name, value);
+                                          setFieldValue(name, value)
 
-                                          if (
-                                            val &&
-                                            val.optionValue !== user?.user?._id
-                                          ) {
-                                            const checkOwnerAddedInCollaborator =
-                                              values["collaborator"].find(
-                                                (d) =>
-                                                  d?.optionValue ===
-                                                  user?.user?._id
-                                              );
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        onOpen={() =>
+                                          onFinalDestinatioDropDownOpen(
+                                            values.customerAccountName
+                                          )
+                                        }
+                                      />)
+                                      : field.fieldName === "owner" ? (
+                                        <FormTypes
+                                          {...field}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={ownerData}
+                                          onChange={(e, val) => {
+                                            setFieldValue(
+                                              field.fieldName,
+                                              val && val.optionValue
+                                                ? val.optionValue
+                                                : ""
+                                            );
+                                            handleValuesChange({
+                                              [field.fieldName]: val && val.optionValue ? val.optionValue : ""
+                                            })
+
                                             if (
-                                              !checkOwnerAddedInCollaborator
+                                              val &&
+                                              val.optionValue !== user?.user?._id
                                             ) {
-                                              setFieldValue("collaborator", [
-                                                ...values["collaborator"],
-                                                collaboratorData.find(
+                                              const checkOwnerAddedInCollaborator =
+                                                values["collaborator"].find(
                                                   (d) =>
                                                     d?.optionValue ===
                                                     user?.user?._id
-                                                ).optionValue,
-                                              ]);
+                                                );
+                                              if (
+                                                !checkOwnerAddedInCollaborator
+                                              ) {
+                                                setFieldValue("collaborator", [
+                                                  ...values["collaborator"],
+                                                  collaboratorData.find(
+                                                    (d) =>
+                                                      d?.optionValue ===
+                                                      user?.user?._id
+                                                  ).optionValue,
+                                                ]);
+                                              }
                                             }
-                                          }
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        isNew={isNew}
-                                        disabled={disableOwnerDropDown || (!isNew && field.disableOnEdit)}
-                                        onOpen={() => {
-                                          onOwnerDropdownOpen(
-                                            values["collaborator"]
-                                          );
-                                        }}
-                                      />
-                                    ) : field.fieldName === "collaborator" ? (
-                                      <FormTypes
-                                        {...field}
-                                        isNew={isNew}
-                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={collaboratorData}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange({ [name]: value })
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onOpen={() => {
-                                          onCollabOwnerMultiselectOpen(
-                                            values["owner"]
-                                          );
-                                        }}
-                                      />
-                                    ) : field.fieldName === "privateAccess" ? (
-                                      <FormTypes
-                                        {...field}
-                                        isNew={isNew}
-                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange({ [name]: value })
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onChange={(e) => {
-                                          setFieldValue(
-                                            field.fieldName,
-                                            e.target.checked
-                                          );
-                                          if (e.target.checked) {
-                                            let doaUserDataTemp = doaCollaboratorResources?.filter(userData => userData?.optionValue && collaboratorData.some(item => item?.optionValue !== values["owner"] && item?.optionValue === userData?.optionValue)).map(d => d?.optionValue)
-                                            setFieldValue("collaborator", [...new Set([
-                                              ...values["collaborator"]].concat(doaUserDataTemp))]
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          isNew={isNew}
+                                          disabled={disableOwnerDropDown || (!isNew && field.disableOnEdit)}
+                                          onOpen={() => {
+                                            onOwnerDropdownOpen(
+                                              values["collaborator"]
                                             );
-                                          }
-                                        }}
-                                      />
-                                    ) : field.fieldName === "probability" ? (
-                                      <FormTypes
-                                        {...field}
-                                        // {...rest}
-                                        isNew={isNew}
-                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange({ [name]: value })
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onChange={(e) => {
-                                          if (
-                                            e.target.value &&
-                                            parseFloat(e.target.value) > 100
-                                          ) {
-                                            setFieldValue("probability", "100");
-                                          } else {
-                                            setFieldValue(
-                                              "probability",
-                                              e.target.value
-                                            );
-                                          }
-                                        }}
-                                      />
-                                    ) : field.fieldName === "lostReason" ? (
-                                      values["stage"] === "Closed Lost" ? (
+                                          }}
+                                        />
+                                      ) : field.fieldName === "collaborator" ? (
                                         <FormTypes
                                           {...field}
+                                          isNew={isNew}
+                                          disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={collaboratorData}
+                                          setFieldValue={(name, value) => {
+                                            handleValuesChange({ [name]: value })
+                                            setFieldValue(name, value)
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          onOpen={() => {
+                                            onCollabOwnerMultiselectOpen(
+                                              values["owner"]
+                                            );
+                                          }}
+                                        />
+                                      ) : field.fieldName === "privateAccess" ? (
+                                        <FormTypes
+                                          {...field}
+                                          isNew={isNew}
+                                          disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          setFieldValue={(name, value) => {
+                                            handleValuesChange({ [name]: value })
+                                            setFieldValue(name, value)
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          onChange={(e) => {
+                                            setFieldValue(
+                                              field.fieldName,
+                                              e.target.checked
+                                            );
+                                            if (e.target.checked) {
+                                              let doaUserDataTemp = doaCollaboratorResources?.filter(userData => userData?.optionValue && collaboratorData.some(item => item?.optionValue !== values["owner"] && item?.optionValue === userData?.optionValue)).map(d => d?.optionValue)
+                                              setFieldValue("collaborator", [...new Set([
+                                                ...values["collaborator"]].concat(doaUserDataTemp))]
+                                              );
+                                            }
+                                          }}
+                                        />
+                                      ) : field.fieldName === "probability" ? (
+                                        <FormTypes
+                                          {...field}
+                                          // {...rest}
                                           isNew={isNew}
                                           disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                           values={values}
@@ -1435,236 +1447,185 @@ export default function ManageQuoteDialog({
                                           isTooltip={field?.isTooltip || false}
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
-                                        />
-                                      ) : null
-                                    ) : field.fieldName === "currency" ? (
-                                      <FormTypes
-                                        {...field}
-                                        isNew={isNew}
-                                        disabled={!isClone && !isNew ? (!editCurrency || field.disableOnEdit) : false}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange({ [name]: value })
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onChange={(e, val) => {
-                                          if (val && val.currencyCode) {
-                                            setFieldValue(
-                                              field.fieldName,
-                                              val.currencyCode
-                                            );
-                                            setCurrencySymbol(val.symbolNative);
-                                          } else {
-                                            setFieldValue(field.fieldName, "");
-                                            setCurrencySymbol(null);
-                                          }
-                                        }}
-                                      />
-                                    ) : field.fieldName === "estimatedAmount" ||
-                                      field.fieldName === "invoiceAmount" ? (
-                                      <FormTypes
-                                        {...field}
-                                        // {...rest}
-                                        isNew={isNew}
-                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
-                                        selectedCurrencyCode={values["currency"]}
-                                        startAdornment={
-                                          currencySymbol ? (
-                                            <InputAdornment position="start">
-                                              {currencySymbol}
-                                            </InputAdornment>
-                                          ) : (
-                                            ""
-                                          )
-                                        }
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange({ [name]: value })
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    ) : field.fieldName === "expiryDate" ? (
-                                      <FormTypes
-                                        {...field}
-                                        // {...rest}
-                                        disablePast={true}
-                                        isNew={isNew}
-                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
-                                        selectedCurrencyCode={values["currency"]}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange({ [name]: value })
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    ) : [
-                                      "quoteAcceptDate",
-                                      "salesOrderCreationDate",
-                                      "invoiceCreationDate",
-                                      "invoicedDate",
-                                    ].indexOf(field?.fieldName) >= 0 ? (
-                                      <FormTypes
-                                        {...field}
-                                        // {...rest}
-                                        isNew={isNew}
-                                        disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange({ [name]: value })
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ["imageUpload", "fileUpload"].some(
-                                            (s) => s === field.type
-                                          )
-                                            ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(
-                                                completePercentage
+                                          onChange={(e) => {
+                                            if (
+                                              e.target.value &&
+                                              parseFloat(e.target.value) > 100
+                                            ) {
+                                              setFieldValue("probability", "100");
+                                            } else {
+                                              setFieldValue(
+                                                "probability",
+                                                e.target.value
                                               );
                                             }
-                                            : null
-                                        }
-                                        customError={customError}
-                                        onChange={(date) => {
-                                          setFieldValue(field.fieldName, date);
-                                          handleErrors({
-                                            ...values,
-                                            [field.fieldName]: date,
-                                          });
-                                        }}
-                                      />
-                                    ) : field.fieldName === formFieldNames.marketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={
-                                            permissions.marketSegment?.isCreate ? 11
-                                              : 11
-                                          }
-                                          sm={
-                                            permissions.marketSegment?.isCreate ? 11
-                                              : 11
-                                          }
-                                          md={
-                                            permissions.marketSegment?.isCreate ? 11
-                                              : 11
-                                          }
-                                        >
+                                          }}
+                                        />
+                                      ) : field.fieldName === "lostReason" ? (
+                                        values["stage"] === "Closed Lost" ? (
                                           <FormTypes
                                             {...field}
                                             isNew={isNew}
                                             disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
-                                            fields={entityData.fields}
-                                            fieldData={field}
+                                            values={values}
                                             errors={errors}
                                             touched={touched}
                                             label={field.fieldLabel}
                                             name={field.fieldName}
                                             type={field.type}
+                                            options={field.option}
                                             setFieldValue={(name, value) => {
                                               handleValuesChange({ [name]: value })
                                               setFieldValue(name, value)
                                             }}
                                             required={field.required}
                                             fullWidth
-                                            isTooltip={field.isTooltip}
-                                            tooltipMessage={field.tooltipMessage}
-                                            onChange={(e, val) => {
-                                              setNewMarketSegmentId(null);
-                                              setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                              setNewSubMarketSegmentId(null);
-                                              setFieldValue(formFieldNames.subMarketSegment, "")
-                                              marketSegmentChange(val && val.optionValue ? val.optionValue : "");
-                                            }}
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
                                             size="small"
-                                            values={
-                                              newMarketSegmentId
-                                                ? initializeMarketSegmentDropdown(
-                                                  values,
-                                                  marketSegmentDataSource
-                                                )
-                                                : values
-                                            }
-                                            options={marketSegmentDataSource}
-                                            doNotShowInfoTooltip={true}
                                           />
-                                        </Grid>
-                                        {
-                                          permissions.marketSegment?.isCreate && (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip
-                                                title="Add Market Segment"
-                                                className="mt-1"
-                                              >
-                                                <IconButton
-                                                  onClick={() => { setShowAddMarketSegmentDialog(true); }}
-                                                  disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
-                                                  size="small"
-                                                >
-                                                  <AddIcon color={isClone ? "primary" : !isNew && field.disableOnEdit ? "disabled" : "primary"} />
-                                                </IconButton>
-                                              </Tooltip>
-                                            </Grid>
-                                          )
-                                        }
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip
-                                              title={
-                                                field?.tooltipMessage ?? ""
+                                        ) : null
+                                      ) : field.fieldName === "currency" ? (
+                                        <FormTypes
+                                          {...field}
+                                          isNew={isNew}
+                                          disabled={!isClone && !isNew ? (!editCurrency || field.disableOnEdit) : false}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            handleValuesChange({ [name]: value })
+                                            setFieldValue(name, value)
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          onChange={(e, val) => {
+                                            if (val && val.currencyCode) {
+                                              setFieldValue(
+                                                field.fieldName,
+                                                val.currencyCode
+                                              );
+                                              setCurrencySymbol(val.symbolNative);
+                                            } else {
+                                              setFieldValue(field.fieldName, "");
+                                              setCurrencySymbol(null);
+                                            }
+                                          }}
+                                        />
+                                      ) : field.fieldName === "estimatedAmount" ||
+                                        field.fieldName === "invoiceAmount" ? (
+                                        <FormTypes
+                                          {...field}
+                                          // {...rest}
+                                          isNew={isNew}
+                                          disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
+                                          selectedCurrencyCode={values["currency"]}
+                                          startAdornment={
+                                            currencySymbol ? (
+                                              <InputAdornment position="start">
+                                                {currencySymbol}
+                                              </InputAdornment>
+                                            ) : (
+                                              ""
+                                            )
+                                          }
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            handleValuesChange({ [name]: value })
+                                            setFieldValue(name, value)
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                        />
+                                      ) : field.fieldName === "expiryDate" ? (
+                                        <FormTypes
+                                          {...field}
+                                          // {...rest}
+                                          disablePast={true}
+                                          isNew={isNew}
+                                          disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
+                                          selectedCurrencyCode={values["currency"]}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            handleValuesChange({ [name]: value })
+                                            setFieldValue(name, value)
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                        />
+                                      ) : [
+                                        "quoteAcceptDate",
+                                        "salesOrderCreationDate",
+                                        "invoiceCreationDate",
+                                        "invoicedDate",
+                                      ].indexOf(field?.fieldName) >= 0 ? (
+                                        <FormTypes
+                                          {...field}
+                                          // {...rest}
+                                          isNew={isNew}
+                                          disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            handleValuesChange({ [name]: value })
+                                            setFieldValue(name, value)
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          imageOrFileUploadCompletePercentage={
+                                            ["imageUpload", "fileUpload"].some(
+                                              (s) => s === field.type
+                                            )
+                                              ? (completePercentage) => {
+                                                setUploadingImageOrFileProgress(
+                                                  completePercentage
+                                                );
                                               }
-                                            >
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
-                                    </Grid>
-                                      : field.fieldName === formFieldNames.subMarketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                              : null
+                                          }
+                                          customError={customError}
+                                          onChange={(date) => {
+                                            setFieldValue(field.fieldName, date);
+                                            handleErrors({
+                                              ...values,
+                                              [field.fieldName]: date,
+                                            });
+                                          }}
+                                        />
+                                      ) : field.fieldName === formFieldNames.marketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                         <Grid container spacing={1}>
                                           <Grid
                                             item
@@ -1701,19 +1662,22 @@ export default function ManageQuoteDialog({
                                               isTooltip={field.isTooltip}
                                               tooltipMessage={field.tooltipMessage}
                                               onChange={(e, val) => {
-                                                setNewSubMarketSegmentId(null);
+                                                setNewMarketSegmentId(null);
                                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                setNewSubMarketSegmentId(null);
+                                                setFieldValue(formFieldNames.subMarketSegment, "")
+                                                marketSegmentChange(val && val.optionValue ? val.optionValue : "");
                                               }}
                                               size="small"
                                               values={
-                                                newSubMarketSegmentId
-                                                  ? initializeSubMarketSegmentDropdown(
+                                                newMarketSegmentId
+                                                  ? initializeMarketSegmentDropdown(
                                                     values,
-                                                    subMarketSegmentDataSource
+                                                    marketSegmentDataSource
                                                   )
                                                   : values
                                               }
-                                              options={subMarketSegmentDataSource}
+                                              options={marketSegmentDataSource}
                                               doNotShowInfoTooltip={true}
                                             />
                                           </Grid>
@@ -1721,13 +1685,11 @@ export default function ManageQuoteDialog({
                                             permissions.marketSegment?.isCreate && (
                                               <Grid item xs={1} sm={1} md={1}>
                                                 <Tooltip
-                                                  title="Add Sub Market Segment"
+                                                  title="Add Market Segment"
                                                   className="mt-1"
                                                 >
                                                   <IconButton
-                                                    onClick={() => {
-                                                      setShowAddMarketSegmentDialog(true);
-                                                    }}
+                                                    onClick={() => { setShowAddMarketSegmentDialog(true); }}
                                                     disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                                     size="small"
                                                   >
@@ -1749,122 +1711,208 @@ export default function ManageQuoteDialog({
                                             </Grid>
                                           ) : null}
                                         </Grid>
-                                      </Grid> : field.fieldName == "projectSales" ?
-                                        <Grid container spacing={1}>
-                                          <Grid
-                                            item
-                                            xs={
-                                              permissions?.projectStrategy?.isCreate ? 10
-                                                : 11
+                                      </Grid>
+                                        : field.fieldName === formFieldNames.subMarketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                          <Grid container spacing={1}>
+                                            <Grid
+                                              item
+                                              xs={
+                                                permissions.marketSegment?.isCreate ? 11
+                                                  : 11
+                                              }
+                                              sm={
+                                                permissions.marketSegment?.isCreate ? 11
+                                                  : 11
+                                              }
+                                              md={
+                                                permissions.marketSegment?.isCreate ? 11
+                                                  : 11
+                                              }
+                                            >
+                                              <FormTypes
+                                                {...field}
+                                                isNew={isNew}
+                                                disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
+                                                fields={entityData.fields}
+                                                fieldData={field}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                setFieldValue={(name, value) => {
+                                                  handleValuesChange({ [name]: value })
+                                                  setFieldValue(name, value)
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field.isTooltip}
+                                                tooltipMessage={field.tooltipMessage}
+                                                onChange={(e, val) => {
+                                                  setNewSubMarketSegmentId(null);
+                                                  setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                }}
+                                                size="small"
+                                                values={
+                                                  newSubMarketSegmentId
+                                                    ? initializeSubMarketSegmentDropdown(
+                                                      values,
+                                                      subMarketSegmentDataSource
+                                                    )
+                                                    : values
+                                                }
+                                                options={subMarketSegmentDataSource}
+                                                doNotShowInfoTooltip={true}
+                                              />
+                                            </Grid>
+                                            {
+                                              permissions.marketSegment?.isCreate && (
+                                                <Grid item xs={1} sm={1} md={1}>
+                                                  <Tooltip
+                                                    title="Add Sub Market Segment"
+                                                    className="mt-1"
+                                                  >
+                                                    <IconButton
+                                                      onClick={() => {
+                                                        setShowAddMarketSegmentDialog(true);
+                                                      }}
+                                                      disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
+                                                      size="small"
+                                                    >
+                                                      <AddIcon color={isClone ? "primary" : !isNew && field.disableOnEdit ? "disabled" : "primary"} />
+                                                    </IconButton>
+                                                  </Tooltip>
+                                                </Grid>
+                                              )
                                             }
+                                            {field?.tooltipMessage ? (
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip
+                                                  title={
+                                                    field?.tooltipMessage ?? ""
+                                                  }
+                                                >
+                                                  <InfoIcon color="disabled" />
+                                                </Tooltip>
+                                              </Grid>
+                                            ) : null}
+                                          </Grid>
+                                        </Grid> : field.fieldName == "projectSales" ?
+                                          <Grid container spacing={1}>
+                                            <Grid
+                                              item
+                                              xs={
+                                                permissions?.projectStrategy?.isCreate ? 10
+                                                  : 11
+                                              }
 
-                                            sm={
-                                              permissions?.projectStrategy?.isCreate ? 10
-                                                : 11
+                                              sm={
+                                                permissions?.projectStrategy?.isCreate ? 10
+                                                  : 11
+                                              }
+                                              md={
+                                                permissions?.projectStrategy?.isCreate ? 10
+                                                  : 11
+                                              }
+                                            >
+                                              <FormTypes
+                                                {...field}
+                                                isNew={isNew}
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                options={projectSalesDataSource}
+                                                disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
+                                                setFieldValue={(name, value) => {
+                                                  handleValuesChange({ [name]: value })
+                                                  setFieldValue(name, value)
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={
+                                                  field?.isTooltip || false
+                                                }
+                                                tooltipMessage={
+                                                  field?.tooltipMessage
+                                                }
+                                                doNotShowInfoTooltip={true}
+                                                size="small"
+                                                onOpen={() =>
+                                                  onProjectSalesDropDownOpen(
+                                                    values.customerAccountName
+                                                  )
+                                                }
+                                              />
+                                            </Grid>
+                                            {
+                                              permissions?.projectStrategy?.isCreate && (
+                                                <Grid item xs={1} sm={1} md={1}>
+                                                  <Tooltip
+                                                    title="Add Project Sales"
+                                                    className="mt-1"
+                                                  >
+                                                    <IconButton
+                                                      onClick={() => {
+                                                        setShowAddProjectSalesDialog(true);
+                                                      }}
+                                                      disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
+                                                      size="small"
+                                                    >
+                                                      <AddIcon color={isClone ? "primary" : !isNew && field.disableOnEdit ? "disabled" : "primary"} />
+                                                    </IconButton>
+                                                  </Tooltip>
+                                                </Grid>
+                                              )
                                             }
-                                            md={
-                                              permissions?.projectStrategy?.isCreate ? 10
-                                                : 11
-                                            }
-                                          >
+                                            {field?.tooltipMessage ? (
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip
+                                                  title={
+                                                    field?.tooltipMessage ?? ""
+                                                  }
+                                                >
+                                                  <InfoIcon color="disabled" />
+                                                </Tooltip>
+                                              </Grid>
+                                            ) : null}
+                                          </Grid>
+                                          : (
                                             <FormTypes
                                               {...field}
                                               isNew={isNew}
+                                              disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
                                               values={values}
                                               errors={errors}
                                               touched={touched}
                                               label={field.fieldLabel}
                                               name={field.fieldName}
                                               type={field.type}
-                                              options={projectSalesDataSource}
-                                              disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
+                                              options={field.option}
                                               setFieldValue={(name, value) => {
                                                 handleValuesChange({ [name]: value })
                                                 setFieldValue(name, value)
                                               }}
                                               required={field.required}
                                               fullWidth
-                                              isTooltip={
-                                                field?.isTooltip || false
-                                              }
-                                              tooltipMessage={
-                                                field?.tooltipMessage
-                                              }
-                                              doNotShowInfoTooltip={true}
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
                                               size="small"
-                                              onOpen={() =>
-                                                onProjectSalesDropDownOpen(
-                                                  values.customerAccountName
+                                              imageOrFileUploadCompletePercentage={
+                                                ["imageUpload", "fileUpload"].some(
+                                                  (s) => s === field.type
                                                 )
+                                                  ? (completePercentage) => {
+                                                    setUploadingImageOrFileProgress(
+                                                      completePercentage
+                                                    );
+                                                  }
+                                                  : null
                                               }
                                             />
-                                          </Grid>
-                                          {
-                                            permissions?.projectStrategy?.isCreate && (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip
-                                                  title="Add Project Sales"
-                                                  className="mt-1"
-                                                >
-                                                  <IconButton
-                                                    onClick={() => {
-                                                      setShowAddProjectSalesDialog(true);
-                                                    }}
-                                                    disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
-                                                    size="small"
-                                                  >
-                                                    <AddIcon color={isClone ? "primary" : !isNew && field.disableOnEdit ? "disabled" : "primary"} />
-                                                  </IconButton>
-                                                </Tooltip>
-                                              </Grid>
-                                            )
-                                          }
-                                          {field?.tooltipMessage ? (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip
-                                                title={
-                                                  field?.tooltipMessage ?? ""
-                                                }
-                                              >
-                                                <InfoIcon color="disabled" />
-                                              </Tooltip>
-                                            </Grid>
-                                          ) : null}
-                                        </Grid>
-                                        : (
-                                          <FormTypes
-                                            {...field}
-                                            isNew={isNew}
-                                            disabled={!isClone ? (!isNew && field.disableOnEdit) : false}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={field.option}
-                                            setFieldValue={(name, value) => {
-                                              handleValuesChange({ [name]: value })
-                                              setFieldValue(name, value)
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                            imageOrFileUploadCompletePercentage={
-                                              ["imageUpload", "fileUpload"].some(
-                                                (s) => s === field.type
-                                              )
-                                                ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(
-                                                    completePercentage
-                                                  );
-                                                }
-                                                : null
-                                            }
-                                          />
-                                        )}
+                                          )}
                                   </Grid>
                                 ))}
                               </Grid>

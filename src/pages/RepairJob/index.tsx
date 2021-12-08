@@ -546,7 +546,7 @@ const RepairJob = () => {
                 field: "typeOfRepair",
               }
             ]}
-            onCreate={clickCreateNew}
+            onCreate={false}
             showClone={false}
             onClone={() => { }}
             renderedFrom='repairJobPage'
@@ -610,8 +610,8 @@ const RepairJob = () => {
           open={showManageRepairJobDialog.open}
           repairJobId={showManageRepairJobDialog.idToClone}
           onClose={() => setShowManageRepairJobDialog({ open: false, isClone: false, idToClone: null })}
-          onSuccess={() => {
-            fetchRepairJobs();
+          onSuccess={(data) => {
+            history.push(`${routes.repairJobDetail.path}/${data._id}`);
             setShowManageRepairJobDialog({ open: false, isClone: false, idToClone: null });
           }}
         />

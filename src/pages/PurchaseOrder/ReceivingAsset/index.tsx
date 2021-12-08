@@ -17,6 +17,7 @@ import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import routes from "../../../components/Helpers/Routes";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
+import { Link } from "react-router-dom";
 
 const useStyles = makeStyles(() => ({
     equal: {
@@ -31,7 +32,7 @@ const useStyles = makeStyles(() => ({
 
 }));
 
-const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduct, handleUpdateData }) => {
+const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, handleUpdateData, statusOptions }) => {
     const toastConfig = useContext(CustomToastContext);
     const {
         state: { user, permissions }
@@ -57,9 +58,15 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                 <p
                     className="text-truncate"
                     title={row.original.description}
-                // to={rowData.type === 'Product' ? `${routes.productDetail.path}/${rowData.id}` : `${routes.packagesDetail.path}/${rowData.id}`}
                 >
-                    {row.original.description}
+                    {row.original.hasOwnProperty("assetNumber") ? <Link className="link"
+                        to={`${routes.productInventoryDetail.path}/${row.original.treeId}`} title={row.original.description}>
+                        {row.original.description}
+                    </Link>
+                        : <Link className="link"
+                            to={`${routes.productDetail.path}/${row.original.treeId}`} title={row.original.description}>
+                            {row.original.description}
+                        </Link>}
                 </p>
                 {row.original.hasOwnProperty("assetNumber") &&
                     <span className="d-flex align-items-center gap-2">
@@ -71,7 +78,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
     },
     {
         accessor: 'actualDelivery',
-        Header: 'Actual Delivery',
+        Header: 'Actual Delivery Date',
         Cell: ({ row }) => (
             row.original.actualDelivery ? <h5 className="createBy text-truncate" title={`${moment(row.original.actualDelivery.slice(0, 10)).format(dateFormat)}`}>
                 <span className="">
@@ -89,58 +96,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
             </h5> : <NoDataCell />
         )
     },
-        // {
-        //     accessor: 'expectedDelivery',
-        //     Header: 'Expected Delivery',
-        //     Cell: ({ row }) => (
-        //         row.original.expectedDelivery ? <h5 className="createBy text-truncate" title={`${moment(row.original.expectedDelivery.slice(0, 10)).format(dateFormat)}`}>
-        //             <span className="">
-        //                 {moment(row.original.expectedDelivery.slice(0, 10)).format("MM/DD/YYYY")}</span>
-        //         </h5> : <NoDataCell />
-        //     )
-        // },
     ])
-    // const columns = [
-
-    //     {
-    //         accessor: 'expectedDelivery',
-    //         Header: 'Expected Delivery',
-    //         Cell: ({ row }) => (
-    //             row.original.expectedDelivery ? <h5 className="createBy text-truncate" title={`${moment(row.original.expectedDelivery.slice(0, 10)).format(dateFormat)}`}>
-    //                 <span className="">
-    //                     {moment(row.original.expectedDelivery.slice(0, 10)).format("MM/DD/YYYY")}</span>
-    //             </h5> : <NoDataCell />
-    //         )
-    //     },
-
-    //     {
-    //         accessor: 'quantity',
-    //         Header: 'Quantity',
-    //         Cell: ({ row }) => (
-    //             row.original.quantity ? <p className="text-truncate">
-    //                 {row.original.quantity}
-    //             </p> : <NoDataCell />
-    //         )
-    //     },
-    //     {
-    //         accessor: 'actualReceived',
-    //         Header: 'Actual Received',
-    //         Cell: ({ row }) => (
-    //             row.original.actualReceived ? <p className="text-truncate">
-    //                 {row.original.actualReceived}
-    //             </p> : <NoDataCell />
-    //         )
-    //     },
-
-    //     {
-    //         accessor: 'baseUOM',
-    //         Header: 'Base UOM',
-    //         Cell: ({ row }) => (
-    //             row.original.baseUOM ? <p>{startCase(row.original.baseUOM)}</p> : <NoDataCell />
-    //         )
-    //     },
-
-    // ]
 
     useEffect(() => {
         fetchColumns()
@@ -150,9 +106,10 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
     const fetchColumns = () => {
         setLoadingColumns(true)
         axiosInstance().get("/field/child?resource=Purchase Order Product").then(({ data: { data } }) => {
-            const fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
+            const fieldsList = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
             let tempColumns = [];
-            fields.map(fields => {
+            fieldsList.map(fields => {
+
                 if (fields.type === "date") {
                     tempColumns.push({
                         accessor: fields.fieldName,
@@ -166,6 +123,33 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
 
                     })
                 }
+                else if (fields.type === "decimal" || fields.type === "percent") {
+                    tempColumns.push({
+                        accessor: fields.fieldName,
+                        Header: fields.fieldLabel,
+                        Cell: ({ row }) => (
+                            row.original[`${fields.fieldName}`] ? <p className="text-truncate">
+                                {row.original[`${fields.fieldName}`]}
+                            </p> : <NoDataCell />
+                        )
+
+                    })
+                }
+                else if (fields.type === "currencyAmount") {
+                    fields.displayCurrency.map(currency => {
+                        tempColumns.push({
+                            accessor: `${fields.fieldName}_${currency.toLowerCase()}`,
+                            Header: `${fields.fieldLabel} ${currency}`,
+                            Cell: ({ row }) => (
+                                row.original[`${fields.fieldName}_${currency.toLowerCase()}`] ? <p className="text-truncate">
+                                    {row.original[`${fields.fieldName}_${currency.toLowerCase()}`]}
+                                </p> : <NoDataCell />
+                            )
+
+                        })
+                    })
+
+                }
                 else {
                     tempColumns.push({
                         accessor: fields.fieldName,
@@ -177,8 +161,8 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                     })
                 }
             })
-            // genrateColoum(fields, columns, rendererNames, false);
-            setColumns(prevState => { return [...prevState, ...tempColumns] })
+            // columns length check with 2 because sometimes it call twice making double entry
+            if (columns.length === 2) setColumns(prevState => { return [...prevState, ...tempColumns] })
             setLoadingColumns(false)
         })
     }
@@ -194,11 +178,15 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                 };
                 return res;
             });
+            if (rows.every(d => d.qty === d.actualReceived) && statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice") >= statusOptions.findIndex(d => d.optionLabel === purchaseOrderData?.status)) {
+                handleUpdateData({ "status": "Ready to Invoice" })
+                setCurrentStep(4)
+            }
             axiosInstance().get(`${productInventory.api}?filterById=[{"field": "pONumber", "term": "${purchaseOrderData._id}"}]`)
                 .then(({ data }) => {
                     data.data = data.data.map((u) => {
-                        let tempProduct = rows.find(obj => obj.treeId === u.product.optionValue)
-                        if (tempProduct) {
+                        let tempProduct = rows.find(obj => obj.treeId === u?.product?.optionValue)
+                        if (tempProduct && !rows.some(obj => obj.treeId === u._id)) {
                             rows.push({
                                 ...u,
                                 description: u.assetNumber,
@@ -314,11 +302,11 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                 onClose={() => setShowCreateAssetDialog(false)}
                 onSuccess={() => {
                     setShowCreateAssetDialog(false)
-                    handleUpdateData({ status: "Received" })
                     fetchSerializedAsset()
                 }}
                 title="Create Asset"
                 productList={selectedProducts.filter(d => d.hasOwnProperty("productDetail"))}
+                handleUpdateData={handleUpdateData}
             />
         }
     </>

@@ -100,6 +100,13 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
     }
     onSubmit(returnData)
   };
+  function validate(values) {
+    const errors = {};
+    if (values?.qty < values?.actualReceived) {
+      errors['qty'] = 'Quantity should be greater than Actual Received';
+    }
+    return errors;
+  }
 
   return (<Dialog
     maxWidth="md"
@@ -114,7 +121,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
         enableReinitialize={true}
         initialValues={initialData.values}
         validationSchema={yupSchema(initialData.fields)}
-        validateOnMount
+        validate={validate}
         onSubmit={handleSubmit}>
         {({ values,
           errors,
@@ -124,7 +131,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
         }) => (
           <Fragment>
             <CustomDialogHeader
-              title={bulkEdit ? "Edit" : `Edit ${productData.productName || ""}`}
+              title={bulkEdit ? "Bulk Edit" : `Edit ${productData.productName || ""}`}
               onClose={() => {
                 onClose()
               }}
