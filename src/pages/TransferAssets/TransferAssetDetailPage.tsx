@@ -49,6 +49,7 @@ const TransferAssetDetailPage = () => {
   const [isNextStep, setNextStep] = useState(true);
   const [isPrevStep, setPrevStep] = useState(true);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [fileDownloading, setFileDownloading] = useState(false);
   const [transferAssetFields, setTransferAssetFields] = useState([]);
   const [existingAssets, setExistingAssets] = useState([]);
   const [loadingTickets, setLoadingTickets] = useState([]);
@@ -228,6 +229,43 @@ const TransferAssetDetailPage = () => {
       });
   }
 
+  const handleViewPdf = (download) => {
+    axiosInstance().get(`${transferAsset.api}/${id}/pdf`)
+      .then(({ data }) => {
+        axiosInstance()
+          .get(`user/download?fileName=${data.data.fileName}`, {
+            responseType: "blob",
+          })
+          .then(({ data }) => {
+            if (download) {
+              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', `TransferAsset-${transferAssetData.purchaseOrderNumber}.pdf`);
+              document.body.appendChild(link);
+              link.click();
+            }
+            else {
+              const file = new Blob([data], { type: "application/pdf" });
+              const fileURL = URL.createObjectURL(file);
+              const pdfWindow = window.open();
+              pdfWindow.location.href = fileURL;
+              toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+
+            }
+            setFileDownloading(false);
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+            setFileDownloading(false);
+          });
+      }).catch((err) => {
+        toastConfig.setToastConfig(err);
+        setFileDownloading(false);
+      })
+  }
+
+
   return (
     <>
       <Fragment>
@@ -358,6 +396,7 @@ const TransferAssetDetailPage = () => {
                       ownerId={transferAssetData?.createdBy.user._id}
                       updateTransferStatus={updateTransferStatus}
                       transferAssetData={transferAssetData}
+                      handleViewPdf={handleViewPdf}
                     />
                   )}
                   {currentStep === 1 && (
@@ -373,6 +412,7 @@ const TransferAssetDetailPage = () => {
                       setExistingAssets={setExistingAssets}
                       setTransferIsEnded={setTransferIsEnded}
                       updateTransferStatus={updateTransferStatus}
+                      handleViewPdf={handleViewPdf}
                     />
                   )}
                   {currentStep === 2 && (
@@ -387,6 +427,7 @@ const TransferAssetDetailPage = () => {
                       setNextStep={setNextStep}
                       setTransferIsEnded={setTransferIsEnded}
                       updateTransferStatus={updateTransferStatus}
+                      handleViewPdf={handleViewPdf}
                     />
                   )}
                 </Box>

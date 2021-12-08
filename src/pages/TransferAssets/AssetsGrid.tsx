@@ -26,6 +26,8 @@ interface AssetsGridProps {
   ownerId: string | any;
   updateTransferStatus?: any;
   transferAssetData?: any;
+  handleViewPdf?: any;
+
 }
 
 const AssetsGrid: FC<AssetsGridProps> = (props) => {
@@ -191,7 +193,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" mx="4px">
-        <Button
+        {permissions?.transferAsset.isUpdate && <Button
           variant={isMobile ? 'outlined' : 'contained'}
           color="primary"
           size="small"
@@ -200,8 +202,8 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           }}
         >
           {`Add ${routes.productInventory.title}`}
-        </Button>
-        <Button
+        </Button>}
+        {permissions?.transferAsset.isUpdate && <Button
           variant="contained"
           size="small"
           color="primary"
@@ -214,7 +216,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
 
           Remove Assets
 
-        </Button>
+        </Button>}
       </Box>
 
       <Box mt={1}>

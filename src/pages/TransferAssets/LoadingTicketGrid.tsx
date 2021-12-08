@@ -14,6 +14,8 @@ import { CommonRenderer, DateRenderer } from '../../components/AgGridComponents/
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { AiFillFilePdf } from "react-icons/ai";
+
 
 interface LoadingGridProps {
   fetchAssets: any;
@@ -27,6 +29,8 @@ interface LoadingGridProps {
   setExistingAssets?: any;
   setTransferIsEnded?: any;
   updateTransferStatus?: any;
+  handleViewPdf?: any;
+  fileDownloading?: boolean;
 }
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
@@ -40,7 +44,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     setNextStep,
     setExistingAssets,
     setTransferIsEnded,
-    updateTransferStatus
+    updateTransferStatus,
+    handleViewPdf,
+    fileDownloading
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -219,7 +225,35 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       <Box display="flex" justifyContent="space-between" mx="4px">
         <div></div>
         <Box>
-          <Button
+          {permissions?.transferAsset?.isRead && (
+            <Button
+              variant="outlined"
+              color="primary"
+              type="button"
+              size="small"
+              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              disabled={fileDownloading}
+              onClick={() => { handleViewPdf(false) }}
+            >
+              {isMobile ? <AiFillFilePdf size={22} /> : fileDownloading ? "Please wait..." : "Preview"}
+            </Button>
+          )}
+          <Box component="span" mx={1} />
+          {permissions?.transferAsset?.isRead && (
+            <Button
+              variant="outlined"
+              color="primary"
+              type="button"
+              size="small"
+              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              disabled={fileDownloading}
+              onClick={() => { handleViewPdf(true) }}
+            >
+              {isMobile ? <AiFillFilePdf size={22} /> : fileDownloading ? "Please wait..." : "Download"}
+            </Button>
+          )}
+          <Box component="span" mx={1} />
+          {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isCreate && <Button
             variant="contained"
             size="small"
             color="primary"
@@ -227,9 +261,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             onClick={() => setOpenLoadingTicketDialog(true)}
           >
             Create Loading Ticket
-          </Button>
+          </Button>}
           <Box component="span" mx={1} />
-          <Button
+          {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isUpdate && <Button
             variant="contained"
             size="small"
             color="primary"
@@ -241,7 +275,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             onClick={() => setShowConfirmBox(true)}
           >
             Remove Loading Ticket
-          </Button>
+          </Button>}
         </Box>
       </Box>
 
