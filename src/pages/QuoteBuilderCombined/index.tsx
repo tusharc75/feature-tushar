@@ -267,6 +267,7 @@ const QuoteBuilders = () => {
 
   useEffect(() => {
     fetchGridColumns()
+    fetchDoa()
   }, [])
 
   const fetchGridColumns = async () => {
