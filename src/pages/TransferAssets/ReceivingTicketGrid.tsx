@@ -14,6 +14,7 @@ import { CommonRenderer, DateRenderer } from '../../components/AgGridComponents/
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { AiFillFilePdf } from "react-icons/ai";
 
 interface ReceivingGridProps {
   fetchAssets: any;
@@ -26,6 +27,8 @@ interface ReceivingGridProps {
   currentStep: number;
   setTickets: any;
   updateTransferStatus?: any;
+  handleViewPdf?: any;
+  fileDownloading?: boolean;
 }
 
 const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
@@ -38,7 +41,9 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     setTickets,
     setNextStep,
     setTransferIsEnded,
-    updateTransferStatus
+    updateTransferStatus,
+    handleViewPdf,
+    fileDownloading
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -249,7 +254,35 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       <Box display="flex" justifyContent="space-between" mx="4px">
         <div></div>
         <Box>
-          <Button
+          {permissions?.transferAsset?.isRead && (
+            <Button
+              variant="outlined"
+              color="primary"
+              type="button"
+              size="small"
+              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              disabled={fileDownloading}
+              onClick={() => { handleViewPdf(false) }}
+            >
+              {isMobile ? <AiFillFilePdf size={22} /> : fileDownloading ? "Please wait..." : "Preview"}
+            </Button>
+          )}
+          <Box component="span" mx={1} />
+          {permissions?.transferAsset?.isRead && (
+            <Button
+              variant="outlined"
+              color="primary"
+              type="button"
+              size="small"
+              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              disabled={fileDownloading}
+              onClick={() => { handleViewPdf(true) }}
+            >
+              {isMobile ? <AiFillFilePdf size={22} /> : fileDownloading ? "Please wait..." : "Download"}
+            </Button>
+          )}
+          <Box component="span" mx={1} />
+          {permissions?.transferAsset.isUpdate && permissions?.receivingTicket.isCreate && <Button
             variant="contained"
             size="small"
             color="primary"
@@ -257,9 +290,9 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             onClick={() => setOpenReceivingTicketDialog(true)}
           >
             Create Receiving Ticket
-          </Button>
+          </Button>}
           <Box component="span" mx={1} />
-          <Button
+          {permissions?.transferAsset.isUpdate && permissions?.receivingTicket.isUpdate && <Button
             variant="contained"
             size="small"
             color="primary"
@@ -267,7 +300,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             onClick={() => setShowConfirmBox(true)}
           >
             Remove Receiving Ticket
-          </Button>
+          </Button>}
         </Box>
       </Box>
 
