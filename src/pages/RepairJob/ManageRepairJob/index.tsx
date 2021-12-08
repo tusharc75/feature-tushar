@@ -41,6 +41,7 @@ const ManageRepairJob = (props) => {
   const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [allFields, setAllFields] = useState([]);
+  const [title, setTitle] = useState("");
 
   const [disableFieldsIfLoadingTicketIsCreated, setDisableFieldsIfLoadingTicketIsCreated] = useState(true)
 
@@ -63,6 +64,7 @@ const ManageRepairJob = (props) => {
             .then(({ data: { data } }) => {
               if (isClone) {
                 const { _id, brand, createdBy, history, repairJobName, updatedBy, ...rest } = data;
+                setTitle('Clone')
 
                 setRepairJobData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -74,6 +76,7 @@ const ManageRepairJob = (props) => {
                 // setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
                 setLoading(false);
               } else {
+                setTitle(`Editing - [${data.repairJobName}]`)
                 setRepairJobData({
                   fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
                   initialValues: getObjKeysWithValues(data, fieldsDataForUpdate)
@@ -115,6 +118,8 @@ const ManageRepairJob = (props) => {
               toastConfig.setToastConfig(error);
             });
         } else {
+          setTitle('Create Repair Job')
+
           let initialData = { ...getObjKeys('', fieldsDataForCreate), expectedCompletionDate: "" };
           setDisableFieldsIfLoadingTicketIsCreated(false);
           setAllFields(fieldsDataForCreate);
@@ -139,9 +144,7 @@ const ManageRepairJob = (props) => {
 
       if (fields.length > 0) {
         fields = fields.map(field => {
-
           const sectionFields = field.sectionFields.map(_f => {
-
 
             if (_f.fieldName === "repairPlant" || _f.fieldName === "plantShipTo") {
               if (formValues && formValues["typeOfRepair"] === "Internal") {
@@ -150,7 +153,6 @@ const ManageRepairJob = (props) => {
                 _f.required = false
               }
             }
-
 
             if (_f.fieldName === "vendor" || _f.fieldName === "supplierShipTo") {
               if (formValues && formValues["typeOfRepair"] === "External") {
@@ -166,7 +168,6 @@ const ManageRepairJob = (props) => {
             ...field,
             sectionFields
           }
-
         })
       }
       setRepairJobData({ ...repairJobData, fields })
@@ -291,18 +292,6 @@ const ManageRepairJob = (props) => {
         }}
         open={open}
       >
-        <CustomDialogHeader
-          title={!repairJobId ? 'Create Repair Job' : `${isClone ? 'Clone' : 'Editing'}`}
-          onClose={(e, reason) => {
-            if (isFieldNotTouched(repairJobData, formValues)) onClose();
-            else setShowConfirmDialog(true);
-          }}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen(prevState => !prevState)
-          }}
-          showManimizeMaximize={true}
-        />
         {loading || !repairJobData.fields.length ? (
           <>
             <CustomDialogContent>
@@ -328,6 +317,18 @@ const ManageRepairJob = (props) => {
           <Formik innerRef={(ref) => { if (ref) { setFormValues(ref.values) } }} initialValues={repairJobData.initialValues} validationSchema={yupSchema(allFields)} validateOnMount onSubmit={handleSubmit}>
             {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues, submitForm }) => (
               <>
+                <CustomDialogHeader
+                  title={title}
+                  onClose={(e, reason) => {
+                    if (isFieldNotTouched(repairJobData, formValues)) onClose();
+                    else setShowConfirmDialog(true);
+                  }}
+                  isMinimized={!fullScreen}
+                  onMinimizeMaximize={() => {
+                    setFullScreen(prevState => !prevState)
+                  }}
+                  showManimizeMaximize={true}
+                />
                 <CustomDialogContent>
                   <Form>
 
