@@ -16,8 +16,8 @@ import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
 import { AzureLogin } from '../../components/Azure/Azure';
 import { SiMicrosoftoffice } from 'react-icons/si';
 import { SVG } from '../../assets';
-import { SET_GRID_METADATA } from "../../StateProvider/actionTypes"
-import { entity } from "../../constants/helpers"
+import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
+import { entity } from '../../constants/helpers';
 import axios from 'axios';
 
 const useStyles = makeStyles(() => ({
@@ -55,7 +55,7 @@ const Login = () => {
   const account = useAccount(accounts[0] || {});
   const [counter, setCounter] = useState(0);
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
-  const { entityApi } = entity
+  const { entityApi } = entity;
 
   useEffect(() => {
     if (!isEmpty(account)) {
@@ -67,6 +67,21 @@ const Login = () => {
           });
           const { data } = res.data;
           localStorage.setItem('token', data.token);
+          const gridRequest = await axiosInstance().get(`user/meta-grid/${data.user?._id}`);
+
+          let tempMetaData = JSON.stringify(gridRequest.data.data?.gridMetaData);
+          localStorage.setItem('gridMetaData', tempMetaData);
+          dispatch({ type: SET_GRID_METADATA, payload: gridRequest.data.data?.gridMetaData });
+
+          const entityRequest = await axiosInstance().get(`${entityApi}`);
+
+          let mappedEntities = [];
+          if (entityRequest.data.data && entityRequest.data.data.length) {
+            entityRequest.data.data.forEach((o) => {
+              mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
+            });
+          }
+          localStorage.setItem('mappedEntities', JSON.stringify(mappedEntities));
 
           dispatch({ type: SET_USER, payload: data });
           if (data?.role?.selectedEntity?._id) {
@@ -107,19 +122,18 @@ const Login = () => {
         setSubmitting(false);
         const { data } = response;
         localStorage.setItem('token', data.token);
-        
+
         axiosInstance()
           .get(`${entityApi}`)
           .then(({ data: { data } }) => {
-            let mappedEntities = []
+            let mappedEntities = [];
             if (data && data.length) {
-              data.forEach(o => {
-                mappedEntities = [...mappedEntities,
-                { optionLabel: o?.entityName, optionValue: o?._id }]
-              })
+              data.forEach((o) => {
+                mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
+              });
             }
-            localStorage.setItem("mappedEntities", JSON.stringify(mappedEntities))
-          })
+            localStorage.setItem('mappedEntities', JSON.stringify(mappedEntities));
+          });
 
         dispatch({ type: SET_USER, payload: data });
         if (data?.role?.selectedEntity?._id) {
@@ -149,10 +163,10 @@ const Login = () => {
         axiosInstance()
           .get(`user/meta-grid/${data?.user?._id}`)
           .then(({ data: { data } }) => {
-            let tempMetaData = JSON.stringify(data?.gridMetaData)
-            localStorage.setItem("gridMetaData", tempMetaData);
+            let tempMetaData = JSON.stringify(data?.gridMetaData);
+            localStorage.setItem('gridMetaData', tempMetaData);
             dispatch({ type: SET_GRID_METADATA, payload: data?.gridMetaData });
-          })
+          });
       })
       .catch((error) => {
         setSubmitting(false);

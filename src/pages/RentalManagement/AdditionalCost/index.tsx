@@ -154,7 +154,7 @@ const AdditionalCost = ({ rentalManagementData }) => {
                     allowSelection={true}
                     allowSwipe={true}
                     permissions={permissions}
-                    primaryField={columns?.find(d => d.field === "description")}
+                    primaryField={columns?.find(d => d.field)}
                     onClick={(data) => {
                         setShowCostDialog(true)
                         setSelectedCostData(data)

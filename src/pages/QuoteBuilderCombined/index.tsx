@@ -267,6 +267,7 @@ const QuoteBuilders = () => {
 
   useEffect(() => {
     fetchGridColumns()
+    fetchDoa()
   }, [])
 
   const fetchGridColumns = async () => {
@@ -361,6 +362,29 @@ const QuoteBuilders = () => {
     opportunityDetails,
     showFilteredRecordsOnly
   ]);
+
+  const fetchDoa = async () => {
+    axiosInstance()
+      .get(`/doa/${selectedEntity}`)
+      .then(({ data: { data } }) => {
+        let doaData = [];
+
+        data.users?.forEach((item) => {
+          if (!isObjectEmpty(item)) {
+            doaData.push({
+              optionValue: item._id,
+              optionLabel: [item?.firstName, item?.lastName].filter(f => f).join(" "),
+            });
+          }
+        });
+
+        setDoa((prevState) => [...prevState,...doaData]);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setDoa([]);
+      });
+  };
 
   const getVersionStatus = (id, currency) => {
     // setAllVersionStatusButtonText(gettingVersionStatusText);
