@@ -42,7 +42,7 @@ const ManageRepairJob = (props) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [allFields, setAllFields] = useState([]);
 
-  const [disableFieldsIfLoadingTicketIsCreated, setDisableFieldsIfLoadingTicketIsCreated] = useState(false)
+  const [disableFieldsIfLoadingTicketIsCreated, setDisableFieldsIfLoadingTicketIsCreated] = useState(true)
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(repairJobData.fields));
@@ -69,6 +69,7 @@ const ManageRepairJob = (props) => {
                   initialValues: getObjKeysWithValues(rest, fieldsDataForCreate)
                 });
                 setAllFields(fieldsDataForCreate);
+                setDisableFieldsIfLoadingTicketIsCreated(false);
 
                 // setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
                 setLoading(false);
@@ -88,6 +89,8 @@ const ManageRepairJob = (props) => {
                   .then(({ data: { data } }) => {
                     let tempProductInventory = data.map(u => ({ ...u, _id: u?.id, productName: u?.product?.optionLabel }))
 
+                    let isLoadingTicketFound = false;
+
                     axiosInstance()
                       .get(`${repairJob.repairJobApi}/${repairJobId}/delivery-ticket`)
                       .then(({ data }) => {
@@ -96,11 +99,15 @@ const ManageRepairJob = (props) => {
                             if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
                               tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
                               tempProductInventory[index]["deliveryTicketId"] = obj?._id
+
+                              if (isLoadingTicketFound === false) {
+                                isLoadingTicketFound = true;
+                              }
                             }
                           })
                         })
 
-                        setDisableFieldsIfLoadingTicketIsCreated(tempProductInventory.some(s => s["deliveryTicketId"]))
+                        setDisableFieldsIfLoadingTicketIsCreated(isLoadingTicketFound);
                       });
                   });
               }
@@ -109,7 +116,7 @@ const ManageRepairJob = (props) => {
             });
         } else {
           let initialData = { ...getObjKeys('', fieldsDataForCreate), expectedCompletionDate: "" };
-
+          setDisableFieldsIfLoadingTicketIsCreated(false);
           setAllFields(fieldsDataForCreate);
           setRepairJobData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -223,9 +230,9 @@ const ManageRepairJob = (props) => {
                 message: message
               });
             }).catch((error) => {
-              // toastConfig.setToastConfig(error);
+              
               setSubmitting(false);
-              onSuccess();
+              onSuccess(data);
               toastConfig.setToastConfig({
                 open: true,
                 type: 'success',
