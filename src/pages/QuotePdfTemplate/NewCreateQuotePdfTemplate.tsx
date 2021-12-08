@@ -19,7 +19,7 @@ import CircularProgress from "@material-ui/core/CircularProgress"
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete } from "@material-ui/lab";
 import { useData } from '../../StateProvider/Provider';
-import { quoteBuilder } from "../../constants/helpers";
+import { quoteBuilder, RESOURCE_LABEL } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const defaultProductColumns = 7;
@@ -86,7 +86,7 @@ export default function NewCreateQuotePdfTemplate() {
     const [isLandscapChecked, setIsLandscapChecked] = useState(false)
     const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
     const [isPreview, setIsPreview] = useState(false)
-    const typeOptions = [routes.quoteBuilder.title, routes.rentalManagement.title, routes.repairJob.title, routes.purchaseOrder.title, routes.deliveryTicket.title, routes.receivingTicket.title, routes.transferAsset.title].filter(d => d)
+    const typeOptions = [RESOURCE_LABEL.quoteBuilder, RESOURCE_LABEL.rentalManagement, RESOURCE_LABEL.repairJob, RESOURCE_LABEL.purchaseOrder, RESOURCE_LABEL.deliveryTicket, RESOURCE_LABEL.receivingTicket, RESOURCE_LABEL.transferAsset].filter(d => d)
     const [variables, setVariables] = useState([])
     const [formValues, setFormValues] = useState(null)
     const onBackButtonEvent = (e) => {
