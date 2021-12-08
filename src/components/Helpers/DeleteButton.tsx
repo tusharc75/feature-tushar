@@ -19,9 +19,9 @@ function DeleteButton({ text, onClick, ...rest }) {
         <Button
             className={classes.deleteButton}
             size="small"
-            variant="outlined"
+            variant={isMobile ? "text" : "outlined" }
             onClick={onClick}
-            style={isMobile ? {color:"#f44336", border: "1px solid #f44336", padding:"5px 10px"} : {}}
+            style={isMobile ? {color:"#f44336", padding:"5px 10px"} : {}}
             {...rest}
 
         >

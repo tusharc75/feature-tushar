@@ -27,6 +27,9 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { makeStyles } from '@material-ui/core/styles';
+import {isMobile} from "react-device-detect";
+import { useHistory } from "react-router-dom";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 const renderedFrom = "rentalManagementDetailsPageReceivingTicket"
 
@@ -45,7 +48,7 @@ const useStyles = makeStyles((theme) => ({
 const ReceivingTicket = ({ currentStep, handleReceivingTicketDialog, rentalManagementId }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
-
+  const history = useHistory();
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
@@ -305,6 +308,38 @@ const ReceivingTicket = ({ currentStep, handleReceivingTicketDialog, rentalManag
     <Grid item xs={12} md={12} sm={12} className="mt-3">
 
       {columns ?
+          isMobile ?
+              <CustomSwipableList
+                  allowSelection={true}
+                  allowSwipe={true}
+                  permissions={true}
+                  primaryField={columns?.find(d => d.field)}
+                  onClick={(data) => {
+                    history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                  }}
+                  dataRows={dataRows}
+                  selectedRecords={selectedRecords}
+                  dispatch={dispatch}
+                  onEdit={false}
+                  extraParamsToCheckDelete={true}
+                  onDelete={false}
+                  rowCount={rowCount}
+                  page={page}
+                  loading={loading}
+                  additionalDetails={[
+                  ]}
+                  chips={[
+                    {
+                      label: "Asset number : ",
+                      field: "assetNumber",
+                    }
+                  ]}
+                  owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                  onCreate={false}
+                  showClone={false}
+                  onClone={() => { }}
+                  renderedFrom={renderedFrom}
+              /> :
         <CustomAgGrid
           columns={columns}
           dataRows={dataRows}
