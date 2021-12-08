@@ -30,7 +30,7 @@ const ManageDeliveryTicket = (props) => {
     const { deliveryTicketApi } = deliveryTicket;
     const { deliveryTicketId, onClose, onSuccess, warehouseId = null, productInventoryForDeliveryTicket = null, rentalData = null, transferData = null, repairJobData = null } = props;
     const [loading, setLoading] = useState(false);
-    const [initialData, setInitialData] = useState({ fields: [], values: {} });
+    const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [formsData, setFormsData] = useState([]);
     const [isSubmitting, setSubmitting] = useState(false);
@@ -40,12 +40,6 @@ const ManageDeliveryTicket = (props) => {
     const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
     const [ownerData, setOwnerData] = useState([]);
     const [collaboratorData, setCollaboratorData] = useState([]);
-    const [
-        ownerCollaboratorCommonDataSource,
-        setOwnerCollaboratorCommonDataSource,
-    ] = useState([]);
-    const [ownerDataSource, setOwnerDataSource] = useState([]);
-    const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
     const [disableOwnerSelection, setDisableOwnerSelection] = useState(false);
 
     useEffect(() => {
@@ -172,7 +166,7 @@ const ManageDeliveryTicket = (props) => {
                         tempInitialData["plantShipTo"] = repairJobData?.plantShipTo;
                     }
                     if (repairJobData?.typeOfRepair === "External") {
-                        tempInitialData["supplierAccount"] = repairJobData?.vendor?.optionValue;
+                        // tempInitialData["supplierAccount"] = repairJobData?.vendor?.optionValue;
                         tempInitialData["supplierShippingAddress"] = repairJobData?.supplierShipTo;
                     }
 
@@ -290,7 +284,7 @@ const ManageDeliveryTicket = (props) => {
                 }, formValues)) onClose()
                 else setShowConfirmDialog(true)
             }}
-            title={`${deliveryTicketId ? `Update ` : "Create Loading Ticket"}`}
+            title={`${deliveryTicketId ? `Update ${initialData.values?.deliveryJobName ? `(${initialData.values?.deliveryJobName})` : ""}` : "Create Loading Ticket"}`}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
                 setFullScreen(prevState => !prevState)
@@ -370,6 +364,29 @@ const ManageDeliveryTicket = (props) => {
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
                                                                                     imageOrFileUploadCompletePercentage={null}
+                                                                                />
+                                                                            ) : field.fieldName === "supplierAccount" ? (
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    disabled={(repairJobData && repairJobData["typeOfRepair"] === "External") || field.disableOnEdit}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    minDate={new Date()}
+                                                                                    maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
                                                                                 />
                                                                             ) : field.fieldName === "pick-UpDate" ? (
                                                                                 <FormTypes

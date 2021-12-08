@@ -401,7 +401,7 @@ export default function DeliveryTicketDetail(props) {
                   mainPoints={deliveryTicketData ? getMainPoints : ""}
                   showHeading={true}
                 >
-                  {permissions?.deliveryTicket?.isUpdate && canEdit && deliveryTicketData.status !== "Delivered" && (
+                  {permissions?.deliveryTicket?.isUpdate && canEdit && deliveryTicketData?.status !== "Delivered" && (
                     <Button
                       variant="contained"
                       color="primary"
@@ -530,108 +530,101 @@ export default function DeliveryTicketDetail(props) {
                   </TabPanel>
 
                   <TabPanel value={tabValue} index={1}>
-                    {
-                      dataRows && dataRows.length ?
-                        <>
-                          <Grid container spacing={1} className="p-2">
-                            <Grid item xs={12} className="mt-2 d-flex gap-2">
-                              <Typography variant="subtitle1" className="font-weight-bold text-primary">
-                                Serialized Assets
-                              </Typography>
+                    <Grid container spacing={1} className="p-2">
+                      <Grid item xs={12} className="mt-2 d-flex gap-2">
+                        <Typography variant="subtitle1" className="font-weight-bold text-primary">
+                          Serialized Assets
+                        </Typography>
 
-                              {
-                                deliveryTicketData.status === "New" && <IconButton
-                                  onClick={() => {
-                                    setAddSerializedAssetDialog(true)
-                                  }}
-                                  color='primary'
-                                  size="small"
-                                >
-                                  <Tooltip
-                                    title="Add More Serialized Assets">
-                                    <AddBoxRoundedIcon />
-                                  </Tooltip>
-                                </IconButton>
-                              }
+                        {
+                          deliveryTicketData?.status === "New" && <IconButton
+                            onClick={() => {
+                              setAddSerializedAssetDialog(true)
+                            }}
+                            color='primary'
+                            size="small"
+                          >
+                            <Tooltip
+                              title="Add More Serialized Assets">
+                              <AddBoxRoundedIcon />
+                            </Tooltip>
+                          </IconButton>
+                        }
 
-                              {
-                                deliveryTicketData.status === "New" && <IconButton
-                                  disabled={selectedRecords.length === 0}
-                                  onClick={() => {
-                                    setShowRemoveAssetFromLoadingTicketDialog(true)
-                                  }}
-                                  color='primary'
-                                  size="small"
-                                >
-                                  <Tooltip
-                                    title="Remove Serialized Assets">
-                                    <RemoveCircleRoundedIcon />
-                                  </Tooltip>
-                                </IconButton>
-                              }
+                        {
+                          deliveryTicketData?.status === "New" && <IconButton
+                            disabled={selectedRecords.length === 0}
+                            onClick={() => {
+                              setShowRemoveAssetFromLoadingTicketDialog(true)
+                            }}
+                            color='primary'
+                            size="small"
+                          >
+                            <Tooltip
+                              title="Remove Serialized Assets">
+                              <RemoveCircleRoundedIcon />
+                            </Tooltip>
+                          </IconButton>
+                        }
 
-                            </Grid>
-                            <Grid item xs={12}>
-                              {isMobile ? <CustomSwipableList
-                                allowSelection={true}
-                                allowSwipe={true}
-                                permissions={permissions}
-                                primaryField={columns?.find(d => d.field === "assetNumber")}
-                                onClick={(data) => {
-                                  history.push(`${routes.productInventoryDetail.path}/${data._id}`)
-                                }}
-                                dataRows={dataRows}
-                                selectedRecords={selectedRecords}
-                                dispatch={dispatch}
-                                onEdit={() => {
+                      </Grid>
+                      <Grid item xs={12}>
+                        {isMobile ? <CustomSwipableList
+                          allowSelection={true}
+                          allowSwipe={true}
+                          permissions={permissions}
+                          primaryField={columns?.find(d => d.field === "assetNumber")}
+                          onClick={(data) => {
+                            history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                          }}
+                          dataRows={dataRows}
+                          selectedRecords={selectedRecords}
+                          dispatch={dispatch}
+                          onEdit={() => {
 
-                                }}
-                                extraParamsToCheckDelete={true}
-                                onDelete={() => {
-                                }}
-                                rowCount={rowCount}
-                                page={page}
-                                loading={loading}
-                                chips={
-                                  [{
-                                    label: `Product Description: `,
-                                    field: "productName",
-                                    forceShow: true
-                                  }]
-                                }
-                                onCreate={null}
-                                showClone={false}
-                                fullHeight={true}
-                                renderedFrom={"receivingTicketDetailInventoryPage"}
-                                onClone={() => {
-                                }}
+                          }}
+                          extraParamsToCheckDelete={true}
+                          onDelete={() => {
+                          }}
+                          rowCount={rowCount}
+                          page={page}
+                          loading={loading}
+                          chips={
+                            [{
+                              label: `Product Description: `,
+                              field: "productName",
+                              forceShow: true
+                            }]
+                          }
+                          onCreate={null}
+                          showClone={false}
+                          fullHeight={true}
+                          renderedFrom={"receivingTicketDetailInventoryPage"}
+                          onClone={() => {
+                          }}
 
-                              /> :
+                        /> :
 
-                                Object.keys(frameWorkComponent).length > 0 ? <CustomAgGrid
-                                  allowSelection={deliveryTicketData.status === "New"}
-                                  allowAction={false}
-                                  columns={columns}
-                                  dataRows={dataRows}
-                                  frameworkComponents={frameWorkComponent}
-                                  setGridApi={setGridApi}
-                                  dispatch={dispatch}
-                                  rowCount={rowCount}
-                                  limit={limit}
-                                  pageSizes={pageSizes}
-                                  page={page}
-                                  actionWidth={150}
-                                  loading={false}
-                                  renderedFrom={renderedFrom}
-                                  refreshGrid={fetchProductInventory}
-                                /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-                              }
-                            </Grid>
-                          </Grid>
-                        </>
-                        : null
-                    }
-
+                          Object.keys(frameWorkComponent).length > 0 ? <CustomAgGrid
+                            allowSelection={deliveryTicketData?.status === "New"}
+                            allowAction={false}
+                            columns={columns}
+                            dataRows={dataRows}
+                            frameworkComponents={frameWorkComponent}
+                            setGridApi={setGridApi}
+                            dispatch={dispatch}
+                            rowCount={rowCount}
+                            limit={limit}
+                            pageSizes={pageSizes}
+                            page={page}
+                            actionWidth={150}
+                            loading={false}
+                            renderedFrom={renderedFrom}
+                            refreshGrid={fetchProductInventory}
+                          /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+                        }
+                      </Grid>
+                    </Grid>
                   </TabPanel>
 
                 </>
@@ -775,9 +768,9 @@ export default function DeliveryTicketDetail(props) {
             }}
             isAdding={isAdding}
             selectedProducts={[]}
-            rentalId={deliveryTicketData.type === "Rental Job" ? deliveryTicketData?.rental?.optionValue : ""}
-            repairJobId={deliveryTicketData.type === "Repair Job" ? deliveryTicketData?.repairJob?.optionValue : ""}
-            transferAssetId={deliveryTicketData.type === "Transfer Asset" ? deliveryTicketData?.transferAsset?.optionValue : ""}
+            rentalId={deliveryTicketData?.type === "Rental Job" ? deliveryTicketData?.rental?.optionValue : ""}
+            repairJobId={deliveryTicketData?.type === "Repair Job" ? deliveryTicketData?.repairJob?.optionValue : ""}
+            transferAssetId={deliveryTicketData?.type === "Transfer Asset" ? deliveryTicketData?.transferAsset?.optionValue : ""}
             notIn="loadingTicket"
           // type={inventoryType}
           />

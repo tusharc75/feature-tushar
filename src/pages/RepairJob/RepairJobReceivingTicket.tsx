@@ -115,7 +115,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
 
                                 tempProductInventory.forEach((d) => {
                                     d["_id"] = d["id"];
-                                    d["hideSelection"] = d.status === "In-Transit" || "Lost";
+                                    d["hideSelection"] = d.status === "In-Transit" || d.status === "Lost";
                                 })
 
                                 setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))
@@ -372,6 +372,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                                 return ["Scrap", "Lost"].some(s => s === params.data.status);
                             },
                     }}
+                    isClientSideGrid={true}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
 

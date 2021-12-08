@@ -610,7 +610,8 @@ const RepairJob = () => {
           open={showManageRepairJobDialog.open}
           repairJobId={showManageRepairJobDialog.idToClone}
           onClose={() => setShowManageRepairJobDialog({ open: false, isClone: false, idToClone: null })}
-          onSuccess={() => {
+          onSuccess={(data) => {
+            history.push(`${routes.repairJobDetail.path}/${data._id}`);
             setShowManageRepairJobDialog({ open: false, isClone: false, idToClone: null });
           }}
         />
