@@ -13,9 +13,13 @@ import { FaRegistered } from 'react-icons/fa';
 import { AiFillAccountBook, AiFillSetting, AiOutlineTransaction } from 'react-icons/ai';
 import { TextField, InputAdornment } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
+import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
+import axiosInstance from '../../axios/axiosInstance';
+import { SET_GRID_METADATA, SET_SELECTED_ENTITY, SET_USER } from '../../StateProvider/actionTypes';
 
 function Dashboard() {
   const history = useHistory();
+  const { dispatch }: any = useData();
   const {
     state: { user }
   } = useData();
@@ -114,6 +118,20 @@ function Dashboard() {
       };
     });
     setSections(data);
+
+    // (async () => {
+    //   try {
+    //     axiosInstance()
+    //       .get(`user/meta-grid/${user?._id}`)
+    //       .then(({ data: { data } }) => {
+    //         let tempMetaData = JSON.stringify(data?.gridMetaData);
+    //         localStorage.setItem('gridMetaData', tempMetaData);
+    //         dispatch({ type: SET_GRID_METADATA, payload: data?.gridMetaData });
+    //       });
+    //   } catch (e) {
+    //     console.log(e);
+    //   }
+    // })();
   }, [user]);
 
   const handleRoutes = (item) => {

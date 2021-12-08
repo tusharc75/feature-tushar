@@ -1,6 +1,16 @@
-import { useState, useEffect, Fragment, useContext } from "react";
+import React, { useState, useEffect, Fragment, useContext } from "react";
 import Grid from '@material-ui/core/Grid';
-import { Box, Typography, Button, CircularProgress } from "@material-ui/core";
+import {
+    Box,
+    Typography,
+    Button,
+    CircularProgress,
+    Menu,
+    MenuItem,
+    IconButton,
+    makeStyles,
+    useMediaQuery
+} from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
@@ -14,8 +24,61 @@ import { useData } from "../../StateProvider/Provider";
 import { checkFormulaLoop, checkUniqueValidation } from "../../constants/formulaUtility";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { isEqual } from "lodash";
+import {isMobile} from "react-device-detect";
+import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import {IoIosArrowDropdown} from "react-icons/io";
+import {classNames} from "react-easy-crop/helpers";
+import {RiCloseCircleFill, RiSaveFill} from "react-icons/all";
+
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        width: "100%",
+        flexGrow: 1,
+        display: "flex",
+        justifyContent: "flex-end",
+    },
+    linksContainer: {
+        display: "flex",
+        justifyContent: "flex-end",
+        ["@media (max-width: 960px)"]: {
+            display: "none",
+        },
+    },
+    menuButtonList:{
+        alignItems:"flex-start",
+        padding: "1px"
+    },
+    links: {
+        color: theme.palette.info.light, //  textDark
+        fontSize: 15,
+    },
+    darkLinks: {
+        color: theme.palette.info.dark, //  textDark
+        fontSize: 15,
+    },
+    linkDivider: {
+        backgroundColor: "#ffffff42", //  darkBg
+        margin: "0 10px",
+    },
+    darkLinkDivider: {
+        backgroundColor: "grey", //  darkBg
+        margin: "0 10px",
+    },
+    delBtn: {
+        color: "red",
+    },
+    expandIcon: {
+        position: "absolute",
+        right: "0",
+        color: "white"
+    }
+
+}));
 
 const CreateFormBuilder = () => {
+
+
 
     const { state: { permissions } }: any = useData();
     const [formBuilderPermissions, setFormBuilderPermissions] = useState({
@@ -24,6 +87,8 @@ const CreateFormBuilder = () => {
         isRead: false,
         isDelete: false,
     });
+    const classes = useStyles();
+    const isMobile = useMediaQuery("(max-width: 960px)");
 
     const history = useHistory();
     const { resource } = useParams();
@@ -34,6 +99,16 @@ const CreateFormBuilder = () => {
     const [deleteField, setDeleteField] = useState([]);
     const [isUpdating, setIsUpdating] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [anchorEl, setAnchorEl] = useState(null);
+
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
 
     useEffect(() => {
         if (permissions && permissions.formBuilder) {
@@ -153,7 +228,7 @@ const CreateFormBuilder = () => {
 
     return (<Fragment>
         <Grid container className="headerbox">
-            <Grid item md={4} sm={11} xs={10}>
+            <Grid item md={5} sm={11} xs={10}>
                 <CustomBreadCrumbs routes={[routes.formBuilder, { title: resource }]}
                     isConfirmBeforeClick={true}
                     onBreadCrumbClick={(path) => {
@@ -164,7 +239,10 @@ const CreateFormBuilder = () => {
                     }}
                 />
             </Grid>
-            <Grid container justify="flex-end" item md={8} sm={1} xs={2}>
+            <Grid container justify="flex-end" item md={7} sm={1} xs={2} className="pr-3">
+
+                <div className={classes.linksContainer}>
+
                 <label
                     htmlFor="importField"
                     style={{ color: "white" }}
@@ -191,33 +269,86 @@ const CreateFormBuilder = () => {
                 >
                     Export Fields
                 </label>
+
                 <a id="downloadAnchorElem" style={{ display: "none" }}></a>
+
+                </div>
+                <Menu
+                    id="importField"
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                >
+                    <MenuItem
+                    >
+                        <label
+                            htmlFor="importField"
+                            className="cursor-pointer"
+                        >
+                            Import Fields
+                            <input
+                                onClick={(e: any) => (e.target.value = null)}
+                                id="importField"
+                                name="importField"
+                                onChange={handleImportFields}
+                                style={{
+                                    opacity: "0",
+                                    position: "absolute",
+                                    zIndex: -1,
+                                }}
+                                type="file"
+                            />
+                        </label>
+
+                    </MenuItem>
+                    <MenuItem
+                        onClick={handleExportFields}
+                    >
+                        Export Fields
+                    </MenuItem>
+                    {/* <MenuItem>Email a Link</MenuItem> */}
+                </Menu>
+                {isMobile && (
+                    <IconButton onClick={handleClick} className={classes.menuButtonList}>
+                        <IoIosArrowDropdown className={classes.expandIcon} />
+                    </IconButton>
+                )}
+
             </Grid>
+
+
         </Grid>
         <CustomContainer>
             {section ?
                 <Fragment>
                     <Box p={1} pb={0} ml={1} bgcolor="white" >
-                        <Grid container spacing={1}>
-                            <Grid item xs={3}>
+                        <Grid container spacing={1} className={isMobile ? "mobile_form_header" : "des_form_header"}>
+                            <Grid item xs={8} style={isMobile ? {display:"block"} : {display:"flex" } }>
+                            <Grid item xs={isMobile ? 12 : 6} md={4} sm={6}>
                                 <Typography variant="caption">Brand </Typography>
                                 <Typography variant="body1">{brandName}</Typography>
                             </Grid>
-                            <Grid item xs={3}>
+                            <Grid item xs={isMobile ? 12 : 6} md={4} sm={6}>
                                 <Typography variant="caption">Resource </Typography>
                                 <Typography variant="body1">{resource}</Typography>
                             </Grid>
-                            <Grid item xs={6} container justify="flex-end">
+                            </Grid>
+                            <Grid item xs={4}>
+                            <Grid item xs={12} container justify="flex-end">
                                 <Box>
                                     {formBuilderPermissions.isUpdate &&
-                                        <Button disabled={isUpdating} color="primary" size="small" onClick={handleSave} variant="contained" >
-                                            Save
+                                        <Button disabled={isUpdating} color="primary" size="small" onClick={handleSave} variant={isMobile ? "text" : "contained"}
+                                                style={isMobile ? {color:"var(--success)"} : {}}
+                                        >
+                                            {isMobile ? <RiSaveFill size={24}/> : "Save"}
                                             {isUpdating && <CircularProgress size={24} />}
                                         </Button>
                                     }
                                 </Box>
                                 <Box ml={1} >
-                                    <Button color="primary" variant="contained" size="small"
+                                    <Button color="primary" variant={isMobile ? "text" : "contained"} size="small"
+                                            style={isMobile ? {color:"var(--error)"} : {}}
                                         onClick={() => {
                                             if ((!isEqual(orisection, section)) && formBuilderPermissions.isUpdate) {
                                                 setShowConfirmDialog(true)
@@ -225,8 +356,10 @@ const CreateFormBuilder = () => {
                                             else {
                                                 history.push({ pathname: routes.formBuilder.path })
                                             }
-                                        }} > Close</Button>
+                                        }} >  {isMobile ? <RiCloseCircleFill size={24}/> : "Save"}
+                                    </Button>
                                 </Box>
+                            </Grid>
                             </Grid>
                         </Grid>
                     </Box>

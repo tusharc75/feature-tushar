@@ -19,14 +19,15 @@ import CircularProgress from "@material-ui/core/CircularProgress"
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete } from "@material-ui/lab";
 import { useData } from '../../StateProvider/Provider';
-import { quoteBuilder } from "../../constants/helpers";
+import { quoteBuilder, RESOURCE_LABEL } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const defaultProductColumns = 7;
 
 const PdfTemplateSchema = object().shape({
-    name: string().min(3, 'Too Short!').max(50, 'Too Long').required('Quote PDF template Name  is required'),
+    name: string().min(3, 'Too Short!').max(50, 'Too Long').required('PDF template Name  is required'),
     owner: string().required('Owner is required'),
+    type: string().required('Type is required'),
     showPageNumberInFooter: boolean()
 });
 
@@ -85,7 +86,9 @@ export default function NewCreateQuotePdfTemplate() {
     const [isLandscapChecked, setIsLandscapChecked] = useState(false)
     const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
     const [isPreview, setIsPreview] = useState(false)
-    const typeOptions = [routes.quoteBuilder.title, routes.rentalManagement.title, routes.repairJob.title, routes.purchaseOrder.title,]
+    const typeOptions = [RESOURCE_LABEL.quoteBuilder, RESOURCE_LABEL.rentalManagement, RESOURCE_LABEL.repairJob, RESOURCE_LABEL.purchaseOrder, RESOURCE_LABEL.deliveryTicket, RESOURCE_LABEL.receivingTicket, RESOURCE_LABEL.transferAsset].filter(d => d)
+    const [variables, setVariables] = useState([])
+    const [formValues, setFormValues] = useState(null)
     const onBackButtonEvent = (e) => {
         if (hasPermissionToUpdate) {
             e.preventDefault();
@@ -101,6 +104,36 @@ export default function NewCreateQuotePdfTemplate() {
             window.removeEventListener('popstate', onBackButtonEvent);
         };
     }, []);
+
+
+    useEffect(() => {
+        if (formValues && formValues.type) {
+            let type: any = formValues.type;
+            type = type.split("")
+
+            if (type[type.length - 1] === "s" && type.join("") !== "Quotes") {
+                type.pop();
+            }
+
+            type = type.join("")
+            let resource: string = ""
+            if (type === "Rental Job") {
+                resource = "Rental Management"
+            } else {
+                resource = type
+            }
+
+            if (resource) {
+                axiosInstance().get(`/field?resource=${resource}`)
+                    .then(({ data: { data } }) => {
+                        const vars = data.map(field => field.fieldData.fieldName)
+                        setVariables(vars)
+                    }).catch(err => {
+                        toastConfig.setToastConfig(err)
+                    })
+            }
+        }
+    }, [formValues])
 
     useEffect(() => {
 
@@ -118,6 +151,7 @@ export default function NewCreateQuotePdfTemplate() {
                     aboveTable: tempPdfTemplate.aboveTable,
                     belowTable: tempPdfTemplate.belowTable,
                     entity: tempPdfTemplate.entity ? tempPdfTemplate.entity : [],
+                    type: tempPdfTemplate.type,
                     owner: tempPdfTemplate.owner && tempPdfTemplate.owner !== undefined ? tempPdfTemplate.owner : user.user._id,
                     collaborator: tempPdfTemplate.collaborator ? tempPdfTemplate.collaborator : [],
                 });
@@ -152,6 +186,7 @@ export default function NewCreateQuotePdfTemplate() {
                             aboveTable: data?.aboveTable,
                             belowTable: data?.belowTable,
                             entity: data?.entity ? data?.entity : [],
+                            type: data?.type,
                             owner: data?.owner && data.owner !== undefined ? data?.owner : user.user._id,
                             collaborator: data?.collaborator ? data?.collaborator : [],
                         });
@@ -185,6 +220,7 @@ export default function NewCreateQuotePdfTemplate() {
                 aboveTable: "",
                 belowTable: "",
                 entity: selectedEntity ? [selectedEntity] : [],
+                type: typeOptions.find(d => d !== "" && d !== undefined && d !== null),
                 owner: user.user._id,
                 collaborator: [],
             })
@@ -245,6 +281,7 @@ export default function NewCreateQuotePdfTemplate() {
                     ...details, name: values.name,
                     pageNumberInFooter: values.showPageNumberInFooter,
                     entity: values?.entity,
+                    type: values?.type,
                     owner: values?.owner,
                     collaborator: values?.collaborator,
                     landscape: values?.landscape,
@@ -274,6 +311,7 @@ export default function NewCreateQuotePdfTemplate() {
                     ...details, name: values.name,
                     pageNumberInFooter: values.showPageNumberInFooter,
                     entity: values?.entity,
+                    type: values?.type,
                     owner: values?.owner,
                     collaborator: values?.collaborator,
                     landscape: values?.landscape,
@@ -341,6 +379,7 @@ export default function NewCreateQuotePdfTemplate() {
             <Paper className={classes.paper}>
                 {initialValues ? (
                     <Formik
+                        innerRef={ref => ref && setFormValues(ref.values)}
                         initialValues={initialValues}
                         validationSchema={PdfTemplateSchema} onSubmit={handleSubmit}>
                         {({ submitForm, touched, errors, setFieldValue, values }) => (
@@ -516,8 +555,8 @@ export default function NewCreateQuotePdfTemplate() {
                                         {<Autocomplete
                                             disabled={!hasPermissionToUpdate}
                                             getOptionLabel={(option: any) => (option ? option : "")}
-                                            value={typeOptions.filter((data) => data === values["type"]).length
-                                                ? typeOptions.filter((data) => data === values["type"])[0]
+                                            value={typeOptions.find((data) => data === values["type"])
+                                                ? typeOptions.find((data) => data === values["type"])
                                                 : ""}
                                             options={typeOptions}
                                             onChange={(e, val) => {
@@ -622,10 +661,7 @@ export default function NewCreateQuotePdfTemplate() {
                                 completePercentage
                             ) => null}
                             showVariableDropdown={true}
-                            variables={['entity', 'customerAccountName', 'quoteDate', 'quoteName',
-                                'version', 'quoteId', "currency", "expiryDate", "collaborator",
-                                "customerContactName", "currentDate", "owner", "incoTerms"
-                            ]}
+                            variables={variables}
                             isCheckHeight={true}
                         />
                     </Box>
@@ -650,6 +686,7 @@ export default function NewCreateQuotePdfTemplate() {
                             imageOrFileUploadCompletePercentage={(
                                 completePercentage
                             ) => null}
+                            variables={variables}
                             showVariableDropdown={true}
                         />
                     </Box>
@@ -672,6 +709,7 @@ export default function NewCreateQuotePdfTemplate() {
                             imageOrFileUploadCompletePercentage={(
                                 completePercentage
                             ) => null}
+                            variables={variables}
                             showVariableDropdown={true}
                         />
                     </Box>
@@ -696,6 +734,7 @@ export default function NewCreateQuotePdfTemplate() {
                                 completePercentage
                             ) => null}
                             showVariableDropdown={true}
+                            variables={variables}
                             isCheckHeight={true}
                         />
                     </Box>

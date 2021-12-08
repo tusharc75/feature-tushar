@@ -28,6 +28,9 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { makeStyles } from '@material-ui/core/styles';
 import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import {FaSuitcase} from "react-icons/fa";
+import {isMobile} from "react-device-detect";
 
 const renderedFrom = "repairJob_receiving_ticket"
 
@@ -43,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled }) => {
+const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPreviousButtonDisabled }) => {
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
 
@@ -112,10 +115,11 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled }) => {
 
                                 tempProductInventory.forEach((d) => {
                                     d["_id"] = d["id"];
-                                    d["hideSelection"] = d.status === "In-Transit";
+                                    d["hideSelection"] = d.status === "In-Transit" || d.status === "Lost";
                                 })
 
                                 setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))
+                                setPreviousButtonDisabled(tempProductInventory.some(s => s["receivingTicketId"]));
 
                                 dispatch({
                                     type: "initialize", data: tempProductInventory, count: tempProductInventory.length
@@ -202,11 +206,11 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled }) => {
     return (<>
 
         <Box display="flex" justifyContent="flex-end" className="gap-1">
-            {/* <Button
+            <Button
                 onClick={() => {
                     setDownlodingFile(true);
 
-                    axiosInstance().get(`/rental-management/${repairJobData._id}/pdf`)
+                    axiosInstance().get(`/repair-job/${repairJobData._id}/pdf`)
                         .then(({ data }) => {
                             axiosInstance()
                                 .get(`user/download?fileName=${data.data.fileName}`, {
@@ -238,7 +242,6 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled }) => {
             >
                 {downlodingFile ? "Please wait..." : "Preview"}
             </Button>
-            <Box mx={1} /> */}
 
             <Button variant="outlined" color="primary" aria-controls="simple-menu"
                 aria-haspopup="true"
@@ -314,7 +317,42 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled }) => {
         <Grid item xs={12} md={12} sm={12} className="mt-3">
 
             {columns ?
-                <CustomAgGrid
+               isMobile ? <CustomSwipableList
+                    allowSelection={true}
+                    allowSwipe={true}
+                    permissions={true}
+                    primaryField={columns?.find(d => d.field)}
+                    onClick={() => {
+                        // history.push(`${routes.rentalManagementDetail.path}/${data._id}`)
+                    }}
+                    dataRows={dataRows}
+                    selectedRecords={selectedRecords}
+                    dispatch={dispatch}
+                    onEdit={() => {
+
+                    }}
+                    extraParamsToCheckDelete={true}
+                    onDelete={() => {
+
+                    }}
+                    rowCount={rowCount}
+                    page={page}
+                    loading={loading}
+                    chips={[
+                        {
+                            label: "Status: ",
+                            field: "status",
+                        }
+                    ]}
+                    additionalDetails={[
+
+                    ]}
+                    owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                    onCreate={false}
+                    showClone={false}
+                    onClone={() => { }}
+                    renderedFrom={renderedFrom}
+                /> : <CustomAgGrid
                     columns={columns}
                     dataRows={dataRows}
                     frameworkComponents={frameworkComponents}
@@ -334,6 +372,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled }) => {
                                 return ["Scrap", "Lost"].some(s => s === params.data.status);
                             },
                     }}
+                    isClientSideGrid={true}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
 

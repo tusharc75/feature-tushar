@@ -76,6 +76,7 @@ import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import queryString from 'query-string';
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import {MdDelete, MdEdit} from "react-icons/md";
+import {BiEdit} from "react-icons/bi";
 
 function DisplayData({ label, value, icon }) {
   return (
@@ -905,7 +906,7 @@ export default function AccountDetailPage(props) {
                     <>
                       <Button
                         id="detailApproveButton"
-                        variant={isMobile ? "outlined" : "contained"}
+                        variant={isMobile ? "text" : "contained"}
                         size="small"
                         color={
                           accountData.staticData?.approved
@@ -923,8 +924,8 @@ export default function AccountDetailPage(props) {
                         }}
                       >
                         {accountData.staticData?.approved
-                          ? isMobile ? <FcDisapprove /> : "Disapprove"
-                          : isMobile ? <FcApproval /> : "Approve"}
+                          ? isMobile ? <FcDisapprove size={22}/> : "Disapprove"
+                          : isMobile ? <FcApproval size={22}/> : "Approve"}
                       </Button>
                     </>
                   )
@@ -938,14 +939,15 @@ export default function AccountDetailPage(props) {
                     <>
                       <Button
                         id="detailEditButton"
-                        variant={isMobile ? "outlined" : "contained"}
+                        variant={isMobile ? "text" : "contained"}
                         color="primary"
                         size="small"
                         onClick={handleOpneUpdateDialog}
                         className={isMobile ? accountClass.mobile_button_layout : ""}
+                        style={isMobile ? {color:"#43aeaa"} : {}}
 
                       >
-                        {isMobile ? <MdEdit/> : "Edit"}
+                        {isMobile ? <BiEdit size={20}/> : "Edit"}
 
                       </Button>
                     </>
@@ -961,9 +963,9 @@ export default function AccountDetailPage(props) {
                     accountData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       id="detailDeleteButton"
-                      text={isMobile ? <MdDelete/> : "Delete"}
+                      text={isMobile ? <MdDelete size={20}/> : "Delete"}
                       onClick={() => setShowConfirmBox(true)}
-                      style={{color:"#f44336", border: "1px solid #f44336"  }}
+                      // style={{color:"#f44336", border: "1px solid #f44336"  }}
                       className={isMobile ? accountClass.mobile_button_layout : ""}
 
                     />

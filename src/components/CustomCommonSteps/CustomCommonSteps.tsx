@@ -122,15 +122,17 @@ const useColorlibStepIconStyles = makeStyles((theme) => ({
 const CustomCommonSteps = (props) => {
     const {
         disableNextStep,
+        disablePreviousStep,
         steps,
         currentStep,
         setCurrentStep,
         onNextButtonClick,
         onPreviousButtonClick
     } = props;
-    console.log(disableNextStep)
+
     const classes = useStyles();
     let activeStep = currentStep;
+
     const ColorlibStepIcon = (props: StepIconProps) => {
         const classes = useColorlibStepIconStyles();
         var { active, completed } = props;
@@ -186,7 +188,7 @@ const CustomCommonSteps = (props) => {
                             <Button size="small"
                                 color="primary"
                                 hidden={currentStep >= 3 || (currentStep === 0 && disableNextStep)}
-                                disabled={currentStep >= 3 || (currentStep === 0 && disableNextStep)}
+                                disabled={currentStep >= steps.length || (currentStep === 0 && disableNextStep) || disableNextStep}
                                 variant="contained" endIcon={<KeyboardArrowRight />}
                                 onClick={() => {
                                     setCurrentStep(currentStep + 1)
@@ -202,10 +204,12 @@ const CustomCommonSteps = (props) => {
                         }
                         backButton={
 
-                            <Button size="small" variant="contained" color={"primary"} startIcon={<KeyboardArrowLeft />} disabled={currentStep === 0 || currentStep > steps.length - 1} onClick={() => {
-                                setCurrentStep(currentStep - 1)
-                                onPreviousButtonClick(currentStep, currentStep - 1)
-                            }} >
+                            <Button size="small" variant="contained" color={"primary"} startIcon={<KeyboardArrowLeft />}
+                                disabled={currentStep > steps.length - 1 || currentStep === 0 || disablePreviousStep}
+                                onClick={() => {
+                                    setCurrentStep(currentStep - 1)
+                                    onPreviousButtonClick(currentStep, currentStep - 1)
+                                }} >
                                 {steps[currentStep - 1] ?? ""}
                             </Button>
 
@@ -227,7 +231,7 @@ const CustomCommonSteps = (props) => {
                                             {(
                                                 <div>
                                                     <IconButton
-                                                        disabled={currentStep > steps.length - 1 || currentStep === 0}
+                                                        disabled={currentStep > steps.length - 1 || currentStep === 0 || disablePreviousStep}
                                                         onClick={() => {
                                                             setCurrentStep(currentStep - 1)
                                                             onPreviousButtonClick(currentStep, currentStep - 1)
@@ -256,7 +260,7 @@ const CustomCommonSteps = (props) => {
                                                             <div>
                                                                 <IconButton
                                                                     color="primary"
-                                                                    disabled={currentStep === 0 || currentStep < steps.length}
+                                                                    disabled={currentStep === 0 || currentStep < steps.length || disablePreviousStep}
                                                                     onClick={() => {
                                                                         setCurrentStep(currentStep + 1)
                                                                         onNextButtonClick(currentStep, currentStep + 1);

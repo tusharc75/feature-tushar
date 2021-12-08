@@ -192,7 +192,7 @@ export default function QuoteProcess(props) {
     setShowTotalSalesDialog,
     showTotalSalesDialog,
     DOAlimit,
-    DOAsetup,
+    DOAsetup
   } = props;
   const defaultSelectColumns = [
     'Product Description',
@@ -312,7 +312,7 @@ export default function QuoteProcess(props) {
 
   useEffect(() => {
     setVisibleColumns(columnView && columnView.length ? columnView : defaultSelectColumns);
-    setVisibleColumnsExcel(columnViewExcel && columnViewExcel.length ? columnViewExcel : defaultSelectColumns)
+    setVisibleColumnsExcel(columnViewExcel && columnViewExcel.length ? columnViewExcel : defaultSelectColumns);
   }, [columnView]);
 
   useEffect(() => {
@@ -329,7 +329,7 @@ export default function QuoteProcess(props) {
     if (tempProcessStatus === 'Customer Process') {
       setNextStep(false);
     }
-    if (tempProcessStatus === 'Quote Builder' || "Send To Customer") {
+    if (tempProcessStatus === 'Quote Builder' || 'Send To Customer') {
       setNextStep(true);
     }
   }, [quoteData]);
@@ -339,7 +339,7 @@ export default function QuoteProcess(props) {
       axiosInstance()
         .get(`/productbuilder/getproduct/` + productBuilderId)
         .then(({ data }) => {
-          let tempProductData = data.data
+          let tempProductData = data.data;
           data = data.data?.product?.map((u, index) => ({
             ...u,
             id: u._id,
@@ -425,15 +425,15 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
 
     const fieldArray = [];
-    BuilderData.productFields?.map((data) => fieldArray.push(data))
-    BuilderData.priceTemplate?.map((data) => data["fields"].map(d => fieldArray.push(d)))
-    BuilderData.productTemplate?.map((data) => data["fields"].map(d => fieldArray.push(d)))
+    BuilderData.productFields?.map((data) => fieldArray.push(data));
+    BuilderData.priceTemplate?.map((data) => data['fields'].map((d) => fieldArray.push(d)));
+    BuilderData.productTemplate?.map((data) => data['fields'].map((d) => fieldArray.push(d)));
     let colName = [];
     let dynamicTable = [];
     let requiredValuesData = [];
@@ -449,7 +449,6 @@ export default function QuoteProcess(props) {
       const requiredValues = {};
 
       quoteRowKeys.forEach((key) => {
-
         if (fieldArray) {
           fieldArray.forEach((data, i) => {
             // console.log(data)
@@ -634,7 +633,6 @@ export default function QuoteProcess(props) {
   };
 
   const refreshProducts = (data) => {
-
     if (ProcessStatus === 'New' && data?.product?.length === 0) {
       setNextStep(false);
     }
@@ -655,7 +653,6 @@ export default function QuoteProcess(props) {
     }
     productBuilderdatatoQuoteBuilderdata(data);
   };
-
 
   const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
     if (BuilderData && Object.keys(BuilderData).length !== 0) {
@@ -766,17 +763,14 @@ export default function QuoteProcess(props) {
         visibleColumnsExcel.forEach((col) => {
           if (Array.isArray(d[col]) && d[col].length > 0) {
             if (d[col][0]?.hasOwnProperty('optionLabel')) {
-              obj[col] = d[col]?.map(d => d.optionLabel).join() || "";
+              obj[col] = d[col]?.map((d) => d.optionLabel).join() || '';
+            } else {
+              obj[col] = d[col]?.join() || '';
             }
-            else {
-              obj[col] = d[col]?.join() || "";
-            }
-          }
-          else if (d[col]?.hasOwnProperty('optionLabel')) {
-            obj[col] = d[col]?.optionLabel || "";
-          }
-          else {
-            obj[col] = d[col] || "";
+          } else if (d[col]?.hasOwnProperty('optionLabel')) {
+            obj[col] = d[col]?.optionLabel || '';
+          } else {
+            obj[col] = d[col] || '';
           }
         });
 
@@ -784,11 +778,11 @@ export default function QuoteProcess(props) {
       });
 
       newTable = newTable.map((row, i) => {
-        return ({
-          "SR No.": i + 1,
+        return {
+          'SR No.': i + 1,
           ...row
-        })
-      })
+        };
+      });
 
       const res = newTable.reduce(
         (result, item) => {
@@ -817,7 +811,7 @@ export default function QuoteProcess(props) {
 
       const wb = utils.book_new();
       const ws = utils.json_to_sheet(newTable);
-      const range = utils.decode_range(ws['!ref'])
+      const range = utils.decode_range(ws['!ref']);
       let cs,
         rs: number = range.s.r;
       let ce,
@@ -830,17 +824,17 @@ export default function QuoteProcess(props) {
 
         ws[sCell].s = {
           font: {
-            name: "Calibri",
+            name: 'Calibri',
             sz: 12,
             bold: true,
-            color: { rgb: "ffffff" },
+            color: { rgb: 'ffffff' }
           },
           fill: {
-            fgColor: { rgb: "02617d" },
-          },
+            fgColor: { rgb: '02617d' }
+          }
         };
 
-        if (sCell !== "A1") {
+        if (sCell !== 'A1') {
           wscols.push({ wch: 20 });
         } else {
           wscols.push({ wch: 6 });
@@ -853,54 +847,54 @@ export default function QuoteProcess(props) {
         if (ws[cell])
           ws[cell].s = {
             font: {
-              name: "Calibri",
+              name: 'Calibri',
               sz: 12,
               bold: true,
-              color: { rgb: "ffffff" },
+              color: { rgb: 'ffffff' }
             },
             fill: {
-              fgColor: { rgb: "ff6666" },
-            },
+              fgColor: { rgb: 'ff6666' }
+            }
           };
       }
 
       Object.keys(ws).forEach((key, i) => {
-        if (key === "!cols" || key === "!ref") return;
+        if (key === '!cols' || key === '!ref') return;
 
         if (ws[key]?.s) {
           ws[key].s = {
             ...ws[key]?.s,
             alignment: {
-              horizontal: "left",
-            },
+              horizontal: 'left'
+            }
           };
         } else {
-          if (key.includes("A")) {
+          if (key.includes('A')) {
             ws[key].s = {
               font: {
-                name: "Calibri",
+                name: 'Calibri',
                 sz: 12,
                 bold: false,
-                color: { rgb: "ffffff" },
+                color: { rgb: 'ffffff' }
               },
               fill: {
-                fgColor: { rgb: "02617d" },
+                fgColor: { rgb: '02617d' }
               },
               alignment: {
-                horizontal: "left",
-              },
+                horizontal: 'left'
+              }
             };
           } else {
             ws[key].s = {
               alignment: {
-                horizontal: "left",
-              },
+                horizontal: 'left'
+              }
             };
           }
         }
       });
 
-      ws["!cols"] = wscols;
+      ws['!cols'] = wscols;
       utils.book_append_sheet(wb, ws);
       const excelBuffer = write(wb, {
         bookType: 'xlsx',
@@ -1358,8 +1352,8 @@ export default function QuoteProcess(props) {
               DOAneeded
                 ? DOASteps.findIndex((d) => d?.key === ProcessStatus)
                 : ProcessStatus === 'DOA Process'
-                  ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
-                  : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
+                ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
+                : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
             }
             id={quoteData._id}
             version={currentVersion}
@@ -1421,7 +1415,7 @@ export default function QuoteProcess(props) {
                 </span>
               ) : null}
               {(ProcessStatus === 'DOA Process' && versionStatus === 'Building Quote' && DOAneeded) ||
-                (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
+              (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
                 <div className={`d-flex align-items-center justify-content-end doaAction ${isMobile ? 'actio-pos-quote' : ''}`}>
                   {!ifQuoteApproved.approved && (
                     <Button
@@ -1636,7 +1630,7 @@ export default function QuoteProcess(props) {
             refresh={fetchQuoteData}
             versionStatus={versionStatus}
             selectedTNC={state?.selectedRecords}
-            type={isRearrangeColumns ? "pdf" : "excel"}
+            type={isRearrangeColumns ? 'pdf' : 'excel'}
           />
         </DndProvider>
       )}
@@ -1800,8 +1794,8 @@ export default function QuoteProcess(props) {
                     value={showPDFArrangeColumns ? visibleColumns : visibleColumnsExcel}
                     onChange={(e, val) => {
                       showPDFArrangeColumns ? setVisibleColumns(val) : setVisibleColumnsExcel(val);
-                      showPDFArrangeColumns ?
-                        handleVersionUpdate(val, visibleColumnsExcel, versionStatus, state?.selectedRecords)
+                      showPDFArrangeColumns
+                        ? handleVersionUpdate(val, visibleColumnsExcel, versionStatus, state?.selectedRecords)
                         : handleVersionUpdate(visibleColumns, val, versionStatus, state?.selectedRecords);
                     }}
                     options={ColumnName}
@@ -1813,13 +1807,24 @@ export default function QuoteProcess(props) {
                         {option}
                       </React.Fragment>
                     )}
-                    renderInput={(params) => <TextField {...params} variant="outlined" label={showPDFArrangeColumns ? `Visible Columns in Quote PDF` : `Visible Columns in Quote Excel`} placeholder="Select " />}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="outlined"
+                        label={showPDFArrangeColumns ? `Visible Columns in Quote PDF` : `Visible Columns in Quote Excel`}
+                        placeholder="Select "
+                      />
+                    )}
                   />
                 </FormControl>
               </Grid>
               <Grid item xs={1} md={1} sm={1}>
-                <IconButton disabled={!allowedToEdit} title="Re-arrange columns" color="inherit"
-                  onClick={() => showPDFArrangeColumns ? setRearrangeColumns(true) : setRearrangeColumnsExcel(true)}>
+                <IconButton
+                  disabled={!allowedToEdit}
+                  title="Re-arrange columns"
+                  color="inherit"
+                  onClick={() => (showPDFArrangeColumns ? setRearrangeColumns(true) : setRearrangeColumnsExcel(true))}
+                >
                   <ImportExportIcon />
                 </IconButton>
               </Grid>

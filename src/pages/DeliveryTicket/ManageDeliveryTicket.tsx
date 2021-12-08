@@ -30,7 +30,7 @@ const ManageDeliveryTicket = (props) => {
     const { deliveryTicketApi } = deliveryTicket;
     const { deliveryTicketId, onClose, onSuccess, warehouseId = null, productInventoryForDeliveryTicket = null, rentalData = null, transferData = null, repairJobData = null } = props;
     const [loading, setLoading] = useState(false);
-    const [initialData, setInitialData] = useState({ fields: [], values: {} });
+    const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [formsData, setFormsData] = useState([]);
     const [isSubmitting, setSubmitting] = useState(false);
@@ -40,12 +40,6 @@ const ManageDeliveryTicket = (props) => {
     const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
     const [ownerData, setOwnerData] = useState([]);
     const [collaboratorData, setCollaboratorData] = useState([]);
-    const [
-        ownerCollaboratorCommonDataSource,
-        setOwnerCollaboratorCommonDataSource,
-    ] = useState([]);
-    const [ownerDataSource, setOwnerDataSource] = useState([]);
-    const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
     const [disableOwnerSelection, setDisableOwnerSelection] = useState(false);
 
     useEffect(() => {
@@ -84,8 +78,16 @@ const ManageDeliveryTicket = (props) => {
                 }
 
                 if (repairJobData) {
-                    if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
-                        return false
+                    if (repairJobData?.typeOfRepair === "Internal") {
+                        if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
+                            return false
+                        }
+                    }
+
+                    if (repairJobData?.typeOfRepair === "External") {
+                        if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
+                            return false
+                        }
                     }
                 }
 
@@ -158,8 +160,18 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["type"] = "Repair Job";
                     tempInitialData["repairJob"] = repairJobData?._id
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
+
+                    if (repairJobData?.typeOfRepair === "Internal") {
+                        tempInitialData["receivingPlant"] = repairJobData?.repairPlant?.optionValue;
+                        tempInitialData["plantShipTo"] = repairJobData?.plantShipTo;
+                    }
+                    if (repairJobData?.typeOfRepair === "External") {
+                        // tempInitialData["supplierAccount"] = repairJobData?.vendor?.optionValue;
+                        tempInitialData["supplierShippingAddress"] = repairJobData?.supplierShipTo;
+                    }
+
                     setInitialData({
-                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
+                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "repairJob"),
                         values: tempInitialData,
                     });
                     setFormValues(tempInitialData)
@@ -172,16 +184,16 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["transferAsset"] = transferData?._id;
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
                     if (transferData?.transferType === "Internal") {
-                        tempInitialData["receivingPlant"] = transferData?.transferToPlant.optionValue;
-                        tempInitialData["shippingAddress"] = transferData?.plantShipTo;
+                        tempInitialData["receivingPlant"] = transferData?.transferToPlant?.optionValue;
+                        tempInitialData["plantShipTo"] = transferData?.plantShipTo;
                     }
                     if (transferData?.transferType === "External Customer") {
-                        tempInitialData["customerAccount"] = transferData?.transferToCustomer.optionValue;
+                        tempInitialData["customerAccount"] = transferData?.transferToCustomer?.optionValue;
                         tempInitialData["shippingAddress"] = transferData?.customerShipTo;
                     }
                     if (transferData?.transferType === "External Supplier") {
-                        tempInitialData["supplierAccount"] = transferData?.transferToSupplier.optionValue;
-                        tempInitialData["shippingAddress"] = transferData?.supplierShipTo;
+                        tempInitialData["supplierAccount"] = transferData?.transferToSupplier?.optionValue;
+                        tempInitialData["supplierShippingAddress"] = transferData?.supplierShipTo;
                     }
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
@@ -272,7 +284,7 @@ const ManageDeliveryTicket = (props) => {
                 }, formValues)) onClose()
                 else setShowConfirmDialog(true)
             }}
-            title={`${deliveryTicketId ? `Update ` : "Create Loading Ticket"}`}
+            title={`${deliveryTicketId ? `Update ${initialData.values?.deliveryJobName ? `(${initialData.values?.deliveryJobName})` : ""}` : "Create Loading Ticket"}`}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
                 setFullScreen(prevState => !prevState)
@@ -352,6 +364,29 @@ const ManageDeliveryTicket = (props) => {
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
                                                                                     imageOrFileUploadCompletePercentage={null}
+                                                                                />
+                                                                            ) : field.fieldName === "supplierAccount" ? (
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    disabled={(repairJobData && repairJobData["typeOfRepair"] === "External") || field.disableOnEdit}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    minDate={new Date()}
+                                                                                    maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
                                                                                 />
                                                                             ) : field.fieldName === "pick-UpDate" ? (
                                                                                 <FormTypes

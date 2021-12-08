@@ -179,9 +179,10 @@ const ProductInventoryDetailsPage = () => {
       gridApi.setRowData([]);
     }
     axiosInstance().get(`/history/inventory/${id}`).then(({ data: { data } }) => {
-      data = data?.map((u) => ({
+      data = data?.map((u, index) => ({
         ...u,
-        id: u.inventory?._id,
+        _id: (index + 1),
+        id: (index + 1),
         reference: u.reference?.optionLabel,
         referenceId: u.reference?.optionValue
       }));
@@ -202,7 +203,7 @@ const ProductInventoryDetailsPage = () => {
       } = await axiosInstance().get(`${productInventory.api}/${id}`);
 
       handleMainPoints(data);
-      setHeadingLbl(`${data?.serialNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
+      setHeadingLbl(`${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
       setCustomizedRoutes([routes.productInventory,
       { title: `${data?.serialNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
       setProductId(data?.product?.optionValue)
@@ -301,6 +302,8 @@ const ProductInventoryDetailsPage = () => {
     }
   }
 
+  const manualStatus = ["Available", "Repair", "Scrap", "Lost"]
+
   return (
     <>
       <Fragment>
@@ -370,6 +373,7 @@ const ProductInventoryDetailsPage = () => {
                         {
                           statusOptions.map(o => {
                             return <MenuItem
+                              disabled={!manualStatus.includes(o?.optionLabel)}
                               onClick={() => {
                                 closeActions()
                                 handleStatusChange(o)
@@ -535,68 +539,64 @@ const ProductInventoryDetailsPage = () => {
                 <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
                   <Paper style={{ overflow: 'hidden' }}>
                     <Box
-                        padding={1}
-                        bgcolor="grey.200"
-                        display="flex"
-                        justifyContent="space-between"
-                        alignItems="center"
+                      padding={1}
+                      bgcolor="grey.200"
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
                     >
                       <Typography variant="subtitle2">
                         BOM - Product
                       </Typography>
                     </Box>
                     {(
-                        <Box>
-                          {loading || loadingBOMData ? (
-                              [1].map((i) => (
-                                  <BoxWithBorder
-                                      key={i}
-                                      style={{
-                                        margin: "8px",
-                                      }}
-                                  >
-                                    <Box padding={1}>
-                                      <Skeleton
-                                          variant="text"
-                                          width="100px"
-                                          height="20px"
-                                      />
-                                      <Box marginTop={1} />
-                                      <Skeleton variant="text" width="100%" height="15px" />
-                                    </Box>
-                                  </BoxWithBorder>
-                              ))
-                          ) : BOMData.length ? (
-                              <>
-                                <ProductHierarchy
-                                    data={BOMData}
-                                    permissions={permissions?.product}
-                                    unassignProduct={() => { }}
+                      <Box>
+                        {loading || loadingBOMData ? (
+                          [1].map((i) => (
+                            <BoxWithBorder
+                              key={i}
+                              style={{
+                                margin: "8px",
+                              }}
+                            >
+                              <Box padding={1}>
+                                <Skeleton
+                                  variant="text"
+                                  width="100px"
+                                  height="20px"
                                 />
-                                <Box px={1} my={1} >
-                                  <Button
-                                      fullWidth
-                                      variant="outlined"
-                                      color='primary'
-                                      onClick={() => history.push(`${routes.productDetail.path}/${productId}/bom`, { productName: productInventoryData?.product?.optionLabel })}>
-                                    View All
-                                  </Button>
-                                </Box>
-                              </>
-                          ) : (
-                              <Box textAlign="center" padding={2} minHeight={150}>
-                                <Typography>No Product has been added </Typography>
+                                <Box marginTop={1} />
+                                <Skeleton variant="text" width="100%" height="15px" />
                               </Box>
-                          )}
-                        </Box>
+                            </BoxWithBorder>
+                          ))
+                        ) : BOMData.length ? (
+                          <>
+                            <ProductHierarchy
+                              data={BOMData}
+                              permissions={permissions?.product}
+                              unassignProduct={() => { }}
+                            />
+                            <Box px={1} my={1} >
+                              <Button
+                                fullWidth
+                                variant="outlined"
+                                color='primary'
+                                onClick={() => history.push(`${routes.productDetail.path}/${productId}/bom`, { productName: productInventoryData?.product?.optionLabel })}>
+                                View All
+                              </Button>
+                            </Box>
+                          </>
+                        ) : (
+                          <Box textAlign="center" padding={2} minHeight={150}>
+                            <Typography>No Product has been added </Typography>
+                          </Box>
+                        )}
+                      </Box>
                     )}
                   </Paper>
                 </Grid>
-
-
               </TabPanel>
-
-
               <TabPanel value={tabValue} index={1}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={12} md={12} lg={12}>

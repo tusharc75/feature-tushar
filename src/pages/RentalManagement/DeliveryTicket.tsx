@@ -11,16 +11,27 @@ import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import { deliveryTicket, gridLoadingTimeout, rentalManagement, sidebarResource } from "../../constants/helpers";
+import {
+  deliveryTicket,
+  gridLoadingTimeout,
+  quoteStepColors,
+  rentalManagement,
+  sidebarResource
+} from "../../constants/helpers";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import { useHistory } from "react-router-dom";
 import { groupBy } from 'lodash';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
+import {isMobile} from "react-device-detect";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import {FaSuitcase} from "react-icons/fa";
 
 const renderedFrom = "rentalManagementDetailsPageDeliveryTicket"
 
 const DeliveryTicket = ({ currentStep, handleDeliveryTicketDialog, rentalManagementId, rentalManagementData, fetchRentalData }) => {
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
 
   const [gridApi, setGridApi] = useState(null);
   const [warehouse, setWarehouse] = useState(null);
@@ -259,6 +270,39 @@ const DeliveryTicket = ({ currentStep, handleDeliveryTicketDialog, rentalManagem
     <Grid item xs={12} md={12} sm={12} className="mt-3">
 
       {columns ?
+          isMobile ?
+              <CustomSwipableList
+                  allowSelection={true}
+                  allowSwipe={true}
+                  permissions={true}
+                  primaryField={columns?.find(d => d.field)}
+                  onClick={(data) => {
+                    history.push(`${routes.deliveryTicketDetail.path}/${data._id}`)
+                  }}
+                  dataRows={dataRows}
+                  selectedRecords={selectedRecords}
+                  dispatch={dispatch}
+                  onEdit={false}
+                  extraParamsToCheckDelete={true}
+                  onDelete={false}
+                  rowCount={rowCount}
+                  page={page}
+                  loading={loading}
+                  additionalDetails={[
+                  ]}
+                  chips={[
+                    {
+                      label: "Asset Number : ",
+                      field: "assetNumber",
+                    }
+                  ]}
+                  owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                  onCreate={false}
+                  showClone={false}
+                  onClone={() => { }}
+                  renderedFrom={renderedFrom}
+              /> :
+
         <CustomAgGrid
           columns={columns}
           dataRows={dataRows}
