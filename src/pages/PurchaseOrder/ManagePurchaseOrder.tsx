@@ -17,10 +17,11 @@ import { Box, Grid } from '@material-ui/core';
 import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { FaDiceOne } from "react-icons/fa";
+import { useHistory } from "react-router-dom";
 
 const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, productId = null, productCategory = null,
     productsToSave = [], isFromSerializedAssetStepFromRental = false, currency = null, rentalManagementId = null }) => {
-
+    const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -107,7 +108,8 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
             } else {
                 axiosInstance().post(`${purchaseOrder.api}`, values).then(({ data: { data } }) => {
                     setLoading(false);
-                    onSuccess(data)
+                    // onSuccess(data)
+                    history.push(`${purchaseOrder.api}/detail/${data._id}`);
                 }).catch((error) => {
                     setLoading(false);
                     toastConfig.setToastConfig(error);
@@ -196,28 +198,47 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                 isTooltip={field?.isTooltip || false}
                                                                 tooltipMessage={field?.tooltipMessage}
                                                                 size="small"
-                                                            /> : <FormTypes
-                                                                isNew={Boolean(purchaseOrderId)}
-                                                                {...field}
-                                                                disabled={Boolean(purchaseOrderId) && field.disableOnEdit && !isClone}
-                                                                values={values}
-                                                                errors={errors}
-                                                                touched={touched}
-                                                                label={field.fieldLabel}
-                                                                name={field.fieldName}
-                                                                type={field.type}
-                                                                options={field.option}
-                                                                setFieldValue={(name, value) => {
-                                                                    // handleValuesChange({ [name]: value })
-                                                                    setFieldValue(name, value)
-                                                                }}
-                                                                required={field.required}
-                                                                fullWidth
-                                                                isTooltip={field?.isTooltip || false}
-                                                                tooltipMessage={field?.tooltipMessage}
-                                                                size="small"
+                                                            /> :
+                                                                field.fieldName === "supplierContact" ? <FormTypes
+                                                                    isNew={Boolean(purchaseOrderId)}
+                                                                    {...field}
+                                                                    values={values}
+                                                                    errors={errors}
+                                                                    touched={touched}
+                                                                    label={field.fieldLabel}
+                                                                    name={field.fieldName}
+                                                                    type={field.type}
+                                                                    options={field.option.filter(d => d.parentAccount === values["supplier"])}
+                                                                    setFieldValue={(name, value) => {
+                                                                        setFieldValue(name, value)
+                                                                    }}
+                                                                    required={field.required}
+                                                                    fullWidth
+                                                                    isTooltip={field?.isTooltip || false}
+                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                    size="small"
+                                                                /> : <FormTypes
+                                                                    isNew={Boolean(purchaseOrderId)}
+                                                                    {...field}
+                                                                    disabled={Boolean(purchaseOrderId) && field.disableOnEdit && !isClone}
+                                                                    values={values}
+                                                                    errors={errors}
+                                                                    touched={touched}
+                                                                    label={field.fieldLabel}
+                                                                    name={field.fieldName}
+                                                                    type={field.type}
+                                                                    options={field.option}
+                                                                    setFieldValue={(name, value) => {
+                                                                        // handleValuesChange({ [name]: value })
+                                                                        setFieldValue(name, value)
+                                                                    }}
+                                                                    required={field.required}
+                                                                    fullWidth
+                                                                    isTooltip={field?.isTooltip || false}
+                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                    size="small"
 
-                                                            />}
+                                                                />}
                                                         </Grid>
                                                     ))}
                                                 </Grid>

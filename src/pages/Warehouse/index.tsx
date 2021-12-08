@@ -16,7 +16,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomContainer from '../../components/CustomContainer';
 import ManageWarehouse from './ManageWarehouse';
 import routes from '../../components/Helpers/Routes';
-import { ExpandMore } from '@material-ui/icons';
+import {AddOutlined, ExpandMore} from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../constants/helpers';
@@ -33,7 +33,7 @@ import { prepareDataForGrid } from "../../constants/helpers"
 import { useLocation } from "react-router-dom";
 import queryString from "query-string";
 import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown } from "react-icons/all";
+import {AiFillCrown, MdAdd} from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
@@ -63,7 +63,9 @@ const AddressResource = () => {
   const [warehouseId, setWarehouseId] = useState("")
   const [entities, setEntities] = useState([])
   const [showUpdateWarningConfirmBox, setShowUpdateWarningConfirmBox] = useState(false)
-  const [columns, setColumns] = useState([])
+  const [columns, setColumns] = useState([
+
+  ])
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
 
 
@@ -75,6 +77,7 @@ const AddressResource = () => {
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([])
   const localStorageSelectedRecords = "warehouse_selected";
+
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('addressResourcePage'));
@@ -386,33 +389,48 @@ const AddressResource = () => {
               <FaWarehouse size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.warehouse.title}</span>
             </Grid>
             <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
-              <Box className={styles.filter_side_header} component="div">
-                <div className="d-flex gap-2">
-                  <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} placeholder={`Search ${routes.warehouse.title}`} />
-                  {warehousePermissions.isCreate && !isMobile && (
+              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+
+                <Grid style={{display: "flex", flex:1}}>
+                  <SearchBox
+                      onSearch={handleSearch}
+                      searchbox={styles.search_box_input}
+                      width={isMobile ? "200px" : "242px"}
+                      style={isMobile ? {flex:1} : {}}
+                      size="small"
+                      value={search}
+                      placeholder={`Search ${routes.warehouse.title}`}
+                  />
+                </Grid>
+
+                <Grid style={{display: "flex" , gap:"5px"}}>
+                  {warehousePermissions.isCreate && (
                     <Button
                       onClick={() => {
                         setAddressResource(null);
                         setOpen({ open: true, isClone: false });
                       }}
-                      variant="contained"
+                      variant={isMobile ? "text" : "contained"}
                       size="small"
                       color="primary"
-                      startIcon={<AddIcon />}
+                      className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                      startIcon={isMobile ? null : <AddOutlined />}
                     >
-                      Add
+                      {isMobile ? <MdAdd size={23}/> : "Add"}
                     </Button>
                   )}
-                  <div className="d-flex gap-2">
+
+
                     <Button
-                      variant="outlined"
+                        variant={isMobile ? "text" : "contained"}
                       color="default"
                       size="small"
                       onClick={openActions}
                       disabled={selectedRecords.length ? false : true}
                       aria-controls="action-menu"
+                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
                     >
-                      Actions <ExpandMore />
+                      {isMobile ? "" :  "Actions" } <ExpandMore/>
                     </Button>
 
                     <Menu
@@ -462,8 +480,7 @@ const AddressResource = () => {
                         </MenuItem>
                       )}
                     </Menu>
-                  </div>
-                </div>
+                </Grid>
               </Box>
             </Grid>
           </Grid>
@@ -475,7 +492,7 @@ const AddressResource = () => {
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions.warehouse}
-              primaryField={columns?.find(d => d.primaryField)}
+              primaryField={columns?.find(d => d.field)}
               onClick={(data) => {
                 history.push(`${routes.warehouseDetail.path}/${data._id}`)
               }}
@@ -497,13 +514,14 @@ const AddressResource = () => {
 
               ]}
               chips={[
+                {
+                  label: "Storage Type",
+                  field: "storageType",
+                },
 
               ]}
               owerCollaboratorInitialsOrImages=""
-              onCreate={() => {
-                setAddressResource(null);
-                setOpen({ open: true, isClone: false });
-              }}
+              onCreate={false}
               showClone={false}
               onClone={() => { }}
               renderedFrom={"warehouse"}

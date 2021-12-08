@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
+import { useState, useEffect, Fragment, useContext, useRef, FC } from 'react';
 import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -10,19 +10,32 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, transferAsset, setFieldsInAscendingOrder } from '../../constants/helpers';
+import { CustomDialogTransition, transferAsset, setFieldsInAscendingOrder, generateUniqueIdOnly } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues, RESOURCE_LABEL } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 
-const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose, onSuccess, number = "" }) => {
+interface Props {
+  isClone?: boolean;
+  transferAssetId?: any;
+  onClose?: any;
+  onSuccess?: any;
+  number?: string;
+  isEditable?: boolean;
+  isMainInfoEditable?: boolean;
+}
+
+const ManageTransferAsset: FC<Props> = (props) => {
+  const { isClone = false, transferAssetId = null, onClose, onSuccess, number = '', isEditable = false, isMainInfoEditable = false } = props;
   const toastConfig = useContext(CustomToastContext);
+  const initialRender = useRef(true);
   const [isSubmitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [formValues, setFormValues] = useState(null);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -37,7 +50,7 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
             .get(`${transferAsset.api}/` + transferAssetId)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, createdBy, updatedBy, serialNumber, ...rest } = data;
+                const { _id, createdBy, updatedBy, entity, ...rest } = data;
 
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -53,9 +66,11 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
             .catch((error) => {
               toastConfig.setToastConfig(error);
             });
+          setAllFields(fieldsDataForUpdate);
         } else {
-          let createValues = getObjKeys('', fieldsDataForCreate);
+          let createValues: any = getObjKeys('', fieldsDataForCreate);
           setAllFields(fieldsDataForCreate);
+          createValues.transferAssetNumber = `TA_${generateUniqueIdOnly()}`
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
             values: createValues
@@ -66,6 +81,49 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
         toastConfig.setToastConfig(error);
       });
   }, [transferAssetId]);
+
+  useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false;
+    } else {
+      let fields = initialData.fields;
+
+      if (fields.length > 0 && formValues) {
+        fields = fields.map((field) => {
+          const sectionFields = field.sectionFields.map((_f) => {
+            if (_f.fieldName === 'transferToPlant' || _f.fieldName === 'plantShipTo') {
+              if (formValues.transferType === 'Internal') {
+                _f.required = true;
+              } else {
+                _f.required = false;
+              }
+            }
+            if (_f.fieldName === 'transferToCustomer' || _f.fieldName === 'customerShipTo') {
+              if (formValues.transferType === 'External Customer') {
+                _f.required = true;
+              } else {
+                _f.required = false;
+              }
+            }
+            if (_f.fieldName === 'transferToSupplier' || _f.fieldName === 'supplierShipTo') {
+              if (formValues.transferType === 'External Supplier') {
+                _f.required = true;
+              } else {
+                _f.required = false;
+              }
+            }
+            return _f;
+          });
+          return {
+            ...field,
+            sectionFields
+          };
+        });
+      }
+
+      setInitialData({ ...initialData, fields });
+    }
+  }, [formValues]);
 
   const handleSubmit = (values) => {
     setSubmitting(true);
@@ -117,11 +175,28 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
       fullWidth
     >
       {initialData.fields.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(allFields)} onSubmit={handleSubmit}>
-          {({ values, errors, touched, setFieldValue, submitForm, setFieldError }) => (
+        <Formik
+          innerRef={(ref) => {
+            if (ref) {
+              setFormValues(ref.values);
+            } else {
+              setFormValues(null);
+            }
+          }}
+          initialValues={initialData.values}
+          validationSchema={yupSchema(allFields)}
+          onSubmit={handleSubmit}
+        >
+          {({ values, errors, touched, setFieldValue, submitForm, setErrors }) => (
             <Fragment>
               <CustomDialogHeader
-                title={transferAssetId ? (isClone ? 'Clone' : `Update ${RESOURCE_LABEL.transferAsset} (${number})`) : 'Create ' + RESOURCE_LABEL.transferAsset}
+                title={
+                  transferAssetId
+                    ? isClone
+                      ? 'Clone'
+                      : `Update ${RESOURCE_LABEL.transferAsset} (${number})`
+                    : 'Create ' + RESOURCE_LABEL.transferAsset
+                }
                 onClose={() => {
                   if (isFieldNotTouched(initialData, values)) onClose();
                   else setShowConfirmDialog(true);
@@ -141,23 +216,27 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                         <Box marginY={2}>
                           <Grid spacing={3} container>
                             {form.sectionFields.map((field, index2) =>
-                              field.fieldName === 'transferToPlant' ? (
-                                values?.transferType.includes('Internal') ? (
+                              field.fieldName === 'transferToPlant' || field.fieldName === 'plantShipTo' ? (
+                                values?.transferType.includes('Internal') && (
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
                                     <FormTypes
                                       isNew={Boolean(transferAssetId)}
                                       {...field}
-                                      disabled={Boolean(transferAssetId) && field.disableOnEdit}
+                                      disabled={Boolean(transferAssetId) && (isMainInfoEditable || field.disableOnEdit)}
                                       values={values}
                                       errors={{ ...errors }}
                                       touched={touched}
                                       label={field.fieldLabel}
                                       name={field.fieldName}
                                       type={field.type}
-                                      options={field.option.filter(val => val.optionValue !== values?.transferFromPlant) ?? []}
+                                      options={field.option.filter((val) => val.optionValue !== values?.transferFromPlant) ?? []}
                                       setFieldValue={(name, value) => {
                                         // handleValuesChange({ [name]: value })
                                         setFieldValue(name, value);
+                                        if (field.fieldName === 'transferToPlant') {
+                                          const address = field.option?.find((_d: any) => _d?.optionValue === value)?.address ?? '';
+                                          setFieldValue('plantShipTo', address);
+                                        }
                                       }}
                                       required={values?.transferType.includes('Internal')}
                                       fullWidth
@@ -166,14 +245,14 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                                       size="small"
                                     />
                                   </Grid>
-                                ) : null
-                              ) : field.fieldName === 'transferToSupplier' ? (
-                                values?.transferType.includes('Supplier') ? (
+                                )
+                              ) : field.fieldName === 'transferToSupplier' || field.fieldName === 'supplierShipTo' ? (
+                                values?.transferType.includes('Supplier') && (
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
                                     <FormTypes
                                       isNew={Boolean(transferAssetId)}
                                       {...field}
-                                      disabled={Boolean(transferAssetId) && field.disableOnEdit}
+                                      disabled={Boolean(transferAssetId) && (isMainInfoEditable || field.disableOnEdit)}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
@@ -184,6 +263,9 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                                       setFieldValue={(name, value) => {
                                         // handleValuesChange({ [name]: value })
                                         setFieldValue(name, value);
+                                        if (field.fieldName === 'transferToSupplier') {
+                                          setFieldValue('supplierShipTo', '');
+                                        }
                                       }}
                                       required={values?.transferType.includes('Supplier')}
                                       fullWidth
@@ -192,14 +274,14 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                                       size="small"
                                     />
                                   </Grid>
-                                ) : null
-                              ) : field.fieldName === 'transferToCustomer' ? (
-                                values?.transferType.includes('Customer') ? (
+                                )
+                              ) : field.fieldName === 'transferToCustomer' || field.fieldName === 'customerShipTo' ? (
+                                values?.transferType.includes('Customer') && (
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
                                     <FormTypes
                                       isNew={Boolean(transferAssetId)}
                                       {...field}
-                                      disabled={Boolean(transferAssetId) && field.disableOnEdit}
+                                      disabled={Boolean(transferAssetId) && (isMainInfoEditable || field.disableOnEdit)}
                                       values={values}
                                       errors={{ ...errors }}
                                       touched={touched}
@@ -210,6 +292,9 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                                       setFieldValue={(name, value) => {
                                         // handleValuesChange({ [name]: value })
                                         setFieldValue(name, value);
+                                        if (field.fieldName === 'transferToCustomer') {
+                                          setFieldValue('customerShipTo', '');
+                                        }
                                       }}
                                       required={values?.transferType.includes('Customer')}
                                       fullWidth
@@ -218,13 +303,13 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                                       size="small"
                                     />
                                   </Grid>
-                                ) : null
+                                )
                               ) : field.fieldName === 'transferType' ? (
                                 <Grid key={index2} item xs={12} sm={6} md={6}>
                                   <FormTypes
                                     isNew={Boolean(transferAssetId)}
                                     {...field}
-                                    disabled={Boolean(transferAssetId)}
+                                    disabled={Boolean(transferAssetId) && (isMainInfoEditable || field.disableOnEdit)}
                                     values={values}
                                     errors={errors}
                                     touched={touched}
@@ -238,14 +323,43 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                                     tooltipMessage={field?.tooltipMessage}
                                     size="small"
                                     onChange={(e, val) => {
-                                      if (val?.optionLabel.includes('Supplier')) {
-                                        setFieldError("transferToSupplier", 'Transfer To Supplier is required');
-                                      } else if (val?.optionLabel.includes('Internal')) {
-                                        setFieldError("transferToPlant", 'Transfer To Plant is required');
-                                      } else {
-                                        setFieldError("transferToCustomer", 'Transfer To Customer is required');
+                                      setFieldValue(field.fieldName, val?.optionValue ?? '');
+
+                                      // DO THIS WHEN CHANGING TYPE
+                                      setFieldValue('transferToCustomer', '');
+                                      setFieldValue('transferToSupplier', '');
+                                      setFieldValue('transferToPlant', '');
+                                      setFieldValue('customerShipTo', '');
+                                      setFieldValue('supplierShipTo', '');
+                                      setFieldValue('plantShipTo', '');
+                                    }}
+                                  />
+                                </Grid>
+                              ) : field.fieldName === 'transferFromPlant' ? (
+                                <Grid key={index2} item xs={12} sm={6} md={6}>
+                                  <FormTypes
+                                    isNew={Boolean(transferAssetId)}
+                                    {...field}
+                                    disabled={Boolean(transferAssetId) && (isEditable || field.disableOnEdit)}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                      const address = field.option?.find((_d: any) => _d?.optionValue === value)?.address ?? '';
+                                      if (address === values?.plantShipTo) {
+                                        setFieldValue('plantShipTo', "");
+                                        setFieldValue('transferToPlant', "");
                                       }
-                                      setFieldValue(field.fieldName, val?.optionValue ?? "");
                                     }}
                                   />
                                 </Grid>
@@ -254,7 +368,7 @@ const ManageTransferAsset = ({ isClone = false, transferAssetId = null, onClose,
                                   <FormTypes
                                     isNew={Boolean(transferAssetId)}
                                     {...field}
-                                    disabled={Boolean(transferAssetId) && field.disableOnEdit}
+                                    disabled={(Boolean(transferAssetId) && field.disableOnEdit) || (field.fieldName === 'status' && true)}
                                     values={values}
                                     errors={errors}
                                     touched={touched}

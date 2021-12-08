@@ -32,13 +32,9 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
     const [disableSaveButton, setDisableSaveButton] = useState(false);
-
-    const {
-        state: { permissions },
-    }: any = useData();
+    const { state: { permissions } }: any = useData();
 
     useEffect(() => {
-        // fetchProductInventory();
         if (type === "product") fetchProductInventory();
         else if (type === "package") fetchPackage();
     }, []);

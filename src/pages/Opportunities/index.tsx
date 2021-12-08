@@ -591,7 +591,7 @@ const Opportunities = () => {
                 },
               ]}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={clickCreateNew}
+              onCreate={false}
               showClone={true}
               onClone={(data) => {  setShowCreateOpportunityDialog({ open: true, isClone: true, idToClone: data._id })}}
               renderedFrom={opportunityResource}

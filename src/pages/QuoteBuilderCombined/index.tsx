@@ -346,7 +346,6 @@ const QuoteBuilders = () => {
   }, [search]);
 
   useEffect(() => {
-    fetchDoa();
     if (renderCount > 0) {
       fetchQuoteBuilder();
     } else setRenderCount((preCount) => preCount + 1);
@@ -362,29 +361,6 @@ const QuoteBuilders = () => {
     opportunityDetails,
     showFilteredRecordsOnly
   ]);
-
-  const fetchDoa = async () => {
-    axiosInstance()
-      .get(`/doa/${selectedEntity}`)
-      .then(({ data: { data } }) => {
-        let doaData = [];
-
-        data.doa.forEach((item) => {
-          if (!isObjectEmpty(item)) {
-            doaData.push({
-              optionValue: item.user?._id,
-              optionLabel: [item.user?.firstName, item.user?.lastName].filter(f => f).join(" "),
-            });
-          }
-        });
-
-        setDoa(doaData);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setDoa([]);
-      });
-  };
 
   const getVersionStatus = (id, currency) => {
     // setAllVersionStatusButtonText(gettingVersionStatusText);
@@ -1015,7 +991,7 @@ const QuoteBuilders = () => {
                   }
                 ]}
                 owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                onCreate={clickCreateNew}
+                onCreate={false}
                 showClone={false}
                 onClone={() => { }}
                 renderedFrom={quoteResource}

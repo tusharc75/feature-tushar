@@ -20,6 +20,7 @@ import Menu from "@material-ui/core/Menu"
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import 'tinymce/icons/default';
 import "./tinymce.scss"
+import { startCase } from 'lodash';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -506,7 +507,7 @@ export default function TinyMCE(props) {
                                                         variables && variables.map(o => {
                                                             return <MenuItem
                                                                 onClick={() => handleVaribleSelect(o)}
-                                                                value={o}>{mappedVariablesNames[o]}</MenuItem>
+                                                                value={o}>{startCase(o)}</MenuItem>
                                                         })
                                                     }
                                                 </Menu>

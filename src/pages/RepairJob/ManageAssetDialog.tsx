@@ -13,8 +13,9 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import FormTypes from '../../components/Helpers/FormTypes'
 import { uniq, map, orderBy } from 'lodash'
 
-export default function ManageAssetDialog({ open, fields, asset, selectedRecords, onSuccess, onClose, repairJobId }) {
+export default function ManageAssetDialog({ open, fields, asset, selectedRecords, onSuccess, onClose, repairJobData }) {
 
+    const { repairJobId } = repairJobData;
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [isUpdating, setIsUpdating] = useState(false)
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -26,7 +27,7 @@ export default function ManageAssetDialog({ open, fields, asset, selectedRecords
 
         setInitialData({
             fields: fields,
-            values: getObjKeysWithValues(asset ? asset : {}, fields),
+            values: getObjKeysWithValues(asset ? { ...asset, expectedCompletionDate: (asset["expectedCompletionDate"] ? asset["expectedCompletionDate"] : repairJobData["expectedCompletionDate"]) } : { expectedCompletionDate: repairJobData["expectedCompletionDate"] }, fields),
         });
 
         const sections = uniq(map(fields, 'sectionName'));
@@ -97,7 +98,7 @@ export default function ManageAssetDialog({ open, fields, asset, selectedRecords
                         }) => (
                             <Fragment>
                                 <CustomDialogHeader
-                                    title={asset ? "Edit Asset" : ("Edit Assets " + "(" + selectedRecords.length + ")")}
+                                    title={asset ? `Edit - ${asset.index} - ${asset.assetNumber}` : ("Edit Assets " + "(" + selectedRecords.length + ")")}
                                     onClose={() => {
                                         onClose()
                                     }}

@@ -198,17 +198,18 @@ const Board = ({ type, filter }) => {
         <Autocomplete
           options={resourceOptions}
           getOptionLabel={(option) => option}
-          style={{ width: 200 }}
+          style={{ width: "100%" }}
           value={resource}
           onChange={(event, newValue) => {
             setResource(newValue);
           }}
           size="small"
           renderInput={(params) => (
+              isMobile ? <TextField {...params} label="Select Resource" variant="standard" className= {isMobile ? "serchBox" : "" } /> :
             <TextField {...params} label="Select Resource" variant="outlined" />
           )}
         />
-        <Box mx={1} />
+        <Box mx={isMobile ? 0 : 1} />
         {Boolean(resource) && resourceData && (
           <Autocomplete
             disabled={loadingResources}

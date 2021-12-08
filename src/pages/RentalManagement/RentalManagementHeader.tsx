@@ -17,6 +17,7 @@ import styles from "../Leads/Header.module.scss";
 import HideWhenOffline from "../../components/HideWhenOffline";
 import routes from "../../components/Helpers/Routes";
 import { isMobile } from 'react-device-detect';
+import {MdAdd} from "react-icons/all";
 
 function RentalManagementHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -99,16 +100,17 @@ function RentalManagementHeader(props) {
 
 
           <Grid style={{display: "flex" , gap:"5px"}}>
-              {RentalManagementPermissions.isCreate && RentalManagementPermissions.isUpdate && !isMobile && (
+              {RentalManagementPermissions.isCreate && RentalManagementPermissions.isUpdate && (
                 <Button
-                  variant="contained"
+                    variant={isMobile ? "text" : "contained"}
                   color="primary"
                   size="small"
                  // className={styles.add_submit_btn}
                   onClick={onCreate}
-                  startIcon={<AddOutlined />}
+                    className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                    startIcon={isMobile ? null : <AddOutlined />}
                 >
-                  Add
+                  {isMobile ? <MdAdd size={23}/> : "Add"}
                 </Button>
               )}
 

@@ -11,6 +11,7 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
 import "./style.scss";
+import {isMobile} from "react-device-detect";
 
 const capitalize = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -66,7 +67,7 @@ const Activity = ({ type }) => {
       </Grid>
       <CustomContainer styles={{ width: "100%" }}>
         <Box className={classes.activityHeader}>
-          <Paper elevation={4} style={{ marginBottom: 20 }}>
+          <Paper elevation={isMobile ? 0 : 4} style={{marginBottom: 20}} >
             <Grid container>
               <Grid item xs={12} md={5} sm={7}>
                 <Box display="flex" justifyContent="center">

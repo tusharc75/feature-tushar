@@ -26,10 +26,11 @@ interface AssetDialogProps {
   fetchAssets?: VoidFunction;
   existingAssets: any[];
   transferAssetId: string | any;
+  updateTransferStatus?: any;
 }
 
 const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
-  const { plantId, closeDialog, fetchAssets, existingAssets, transferAssetId } = props
+  const { plantId, closeDialog, fetchAssets, existingAssets, transferAssetId, updateTransferStatus } = props
   const toastConfig = useContext(CustomToastContext);
 
   const [isAdding, setAdding] = useState(false)
@@ -47,13 +48,8 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
   }: any = useData();
 
   useEffect(() => {
-    fetchProductInventory();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
-
-  useEffect(() => {
     fetchGridColumns()
   }, [])
-
   const fetchGridColumns = () => {
     axiosInstance()
       .get("/field?resource=Product Inventory")
@@ -73,22 +69,16 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
             }
           }
         })
+
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
-          actionsRenderer: null
         }
         setFrameWorkComponent({ ...tempFrameworkComponent })
         columns = [...columns, ...getStaticFields()]
         setColumns([...columns])
       })
   }
-  const NameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
-
   const fetchProductInventory = () => {
     dispatch({ type: 'loading', loading: true });
 
@@ -96,8 +86,7 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
       gridApi.setRowData([]);
     }
 
-    let queryString = getQueryString();
-    queryString = `${queryString}&filterById=${JSON.stringify([{ field: 'warehouse', term: plantId }])}&repairable=true&filterByIdType=or`;
+    let queryString = `?&filterById=${JSON.stringify([{ field: 'warehouse', term: plantId }])}&repairable=true&filterByIdType=or`;
 
     axiosInstance()
       .get(`${productInventory.api}${queryString}`)
@@ -105,12 +94,13 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
         data = data.filter((asset: any) => !existingAssets.includes(asset._id))
           .map((u: any) => {
             let finalObject = prepareDataForGrid(u);
-            finalObject["canDelete"] = permissions?.productInventory?.isDelete
-            finalObject["allowedToEdit"] = permissions?.productInventory.isUpdate
-
             return finalObject
 
           });
+
+        if (data.length === 0) {
+          updateTransferStatus("New")
+        }
 
         dispatch({ type: 'initialize', data: data, count: data.length });
         setTimeout(() => {
@@ -123,54 +113,13 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
       });
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
-
-    if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id))}`;
-    }
-
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
-    }
-
-    if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-    }
-
-    if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
-    }
-    return deepFilter;
-  };
-
+  useEffect(() => {
+    fetchProductInventory();
+  }, []);
 
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-
-
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
   };
 
   const getRowStyleScheduled = (params) => {
@@ -195,6 +144,7 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
           setAdding(false)
           fetchAssets()
           closeDialog()
+          updateTransferStatus("In Progress")
         }).catch(err => {
           setAdding(false)
           toastConfig.setToastConfig(err)
@@ -223,10 +173,7 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
                         disabled={selectedRecords.length === 0 || isAdding}
                         endIcon={isAdding && <CircularProgress size={20} />}
                       >
-                        {getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length
-                          ? '(' + getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length + ')  '
-                          : ''}
-                        Add
+                        {selectedRecords.length > 0 ? `(${selectedRecords.length}) ` : ""}Add
                       </Button>
                     </Box>
                   </Grid>
@@ -247,10 +194,7 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
                   loading={loading}
                   customGridOptions={{ getRowStyle: getRowStyleScheduled }}
                   isClientSideGrid={true}
-                  // selectedRecords={selectedRecords}
                   renderedFrom={addSerializedAssetsRenderedFrom}
-                  showOnlyShowFilteredRecordSwitch={true}
-                // allowHeaderSelection={false}
                 />
               ) : (
                 <Box p={2} height={500} bgcolor="white">
