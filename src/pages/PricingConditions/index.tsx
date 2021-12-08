@@ -1,9 +1,8 @@
 import { useContext, useEffect, useState, useReducer, Fragment } from "react";
 import { Box, Button, Menu, MenuItem, Grid } from "@material-ui/core";
 import { useData } from "../../StateProvider/Provider";
-import {AddOutlined, ExpandMore} from "@material-ui/icons";
+import { AddOutlined, ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import AddIcon from "@material-ui/icons/Add";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import SearchBox from "../../components/Helpers/SearchBox";
 import CustomContainer from "../../components/CustomContainer";
@@ -17,98 +16,105 @@ import {
   pricingCondition,
 } from "../../constants/helpers";
 import routes from "./../../components/Helpers/Routes";
-import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid, {
   reducer,
   intialState,
 } from "../../components/AgGridComponents/CustomAgGrid";
-import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { Link, useHistory } from "react-router-dom";
-import {isMobile} from "react-device-detect";
-import {MdAdd} from "react-icons/all";
+import { isMobile } from "react-device-detect";
+import { MdAdd } from "react-icons/all";
+import PricingConditionsDialog from "./PricingConditionsDialog";
+import useColumns, { getFrameworkComponents, getStaticFields } from '../../constants/useColumns';
+import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
+import { prepareDataForGrid } from "../../constants/helpers"
+import { startCase } from 'lodash';
 
 let timeout;
+
 const PricingConditions = () => {
 
   const { state: { permissions } }: any = useData();
-  const { pricingConditionApi } = pricingCondition;
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
+
+  const [pricingConditionId, setPricingConditionId] = useState(null);
+  const [open, setOpen] = useState({ open: false, isClone: false });
 
   const history = useHistory();
   const [gridApi, setGridApi] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const {
-    dataRows,
-    rowCount,
-    loading,
-    page,
-    limit,
-    pageSizes,
-    search,
-    filters,
-    sorting,
-    selectedRecords,
-  } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { getColumnData } = useColumns();
+  const [frameworkComponent, setFrameworkComponent] = useState(null)
+  const [columns, setColumns] = useState([])
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (timeout) {
-      clearTimeout(timeout);
-    }
-    timeout = setTimeout(() => {
-      fetchPriceConditionList()
-    }, millisec);
-  }, [search]);
+    fetchGridMetadata()
+  }, [])
 
   useEffect(() => {
-    fetchPriceConditionList();
-  }, [page, limit, filters, sorting]);
+    fetchPriceConditionList()
+  }, [page, limit, filters, sorting, search])
 
-  const columnState = JSON.parse(localStorage.getItem("pricingConditionPage"));
-
-  const columns = [
-    {
-      field: "conditionName",
-      headerName: "Name",
-      show: true,
-      disabled: true,
-      cellRenderer: "nameRenderer"
-    },
-    {
-      field: "description",
-      headerName: "Description",
-      show: true,
-      cellRenderer: "commonRenderer"
-    },
-    {
-      field: "conditionType",
-      headerName: "Condition Type",
-      show: true,
-      cellRenderer: "commonRenderer"
-    },
-  ];
-
-  if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
-        if (d.colId == item.field) {
-          item.show = !d.hide;
+  const fetchGridMetadata = () => {
+    axiosInstance().get(`/field?resource=${startCase(pricingCondition.resource)}`).then(({ data: { data } }) => {
+      let columns = [];
+      let rendererNames = [];
+      data.forEach(o => {
+        let currentColumn = getColumnData(pricingCondition.resource, o?.fieldData, `${pricingCondition.route}/detail`)
+        if (currentColumn !== null) {
+          columns = [...columns, currentColumn?.columnData]
+          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+            rendererNames.push(currentColumn?.rendererName)
+          }
         }
-      });
-    });
+        return o?.fieldData
+      })
+      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+      console.log(rendererNames)
+      console.log(columns)
+      tempFrameworkComponent = {
+        ...tempFrameworkComponent,
+        actionsRenderer: ActionsRenderer
+      }
+      setFrameworkComponent({ ...tempFrameworkComponent })
+      columns = [...columns, ...getStaticFields()]
+      setColumns([...columns])
+    })
   }
 
-  const NameRenderer = params => <Link className="link"
-    to={`${routes.pricingConditionDetail.path}/${params.data._id}`} title={params.value}>
-    {params.value}
-  </Link>;
+  const fetchPriceConditionList = () => {
+    dispatch({ type: "loading", loading: true });
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+    const queryString = getQueryString();
+    axiosInstance().get(`${pricingCondition.api}${queryString}`).then(({ data: { data, count } }) => {
+      let rows = data.map((u) => {
+        let finalObject = prepareDataForGrid(u);
+        finalObject["canDelete"] = permissions.pricingCondition.isDelete;
+        finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+        finalObject["allowedToEdit"] = permissions.pricingCondition.isUpdate;
+        return {
+          ...finalObject,
+        };
+      });
+      dispatch({ type: "initialize", data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: "loading", loading: false });
+      }, gridLoadingTimeout);
+    })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        dispatch({ type: "loading", loading: false });
+      });
+  };
 
   const ActionsRenderer = params => (
     permissions.pricingCondition.isDelete &&
@@ -121,12 +127,6 @@ const PricingConditions = () => {
       </IconButton>
     </Tooltip >
   )
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    commonRenderer: CommonRenderer,
-    actionsRenderer: ActionsRenderer
-  };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -174,32 +174,6 @@ const PricingConditions = () => {
     return deepFilter;
   };
 
-  const fetchPriceConditionList = () => {
-    dispatch({ type: "loading", loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-    const queryString = getQueryString();
-    axiosInstance().get(`/pricing-condition${queryString}`).then(({ data }) => {
-      let rows = data.data.map((item) => {
-        const { createdBy, updatedBy, ...restProperties } = item;
-        let res = {
-          ...restProperties,
-          id: item._id,
-        };
-        return res;
-      });
-      dispatch({ type: "initialize", data: rows, count: data.count });
-      setTimeout(() => {
-        dispatch({ type: "loading", loading: false });
-      }, gridLoadingTimeout);
-    })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        dispatch({ type: "loading", loading: false });
-      });
-  };
-
   const handleDelete = () => {
     let ids = []
     if (deleteRecord) {
@@ -208,7 +182,7 @@ const PricingConditions = () => {
     else {
       ids = selectedRecords.map(d => d._id);
     }
-    axiosInstance().put(`${pricingConditionApi}/remove`, { "ids": ids }).then(() => {
+    axiosInstance().put(`${pricingCondition.api}/remove`, { "ids": ids }).then(() => {
       fetchPriceConditionList();
       setShowDeleteConfirmBox(false)
       setDeleteRecord(null)
@@ -229,15 +203,6 @@ const PricingConditions = () => {
   const onSearch = (e) => {
     dispatch({ type: "search", search: e.target.value });
   };
-
-  const CreateNew = (id, isClone) => {
-    if (isClone) {
-      history.push(routes.pricingConditionDetail.path + "/0", { isClone: true })
-    }
-    else {
-      history.push(routes.pricingConditionDetail.path + "/" + id, { isClone: false })
-    }
-  }
 
   return (
     <Fragment>
@@ -279,77 +244,80 @@ const PricingConditions = () => {
             </Grid>
             <Grid className={styles.filter_side} item xs={isMobile ? 12 : 6}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-
-                <Grid style={{display: "flex", flex:1}}>
-                <SearchBox
-                  onSearch={onSearch}
-                  searchbox={styles.search_box_input}
-                  value={search}
-                  size="small"
-                  placeholder="Search PriceCondition"
-                  width={isMobile ? "200px" : "242px"}
-                  style={isMobile ? {flex:1} : {}}
-                />
+                <Grid style={{ display: "flex", flex: 1 }}>
+                  <SearchBox
+                    onSearch={onSearch}
+                    searchbox={styles.search_box_input}
+                    value={search}
+                    size="small"
+                    placeholder="Search"
+                    width={isMobile ? "200px" : "242px"}
+                    style={isMobile ? { flex: 1 } : {}}
+                  />
                 </Grid>
-
-                <Grid style={{display: "flex" , gap:"5px"}}>
-                <Button
+                <Grid style={{ display: "flex", gap: "5px" }}>
+                  <Button
                     variant={isMobile ? "text" : "contained"}
-                  color="primary"
-                  size="small"
+                    color="primary"
+                    size="small"
                     className={isMobile ? "mobile_button" : styles.add_submit_btn}
                     startIcon={isMobile ? null : <AddOutlined />}
-                  onClick={() => CreateNew("0", false)}
-                >
-                  {isMobile ? <MdAdd size={23}/> : "Add"}
-                </Button>
-                <Button
+                    onClick={() => {
+                      setPricingConditionId(null);
+                      setOpen({ open: true, isClone: false });
+                    }}
+                  >
+                    {isMobile ? <MdAdd size={23} /> : "Add"}
+                  </Button>
+                  <Button
                     variant={isMobile ? "text" : "contained"}
-                  color="default"
-                  size="small"
+                    color="default"
+                    size="small"
                     className={isMobile ? "mobile_button" : styles.action_submit_btn}
-                  onClick={openActions}
-                  disabled={selectedRecords.length ? false : true}
-                  aria-controls="action-menu"
-                >
-                  {isMobile ? "" :  "Actions" } <ExpandMore/>
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left",
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                </Menu>
+                    onClick={openActions}
+                    disabled={selectedRecords.length ? false : true}
+                    aria-controls="action-menu"
+                  >
+                    {isMobile ? "" : "Actions"} <ExpandMore />
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "left",
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                  </Menu>
                 </Grid>
               </Box>
             </Grid>
           </Grid>
         </div>
-        <Box component="div">
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={100}
-            loading={loading}
-            renderedFrom="pricingConditionPage"
-            refreshGrid={fetchPriceConditionList}
-          />
-        </Box>
+        {columns && frameworkComponent ?
+          <Box component="div">
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameworkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={100}
+              loading={loading}
+              renderedFrom="pricingConditionPage"
+              refreshGrid={fetchPriceConditionList}
+            />
+          </Box>
+          : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
       </CustomContainer>
       {showDeleteConfirmBox &&
         <ConfirmationDialog
@@ -357,6 +325,17 @@ const PricingConditions = () => {
           message={deleteRecord?._id ? `Are you sure you want to delete the pricing condition ${deleteRecord?.name} ?` : "Are you sure you want to delete selected pricingCondition(s) ?"}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDelete}
+        />
+      }
+      {open?.open &&
+        <PricingConditionsDialog
+          pricingConditionId={pricingConditionId}
+          isClone={open?.isClone}
+          onClose={() => setOpen({ open: false, isClone: false })}
+          onSuccess={() => {
+            setOpen({ open: false, isClone: false });
+            fetchPriceConditionList()
+          }}
         />
       }
     </Fragment>

@@ -370,13 +370,6 @@ export const budget = {
   resource: 'budget'
 };
 
-export const pricingCondition = {
-  pricingConditionApi: "/pricing-condition",
-  pricingConditionRoute: "pricing-condition",
-  pricingConditionPermission: "pricingCondition",
-
-};
-
 export const quotePdfTemplate = {
   quotePdfTemplateApi: '/quote-pdf-template',
   quotePdfTemplateRoute: '/quote-pdf-template',
@@ -406,6 +399,14 @@ export const transferAsset = {
   permission: 'transferAsset',
   resource: 'transferAsset'
 };
+
+
+export const pricingCondition = {
+  resource: 'pricingCondition',
+  api: '/pricing-condition',
+  route: 'pricing-condition'
+};
+
 
 export const profileMenuItems = {
   profile: 1,
