@@ -25,10 +25,11 @@ interface AssetsGridProps {
   transferAssetId: string | any;
   ownerId: string | any;
   updateTransferStatus?: any;
+  transferAssetData?: any;
 }
 
 const AssetsGrid: FC<AssetsGridProps> = (props) => {
-  const { permissions, user, plantId, fetchAssets, transferAssetId, ownerId, setNextStep, updateTransferStatus } = props
+  const { permissions, user, plantId, fetchAssets, transferAssetId, ownerId, setNextStep, updateTransferStatus, transferAssetData } = props
   const toastConfig = useContext(CustomToastContext);
 
 
@@ -124,6 +125,10 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       let data = await fetchAssets(forceRefresh)
       let ticketData: any = await fetchLoadingTickets();
 
+      if (data.length === 0 && transferAssetData?.status !== "New") {
+        updateTransferStatus("New")
+      }
+
       for (let i = 0; i < ticketData.length; i++) {
         for (let j = 0; j < data.length; j++) {
           if (ticketData[i]?.productInventory.some((asset: any) => data[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
@@ -140,6 +145,8 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           assetNumber: `${index + 1}. ${finalObject.assetNumber}`
         }
       })
+
+
 
       gridDispatch({ type: "initialize", data: data, count: data.length })
       gridDispatch({ type: "loading", loading: false });
