@@ -32,7 +32,7 @@ import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { ListItemText } from '@material-ui/core';
 import { AiOutlineMail } from 'react-icons/ai';
-import { BiPhone } from 'react-icons/bi';
+import { BiEdit, BiPhone } from 'react-icons/bi';
 import { FiStar } from 'react-icons/fi';
 import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
 import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
@@ -45,6 +45,7 @@ import routes from '../../components/Helpers/Routes';
 import queryString from 'query-string';
 import AddReportsToContact from './AddReportsToContact';
 import { MdDelete, MdEdit } from 'react-icons/md';
+import accountClass from '../Account/account.module.scss';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -680,13 +681,14 @@ const ContactDetailsPage = (props) => {
               {contactPermissions.isUpdate && canEdit ? (
                 <Button
                   id="detailEditButton"
-                  variant={isMobile ? 'outlined' : 'contained'}
+                  variant={isMobile ? 'text' : 'contained'}
                   color="primary"
                   size="small"
                   onClick={handleOpneUpdateDialog}
                   className={contactClass.mobile_button_layout}
+                  style={isMobile ? { color: '#43aeaa' } : {}}
                 >
-                  {isMobile ? <MdEdit /> : 'Edit'}
+                  {isMobile ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               ) : null}
 
@@ -696,9 +698,10 @@ const ContactDetailsPage = (props) => {
               contactData.owner.optionValue === user.user._id ? (
                 <DeleteButton
                   id="detailDeleteButton"
-                  text={isMobile ? <MdDelete /> : 'Delete'}
+                  text={isMobile ? <MdDelete size={20} /> : 'Delete'}
                   size="small"
                   onClick={() => setShowConfirmBox(true)}
+                  className={isMobile ? accountClass.mobile_button_layout : ''}
                 />
               ) : null}
             </DetailsPageHeader>
