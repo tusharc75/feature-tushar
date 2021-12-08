@@ -118,6 +118,20 @@ function Dashboard() {
       };
     });
     setSections(data);
+
+    // (async () => {
+    //   try {
+    //     axiosInstance()
+    //       .get(`user/meta-grid/${user?._id}`)
+    //       .then(({ data: { data } }) => {
+    //         let tempMetaData = JSON.stringify(data?.gridMetaData);
+    //         localStorage.setItem('gridMetaData', tempMetaData);
+    //         dispatch({ type: SET_GRID_METADATA, payload: data?.gridMetaData });
+    //       });
+    //   } catch (e) {
+    //     console.log(e);
+    //   }
+    // })();
   }, [user]);
 
   const handleRoutes = (item) => {
