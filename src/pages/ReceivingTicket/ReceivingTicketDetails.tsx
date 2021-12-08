@@ -97,6 +97,8 @@ const ReceivingTicketDetails = () => {
   const { dataRows, rowCount, page, limit, pageSizes, selectedRecords } = state;
 
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
+  const [transferData, setTransferData] = useState(null);
+
   const [isAdding, setIsAdding] = useState(false);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
@@ -166,6 +168,8 @@ const ReceivingTicketDetails = () => {
 
           const { data: { data: transferData } } = await axiosInstance()
             .get(`${routes.transferAsset.path}/${record.transferAsset?.optionValue}`)
+          setTransferData(transferData)
+
 
           data = data.filter((fields: any) => {
             if (transferData?.transferType === "Internal") {
@@ -617,6 +621,9 @@ const ReceivingTicketDetails = () => {
       )}
       {openUpdateDialog && (
         <ManageReceivingTicket
+          rentalData={receivingTicketData?.type === "Rental Job" ? receivingTicketData?.rentalJob?.optionValue : null}
+          repairJobData={receivingTicketData?.type === "Repair Job" ? receivingTicketData?.repairJob?.optionValue : null}
+          transferData={receivingTicketData?.type === "Transfer Asset" ? transferData : null}
           open={openUpdateDialog}
           isClone={false}
           receivingTicketId={id}
