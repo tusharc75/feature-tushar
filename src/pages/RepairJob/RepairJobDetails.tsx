@@ -19,7 +19,7 @@ import ManageRepairJob from './ManageRepairJob';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import queryString from "query-string";
 import { BiFoodMenu } from 'react-icons/bi';
-import {FaSuitcase, FaWpforms} from 'react-icons/fa';
+import { FaSuitcase, FaWpforms } from 'react-icons/fa';
 import TabPanel from '../../components/TabPanel';
 import CustomCommonSteps from '../../components/CustomCommonSteps/CustomCommonSteps';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
@@ -32,7 +32,7 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import RepairJobReceivingTicket from './RepairJobReceivingTicket';
 import RepairJobDeliveryTicket from './RepairJobDeliveryTicket';
 import ManageAssetDialog from './ManageAssetDialog';
-import {isMobile} from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 const reservedStatus = "Reserved";
@@ -156,7 +156,7 @@ const RepairJobDetails = () => {
           u["_id"] = u["id"];
           u["index"] = `${index + 1}.0`;
 
-          return prepareDataForGrid(u, user) ;
+          return prepareDataForGrid(u, user);
         });
 
         let foundBlankValue = false;
@@ -247,12 +247,17 @@ const RepairJobDetails = () => {
     </span>
   );
 
-  const getResourceFields = () => {
+  const getResourceFields = (repairJobData) => {
     setShowLoading(true);
     axiosInstance()
       .get(`/field?resource=${sidebarResource.repairJob}`)
       .then(({ data: { data } }) => {
-        setRepairJobFields(data)
+        if (repairJobData["typeOfRepair"] === "Internal") {
+          setRepairJobFields(data.filter(f => ["vendor", "supplierShipTo"].indexOf(f?.fieldData?.fieldName) === -1));
+        }
+        else if (repairJobData["typeOfRepair"] === "External") {
+          setRepairJobFields(data.filter(f => ["repairPlant", "plantShipTo"].indexOf(f?.fieldData?.fieldName) === -1));
+        }
         setShowLoading(false);
       })
       .catch((err) => {
@@ -275,7 +280,7 @@ const RepairJobDetails = () => {
         }
         setHeadingLabel(data.repairJobName);
         setCustomizedRoutes([routes.repairJob, { title: data.repairJobName }]);
-        getResourceFields();
+        getResourceFields(data);
 
         if (permissions?.repairJob?.isUpdate && openEdit === "true") {
           setOpenUpdateDialog(true)
@@ -499,63 +504,63 @@ const RepairJobDetails = () => {
                               <Grid item xs={12} md={12} sm={12} className="mt-3">
 
                                 {step1Columns ?
-                                    isMobile ?
-                                        <CustomSwipableList
-                                            allowSelection={true}
-                                            allowSwipe={true}
-                                            permissions={permissions}
-                                            primaryField={step1Columns?.find(d => d.field)}
-                                            onClick={(data) => {
-                                              history.push(`${routes.productInventoryDetail.path}/${data._id}`)
-                                            }}
-                                            dataRows={step1DataRows}
-                                            selectedRecords={true}
-                                            dispatch={step1Dispatch}
-                                            onEdit={(data) => {
-                                              history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
-                                            }}
-                                            extraParamsToCheckDelete={true}
-                                            onDelete={(data) => {
-                                              setShowAssetRemoveConfirmationDialog({ open: true, id: data._id ?? data.id, ids: [] });
+                                  isMobile ?
+                                    <CustomSwipableList
+                                      allowSelection={true}
+                                      allowSwipe={true}
+                                      permissions={permissions}
+                                      primaryField={step1Columns?.find(d => d.field)}
+                                      onClick={(data) => {
+                                        history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                                      }}
+                                      dataRows={step1DataRows}
+                                      selectedRecords={true}
+                                      dispatch={step1Dispatch}
+                                      onEdit={(data) => {
+                                        history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
+                                      }}
+                                      extraParamsToCheckDelete={true}
+                                      onDelete={(data) => {
+                                        setShowAssetRemoveConfirmationDialog({ open: true, id: data._id ?? data.id, ids: [] });
 
-                                            }}
-                                            rowCount={step1RowCount}
-                                            page={step1Page}
-                                            loading={step1Loading}
-                                            chips={[
-                                              {
-                                                label: "Product Desc. : ",
-                                                field: "product",
-                                              }
-                                            ]}
-                                            additionalDetails={[
-                                              // {
-                                              //   icon: <FaSuitcase size={18} />,
-                                              //   field: "customerAccount"
-                                              // },
-                                            ]}
-                                            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                                            onCreate={false}
-                                            showClone={false}
-                                            onClone={() => {} }
-                                            renderedFrom={step1RenderedFrom}
-                                        /> :
-                                  <CustomAgGrid
-                                    columns={step1Columns}
-                                    dataRows={step1DataRows}
-                                    frameworkComponents={step1FrameworkComponent}
-                                    setGridApi={setStep1GridApi}
-                                    dispatch={step1Dispatch}
-                                    rowCount={step1RowCount}
-                                    limit={step1Limit}
-                                    pageSizes={step1PageSizes}
-                                    page={step1Page}
-                                    allowAction={true}
-                                    actionWidth={150}
-                                    loading={step1Loading}
-                                    allowSelection={true}
-                                    renderedFrom={step1RenderedFrom}
-                                  />
+                                      }}
+                                      rowCount={step1RowCount}
+                                      page={step1Page}
+                                      loading={step1Loading}
+                                      chips={[
+                                        {
+                                          label: "Product Desc. : ",
+                                          field: "product",
+                                        }
+                                      ]}
+                                      additionalDetails={[
+                                        // {
+                                        //   icon: <FaSuitcase size={18} />,
+                                        //   field: "customerAccount"
+                                        // },
+                                      ]}
+                                      owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                                      onCreate={false}
+                                      showClone={false}
+                                      onClone={() => { }}
+                                      renderedFrom={step1RenderedFrom}
+                                    /> :
+                                    <CustomAgGrid
+                                      columns={step1Columns}
+                                      dataRows={step1DataRows}
+                                      frameworkComponents={step1FrameworkComponent}
+                                      setGridApi={setStep1GridApi}
+                                      dispatch={step1Dispatch}
+                                      rowCount={step1RowCount}
+                                      limit={step1Limit}
+                                      pageSizes={step1PageSizes}
+                                      page={step1Page}
+                                      allowAction={true}
+                                      actionWidth={150}
+                                      loading={step1Loading}
+                                      allowSelection={true}
+                                      renderedFrom={step1RenderedFrom}
+                                    />
                                   : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                                 }
                               </Grid>
