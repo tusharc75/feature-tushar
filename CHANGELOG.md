@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.16.0](https://github.com/vebholic/oms_frontend/compare/v2.15.0...v2.16.0) (2021-12-08)
+
+
+### Features
+
+* - Customer Account dropdown removed ([f1c7eb7](https://github.com/vebholic/oms_frontend/commit/f1c7eb7d32c9ba9fe4a71d1be1ae14394619470b))
+* - PO-496 - Start date and expected completion date > disabled dates of both calendar based on ([7caf76e](https://github.com/vebholic/oms_frontend/commit/7caf76ea09d9248a9ac1f98c1986a1ae4d8f273f))
+* - PO-498 - Bulk Edit or single edit, Expected Completion date should be prefilled ([87e3b3b](https://github.com/vebholic/oms_frontend/commit/87e3b3bb5c1e6afc238782ab2735c623893097f6))
+* - PO-512 - Disable plant and repair related fields in repair job update dialog if any loading ([22d1449](https://github.com/vebholic/oms_frontend/commit/22d1449416283b1c6a95d96b227bf3cff4fa565f))
+* - PO-518 - If any asset have status of either Scrap, Repair, Lost, user can go receiving page ([bdfb9c8](https://github.com/vebholic/oms_frontend/commit/bdfb9c8e4ab4195a17e6ff4e6bbf7ac279dbb20f))
+* - PO-518 - Instead of status of asset, now we are checking status of loading ticket ([72e9258](https://github.com/vebholic/oms_frontend/commit/72e92582b8fc82e9da3209cece831bd6895841fd))
+* - PO-518 - Instead of status of asset, now we are checking status of loading ticket ([a9af976](https://github.com/vebholic/oms_frontend/commit/a9af9760c8f26e2b204e264d9414785e7da4e34c))
+* - PO-518 - Instead of status of asset, now we are checking status of loading ticket ([625f418](https://github.com/vebholic/oms_frontend/commit/625f41860956d4f3369a120b6b1ac89069af1713))
+* address changes ([9061bc5](https://github.com/vebholic/oms_frontend/commit/9061bc5e105229fcd71fd17c787d9f067a2e93e4))
+* auto fill plant ship to when repair plant get selected ([31cae85](https://github.com/vebholic/oms_frontend/commit/31cae85d39b5c9d8470703b35e5e2c7f6f73c87a))
+* merge to master ([568c8e7](https://github.com/vebholic/oms_frontend/commit/568c8e7b57abd00a981cb5863b8d1646ddda9f6d))
+
+
+### Bug Fixes
+
+* **azure instance:** Bug fix while login with azure ([b0abba4](https://github.com/vebholic/oms_frontend/commit/b0abba48a7b4ab2105ea82cfbfd3d130e564754f))
+* **azure instance:** Grid Bug fixed while login with azure ([0132cac](https://github.com/vebholic/oms_frontend/commit/0132cac0691294f63e564da7aecd3d5515fcf72f))
+* **fix:** fix and changes ([4ad81fa](https://github.com/vebholic/oms_frontend/commit/4ad81fab6cd643e3e215261d3a208005660fd45e))
+* **loadingticket:** error fic ([b03d977](https://github.com/vebholic/oms_frontend/commit/b03d9773c2dbd812766808be4b5d1fbeab0c7e11))
+* merge confict resolved ([8fbc17c](https://github.com/vebholic/oms_frontend/commit/8fbc17c5bcc7a8b8aece6f82b8b6c7313cfc2d55))
+* rental job string fix PUAT-37 ([137e4e7](https://github.com/vebholic/oms_frontend/commit/137e4e763722509253ab5a87e00ab2e8809cc015))
+* **transferasset:** grid has sr no ([ad0ef76](https://github.com/vebholic/oms_frontend/commit/ad0ef76de85ea133d168de52e2d5e4f54c0fe8da))
+
 ## [2.15.0](https://github.com/vebholic/oms_frontend/compare/v2.14.2...v2.15.0) (2021-12-07)
 
 
