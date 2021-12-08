@@ -29,6 +29,7 @@ import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { simplifyValues } from "../../constants/helpers"
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from "react-icons/fa";
+import ManageAddressDialog from "../../components/Address/ManageAddressDialog";
 interface InitialData {
   fields: any[];
   values: object;
@@ -66,6 +67,8 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [formValues, setFormValues] = useState({})
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [showAddAddresstDialog, setShowAddAddresstDialog] = useState(false);
+  const [addressDataSource, setAddressDataSource] = useState([]);
 
   useEffect(() => {
     if (initialData.fields.length > 0) {
@@ -103,6 +106,13 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
         //   data.filter(d => d.isCreate).map((d: any) => d.fieldData);
 
         //  Initialize market segment dropdown which have parentMarketSegment === "" or that record have child
+        const addressDropdownData = filterData.map(m => m.fieldData).find(
+          (d) => d.fieldName === "finalDestination"
+        );
+        if (addressDropdownData) {
+          setAddressDataSource(addressDropdownData.option);
+        }
+
         const marketSegmentDropdownData = filterData.map(m => m.fieldData).find(
           (d) => d.fieldName === formFieldNames.marketSegment
         );
@@ -762,28 +772,99 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                                                   tooltipMessage={field?.tooltipMessage}
                                                   size="small"
                                                 />
-                                              ) : <FormTypes
-                                                {...field}
-                                                isNew={Boolean(projectSalesId)}
-                                                values={values}
-                                                errors={errors}
-                                                touched={touched}
-                                                label={field.fieldLabel}
-                                                name={field.fieldName}
-                                                type={field.type}
-                                                options={field.option}
-                                                setFieldValue={(name, value) => {
-                                                  handleValuesChange({ [name]: value })
-                                                  setFieldValue(name, value)
-                                                }}
-                                                required={field.required}
-                                                fullWidth
-                                                isTooltip={field?.isTooltip || false}
-                                                tooltipMessage={field?.tooltipMessage}
-                                                size="small"
-                                                imageOrFileUploadCompletePercentage={null}
-                                                disabled={projectSalesId && field.fieldName === "projectManager" || (!projectSalesId && field.disableOnEdit)}
-                                              />
+                                              ) : field.fieldName === "finalDestination" ?
+                                                <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                                  <Grid container spacing={1}>
+                                                    <Grid
+                                                      item
+                                                      xs={
+                                                        permissions?.projectStrategy?.isCreate ? 11
+                                                          : 12
+                                                      }
+                                                      sm={
+                                                        permissions?.projectStrategy?.isCreate ? 11
+                                                          : 12
+                                                      }
+                                                      md={
+                                                        permissions?.projectStrategy?.isCreate ? 11
+                                                          : 12
+                                                      }
+                                                    >
+                                                      <FormTypes
+                                                        {...field}
+                                                        values={values}
+                                                        errors={errors}
+                                                        touched={touched}
+                                                        label={field.fieldLabel}
+                                                        name={field.fieldName}
+                                                        type={field.type}
+                                                        options={addressDataSource}
+                                                        setFieldValue={(name, value) => {
+                                                          handleValuesChange({ [name]: value })
+                                                          setFieldValue(name, value)
+                                                        }}
+                                                        required={field.required}
+                                                        fullWidth
+                                                        isTooltip={field?.isTooltip || false}
+                                                        tooltipMessage={field?.tooltipMessage}
+                                                        size="small"
+                                                      />
+                                                    </Grid>
+                                                    {
+                                                      permissions?.projectStrategy?.isCreate && (
+                                                        <Grid item xs={1} sm={1} md={1}>
+                                                          <Tooltip
+                                                            title="Add Address"
+                                                            className="mt-1"
+                                                          >
+                                                            <IconButton
+                                                              onClick={() => {
+                                                                setShowAddAddresstDialog(true);
+                                                              }}
+                                                              disabled={field.disableOnEdit}
+                                                              size="small"
+                                                            >
+                                                              <AddIcon color={field.disableOnEdit ? "disabled" : "primary"} />
+                                                            </IconButton>
+                                                          </Tooltip>
+                                                        </Grid>
+                                                      )
+                                                    }
+                                                    {field?.tooltipMessage ? (
+                                                      <Grid item xs={1} sm={1} md={1}>
+                                                        <Tooltip
+                                                          title={
+                                                            field?.tooltipMessage ?? ""
+                                                          }
+                                                        >
+                                                          <InfoIcon color="disabled" />
+                                                        </Tooltip>
+                                                      </Grid>
+                                                    ) : null}
+                                                  </Grid>
+                                                </Grid>
+                                                : <FormTypes
+                                                  {...field}
+                                                  isNew={Boolean(projectSalesId)}
+                                                  values={values}
+                                                  errors={errors}
+                                                  touched={touched}
+                                                  label={field.fieldLabel}
+                                                  name={field.fieldName}
+                                                  type={field.type}
+                                                  options={field.option}
+                                                  setFieldValue={(name, value) => {
+                                                    handleValuesChange({ [name]: value })
+                                                    setFieldValue(name, value)
+                                                  }}
+                                                  required={field.required}
+                                                  fullWidth
+                                                  isTooltip={field?.isTooltip || false}
+                                                  tooltipMessage={field?.tooltipMessage}
+                                                  size="small"
+                                                  imageOrFileUploadCompletePercentage={null}
+                                                  disabled={projectSalesId && field.fieldName === "projectManager" || (!projectSalesId && field.disableOnEdit)}
+                                                />
                                   }
                                 </Grid>
                               ))}
@@ -818,6 +899,26 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                       );
                     })}
                 </Form>
+                {
+                  showAddAddresstDialog && <ManageAddressDialog
+                    onClose={() => {
+                      setShowAddAddresstDialog(false);
+                    }}
+                    onSuccess={(obj) => {
+                      if (obj) {
+                        setShowAddAddresstDialog(false);
+                        setAddressDataSource((prevState) => [...prevState,
+                        {
+                          default: false,
+                          optionLabel: obj?.fullAddress,
+                          optionValue: obj._id,
+                          order: addressDataSource.length + 1,
+                        }]);
+                        setFieldValue("finalDestination", [...values[`finalDestination`], obj._id]);
+                      }
+                    }}
+                  />
+                }
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button
