@@ -23,8 +23,8 @@ const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected
 
 const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts,
     rentalId = null, repairJobId = null, transferAssetId = null, notIn = null, queryString = null, filterByPlant = null }) => {
-    const toastConfig = useContext(CustomToastContext)
 
+    const toastConfig = useContext(CustomToastContext)
     const [serializedProducts, setSerializedProducts] = useState([]);
     const [gridApi, setGridApi] = useState(null);
     const { getColumnData } = useColumns();
@@ -33,9 +33,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
-    const {
-        state: { permissions },
-    }: any = useData();
+    const { state: { permissions } }: any = useData();
 
     useEffect(() => {
         fetchProductInventory()
@@ -44,6 +42,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     useEffect(() => {
         fetchGridColumns()
     }, [])
+
     const fetchGridColumns = () => {
         axiosInstance()
             .get("/field?resource=Product Inventory")
@@ -55,7 +54,6 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                         o.fieldData.primaryField = true
                     }
                     let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
-
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -63,7 +61,6 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                         }
                     }
                 })
-
                 let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
                 tempFrameworkComponent = {
                     ...tempFrameworkComponent,
@@ -74,11 +71,9 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
             })
     }
 
-
     useEffect(() => {
         let tempProducts = serializedProducts
         const alreadyStoredSelectedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
-
         if (tempProducts.length === 0) {
             selectedProducts.map(d => {
                 if (d.productName) {
@@ -242,7 +237,8 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         }
         return null;
     };
-
+    console.log(selectedProducts)
+    console.log(serializedProducts)
     return (<Fragment>
         {(<Dialog
             fullScreen={true}
@@ -265,7 +261,6 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                             ) : null
                                     }
                                 </div>
-
                                 {
                                     serializedProducts.length > 0 && serializedProducts.some(s => s.qty < 0) ? <div className="text-error font-weight-bold">You have selected more assets then needed.</div> : ""
                                 }
