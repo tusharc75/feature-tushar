@@ -203,7 +203,7 @@ const ProductInventoryDetailsPage = () => {
       } = await axiosInstance().get(`${productInventory.api}/${id}`);
 
       handleMainPoints(data);
-      setHeadingLbl(`${data?.serialNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
+      setHeadingLbl(`${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
       setCustomizedRoutes([routes.productInventory,
       { title: `${data?.serialNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
       setProductId(data?.product?.optionValue)
@@ -596,11 +596,7 @@ const ProductInventoryDetailsPage = () => {
                     )}
                   </Paper>
                 </Grid>
-
-
               </TabPanel>
-
-
               <TabPanel value={tabValue} index={1}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={12} md={12} lg={12}>
