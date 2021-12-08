@@ -91,7 +91,7 @@ import RepairJob from './pages/RepairJob';
 import RepairJobDetails from './pages/RepairJob/RepairJobDetails';
 import ReceivingTicket from './pages/ReceivingTicket';
 import ReceivingTicketDetails from './pages/ReceivingTicket/ReceivingTicketDetails';
-import PricingConditionsDetailsPage from './pages/PricingConditions/PricingConditionsDetailsPage';
+import PricingConditionsDetails from './pages/PricingConditions/PricingConditionsDetails';
 import SalesOrder from './pages/SalesOrderCreation';
 import SalesOrderDetails from './pages/SalesOrderCreation/SalesOrderDetails';
 import PackageList from './pages/Packages';
@@ -529,7 +529,7 @@ function App() {
               <PricingConditions />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.pricingCondition.path}/detail/:id`}>
-              <PricingConditionsDetailsPage />
+              <PricingConditionsDetails />
             </PrivateRoute>
             <PrivateRoute exact path={routes.marketSegment.path}>
               <MarketSegment />

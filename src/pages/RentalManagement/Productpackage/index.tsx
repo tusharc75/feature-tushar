@@ -22,7 +22,6 @@ import {
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import RentalJobQtyDialog from './RentalJobQtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
-const { pricingConditionApi } = pricingCondition
 
 const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) => {
 
@@ -281,7 +280,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             data.customer = [rentalManagementData?.customerAccount.optionValue];
             data.warehouse = [];
             return new Promise((resolve, reject) => {
-                axiosInstance().post(pricingConditionApi + `/calculatePrice`, data)
+                axiosInstance().post(pricingCondition.api + `/calculatePrice`, data)
                     .then(({ data: { data } }) => {
                         resolve(data)
                     }).catch(err => {
