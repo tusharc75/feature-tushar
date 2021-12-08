@@ -25,8 +25,9 @@ import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 const defaultProductColumns = 7;
 
 const PdfTemplateSchema = object().shape({
-    name: string().min(3, 'Too Short!').max(50, 'Too Long').required('Quote PDF template Name  is required'),
+    name: string().min(3, 'Too Short!').max(50, 'Too Long').required('PDF template Name  is required'),
     owner: string().required('Owner is required'),
+    type: string().required('Type is required'),
     showPageNumberInFooter: boolean()
 });
 
@@ -85,9 +86,9 @@ export default function NewCreateQuotePdfTemplate() {
     const [isLandscapChecked, setIsLandscapChecked] = useState(false)
     const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
     const [isPreview, setIsPreview] = useState(false)
+    const typeOptions = [routes.quoteBuilder.title, routes.rentalManagement.title, routes.repairJob.title, routes.purchaseOrder.title, routes.deliveryTicket.title, routes.receivingTicket.title, routes.transferAsset.title].filter(d => d)
     const [variables, setVariables] = useState([])
     const [formValues, setFormValues] = useState(null)
-    const typeOptions = [routes.quoteBuilder.title, routes.rentalManagement.title, routes.repairJob.title, routes.purchaseOrder.title, routes.deliveryTicket.title, routes.receivingTicket.title, routes.transferAsset.title]
     const onBackButtonEvent = (e) => {
         if (hasPermissionToUpdate) {
             e.preventDefault();
@@ -150,6 +151,7 @@ export default function NewCreateQuotePdfTemplate() {
                     aboveTable: tempPdfTemplate.aboveTable,
                     belowTable: tempPdfTemplate.belowTable,
                     entity: tempPdfTemplate.entity ? tempPdfTemplate.entity : [],
+                    type: tempPdfTemplate.type,
                     owner: tempPdfTemplate.owner && tempPdfTemplate.owner !== undefined ? tempPdfTemplate.owner : user.user._id,
                     collaborator: tempPdfTemplate.collaborator ? tempPdfTemplate.collaborator : [],
                 });
@@ -184,6 +186,7 @@ export default function NewCreateQuotePdfTemplate() {
                             aboveTable: data?.aboveTable,
                             belowTable: data?.belowTable,
                             entity: data?.entity ? data?.entity : [],
+                            type: data?.type,
                             owner: data?.owner && data.owner !== undefined ? data?.owner : user.user._id,
                             collaborator: data?.collaborator ? data?.collaborator : [],
                         });
@@ -217,6 +220,7 @@ export default function NewCreateQuotePdfTemplate() {
                 aboveTable: "",
                 belowTable: "",
                 entity: selectedEntity ? [selectedEntity] : [],
+                type: typeOptions.find(d => d !== "" && d !== undefined && d !== null),
                 owner: user.user._id,
                 collaborator: [],
             })
@@ -277,6 +281,7 @@ export default function NewCreateQuotePdfTemplate() {
                     ...details, name: values.name,
                     pageNumberInFooter: values.showPageNumberInFooter,
                     entity: values?.entity,
+                    type: values?.type,
                     owner: values?.owner,
                     collaborator: values?.collaborator,
                     landscape: values?.landscape,
@@ -306,6 +311,7 @@ export default function NewCreateQuotePdfTemplate() {
                     ...details, name: values.name,
                     pageNumberInFooter: values.showPageNumberInFooter,
                     entity: values?.entity,
+                    type: values?.type,
                     owner: values?.owner,
                     collaborator: values?.collaborator,
                     landscape: values?.landscape,
@@ -549,8 +555,8 @@ export default function NewCreateQuotePdfTemplate() {
                                         {<Autocomplete
                                             disabled={!hasPermissionToUpdate}
                                             getOptionLabel={(option: any) => (option ? option : "")}
-                                            value={typeOptions.filter((data) => data === values["type"]).length
-                                                ? typeOptions.filter((data) => data === values["type"])[0]
+                                            value={typeOptions.find((data) => data === values["type"])
+                                                ? typeOptions.find((data) => data === values["type"])
                                                 : ""}
                                             options={typeOptions}
                                             onChange={(e, val) => {

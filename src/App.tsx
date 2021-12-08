@@ -9,7 +9,7 @@ import { CustomNotificationCountContext } from './StateProvider/CustomNotificati
 import axiosInstance from './axios/axiosInstance';
 import { CustomChatNotificationCountContext } from './StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import queryString from 'query-string';
-import { SET_USER, SET_SELECTED_ENTITY } from './StateProvider/actionTypes';
+import { SET_USER, SET_SELECTED_ENTITY, SET_GRID_METADATA } from './StateProvider/actionTypes';
 import routes from './components/Helpers/Routes';
 import { termsAndCondition, customerAccount, customerContact, supplierAccount, supplierContact } from './constants/helpers';
 import CustomToaster from './components/Helpers/CustomToast';
@@ -184,6 +184,22 @@ function App() {
         });
     }
   }, [mappedEntities]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        axiosInstance()
+          .get(`user/meta-grid/${user?._id}`)
+          .then(({ data: { data } }) => {
+            let tempMetaData = JSON.stringify(data?.gridMetaData);
+            localStorage.setItem('gridMetaData', tempMetaData);
+            dispatch({ type: SET_GRID_METADATA, payload: data?.gridMetaData });
+          });
+      } catch (e) {
+        console.log(e);
+      }
+    })();
+  }, [user]);
 
   const getNotification = async () => {
     if (localStorage.getItem('token')) {

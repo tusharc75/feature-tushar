@@ -415,13 +415,6 @@ const ManageRepairJob = (props) => {
                                           isTooltip={field?.isTooltip || false}
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                              ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
-                                              : null
-                                          }
                                         /> : field.fieldName === "typeOfRepair"
                                           ? <FormTypes
                                             repairJobId={repairJobId}

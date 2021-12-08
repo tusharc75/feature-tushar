@@ -115,7 +115,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
 
                                 tempProductInventory.forEach((d) => {
                                     d["_id"] = d["id"];
-                                    d["hideSelection"] = d.status === "In-Transit" || "Lost";
+                                    d["hideSelection"] = d.status === "In-Transit" || d.status === "Lost";
                                 })
 
                                 setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))
