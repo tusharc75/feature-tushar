@@ -411,7 +411,8 @@ const ReceivingTicketDetails = () => {
                         </Button> : null : null
                   }
                   {
-                    receivingTicketData?.deliveryPerson?.optionValue === user?.user?._id && (receivingTicketData?.status === "In-Transit" || receivingTicketData?.status === "Delivered") ?
+                    // receivingTicketData?.deliveryPerson?.optionValue === user?.user?._id && 
+                    (receivingTicketData?.status === "In-Transit" || receivingTicketData?.status === "Delivered") ?
                       <Button
                         variant="contained"
                         color="primary"
