@@ -50,6 +50,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   const [openReceivingTicketDialog, setOpenReceivingTicketDialog] = useState(false);
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
   const [assetsDelivered, setAssetsDelivered] = useState([]);
+  const [loadingTicketsNotDelivered, setLoadingTicketsDelivered] = useState([]);
 
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -192,11 +193,13 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   useEffect(() => {
     if (selectedRecords.length > 0) {
-      const inventoryWithNoTicket = selectedRecords.filter((asset: any) => !asset?.hasOwnProperty('receivingTicket'));
+      const inventoryWithNoTicket = selectedRecords.filter((asset: any) => !asset?.hasOwnProperty('receivingTicket') && asset?.deliveryTicketStatus === "Delivered");
+      const loadingTicketsNotDelivered = selectedRecords.filter((asset: any) => asset?.deliveryTicketStatus !== "Delivered");
       const selectedInventoryDelivered = selectedRecords.filter(
         (asset: any) => asset?.receivingTicketStatus === 'Delivered' || asset?.receivingTicketStatus === 'In-Transit'
       );
 
+      setLoadingTicketsDelivered(loadingTicketsNotDelivered)
       setAssetsDelivered(selectedInventoryDelivered);
       setAssetWithNoTicket(inventoryWithNoTicket);
     }
@@ -286,7 +289,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             variant="contained"
             size="small"
             color="primary"
-            disabled={selectedRecords.length === 0 || assetWithNoTicket.length === 0}
+            disabled={selectedRecords.length === 0 || assetWithNoTicket.length === 0 || loadingTicketsNotDelivered.length > 0}
             onClick={() => setOpenReceivingTicketDialog(true)}
           >
             Create Receiving Ticket
