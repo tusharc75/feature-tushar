@@ -13,13 +13,15 @@ export default function SignatureDialog(props) {
     const { setToastConfig } = useContext(CustomToastContext);
 
     const [activeStep, setActiveStep] = useState(0)
-    const signCanvas: any = useRef(null);
+    const signCanvas1: any = useRef(null);
+    const signCanvas2: any = useRef(null);
+
     const [loading, setLoading] = useState(false);
 
-    const clear = () => signCanvas.current?.clear();
+    const clearSignCanvas1 = () => signCanvas1.current?.clear();
+    const clearSignCanvas2 = () => signCanvas2.current?.clear();
 
-
-    const handleClickNext = () => {
+    const handleClickNext = (signCanvas) => {
         const isEmpty = signCanvas.current?.isEmpty();
 
 
@@ -42,7 +44,7 @@ export default function SignatureDialog(props) {
 
             if (activeStep === 0) {
                 setActiveStep(prevStep => prevStep + 1)
-                clear()
+                // clearSignCanvas1()
             }
         } else {
             setToastConfig({ open: true, type: "warning", message: "Signature pad cannot be empty!" })
@@ -84,15 +86,26 @@ export default function SignatureDialog(props) {
                         </Box>
                     </>
                 }
-                <SignaturePad
-                    ref={signCanvas}
-                    canvasProps={{ minWidth: 500, width: 500, height: 400 }}
-                />
+
+                <div style={{ display: activeStep === 1 ? "none" : "block" }}>
+                    <SignaturePad
+                        ref={signCanvas1}
+                        canvasProps={{ minWidth: 500, width: 500, height: 400 }}
+                    />
+                </div>
+
+                <div style={{ display: activeStep === 0 ? "none" : "block" }}>
+                    <SignaturePad
+                        ref={signCanvas2}
+                        canvasProps={{ minWidth: 500, width: 500, height: 400 }}
+                    />
+                </div>
+
                 <Button
                     variant="outlined"
                     size="small"
                     color="primary"
-                    onClick={clear}
+                    onClick={() => { activeStep === 0 ? clearSignCanvas1() : clearSignCanvas2() }}
                     fullWidth
                 >
                     Clear
@@ -120,17 +133,17 @@ export default function SignatureDialog(props) {
                             size="small"
                             color="primary"
                             disabled={submitting}
-                            onClick={handleClickNext}
+                            onClick={() => { handleClickNext(activeStep === 0 ? signCanvas1 : signCanvas2) }}
                         >
                             {activeStep === 0 ? "Next" : "Submit"}
                         </Button>
                     </>
                     : <Button
                         size="small"
-                        disabled={loading || signCanvas.current?.isEmpty()}
+                        disabled={loading || signCanvas1.current?.isEmpty()}
                         onClick={() => {
                             setLoading(true);
-                            onSigned(signCanvas.current?.getTrimmedCanvas().toDataURL("image/png"))
+                            onSigned(signCanvas1.current?.getTrimmedCanvas().toDataURL("image/png"))
                         }} color="primary" variant="contained">
                         {loading ? "Sending..." : "Send"}
                     </Button>}
