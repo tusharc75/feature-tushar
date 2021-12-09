@@ -1305,3 +1305,16 @@ export function treeToFlatArray(array, childrenProperty) {
 
   return result;
 }
+
+
+export const arrayToDropwdownOption = (array) => {
+  const option: any = []
+  array?.forEach((element, index) => {
+    option.push({
+      "optionLabel": element,
+      "optionValue": element,
+      "order": index
+    })
+  });
+  return option;
+}
