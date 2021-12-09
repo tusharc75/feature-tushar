@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.17.0](https://github.com/vebholic/oms_frontend/compare/v2.16.0...v2.17.0) (2021-12-09)
+
+
+### Features
+
+* - PO-524 - if po is related to internal then external info should not not be shown in header ([044732e](https://github.com/vebholic/oms_frontend/commit/044732e0d8b97a331419002ed6dedbe89f688463))
+* - PO-524 - Status change done ([ae0ec30](https://github.com/vebholic/oms_frontend/commit/ae0ec30257365d11cbdd2a4cac96edcb7a60c884))
+* - PO-525 - while editing repair job, repair job name should show in brackes [ ] ([dfa627f](https://github.com/vebholic/oms_frontend/commit/dfa627f35dba3ff7698ea538fc642aa1a5f851b4))
+* - Repair job changes ([192ac49](https://github.com/vebholic/oms_frontend/commit/192ac49508e11c7b207a6e86efdcf468599693c7))
+* - Repair job completed successfully ([108be28](https://github.com/vebholic/oms_frontend/commit/108be28af82077dab43cce41312c1a8b788d0fb6))
+* pricing-condition changes ([614ffdf](https://github.com/vebholic/oms_frontend/commit/614ffdf25f3101437ca98c7bbfc039d21cbf992a))
+* **transferasset:** pdf view and download btn ([ab3cc15](https://github.com/vebholic/oms_frontend/commit/ab3cc15027dff9d19852ab1560b950c9b7563442))
+
+
+### Bug Fixes
+
+* address changes ([5abf9b6](https://github.com/vebholic/oms_frontend/commit/5abf9b6fa58a41c284ac994b5c9a7d02619bd78e))
+* **azure instance:** bug fixed ([5e3a4e6](https://github.com/vebholic/oms_frontend/commit/5e3a4e67976bc087770b58956bee758ae4a402d8))
+* bug fix ([145b3f8](https://github.com/vebholic/oms_frontend/commit/145b3f849f7b9466cabf4ed013e541bcb2c9747c))
+* customer accounts add reports to bug fixed ([f99a267](https://github.com/vebholic/oms_frontend/commit/f99a2671fa15e3ee02fef2aef71f634f2c42225f))
+* **pdftemplate:** type names fix ([780b737](https://github.com/vebholic/oms_frontend/commit/780b737e50919e853f8edcb4612ade5b92d96b40))
+* **receivingticket:** show edit form dynamically ([735d329](https://github.com/vebholic/oms_frontend/commit/735d3293bd85e3021a8d0432038cfc2c3b409910))
+* renal ([fc5ae69](https://github.com/vebholic/oms_frontend/commit/fc5ae693b45c479a2527871532b7d41802a7eb50))
+* rental bug fix ([15d1123](https://github.com/vebholic/oms_frontend/commit/15d1123b83d7ddfbc1872c0d8c808802385de66e))
+* reverse merge ([a98219a](https://github.com/vebholic/oms_frontend/commit/a98219aec900548e8883d88f85462b4966fae702))
+* **transferasset:** changes and bug fix ([de91352](https://github.com/vebholic/oms_frontend/commit/de9135201d3a36cded6aabe10ef0ee1185751866))
+* **transferasset:** entity based plant ([fcb924b](https://github.com/vebholic/oms_frontend/commit/fcb924ba1285d2abc6dad982d5d8e1dc50f7c462))
+
 ## [2.16.0](https://github.com/vebholic/oms_frontend/compare/v2.15.0...v2.16.0) (2021-12-08)
 
 
