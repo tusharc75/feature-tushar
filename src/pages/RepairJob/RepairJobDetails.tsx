@@ -595,6 +595,7 @@ const RepairJobDetails = () => {
                                       loading={step1Loading}
                                       allowSelection={repairJobData && repairJobData["status"] === completedStatus ? false : true}
                                       renderedFrom={step1RenderedFrom}
+                                      isClientSideGrid={true}
                                     />
                                   : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                                 }
