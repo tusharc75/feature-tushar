@@ -18,6 +18,7 @@ import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
+import moment from "moment";
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -319,6 +320,17 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     }
   };
 
+
+  function validate(values) {
+    const errors = {};
+    let startDate = moment(values?.startDate);
+    let endDate = moment(values?.endDate);
+    if (endDate.diff(startDate, 'days') < 0) {
+      errors['endDate'] = 'Please enter valid end date';
+    }
+    return errors;
+  }
+
   return (<Dialog
     maxWidth="md"
     fullScreen={fullScreen || (isMobile || isTablet)}
@@ -334,6 +346,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         initialValues={initialData.values}
         validationSchema={yupSchema(initialData.fields)}
         validateOnMount
+        validate={validate}
         onSubmit={handleSubmit}>
         {({ values,
           errors,
@@ -442,33 +455,61 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                                   </Box>
                                 </Box>
                               </Grid>
-                              :
-                              <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                <Box display="flex" >
-                                  <Box flexGrow={1}  >
-                                    <FormTypes
-                                      {...field}
-                                      fields={initialData.fields}
-                                      fieldData={field}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value)
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field.isTooltip}
-                                      tooltipMessage={field.tooltipMessage}
-                                      size="small"
-                                    />
+                              : ["startDate", "endDate"].includes(field.fieldName) ?
+                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Box display="flex" >
+                                    <Box flexGrow={1}  >
+                                      <FormTypes
+                                        {...field}
+                                        minDate={field.fieldName === "endDate" ? moment(values?.startDate) : moment(rentalManagementData?.rentalStartDate)}
+                                        maxDate={moment(rentalManagementData?.rentalEndDate)}
+                                        fields={initialData.fields}
+                                        fieldData={field}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value)
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field.isTooltip}
+                                        tooltipMessage={field.tooltipMessage}
+                                        size="small"
+                                      />
+                                    </Box>
                                   </Box>
-                                </Box>
-                              </Grid>
+                                </Grid> :
+                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Box display="flex" >
+                                    <Box flexGrow={1}  >
+                                      <FormTypes
+                                        {...field}
+                                        fields={initialData.fields}
+                                        fieldData={field}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value)
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field.isTooltip}
+                                        tooltipMessage={field.tooltipMessage}
+                                        size="small"
+                                      />
+                                    </Box>
+                                  </Box>
+                                </Grid>
                         ))}
                       </Grid>
                     </Box>
