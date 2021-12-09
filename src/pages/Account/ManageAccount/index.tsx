@@ -21,6 +21,7 @@ export default function ManageAccountDialog(props) {
     id,
     accountResource,
     accountApi,
+    onSuccess,
     isGetAccountData,
     onGetAddedAccount,
     owners,
@@ -157,6 +158,7 @@ export default function ManageAccountDialog(props) {
             type: "success",
             message: data.message,
           });
+          onSuccess(data)
           if (Boolean(isRedirectToDetailPage)) {
             history.push(`${accountApi}/detail/${newId}`);
           }
