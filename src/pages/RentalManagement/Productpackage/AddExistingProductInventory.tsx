@@ -42,7 +42,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        axiosInstance().get(`${type === "product" ? product.api : packages.packageApi}${queryString}`).then(({ data: { data } }) => {
+        axiosInstance().get(`${type === "product" ? product.api : packages.packageApi}${queryString}`).then(({ data: { data, count } }) => {
             setMaterialList(JSON.parse(JSON.stringify(data)));
             data = data?.map((u) => ({
                 ...u,
@@ -52,7 +52,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 productCategory: u.productCategory?.optionLabel,
                 priceTemplate: u.priceTemplate?.optionLabel,
             }));
-            dispatch({ type: "initialize", data: data, count: data.count });
+            dispatch({ type: "initialize", data: data, count: count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
