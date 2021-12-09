@@ -247,7 +247,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                         <Box marginY={2}>
                           <Grid spacing={3} container>
                             {form.sectionFields.map((field, index2) =>
-                              field.fieldName === 'transferToPlant' /* || field.fieldName === 'plantShipTo' */? (
+                              field.fieldName === 'transferToPlant'  || field.fieldName === 'plantShipTo' ? (
                                 values?.transferType.includes('Internal') && (
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
                                      <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
@@ -284,6 +284,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       size="small"
                                     />
                                   </Grid>
+                                   {  field.fieldName === 'transferToPlant' ? 
                                   <Grid item xs={1} sm={1} md={1}>
                                           <Tooltip title="Transfer to Plant" className="mt-1">
                                             <IconButton
@@ -297,8 +298,9 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                             </IconButton>
                                           </Tooltip>
                                         </Grid>
+                                      :null}
 
-                                        {field?.tooltipMessage ? (
+                                        { field.fieldName === 'transferToPlant' &&  field?.tooltipMessage ? (
                                           <Grid item xs={1} sm={1} md={1}>
                                             <Tooltip title={field?.tooltipMessage ?? ''}>
                                               <InfoIcon color="disabled" />
@@ -309,7 +311,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   </Grid>
                                   </Grid>
                                 )
-                              ) : field.fieldName === 'transferToSupplier' /*|| field.fieldName === 'supplierShipTo'*/ ? (
+                              ) : field.fieldName === 'transferToSupplier' || field.fieldName === 'supplierShipTo' ? (
                                 values?.transferType.includes('Supplier') && (
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
                                      <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
@@ -345,6 +347,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       size="small"
                                     />
                                   </Grid>
+                                  {field.fieldName === 'transferToSupplier'?
                                   <Grid item xs={1} sm={1} md={1}>
                                           <Tooltip title="Add Transfer To Supplier" className="mt-1">
                                             <IconButton
@@ -358,8 +361,9 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                             </IconButton>
                                           </Tooltip>
                                         </Grid>
+                                        :null}
 
-                                        {field?.tooltipMessage ? (
+                                        {field.fieldName === 'transferToSupplier'&& field?.tooltipMessage ? (
                                           <Grid item xs={1} sm={1} md={1}>
                                             <Tooltip title={field?.tooltipMessage ?? ''}>
                                               <InfoIcon color="disabled" />
@@ -370,7 +374,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   </Grid>
                                   </Grid>
                                 )
-                              ) : field.fieldName === 'transferToCustomer' /*|| field.fieldName === 'customerShipTo' */? (
+                              ) : field.fieldName === 'transferToCustomer' || field.fieldName === 'customerShipTo' ? (
                                 values?.transferType.includes('Customer') && (
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
                                     <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
@@ -406,6 +410,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       size="small"
                                     />
                                   </Grid>
+                                  {field.fieldName === 'transferToCustomer' ?
                                   <Grid item xs={1} sm={1} md={1}>
                                           <Tooltip title="Add Manufacturer" className="mt-1">
                                             <IconButton
@@ -419,8 +424,9 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                             </IconButton>
                                           </Tooltip>
                                         </Grid>
+                                        :null}
 
-                                        {field?.tooltipMessage ? (
+                                        {field.fieldName === 'transferToCustomer' && field?.tooltipMessage ? (
                                           <Grid item xs={1} sm={1} md={1}>
                                             <Tooltip title={field?.tooltipMessage ?? ''}>
                                               <InfoIcon color="disabled" />
@@ -653,7 +659,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
           // isUpdateDisabled={false}
           // productCategoryId={productCategoryId}
           open = {customerOpen?.open}
-         onClose={()=>setSupplierOpen({ open: false, isClone: false })}
+         onClose={()=>setCustomerOpen({ open: false, isClone: false })}
           isClone={customerOpen?.isClone}
           accountResource='customerAccount'
           accountApi='customer-account'

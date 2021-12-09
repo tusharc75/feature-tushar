@@ -34,6 +34,8 @@ const ignoreField = ["priceTemplate"]
 const CreateProduct = (props) => {
     const location = useLocation();
     const pathName = location.pathname;
+
+    const  sessionproductCategoryId = JSON.parse(sessionStorage.getItem('productCategoryId')) 
    
 
 
@@ -75,6 +77,15 @@ const CreateProduct = (props) => {
 
     },[pathName])
 
+    useEffect(() => {
+       if (sessionproductCategoryId === ""){
+        sessionStorage.removeItem('productCategoryId')
+        sessionStorage.removeItem('productCategoryName')
+       } 
+
+    },[sessionproductCategoryId])
+
+    
 
     useEffect(() => {
         var _isProductTemplate = false;
@@ -590,8 +601,7 @@ const CreateProduct = (props) => {
                                                                         >
                                                                             <FormTypes
                                                                                 isNew={Boolean(productId)}
-                                                                                //disabled={(Boolean(productId) && field.disableOnEdit)}
-                                                                                disabled = {JSON.parse(sessionStorage.getItem('productCategoryId')) !== ""}
+                                                                                disabled={(Boolean(productId) && field.disableOnEdit) || JSON.parse(sessionStorage.getItem('productCategoryId')) !== null}
                                                                                 fields={initialData.fields}
                                                                                 fieldData={field}
                                                                                 errors={errors}
@@ -643,11 +653,12 @@ const CreateProduct = (props) => {
                                                                                     >
                                                                                         <IconButton
                                                                                             onClick={() => { setShowAddProductCategoryDialog(true); }}
-                                                                                          //  disabled={(Boolean(productId) && field.disableOnEdit)}
-                                                                                          disabled={JSON.parse(sessionStorage.getItem('productCategoryId')) !== ""}
+                                                                                          
+                                                                                           disabled={(Boolean(productId) && field.disableOnEdit) || JSON.parse(sessionStorage.getItem('productCategoryId')) !== null}
+                                                                                        //   disabled={JSON.parse(sessionStorage.getItem('productCategoryId')) !== null}
                                                                                             size="small"
                                                                                         >
-                                                                                            <AddIcon color={(Boolean(productId) && field.disableOnEdit) || JSON.parse(sessionStorage.getItem('productCategoryId')) !== "" ? "disabled" : "primary"} />
+                                                                                            <AddIcon color={(Boolean(productId) && field.disableOnEdit) || JSON.parse(sessionStorage.getItem('productCategoryId')) !== null ? "disabled" : "primary"} />
                                                                                         </IconButton>
                                                                                     </Tooltip>
                                                                                 </Grid>
