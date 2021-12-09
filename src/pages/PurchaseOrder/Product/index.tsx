@@ -86,7 +86,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
         setCurrentStepDisable(false)
         axiosInstance().get(`${purchaseOrder.api}/product/${id}`).then(({ data: { data } }) => {
             setPurchaseOrderProduct(JSON.parse(JSON.stringify(data)))
-            let rows = data?.map((item) => {
+            let rows = data?.map((item, index) => {
                 if ((!currentStepDisable) && (
                     item.qty === 0
                     || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === 0
@@ -96,7 +96,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                 let res: any = {
                     ...prepareDataForGrid(item),
                 };
-                res.productName = item.productDetail?.productName
+                res.productName = `${index + 1}. ${item.productDetail?.productName}`
                 res.productNumber = item.productDetail?.productNumber
                 res.productDetail = item.productDetail
                 return res;
@@ -183,6 +183,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                 setSelectedProductData(null)
                 setAddingProducts(false)
                 setShowProductDialog(false)
+                setIsBulkEdit(false)
             }).catch((error) => {
                 setAddProductDialog(false)
                 toastConfig.setToastConfig(error)
@@ -370,6 +371,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                 <PurchaseOrderQtyDialog
                     onClose={() => {
                         setShowProductDialog(false)
+                        setIsBulkEdit(false)
                         setSelectedProductData(null)
                     }}
                     onSubmit={handleUpdateQty}

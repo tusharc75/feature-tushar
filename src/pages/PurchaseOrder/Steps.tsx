@@ -22,8 +22,8 @@ import { AiOutlineCloseCircle } from "react-icons/ai";
 import { FaHourglassHalf } from "react-icons/fa";
 
 import { isMobile } from "react-device-detect";
-import {TiArrowBack} from "react-icons/ti";
-import {RiShareForwardFill} from "react-icons/ri";
+import { TiArrowBack } from "react-icons/ti";
+import { RiShareForwardFill } from "react-icons/ri";
 import MobileStepper from "@material-ui/core/MobileStepper";
 import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
@@ -124,7 +124,7 @@ const useColorlibStepIconStyles = makeStyles((theme) => ({
 
 const Steps = (props) => {
     const {
-        isNextStep,
+        currentStepDisable,
         steps,
         currentStep,
         setCurrentStep
@@ -177,40 +177,40 @@ const Steps = (props) => {
         <div>
             {
                 isMobile ? <div>
-                        <MobileStepper
-                            style={{background: "#dee2e6"}}
-                            variant="dots"
-                            steps={steps.length}
-                            position="bottom"
-                            activeStep={currentStep}
-                            nextButton={
-                                    <Button size="small"
-                                            color="primary"
-                                            hidden={currentStep >= 3 || (currentStep === 0 && isNextStep)}
-                                            disabled={currentStep >= 3 || (currentStep === 0 && isNextStep)}
-                                            variant="contained" endIcon={<KeyboardArrowRight/> }
-                                            onClick={() => {
-                                                setCurrentStep(currentStep + 1)
-                                            }} >
-                                        {steps[currentStep + 1] ?? ""}
-                                    </Button>
+                    <MobileStepper
+                        style={{ background: "#dee2e6" }}
+                        variant="dots"
+                        steps={steps.length}
+                        position="bottom"
+                        activeStep={currentStep}
+                        nextButton={
+                            <Button size="small"
+                                color="primary"
+                                hidden={currentStep >= 3 || currentStepDisable}
+                                disabled={currentStep >= 3 || currentStepDisable}
+                                variant="contained" endIcon={<KeyboardArrowRight />}
+                                onClick={() => {
+                                    setCurrentStep(currentStep + 1)
+                                }} >
+                                {steps[currentStep + 1] ?? ""}
+                            </Button>
 
-                                    // : <Button size="small" disabled={loading} color="primary" onClick={handleNext}
-                                    //           variant="contained" endIcon={<KeyboardArrowRight/>}>
-                                    //     {steps[activeStep + 1]?.label ?? ""}
-                                    // </Button>
-                            }
-                            backButton={
+                            // : <Button size="small" disabled={loading} color="primary" onClick={handleNext}
+                            //           variant="contained" endIcon={<KeyboardArrowRight/>}>
+                            //     {steps[activeStep + 1]?.label ?? ""}
+                            // </Button>
+                        }
+                        backButton={
 
-                                    <Button size="small" variant="contained" color={"primary"} startIcon={<KeyboardArrowLeft/>} disabled={currentStep === 5 || currentStep === 0} onClick={() => {
-                                        setCurrentStep(currentStep - 1)
-                                    }} >
-                                        {steps[currentStep - 1] ?? ""}
-                                    </Button>
+                            <Button size="small" variant="contained" color={"primary"} startIcon={<KeyboardArrowLeft />} disabled={currentStep === 5 || currentStep === 0 || currentStepDisable} onClick={() => {
+                                setCurrentStep(currentStep - 1)
+                            }} >
+                                {steps[currentStep - 1] ?? ""}
+                            </Button>
 
-                            }
-                        />
-                    </div> :
+                        }
+                    />
+                </div> :
                     <div className="position-relative">
                         <Grid container xs={12}>
                             <Grid
@@ -226,13 +226,13 @@ const Steps = (props) => {
                                             {(
                                                 <div>
                                                     <IconButton
-                                                        disabled={currentStep === 5 || currentStep === 0}
+                                                        disabled={currentStep === 5 || currentStep === 0 || currentStepDisable}
                                                         onClick={() => {
                                                             setCurrentStep(currentStep - 1)
                                                         }}
                                                         className="stepperButton"
                                                     >
-                                                        <TiArrowBack size={30}/>
+                                                        <TiArrowBack size={30} />
                                                     </IconButton>
                                                 </div>
                                             )}
@@ -260,7 +260,7 @@ const Steps = (props) => {
                                                                     }}
                                                                     size="small"
                                                                 >
-                                                                    <IoIosArrowDropleftCircle/>
+                                                                    <IoIosArrowDropleftCircle />
                                                                 </IconButton>
                                                             </div>
                                                         )}
@@ -285,7 +285,7 @@ const Steps = (props) => {
                                                                             setCurrentStep(currentStep + 1)
                                                                         }}
                                                                         size="small"
-                                                                        disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
+                                                                        disabled={currentStep >= 5 || currentStepDisable}
 
                                                                     >
                                                                         Next
@@ -299,20 +299,20 @@ const Steps = (props) => {
                                         </Grid>
                                     </Grid>
                                     <Stepper className={`${classes.pbStepper} stepper-responsive`}
-                                             activeStep={activeStep} >
+                                        activeStep={activeStep} >
                                         {steps.map((label, i) => (
                                             <Step
                                                 key={label}
                                                 className={clsx(classes.step, {
                                                     [classes.active]:
-                                                    currentStep > i ||
-                                                    steps[currentStep] === "End",
+                                                        currentStep > i ||
+                                                        steps[currentStep] === "End",
                                                     [classes.currentStep]: currentStep === i,
                                                     [classes.inActive]: currentStep !== i,
                                                 })}
                                             >
                                                 <StepLabel
-                                                    style={{color: "#555"}}
+                                                    style={{ color: "#555" }}
                                                     // StepIconComponent={ColorlibStepIcon}
                                                     className="currentStepColor"
                                                 >
@@ -341,10 +341,10 @@ const Steps = (props) => {
                                                             onClick={() => {
                                                                 setCurrentStep(currentStep + 1)
                                                             }}
-                                                            disabled={currentStep >= 5 || (currentStep === 0 && isNextStep)}
+                                                            disabled={currentStep >= 5 || currentStepDisable}
                                                             className="stepperButtonNext"
                                                         >
-                                                            <RiShareForwardFill/>
+                                                            <RiShareForwardFill />
                                                         </IconButton>
                                                     )}
                                                 </div>

@@ -157,7 +157,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
         }) => (
           <Fragment>
             <CustomDialogHeader
-              title={bulkEdit ? "Bulk Edit" : `Edit ${productData.productName || ""}`}
+              title={bulkEdit ? "Bulk Edit" : `Edit ${productData?.productName || ""}`}
               onClose={() => {
                 onClose()
               }}
