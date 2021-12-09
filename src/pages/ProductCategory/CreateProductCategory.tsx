@@ -85,6 +85,11 @@ const CreateProductCategory = (props) => {
             axiosInstance().post(`/product-category`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess(data)
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: "Product Category Created Successfully",
+                });
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
