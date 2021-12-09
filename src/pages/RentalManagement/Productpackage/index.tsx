@@ -199,7 +199,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             element.type = d.type.toLowerCase();
             element.unit = d.unit && d.unit.length ? d.unit[0] : "";
             element.pricingMethod = d.pricingMethod && d.pricingMethod.length ? d.pricingMethod[0] : "";
-            element.qty = 1;
+            element.qty = d.qty ? parseFloat(d.qty) : 1;
             element.startDate = rentalManagementData ? rentalManagementData?.rentalStartDate : new Date();
             element.endDate = rentalManagementData ? rentalManagementData?.rentalEndDate : new Date();
             element.parentId = addExistingProductDialog.parentId;
