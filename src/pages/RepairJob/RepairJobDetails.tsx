@@ -39,6 +39,7 @@ import CustomSwipableList from "../../components/SwipableListComponents/CustomSw
 const reservedStatus = "Reserved";
 const renderedFrom = "repairJobDetails"
 const step1RenderedFrom = `${renderedFrom}_assets`
+const completedStatus = repairJobStatus[2];
 
 function a11yProps(index: any) {
   return {
@@ -65,6 +66,7 @@ const RepairJobDetails = () => {
   const [repairJobFields, setRepairJobFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
+  const [showRepairJobCompleteConfirmationDialog, setShowRepairJobCompleteConfirmationDialog] = useState(false);
 
   const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
 
@@ -273,8 +275,14 @@ const RepairJobDetails = () => {
         setRepairJobData(data)
         if (data.processStatus) {
           const step = repairJobProcessSteps.findIndex(f => f === data.processStatus);
-          if (step > -1)
-            setCurrentStep(step);
+
+          if (step > -1) {
+            if (data.processStatus === "End") {
+              setCurrentStep(step - 1);
+            } else {
+              setCurrentStep(step);
+            }
+          }
         }
         setHeadingLabel(data.repairJobName);
         setCustomizedRoutes([routes.repairJob, { title: data.repairJobName }]);
@@ -320,19 +328,38 @@ const RepairJobDetails = () => {
     }
   };
 
-  const onNextButtonClick = (oldStep, nextStep) => {
-    axiosInstance()
-      .put(`${repairJob.repairJobApi}/${id}/process-status`, {
-        "processStatus": repairJobProcessSteps[nextStep]
-      })
-      .then(() => {
-        //  Update status to Complete when finished steps
-        if (repairJobProcessSteps[nextStep] === repairJobProcessSteps[repairJobProcessSteps.length - 1]) {
-          axiosInstance().put(`${repairJob.repairJobApi}/${id}/status`, { "status": repairJobStatus[2] })
-        }
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+  const onNextButtonClick = (oldStep, nextStep, showConfirmationDialog) => {
+    if (showConfirmationDialog) {
+      setShowRepairJobCompleteConfirmationDialog(true);
+    } else {
+      axiosInstance()
+        .put(`${repairJob.repairJobApi}/${id}/process-status`, {
+          "processStatus": repairJobProcessSteps[nextStep]
+        })
+        .then(() => {
+          //  Update status to Complete when finished steps
+          if (repairJobProcessSteps[nextStep] === repairJobProcessSteps[repairJobProcessSteps.length - 1]) {
+            axiosInstance().put(`${repairJob.repairJobApi}/${id}/status`, { "status": completedStatus }).then(() => {
+              setCurrentStep(nextStep);
+              fetchRepairJobData();
+
+              toastConfig.setToastConfig({
+                open: true,
+                type: "success",
+                message: "Repair job completed successfully."
+              });
+
+            })
+          }
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+        }).finally(() => {
+          if (showRepairJobCompleteConfirmationDialog === true) {
+            setShowRepairJobCompleteConfirmationDialog(false);
+            setOkBtnLoading(false)
+          }
+        });
+    }
   }
 
   const onPreviousButtonClick = (oldStep, previousStep) => {
@@ -454,57 +481,60 @@ const RepairJobDetails = () => {
                     <Paper>
                       <CustomCommonSteps
                         disableNextStep={disableNextStep}
-                        disablePreviousStep={disablePreviousStep}
+                        disablePreviousStep={false}
                         steps={repairJobProcessSteps.filter(f => f !== "End")}
                         currentStep={currentStep}
                         setCurrentStep={setCurrentStep}
                         onNextButtonClick={onNextButtonClick}
                         onPreviousButtonClick={onPreviousButtonClick}
+                        forViewOnly={repairJobData && repairJobData["status"] === completedStatus}
                       />
 
                       <Grid container spacing={2}>
                         <Grid item xs={12} sm={12} md={12} lg={12}>
                           {(currentStep === 0) && (
                             <>
-                              <Box display="flex" mt={2} mb={2} pr={1} justifyContent="flex-end" alignItems="center" className="gap-2">
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  type="button"
-                                  size="small"
-                                  onClick={() => {
-                                    setAddSerializedAssetDialog(true)
-                                  }}
-                                >
-                                  {`Add ${routes.productInventory.title}`}
-                                </Button>
+                              {
+                                repairJobData && repairJobData["status"] !== completedStatus && <Box display="flex" mt={2} mb={2} pr={1} justifyContent="flex-end" alignItems="center" className="gap-2">
+                                  <Button
+                                    variant="contained"
+                                    color="primary"
+                                    type="button"
+                                    size="small"
+                                    onClick={() => {
+                                      setAddSerializedAssetDialog(true)
+                                    }}
+                                  >
+                                    {`Add ${routes.productInventory.title}`}
+                                  </Button>
 
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  type="button"
-                                  size="small"
-                                  disabled={step1SelectedRecords.length === 0}
-                                  onClick={() => {
-                                    setShowEditAssetDialog({ open: true, asset: null, selectedRecords: step1SelectedRecords })
-                                  }}
-                                >
-                                  Bulk Edit
-                                </Button>
+                                  <Button
+                                    variant="contained"
+                                    color="primary"
+                                    type="button"
+                                    size="small"
+                                    disabled={step1SelectedRecords.length === 0}
+                                    onClick={() => {
+                                      setShowEditAssetDialog({ open: true, asset: null, selectedRecords: step1SelectedRecords })
+                                    }}
+                                  >
+                                    Bulk Edit
+                                  </Button>
 
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  type="button"
-                                  size="small"
-                                  disabled={step1SelectedRecords.length === 0 || step1SelectedRecords.some(s => s.status !== reservedStatus)}
-                                  onClick={() => {
-                                    setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: step1SelectedRecords.map(m => m._id ?? m.id) });
-                                  }}
-                                >
-                                  Delete
-                                </Button>
-                              </Box>
+                                  <Button
+                                    variant="contained"
+                                    color="primary"
+                                    type="button"
+                                    size="small"
+                                    disabled={step1SelectedRecords.length === 0 || step1SelectedRecords.some(s => s.status !== reservedStatus)}
+                                    onClick={() => {
+                                      setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: step1SelectedRecords.map(m => m._id ?? m.id) });
+                                    }}
+                                  >
+                                    Delete
+                                  </Button>
+                                </Box>
+                              }
 
                               <Grid item xs={12} md={12} sm={12} className="mt-3">
 
@@ -560,10 +590,10 @@ const RepairJobDetails = () => {
                                       limit={step1Limit}
                                       pageSizes={step1PageSizes}
                                       page={step1Page}
-                                      allowAction={true}
+                                      allowAction={repairJobData && repairJobData["status"] === completedStatus ? false : true}
                                       actionWidth={150}
                                       loading={step1Loading}
-                                      allowSelection={true}
+                                      allowSelection={repairJobData && repairJobData["status"] === completedStatus ? false : true}
                                       renderedFrom={step1RenderedFrom}
                                     />
                                   : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
@@ -626,6 +656,20 @@ const RepairJobDetails = () => {
             okBtnLoading={okBtnLoading}
           />
         )
+      }
+
+      {
+        showRepairJobCompleteConfirmationDialog && <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to complete this repair job ?`}
+          onClose={() => {
+            setShowRepairJobCompleteConfirmationDialog(false)
+          }}
+          onOk={() => {
+            onNextButtonClick(repairJobProcessSteps.length - 2, repairJobProcessSteps.length - 1, false)
+          }}
+          okBtnLoading={okBtnLoading}
+        />
       }
 
       {openUpdateDialog && (

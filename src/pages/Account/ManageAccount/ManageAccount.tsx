@@ -558,15 +558,15 @@ export default function ManageAccount(props) {
                                           <Grid
                                             item
                                             xs={
-                                              permissions.marketSegment?.isCreate ? 10
+                                              permissions[accountResource]?.isCreate ? 10
                                                 : 11
                                             }
                                             sm={
-                                              permissions.marketSegment?.isCreate ? 10
+                                              permissions[accountResource]?.isCreate ? 10
                                                 : 11
                                             }
                                             md={
-                                              permissions.marketSegment?.isCreate ? 10
+                                              permissions[accountResource]?.isCreate ? 10
                                                 : 11
                                             }
                                           >
@@ -619,7 +619,7 @@ export default function ManageAccount(props) {
                                             />
                                           </Grid>
                                           {
-                                            permissions.marketSegment?.isCreate && (
+                                            permissions[accountResource]?.isCreate && (
                                               <Grid item xs={1} sm={1} md={1}>
                                                 <Tooltip
                                                   title="Add Address"
@@ -658,15 +658,15 @@ export default function ManageAccount(props) {
                                             <Grid
                                               item
                                               xs={
-                                                permissions.marketSegment?.isCreate ? 10
+                                                permissions[accountResource]?.isCreate ? 10
                                                   : 11
                                               }
                                               sm={
-                                                permissions.marketSegment?.isCreate ? 10
+                                                permissions[accountResource]?.isCreate ? 10
                                                   : 11
                                               }
                                               md={
-                                                permissions.marketSegment?.isCreate ? 10
+                                                permissions[accountResource]?.isCreate ? 10
                                                   : 11
                                               }
                                             >
