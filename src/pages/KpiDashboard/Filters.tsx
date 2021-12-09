@@ -239,11 +239,11 @@ const Filters = (props) => {
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={6}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={4} md={2}>
+              {/* <Grid item xs={12} sm={4} md={2}>
                 <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
                   Filters
                 </Button>
-              </Grid>
+              </Grid> */}
               {/* <Grid item xs={6} sm={4} md={3}>
                 <FormControl className={classes.status} size="small" variant="outlined">
                   <InputLabel id="status">Status</InputLabel>

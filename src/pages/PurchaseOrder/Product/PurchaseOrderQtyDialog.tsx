@@ -40,10 +40,11 @@ interface PurchaseOrderQtyDialogProps {
   currency: string;
   onSubmit: VoidFunction | any;
   productData?: object | any;
+  purchaseOrderData?: object | any;
   bulkEdit?: boolean | any;
 }
 
-const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, currency, onSubmit, productData, bulkEdit }) => {
+const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, currency, onSubmit, productData, bulkEdit, purchaseOrderData }) => {
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
@@ -81,9 +82,16 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
         }
       })
       //End
+      let tempObjKeysWithValues = getObjKeysWithValues(!bulkEdit ? productData : "", poFields)
+      if (!tempObjKeysWithValues["taxSchedule"] && purchaseOrderData["taxSchedule"]) {
+        tempObjKeysWithValues["taxSchedule"] = purchaseOrderData["taxSchedule"]
+      }
+      if (!tempObjKeysWithValues["expectedDelivery"] && purchaseOrderData["deliveryDate"]) {
+        tempObjKeysWithValues["expectedDelivery"] = purchaseOrderData["deliveryDate"]
+      }
       setInitialData({
         fields: poFields,
-        values: getObjKeysWithValues(!bulkEdit ? productData : "", poFields),
+        values: tempObjKeysWithValues,
       });
       EvaluteproductFields(poFields);
     })
@@ -149,7 +157,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
         }) => (
           <Fragment>
             <CustomDialogHeader
-              title={bulkEdit ? "Bulk Edit" : `Edit ${productData.productName || ""}`}
+              title={bulkEdit ? "Bulk Edit" : `Edit ${productData?.productName || ""}`}
               onClose={() => {
                 onClose()
               }}
