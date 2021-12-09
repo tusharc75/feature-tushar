@@ -1,6 +1,6 @@
-import React, { useReducer, useState, useEffect, Fragment, FC, useContext } from 'react'
+import { useReducer, useState, useEffect, Fragment, FC, useContext } from 'react'
 import { Button, Box, } from '@material-ui/core'
-import { Link, useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 
 import routes from '../../components/Helpers/Routes';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
@@ -27,11 +27,11 @@ interface AssetsGridProps {
   updateTransferStatus?: any;
   transferAssetData?: any;
   handleViewPdf?: any;
-
+  fileDownloading?: boolean
 }
 
 const AssetsGrid: FC<AssetsGridProps> = (props) => {
-  const { permissions, user, plantId, fetchAssets, transferAssetId, ownerId, setNextStep, updateTransferStatus, transferAssetData } = props
+  const { permissions, user, plantId, fetchAssets, currentStep, transferAssetId, ownerId, setNextStep, updateTransferStatus, transferAssetData } = props
   const toastConfig = useContext(CustomToastContext);
 
 
@@ -127,8 +127,12 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       let data = await fetchAssets(forceRefresh)
       let ticketData: any = await fetchLoadingTickets();
 
-      if (data.length === 0 && transferAssetData?.status !== "New") {
-        updateTransferStatus("New")
+      if (currentStep === 0) {
+        if (data.length === 0 && transferAssetData?.status !== "New") {
+          updateTransferStatus("New")
+        } else if (data.length > 0 && transferAssetData?.status !== "In Progress") {
+          updateTransferStatus("In Progress")
+        }
       }
 
       for (let i = 0; i < ticketData.length; i++) {

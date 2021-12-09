@@ -35,13 +35,14 @@ const TransferAssetDetailPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
+  const { openEdit, tab }: any = parsed;
+  const parsedTab = tab !== undefined ? parseInt(tab) : 0
   const {
     state: { user, permissions }
   }: any = useData();
   const [headingLabel, setHeadingLabel] = useState('');
   const [transferType, setType] = useState(null);
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(parsedTab);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setDeleting] = useState(false);
   const [transferAssetData, setTransferAssetData] = useState(null);
@@ -211,6 +212,7 @@ const TransferAssetDetailPage = () => {
    */
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
+    history.push(`?tab=${newValue}`)
   };
   function a11yProps(index: any) {
     return {
@@ -397,6 +399,7 @@ const TransferAssetDetailPage = () => {
                       updateTransferStatus={updateTransferStatus}
                       transferAssetData={transferAssetData}
                       handleViewPdf={handleViewPdf}
+                      fileDownloading={fileDownloading}
                     />
                   )}
                   {currentStep === 1 && (
@@ -413,6 +416,7 @@ const TransferAssetDetailPage = () => {
                       setTransferIsEnded={setTransferIsEnded}
                       updateTransferStatus={updateTransferStatus}
                       handleViewPdf={handleViewPdf}
+                      fileDownloading={fileDownloading}
                     />
                   )}
                   {currentStep === 2 && (
@@ -428,6 +432,7 @@ const TransferAssetDetailPage = () => {
                       setTransferIsEnded={setTransferIsEnded}
                       updateTransferStatus={updateTransferStatus}
                       handleViewPdf={handleViewPdf}
+                      fileDownloading={fileDownloading}
                     />
                   )}
                 </Box>
