@@ -9,7 +9,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import axiosInstance from "../../axios/axiosInstance";
 import { GiStockpiles } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import {AddOutlined, ExpandMore} from "@material-ui/icons";
+import { AddOutlined, ExpandMore } from "@material-ui/icons";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
@@ -22,12 +22,12 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from "react-router-dom";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers"
 import ManagePurchaseOrder from "./ManagePurchaseOrder";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import { MdAccountCircle } from "react-icons/md";
-import {AiFillCrown, MdAdd} from "react-icons/all";
+import { AiFillCrown, MdAdd } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 
@@ -50,9 +50,9 @@ const PurchaseOrder = () => {
     const localStorageSelectedRecords = `${routes.purchaseOrder?.title}_selected`;
 
     const {
-        state: { user, permissions },
+        state: { user, permissions, selectedEntity },
     }: any = useData();
-    const {getColumnData} = useColumns();
+    const { getColumnData } = useColumns();
     const history = useHistory();
 
     useEffect(() => {
@@ -61,7 +61,7 @@ const PurchaseOrder = () => {
 
     useEffect(() => {
         fetchPurchaseOrder()
-    }, [page, limit, filters, sorting, search]);
+    }, [page, limit, filters, sorting, search, selectedEntity]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -319,58 +319,58 @@ const PurchaseOrder = () => {
                     </Grid>
                     <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side} >
                         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
-                            <Grid style={{display: "flex", flex:1}}>
+                            <Grid style={{ display: "flex", flex: 1 }}>
                                 <SearchBox
                                     onSearch={handleSearch}
                                     width="242px"
                                     size="small"
                                     value={search}
-                                    style={isMobile ? {flex:1} : {}}
+                                    style={isMobile ? { flex: 1 } : {}}
                                 />
 
                             </Grid>
 
-                            <Grid style={{display: "flex" , gap:"5px"}}>
+                            <Grid style={{ display: "flex", gap: "5px" }}>
                                 {permissions?.purchaseOrder?.isCreate &&
                                     <Button onClick={() => {
                                         setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: null })
-                                    }} variant={isMobile ? "text" : "contained"} size="small" color="primary"  className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                                            startIcon={isMobile ? null : <AddOutlined />}> {isMobile ? <MdAdd size={23}/> : "Add"}</Button>
+                                    }} variant={isMobile ? "text" : "contained"} size="small" color="primary" className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                                        startIcon={isMobile ? null : <AddOutlined />}> {isMobile ? <MdAdd size={23} /> : "Add"}</Button>
                                 }
 
-                                    <HtmlTooltip title="Please select some purchase orders">
-                                        <span>
-                                            <Button
-                                                variant={isMobile ? "text" : "contained"}
-                                                color="default"
-                                                size="small"
-                                                onClick={openActions}
-                                                disabled={selectedRecords.length ? false : true}
-                                                aria-controls="action-menu"
-                                                className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                                            >
-                                               {isMobile ? "" :  "Actions" } <ExpandMore />
+                                <HtmlTooltip title="Please select some purchase orders">
+                                    <span>
+                                        <Button
+                                            variant={isMobile ? "text" : "contained"}
+                                            color="default"
+                                            size="small"
+                                            onClick={openActions}
+                                            disabled={selectedRecords.length ? false : true}
+                                            aria-controls="action-menu"
+                                            className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                                        >
+                                            {isMobile ? "" : "Actions"} <ExpandMore />
 
-                                            </Button>
-                                        </span>
-                                    </HtmlTooltip>
-                                    <Menu
-                                        anchorEl={anchorEl}
-                                        keepMounted
-                                        getContentAnchorEl={null}
-                                        anchorOrigin={{
-                                            vertical: "bottom",
-                                            horizontal: "left",
-                                        }}
-                                        id="action-menu"
-                                        open={Boolean(anchorEl)}
-                                        onClose={closeActions}
-                                    >
-                                        {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
-                                            closeActions()
-                                            setShowDeleteConfirmBox(true)
-                                        }}>Delete</MenuItem>}
-                                    </Menu>
+                                        </Button>
+                                    </span>
+                                </HtmlTooltip>
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    keepMounted
+                                    getContentAnchorEl={null}
+                                    anchorOrigin={{
+                                        vertical: "bottom",
+                                        horizontal: "left",
+                                    }}
+                                    id="action-menu"
+                                    open={Boolean(anchorEl)}
+                                    onClose={closeActions}
+                                >
+                                    {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
+                                        closeActions()
+                                        setShowDeleteConfirmBox(true)
+                                    }}>Delete</MenuItem>}
+                                </Menu>
                             </Grid>
                         </Box>
                     </Grid>
@@ -406,7 +406,7 @@ const PurchaseOrder = () => {
                                     label: "Delivery Date: ",
                                     field: "deliveryDate",
                                     fieldType: "date",
-                                     setBackground : (data) => { return data.status === "" && new Date() > new Date(data.deliveryDate) ? {backgroundColor : "#efcccc"} : null }
+                                    setBackground: (data) => { return data.status === "" && new Date() > new Date(data.deliveryDate) ? { backgroundColor: "#efcccc" } : null }
                                 },
                                 {
                                     label: "Status: ",
@@ -445,6 +445,7 @@ const PurchaseOrder = () => {
                     setShowManagePurchaseOrderDialog({ open: false, isClone: false, idToClone: null });
                     fetchPurchaseOrder()
                 }}
+                currency={user?.entity?.find(d => d._id === selectedEntity)?.currency}
             />
         }
         {

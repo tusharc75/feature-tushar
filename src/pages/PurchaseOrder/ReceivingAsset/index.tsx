@@ -3,21 +3,24 @@ import Box from "@material-ui/core/Box/Box";
 import { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
-import { Button, Chip, IconButton, makeStyles, useMediaQuery } from "@material-ui/core";
+import { Button, Chip, Dialog, IconButton, makeStyles, useMediaQuery } from "@material-ui/core";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
-import { dateFormat, defaultActivityShow, gridLoadingTimeout, productInventory, purchaseOrder, rentalManagement, translateDataToTree } from "../../../constants/helpers";
+import { CustomDialogTransition, dateFormat, defaultActivityShow, gridLoadingTimeout, productInventory, purchaseOrder, rentalManagement, translateDataToTree } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import moment from "moment";
 import { startCase } from "lodash";
 import CreateSeriaizedAsset from "./CreateSerializedAsset";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import routes from "../../../components/Helpers/Routes";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { Link } from "react-router-dom";
+import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
+import { AiFillFilePdf } from "react-icons/ai";
+import { MdEmail } from "react-icons/md";
 
 const useStyles = makeStyles(() => ({
     equal: {
@@ -32,7 +35,7 @@ const useStyles = makeStyles(() => ({
 
 }));
 
-const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, handleUpdateData, statusOptions }) => {
+const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, handleUpdateData, statusOptions, handleViewPdf, pdfFileBase64, downlodingFile, handleAttachments }) => {
     const toastConfig = useContext(CustomToastContext);
     const {
         state: { user, permissions }
@@ -46,6 +49,10 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
     const isTabletScreen = useMediaQuery('(max-width:960px)');
     const [showActivity, setActivityShow] = useState(defaultActivityShow);
     const [selectedProducts, setSelectedProducts] = useState([])
+    const [sendEmail, setSendEmail] = useState(false);
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+    const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
+    const [generatingPdfFile, setGeneratingFile] = useState(false);
 
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
@@ -101,6 +108,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
     useEffect(() => {
         fetchColumns()
         fetchSerializedAsset()
+        fetchEmailsData()
     }, []);
 
     const fetchColumns = () => {
@@ -216,9 +224,78 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
 
     }
 
+    const fetchEmailsData = () => {
+        let ownerCollaboratorEmails = [];
+        if (purchaseOrderData?.collaborator && purchaseOrderData.collaborator.length) {
+            ownerCollaboratorEmails = purchaseOrderData.collaborator.filter((o) => o?.email).map((o) => o?.email);
+        }
+        if (purchaseOrderData?.owner?.email) {
+            ownerCollaboratorEmails.push(purchaseOrderData.owner.email);
+        }
+        let toEmails = [];
+        if (purchaseOrderData?.supplier?.email) {
+            toEmails.push(purchaseOrderData.supplier.email);
+        }
+        setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
+    }
+
+    let attachments = [];
+    if (pdfFileBase64) {
+        attachments.push({
+            base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(',') + 1)),
+            contentType: pdfFileBase64.split(';')[0].split(':')[1],
+            name: `Purchase Order-${purchaseOrderData.purchaseOrderNumber}`
+        });
+    }
+
+    const onSendEmailSuccess = () => {
+        setSendEmail(false);
+        handleAttachments();
+    };
+
     return (<>
         <Box display="flex" justifyContent="space-between" m={1}>
             <Box display="flex">
+                <Box display="flex">
+                    {permissions?.purchaseOrder?.isRead && (
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            type="button"
+                            size="small"
+                            startIcon={isMobile ? '' : <AiFillFilePdf />}
+                            disabled={downlodingFile}
+                            onClick={() => { handleViewPdf(false) }}
+                        >
+                            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Preview"}
+                        </Button>
+                    )}
+                    <Box mx={1} />
+                    {permissions?.purchaseOrder?.isRead && (
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            type="button"
+                            size="small"
+                            startIcon={isMobile ? '' : <AiFillFilePdf />}
+                            disabled={downlodingFile}
+                            onClick={() => { handleViewPdf(true) }}
+                        >
+                            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
+                        </Button>
+                    )}
+                    <Box mx={1} />
+                    {permissions?.purchaseOrder?.isRead && <Button
+                        variant={isMobile ? "outlined" : "contained"}
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                            setSendEmail(true)
+                        }}
+                    >
+                        {isMobile ? <MdEmail size={22} /> : `Send Email`}
+                    </Button>}
+                </Box>
                 <Box mx={1} />
                 <Button
                     variant="contained"
@@ -309,6 +386,44 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                 handleUpdateData={handleUpdateData}
             />
         }
+        {sendEmail && (
+            <Dialog
+                open={sendEmail}
+                fullScreen={fullScreen || isMobile || isTablet}
+                TransitionComponent={CustomDialogTransition}
+                aria-labelledby="customized-dialog-title"
+                maxWidth="md"
+                onClose={() => {
+                    setSendEmail(false);
+                    setFullScreen(false);
+                }}
+                fullWidth
+            >
+                <CreateEmail
+                    generatingFile={generatingPdfFile}
+                    handleClose={() => {
+                        setSendEmail(false);
+                        setFullScreen(false);
+                    }}
+                    fetchData={onSendEmailSuccess}
+                    id={purchaseOrderData._id}
+                    showESign={true}
+                    isQuoteBuilder={true}
+                    options={userEmails?.to}
+                    cc={userEmails?.cc ?? []}
+                    emailId={null}
+                    qouteBuilderAttachments={attachments}
+                    subject={`${user?.user?.brandName ?? 'Brand'} Offer - ${purchaseOrderData?.purchaseOrderId ?? ''}`}
+                    fromQuote={true}
+                    isMinimized={!fullScreen}
+                    onMinimizeMaximize={() => {
+                        setFullScreen((prevState) => !prevState);
+                    }}
+                    showManimizeMaximize={true}
+                    fromPurchaseOrder={true}
+                />
+            </Dialog>
+        )}
     </>
     );
 }
