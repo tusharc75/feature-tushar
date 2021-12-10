@@ -86,10 +86,10 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
         let unitArray: any = []
         productData?.forEach(element => {
           if (element?.[`${element.type}Detail`]?.unit) {
-            unitArray.push([...element?.[`${element.type}Detail`].unit])
+            unitArray.push([...element?.[`${element.type}Detail`]?.unit])
           }
         });
-        let unit: any = unitArray.shift().filter(function (v) {
+        let unit: any = unitArray?.shift()?.filter(function (v) {
           return unitArray.every(function (a) {
             return a.indexOf(v) !== -1;
           });
