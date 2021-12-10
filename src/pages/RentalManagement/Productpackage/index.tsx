@@ -161,6 +161,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
     }, []);
 
     const fetchProductInventory = () => {
+        setNextStep(false)
         axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`).then(({ data: { data } }) => {
             setMaterial(JSON.parse(JSON.stringify(data.material)))
             const rows = data.material.filter((e) => e.parentId === null)

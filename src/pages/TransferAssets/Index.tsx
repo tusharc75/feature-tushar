@@ -212,7 +212,7 @@ const TransferAsset = () => {
           </IconButton>
         </HtmlTooltip>
       }
-      {permissions?.transferAsset?.isDelete || params?.data?.status === "New" &&
+      {permissions?.transferAsset?.isDelete &&
         <HtmlTooltip title="Delete">
           <IconButton size="small" aria-label="Delete" onClick={() => {
             setDeleteRecord(params.data);

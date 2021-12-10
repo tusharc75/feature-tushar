@@ -38,7 +38,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     permissions,
     fetchAssets,
     transferAssetId,
-    setPrevStep,
     transferAssetData,
     setTickets,
     setNextStep,

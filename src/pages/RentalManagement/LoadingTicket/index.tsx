@@ -1,38 +1,39 @@
 import Box from "@material-ui/core/Box/Box";
 import { useState, useEffect, useReducer, useContext } from "react";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
+import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
+import { CommonRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
 import { Link } from 'react-router-dom'
-import routes from "../../components/Helpers/Routes";
+import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button, IconButton, Tooltip } from "@material-ui/core";
 import { AiFillFilePdf } from "react-icons/ai";
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import NoDataCell from "../../components/Helpers/NoDataCell";
+import axiosInstance from "../../../axios/axiosInstance";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import NoDataCell from "../../../components/Helpers/NoDataCell";
 import {
   deliveryTicket,
   gridLoadingTimeout,
   quoteStepColors,
   rentalManagement,
   sidebarResource
-} from "../../constants/helpers";
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+} from "../../../constants/helpers";
+import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import { useHistory } from "react-router-dom";
 import { groupBy } from 'lodash';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
-import {isMobile} from "react-device-detect";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import {FaSuitcase} from "react-icons/fa";
+import { isMobile } from "react-device-detect";
+import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
+import { FaSuitcase } from "react-icons/fa";
+import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 
 const renderedFrom = "rentalManagementDetailsPageDeliveryTicket"
 
-const DeliveryTicket = ({ currentStep, handleDeliveryTicketDialog, rentalManagementId, rentalManagementData, fetchRentalData }) => {
+const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-
   const [gridApi, setGridApi] = useState(null);
   const [warehouse, setWarehouse] = useState(null);
   const [assignedSerializedAsset, setAssignedSerializedAsset] = useState([]);
@@ -42,9 +43,12 @@ const DeliveryTicket = ({ currentStep, handleDeliveryTicketDialog, rentalManagem
   const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false)
   const [okBtnLoading, setOkBtnLoading] = useState(false)
 
+
+  const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
+  const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
+
   useEffect(() => {
     fetchRecords();
-    // eslint-disable-next-line
   }, []);
 
   const fetchRecords = () => {
@@ -54,13 +58,13 @@ const DeliveryTicket = ({ currentStep, handleDeliveryTicketDialog, rentalManagem
 
     localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
 
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`)
+    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`)
       .then(({ data }) => {
         setAssignedSerializedAsset(data.data)
         let tempProductInventory = data.data.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
         dispatch({ type: "loading", loading: true });
         axiosInstance()
-          .get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/delivery-ticket `)
+          .get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/delivery-ticket `)
           .then(({ data }) => {
             data.data.map(obj => {
               tempProductInventory.map((d, index) => {
@@ -99,11 +103,13 @@ const DeliveryTicket = ({ currentStep, handleDeliveryTicketDialog, rentalManagem
       <NoDataCell />
     )
   );
+
   const InventoryRenderer = (params) => (
     <Link className="link text-truncate" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
       {params.value}
     </Link>
   );
+
   const ProductNameRenderer = (params) => (
     <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.product?.optionValue}`}>
       {params.value}
@@ -149,7 +155,6 @@ const DeliveryTicket = ({ currentStep, handleDeliveryTicketDialog, rentalManagem
           leftItems.push(product.id)
         }
       }
-
       if (currentStep === 3 && leftItems.length === 0 && rentalManagementData) {
         if (rentalManagementData.status === "New") {
           const tempUpdateData = {
@@ -179,14 +184,18 @@ const DeliveryTicket = ({ currentStep, handleDeliveryTicketDialog, rentalManagem
     }
   }
 
-  return (<>
 
+  const handleDeliveryTicketDialog = (selectedProductInventory, warehouse) => {
+    setProductInventoryForDeliveryTicket(selectedProductInventory);
+    setShowDeliveryTicketDialog(true);
+  };
+
+  return (<>
     <Box display="flex" justifyContent="flex-end" p="4px">
       <Button
         onClick={() => {
           setDownlodingFile(true);
-
-          axiosInstance().get(`/rental-management/${rentalManagementId}/pdf`)
+          axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
             .then(({ data }) => {
               axiosInstance()
                 .get(`user/download?fileName=${data.data.fileName}`, {
@@ -219,7 +228,6 @@ const DeliveryTicket = ({ currentStep, handleDeliveryTicketDialog, rentalManagem
         {downlodingFile ? "Please wait..." : "Preview"}
       </Button>
       <Box mx={1} />
-
       <IconButton
         disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")))}
         onClick={() => {
@@ -233,9 +241,7 @@ const DeliveryTicket = ({ currentStep, handleDeliveryTicketDialog, rentalManagem
           <AddBoxRoundedIcon />
         </Tooltip>
       </IconButton>
-
       <Box mx={1} />
-
       <IconButton
         disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
         onClick={() => {
@@ -249,80 +255,72 @@ const DeliveryTicket = ({ currentStep, handleDeliveryTicketDialog, rentalManagem
           <RemoveCircleRoundedIcon />
         </Tooltip>
       </IconButton>
-
       <Box mx={1} />
-
-      {/* <Button
-        variant="contained"
-        color="primary"
-        type="button"
-        size="small"
-        disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
-        onClick={() => {
-          setShowRemoveAssetFromLoadingTicketDialog(true)
-        }}
-      >
-        Remove From Assigned Loading Tickets
-      </Button> */}
-
     </Box>
-
     <Grid item xs={12} md={12} sm={12} className="mt-3">
-
       {columns ?
-          isMobile ?
-              <CustomSwipableList
-                  allowSelection={true}
-                  allowSwipe={true}
-                  permissions={true}
-                  primaryField={columns?.find(d => d.field)}
-                  onClick={(data) => {
-                    history.push(`${routes.deliveryTicketDetail.path}/${data._id}`)
-                  }}
-                  dataRows={dataRows}
-                  selectedRecords={selectedRecords}
-                  dispatch={dispatch}
-                  onEdit={false}
-                  extraParamsToCheckDelete={true}
-                  onDelete={false}
-                  rowCount={rowCount}
-                  page={page}
-                  loading={loading}
-                  additionalDetails={[
-                  ]}
-                  chips={[
-                    {
-                      label: "Asset Number : ",
-                      field: "assetNumber",
-                    }
-                  ]}
-                  owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                  onCreate={false}
-                  showClone={false}
-                  onClone={() => { }}
-                  renderedFrom={renderedFrom}
-              /> :
-
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={false}
-          loading={loading}
-          allowSelection={true}
-          renderedFrom={renderedFrom}
-        />
+        isMobile ?
+          <CustomSwipableList
+            allowSelection={true}
+            allowSwipe={true}
+            permissions={true}
+            primaryField={columns?.find(d => d.field)}
+            onClick={(data) => {
+              history.push(`${routes.deliveryTicketDetail.path}/${data._id}`)
+            }}
+            dataRows={dataRows}
+            selectedRecords={selectedRecords}
+            dispatch={dispatch}
+            onEdit={false}
+            extraParamsToCheckDelete={true}
+            onDelete={false}
+            rowCount={rowCount}
+            page={page}
+            loading={loading}
+            additionalDetails={[
+            ]}
+            chips={[
+              {
+                label: "Asset Number : ",
+                field: "assetNumber",
+              }
+            ]}
+            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+            onCreate={false}
+            showClone={false}
+            onClone={() => { }}
+            renderedFrom={renderedFrom}
+          /> :
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            allowAction={false}
+            loading={loading}
+            allowSelection={true}
+            renderedFrom={renderedFrom}
+          />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
 
       }
     </Grid>
-
+    {showDeliveryTicketDialog && (
+      <ManageDeliveryTicket
+        onClose={() => setShowDeliveryTicketDialog(false)}
+        productInventoryForDeliveryTicket={productInventoryForDeliveryTicket}
+        warehouseId={rentalManagementData?.warehouse}
+        rentalData={rentalManagementData}
+        onSuccess={() => {
+          setShowDeliveryTicketDialog(false);
+        }}
+      />
+    )}
     {
       showRemoveAssetFromLoadingTicketDialog && (
         <ConfirmationDialog
@@ -361,5 +359,5 @@ const DeliveryTicket = ({ currentStep, handleDeliveryTicketDialog, rentalManagem
   );
 }
 
-export default DeliveryTicket;
+export default LoadingTicket;
 

@@ -224,20 +224,18 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
             tempInitialData["type"] = "Transfer Asset"
             tempInitialData["expectedDeliveryDate"] = moment(new Date()).add(7, 'days');
             tempInitialData["receivingJobName"] = `${transferData?.transferAssetNumber}_${generateUniqueIdOnly()}`
-            if (transferData?.transferType === "Internal") {
-              tempInitialData["receivingPlant"] = transferData?.transferToPlant?.optionValue;
-              tempInitialData["pickupAddress"] = transferData?.plantShipTo;
-            }
+            tempInitialData["warehouse"] = transferData?.transferToPlant.optionValue
+            tempInitialData["receivingPlantAddress"] = transferData?.transferToPlant.address
             if (transferData?.transferType === "External Customer") {
               tempInitialData["customerAccount"] = transferData?.transferToCustomer?.optionValue;
-              tempInitialData["pickupAddress"] = transferData?.customerShipTo;
+              tempInitialData["customerPickupAddress"] = transferData?.customerShipTo;
             }
             if (transferData?.transferType === "External Supplier") {
               tempInitialData["supplierAccount"] = transferData?.transferToSupplier?.optionValue;
-              tempInitialData["supplierShippingAddress"] = transferData?.supplierShipTo;
+              tempInitialData["supplierPickupAddress"] = transferData?.supplierShipTo;
             }
             setReceivingTicketData({
-              fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "transferAsset"),
+              fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "transferAsset"),
               initialValues: tempInitialData,
             });
             setFormValues(tempInitialData)
@@ -562,7 +560,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
                                           />
                                         ) : <FormTypes
                                           {...field}
-                                          disabled={Boolean(receivingTicketId) && field.disableOnEdit}
+                                          disabled={Boolean(receivingTicketId) && field.disableOnEdit || (field.fieldName === "receivingPlantAddress" && true)}
                                           isNew={Boolean(receivingTicketId)}
                                           values={values}
                                           errors={errors}

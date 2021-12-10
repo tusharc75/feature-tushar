@@ -182,44 +182,41 @@ const Steps = (props) => {
 
             {
                 isMobile ? <div>
-                        <MobileStepper
-                            style={{background: "#dee2e6"}}
-                            variant="dots"
-                            steps={steps.length}
-                            position="bottom"
-                            activeStep={currentStep}
-                            nextButton={
-                                <Button size="small"
-                                        color="primary"
-                                        // hidden={currentStep >= 3 || (currentStep === 0 && isNextStep)}
-                                        disabled={currentStep >= 5 || (currentStep === 0 && isNextStep) || !nextStep}                                        variant="contained"
-                                        endIcon={<KeyboardArrowRight/>}
-                                        onClick={() => {
-                                            setCurrentStep(currentStep + 1)
-                                        }}
-                                >
-                                    {steps[currentStep + 1] ?? ""}
-                                </Button>
+                    <MobileStepper
+                        style={{ background: "#dee2e6" }}
+                        variant="dots"
+                        steps={steps.length}
+                        position="bottom"
+                        activeStep={currentStep}
+                        nextButton={
+                            <Button size="small"
+                                color="primary"
+                                disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep} variant="contained"
+                                endIcon={<KeyboardArrowRight />}
+                                onClick={() => {
+                                    setCurrentStep(currentStep + 1)
+                                }}
+                            >
+                                {steps[currentStep + 1] ?? ""}
+                            </Button>
 
-                                // : <Button size="small" disabled={loading} color="primary" onClick={handleNext}
-                                //           variant="contained" endIcon={<KeyboardArrowRight/>}>
-                                //     {steps[activeStep + 1]?.label ?? ""}
-                                // </Button>
-                            }
-                            backButton={
-
-                                <Button size="small" variant="contained" color={"primary"} startIcon={<KeyboardArrowLeft/>}
-                                        disabled={currentStep === 5 || currentStep === 0}
-                                        onClick={() => {
-                                            setCurrentStep(currentStep - 1)
-                                        }}
-                                >
-                                    {steps[currentStep - 1] ?? ""}
-                                </Button>
-
-                            }
-                        />
-                    </div> :
+                            // : <Button size="small" disabled={loading} color="primary" onClick={handleNext}
+                            //           variant="contained" endIcon={<KeyboardArrowRight/>}>
+                            //     {steps[activeStep + 1]?.label ?? ""}
+                            // </Button>
+                        }
+                        backButton={
+                            <Button size="small" variant="contained" color={"primary"} startIcon={<KeyboardArrowLeft />}
+                                disabled={currentStep === steps.length || currentStep === 0}
+                                onClick={() => {
+                                    setCurrentStep(currentStep - 1)
+                                }}
+                            >
+                                {steps[currentStep - 1] ?? ""}
+                            </Button>
+                        }
+                    />
+                </div> :
 
                     <div className="position-relative">
                         {/* {!versionStatus.includes("Accepted by Customer") &&
@@ -245,15 +242,15 @@ const Steps = (props) => {
                                             {(
                                                 <div>
                                                     <IconButton
-                                                        disabled={currentStep === 5 || currentStep === 0}
+                                                        disabled={currentStep === steps.length || currentStep === 0}
                                                         className={"stepperButton"}
                                                         onClick={() => {
                                                             setCurrentStep(currentStep - 1)
                                                         }}
-                                                        // size="large"
-                                                        // startIcon={<IoIosArrowDropleftCircle />}
+                                                    // size="large"
+                                                    // startIcon={<IoIosArrowDropleftCircle />}
                                                     >
-                                                        <TiArrowBack size={30}/>
+                                                        <TiArrowBack size={30} />
                                                     </IconButton>
                                                 </div>
                                             )}
@@ -267,7 +264,7 @@ const Steps = (props) => {
                                         <Grid
                                             item
                                             xs={6}
-                                            // className="d-flex align-items-center justify-content-start "
+                                        // className="d-flex align-items-center justify-content-start "
                                         >
                                             {isMobile && (
                                                 <>
@@ -276,13 +273,13 @@ const Steps = (props) => {
                                                             <div>
                                                                 <IconButton
                                                                     color="primary"
-                                                                    disabled={currentStep === 5 || currentStep === 0}
+                                                                    disabled={currentStep === steps.length - 1 || currentStep === 0}
                                                                     onClick={() => {
                                                                         setCurrentStep(currentStep + 1)
                                                                     }}
                                                                     size="small"
                                                                 >
-                                                                    <IoIosArrowDropleftCircle/>
+                                                                    <IoIosArrowDropleftCircle />
                                                                 </IconButton>
                                                             </div>
                                                         )}
@@ -307,10 +304,10 @@ const Steps = (props) => {
                                                                             setCurrentStep(currentStep + 1)
                                                                         }}
                                                                         size="small"
-                                                                        disabled={currentStep >= 5 || (currentStep === 0 && isNextStep) || nextStep}
+                                                                        disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || nextStep}
 
                                                                     >
-                                                                        <IoIosArrowDroprightCircle/>
+                                                                        <IoIosArrowDroprightCircle />
                                                                     </IconButton>
                                                                 )}
                                                             </div>
@@ -321,20 +318,20 @@ const Steps = (props) => {
                                         </Grid>
                                     </Grid>
                                     <Stepper className={`${classes.pbStepper} stepper-responsive`}
-                                             activeStep={activeStep}>
+                                        activeStep={activeStep}>
                                         {steps.map((label, i) => (
                                             <Step
                                                 key={label}
                                                 className={clsx(classes.step, {
                                                     [classes.active]:
-                                                    currentStep > i ||
-                                                    steps[currentStep] === "End",
+                                                        currentStep > i ||
+                                                        steps[currentStep] === "End",
                                                     [classes.currentStep]: currentStep === i,
                                                     [classes.inActive]: currentStep !== i,
                                                 })}
                                             >
                                                 <StepLabel
-                                                    style={{color: "#555"}}
+                                                    style={{ color: "#555" }}
                                                     // StepIconComponent={ColorlibStepIcon}
                                                     className={"currentStepColor"}
                                                 >
@@ -359,15 +356,14 @@ const Steps = (props) => {
                                                 <div>
                                                     {(
                                                         <IconButton
-
                                                             onClick={() => {
                                                                 setCurrentStep(currentStep + 1)
                                                             }}
-                                                            disabled={currentStep >= 5 || (currentStep === 0 && isNextStep) || !nextStep}
+                                                            disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep}
                                                             // endIcon={<IoIosArrowDroprightCircle />}
                                                             className={"stepperButtonNext"}
                                                         >
-                                                            <RiShareForwardFill/>
+                                                            <RiShareForwardFill />
                                                         </IconButton>
                                                     )}
                                                 </div>
