@@ -17,7 +17,7 @@ const completedStatus = repairJobStatus[2];
 
 export default function ManageAssetDialog({ open, fields, asset, selectedRecords, onSuccess, onClose, repairJobData }) {
 
-    const { repairJobId } = repairJobData;
+    const { _id } = repairJobData;
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [isUpdating, setIsUpdating] = useState(false)
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -60,7 +60,7 @@ export default function ManageAssetDialog({ open, fields, asset, selectedRecords
             })
         }
 
-        axiosInstance().put(`${repairJob.repairJobApi}/${repairJobId}/update-assets`, prepareDataToUpdate).then(() => {
+        axiosInstance().put(`${repairJob.repairJobApi}/${_id}/update-assets`, prepareDataToUpdate).then(() => {
             setIsUpdating(false);
             onSuccess();
         }).catch((error) => {
