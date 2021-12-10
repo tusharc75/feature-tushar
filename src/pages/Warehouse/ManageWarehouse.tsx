@@ -25,6 +25,8 @@ const ManageWarehouse = (props) => {
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
+    
+
     useEffect(() => {
         axiosInstance().get("/field?resource=Warehouse").then(({ data: { data } }) => {
             const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
@@ -80,7 +82,7 @@ const ManageWarehouse = (props) => {
         else {
             axiosInstance().post(`/warehouse`, values).then(({ data }) => {
                 setLoading(false);
-                onSuccess(data.data)
+                onSuccess(data)
                 toastConfig.setToastConfig({
                     open: true,
                     type: "success",

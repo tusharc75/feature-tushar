@@ -20,26 +20,113 @@ import {
     gridPageSizes,
     isObjectEmpty
 } from "../../constants/helpers";
-import CustomAgGrid, {
-    reducer,
-    intialState,
-} from "../../components/AgGridComponents/CustomAgGrid";
+import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { useData } from "../../StateProvider/Provider";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
-import { AddOutlined, ExpandMore } from "@material-ui/icons";
+import {AddOutlined, ExpandMore} from "@material-ui/icons";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useLocation } from "react-router-dom";
 import queryString from "query-string";
-import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
+import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers"
 import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown, MdAdd } from "react-icons/all";
+import {AiFillCrown, MdAdd} from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { FaSuitcase } from 'react-icons/fa';
+
+function reducer(state, action) {
+    switch (action.type) {
+        case "loading":
+            return {
+                ...state,
+                loading: action.loading
+            }
+
+        case "initialize":
+            return {
+                ...state,
+                dataRows: action.data,
+                rowCount: action.count
+            }
+
+        case "selection":
+            return {
+                ...state,
+                selectedRecords: action.selectedRecords,
+            }
+
+        case "update":
+            return {
+                ...state,
+                dataRows: action.data,
+                loading: false
+            }
+
+        case "filter":
+            return {
+                ...state,
+                loading: true,
+                filters: action.filters,
+                page: 0
+            }
+
+        case "sort":
+            return {
+                ...state,
+                sorting: action.sorting,
+                loading: true
+            }
+
+        case "search":
+            return {
+                ...state,
+                search: action.search,
+                loading: true
+            }
+
+        case "pageChange":
+            return {
+                ...state,
+                page: action.page
+            }
+
+        case "pageSizeChange":
+            return {
+                ...state,
+                limit: action.limit,
+                page: 0,
+                loading: true
+            }
+
+        case "complete":
+            return {
+                ...state,
+                loading: false
+            }
+
+        default:
+            break;
+    }
+
+    return state;
+}
+
+const intialState = {
+    dataRows: [],
+    rowCount: 0,
+    loading: false,
+    page: 0,
+    limit: 25,
+    pageSizes: gridPageSizes,
+    search: "",
+    filters: {},
+    sorting: [],
+    selectedRecords: []
+}
 
 const ProductCategory = () => {
     const history = useHistory();
@@ -48,7 +135,7 @@ const ProductCategory = () => {
     const {
         state: { permissions, user, selectedEntity },
     }: any = useData();
-    const { getColumnData } = useColumns();
+    const {getColumnData} = useColumns();
 
     const [productCategoryPermissions, setProductCategoryPermissions] = useState({
         isCreate: permissions.productCategory?.isCreate,
@@ -393,59 +480,59 @@ const ProductCategory = () => {
                     <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
                         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
 
-                            <Grid style={{ width: "100%", display: "flex" }}>
+                                <Grid style={{width:"100%" , display:"flex"}}>
                                 <SearchBox
                                     onSearch={handleSearch}
                                     searchbox={styles.search_box_input}
                                     width={isMobile ? "200px" : "242px"}
-                                    style={isMobile ? { flex: 1 } : {}}
+                                    style={isMobile ? {flex:1} : {}}
                                     size="small"
                                     value={search}
                                 />
-                            </Grid>
+                                </Grid>
 
 
-                            <Grid style={{ display: "flex", gap: "5px" }}>
-                                {productCategoryPermissions.isCreate &&
-                                    <Button className={isMobile ? "mobile_button" : styles.add_submit_btn} onClick={() => {
-                                        setProductCategoryId(null);
-                                        setOpen({ open: true, isClone: false });
-                                    }} variant={isMobile ? "text" : "contained"} size="small" color="primary"
-                                        startIcon={isMobile ? null : <AddOutlined />}>
-                                        {isMobile ? <MdAdd size={23} /> : "Add"}
-                                    </Button>
-                                }
-                                {productCategoryPermissions.isDelete &&
-                                    <Button
-                                        variant={isMobile ? "text" : "contained"}
-                                        color="default"
-                                        size="small"
-                                        onClick={openActions}
-                                        disabled={selectedRecords.length ? false : true}
-                                        aria-controls="action-menu"
-                                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                            <Grid style={{display: "flex" , gap:"5px"}}>
+                                    {productCategoryPermissions.isCreate &&
+                                        <Button className={isMobile ? "mobile_button" : styles.add_submit_btn} onClick={() => {
+                                            setProductCategoryId(null);
+                                            setOpen({ open: true, isClone: false });
+                                        }} variant={isMobile ? "text" : "contained"} size="small" color="primary"
+                                                startIcon={isMobile ? null : <AddOutlined />}>
+                                            {isMobile ? <MdAdd size={23}/> : "Add"}
+                                        </Button>
+                                    }
+                                    {productCategoryPermissions.isDelete &&
+                                        <Button
+                                            variant={isMobile ? "text" : "contained"}
+                                            color="default"
+                                            size="small"
+                                            onClick={openActions}
+                                            disabled={selectedRecords.length ? false : true}
+                                            aria-controls="action-menu"
+                                            className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                                        >
+                                            {isMobile ? "" :  "Actions" } <ExpandMore/>
+                                        </Button>
+                                    }
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        keepMounted
+                                        getContentAnchorEl={null}
+                                        anchorOrigin={{
+                                            vertical: "bottom",
+                                            horizontal: "left",
+                                        }}
+                                        id="action-menu"
+                                        open={Boolean(anchorEl)}
+                                        onClose={closeActions}
                                     >
-                                        {isMobile ? "" : "Actions"} <ExpandMore />
-                                    </Button>
-                                }
-                                <Menu
-                                    anchorEl={anchorEl}
-                                    keepMounted
-                                    getContentAnchorEl={null}
-                                    anchorOrigin={{
-                                        vertical: "bottom",
-                                        horizontal: "left",
-                                    }}
-                                    id="action-menu"
-                                    open={Boolean(anchorEl)}
-                                    onClose={closeActions}
-                                >
-                                    <MenuItem onClick={() => {
-                                        closeActions()
-                                        { selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]) }
-                                        setShowDeleteConfirmBox(true)
-                                    }}>Delete</MenuItem>
-                                </Menu>
+                                        <MenuItem onClick={() => {
+                                            closeActions()
+                                            { selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]) }
+                                            setShowDeleteConfirmBox(true)
+                                        }}>Delete</MenuItem>
+                                    </Menu>
                             </Grid>
 
                         </Box>
@@ -482,7 +569,7 @@ const ProductCategory = () => {
                         additionalDetails={[
                         ]}
                         chips={[
-
+                           
                         ]}
                         owerCollaboratorInitialsOrImages=""
                         onCreate={false}
