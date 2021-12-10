@@ -554,6 +554,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                         },
                     ];
                 });
+                
             }
            
           }}
@@ -570,8 +571,10 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
          
           onSuccess={(data) => {
 
+           
             setProductOpen({ open: false, isClone: false });
             if(data._id){
+
                 setFieldValue("product", data._id);
                 setProductDescriptionOptions((prevState) => {     
                     return [
@@ -584,7 +587,23 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                         },
                     ];
                 });
+                setFieldValue("productCategory", data.productCategory);
+                setProductCategoryOptions((prevState) => {     
+                  return [
+                      ...prevState,
+                      {
+                          optionValue: data.productCategory,
+                          order: productDescriptionOptions.length,
+                          default: false
+                      },
+                  ];
+                 
+              });
+              sessionStorage.setItem('productCategoryId', JSON.stringify(data.productCategory));
+
+
             }
+
            
           }}
         />

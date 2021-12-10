@@ -200,6 +200,13 @@ const CreateProduct = (props) => {
                     //     handleChangeCategory(data._id, data.name, true, null)
                     // }
                 }
+
+                if(JSON.parse(sessionStorage.getItem('productCategoryId')) !== null){
+                    let ProductCategoryId = JSON.parse(sessionStorage.getItem('productCategoryId'));
+                    setNewProductCategoryId(ProductCategoryId);
+
+                }
+
             }
         }).catch((error) => {
             toastConfig.setToastConfig(error);
