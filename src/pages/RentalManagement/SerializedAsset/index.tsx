@@ -138,6 +138,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   }, []);
 
   const fetchProductInventory = () => {
+    setNextStep(false)
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`).then(({ data: { data } }) => {
       const rows = data.material.filter((e) => e.parentId === null)
       rows.forEach((parent, i) => {
@@ -376,6 +377,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         }}
         isAdding={isAdding}
         selectedProducts={[...selectedProducts.filter(p => p.type === "product").map(m => { return { ...m, _id: m.materialId, id: m.materialId, productName: m.productDetail?.productName } })]}
+        filterByPlant={rentalManagementData?.warehouse?.optionValue ? rentalManagementData?.warehouse?.optionValue : null}
       />
     }
     {showConfirmBox && (

@@ -376,6 +376,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
               showManimizeMaximize={true}
             ></CustomDialogHeader>
             <CustomDialogContent>
+              {isBulkedit && <h6 className="form-label-style mb-2" >* Please enter value you want to bulk update.</h6>}
               <Form autoComplete="off" autoCorrect="off" noValidate >
                 {fields && fields.map((section, i) => (
                   <div key={i}>

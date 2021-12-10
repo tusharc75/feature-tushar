@@ -154,14 +154,11 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
-
         if (showFilteredRecordsOnly) {
             deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id))}`;
         }
-
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
-
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
@@ -170,15 +167,12 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
             });
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
         }
-
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
-
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
         }
-
         //  To fetch the remaining unassigned assets of that rental management
         if (rentalId) {
             deepFilter = `${deepFilter}&rental=${rentalId}&notIn=${notIn}`;
@@ -187,19 +181,17 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         } else if (transferAssetId) {
             deepFilter = `${deepFilter}&transferAssetId=${transferAssetId}&notIn=${notIn}`;
         } else {
-            if (filterByPlant === null) {
+            if (filterByPlant == null) {
                 deepFilter = `${deepFilter}&entityWise=1`;
             } else {
-                deepFilter = `${deepFilter}&${filterByPlant}`;
+                deepFilter = `${deepFilter}&entityWise=0&plant=${filterByPlant}`;
             }
-
             if (queryString) {
                 deepFilter = `${deepFilter}&${queryString}`;
             } else {
                 deepFilter = `${deepFilter}&availableAssets=true`;
             }
         }
-
         return deepFilter;
     };
 
@@ -229,7 +221,6 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         return null;
     };
 
-    console.log([...getLocalStorageArrayData(localStorageSelectedRecords)])
     return (<Fragment>
         {(<Dialog
             fullScreen={true}

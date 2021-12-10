@@ -15,13 +15,9 @@ import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActiv
 import Steps from './Steps';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { MdEdit, MdDelete } from 'react-icons/md';
-import DeliveryTicket from './DeliveryTicket';
 import ManageRentalManagementDialog from './ManageRental/ManageRentalManagementDialog';
-import ManageDeliveryTicket from '../DeliveryTicket/ManageDeliveryTicket';
 import Activity from '../../components/Activity';
 import styles from './Retal.module.scss';
-import ReceivingTicket from './ReceivingTicket';
-import ManageReceivingTicket from '../ReceivingTicket/ManageReceivingTicket';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import DeleteButton from '../../components/Helpers/DeleteButton';
@@ -33,8 +29,11 @@ import TabPanel from '../../components/TabPanel';
 import Productpackage from './Productpackage';
 import AdditionalCost from './AdditionalCost';
 import SerializedAsset from './SerializedAsset';
+import LoadingTicket from './LoadingTicket';
+import ReceivingTicket from './ReceivingTicket';
+import Invoice from './Invoice';
 
-const rentalProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Ready To Ship'];
+const rentalProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Ready To Invoice'];
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -45,9 +44,7 @@ const RentalManagementDetailsPage = () => {
   const parsed = queryString.parse(history.location.search);
   const { openEdit } = parsed;
 
-  const {
-    state: { user, permissions }
-  }: any = useData();
+  const { state: { user, permissions } }: any = useData();
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [headingLbl, setHeadingLbl] = useState('');
@@ -58,15 +55,11 @@ const RentalManagementDetailsPage = () => {
   const [rentalManagementFields, setRentalManagementFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
-  const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
-  const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
+  const [currentStep, setCurrentStep] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [productInventoryForReceivingTicket, setProductInventoryForReceivingTicket] = useState<any[]>([]);
-  const [showReceivingTicketDialog, setShowReceivingTicketDialog] = useState(false);
+
   const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false);
   const [nextStep, setNextStep] = useState(true);
   const [tabValue, setTabValue] = useState(0);
@@ -91,14 +84,11 @@ const RentalManagementDetailsPage = () => {
       getRentalManagementFields();
       fetchRentalManagementData();
     }
-    // eslint-disable-next-line
   }, [id]);
 
   useEffect(() => {
-    if (currentStep >= 0 && currentStep <= 4) {
-      axiosInstance()
-        .put(`${rentalManagement.rentalManagementApi}/${id}/process-status`, { processStatus: rentalProcessSteps[currentStep] })
-        .then(({ data }) => {})
+    if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
+      axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/process-status`, { processStatus: rentalProcessSteps[currentStep] }).then(({ data }) => { })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -136,11 +126,11 @@ const RentalManagementDetailsPage = () => {
       } catch (ex) {
         console.error(`Rental Management: Error while adding/updating data for Offline context. Error: ${ex.message}`);
       }
+      setCurrentStep(rentalProcessSteps.indexOf(data?.processStatus) !== -1 ? rentalProcessSteps.indexOf(data?.processStatus) : 0);
       handleMainPoints(data);
       setHeadingLbl(data.rentalJobName);
       setCustomizedRoutes([routes.rentalManagement, { title: `${data.rentalJobName}` }]);
       setRentalManagementData(data);
-      setCurrentStep(rentalProcessSteps.indexOf(data?.processStatus) !== -1 ? rentalProcessSteps.indexOf(data?.processStatus) : 0);
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
@@ -192,17 +182,6 @@ const RentalManagementDetailsPage = () => {
       });
   };
 
-  const handleDeliveryTicketDialog = (selectedProductInventory, warehouse) => {
-    setProductInventoryForDeliveryTicket(selectedProductInventory);
-    // setWarehouseForDeliveryTicket(warehouse)
-    setShowDeliveryTicketDialog(true);
-  };
-
-  const handleReceivingTicketDialog = (selectedProductInventory) => {
-    setProductInventoryForReceivingTicket(selectedProductInventory);
-    // setWarehouseForReceivingTicket(warehouse)
-    setShowReceivingTicketDialog(true);
-  };
 
   return (
     <>
@@ -236,17 +215,17 @@ const RentalManagementDetailsPage = () => {
                   )}
                   <HideWhenOffline>
                     {permissions?.rentalManagement?.isDelete &&
-                    rentalManagementData?.owner?.optionValue &&
-                    user?.user?._id &&
-                    rentalManagementData.owner.optionValue === user.user._id ? (
+                      rentalManagementData?.owner?.optionValue &&
+                      user?.user?._id &&
+                      rentalManagementData.owner.optionValue === user.user._id ? (
                       <DeleteButton text="Delete" className="buttonDeleteBigScreen" onClick={() => setShowConfirmBox(true)} />
                     ) : null}
                   </HideWhenOffline>
                   <HideWhenOffline>
                     {permissions?.rentalManagement?.isDelete &&
-                    rentalManagementData?.owner?.optionValue &&
-                    user?.user?._id &&
-                    rentalManagementData.owner.optionValue === user.user._id ? (
+                      rentalManagementData?.owner?.optionValue &&
+                      user?.user?._id &&
+                      rentalManagementData.owner.optionValue === user.user._id ? (
                       <Button className="buttonDeleteSmallScreen" onClick={() => setShowConfirmBox(true)}>
                         <MdDelete size={24} />
                       </Button>
@@ -392,7 +371,7 @@ const RentalManagementDetailsPage = () => {
                                       access: true
                                     }
                                   ]}
-                                  handleActivityRefresh={() => {}}
+                                  handleActivityRefresh={() => { }}
                                   emails={[]}
                                 />
                               </div>
@@ -407,17 +386,22 @@ const RentalManagementDetailsPage = () => {
               <TabPanel value={tabValue} index={1}>
                 <Paper>
                   <Steps
-                    className={styles.steps_box}
                     isNextStep={false}
                     nextStep={nextStep}
-                    steps={rentalProcessSteps.slice(0, 5)}
+                    steps={rentalProcessSteps}
                     currentStep={currentStep}
                     setCurrentStep={setCurrentStep}
                   />
                   {currentStep === 0 && (
-                    <Productpackage rentalManagementData={rentalManagementData} setNextStep={setNextStep} currencySymbol={currencySymbol} />
+                    <Productpackage
+                      rentalManagementData={rentalManagementData}
+                      setNextStep={setNextStep}
+                      currencySymbol={currencySymbol} />
                   )}
-                  {currentStep === 1 && <AdditionalCost rentalManagementData={rentalManagementData} />}
+                  {currentStep === 1 &&
+                    <AdditionalCost
+                      rentalManagementData={rentalManagementData}
+                      setNextStep={setNextStep} />}
                   {currentStep === 2 && (
                     <SerializedAsset
                       rentalManagementData={rentalManagementData}
@@ -429,16 +413,27 @@ const RentalManagementDetailsPage = () => {
                     />
                   )}
                   {currentStep === 3 && (
-                    <DeliveryTicket
+                    <LoadingTicket
                       fetchRentalData={fetchRentalManagementData}
                       rentalManagementData={rentalManagementData}
-                      rentalManagementId={id}
                       currentStep={currentStep}
-                      handleDeliveryTicketDialog={handleDeliveryTicketDialog}
                     />
                   )}
-                  {(currentStep === 4 || currentStep === 5) && (
-                    <ReceivingTicket rentalManagementId={id} currentStep={currentStep} handleReceivingTicketDialog={handleReceivingTicketDialog} />
+                  {(currentStep === 4) && (
+                    <ReceivingTicket
+                      rentalManagementData={rentalManagementData}
+                      currentStep={currentStep}
+                    />
+                  )}
+                  {(currentStep === 5) && (
+                    <Invoice
+                      rentalManagementData={rentalManagementData}
+                      setNextStep={setNextStep}
+                      isSmallScreen={isSmallScreen}
+                      isTabletScreen={isTabletScreen}
+                      showActivity={showActivity}
+                      currencySymbol={currencySymbol}
+                    />
                   )}
                 </Paper>
               </TabPanel>
@@ -470,31 +465,7 @@ const RentalManagementDetailsPage = () => {
           }}
         />
       )}
-      {showDeliveryTicketDialog && (
-        <ManageDeliveryTicket
-          onClose={() => setShowDeliveryTicketDialog(false)}
-          productInventoryForDeliveryTicket={productInventoryForDeliveryTicket}
-          warehouseId={warehouseForDeliveryTicket}
-          rentalData={rentalManagementData}
-          onSuccess={() => {
-            setShowDeliveryTicketDialog(false);
-          }}
-        />
-      )}
-      {showReceivingTicketDialog && (
-        <ManageReceivingTicket
-          open={showReceivingTicketDialog}
-          isClone={false}
-          receivingTicketId={null}
-          productInventoryForReceivingTicket={productInventoryForReceivingTicket}
-          rentalData={rentalManagementData}
-          onClose={() => setShowReceivingTicketDialog(false)}
-          onSuccess={() => {
-            setShowReceivingTicketDialog(false);
-          }}
-          isRedirectToDetailPage={false}
-        />
-      )}
+
     </>
   );
 };
