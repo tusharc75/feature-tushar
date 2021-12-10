@@ -45,7 +45,6 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData }) =
 
 
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
-  const [warehouseForDeliveryTicket, setWarehouseForDeliveryTicket] = useState(null);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
 
   useEffect(() => {
@@ -315,7 +314,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData }) =
       <ManageDeliveryTicket
         onClose={() => setShowDeliveryTicketDialog(false)}
         productInventoryForDeliveryTicket={productInventoryForDeliveryTicket}
-        warehouseId={warehouseForDeliveryTicket}
+        warehouseId={rentalManagementData?.warehouse}
         rentalData={rentalManagementData}
         onSuccess={() => {
           setShowDeliveryTicketDialog(false);
