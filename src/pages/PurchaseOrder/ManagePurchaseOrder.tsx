@@ -10,7 +10,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, purchaseOrder, setFieldsInAscendingOrder } from "../../constants/helpers";
+import { CustomDialogTransition, generateUniqueIdOnly, purchaseOrder, setFieldsInAscendingOrder } from "../../constants/helpers";
 import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { Box, Grid } from '@material-ui/core';
@@ -56,7 +56,8 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                 });
             }
             else {
-                let createValues = getObjKeys("", fieldsDataForCreate)
+                let createValues: any = getObjKeys("", fieldsDataForCreate)
+                createValues.purchaseOrderNumber = `PO_${generateUniqueIdOnly()}`
                 if (productId && createValues) {
                     createValues["product"] = productId
                 }
