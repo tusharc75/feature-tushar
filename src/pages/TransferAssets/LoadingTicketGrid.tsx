@@ -38,7 +38,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     permissions,
     fetchAssets,
     transferAssetId,
-    setPrevStep,
     transferAssetData,
     setTickets,
     setNextStep,
@@ -171,6 +170,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
     if (dataRows.length) {
       const inventoryDelivered = dataRows.filter((asset: any) => asset['deliveryTicketStatus'] === 'Delivered');
+      const inventoryLost = dataRows.filter((asset: any) => asset?.status === 'Lost');
 
 
       if (inventoryDelivered.length > 0) {
@@ -180,7 +180,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       }
 
       if (transferAssetData?.transferType === 'Internal') {
-        if (inventoryDelivered.length === dataRows.length) {
+        if (inventoryDelivered.length === dataRows.length || inventoryLost.length === dataRows.length) {
           setTransferIsEnded(true);
           updateTransferStatus("Completed")
         } else {

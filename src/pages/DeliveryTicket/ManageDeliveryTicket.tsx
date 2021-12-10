@@ -181,6 +181,7 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
                     tempInitialData["deliveryJobName"] = `${transferData?.transferAssetNumber}_${generateUniqueIdOnly()}`
                     tempInitialData["warehouse"] = warehouseId;
+                    tempInitialData["pickupPlantAddress"] = transferData?.transferFromPlant.address ?? "";
                     tempInitialData["type"] = "Transfer Asset";
                     tempInitialData["transferAsset"] = transferData?._id;
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
@@ -567,7 +568,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                 />
                                                                             ) : <FormTypes
                                                                                 {...field}
-                                                                                isNew={Boolean(deliveryTicketId)}
+                                                                                isNew={Boolean(deliveryTicketId) && field.disableOnEdit || (field.fieldName === "pickupPlantAddress" && true)}
                                                                                 values={values}
                                                                                 errors={errors}
                                                                                 touched={touched}
