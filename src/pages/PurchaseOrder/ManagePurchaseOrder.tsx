@@ -247,7 +247,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                         : <FormTypes
                                                                             isNew={Boolean(purchaseOrderId)}
                                                                             {...field}
-                                                                            disabled={Boolean(purchaseOrderId) && field.disableOnEdit && !isClone}
+                                                                            disabled={(Boolean(purchaseOrderId) && field.disableOnEdit && !isClone) || field.fieldName === "purchaseOrderNumber"}
                                                                             values={values}
                                                                             errors={errors}
                                                                             touched={touched}
