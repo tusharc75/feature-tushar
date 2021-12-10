@@ -83,11 +83,16 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
       })
       //End
       if (bulkEdit) {
-        let unit: any = []
+        let unitArray: any = []
         productData?.forEach(element => {
           if (element?.[`${element.type}Detail`]?.unit) {
-            unit = [...unit, ...element?.[`${element.type}Detail`].unit];
+            unitArray.push([...element?.[`${element.type}Detail`].unit])
           }
+        });
+        let unit: any = unitArray.shift().filter(function (v) {
+          return unitArray.every(function (a) {
+            return a.indexOf(v) !== -1;
+          });
         });
         const unitOptions: any = arrayToDropwdownOption(uniq(unit))
         poFields.forEach((element) => {
@@ -100,7 +105,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
         })
         setInitialData({
           fields: poFields,
-          values:  getObjKeys("", poFields),
+          values: getObjKeys("", poFields),
         });
       }
       else {
