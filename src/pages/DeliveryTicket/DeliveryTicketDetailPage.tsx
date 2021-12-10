@@ -348,26 +348,38 @@ export default function DeliveryTicketDetail(props) {
     (deliveryTicketData?.status === "In-Transit") ? "Sign-off - Delivery" : "" : ""
 
   const handleSignature = (signedData) => {
-    const { type, sign: newSign } = signedData;
-    let stateArr = signatures;
-    stateArr.push({ type, signature: newSign, status: label === "Sign-off - Dispatch" ? "Start Delivery" : "Sign-Off" });
-    setSignatures(stateArr)
+    let signaturesToSend = [...signatures];
+    const status = label === "Sign-off - Dispatch" ? "Start Delivery" : "Sign-Off";
 
-    if (stateArr.length === 2 || stateArr.length === 4) {
+    const { type, sign: newSign } = signedData;
+    const indexOfExistingSignature = signatures.findIndex((sign) => sign.type === type && sign.status === status);
+
+    if (indexOfExistingSignature === -1) {
+      signaturesToSend = [...signatures, { type, signature: newSign, status: status }];
+    } else {
+      signaturesToSend[indexOfExistingSignature] = {
+        ...signaturesToSend[indexOfExistingSignature],
+        type,
+        signature: newSign,
+        status: status
+      }
+    }
+
+    setSignatures([...signaturesToSend]);
+
+    if (signaturesToSend.length === 2 || signaturesToSend.length === 4) {
       setSubmittingSign(true)
       axiosInstance().put(`${deliveryTicketApi}/signature`, {
         _id: id,
-        signatures: stateArr
+        signatures: [...signaturesToSend]
       }).then(() => {
         handleChangeStatus(label)
         setOpenSignatureDialog(false)
         setSubmittingSign(false)
-        setSignatures([])
       }).catch((error) => {
         toastConfig.setToastConfig(error);
         setOpenSignatureDialog(false)
         setSubmittingSign(false)
-        setSignatures([])
       });
     }
   }
@@ -707,7 +719,6 @@ export default function DeliveryTicketDetail(props) {
             open={true}
             onClose={() => {
               setOpenSignatureDialog(false)
-              setSignatures([])
             }}
             onSigned={handleSignature}
           />}
