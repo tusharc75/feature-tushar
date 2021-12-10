@@ -15,10 +15,16 @@ import CustomButton from '../../../components/Helpers/CustomButton'
 import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
-import { uniq, map, orderBy, isEqual } from 'lodash';
+import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
 import moment from "moment";
+
+function findCommonElements(inArrays) {
+  if (typeof inArrays === "undefined") return undefined;
+  if (typeof inArrays[0] === "undefined") return undefined;
+  return intersection.apply(this, inArrays);
+}
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -59,18 +65,28 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       data = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
       setAllFields(JSON.parse(JSON.stringify(data)))
       if (isBulkedit) {
-        let unit: any = []
-        let pricingMethod: any = []
+        let unitArray: any = []
+        let pricingMethodArray: any = []
         selectedProducts?.forEach(element => {
           if (element?.[`${element.type}Detail`]?.unit) {
-            unit = [...unit, ...element?.[`${element.type}Detail`].unit];
+            unitArray.push([...element?.[`${element.type}Detail`].unit])
           }
           if (element?.[`${element.type}Detail`].pricingMethod) {
-            pricingMethod = [...pricingMethod, ...element?.[`${element.type}Detail`].pricingMethod];
+            pricingMethodArray.push([...element?.[`${element.type}Detail`].pricingMethod])
           }
         });
-        const unitOptions: any = arrayToDropwdownOption(uniq(unit))
-        const pricingMethodOptions: any = arrayToDropwdownOption(uniq(pricingMethod));
+        let unit: any = unitArray.shift().filter(function (v) {
+          return unitArray.every(function (a) {
+            return a.indexOf(v) !== -1;
+          });
+        });
+        let pricingMethod: any = pricingMethodArray.shift().filter(function (v) {
+          return pricingMethodArray.every(function (a) {
+            return a.indexOf(v) !== -1;
+          });
+        });
+        const unitOptions: any = arrayToDropwdownOption(unit)
+        const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
         data.forEach((element) => {
           if (element.fieldName === "unit") {
             element.option = unitOptions;
@@ -131,19 +147,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       }
       return editTitle;
     } else {
-      let bulkEdit = "Bulk Edit -";
-      const groupByProducts = groupBy(selectedProducts, "type");
-      const edits = [];
-      if (groupByProducts["Product"]) {
-        edits.push(`${groupByProducts["Product"].length} - Products`)
-      }
-      if (groupByProducts["Package"]) {
-        edits.push(`${groupByProducts["Package"].length} - Package`)
-      }
-      if (groupByProducts["productInPackage"]) {
-        edits.push(`${groupByProducts["productInPackage"].length} - Product In Package`)
-      }
-      return `${bulkEdit}(${edits.join(", ")})`;
+      return "Bulk Edit";
     }
   }
 
