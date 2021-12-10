@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, Fragment } from "react";
+import React, { useState, useContext, useEffect, Fragment } from "react";
 import {
   Grid,
   Paper,
@@ -44,6 +44,8 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
 import {MdDelete, MdEdit} from "react-icons/md";
+import {BiEdit} from "react-icons/bi";
+import accountClass from "../Account/account.module.scss";
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -395,21 +397,23 @@ const ProjectSalesDetails = () => {
                   {(permissions?.projectStrategy?.isUpdate && isTeamMember) ||
                     isManager ? (
                     <Button
-                      variant={isMobile ? "outlined" : "contained"}
+                      variant={isMobile ? "text" : "contained"}
                       color="primary"
                       size="small"
-                      className="mobile_button_layout"
+                      className={isMobile ? accountClass.mobile_button_layout : ""}
                       onClick={handleOpenUpdateDialog}
+                      style={isMobile ? {color:"#43aeaa"} : {}}
                     >
-                      {isMobile ? <MdEdit/> : "Edit"}
+                      {isMobile ? <BiEdit size={20}/> : "Edit"}
                     </Button>
                   ) : null}
                   {permissions?.projectStrategy?.isDelete && isManager ? (
                     <DeleteButton
-                      text={isMobile ? <MdDelete/> : "Delete"}
+                      text={isMobile ? <MdDelete size={20}/> : "Delete"}
                       onClick={() => {
                         handleDeleteProject(id);
                       }}
+                      className={isMobile ? accountClass.mobile_button_layout : ""}
                     />
                   ) : null}
                 </DetailsPageHeader>

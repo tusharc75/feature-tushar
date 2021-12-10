@@ -27,12 +27,13 @@ import HideWhenOffline from '../../components/HideWhenOffline';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
-import { BiFoodMenu } from 'react-icons/bi';
+import {BiEdit, BiFoodMenu} from 'react-icons/bi';
 import TabPanel from '../../components/TabPanel';
 
 import Productpackage from './Productpackage';
 import AdditionalCost from './AdditionalCost';
 import SerializedAsset from './SerializedAsset';
+import {isMobile} from "react-device-detect";
 
 const rentalProcessSteps = ['New', 'Additional Services', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Ready To Ship'];
 
@@ -230,8 +231,15 @@ const RentalManagementDetailsPage = () => {
                     </Button>
                   )}
                   {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
-                    <Button className="buttonStyleSmallScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                      <MdEdit size={24} />
+                    <Button
+                        className="buttonStyleSmallScreen"
+                        variant="text"
+                        color="primary"
+                        size="small"
+                        onClick={handleOpenUpdateDialog}
+                        style={isMobile ? {color:"#43aeaa"} : {}}
+                    >
+                      <BiEdit size={20} />
                     </Button>
                   )}
                   <HideWhenOffline>
@@ -248,7 +256,7 @@ const RentalManagementDetailsPage = () => {
                     user?.user?._id &&
                     rentalManagementData.owner.optionValue === user.user._id ? (
                       <Button className="buttonDeleteSmallScreen" onClick={() => setShowConfirmBox(true)}>
-                        <MdDelete size={24} />
+                        <MdDelete size={20} />
                       </Button>
                     ) : null}
                   </HideWhenOffline>

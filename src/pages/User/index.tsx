@@ -679,7 +679,7 @@ const User: FC = () => {
             additionalDetails={[]}
             chips={[]}
             owerCollaboratorInitialsOrImages=""
-            onCreate={() => { }}
+            onCreate={false}
             showClone={false}
             onClone={() => { }}
             renderedFrom={"user"} /> : <CustomAgGrid

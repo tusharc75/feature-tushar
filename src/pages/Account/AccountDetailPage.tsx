@@ -924,8 +924,8 @@ export default function AccountDetailPage(props) {
                         }}
                       >
                         {accountData.staticData?.approved
-                          ? isMobile ? <FcDisapprove size={22}/> : "Disapprove"
-                          : isMobile ? <FcApproval size={22}/> : "Approve"}
+                          ? isMobile ? <FcDisapprove size={21}/> : "Disapprove"
+                          : isMobile ? <FcApproval size={21}/> : "Approve"}
                       </Button>
                     </>
                   )

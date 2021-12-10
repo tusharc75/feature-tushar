@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useReducer } from 'react';
+import React, { useState, useEffect, useContext, useReducer } from 'react';
 import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, IconButton, Tooltip } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory, Link } from 'react-router-dom';
@@ -18,7 +18,7 @@ import {
 import ManageRepairJob from './ManageRepairJob';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import queryString from "query-string";
-import { BiFoodMenu } from 'react-icons/bi';
+import {BiEdit, BiFoodMenu} from 'react-icons/bi';
 import {FaSuitcase, FaWpforms} from 'react-icons/fa';
 import TabPanel from '../../components/TabPanel';
 import CustomCommonSteps from '../../components/CustomCommonSteps/CustomCommonSteps';
@@ -34,6 +34,8 @@ import RepairJobDeliveryTicket from './RepairJobDeliveryTicket';
 import ManageAssetDialog from './ManageAssetDialog';
 import {isMobile} from "react-device-detect";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import accountClass from "../Account/account.module.scss";
+import {MdDelete} from "react-icons/md";
 
 const reservedStatus = "Reserved";
 const renderedFrom = "repairJobDetails"
@@ -357,11 +359,18 @@ const RepairJobDetails = () => {
             ) : (
               <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
                 {permissions?.repairJob?.isUpdate && (
-                  <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                    Edit
+                  <Button
+                      variant={isMobile ? "text" : "contained"}
+                      color="primary"
+                      size="small"
+                      onClick={handleOpenUpdateDialog}
+                      className={isMobile ? accountClass.mobile_button_layout : ""}
+                      style={isMobile ? {color:"#43aeaa"} : {}}
+                  >
+                    {isMobile ? <BiEdit size={20}/> : "Edit"}
                   </Button>
                 )}
-                {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {permissions?.repairJob?.isDelete && <DeleteButton text={isMobile ? <MdDelete size={20}/> : "Delete"} onClick={() => setShowConfirmBox(true)} className={isMobile ? accountClass.mobile_button_layout : ""}/>}
               </DetailsPageHeader>
             )}
 

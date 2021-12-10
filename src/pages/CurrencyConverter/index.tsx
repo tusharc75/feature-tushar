@@ -16,6 +16,8 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import CustomButton from '../../components/Helpers/CustomButton'
 import { getUniqueCurrencies } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
+import {isMobile} from "react-device-detect";
+import {MdUpdate} from "react-icons/all";
 
 const useStyles = makeStyles(() => ({
   tdWidth: {
@@ -187,7 +189,7 @@ const CurrencyConverter = () => {
             </Grid>
             <Grid xs={6} md={6} sm={6} container justify="flex-end">
               {currencyConverterPermissions.isUpdate &&
-                <Button onClick={handleUpdate} variant="contained" size="small" color="primary" >Update</Button>
+                <Button onClick={handleUpdate} variant={isMobile ? "text" : "contained"} size="small" color="primary"  style={isMobile ? {color:"var(--info)"} : {}}> {isMobile ? <MdUpdate size={20}/> : "Update" }   </Button>
               }
             </Grid>
           </Grid>
