@@ -30,7 +30,7 @@ import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 
 const renderedFrom = "rentalManagementDetailsPageDeliveryTicket"
 
-const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData }) => {
+const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -52,46 +52,43 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData }) =
   }, []);
 
   const fetchRecords = () => {
+    //setNextStep(false)
     if (gridApi) {
       gridApi.deselectAll();
     }
-
     localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
-
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`)
-      .then(({ data }) => {
-        setAssignedSerializedAsset(data.data)
-        let tempProductInventory = data.data.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
-        dispatch({ type: "loading", loading: true });
-        axiosInstance()
-          .get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/delivery-ticket `)
-          .then(({ data }) => {
-            data.data.map(obj => {
-              tempProductInventory.map((d, index) => {
-                if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                  tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
-                  tempProductInventory[index]["deliveryTicketId"] = obj?._id
-                }
-              })
-            })
-
-            tempProductInventory.forEach((d) => {
-              d["hideSelection"] = d.status === "In-Transit";
-            })
-
-            dispatch({
-              type: "initialize", data: tempProductInventory, count: tempProductInventory.length
-            });
-            setTimeout(() => {
-              dispatch({ type: "loading", loading: false });
-            }, gridLoadingTimeout);
+    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`).then(({ data }) => {
+      setAssignedSerializedAsset(data.data)
+      let productAssets = data.data.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
+      dispatch({ type: "loading", loading: true });
+      axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/delivery-ticket`).then(({ data }) => {
+        data.data.map(obj => {
+          productAssets.map((d, index) => {
+            if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
+              productAssets[index]["deliveryTicket"] = obj?.deliveryJobName
+              productAssets[index]["deliveryTicketId"] = obj?._id
+            }
           })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-          });
-      }).catch((error) => {
-        toastConfig.setToastConfig(error)
-      });
+        })
+        productAssets.forEach((d) => {
+          d["hideSelection"] = d.status === "In-Transit";
+        })
+        // if (productAssets.filter((e) => ["In-Use", "Repair", "Scrap", "In-Transit"].includes(e.status)).length === productAssets.length) {
+        //   setNextStep(true)
+        // }
+        dispatch({
+          type: "initialize", data: productAssets, count: productAssets.length
+        });
+        setTimeout(() => {
+          dispatch({ type: "loading", loading: false });
+        }, gridLoadingTimeout);
+      })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error)
+    });
   }
 
   const TicketRenderer = (params) => (
@@ -171,7 +168,6 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData }) =
             "status": "Ready to Ship",
             "owner": rentalManagementData.owner.optionValue,
             // "collaborator": rentalManagementData.collaborator,
-
           }
           axiosInstance().put(`${rentalManagement.rentalManagementApi}`, tempUpdateData)
             .then(() => {
@@ -183,7 +179,6 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData }) =
       }
     }
   }
-
 
   const handleDeliveryTicketDialog = (selectedProductInventory, warehouse) => {
     setProductInventoryForDeliveryTicket(selectedProductInventory);
@@ -305,9 +300,9 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData }) =
             loading={loading}
             allowSelection={true}
             renderedFrom={renderedFrom}
+            refreshGrid={fetchRecords}
           />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-
       }
     </Grid>
     {showDeliveryTicketDialog && (
@@ -318,6 +313,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData }) =
         rentalData={rentalManagementData}
         onSuccess={() => {
           setShowDeliveryTicketDialog(false);
+          fetchRecords();
         }}
       />
     )}
@@ -354,7 +350,6 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData }) =
         />
       )
     }
-
   </>
   );
 }

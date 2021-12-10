@@ -417,6 +417,7 @@ const RentalManagementDetailsPage = () => {
                       fetchRentalData={fetchRentalManagementData}
                       rentalManagementData={rentalManagementData}
                       currentStep={currentStep}
+                      setNextStep={setNextStep}
                     />
                   )}
                   {(currentStep === 4) && (

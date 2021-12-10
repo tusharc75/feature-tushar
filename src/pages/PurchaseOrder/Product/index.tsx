@@ -54,9 +54,6 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deletePurchaseOrderProduct, setDeletePurchaseOrderProduct] = useState([]);
 
-
-
-
     useEffect(() => {
         fetchPurchaseOrderProduct();
     }, [id]);
@@ -116,7 +113,6 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
         }}>
             <CustomRenderCell value={params.value} />
         </span>
-
     </span >
 
     const ActionsRenderer = (params) => (
@@ -205,7 +201,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     return (
         <Fragment>
             <Box display="flex" justifyContent="space-between" m={1}>
-                <Box display="flex">
+                <Box display="flex" alignItems="center">
                     <Button
                         variant={isMobile ? "outlined" : "contained"}
                         color="primary"
@@ -228,9 +224,8 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                         {isMobile ? <FaCartArrowDown size={22} /> : `Add Existing ${routes.product.title}`}
                     </Button>
                 </Box>
-
                 <div className="d-flex gap-2">
-                    <Box display="flex" justifyContent="flex-end" p="4px">
+                    <Box display="flex" justifyContent="flex-end">
                         <Box mx={1} />
                         <Button
                             variant={isMobile ? "outlined" : "contained"}
@@ -246,17 +241,16 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                         </Button>
                     </Box>
                     <HtmlTooltip title="Please select some product">
-                        <span>
-                            <Button
-                                variant="outlined"
-                                color="default"
-                                size="small"
-                                onClick={openActions}
-                                disabled={selectedRecords.length ? false : true}
-                                aria-controls="action-menu"
-                            >Actions <ExpandMore />
-                            </Button>
-                        </span>
+                        <Button
+                            variant="outlined"
+                            color="default"
+                            size="small"
+                            onClick={openActions}
+                            disabled={selectedRecords.length ? false : true}
+                            aria-controls="action-menu"
+                        >Actions
+                            <ExpandMore />
+                        </Button>
                     </HtmlTooltip>
                     <Menu
                         anchorEl={anchorEl}
