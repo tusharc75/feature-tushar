@@ -118,9 +118,11 @@ export default function Contact(props) {
 
   useEffect(() => {
     if (queryPage === undefined) {
+      sessionStorage.removeItem('page');
       history.push(`?page=${page}`);
     }
     if (page > 0) {
+      sessionStorage.setItem('page', JSON.stringify(page));
       history.replace(
         queryType && querySearch && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
@@ -138,10 +140,34 @@ export default function Contact(props) {
           ? `?page=${page}&search=${querySearch}`
           : `?page=${page}`
       );
+    }else{
+      history.replace(
+        queryType && querySearch && queryColFilter
+          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
+          : queryType && queryColFilter
+          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+          : queryType && querySearch
+          ? `?page=${page}&type=${queryType}&search=${querySearch}`
+          : queryColFilter && querySearch
+          ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+          : queryType
+          ? `?page=${page}&type=${queryType}`
+          : queryColFilter
+          ? `?page=${page}&colFilter=${queryColFilter}`
+          : querySearch
+          ? `?page=${page}&search=${querySearch}`
+          : `?page=${page}`
+      );
+
     }
   }, [page, queryPage]);
 
   useEffect(() => {
+    if (JSON.parse(sessionStorage.getItem('page')) !== null && queryPage !== '0') {
+      let savedPage = JSON.parse(sessionStorage.getItem('page'));
+      // history.replace(`?page=${savedPage}`);
+      dispatch({ type: 'pageChange', page: savedPage });
+    }
     fetchGridColumns();
   }, []);
 

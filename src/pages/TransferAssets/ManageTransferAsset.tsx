@@ -41,6 +41,11 @@ const ManageTransferAsset: FC<Props> = (props) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formValues, setFormValues] = useState(null);
 
+  const [plantsCategoryOptions, setPlantsCategoryOptions] = useState([]);
+  const [plantsToCategoryOptions, setPlantsToCategoryOptions] = useState([]);
+  const [supplierToCategoryOptions, setSupplierToCategoryOptions] = useState([]);
+  const [customerToCategoryOptions, setCustomerToCategoryOptions] = useState([]);
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
@@ -49,6 +54,17 @@ const ManageTransferAsset: FC<Props> = (props) => {
       .then(({ data: { data } }) => {
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+
+        const plantsOptions = data.find((obj) => obj?.fieldData.fieldName === 'transferFromPlant')?.fieldData.option;
+        const plantsToOptions = data.find((obj) => obj?.fieldData.fieldName === 'transferToPlant')?.fieldData.option;
+        const supplierToOptions = data.find((obj) => obj?.fieldData.fieldName === 'transferToSupplier')?.fieldData.option;
+        const cusomerToOptions = data.find((obj) => obj?.fieldData.fieldName === 'transferToCustomer')?.fieldData.option;
+
+        setPlantsCategoryOptions(plantsOptions);
+        setPlantsToCategoryOptions(plantsToOptions);
+        setSupplierToCategoryOptions(supplierToOptions);
+        setCustomerToCategoryOptions(cusomerToOptions);
+
         if (transferAssetId) {
           axiosInstance()
             .get(`${transferAsset.api}/` + transferAssetId)

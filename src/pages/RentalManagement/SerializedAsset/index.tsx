@@ -275,10 +275,11 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
 
   useEffect(() => {
     const flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty !== f.subRows?.length);
+    const products = flatArray.map(m => { return { _id: m.materialId, assetsCount: m.qty - (m.subRows?.length ?? 0) } })
     setShowManagePurchaseOrderDialog(prevState => {
       return {
         ...prevState,
-        products: flatArray.map(m => { return { _id: m.materialId, assetsCount: m.qty - (m.subRows?.length ?? 0) } })
+        products: products
       }
     });
   }, [selectedProducts])
@@ -407,6 +408,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         isFromSerializedAssetStepFromRental={true}
         currency={rentalManagementData.currencyCode}
         rentalManagementId={rentalManagementData._id}
+        deliveryDateMax={rentalManagementData.rentalStartDate}
       />
     }
   </Fragment>

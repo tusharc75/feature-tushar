@@ -429,6 +429,7 @@ const ProductInventory = () => {
         {
             showManageProductInventoryDialog.open &&
             <ManageProductInventory
+                isNew = {true}
                 isClone={showManageProductInventoryDialog.isClone}
                 productInventoryId={showManageProductInventoryDialog.idToClone}
                 onClose={() => setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null })}

@@ -109,13 +109,14 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                                         if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
                                             tempProductInventory[index]["receivingTicket"] = obj?.receivingJobName
                                             tempProductInventory[index]["receivingTicketId"] = obj?._id
+                                            tempProductInventory[index]["isDelivered"] = obj?.status === "Delivered";
                                         }
                                     })
                                 })
 
                                 tempProductInventory.forEach((d) => {
                                     d["_id"] = d["id"];
-                                    d["hideSelection"] = d.status === "In-Transit" || d.status === "Lost";
+                                    d["hideSelection"] = d.status === "In-Transit" || d.status === "Lost" || (d.hasOwnProperty("isDelivered") && d["isDelivered"] === true);
                                 })
 
                                 setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))
