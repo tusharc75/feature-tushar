@@ -180,6 +180,7 @@ const ManageDeliveryTicket = (props) => {
                     const tempInitialData = getObjKeys("", fieldsDataForCreate)
                     tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
                     tempInitialData["deliveryJobName"] = `${transferData?.transferAssetNumber}_${generateUniqueIdOnly()}`
+                    tempInitialData["warehouse"] = warehouseId;
                     tempInitialData["type"] = "Transfer Asset";
                     tempInitialData["transferAsset"] = transferData?._id;
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
@@ -196,7 +197,7 @@ const ManageDeliveryTicket = (props) => {
                         tempInitialData["supplierShippingAddress"] = transferData?.supplierShipTo;
                     }
                     setInitialData({
-                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
+                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "transferAsset"),
                         values: tempInitialData,
                     });
                     setFormValues(tempInitialData)
@@ -545,7 +546,7 @@ const ManageDeliveryTicket = (props) => {
                                                                             ) : field.fieldName === "warehouse" ? (
                                                                                 <FormTypes
                                                                                     {...field}
-                                                                                    disabled={(deliveryTicketId && field.disableOnEdit) || (repairJobData && warehouseId)}
+                                                                                    disabled={(deliveryTicketId && field.disableOnEdit) || (repairJobData && warehouseId) || (transferData && warehouseId) || (rentalData && warehouseId)}
                                                                                     isNew={Boolean(deliveryTicketId)}
                                                                                     values={values}
                                                                                     errors={errors}

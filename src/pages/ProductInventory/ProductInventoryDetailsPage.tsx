@@ -302,7 +302,7 @@ const ProductInventoryDetailsPage = () => {
     }
   }
 
-  const manualStatus = ["Scrap", "Lost"]
+  const manualStatus = ["Available", "Repair", "Scrap", "Lost"]
 
   return (
     <>
@@ -373,7 +373,11 @@ const ProductInventoryDetailsPage = () => {
                         {
                           statusOptions.map(o => {
                             return <MenuItem
-                              disabled={!manualStatus.includes(o?.optionLabel)}
+                              disabled={!manualStatus.includes(o?.optionLabel)
+                                || (o?.optionLabel === "Available"
+                                  && (productInventoryData?.status !== "Repair" || productInventoryData?.status !== "Lost")
+                                  ? true
+                                  : false)}
                               onClick={() => {
                                 closeActions()
                                 handleStatusChange(o)
