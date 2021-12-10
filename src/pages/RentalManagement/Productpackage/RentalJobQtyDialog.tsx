@@ -8,7 +8,7 @@ import { groupBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, isFieldNotTouched } from "..//../../constants/helpers";
+import { CustomDialogTransition, arrayToDropwdownOption } from "..//../../constants/helpers";
 import { Formik, Form } from "formik";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomButton from '../../../components/Helpers/CustomButton'
@@ -18,6 +18,7 @@ import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
+import moment from "moment";
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -58,10 +59,28 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       data = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
       setAllFields(JSON.parse(JSON.stringify(data)))
       if (isBulkedit) {
-        data.forEach((_f) => {
-          _f.required = false;
-          _f.isFormula = false;
-          _f.isMulitFormula = false;
+        let unit: any = []
+        let pricingMethod: any = []
+        selectedProducts?.forEach(element => {
+          if (element?.[`${element.type}Detail`]?.unit) {
+            unit = [...unit, ...element?.[`${element.type}Detail`].unit];
+          }
+          if (element?.[`${element.type}Detail`].pricingMethod) {
+            pricingMethod = [...pricingMethod, ...element?.[`${element.type}Detail`].pricingMethod];
+          }
+        });
+        const unitOptions: any = arrayToDropwdownOption(uniq(unit))
+        const pricingMethodOptions: any = arrayToDropwdownOption(uniq(pricingMethod));
+        data.forEach((element) => {
+          if (element.fieldName === "unit") {
+            element.option = unitOptions;
+          }
+          if (element.fieldName === "pricingMethod") {
+            element.option = pricingMethodOptions;
+          }
+          element.required = false;
+          element.isFormula = false;
+          element.isMulitFormula = false;
         })
         setInitialData({
           fields: data,
@@ -69,6 +88,22 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         });
       }
       else {
+        let unitOptions: any = []
+        let pricingMethodOptions: any = []
+        if (rowData?.[`${rowData.type}Detail`]?.unit) {
+          unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].unit);
+        }
+        if (rowData?.[`${rowData.type}Detail`].pricingMethod) {
+          pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].pricingMethod);
+        }
+        data.forEach(element => {
+          if (element.fieldName === "unit") {
+            element.option = unitOptions;
+          }
+          if (element.fieldName === "pricingMethod") {
+            element.option = pricingMethodOptions;
+          }
+        });
         setInitialData({
           fields: data,
           values: getObjKeysWithValues(rowData, data),
@@ -92,7 +127,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     if (rowData) {
       let editTitle = `Edit - [${rowData.detail}]`;
       if (rowData.subRows && rowData.subRows?.length > 0) {
-        editTitle = `Edit - [${rowData.detail} (${rowData.subRows.length})]`;
+        editTitle = `Edit - [${rowData.detail}(${rowData.subRows.length})]`;
       }
       return editTitle;
     } else {
@@ -108,7 +143,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       if (groupByProducts["productInPackage"]) {
         edits.push(`${groupByProducts["productInPackage"].length} - Product In Package`)
       }
-      return `${bulkEdit} (${edits.join(", ")})`;
+      return `${bulkEdit}(${edits.join(", ")})`;
     }
   }
 
@@ -285,6 +320,17 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     }
   };
 
+
+  function validate(values) {
+    const errors = {};
+    let startDate = moment(values?.startDate);
+    let endDate = moment(values?.endDate);
+    if (endDate.diff(startDate, 'days') < 0) {
+      errors['endDate'] = 'Please enter valid end date';
+    }
+    return errors;
+  }
+
   return (<Dialog
     maxWidth="md"
     fullScreen={fullScreen || (isMobile || isTablet)}
@@ -300,6 +346,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         initialValues={initialData.values}
         validationSchema={yupSchema(initialData.fields)}
         validateOnMount
+        validate={validate}
         onSubmit={handleSubmit}>
         {({ values,
           errors,
@@ -408,33 +455,61 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                                   </Box>
                                 </Box>
                               </Grid>
-                              :
-                              <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                <Box display="flex" >
-                                  <Box flexGrow={1}  >
-                                    <FormTypes
-                                      {...field}
-                                      fields={initialData.fields}
-                                      fieldData={field}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value)
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field.isTooltip}
-                                      tooltipMessage={field.tooltipMessage}
-                                      size="small"
-                                    />
+                              : ["startDate", "endDate"].includes(field.fieldName) ?
+                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Box display="flex" >
+                                    <Box flexGrow={1}  >
+                                      <FormTypes
+                                        {...field}
+                                        minDate={field.fieldName === "endDate" ? moment(values?.startDate) : moment(rentalManagementData?.rentalStartDate)}
+                                        maxDate={moment(rentalManagementData?.rentalEndDate)}
+                                        fields={initialData.fields}
+                                        fieldData={field}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value)
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field.isTooltip}
+                                        tooltipMessage={field.tooltipMessage}
+                                        size="small"
+                                      />
+                                    </Box>
                                   </Box>
-                                </Box>
-                              </Grid>
+                                </Grid> :
+                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Box display="flex" >
+                                    <Box flexGrow={1}  >
+                                      <FormTypes
+                                        {...field}
+                                        fields={initialData.fields}
+                                        fieldData={field}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value)
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field.isTooltip}
+                                        tooltipMessage={field.tooltipMessage}
+                                        size="small"
+                                      />
+                                    </Box>
+                                  </Box>
+                                </Grid>
                         ))}
                       </Grid>
                     </Box>

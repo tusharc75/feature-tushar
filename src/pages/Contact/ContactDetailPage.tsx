@@ -11,7 +11,14 @@ import { useData } from '../../StateProvider/Provider';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import axiosInstance from './../../axios/axiosInstance';
 import Activity from '../../components/Activity';
-import { getObjKeysWithValues, isObjectEmpty, sidebarResource, customerAccount, processFieldName, defaultActivityShow } from './../../constants/helpers';
+import {
+  getObjKeysWithValues,
+  isObjectEmpty,
+  sidebarResource,
+  customerAccount,
+  processFieldName,
+  defaultActivityShow
+} from './../../constants/helpers';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageContact from './ManageContact/index';
@@ -25,7 +32,7 @@ import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { ListItemText } from '@material-ui/core';
 import { AiOutlineMail } from 'react-icons/ai';
-import {BiEdit, BiPhone} from 'react-icons/bi';
+import { BiEdit, BiPhone } from 'react-icons/bi';
 import { FiStar } from 'react-icons/fi';
 import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
 import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
@@ -37,8 +44,8 @@ import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import routes from '../../components/Helpers/Routes';
 import queryString from 'query-string';
 import AddReportsToContact from './AddReportsToContact';
-import {MdDelete, MdEdit} from "react-icons/md";
-import accountClass from "../Account/account.module.scss";
+import { MdDelete, MdEdit } from 'react-icons/md';
+import accountClass from '../Account/account.module.scss';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -51,7 +58,8 @@ const ContactDetailsPage = (props) => {
   const parsed = queryString.parse(history.location.search);
   const { openEdit } = parsed;
   const {
-    state: { user, permissions, selectedEntity, tour }, dispatch
+    state: { user, permissions, selectedEntity, tour },
+    dispatch
   }: any = useData();
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [headingLbl, setHeadingLbl] = useState('');
@@ -84,10 +92,10 @@ const ContactDetailsPage = (props) => {
   const [opportunities, setOpportunities] = useState([]);
   const [projectSales, setProjectSales] = useState([]);
   const [quotes, setQuotes] = useState([]);
-  const [contactsList, setContactsList] = useState([])
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [contactsList, setContactsList] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [showAddContact, setShowAddContact] = useState(false)
+  const [showAddContact, setShowAddContact] = useState(false);
 
   let { id } = useParams();
 
@@ -110,12 +118,11 @@ const ContactDetailsPage = (props) => {
     }
   }, [id]);
 
-
   useEffect(() => {
     if (isSmallScreen) {
-      setActivityShow(true)
+      setActivityShow(true);
     }
-  }, [isSmallScreen])
+  }, [isSmallScreen]);
 
   useEffect(() => {
     if (steps.length > 0) {
@@ -133,26 +140,20 @@ const ContactDetailsPage = (props) => {
   }, [steps]);
 
   useEffect(() => {
-
-    if (tour.start && tour.path === "/customer-contact/detail"
-      || tour.path === "/supplier-contact/detail") {
+    if ((tour.start && tour.path === '/customer-contact/detail') || tour.path === '/supplier-contact/detail') {
       if (tour.stepIndex === 5) {
-        setCurrentTabIndex(0)
+        setCurrentTabIndex(0);
       } else if (tour.stepIndex === 6) {
-        setCurrentTabIndex(1)
+        setCurrentTabIndex(1);
       }
     }
-
-  }, [tour])
+  }, [tour]);
 
   const fetchContactData = async () => {
     setLoading(true);
     axiosInstance()
       .get(`/${contactApi}/${id}`)
       .then(({ data: { data } }) => {
-
-        
-
         handleMainPoints(data);
         let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
 
@@ -173,10 +174,10 @@ const ContactDetailsPage = (props) => {
 
         let orgChartData = [];
 
-        let excludeContacts = []
+        let excludeContacts = [];
         if (data.parentHierarchy && data.parentHierarchy.length > 0) {
           data.parentHierarchy.map((d) => {
-            excludeContacts.push(d._id)
+            excludeContacts.push(d._id);
             orgChartData.push({
               id: d._id,
               name: [d.firstName, d.middleName, d.lastName].filter((d) => d).join(' '),
@@ -188,8 +189,8 @@ const ContactDetailsPage = (props) => {
             });
           });
         }
-        excludeContacts.push(data._id)
-        getContacts(excludeContacts)
+        excludeContacts.push(data._id);
+        getContacts(excludeContacts);
 
         orgChartData.push({
           id: data._id,
@@ -203,7 +204,7 @@ const ContactDetailsPage = (props) => {
 
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
-        
+
         if (isAllowedToEdit && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
@@ -221,26 +222,26 @@ const ContactDetailsPage = (props) => {
     axiosInstance()
       .get(`${contactApi}?entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
-
-        let rows = data.map(u => {
+        let rows = data.map((u) => {
           if (excludeContacts.indexOf(u._id) >= 0) {
-            u.isExclude = true
+            u.isExclude = true;
+          } else {
+            u.isExclude = false;
           }
-          else {
-            u.isExclude = false
-          }
-          return u
-        })
+          return u;
+        });
         let name = [contactData.firstName, contactData.middleName, contactData.lastName].filter((d) => d).join(' ');
 
         if (contactData?.salutation?.optionLabel) {
           name = contactData.salutation.optionLabel + name;
         }
         let currentContact = {
-          ...contactData, isExclude: true,
+          ...contactData,
+          isExclude: true,
           concatedName: name
-        }
-        setContactsList([currentContact, ...rows])
+        };
+        contactData &&
+          setContactsList([currentContact, ...rows].filter((d) => d?.accountName?.optionValue === contactData?.accountName?.optionValue));
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -248,7 +249,6 @@ const ContactDetailsPage = (props) => {
   };
 
   const handleUpdateOrgData = ({ addContact, reportsToContact }) => {
-
     if (addContact?._id && reportsToContact?._id) {
       const contactFieldData = contactFields.map((f) => {
         return f.fieldData;
@@ -258,20 +258,20 @@ const ContactDetailsPage = (props) => {
         reportsTo: reportsToContact?._id,
         _id: addContact?._id
       };
-      handleUpdateContact(updatedData, true)
+      handleUpdateContact(updatedData, true);
     }
-  }
+  };
 
   const handleUpdateChart = (draggedNode, dropNode) => {
-    let draggedNodeData = {}
-    contactsList.forEach(o => {
+    let draggedNodeData = {};
+    contactsList.forEach((o) => {
       if (draggedNode.id === o._id) {
         draggedNodeData = {
           ...o,
           reportsTo: dropNode.id
-        }
+        };
       }
-    })
+    });
 
     const contactFieldData = contactFields.map((f) => {
       return f.fieldData;
@@ -279,13 +279,13 @@ const ContactDetailsPage = (props) => {
 
     const updatedData = {
       ...getObjKeysWithValues(draggedNodeData, contactFieldData),
-      _id: draggedNodeData["_id"]
+      _id: draggedNodeData['_id']
     };
-    if (updatedData && updatedData["reportsTo"] && updatedData["reportsTo"] === "0") {
-      delete updatedData["reportsTo"]
+    if (updatedData && updatedData['reportsTo'] && updatedData['reportsTo'] === '0') {
+      delete updatedData['reportsTo'];
     }
-    handleUpdateContact(updatedData, true)
-  }
+    handleUpdateContact(updatedData, true);
+  };
 
   const fetchRelatedData = () => {
     axiosInstance()
@@ -464,8 +464,8 @@ const ContactDetailsPage = (props) => {
   };
 
   const handleActivityHideShow = () => {
-    setActivityShow(!showActivity)
-  }
+    setActivityShow(!showActivity);
+  };
   const handleOpneUpdateDialog = () => {
     if (activeStep === steps.length - 1) {
       setShowAtLast(true);
@@ -545,7 +545,7 @@ const ContactDetailsPage = (props) => {
     if (values.employees) {
       values.employees = parseInt(values.employees);
     }
-    let updatedData = { ...values, };
+    let updatedData = { ...values };
 
     if (!isUpdateReportsTo) {
       updatedData = {
@@ -553,7 +553,7 @@ const ContactDetailsPage = (props) => {
         _id: contactData._id
       };
     }
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     axiosInstance()
       .put(`/${contactApi}`, updatedData)
       .then(({ data }) => {
@@ -563,43 +563,42 @@ const ContactDetailsPage = (props) => {
           type: 'success',
           message: data.message
         });
-        if (showAddContact) setShowAddContact(false)
+        if (showAddContact) setShowAddContact(false);
         setOpenUpdateDialog(false);
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       })
       .catch((error) => {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
 
   const handleEntityChange = (id) => {
     dispatch({ type: SET_SELECTED_ENTITY, payload: id });
-  }
+  };
 
   const hasAccessToEntity = (id) => {
     const entityList = user.entity?.map((entity) => entity._id);
     return entityList.includes(id);
-  }
+  };
 
   let filteredContactFields = contactFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
 
-  const tourPaths = ["/customer-contact/detail", "/supplier-contact/detail"]
-
+  const tourPaths = ['/customer-contact/detail', '/supplier-contact/detail'];
 
   return (
     <>
-      {
-        showAddContact ?
-          <AddReportsToContact
-            onClose={() => { setShowAddContact(false) }}
-            open={showAddContact}
-            contactsList={contactsList}
-            isSubmitting={isSubmitting}
-            onSubmit={handleUpdateOrgData}
-          />
-          : null
-      }
+      {showAddContact ? (
+        <AddReportsToContact
+          onClose={() => {
+            setShowAddContact(false);
+          }}
+          open={showAddContact}
+          contactsList={contactsList}
+          isSubmitting={isSubmitting}
+          onSubmit={handleUpdateOrgData}
+        />
+      ) : null}
       {openUpdateDialog && showAtLast ? (
         // <UpdateDetailsDialog
         //     title={`Editing  ${contactData.firstName}`}
@@ -632,7 +631,7 @@ const ContactDetailsPage = (props) => {
           // contactResource={contactResource}
           accountResource={accountResource}
           contactResource={contactResource}
-        // contactApi={contactApi}
+          // contactApi={contactApi}
         />
       ) : openUpdateDialog ? (
         <ManageContact
@@ -657,20 +656,17 @@ const ContactDetailsPage = (props) => {
           // contactResource={contactResource}
           accountResource={accountResource}
           contactResource={contactResource}
-        // contactApi={contactApi}
+          // contactApi={contactApi}
         />
       ) : null}
 
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={customizedRoutes} />
       </Grid>
-      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}
+      <div
+        className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}
         style={{
-          height:
-            tour.start && tourPaths.includes(tour.path)
-              && tour.stepIndex > 0 && tour.stepIndex < 9
-              ? "auto"
-              : "calc(100vh - 98px)"
+          height: tour.start && tourPaths.includes(tour.path) && tour.stepIndex > 0 && tour.stepIndex < 9 ? 'auto' : 'calc(100vh - 98px)'
         }}
       >
         <div>
@@ -683,22 +679,30 @@ const ContactDetailsPage = (props) => {
               showHeading={true}
             >
               {contactPermissions.isUpdate && canEdit ? (
-                <Button id="detailEditButton"
-                        variant={isMobile ? "text" : "contained"}
-                        color="primary" size="small"
-                        onClick={handleOpneUpdateDialog}
-                        className={isMobile ? accountClass.mobile_button_layout : ""}
-                        style={isMobile ? {color:"#43aeaa"} : {}}
+                <Button
+                  id="detailEditButton"
+                  variant={isMobile ? 'text' : 'contained'}
+                  color="primary"
+                  size="small"
+                  onClick={handleOpneUpdateDialog}
+                  className={contactClass.mobile_button_layout}
+                  style={isMobile ? { color: '#43aeaa' } : {}}
                 >
-                  {isMobile ? <BiEdit size={20}/> : "Edit"}
+                  {isMobile ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               ) : null}
 
               {contactPermissions.isDelete &&
-                contactData?.owner?.optionValue &&
-                user?.user?._id &&
-                contactData.owner.optionValue === user.user._id ? (
-                <DeleteButton id="detailDeleteButton" text={isMobile ? <MdDelete size={20}/> : "Delete"} size="small" onClick={() => setShowConfirmBox(true)}  className={isMobile ? accountClass.mobile_button_layout : ""}/>
+              contactData?.owner?.optionValue &&
+              user?.user?._id &&
+              contactData.owner.optionValue === user.user._id ? (
+                <DeleteButton
+                  id="detailDeleteButton"
+                  text={isMobile ? <MdDelete size={20} /> : 'Delete'}
+                  size="small"
+                  onClick={() => setShowConfirmBox(true)}
+                  className={isMobile ? accountClass.mobile_button_layout : ''}
+                />
               ) : null}
             </DetailsPageHeader>
             <ProcessFlow
@@ -730,8 +734,8 @@ const ContactDetailsPage = (props) => {
                     textColor="primary"
                     aria-label="icon tabs example"
                   >
-                    <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className='tabLayout' />
-                    <Tab label="Org Chart" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className='tabLayout'/>
+                    <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className="tabLayout" />
+                    <Tab label="Org Chart" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className="tabLayout" />
                   </Tabs>
                   <Box hidden={currentTabIndex !== 0}>
                     {showAtLast ? (
@@ -742,7 +746,6 @@ const ContactDetailsPage = (props) => {
                     {/* <DetailsPage data={contactData} fields={contactFields} /> */}
                   </Box>
                   <Box hidden={currentTabIndex !== 1}>
-
                     <OrgChartContainer
                       data={orgChartData}
                       onClick={(id) => {
@@ -757,7 +760,7 @@ const ContactDetailsPage = (props) => {
             </Box>
             <div className="p-3">
               {permissions?.opportunity?.isRead && (
-                <span id='opportunityAccordion'>
+                <span id="opportunityAccordion">
                   <OpportunityInAccordian
                     opportunityPermissions={permissions.opportunity}
                     opportunities={opportunities}
@@ -926,10 +929,12 @@ const ContactDetailsPage = (props) => {
             </span>} */}
 
           <Paper>
-            {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
-              {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-            </span>}
-            <div style={{ display: showActivity ? "block" : "none" }}>
+            {!isSmallScreen && (
+              <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
+                {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+              </span>
+            )}
+            <div style={{ display: showActivity ? 'block' : 'none' }}>
               {!isObjectEmpty(contactData) && (
                 <div>
                   <Activity
@@ -943,7 +948,7 @@ const ContactDetailsPage = (props) => {
                         access: true
                       }
                     ]}
-                    handleActivityRefresh={() => { }}
+                    handleActivityRefresh={() => {}}
                     emails={[contactData?.email ?? '']}
                   />
                 </div>
@@ -976,23 +981,23 @@ const ContactDetailsPage = (props) => {
                                 <ListItemText
                                   className="ml-2"
                                   primary={
-                                    contactData?.staticData?.lead?.entity === selectedEntity ?
+                                    contactData?.staticData?.lead?.entity === selectedEntity ? (
                                       <Link className="link f_size p-l2" to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
                                         {contactData?.staticData?.lead?.concatedName}
                                       </Link>
-                                      : hasAccessToEntity(contactData?.staticData?.lead?.entity) ?
-                                        <Link
-                                          className="link f_size p-l2"
-                                          onClick={() => {
-                                            handleEntityChange(contactData?.staticData?.lead?.entity)
-                                            history.push(`/lead/detail/${contactData?.staticData?.lead?._id}`)
-                                          }}>
-                                          {contactData?.staticData?.lead?.concatedName}
-                                        </Link>
-                                        :
-                                        <span>
-                                          {contactData?.staticData?.lead?.concatedName}
-                                        </span>
+                                    ) : hasAccessToEntity(contactData?.staticData?.lead?.entity) ? (
+                                      <Link
+                                        className="link f_size p-l2"
+                                        onClick={() => {
+                                          handleEntityChange(contactData?.staticData?.lead?.entity);
+                                          history.push(`/lead/detail/${contactData?.staticData?.lead?._id}`);
+                                        }}
+                                      >
+                                        {contactData?.staticData?.lead?.concatedName}
+                                      </Link>
+                                    ) : (
+                                      <span>{contactData?.staticData?.lead?.concatedName}</span>
+                                    )
                                   }
                                   secondary={
                                     <React.Fragment>
@@ -1023,7 +1028,6 @@ const ContactDetailsPage = (props) => {
                             </List>
                           </CardContent>
                         </Card>
-
                       </Box>
                     </div>
                   </BoxWithBorder>
@@ -1051,7 +1055,6 @@ const ContactDetailsPage = (props) => {
             setOrgChartInFullScreenDialog(false);
           }}
         >
-
           <OrgChartContainer
             data={orgChartData}
             onClick={(id) => {
@@ -1101,7 +1104,6 @@ const ContactDetailsPage = (props) => {
           title="Additional Information"
           fieldData={sectionFields}
         />
-
       )}
     </>
   );

@@ -127,7 +127,8 @@ const CustomCommonSteps = (props) => {
         currentStep,
         setCurrentStep,
         onNextButtonClick,
-        onPreviousButtonClick
+        onPreviousButtonClick,
+        forViewOnly
     } = props;
 
     const classes = useStyles();
@@ -192,7 +193,9 @@ const CustomCommonSteps = (props) => {
                                 variant="contained" endIcon={<KeyboardArrowRight />}
                                 onClick={() => {
                                     setCurrentStep(currentStep + 1)
-                                    onNextButtonClick(currentStep, currentStep + 1);
+                                    if (!forViewOnly) {
+                                        onNextButtonClick(currentStep, currentStep + 1);
+                                    }
                                 }} >
                                 {steps[currentStep + 1] ?? ""}
                             </Button>
@@ -205,10 +208,12 @@ const CustomCommonSteps = (props) => {
                         backButton={
 
                             <Button size="small" variant="contained" color={"primary"} startIcon={<KeyboardArrowLeft />}
-                                disabled={currentStep > steps.length - 1 || currentStep === 0 || disablePreviousStep}
+                                disabled={currentStep === 0 || disablePreviousStep}
                                 onClick={() => {
                                     setCurrentStep(currentStep - 1)
-                                    onPreviousButtonClick(currentStep, currentStep - 1)
+                                    if (!forViewOnly) {
+                                        onPreviousButtonClick(currentStep, currentStep - 1)
+                                    }
                                 }} >
                                 {steps[currentStep - 1] ?? ""}
                             </Button>
@@ -231,10 +236,12 @@ const CustomCommonSteps = (props) => {
                                             {(
                                                 <div>
                                                     <IconButton
-                                                        disabled={currentStep > steps.length - 1 || currentStep === 0 || disablePreviousStep}
+                                                        disabled={currentStep === 0 || disablePreviousStep}
                                                         onClick={() => {
                                                             setCurrentStep(currentStep - 1)
-                                                            onPreviousButtonClick(currentStep, currentStep - 1)
+                                                            if (!forViewOnly) {
+                                                                onPreviousButtonClick(currentStep, currentStep - 1)
+                                                            }
                                                         }}
                                                         className="stepperButton"
                                                     >
@@ -263,7 +270,9 @@ const CustomCommonSteps = (props) => {
                                                                     disabled={currentStep === 0 || currentStep < steps.length || disablePreviousStep}
                                                                     onClick={() => {
                                                                         setCurrentStep(currentStep + 1)
-                                                                        onNextButtonClick(currentStep, currentStep + 1);
+                                                                        if (!forViewOnly) {
+                                                                            onNextButtonClick(currentStep, currentStep + 1);
+                                                                        }
                                                                     }}
                                                                     size="small"
                                                                 >
@@ -290,7 +299,9 @@ const CustomCommonSteps = (props) => {
                                                                         color="primary"
                                                                         onClick={() => {
                                                                             setCurrentStep(currentStep + 1)
-                                                                            onNextButtonClick(currentStep, currentStep + 1);
+                                                                            if (!forViewOnly) {
+                                                                                onNextButtonClick(currentStep, currentStep + 1);
+                                                                            }
                                                                         }}
                                                                         size="small"
                                                                         disabled={(currentStep === 0 && disableNextStep) || currentStep < steps.length || disableNextStep}
@@ -311,7 +322,7 @@ const CustomCommonSteps = (props) => {
                                         {steps.map((label, i) => (
                                             <Step
                                                 key={label}
-                                                className={clsx(classes.step, {
+                                                className={forViewOnly ? clsx(classes.step, classes.active, classes.currentStep) : clsx(classes.step, {
                                                     [classes.active]:
                                                         currentStep > i ||
                                                         steps[currentStep] === "End",
@@ -341,13 +352,21 @@ const CustomCommonSteps = (props) => {
                                 {!isMobile && (
                                     currentStep < steps.length ? <IconButton
                                         onClick={() => {
-                                            setCurrentStep(currentStep + 1)
-                                            onNextButtonClick(currentStep, currentStep + 1);
+                                            if (currentStep < steps.length - 1) {
+                                                setCurrentStep(currentStep + 1)
+                                                if (!forViewOnly) {
+                                                    onNextButtonClick(currentStep, currentStep + 1, false)
+                                                }
+                                            } else {
+                                                if (!forViewOnly) {
+                                                    onNextButtonClick(currentStep, currentStep + 1, true)
+                                                }
+                                            }
                                         }}
                                         disabled={currentStep >= steps.length || (currentStep === 0 && disableNextStep) || disableNextStep}
                                         className="stepperButtonNext"
                                     >
-                                        {currentStep < steps.length - 1 ? <RiShareForwardFill /> : <RiCheckboxCircleFill />}
+                                        {currentStep < steps.length - 1 ? <RiShareForwardFill /> : (forViewOnly ? "" : <RiCheckboxCircleFill />)}
                                     </IconButton> : ""
                                 )}
                             </Grid>

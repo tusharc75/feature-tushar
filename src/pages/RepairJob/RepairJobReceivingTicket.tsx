@@ -16,7 +16,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import {
     gridLoadingTimeout, receivingTicket, repairJob,
-    sidebarResource, productInventory as productInventoryHelperObject
+    sidebarResource, productInventory as productInventoryHelperObject, repairJobStatus
 } from "../../constants/helpers";
 import { groupBy } from "lodash";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -29,8 +29,8 @@ import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter
 import { makeStyles } from '@material-ui/core/styles';
 import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import {FaSuitcase} from "react-icons/fa";
-import {isMobile} from "react-device-detect";
+import { FaSuitcase } from "react-icons/fa";
+import { isMobile } from "react-device-detect";
 
 const renderedFrom = "repairJob_receiving_ticket"
 
@@ -109,13 +109,14 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                                         if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
                                             tempProductInventory[index]["receivingTicket"] = obj?.receivingJobName
                                             tempProductInventory[index]["receivingTicketId"] = obj?._id
+                                            tempProductInventory[index]["isDelivered"] = obj?.status === "Delivered";
                                         }
                                     })
                                 })
 
                                 tempProductInventory.forEach((d) => {
                                     d["_id"] = d["id"];
-                                    d["hideSelection"] = d.status === "In-Transit" || d.status === "Lost";
+                                    d["hideSelection"] = d.status === "In-Transit" || d.status === "Lost" || (d.hasOwnProperty("isDelivered") && d["isDelivered"] === true);
                                 })
 
                                 setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))
@@ -205,7 +206,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
 
     return (<>
 
-        <Box display="flex" justifyContent="flex-end" className="gap-1">
+        <Box display="flex" justifyContent="flex-end" className="gap-1 px-2">
             <Button
                 onClick={() => {
                     setDownlodingFile(true);
@@ -243,14 +244,17 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                 {downlodingFile ? "Please wait..." : "Preview"}
             </Button>
 
-            <Button variant="outlined" color="primary" aria-controls="simple-menu"
-                aria-haspopup="true"
-                disabled={selectedRecords.length === 0}
-                size="small"
-                onClick={handleClick}
-                endIcon={<ArrowDropDownIcon />}>
-                Change Status
-            </Button>
+            {
+                repairJobData && repairJobData["status"] !== repairJobStatus[2] && <Button variant="outlined" color="primary" aria-controls="simple-menu"
+                    aria-haspopup="true"
+                    disabled={selectedRecords.length === 0}
+                    size="small"
+                    onClick={handleClick}
+                    endIcon={<ArrowDropDownIcon />}>
+                    Change Status
+                </Button>
+            }
+
             <Menu
                 id="simple-menu"
                 anchorEl={anchorEl}
@@ -276,11 +280,8 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                     setStatusToUpdate({ open: true, isUpdating: false, status: "Lost", message: "" })
                 }}>Lost</MenuItem>
             </Menu>
-
-            <Box mx={1} />
-
             {
-                repairJobData?.processStatus !== "End" &&
+                repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
                 <IconButton
                     disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("receivingTicketId"))}
                     onClick={() => {
@@ -297,7 +298,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
             }
 
             {
-                repairJobData?.processStatus !== "End" &&
+                repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
                 <IconButton
                     disabled={selectedRecords.length === 0 || selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId"))}
                     onClick={() => {
@@ -317,7 +318,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
         <Grid item xs={12} md={12} sm={12} className="mt-3">
 
             {columns ?
-               isMobile ? <CustomSwipableList
+                isMobile ? <CustomSwipableList
                     allowSelection={true}
                     allowSwipe={true}
                     permissions={true}
@@ -362,7 +363,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                     limit={limit}
                     pageSizes={pageSizes}
                     page={page}
-                    allowSelection={repairJobData?.processStatus !== "End"}
+                    allowSelection={repairJobData && repairJobData["status"] === repairJobStatus[2] ? false : true}
                     allowAction={false}
                     loading={loading}
                     renderedFrom={renderedFrom}
@@ -379,37 +380,39 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
             }
         </Grid>
 
-        {showRemoveAssetFromReceivingTicketDialog && (
-            <ConfirmationDialog
-                open={showRemoveAssetFromReceivingTicketDialog}
-                message={`Are you sure you want to remove selected records from ${sidebarResource.receivingTicket}(s) ?`}
-                onClose={() => {
-                    setShowRemoveAssetFromReceivingTicketDialog(false);
-                }}
-                onOk={() => {
-                    setOkBtnLoading(true);
-
-                    const groupByCalls = groupBy(selectedRecords, "receivingTicketId");
-                    let apiCalls = [];
-
-                    Object.keys(groupByCalls).forEach((key) => {
-                        apiCalls.push(axiosInstance().put(`${receivingTicket.receivingTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
-                    })
-
-                    Promise.all(apiCalls).then(() => {
-                        toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged ${sidebarResource.receivingTicket}(s)` });
-                        fetchRecords();
-                    }).catch((error) => {
-                        toastConfig.setToastConfig(error);
-                    }).finally(() => {
-                        setOkBtnLoading(false);
+        {
+            showRemoveAssetFromReceivingTicketDialog && (
+                <ConfirmationDialog
+                    open={showRemoveAssetFromReceivingTicketDialog}
+                    message={`Are you sure you want to remove selected records from ${sidebarResource.receivingTicket}(s) ?`}
+                    onClose={() => {
                         setShowRemoveAssetFromReceivingTicketDialog(false);
-                    });
+                    }}
+                    onOk={() => {
+                        setOkBtnLoading(true);
 
-                }}
-                okBtnLoading={okBtnLoading}
-            />
-        )}
+                        const groupByCalls = groupBy(selectedRecords, "receivingTicketId");
+                        let apiCalls = [];
+
+                        Object.keys(groupByCalls).forEach((key) => {
+                            apiCalls.push(axiosInstance().put(`${receivingTicket.receivingTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
+                        })
+
+                        Promise.all(apiCalls).then(() => {
+                            toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged ${sidebarResource.receivingTicket}(s)` });
+                            fetchRecords();
+                        }).catch((error) => {
+                            toastConfig.setToastConfig(error);
+                        }).finally(() => {
+                            setOkBtnLoading(false);
+                            setShowRemoveAssetFromReceivingTicketDialog(false);
+                        });
+
+                    }}
+                    okBtnLoading={okBtnLoading}
+                />
+            )
+        }
 
         {
             statusToUpdate.open && <Dialog open

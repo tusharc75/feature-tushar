@@ -33,27 +33,37 @@ import CustomButton from '../../../components/Helpers/CustomButton'
 import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
+import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 
 interface PurchaseOrderQtyDialogProps {
   onClose: VoidFunction | any;
   currency: string;
   onSubmit: VoidFunction | any;
   productData?: object | any;
+  purchaseOrderData?: object | any;
   bulkEdit?: boolean | any;
 }
 
-const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, currency, onSubmit, productData, bulkEdit }) => {
+const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, currency, onSubmit, productData, bulkEdit, purchaseOrderData }) => {
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
+  const [allFields, setAllFields] = useState([]);
 
   useEffect(() => {
     axiosInstance().get("/field/child?resource=Purchase Order Product").then(({ data: { data } }) => {
       const poFields = CURReplaceByCurrencySingle(data, currency);
       //Update Unit As Product Start
+      setAllFields(JSON.parse(JSON.stringify(poFields)))
+      if (bulkEdit) {
+        poFields.forEach((_f) => {
+          _f.required = false;
+          _f.isFormula = false;
+          _f.isMulitFormula = false;
+        })
+      }
       poFields.filter((_f) => {
         if (["unit", "umo"].includes(_f.fieldName.toLowerCase())) {
           if (!bulkEdit && (productData?.productDetail?.unit || productData?.productDetail?.umo)) {
@@ -72,9 +82,16 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
         }
       })
       //End
+      let tempObjKeysWithValues = getObjKeysWithValues(!bulkEdit ? productData : "", poFields)
+      if (!tempObjKeysWithValues["taxSchedule"] && purchaseOrderData["taxSchedule"]) {
+        tempObjKeysWithValues["taxSchedule"] = purchaseOrderData["taxSchedule"]
+      }
+      if (!tempObjKeysWithValues["expectedDelivery"] && purchaseOrderData["deliveryDate"]) {
+        tempObjKeysWithValues["expectedDelivery"] = purchaseOrderData["deliveryDate"]
+      }
       setInitialData({
         fields: poFields,
-        values: getObjKeysWithValues(!bulkEdit ? productData : productData[0], poFields),
+        values: tempObjKeysWithValues,
       });
       EvaluteproductFields(poFields);
     })
@@ -93,7 +110,16 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
   const handleSubmit = (values) => {
     let returnData = []
     if (bulkEdit) {
-      returnData = productData.map(d => { return ({ ...values, _id: d._id || d.productDetail._id, productId: d.productId }) })
+      for (const x in values) {
+        if (values[x] === "" || values[x] === 0 || (Array.isArray(values[x]) && values[x].length === 0)) {
+          delete values[x]
+        }
+      }
+      productData.forEach(element => {
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
+        returnData.push({ ...element, ...calValues })
+      })
+      // returnData = productData.map(d => { return ({ ...values, _id: d._id || d.productDetail._id, productId: d.productId }) })
     }
     else {
       returnData = [{ ...values, _id: productData._id || productData.productDetail._id, productId: productData.productId }]
@@ -131,7 +157,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
         }) => (
           <Fragment>
             <CustomDialogHeader
-              title={bulkEdit ? "Bulk Edit" : `Edit ${productData.productName || ""}`}
+              title={bulkEdit ? "Bulk Edit" : `Edit ${productData?.productName || ""}`}
               onClose={() => {
                 onClose()
               }}

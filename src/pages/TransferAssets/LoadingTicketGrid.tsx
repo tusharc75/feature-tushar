@@ -14,6 +14,8 @@ import { CommonRenderer, DateRenderer } from '../../components/AgGridComponents/
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { AiFillFilePdf } from "react-icons/ai";
+
 
 interface LoadingGridProps {
   fetchAssets: any;
@@ -27,6 +29,8 @@ interface LoadingGridProps {
   setExistingAssets?: any;
   setTransferIsEnded?: any;
   updateTransferStatus?: any;
+  handleViewPdf?: any;
+  fileDownloading?: boolean;
 }
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
@@ -40,7 +44,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     setNextStep,
     setExistingAssets,
     setTransferIsEnded,
-    updateTransferStatus
+    updateTransferStatus,
+    handleViewPdf,
+    fileDownloading
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -116,7 +122,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       let ticketData: any = await fetchLoadingTickets();
 
       for (let i = 0; i < ticketData.length; i++) {
-        assetData[i].assetNumber = `${i + 1}. ${assetData[i].assetNumber}`;
         for (let j = 0; j < assetData.length; j++) {
           if (ticketData[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
             assetData[j].deliveryTicket = ticketData[i].deliveryJobName;
@@ -157,38 +162,34 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   useEffect(() => {
     if (selectedRecords.length > 0) {
       const inventoryWithNoTicket = selectedRecords.filter((asset: any) => !asset?.hasOwnProperty('deliveryTicket'));
+      const selectedInventoryIntransit = selectedRecords.filter((asset: any) => asset['deliveryTicketStatus'] === 'In-Transit');
+      const selectedInventoryDelivered = selectedRecords.filter((asset: any) => asset['deliveryTicketStatus'] === 'Delivered');
+      setAssetsDelivered(selectedInventoryDelivered);
+      setAssetsIntransit(selectedInventoryIntransit);
       setAssetWithNoTicket(inventoryWithNoTicket);
     }
 
-    setNextStep(true);
-    const inventoryWithNoTicket = dataRows.filter((asset: any) => !asset?.hasOwnProperty('deliveryTicket'));
-    const inventoryWithTicket = dataRows.filter((asset: any) => asset?.hasOwnProperty('deliveryTicket'));
-    const inventoryDelivered = dataRows.filter((asset: any) => asset['deliveryTicketStatus'] === 'Delivered');
-    const selectedInventoryIntransit = selectedRecords.filter((asset: any) => asset['deliveryTicketStatus'] === 'In-Transit');
-    const selectedInventoryDelivered = selectedRecords.filter((asset: any) => asset['deliveryTicketStatus'] === 'Delivered');
-    setAssetsDelivered(selectedInventoryDelivered);
-    setAssetsIntransit(selectedInventoryIntransit);
+    if (dataRows.length) {
+      const inventoryDelivered = dataRows.filter((asset: any) => asset['deliveryTicketStatus'] === 'Delivered');
 
-    if (inventoryDelivered.length > 0) {
-      setNextStep(true);
-    } else {
-      setNextStep(false);
-    }
 
-    // if (inventoryWithTicket.length > 0) {
-    //   setPrevStep(false);
-    // } else {
-    //   setPrevStep(true);
-    // }
-
-    if (transferAssetData?.transferType === 'Internal') {
-      if (inventoryDelivered.length === dataRows.length) {
-        setTransferIsEnded(true);
-        updateTransferStatus('Completed');
+      if (inventoryDelivered.length > 0) {
+        setNextStep(true);
       } else {
-        setTransferIsEnded(false);
+        setNextStep(false);
       }
+
+      if (transferAssetData?.transferType === 'Internal') {
+        if (inventoryDelivered.length === dataRows.length) {
+          setTransferIsEnded(true);
+          updateTransferStatus("Completed")
+        } else {
+          setTransferIsEnded(false);
+        }
+      }
+
     }
+
   }, [dataRows, selectedRecords]);
 
   const handleRemoveTicket = () => {
@@ -224,7 +225,35 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       <Box display="flex" justifyContent="space-between" mx="4px">
         <div></div>
         <Box>
-          <Button
+          {permissions?.transferAsset?.isRead && (
+            <Button
+              variant="outlined"
+              color="primary"
+              type="button"
+              size="small"
+              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              disabled={fileDownloading}
+              onClick={() => { handleViewPdf(false) }}
+            >
+              {isMobile ? <AiFillFilePdf size={22} /> : fileDownloading ? "Please wait..." : "Preview"}
+            </Button>
+          )}
+          <Box component="span" mx={1} />
+          {permissions?.transferAsset?.isRead && (
+            <Button
+              variant="outlined"
+              color="primary"
+              type="button"
+              size="small"
+              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              disabled={fileDownloading}
+              onClick={() => { handleViewPdf(true) }}
+            >
+              {isMobile ? <AiFillFilePdf size={22} /> : fileDownloading ? "Please wait..." : "Download"}
+            </Button>
+          )}
+          <Box component="span" mx={1} />
+          {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isCreate && <Button
             variant="contained"
             size="small"
             color="primary"
@@ -232,9 +261,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             onClick={() => setOpenLoadingTicketDialog(true)}
           >
             Create Loading Ticket
-          </Button>
+          </Button>}
           <Box component="span" mx={1} />
-          <Button
+          {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isUpdate && <Button
             variant="contained"
             size="small"
             color="primary"
@@ -246,7 +275,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             onClick={() => setShowConfirmBox(true)}
           >
             Remove Loading Ticket
-          </Button>
+          </Button>}
         </Box>
       </Box>
 

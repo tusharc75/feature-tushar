@@ -149,6 +149,9 @@ const PurchaseOrderDetailsPage = () => {
             { title: `${data?.purchaseOrderNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
             setPurchaseOrderData(data);
             setCurrentStep(purchaseOrderSteps.indexOf(data?.processStatus) !== -1 ? purchaseOrderSteps.indexOf(data?.processStatus) : 0)
+            if (data?.status === "Ready to Invoice" || data?.status === "Invoiced" || data?.status === "Closed") {
+                setCurrentStepDisable(true)
+            }
             setCurrencySymbol(
                 getUniqueCurrencies().find(
                     (d) => d.currencyCode === data["currency"]
@@ -349,7 +352,7 @@ const PurchaseOrderDetailsPage = () => {
                                             </Button>
                                         </>
                                     )}
-                                    {permissions?.purchaseOrder?.isUpdate && purchaseOrderData?.status === "Ready to Invoice" && (
+                                    {permissions?.purchaseOrder?.isUpdate && (purchaseOrderData?.status === "Ready to Invoice" || purchaseOrderData?.status === "Invoiced" || purchaseOrderData?.status === "Closed") && (
                                         <>
                                             <Button
                                                 variant={isMobile ? "text" : "contained"}
@@ -467,7 +470,7 @@ const PurchaseOrderDetailsPage = () => {
                                             <Paper>
                                                 <Steps
                                                     // className={styles.steps_box}
-                                                    isNextStep={!Boolean(purchaseOrderProduct.length) || currentStepDisable}
+                                                    currentStepDisable={currentStepDisable}
                                                     steps={purchaseOrderSteps.slice(0, 4)}
                                                     currentStep={currentStep}
                                                     setCurrentStep={setCurrentStep}
@@ -506,6 +509,10 @@ const PurchaseOrderDetailsPage = () => {
                                                         setCurrentStep={setCurrentStep}
                                                         handleUpdateData={handleUpdateData}
                                                         statusOptions={statusOptions}
+                                                        handleViewPdf={handleViewPdf}
+                                                        pdfFileBase64={pdfFileBase64}
+                                                        downlodingFile={downlodingFile}
+                                                        handleAttachments={handleAttachments}
                                                     />
                                                 }
                                             </Paper>

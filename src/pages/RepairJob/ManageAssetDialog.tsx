@@ -3,7 +3,7 @@ import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core'
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog'
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent'
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader'
-import { CustomDialogTransition, getObjKeysWithValues, repairJob, yupSchema } from '../../constants/helpers'
+import { CustomDialogTransition, getObjKeysWithValues, repairJob, yupSchema, repairJobStatus } from '../../constants/helpers'
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter'
 import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext'
@@ -13,9 +13,11 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import FormTypes from '../../components/Helpers/FormTypes'
 import { uniq, map, orderBy } from 'lodash'
 
+const completedStatus = repairJobStatus[2];
+
 export default function ManageAssetDialog({ open, fields, asset, selectedRecords, onSuccess, onClose, repairJobData }) {
 
-    const { repairJobId } = repairJobData;
+    const { _id } = repairJobData;
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [isUpdating, setIsUpdating] = useState(false)
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -58,7 +60,7 @@ export default function ManageAssetDialog({ open, fields, asset, selectedRecords
             })
         }
 
-        axiosInstance().put(`${repairJob.repairJobApi}/${repairJobId}/update-assets`, prepareDataToUpdate).then(() => {
+        axiosInstance().put(`${repairJob.repairJobApi}/${_id}/update-assets`, prepareDataToUpdate).then(() => {
             setIsUpdating(false);
             onSuccess();
         }).catch((error) => {
@@ -129,6 +131,7 @@ export default function ManageAssetDialog({ open, fields, asset, selectedRecords
                                                                     <Box flexGrow={1}>
                                                                         <FormTypes
                                                                             {...field}
+                                                                            disabled={repairJobData["status"] === completedStatus ? true : field.disableOnEdit}
                                                                             fields={initialData.fields}
                                                                             fieldData={field}
                                                                             values={values}
@@ -163,23 +166,27 @@ export default function ManageAssetDialog({ open, fields, asset, selectedRecords
                                         variant="outlined" color="primary" onClick={onClose}>
                                         Cancel
                                     </Button>
-                                    <Button
-                                        size="small"
-                                        onClick={() => {
-                                            setIsUpdating(true);
-                                            submitForm();
-                                        }}
-                                        disabled={isUpdating || Object.keys(errors).length > 0}
-                                        variant="contained"
-                                        color="primary"
-                                    >
-                                        {
-                                            isUpdating ? <CircularProgress
-                                                style={{ marginRight: "8px" }}
-                                                size={20} color="inherit" /> : null
-                                        }
-                                        Update
-                                    </Button>
+
+                                    {
+                                        repairJobData["status"] === completedStatus ? "" : <Button
+                                            size="small"
+                                            onClick={() => {
+                                                setIsUpdating(true);
+                                                submitForm();
+                                            }}
+                                            disabled={isUpdating || Object.keys(errors).length > 0}
+                                            variant="contained"
+                                            color="primary"
+                                        >
+                                            {
+                                                isUpdating ? <CircularProgress
+                                                    style={{ marginRight: "8px" }}
+                                                    size={20} color="inherit" /> : null
+                                            }
+                                            Update
+                                        </Button>
+                                    }
+
                                 </CustomDialogFooter>
                             </Fragment>
                         )}

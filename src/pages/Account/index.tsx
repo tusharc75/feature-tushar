@@ -45,8 +45,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { GridApi } from 'ag-grid-community';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import {MdAdd} from "react-icons/all";
-
+import { MdAdd } from 'react-icons/all';
 
 const AccTypes = [
   {
@@ -78,6 +77,7 @@ export default function Account(props) {
   const {
     account: { accountApi, accountResource, accountRoute }
   } = props;
+
   const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
   const {
     state: { user, permissions, selectedEntity },
@@ -143,9 +143,11 @@ export default function Account(props) {
 
   useEffect(() => {
     if (queryPage === undefined) {
+      sessionStorage.removeItem('page');
       history.replace(`?page=${page}`);
     }
     if (page > 0) {
+      sessionStorage.setItem('page', JSON.stringify(page));
       history.replace(
         queryType && queryApproval && queryColFilter && querySearch
           ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
@@ -217,6 +219,11 @@ export default function Account(props) {
   }, [page, queryPage]);
 
   useEffect(() => {
+    if (JSON.parse(sessionStorage.getItem('page')) !== null && queryPage !== '0') {
+      let savedPage = JSON.parse(sessionStorage.getItem('page'));
+      // history.replace(`?page=${savedPage}`);
+      dispatch({ type: 'pageChange', page: savedPage });
+    }
     fetchGridColumns();
   }, []);
 
@@ -1034,41 +1041,51 @@ export default function Account(props) {
                 )}
               </div>
             </Grid>
-            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1 " justify={isMobile ? "flex-start" : "flex-end"}>
+            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1 " justify={isMobile ? 'flex-start' : 'flex-end'}>
               <div
                 id="resourceOperations"
-                className={`${isMobile ? accountClass.mobile_filter_side_header : accountClass.account_header} ${accountClass['account_header-mobile']}`}
-                style={isMobile ? {flex:1} : {}}
+                className={`${isMobile ? accountClass.mobile_filter_side_header : accountClass.account_header} ${
+                  accountClass['account_header-mobile']
+                }`}
+                style={isMobile ? { flex: 1 } : {}}
               >
                 <Grid style={{ display: 'flex', flex: 1 }}>
-                  {!isOffline && <SearchBox onSearch={handleSearch} searchbox="account_header_search_bar" style={isMobile ? {flex:1} : {}} value={search} width={isMobile ? "200px" : "auto"}/>}
+                  {!isOffline && (
+                    <SearchBox
+                      onSearch={handleSearch}
+                      searchbox="account_header_search_bar"
+                      style={isMobile ? { flex: 1 } : {}}
+                      value={search}
+                      width={isMobile ? '200px' : 'auto'}
+                    />
+                  )}
                 </Grid>
 
-                <Grid style={{display: "flex" , gap:"5px"}}>
+                <Grid style={{ display: 'flex', gap: '5px' }}>
                   {accountPermissions.isCreate && (
                     <Button
-                        variant={isMobile ? "text" : "contained"}
+                      variant={isMobile ? 'text' : 'contained'}
                       color="primary"
                       size="small"
-                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                      className={isMobile ? 'mobile_button' : styles.add_submit_btn}
                       onClick={clickCreateNew}
-                        startIcon={isMobile ? null : <AddOutlined />}
+                      startIcon={isMobile ? null : <AddOutlined />}
                     >
-                      {isMobile ? <MdAdd size={23}/> : "Add"}
+                      {isMobile ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
 
                   {!isOffline && (accountPermissions.isDelete || accountPermissions.approveAccount) && (
                     <Button
                       disabled={selectedRecords.length === 0}
-                      variant={isMobile ? "text" : "outlined"}
+                      variant={isMobile ? 'text' : 'outlined'}
                       color="default"
                       size="small"
-                      className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                      className={isMobile ? 'mobile_button' : styles.add_submit_btn}
                       onClick={openActions}
                       aria-controls="action-menu"
                     >
-                      {isMobile ? "" : "Actions"} <ExpandMore />
+                      {isMobile ? '' : 'Actions'} <ExpandMore />
                     </Button>
                   )}
                   <Menu
@@ -1177,60 +1194,68 @@ export default function Account(props) {
         </div>
 
         {Object.keys(frameWorkComponent).length > 0 ? (
-            isMobile ? <CustomSwipableList
-                    allowSelection={true}
-                    allowSwipe={true}
-                    permissions={accountPermissions}
-                    primaryField={columns?.find(d => d.field === "accountName")}
-                    onClick={(d) => {
-                      history.push(`${accountApi}/detail/${d._id}`)
-                    }}
-                    dataRows={dataRows}
-                    selectedRecords={selectedRecords}
-                    dispatch={dispatch}
-                    onEdit={(d) => {
-                      history.push(`${accountApi}/detail/${d._id}?openEdit=true`)
-                    }}
-                    extraParamsToCheckDelete={true}
-                    onDelete={(d) => {
-                      setSingleAccountDelete({
-                        show: true,
-                        id: d._id,
-                        accountName: d.accountName
-                      });
-                    }}
-                    rowCount={rowCount}
-                    page={page}
-                    loading={loading}
-                    additionalDetails={[]}
-                    chips={[
-                      // {
-                      //     label: "Serial Number : ",
-                      //     field: "serialNumber",
-                      // },
-                    ]}
-                    owerCollaboratorInitialsOrImages=""
-                    onCreate={false}
-                    showClone={true}
-                    onClone={(data) => { cloneAccount(data)}}
-                    renderedFrom={accountResource} /> :
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            loading={loading}
-            renderedFrom={accountResource}
-            refreshGrid={fetchAccounts}
-            isClientSideGrid={isOffline}
-            allowAction={!isOffline}
-            allowSelection={!isOffline}
-          />
+          isMobile ? (
+            <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={accountPermissions}
+              primaryField={columns?.find((d) => d.field === 'accountName')}
+              onClick={(d) => {
+                history.push(`${accountApi}/detail/${d._id}`);
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(d) => {
+                history.push(`${accountApi}/detail/${d._id}?openEdit=true`);
+              }}
+              extraParamsToCheckDelete={true}
+              onDelete={(d) => {
+                setSingleAccountDelete({
+                  show: true,
+                  id: d._id,
+                  accountName: d.accountName
+                });
+              }}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              additionalDetails={[]}
+              chips={
+                [
+                  // {
+                  //     label: "Serial Number : ",
+                  //     field: "serialNumber",
+                  // },
+                ]
+              }
+              owerCollaboratorInitialsOrImages=""
+              onCreate={false}
+              showClone={true}
+              onClone={(data) => {
+                cloneAccount(data);
+              }}
+              renderedFrom={accountResource}
+            />
+          ) : (
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              loading={loading}
+              renderedFrom={accountResource}
+              refreshGrid={fetchAccounts}
+              isClientSideGrid={isOffline}
+              allowAction={!isOffline}
+              allowSelection={!isOffline}
+            />
+          )
         ) : null}
 
         {showDeleteWarningConfirmBox?.show ? (

@@ -22,7 +22,6 @@ import {
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import RentalJobQtyDialog from './RentalJobQtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
-const { pricingConditionApi } = pricingCondition
 
 const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) => {
 
@@ -200,7 +199,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             element.type = d.type.toLowerCase();
             element.unit = d.unit && d.unit.length ? d.unit[0] : "";
             element.pricingMethod = d.pricingMethod && d.pricingMethod.length ? d.pricingMethod[0] : "";
-            element.qty = d.qty ? d.qty : 1;
+            element.qty = d.qty ? parseFloat(d.qty) : 1;
             element.startDate = rentalManagementData ? rentalManagementData?.rentalStartDate : new Date();
             element.endDate = rentalManagementData ? rentalManagementData?.rentalEndDate : new Date();
             element.parentId = addExistingProductDialog.parentId;
@@ -281,7 +280,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             data.customer = [rentalManagementData?.customerAccount.optionValue];
             data.warehouse = [];
             return new Promise((resolve, reject) => {
-                axiosInstance().post(pricingConditionApi + `/calculatePrice`, data)
+                axiosInstance().post(pricingCondition.api + `/calculatePrice`, data)
                     .then(({ data: { data } }) => {
                         resolve(data)
                     }).catch(err => {

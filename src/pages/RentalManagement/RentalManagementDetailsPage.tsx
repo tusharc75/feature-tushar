@@ -35,7 +35,7 @@ import AdditionalCost from './AdditionalCost';
 import SerializedAsset from './SerializedAsset';
 import {isMobile} from "react-device-detect";
 
-const rentalProcessSteps = ['New', 'Additional Services', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Ready To Ship'];
+const rentalProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Ready To Ship'];
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);

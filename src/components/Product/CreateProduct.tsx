@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, Fragment, useContext } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory,useLocation } from "react-router-dom";
 import { Box, Tooltip, Grid, Button, InputAdornment, Collapse } from '@material-ui/core';
 import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
@@ -32,11 +32,17 @@ import {FaDiceOne} from "react-icons/fa";
 const ignoreField = ["priceTemplate"]
 
 const CreateProduct = (props) => {
+    const location = useLocation();
+    const pathName = location.pathname;
+
+    const  sessionproductCategoryId = JSON.parse(sessionStorage.getItem('productCategoryId')) 
+   
+
 
     const { state: { permissions, user, selectedEntity } }: any = useData();
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
-    const { productId, handleClose, isClone, isAddInBuilder, addProductInBuilder, openFrom, isRedirectToDetailPage, fromQuote } = props;
+    const { productId, handleClose, isClone, isAddInBuilder, addProductInBuilder, openFrom, isRedirectToDetailPage, fromQuote,onSuccess } = props;
     const [masterFields, setMasterFields] = useState([]);
     const [productFields, setProductFields] = useState([]);
     const [submitting, setSubmitting] = useState(false);
@@ -61,6 +67,25 @@ const CreateProduct = (props) => {
     const [expanded, setExpanded] = useState({});
     const [fieldChanges, setFieldChanges] = useState([]);
 
+
+
+    useEffect(() => {
+        if(pathName !== '/product-inventory'){
+            sessionStorage.removeItem('productCategoryId')
+            sessionStorage.removeItem('productCategoryName')
+        }
+
+    },[pathName])
+
+    useEffect(() => {
+       if (sessionproductCategoryId === ""){
+        sessionStorage.removeItem('productCategoryId')
+        sessionStorage.removeItem('productCategoryName')
+       } 
+
+    },[sessionproductCategoryId])
+
+    
 
     useEffect(() => {
         var _isProductTemplate = false;
@@ -155,12 +180,39 @@ const CreateProduct = (props) => {
                         setProductCategoryDataSource(currentContactRemovedDataSource);
                     }
                 }
+                if (JSON.parse(sessionStorage.getItem('productCategoryId')) !== null && (JSON.parse(sessionStorage.getItem('productCategoryName')) !== null)){
+                    let ProductCategoryId = JSON.parse(sessionStorage.getItem('productCategoryId'));
+                    let ProductCategoryName = JSON.parse(sessionStorage.getItem('productCategoryName'));
+                    
+                    setProductCategoryDataSource((prevState) => {
+                        return [
+                            ...prevState,
+                            {
+                                optionValue: ProductCategoryId,
+                                optionLabel: ProductCategoryName,
+                                order: productCategoryDataSource.length,
+                                default: false,
+                            },
+                        ];
+                    });
+                    setNewProductCategoryId(ProductCategoryId);
+                    // if (isProductTemplate) {
+                    //     handleChangeCategory(data._id, data.name, true, null)
+                    // }
+                }
+
+                if(JSON.parse(sessionStorage.getItem('productCategoryId')) !== null){
+                    let ProductCategoryId = JSON.parse(sessionStorage.getItem('productCategoryId'));
+                    setNewProductCategoryId(ProductCategoryId);
+
+                }
+
             }
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
     }, []);
-
+    
     const handleSubmit = (values) => {
         setSubmitting(true);
         values.fields = fields;
@@ -182,6 +234,12 @@ const CreateProduct = (props) => {
                 const productId = data._id;
                 setSubmitting(false);
                 handleClose();
+                onSuccess(data)
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: "Product Created Successfully",
+                });
                 if (isAddInBuilder) {
                     delete data.brand
                     delete data.createdBy
@@ -550,7 +608,7 @@ const CreateProduct = (props) => {
                                                                         >
                                                                             <FormTypes
                                                                                 isNew={Boolean(productId)}
-                                                                                disabled={(Boolean(productId) && field.disableOnEdit)}
+                                                                                disabled={(Boolean(productId) && field.disableOnEdit) || JSON.parse(sessionStorage.getItem('productCategoryId')) !== null}
                                                                                 fields={initialData.fields}
                                                                                 fieldData={field}
                                                                                 errors={errors}
@@ -602,10 +660,12 @@ const CreateProduct = (props) => {
                                                                                     >
                                                                                         <IconButton
                                                                                             onClick={() => { setShowAddProductCategoryDialog(true); }}
-                                                                                            disabled={(Boolean(productId) && field.disableOnEdit)}
+                                                                                          
+                                                                                           disabled={(Boolean(productId) && field.disableOnEdit) || JSON.parse(sessionStorage.getItem('productCategoryId')) !== null}
+                                                                                        //   disabled={JSON.parse(sessionStorage.getItem('productCategoryId')) !== null}
                                                                                             size="small"
                                                                                         >
-                                                                                            <AddIcon color={(Boolean(productId) && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                                                            <AddIcon color={(Boolean(productId) && field.disableOnEdit) || JSON.parse(sessionStorage.getItem('productCategoryId')) !== null ? "disabled" : "primary"} />
                                                                                         </IconButton>
                                                                                     </Tooltip>
                                                                                 </Grid>
