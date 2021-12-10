@@ -36,7 +36,7 @@ const TransferAssetDetailPage = () => {
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { openEdit, tab }: any = parsed;
-  const parsedTab = tab !== undefined ? parseInt(tab) : 0
+  const parsedTab = tab !== undefined ? parseInt(tab) : 1
   const {
     state: { user, permissions }
   }: any = useData();

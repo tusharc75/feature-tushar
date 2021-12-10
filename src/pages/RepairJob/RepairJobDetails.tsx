@@ -723,7 +723,7 @@ const RepairJobDetails = () => {
           }}
           isAdding={isAdding}
           selectedProducts={[]}
-          queryString={`ignoreIds=${JSON.stringify(step1DataRows.map(m => m._id ?? m.id))}&repairable=true`}
+          queryString={`ignoreIds=${JSON.stringify(step1DataRows.map(m => m._id ?? m.id))}&repairable=true&notScrapRepair=1`}
           filterByPlant={`filterById=[{"field":"warehouse", "term": "${repairJobData.plant?.optionValue}"}]`}
         />
       }

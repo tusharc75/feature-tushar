@@ -9,9 +9,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
-import AddIcon from '@material-ui/icons/AddCircle';
-import InfoIcon from '@material-ui/icons/Info';
-import { IconButton, Tooltip } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, transferAsset, setFieldsInAscendingOrder, generateUniqueIdOnly } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues, RESOURCE_LABEL } from '../../constants/helpers';
@@ -20,8 +17,6 @@ import { Box, Grid } from '@material-ui/core';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { useData } from "../../StateProvider/Provider";
-import ManageWarehouse from "../Warehouse/ManageWarehouse"
-import ManageAccountDialog from "../Account/ManageAccount/index";
 
 interface Props {
   isClone?: boolean;
@@ -35,7 +30,7 @@ interface Props {
 
 const ManageTransferAsset: FC<Props> = (props) => {
   const {
-    state: { selectedEntity,permissions },
+    state: { selectedEntity },
   }: any = useData();
   const { isClone = false, transferAssetId = null, onClose, onSuccess, number = '', isEditable = false, isMainInfoEditable = false } = props;
   const toastConfig = useContext(CustomToastContext);
@@ -43,19 +38,15 @@ const ManageTransferAsset: FC<Props> = (props) => {
   const [isSubmitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
-  const [plantsCategoryOptions, setPlantsCategoryOptions] = useState([]);
-  const [plantsToCategoryOptions, setPlantsToCategoryOptions] = useState([]);
-  const [supplierToCategoryOptions,setSupplierToCategoryOptions] = useState([]);
-  const [customerToCategoryOptions, setCustomerToCategoryOptions]= useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formValues, setFormValues] = useState(null);
-  const [customerOpen, setCustomerOpen] = useState({open: false, isClone: false})
-  const [transferToPlantOpen,setTransferToPlantOpen]= useState({open: false, isClone: false})
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [plantsOpen, setPlantsOpen] = useState({ open: false, isClone: false });
-  const[supplierOpen, setSupplierOpen] = useState({open:false,isClone: false});
-  
 
+  const [plantsCategoryOptions, setPlantsCategoryOptions] = useState([]);
+  const [plantsToCategoryOptions, setPlantsToCategoryOptions] = useState([]);
+  const [supplierToCategoryOptions, setSupplierToCategoryOptions] = useState([]);
+  const [customerToCategoryOptions, setCustomerToCategoryOptions] = useState([]);
+
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     axiosInstance()
@@ -63,6 +54,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
       .then(({ data: { data } }) => {
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+
         const plantsOptions = data.find((obj) => obj?.fieldData.fieldName === 'transferFromPlant')?.fieldData.option;
         const plantsToOptions = data.find((obj) => obj?.fieldData.fieldName === 'transferToPlant')?.fieldData.option;
         const supplierToOptions = data.find((obj) => obj?.fieldData.fieldName === 'transferToSupplier')?.fieldData.option;
@@ -72,10 +64,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
         setPlantsToCategoryOptions(plantsToOptions);
         setSupplierToCategoryOptions(supplierToOptions);
         setCustomerToCategoryOptions(cusomerToOptions);
-        
 
-        
-       
         if (transferAssetId) {
           axiosInstance()
             .get(`${transferAsset.api}/` + transferAssetId)
@@ -247,17 +236,9 @@ const ManageTransferAsset: FC<Props> = (props) => {
                         <Box marginY={2}>
                           <Grid spacing={3} container>
                             {form.sectionFields.map((field, index2) =>
-                              field.fieldName === 'transferToPlant'  || field.fieldName === 'plantShipTo' ? (
+                              field.fieldName === 'transferToPlant' || field.fieldName === 'plantShipTo' ? (
                                 values?.transferType.includes('Internal') && (
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
-                                     <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={permissions?.isCreate ? 10 : 11}
-                                          sm={permissions?.isCreate ? 10 : 11}
-                                          md={permissions?.isCreate ? 10 : 11}
-                                        >
                                     <FormTypes
                                       isNew={Boolean(transferAssetId)}
                                       {...field}
@@ -268,7 +249,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       label={field.fieldLabel}
                                       name={field.fieldName}
                                       type={field.type}
-                                      options={plantsToCategoryOptions}
+                                      options={field.option.filter((val) => val.optionValue !== values?.transferFromPlant) ?? []}
                                       setFieldValue={(name, value) => {
                                         // handleValuesChange({ [name]: value })
                                         setFieldValue(name, value);
@@ -284,44 +265,10 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       size="small"
                                     />
                                   </Grid>
-                                   {  field.fieldName === 'transferToPlant' ? 
-                                  <Grid item xs={1} sm={1} md={1}>
-                                          <Tooltip title="Transfer to Plant" className="mt-1">
-                                            <IconButton
-                                              onClick={() => {
-                                                setPlantsOpen({ open: true, isClone: false });
-                                              }}
-                                              // disabled={!isNew && field.disableOnEdit}
-                                              size="small"
-                                            >
-                                              <AddIcon color={'primary'} />
-                                            </IconButton>
-                                          </Tooltip>
-                                        </Grid>
-                                      :null}
-
-                                        { field.fieldName === 'transferToPlant' &&  field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                  </Grid>
-                                  </Grid>
-                                  </Grid>
                                 )
                               ) : field.fieldName === 'transferToSupplier' || field.fieldName === 'supplierShipTo' ? (
                                 values?.transferType.includes('Supplier') && (
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
-                                     <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={permissions?.isCreate ? 10 : 11}
-                                          sm={permissions?.isCreate ? 10 : 11}
-                                          md={permissions?.isCreate ? 10 : 11}
-                                        >
                                     <FormTypes
                                       isNew={Boolean(transferAssetId)}
                                       {...field}
@@ -332,7 +279,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       label={field.fieldLabel}
                                       name={field.fieldName}
                                       type={field.type}
-                                      options={supplierToCategoryOptions}
+                                      options={field.option}
                                       setFieldValue={(name, value) => {
                                         // handleValuesChange({ [name]: value })
                                         setFieldValue(name, value);
@@ -347,44 +294,10 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       size="small"
                                     />
                                   </Grid>
-                                  {field.fieldName === 'transferToSupplier'?
-                                  <Grid item xs={1} sm={1} md={1}>
-                                          <Tooltip title="Add Transfer To Supplier" className="mt-1">
-                                            <IconButton
-                                              onClick={() => {
-                                                setSupplierOpen({ open: true, isClone: false });
-                                              }}
-                                              // disabled={!isNew && field.disableOnEdit}
-                                              size="small"
-                                            >
-                                              <AddIcon color={'primary'} />
-                                            </IconButton>
-                                          </Tooltip>
-                                        </Grid>
-                                        :null}
-
-                                        {field.fieldName === 'transferToSupplier'&& field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                  </Grid>
-                                  </Grid>
-                                  </Grid>
                                 )
                               ) : field.fieldName === 'transferToCustomer' || field.fieldName === 'customerShipTo' ? (
                                 values?.transferType.includes('Customer') && (
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
-                                    <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={permissions?.isCreate ? 10 : 11}
-                                          sm={permissions?.isCreate ? 10 : 11}
-                                          md={permissions?.isCreate ? 10 : 11}
-                                        >
                                     <FormTypes
                                       isNew={Boolean(transferAssetId)}
                                       {...field}
@@ -395,7 +308,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       label={field.fieldLabel}
                                       name={field.fieldName}
                                       type={field.type}
-                                      options={customerToCategoryOptions}
+                                      options={field.option}
                                       setFieldValue={(name, value) => {
                                         // handleValuesChange({ [name]: value })
                                         setFieldValue(name, value);
@@ -409,32 +322,6 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       tooltipMessage={field?.tooltipMessage}
                                       size="small"
                                     />
-                                  </Grid>
-                                  {field.fieldName === 'transferToCustomer' ?
-                                  <Grid item xs={1} sm={1} md={1}>
-                                          <Tooltip title="Add Manufacturer" className="mt-1">
-                                            <IconButton
-                                              onClick={() => {
-                                                setCustomerOpen({ open: true, isClone: false });
-                                              }}
-                                              // disabled={!isNew && field.disableOnEdit}
-                                              size="small"
-                                            >
-                                              <AddIcon color={'primary'} />
-                                            </IconButton>
-                                          </Tooltip>
-                                        </Grid>
-                                        :null}
-
-                                        {field.fieldName === 'transferToCustomer' && field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                  </Grid>
-                                  </Grid>
                                   </Grid>
                                 )
                               ) : field.fieldName === 'transferType' ? (
@@ -470,14 +357,6 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                 </Grid>
                               ) : field.fieldName === 'transferFromPlant' ? (
                                 <Grid key={index2} item xs={12} sm={6} md={6}>
-                                   <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={permissions?.isCreate ? 10 : 11}
-                                          sm={permissions?.isCreate ? 10 : 11}
-                                          md={permissions?.isCreate ? 10 : 11}
-                                        >
                                   <FormTypes
                                     isNew={Boolean(transferAssetId)}
                                     {...field}
@@ -488,7 +367,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                     label={field.fieldLabel}
                                     name={field.fieldName}
                                     type={field.type}
-                                    options={plantsCategoryOptions}
+                                    options={field.option.filter((o: any) => o?.entity.includes(selectedEntity)) ?? []}
                                     required={field.required}
                                     fullWidth
                                     isTooltip={field?.isTooltip || false}
@@ -503,30 +382,6 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       }
                                     }}
                                   />
-                                </Grid>
-                                <Grid item xs={1} sm={1} md={1}>
-                                          <Tooltip title="Tranfer From Plant" className="mt-1">
-                                            <IconButton
-                                              onClick={() => {
-                                                setTransferToPlantOpen({ open: true, isClone: false });
-                                              }}
-                                              // disabled={!isNew && field.disableOnEdit}
-                                              size="small"
-                                            >
-                                              <AddIcon color={'primary'} />
-                                            </IconButton>
-                                          </Tooltip>
-                                        </Grid>
-
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                </Grid>
-                                </Grid>
                                 </Grid>
                               ) : (
                                 <Grid key={index2} item xs={12} sm={6} md={6}>
@@ -559,134 +414,6 @@ const ManageTransferAsset: FC<Props> = (props) => {
                       </div>
                     ))}
                 </Form>
-                {transferToPlantOpen?.open && (
-        <ManageWarehouse
-          // isUpdateDisabled={false}
-          // productCategoryId={productCategoryId}
-          open = {transferToPlantOpen?.open}
-         close={()=>setTransferToPlantOpen({ open: false, isClone: false })}
-          isClone={transferToPlantOpen?.isClone}
-         
-          onSuccess={({data}) => {
-        
-            setTransferToPlantOpen({ open: false, isClone: false });
-            if(data._id){
-                setFieldValue("transferFromPlant", data._id);
-                setPlantsCategoryOptions((prevState) => {     
-                    return [
-                        ...prevState,
-                        {
-                            optionValue: data._id,
-                            optionLabel: data.warehouseName,
-                            order: plantsCategoryOptions.length,
-                            default: false
-                        },
-                    ];
-                });
-            }
-           
-          }
-        }
-        />
-      )}
-      {plantsOpen?.open && (
-        <ManageWarehouse
-          // isUpdateDisabled={false}
-          // productCategoryId={productCategoryId}
-          open = {plantsOpen?.open}
-         close={()=>setPlantsOpen({ open: false, isClone: false })}
-          isClone={plantsOpen?.isClone}
-         
-          onSuccess={({data}) => {
-        
-            setPlantsOpen({ open: false, isClone: false });
-            if(data._id){
-                setFieldValue("transferToPlant", data._id);
-                setFieldValue('plantShipTo', data.address);
-                setPlantsToCategoryOptions((prevState) => {     
-                    return [
-                        ...prevState,
-                        {
-                            optionValue: data._id,
-                            optionLabel: data.warehouseName,
-                            order: plantsCategoryOptions.length,
-                            default: false
-                        },
-                    ];
-                });
-            }
-           
-          }}
-        />
-      )}
-
-{supplierOpen?.open && (
-        <ManageAccountDialog
-          // isUpdateDisabled={false}
-          // productCategoryId={productCategoryId}
-          open = {supplierOpen?.open}
-         onClose={()=>setSupplierOpen({ open: false, isClone: false })}
-          isClone={supplierOpen?.isClone}
-          accountResource='supplierAccount'
-          accountApi='supplier-account'
-          isRedirectToDetailPage={false}
-          
-          onSuccess={({data}) => {
-            
-            setSupplierOpen({ open: false, isClone: false });
-           
-            if(data._id){
-                setFieldValue("transferToSupplier", data._id);
-                setSupplierToCategoryOptions((prevState) => {     
-                    return [
-                        ...prevState,
-                        {
-                            optionValue: data._id,
-                            optionLabel: data.accountName,
-                            order: supplierToCategoryOptions.length,
-                            default: false
-                        },
-                    ];
-                });
-            }
-           
-          }}
-        />
-      )}
-
-{customerOpen?.open && (
-        <ManageAccountDialog
-          // isUpdateDisabled={false}
-          // productCategoryId={productCategoryId}
-          open = {customerOpen?.open}
-         onClose={()=>setCustomerOpen({ open: false, isClone: false })}
-          isClone={customerOpen?.isClone}
-          accountResource='customerAccount'
-          accountApi='customer-account'
-          isRedirectToDetailPage={false}
-          
-          onSuccess={({data}) => {
-            
-            setCustomerOpen({ open: false, isClone: false });
-           
-            if(data._id){
-                setFieldValue("transferToCustomer", data._id);
-                setCustomerToCategoryOptions((prevState) => {     
-                    return [
-                        ...prevState,
-                        {
-                            optionValue: data._id,
-                            optionLabel: data.accountName,
-                            order: supplierToCategoryOptions.length,
-                            default: false
-                        },
-                    ];
-                });
-            }
-           
-          }}
-        />
-      )}
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button

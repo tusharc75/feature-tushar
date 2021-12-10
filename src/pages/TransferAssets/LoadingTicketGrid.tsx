@@ -341,6 +341,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           onClose={() => setOpenLoadingTicketDialog(false)}
           productInventoryForDeliveryTicket={assetWithNoTicket}
           transferData={transferAssetData}
+          warehouseId={transferAssetData?.transferFromPlant?.optionValue}
           onSuccess={() => {
             setOpenLoadingTicketDialog(false);
             fetchAssetsData(true);
