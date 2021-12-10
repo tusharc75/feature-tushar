@@ -82,7 +82,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData }) => {
     }
 
     localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
-
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`)
       .then(({ data }) => {
         let tempProductInventory = data.data.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
@@ -109,11 +108,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData }) => {
                     }
                   })
                 })
-
                 tempProductInventory.forEach((d) => {
                   d["hideSelection"] = d.status === "In-Transit";
                 })
-
                 dispatch({
                   type: "initialize", data: tempProductInventory, count: tempProductInventory.length
                 });
@@ -365,9 +362,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData }) => {
                   return ["Scrap", "Lost"].some(s => s === params.data.status);
                 },
             }}
+            refreshGrid={fetchRecords}
           />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-
       }
     </Grid>
     {showReceivingTicketDialog && (
@@ -380,6 +377,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData }) => {
         onClose={() => setShowReceivingTicketDialog(false)}
         onSuccess={() => {
           setShowReceivingTicketDialog(false);
+          fetchRecords();
         }}
         isRedirectToDetailPage={false}
       />
@@ -424,7 +422,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData }) => {
 
         <CustomDialogContent>
           <Box className="my-2">
-
             {
               statusToUpdate.status === "Repair" ? <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
                 : <TextField
@@ -440,10 +437,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData }) => {
                   }}
                 />
             }
-
           </Box>
         </CustomDialogContent>
-
         <CustomDialogFooter>
           <Button
             size="small"

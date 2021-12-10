@@ -9,7 +9,7 @@ import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import { getLocalStorageArrayData, prepareDataForGrid } from "../../constants/helpers"
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { FaRegistered , FaSuitcase } from "react-icons/fa";
+import { FaRegistered, FaSuitcase } from "react-icons/fa";
 import AddIcon from "@material-ui/icons/Add";
 
 import {
@@ -39,7 +39,7 @@ import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementD
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import HideWhenOffline from "../../components/HideWhenOffline";
-import useColumns, {getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
 import { camelCase } from "lodash";
 import { isMobile, isTablet } from 'react-device-detect'
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
@@ -68,7 +68,7 @@ const RentalManagement = () => {
   const {
     state: { user, permissions, selectedEntity },
   }: any = useData();
-  const {getColumnData} = useColumns();
+  const { getColumnData } = useColumns();
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -97,7 +97,6 @@ const RentalManagement = () => {
   //   isDelete: permissions?.quoteBuilder?.isDelete,
   // });
   const { rentalManagementResource, rentalManagementApi } = rentalManagement;
-  //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const {
@@ -135,7 +134,7 @@ const RentalManagement = () => {
         console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`)
       }
     }
-    
+
     let columns = []
     let rendererNames = []
     data.forEach(o => {
@@ -181,11 +180,9 @@ const RentalManagement = () => {
     if (rentalManagementTimeout) {
       clearTimeout(rentalManagementTimeout);
     }
-
     rentalManagementTimeout = setTimeout(() => {
       fetchRentalManagement();
     }, millisec);
-    // eslint-disable-next-line
   }, [search]);
 
   useEffect(() => {
@@ -225,42 +222,6 @@ const RentalManagement = () => {
         toastConfig.setToastConfig(error);
       });
   };
-
-  const RentalManagementNameRenderer = (params) => (
-    <>
-      <Link
-        className="text-truncate link"
-        title={params.value}
-        to={`${routes.rentalManagement.path}/detail/${params.data._id}`}
-      >
-        {params.value}
-      </Link>
-    </>
-  );
-
-  const CustomerAccountRenderer = (params) => <>
-    {
-      params.value ?
-        <Link
-          className="link"
-          title={params.value}
-          to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}
-        >
-          {params.value}
-        </Link> : <NoDataCell />
-    }
-  </>
-
-
-  const RelatedOpportunityRenderer = params => <>
-    {
-      params.value ?
-        <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
-          {params.value}
-        </Link>
-        : <NoDataCell />
-    }
-  </>
 
   const ActionsRenderer = (params) => (
     <>
@@ -308,10 +269,8 @@ const RentalManagement = () => {
     switch (field) {
       case "createdBy":
         return "createdBy.user.concatedName";
-
       case "updatedBy":
         return "updatedBy.user.concatedName";
-
       default:
         return field;
     }
@@ -319,9 +278,7 @@ const RentalManagement = () => {
 
   const replaceFieldNameForSorting = (field) => {
     const updatedField = replaceFieldName(field);
-
     if (field !== updatedField) return updatedField;
-
     switch (field) {
       case "owner":
         return "owner.optionLabel";
@@ -389,21 +346,16 @@ const RentalManagement = () => {
     return deepFilter;
   };
 
-
   const fetchRentalManagement = async () => {
     dispatch({ type: "loading", loading: true });
     const queryString = getQueryString();
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
     try {
       let data, count;
-
       if (!isOffline) {
         const response: any = await axiosInstance().get(`${rentalManagementApi}${queryString}`);
-
         data = response?.data?.data;
         count = response?.data?.count;
       }
@@ -411,15 +363,12 @@ const RentalManagement = () => {
         data = offlineGridData?.rentalManagement || [];
         count = offlineGridData?.rentalManagement?.length || 0;
       }
-
       try {
         updateOfflineGridData("rentalManagement", data);
       } catch (ex) {
         console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`)
       }
-
       let rows = data.map((u) => {
-
         let finalObject = prepareDataForGrid(u, user);
         finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
         finalObject["isChecked"] = false;
@@ -427,19 +376,17 @@ const RentalManagement = () => {
         finalObject["owerCollaboratorInitialsOrImages"] = [];
         if (finalObject["owner"])
           finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] }); finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
-          if (f.initials) {
-            f.initials = f.initials.split(" ").map((i) => i[0]).join("");
-          }
-        })
+            if (f.initials) {
+              f.initials = f.initials.split(" ").map((i) => i[0]).join("");
+            }
+          })
         return finalObject;
       });
-
       if (appendRows) {
         dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
       } else {
         dispatch({ type: "initialize", data: rows, count: count });
       }
-
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
       }, gridLoadingTimeout);
