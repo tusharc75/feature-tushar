@@ -390,12 +390,9 @@ const TransferAssetDetailPage = () => {
                     <AssetsGrid
                       fetchAssets={fetchAssets}
                       currentStep={currentStep}
-                      plantId={plantId}
-                      transferAssetId={id}
                       permissions={permissions}
                       user={user}
                       setNextStep={setNextStep}
-                      ownerId={transferAssetData?.createdBy.user._id}
                       updateTransferStatus={updateTransferStatus}
                       transferAssetData={transferAssetData}
                       handleViewPdf={handleViewPdf}
@@ -460,7 +457,7 @@ const TransferAssetDetailPage = () => {
         openUpdateDialog && (
           <ManageTransferAsset
             isEditable={existingAssets.length > 0}
-            isMainInfoEditable={currentStep >= 1 && loadingTickets.length > 0}
+            isMainInfoEditable={currentStep >= 1 && (loadingTickets.length > 0 || receivingTickets.length > 0)}
             number={transferAssetData?.transferAssetNumber}
             isClone={false}
             transferAssetId={id}
