@@ -270,10 +270,16 @@ const Top2Dashboard = (props) => {
               getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
               onChange={(_, val) => {
                 let data = { ...salesFilter, customerAccount: val }
-                if (val?.country) {
-                  let foundCountry = Countries.find(o => o.optionValue === val?.country)
+                if (val?.countryBillTo) {
+                  let foundCountry = Countries.find(o => o.optionValue === val?.countryBillTo)
                   if (foundCountry) {
-                    data.country = foundCountry
+                    data.countryBillTo = foundCountry
+                  }
+                }
+                if (val?.countrySellTo) {
+                  let foundCountry = Countries.find(o => o.optionValue === val?.countrySellTo)
+                  if (foundCountry) {
+                    data.countrySellTo = foundCountry
                   }
                 }
                 setSalesFilter({ ...data });
@@ -330,11 +336,24 @@ const Top2Dashboard = (props) => {
               fullWidth
               options={Countries}
               autoHighlight
-              value={salesFilter.country}
+              value={salesFilter.countrySellTo}
               getOptionLabel={(option) => option.optionLabel || ''}
               getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
-              onChange={(_, val) => setSalesFilter({ ...salesFilter, country: val })}
-              renderInput={(params) => <TextField {...params} label="Country" variant="outlined" />}
+              onChange={(_, val) => setSalesFilter({ ...salesFilter, countrySellTo: val })}
+              renderInput={(params) => <TextField {...params} label="Country Sell To" variant="outlined" />}
+            />
+            <Box mt={1} />
+
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={Countries}
+              autoHighlight
+              value={salesFilter?.countryBillTo}
+              getOptionLabel={(option) => option.optionLabel || ''}
+              getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
+              onChange={(_, val) => setSalesFilter({ ...salesFilter, countryBillTo: val })}
+              renderInput={(params) => <TextField {...params} label="Country Bill To" variant="outlined" />}
             />
           </Box>
         </Box>
