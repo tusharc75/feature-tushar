@@ -38,7 +38,8 @@ const Dashboard = () => {
       from: new Date(moment().subtract(1, 'year').calendar()),
       to: new Date()
     },
-    country: {}
+    countrySellTo: {},
+    countryBillTo: {}
   });
   const getExchangeRates = async (date, amount) => {
     if (filterCurrency && filterCurrency !== currency) {

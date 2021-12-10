@@ -87,7 +87,7 @@ const ManageAddressDialog = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={"Create " + routes.address.title}
+                        <CustomDialogHeader title={"Create "}
                             onClose={() => {
                                 if (isFieldNotTouched({
                                     fields: initialData.fields,

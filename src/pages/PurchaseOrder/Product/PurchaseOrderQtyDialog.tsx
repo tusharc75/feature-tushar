@@ -16,7 +16,7 @@ import {
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateUtils from '@date-io/date-fns';
 import moment from 'moment';
-import { dateFormatForInputControl } from '../../../constants/helpers';
+import { arrayToDropwdownOption, dateFormatForInputControl } from '../../../constants/helpers';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -82,17 +82,45 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
         }
       })
       //End
-      let tempObjKeysWithValues = getObjKeysWithValues(!bulkEdit ? productData : "", poFields)
-      if (!tempObjKeysWithValues["taxSchedule"] && purchaseOrderData["taxSchedule"]) {
-        tempObjKeysWithValues["taxSchedule"] = purchaseOrderData["taxSchedule"]
+      if (bulkEdit) {
+        let unitArray: any = []
+        productData?.forEach(element => {
+          if (element?.[`${element.type}Detail`]?.unit) {
+            unitArray.push([...element?.[`${element.type}Detail`].unit])
+          }
+        });
+        let unit: any = unitArray.shift().filter(function (v) {
+          return unitArray.every(function (a) {
+            return a.indexOf(v) !== -1;
+          });
+        });
+        const unitOptions: any = arrayToDropwdownOption(uniq(unit))
+        poFields.forEach((element) => {
+          if (element.fieldName === "unit") {
+            element.option = unitOptions;
+          }
+          element.required = false;
+          element.isFormula = false;
+          element.isMulitFormula = false;
+        })
+        setInitialData({
+          fields: poFields,
+          values: getObjKeys("", poFields),
+        });
       }
-      if (!tempObjKeysWithValues["expectedDelivery"] && purchaseOrderData["deliveryDate"]) {
-        tempObjKeysWithValues["expectedDelivery"] = purchaseOrderData["deliveryDate"]
+      else {
+        let tempObjKeysWithValues = getObjKeysWithValues(productData, poFields)
+        if (!tempObjKeysWithValues["taxSchedule"] && purchaseOrderData["taxSchedule"]) {
+          tempObjKeysWithValues["taxSchedule"] = purchaseOrderData["taxSchedule"]
+        }
+        if (!tempObjKeysWithValues["expectedDelivery"] && purchaseOrderData["deliveryDate"]) {
+          tempObjKeysWithValues["expectedDelivery"] = purchaseOrderData["deliveryDate"]
+        }
+        setInitialData({
+          fields: poFields,
+          values: tempObjKeysWithValues,
+        });
       }
-      setInitialData({
-        fields: poFields,
-        values: tempObjKeysWithValues,
-      });
       EvaluteproductFields(poFields);
     })
   }, []);
