@@ -685,7 +685,7 @@ const ContactDetailsPage = (props) => {
                   color="primary"
                   size="small"
                   onClick={handleOpneUpdateDialog}
-                  className={contactClass.mobile_button_layout}
+                  className={isMobile ? accountClass.mobile_button_layout : ""}
                   style={isMobile ? { color: '#43aeaa' } : {}}
                 >
                   {isMobile ? <BiEdit size={20} /> : 'Edit'}
