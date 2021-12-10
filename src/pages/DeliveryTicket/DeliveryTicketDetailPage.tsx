@@ -454,7 +454,8 @@ export default function DeliveryTicketDetail(props) {
                   }
 
                   {
-                    deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id && (deliveryTicketData?.status === "In-Transit" || deliveryTicketData?.status === "Delivered") ?
+                    // deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id && 
+                    (deliveryTicketData?.status === "In-Transit" || deliveryTicketData?.status === "Delivered") ?
                       <Button
                         variant="contained"
                         color="primary"

@@ -302,7 +302,7 @@ const ProductInventoryDetailsPage = () => {
     }
   }
 
-  const manualStatus = ["Available", "Repair", "Scrap", "Lost"]
+  const manualStatus = ["Scrap", "Lost"]
 
   return (
     <>
