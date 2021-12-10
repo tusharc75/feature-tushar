@@ -28,6 +28,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [formsData, setFormsData] = useState([]);
+    const [purchaseOrderData, setPurchaseOrderData] = useState(null);
 
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -38,6 +39,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
             const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             if (purchaseOrderId) {
                 axiosInstance().get(`${purchaseOrder.api}/` + purchaseOrderId).then(({ data: { data } }) => {
+                    setPurchaseOrderData(data)
                     if (isClone) {
                         const { _id, createdBy, updatedBy, serialNumber, ...rest } = data
 
@@ -156,7 +158,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={purchaseOrderId ? (isClone ? "Clone" : "Update " + routes.purchaseOrder.title) : "Create " + routes.purchaseOrder.title}
+                        <CustomDialogHeader title={purchaseOrderId ? (isClone ? "Clone" : `Update [ ${purchaseOrderData?.purchaseOrderNumber || ""} ]`) : "Create " + routes.purchaseOrder.title}
                             onClose={() => {
                                 if (isFieldNotTouched(initialData, values)) onClose()
                                 else setShowConfirmDialog(true)
