@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.18.0](https://github.com/vebholic/oms_frontend/compare/v2.17.0...v2.18.0) (2021-12-10)
+
+
+### Features
+
+* - PO-342 - Filter issue fixed in serialized asset step ([fb3e69a](https://github.com/vebholic/oms_frontend/commit/fb3e69a456449de07af012115153d4de7e298390))
+* - PO-403 - Loading ticket, receiving ticket signature issues fixed ([d62783a](https://github.com/vebholic/oms_frontend/commit/d62783adb42c30e5ce78d00560172d9a8d47a3af))
+* - PO-530 - while changing date , in serilased asset shows invalid ([71ec97d](https://github.com/vebholic/oms_frontend/commit/71ec97d5da23ed754a2d8150d971a2163d430510))
+* - PO-557 - Loading ticket View Signature button is not visible after signing - Fixed ([bf3e41d](https://github.com/vebholic/oms_frontend/commit/bf3e41df733a6a381fcdc5e1bf871898323e5e58))
+* - Repair job > receiving ticket issue fixed ([a0b166b](https://github.com/vebholic/oms_frontend/commit/a0b166b84f180cc099129ad9aa37673bebeeb52f))
+* **add icon and its functionality:** add icon and its functionalities ([a808f15](https://github.com/vebholic/oms_frontend/commit/a808f1540d7cfd840936384f057a629b4c2b246c))
+* dashboard and po changes ([dcf9008](https://github.com/vebholic/oms_frontend/commit/dcf9008130e687d0f95dd7223757b087adcb7717))
+* **serializedassets:** disable button ([e4ffe1d](https://github.com/vebholic/oms_frontend/commit/e4ffe1d30c2e98512da8dd664aa97716cf1a0a24))
+* **transferasset:** persist tab ([9ed4ab6](https://github.com/vebholic/oms_frontend/commit/9ed4ab6dbaa7f69040a199e86dc3fbb8c7e435ba))
+
+
+### Bug Fixes
+
+* **add button bug fix product inventory and transfer assest:** bug fix ([a4d9bcf](https://github.com/vebholic/oms_frontend/commit/a4d9bcf57ce165800eccb3e24a16bbb0e147bb6a))
+* bug fix ([c80529a](https://github.com/vebholic/oms_frontend/commit/c80529a6da748332cc288fe8020537c5ed173dea))
+* pO changes ([6a88b5b](https://github.com/vebholic/oms_frontend/commit/6a88b5bd86492529348af2a947afa24a820dea01))
+* rental bu fix ([5cddbe0](https://github.com/vebholic/oms_frontend/commit/5cddbe07e8307ec9002db440ea59f982d9091b93))
+* rental validation ([13c94d3](https://github.com/vebholic/oms_frontend/commit/13c94d3658959bf32a1f007ed7b844e600130e4c))
+* **transferasset:** minor fix ([6cdd2b2](https://github.com/vebholic/oms_frontend/commit/6cdd2b275bc1aa3839ecb50b0416eb0a7ced79d2))
+
 ## [2.17.0](https://github.com/vebholic/oms_frontend/compare/v2.16.0...v2.17.0) (2021-12-09)
 
 
