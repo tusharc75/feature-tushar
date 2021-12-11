@@ -554,6 +554,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                         },
                     ];
                 });
+                
             }
            
           }}
@@ -596,8 +597,13 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                           default: false
                       },
                   ];
+                 
               });
+              sessionStorage.setItem('productCategoryId', JSON.stringify(data.productCategory));
+
+
             }
+
            
           }}
         />
