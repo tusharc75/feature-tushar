@@ -66,7 +66,7 @@ export default function ProductHierarchy({ data, permissions, unassignProduct })
                             data={data}
                             columns={columns}
                             parentChildData={(row, rows) => {
-                                return rows.find(a => a._id === row.parent)
+                                return rows.find(a => (a._id === row.parent) || (a.treeId === row.parent) )
                             }}
                             options={options}
                         />
