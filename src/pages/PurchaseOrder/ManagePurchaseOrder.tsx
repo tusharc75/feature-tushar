@@ -18,6 +18,7 @@ import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { FaDiceOne } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
+import moment from "moment";
 
 const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, productId = null, productCategory = null,
     productsToSave = [], isFromSerializedAssetStepFromRental = false, currency = null, rentalManagementId = null
@@ -223,12 +224,13 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                         size="small"
                                                                     />
                                                                     :
-                                                                    field.fieldName === "deliveryDate" && deliveryDateMax ?
+                                                                    field.fieldName === "deliveryDate" ?
                                                                         <FormTypes
                                                                             {...field}
                                                                             disabled={Boolean(purchaseOrderId) && field.disableOnEdit && !isClone}
                                                                             values={values}
-                                                                            maxDate={deliveryDateMax}
+                                                                            maxDate={deliveryDateMax ? deliveryDateMax : null}
+                                                                            minDate={deliveryDateMax ? null : moment(new Date())}
                                                                             errors={errors}
                                                                             touched={touched}
                                                                             label={field.fieldLabel}
@@ -247,7 +249,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                         : <FormTypes
                                                                             isNew={Boolean(purchaseOrderId)}
                                                                             {...field}
-                                                                            disabled={(Boolean(purchaseOrderId) && field.disableOnEdit && !isClone) || field.fieldName === "purchaseOrderNumber"}
+                                                                            disabled={(Boolean(purchaseOrderId) && field.disableOnEdit && !isClone) || field.fieldName === "purchaseOrderNumber" || field.fieldName === "status"}
                                                                             values={values}
                                                                             errors={errors}
                                                                             touched={touched}

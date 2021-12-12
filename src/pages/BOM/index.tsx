@@ -156,7 +156,7 @@ const BOMTable = () => {
               data={BOMData}
               columns={columns}
               parentChildData={(row, rows) => {
-                return rows.find((a) => a._id === row.parent);
+                return rows.find((a) => a.treeId  === row.parent);
               }}
               options={{
                 search: true,
