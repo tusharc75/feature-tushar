@@ -153,7 +153,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBas
 
     return (<>
         <Box display="flex" justifyContent="space-between" m={1}>
-            <Box display="flex">
+            <Box display="flex" alignItems="center">
                 {permissions?.purchaseOrder?.isRead && (
                     <Button
                         variant="outlined"

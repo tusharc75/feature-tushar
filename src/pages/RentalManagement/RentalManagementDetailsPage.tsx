@@ -430,10 +430,7 @@ const RentalManagementDetailsPage = () => {
                     <Invoice
                       rentalManagementData={rentalManagementData}
                       setNextStep={setNextStep}
-                      isSmallScreen={isSmallScreen}
-                      isTabletScreen={isTabletScreen}
-                      showActivity={showActivity}
-                      currencySymbol={currencySymbol}
+                      fetchRentalData={fetchRentalManagementData}
                     />
                   )}
                 </Paper>
