@@ -145,7 +145,8 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
                     tempInitialData["shippingAddress"] = rentalData.shippingAddress
                     tempInitialData["deliveryJobName"] = `${rentalData?.rentalJobName}_${generateUniqueIdOnly()}`
-                    tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
+                    tempInitialData["pick-UpDate"] = moment(rentalData?.rentalStartDate).subtract(1, 'days');
+                    tempInitialData["deliveryDate"] = moment(rentalData?.rentalStartDate).subtract(1, 'days');
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
                         values: tempInitialData,
@@ -265,6 +266,17 @@ const ManageDeliveryTicket = (props) => {
         }))
     }
 
+    function validate(values) {
+        const errors = {};
+        let startDate = moment(values?.["pick-UpDate"]);
+        let endDate = moment(values?.deliveryDate);
+        if (endDate.diff(startDate, 'days') < 0) {
+          errors['pick-UpDate'] = 'Please enter valid pick-Up  date';
+        }
+        return errors;
+    }
+
+
     return (<Dialog
         maxWidth="md"
         fullScreen={fullScreen || (isMobile || isTablet)}
@@ -321,6 +333,7 @@ const ManageDeliveryTicket = (props) => {
                 initialValues={initialData.values}
                 validationSchema={yupSchema(initialData.fields)}
                 onSubmit={handleSubmit}
+                validate={validate}
             >
                 {({ values, errors, setFieldValue, touched, submitForm }) => (
                     <>
@@ -387,8 +400,6 @@ const ManageDeliveryTicket = (props) => {
                                                                                     isTooltip={field?.isTooltip || false}
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
-                                                                                    minDate={new Date()}
-                                                                                    maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
                                                                                 />
                                                                             ) : field.fieldName === "pick-UpDate" ? (
                                                                                 <FormTypes
@@ -409,8 +420,9 @@ const ManageDeliveryTicket = (props) => {
                                                                                     isTooltip={field?.isTooltip || false}
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
-                                                                                    minDate={new Date()}
-                                                                                    maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
+                                                                                    //minDate={new Date()}
+                                                                                    //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
+                                                                                    maxDate={rentalData?.rentalStartDate ? moment(rentalData?.rentalStartDate) : moment().add(1, 'years').calendar()}
                                                                                 />
                                                                             ) : field.fieldName === "deliveryDate" ? (
                                                                                 <FormTypes
@@ -431,7 +443,9 @@ const ManageDeliveryTicket = (props) => {
                                                                                     isTooltip={field?.isTooltip || false}
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
-                                                                                    minDate={moment(values["pick-UpDate"]).add(7, 'days')}
+                                                                                    //minDate={moment(values["pick-UpDate"]).add(7, 'days')}
+                                                                                    //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
+                                                                                    maxDate={rentalData?.rentalStartDate ? moment(rentalData?.rentalStartDate) : moment().add(1, 'years').calendar()}
                                                                                 />
                                                                             ) : field.fieldName === "deliveryJobName" ? (
                                                                                 <FormTypes

@@ -255,7 +255,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
 
     return (<>
         <Box display="flex" justifyContent="space-between" m={1}>
-            <Box display="flex">
+            <Box display="flex" alignItems="center">
                 <Box display="flex">
                     {permissions?.purchaseOrder?.isRead && (
                         <Button

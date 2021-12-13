@@ -33,8 +33,8 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
 
     const [headerLabel, setHeaderLabel] = useState("");
 
-
-    const [conditionType, setConditionType] = useState(["Price", "Rent", "Discount", "Charge", "Tax"]);
+    //["Price", "Rent", "Discount", "Charge", "Tax"]
+    const [conditionType, setConditionType] = useState(["Rent"]);
     const [currency, setCurrency] = useState([detailData.currency]);
     const [unit, setUnits] = useState([]);
     const [pricingMethod, setPricingMethod] = useState([]);

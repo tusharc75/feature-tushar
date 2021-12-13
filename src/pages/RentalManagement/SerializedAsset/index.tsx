@@ -9,7 +9,7 @@ import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray, generateUniqueId } from "../../../constants/helpers";
+import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray, productInventory } from "../../../constants/helpers";
 import moment from "moment";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
@@ -40,7 +40,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         Cell: ({ row }) => (
           <div className="d-flex gap-2 align-items-center">
             <p className="text-truncate" title={row.original.detail}  >
-              {row.original.detail}
+              {row.original?.type === "asset" ?
+                <a className="link text-truncate" href={`${productInventory.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
+                row.original.detail}
             </p>
             {row.original?.type === "asset" &&
               <span className="d-flex align-items-center gap-2">

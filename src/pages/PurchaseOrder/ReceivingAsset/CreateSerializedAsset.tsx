@@ -66,13 +66,16 @@ const CreateSerializedAsset = (props) => {
     }
 
     const validate = (values) => {
-        let errors = null;
+        let errors = { quantity: null, warehouse: null };
 
         if (values.length > 0) {
             values.map(d => {
                 let tempProduct = productList.find(u => u.productId === d.productId)
                 if (tempProduct && d.quantity > (tempProduct.qty - tempProduct.actualReceived)) {
-                    errors = "should be greater"
+                    errors.quantity = "should be greater"
+                }
+                if (tempProduct && !d.warehouse) {
+                    errors.warehouse = "Plant is required"
                 }
             })
         }
@@ -181,6 +184,8 @@ const CreateSerializedAsset = (props) => {
                                                                                                 variant="outlined"
                                                                                                 name="plants"
                                                                                                 label="Plants"
+                                                                                                error={validate([userVal]).warehouse}
+                                                                                                helperText={validate([userVal]).warehouse ? "Plant is required" : ""}
                                                                                                 required
                                                                                             />}
                                                                                         />
@@ -203,10 +208,9 @@ const CreateSerializedAsset = (props) => {
                                                                                                 ["quantity"]: e.target.value.replace(/[^0-9]/g, '')
                                                                                             })
                                                                                         }}
+                                                                                        error={validate([userVal])?.quantity}
+                                                                                        helperText={validate([userVal]).quantity ? "Receiving qunatity is more than actual quantity" : ""}
                                                                                     />
-                                                                                    {validate([userVal]) && (
-                                                                                        <span style={{ color: 'red' }}>{`quantity is high`}</span>
-                                                                                    )}
                                                                                 </Grid>
                                                                             </Grid>
                                                                         ))
@@ -231,7 +235,7 @@ const CreateSerializedAsset = (props) => {
                                 Cancel
                             </Button>
                             <Button
-                                onClick={() => { if (!validate(values.seriaizedAsset)) handleCreateSerializedAsset(values.seriaizedAsset) }}
+                                onClick={() => { if (!validate(values.seriaizedAsset).quantity && !validate(values.seriaizedAsset).warehouse) handleCreateSerializedAsset(values.seriaizedAsset) }}
                                 variant="contained"
                                 disabled={isSubmitting}
                                 color="primary"

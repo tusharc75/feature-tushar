@@ -26,7 +26,7 @@ import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum }
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomRenderCell from "../../../components/Helpers/CustomRenderCell";
-
+import InfoIcon from "@material-ui/icons/Info";
 
 const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable, id, setPurchaseOrderProduct }) => {
 
@@ -113,6 +113,17 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
         }}>
             <CustomRenderCell value={params.value} />
         </span>
+        <HtmlTooltip title="Details">
+            <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                    window.open(`${routes.productDetail.path}/${params.data.productId}`);
+                }}
+            >
+                <InfoIcon color="primary" />
+            </IconButton>
+        </HtmlTooltip>
     </span >
 
     const ActionsRenderer = (params) => (
@@ -129,7 +140,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     <EditIcon color="primary" />
                 </IconButton>
             </HtmlTooltip>
-            <GridDeleteIcon
+            {(params.data?.actualReceived === undefined || params.data?.actualReceived === 0) && <GridDeleteIcon
                 hasDeletePermission={permissions?.purchaseOrder?.isUpdate}
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
@@ -140,6 +151,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                 }
                 entity="rentalManagement"
             />
+            }
         </>
     );
 

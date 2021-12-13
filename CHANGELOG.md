@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.18.3](https://github.com/vebholic/oms_frontend/compare/v2.18.2...v2.18.3) (2021-12-13)
+
+
+### Bug Fixes
+
+* bom fix ([8eaebd1](https://github.com/vebholic/oms_frontend/commit/8eaebd11194a35d2c009990624b39fee9ab63941))
+* pO bugs ([480a7b9](https://github.com/vebholic/oms_frontend/commit/480a7b93330c4ae391321b00656ba37c5b0d2daf))
+* rental bug fix ([4908607](https://github.com/vebholic/oms_frontend/commit/4908607bd7db5c0d799d764b832846ba6ba50311))
+
 ### [2.18.2](https://github.com/vebholic/oms_frontend/compare/v2.18.1...v2.18.2) (2021-12-12)
 
 ### [2.18.1](https://github.com/vebholic/oms_frontend/compare/v2.18.0...v2.18.1) (2021-12-11)
