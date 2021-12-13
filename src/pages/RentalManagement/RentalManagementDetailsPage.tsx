@@ -25,6 +25,11 @@ import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiFoodMenu } from 'react-icons/bi';
 import TabPanel from '../../components/TabPanel';
+import Menu from "@material-ui/core/Menu"
+import { isMobile } from "react-device-detect";
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import { GrStatusInfo } from "react-icons/all";
+import MenuItem from "@material-ui/core/MenuItem"
 
 import Productpackage from './Productpackage';
 import AdditionalCost from './AdditionalCost';
@@ -59,6 +64,8 @@ const RentalManagementDetailsPage = () => {
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [statusOptions, setStatusOptions] = useState([])
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false);
   const [nextStep, setNextStep] = useState(true);
@@ -151,6 +158,12 @@ const RentalManagementDetailsPage = () => {
     try {
       if (!isOffline) {
         const response: any = await axiosInstance().get('/field?resource=Rental Management');
+        response?.data?.data.some(o => {
+          if (o?.fieldData?.fieldName === "status") {
+            setStatusOptions([...o.fieldData.option])
+            return true
+          }
+        })
         setRentalManagementFields(response?.data?.data);
       } else {
         setRentalManagementFields(offlineFieldsData?.rentalManagement);
@@ -182,6 +195,32 @@ const RentalManagementDetailsPage = () => {
       });
   };
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const handleStatusChange = o => {
+    if (o.optionValue && rentalManagementData?.status !== o.optionValue) {
+      updateJobStatus(o.optionValue)
+    }
+  }
+
+  const updateJobStatus = (status) => {
+    axiosInstance().patch(`${rentalManagement.rentalManagementApi}/status/${rentalManagementData._id}`, { status: status }).then(({ data: { data } }) => {
+      fetchRentalManagementData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: `Status changed to ${status}`
+      });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  }
 
   return (
     <>
@@ -231,6 +270,41 @@ const RentalManagementDetailsPage = () => {
                       </Button>
                     ) : null}
                   </HideWhenOffline>
+                  {permissions?.rentalManagement?.isUpdate && (["Ready to Invoice", "Invoiced", "Closed"].includes(rentalManagementData?.status)) && (
+                    <>
+                      <Button
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        aria-controls="action-menu"
+                        endIcon={isMobile ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
+                      >
+                        {isMobile ? <GrStatusInfo size={20} /> : "Change Status"}
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}>
+                        {statusOptions?.map((o, index) => {
+                          return <MenuItem
+                            disabled={index <= statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice")}
+                            onClick={() => {
+                              closeActions()
+                              handleStatusChange(o)
+                            }}
+                            value={o}>{o?.optionLabel}</MenuItem>
+                        })}
+                      </Menu>
+                    </>
+                  )}
                 </DetailsPageHeader>
               )}
               <Tabs
@@ -431,6 +505,8 @@ const RentalManagementDetailsPage = () => {
                       rentalManagementData={rentalManagementData}
                       setNextStep={setNextStep}
                       fetchRentalData={fetchRentalManagementData}
+                      updateJobStatus={updateJobStatus}
+                      statusOptions={statusOptions}
                     />
                   )}
                 </Paper>

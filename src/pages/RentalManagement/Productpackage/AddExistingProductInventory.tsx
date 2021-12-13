@@ -18,6 +18,7 @@ import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
+import { startCase } from "lodash";
 
 const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts }) => {
 
@@ -151,7 +152,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             aria-labelledby="customized-dialog-title"
             open={true}
         >
-            <CustomDialogHeader title={`Add ${type}`} onClose={handleProductInventoryClose} ></CustomDialogHeader>
+            <CustomDialogHeader title={`Add ${startCase(type)}`} onClose={handleProductInventoryClose} ></CustomDialogHeader>
             <div className="listing-grid p-3">
                 <Box mb={2}>
                     <Grid container >
