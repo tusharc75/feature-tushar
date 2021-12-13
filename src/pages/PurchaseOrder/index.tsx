@@ -247,7 +247,7 @@ const PurchaseOrder = () => {
                     </IconButton>
                 </HtmlTooltip>
             }
-            {permissions?.purchaseOrder?.isDelete &&
+            {/* {permissions?.purchaseOrder?.isDelete &&
                 <HtmlTooltip title="Delete">
                     <IconButton size="small" aria-label="Delete" onClick={() => {
                         setDeleteRecord(params.data);
@@ -256,7 +256,7 @@ const PurchaseOrder = () => {
                         <DeleteIcon color="error" />
                     </IconButton>
                 </HtmlTooltip >
-            }
+            } */}
         </>
     )
 
