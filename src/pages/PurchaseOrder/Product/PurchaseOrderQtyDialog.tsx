@@ -79,7 +79,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
         })
         setInitialData({
           fields: poFields,
-          values: getObjKeys("", poFields),
+          values: { ...getObjKeys("", poFields), expectedDelivery: "" },
         });
       }
       else {

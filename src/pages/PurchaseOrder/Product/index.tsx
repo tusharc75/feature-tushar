@@ -140,7 +140,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     <EditIcon color="primary" />
                 </IconButton>
             </HtmlTooltip>
-            {params.data?.actualReceived === 0 && <GridDeleteIcon
+            {(params.data?.actualReceived === undefined || params.data?.actualReceived === 0) && <GridDeleteIcon
                 hasDeletePermission={permissions?.purchaseOrder?.isUpdate}
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
