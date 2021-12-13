@@ -55,38 +55,12 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
   useEffect(() => {
     axiosInstance().get("/field/child?resource=Purchase Order Product").then(({ data: { data } }) => {
       const poFields = CURReplaceByCurrencySingle(data, currency);
-      //Update Unit As Product Start
       setAllFields(JSON.parse(JSON.stringify(poFields)))
-      if (bulkEdit) {
-        poFields.forEach((_f) => {
-          _f.required = false;
-          _f.isFormula = false;
-          _f.isMulitFormula = false;
-        })
-      }
-      poFields.filter((_f) => {
-        if (["unit", "umo"].includes(_f.fieldName.toLowerCase())) {
-          if (!bulkEdit && (productData?.productDetail?.unit || productData?.productDetail?.umo)) {
-            let unitOption = productData?.productDetail?.unit || productData?.productDetail?.umo
-            if (unitOption) {
-              let newUnitOptions = unitOption?.map((item, index) => {
-                let res: any = {}
-                res.optionLabel = item
-                res.optionValue = item
-                res.order = index
-                return res;
-              });
-              _f.option = newUnitOptions;
-            }
-          }
-        }
-      })
-      //End
       if (bulkEdit) {
         let unitArray: any = []
         productData?.forEach(element => {
-          if (element?.[`${element.type}Detail`]?.unit) {
-            unitArray.push([...element?.[`${element.type}Detail`]?.unit])
+          if (element?.productDetail?.unit) {
+            unitArray.push([...element?.productDetail?.unit])
           }
         });
         let unit: any = unitArray?.shift()?.filter(function (v) {
@@ -94,7 +68,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
             return a.indexOf(v) !== -1;
           });
         });
-        const unitOptions: any = arrayToDropwdownOption(uniq(unit))
+        const unitOptions: any = arrayToDropwdownOption(unit)
         poFields.forEach((element) => {
           if (element.fieldName === "unit") {
             element.option = unitOptions;
@@ -109,6 +83,15 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
         });
       }
       else {
+
+        poFields.filter((_f) => {
+          if (["unit"].includes(_f.fieldName.toLowerCase())) {
+            if (productData?.productDetail?.unit) {
+              _f.option = arrayToDropwdownOption(productData?.productDetail?.unit)
+            }
+          }
+        })
+
         let tempObjKeysWithValues = getObjKeysWithValues(productData, poFields)
         if (!tempObjKeysWithValues["taxSchedule"] && purchaseOrderData["taxSchedule"]) {
           tempObjKeysWithValues["taxSchedule"] = purchaseOrderData["taxSchedule"]

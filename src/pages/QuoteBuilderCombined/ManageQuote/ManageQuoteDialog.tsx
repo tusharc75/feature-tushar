@@ -271,13 +271,13 @@ export default function ManageQuoteDialog({
           )
         );
       }
-      const countryBillToDropdownData = entityData.fields.map(m => m.fieldData).find(
+      const countryBillToDropdownData = entityData.fields.find(
         (d) => d.fieldName === "countryBillTo"
       );
       if (countryBillToDropdownData) {
         setCountryBillToMainData(countryBillToDropdownData.option)
       }
-      const countrySellToDropdownData = entityData.fields.map(m => m.fieldData).find(
+      const countrySellToDropdownData = entityData.fields.find(
         (d) => d.fieldName === "countrySellTo"
       );
       if (countryBillToDropdownData) {
