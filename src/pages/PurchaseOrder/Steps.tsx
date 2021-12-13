@@ -223,7 +223,7 @@ const Steps = (props) => {
                                 {!isMobile && (
                                     <>
                                         <div>
-                                            {(
+                                            {!currentStepDisable && (
                                                 <div>
                                                     <IconButton
                                                         disabled={currentStep === 5 || currentStep === 0 || currentStepDisable}
@@ -250,7 +250,7 @@ const Steps = (props) => {
                                             {isMobile && (
                                                 <>
                                                     <div>
-                                                        {(
+                                                        {!currentStepDisable && (
                                                             <div>
                                                                 <IconButton
                                                                     color="primary"
@@ -278,7 +278,7 @@ const Steps = (props) => {
                                                     <div>
                                                         {(
                                                             <div>
-                                                                {(
+                                                                {!currentStepDisable && (
                                                                     <IconButton
                                                                         color="primary"
                                                                         onClick={() => {
@@ -335,7 +335,7 @@ const Steps = (props) => {
                                         <div>
                                             {(
                                                 <div>
-                                                    {(
+                                                    {!currentStepDisable && (
                                                         <IconButton
 
                                                             onClick={() => {
