@@ -179,7 +179,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
           tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
           tempInitialData["warehouse"] = rentalData?.warehouse?.optionValue
           tempInitialData["receivingPlantAddress"] = rentalData.shippingAddress
-          tempInitialData["customerPickupAddress"] = rentalData.shippingAddress
+          tempInitialData["pickupAddress"] = rentalData.shippingAddress
           tempInitialData["type"] = "Rental Job"
           tempInitialData["receivingJobName"] = `${rentalData?.rentalJobName}_${generateUniqueIdOnly()}`
           setReceivingTicketData({

@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ReceivingTicket = ({ currentStep, rentalManagementData }) => {
+const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -77,23 +77,23 @@ const ReceivingTicket = ({ currentStep, rentalManagementData }) => {
   }, []);
 
   const fetchRecords = () => {
+    setNextStep(false)
     if (gridApi) {
       gridApi.deselectAll();
     }
-
     localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`)
       .then(({ data }) => {
-        let tempProductInventory = data.data.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
+        let productAssets = data.data.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
         dispatch({ type: "loading", loading: true });
         axiosInstance()
           .get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/delivery-ticket`)
           .then(({ data }) => {
             data.data.map(obj => {
-              tempProductInventory.map((d, index) => {
+              productAssets.map((d, index) => {
                 if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                  tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
-                  tempProductInventory[index]["deliveryTicketId"] = obj?._id
+                  productAssets[index]["deliveryTicket"] = obj?.deliveryJobName
+                  productAssets[index]["deliveryTicketId"] = obj?._id
                 }
               })
             })
@@ -101,18 +101,21 @@ const ReceivingTicket = ({ currentStep, rentalManagementData }) => {
               .get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/receiving-ticket`)
               .then(({ data }) => {
                 data.data.map(obj => {
-                  tempProductInventory.map((d, index) => {
+                  productAssets.map((d, index) => {
                     if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                      tempProductInventory[index]["receivingTicket"] = obj?.receivingJobName
-                      tempProductInventory[index]["receivingTicketId"] = obj?._id
+                      productAssets[index]["receivingTicket"] = obj?.receivingJobName
+                      productAssets[index]["receivingTicketId"] = obj?._id
                     }
                   })
                 })
-                tempProductInventory.forEach((d) => {
+                productAssets.forEach((d) => {
                   d["hideSelection"] = d.status === "In-Transit";
                 })
+                if (productAssets.filter((e) => ["Under Review"].includes(e.status)).length === productAssets.length) {
+                  setNextStep(true)
+                }
                 dispatch({
-                  type: "initialize", data: tempProductInventory, count: tempProductInventory.length
+                  type: "initialize", data: productAssets, count: productAssets.length
                 });
                 setTimeout(() => {
                   dispatch({ type: "loading", loading: false });
