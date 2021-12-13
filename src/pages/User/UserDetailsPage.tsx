@@ -668,7 +668,7 @@ const UserDetailsPage = () => {
                     <DeleteButton
                       text="Delete"
                       disabled={user?.user?._id === id || userData?.userType === userType.brandAdmin}
-                      onClick={() => setShowConfirmBox(true)}
+                      onClick={() => handleDeleteUser(true)}
                     />
                   ) : null}
                 </DetailsPageHeader>
@@ -1308,7 +1308,7 @@ const UserDetailsPage = () => {
         />
       }
       {
-        showConfirmBox ?
+        showConfirmBox && deleteUserRec ?
           <ResourceTransferDialog
             open={showConfirmBox}
             resource="User"

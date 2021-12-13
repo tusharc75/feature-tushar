@@ -48,7 +48,7 @@ const TransferAsset = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
   const {
-    state: { user, permissions },
+    state: { user, permissions, selectedEntity },
   }: any = useData();
   const { getColumnData } = useColumns();
   const history = useHistory();
@@ -59,7 +59,7 @@ const TransferAsset = () => {
 
   useEffect(() => {
     fetchTransferAsset()
-  }, [page, limit, filters, sorting, search]);
+  }, [page, limit, filters, sorting, search, selectedEntity]);
 
   const fetchGridColumns = () => {
     axiosInstance()
