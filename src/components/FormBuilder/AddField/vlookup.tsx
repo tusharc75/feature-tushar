@@ -108,10 +108,30 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
     export_json.forEach((_d) => {
       delete _d?.optionValue;
     });
+    const header = []
+    if (export_json.length) {
+      for (var key in export_json[0]) {
+        if (key === "optionLabel") {
+          header.push(values["fieldLabel"]);
+        }
+        else {
+          const filter = fields.filter((_f) => _f.fieldName === key)
+          if (filter.length) {
+            header.push(filter[0]["fieldLabel"]);
+          }
+          else {
+            header.push(key);
+          }
+        }
+      }
+    }
     const ws = utils.json_to_sheet(export_json);
+    if (header.length) {
+      utils.sheet_add_aoa(ws, [header]);
+    }
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, 'Sheet1');
-    writeFile(wb, 'vlookup dropdown options.xlsx');
+    writeFile(wb, `${values["fieldLabel"]} Vlookup Dropdown Options.xlsx`);
   };
 
   const convertLabelToValue = (value) => {

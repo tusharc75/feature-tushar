@@ -493,7 +493,7 @@ const ProductBuilder = (props) => {
           fields,
           productRow,
           row.column.colId,
-          currency,
+          currency?.toUpperCase(),
           unit,
           value
         );
