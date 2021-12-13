@@ -141,116 +141,108 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
     }
 
     setLoading(true);
-    axiosInstance()
-      .get('/field?resource=Receiving Ticket')
-      .then(({ data: { data } }) => {
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-        if (receivingTicketId) {
-          axiosInstance()
-            .get(`${receivingTicket.receivingTicketApi}/` + receivingTicketId)
-            .then(({ data: { data } }) => {
-
-              if (isClone) {
-                const { _id, createdBy, history, receivingJobName, updatedBy, ...rest } = data;
-
-                setReceivingTicketData({
-                  fields: fieldsDataForCreate,
-                  initialValues: getObjKeysWithValues(rest, fieldsDataForCreate)
-                });
-                setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
-                setLoading(false);
-              } else {
-                setDisableOwnerSelection(receivingTicketId && user.user._id !== data?.owner?.optionValue);
-
-                setTitle(prevState => `${prevState} ${data.receivingJobName}`);
-                setDisableReceivingJobName(true);
-
-                setReceivingTicketData({
-                  fields: fieldsDataForUpdate,
-                  initialValues: getObjKeysWithValues(data, fieldsDataForUpdate)
-                });
-                setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
-                setLoading(false);
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          if (productInventoryForReceivingTicket && rentalData) {
-            setDisableReceivingJobName(true);
-            const tempInitialData = getObjKeys("", fieldsDataForCreate)
-            tempInitialData["productInventory"] = productInventoryForReceivingTicket.map(d => d._id)
-            tempInitialData["rentalJob"] = rentalData._id
-            tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
-            tempInitialData["pickupAddress"] = rentalData.shippingAddress
-            tempInitialData["type"] = "Rental Job"
-            tempInitialData["receivingJobName"] = `${rentalData?.rentalJobName}_${generateUniqueIdOnly()}`
-            setReceivingTicketData({
-              fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rentalJob"),
-              initialValues: tempInitialData,
-            });
-            setFormValues(tempInitialData)
-          } else if (productInventoryForReceivingTicket && repairJobData) {
-            setDisableReceivingJobName(true);
-            const tempInitialData = getObjKeys("", fieldsDataForCreate)
-            tempInitialData["productInventory"] = productInventoryForReceivingTicket.map(d => d._id)
-            tempInitialData["repairJob"] = repairJobData._id
-            tempInitialData["type"] = "Repair Job"
-            tempInitialData["receivingJobName"] = `${repairJobData?.repairJobName}_${generateUniqueIdOnly()}`
-
-            if (repairJobData?.typeOfRepair === "Internal") {
-              // tempInitialData["customerAccount"] = repairJobData?.repairPlant?.optionValue;
-              tempInitialData["pickupAddress"] = repairJobData?.plantShipTo;
+    axiosInstance().get('/field?resource=Receiving Ticket').then(({ data: { data } }) => {
+      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      if (receivingTicketId) {
+        axiosInstance()
+          .get(`${receivingTicket.receivingTicketApi}/` + receivingTicketId)
+          .then(({ data: { data } }) => {
+            if (isClone) {
+              const { _id, createdBy, history, receivingJobName, updatedBy, ...rest } = data;
+              setReceivingTicketData({
+                fields: fieldsDataForCreate,
+                initialValues: getObjKeysWithValues(rest, fieldsDataForCreate)
+              });
+              setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
+              setLoading(false);
+            } else {
+              setDisableOwnerSelection(receivingTicketId && user.user._id !== data?.owner?.optionValue);
+              setTitle(prevState => `${prevState} ${data.receivingJobName}`);
+              setDisableReceivingJobName(true);
+              setReceivingTicketData({
+                fields: fieldsDataForUpdate,
+                initialValues: getObjKeysWithValues(data, fieldsDataForUpdate)
+              });
+              setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
+              setLoading(false);
             }
-            if (repairJobData?.typeOfRepair === "External") {
-              tempInitialData["supplierAccount"] = repairJobData?.vendor?.optionValue;
-              tempInitialData["supplierShippingAddress"] = repairJobData?.supplierShipTo;
-            }
-
-            setReceivingTicketData({
-              fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "repairJob"),
-              initialValues: tempInitialData,
-            });
-            setFormValues(tempInitialData)
-
-          } else if (productInventoryForReceivingTicket && transferData) {
-            setDisableReceivingJobName(true);
-            const tempInitialData = getObjKeys("", fieldsDataForCreate)
-            tempInitialData["productInventory"] = productInventoryForReceivingTicket.map(d => d._id)
-            tempInitialData["transferAsset"] = transferData._id
-            tempInitialData["type"] = "Transfer Asset"
-            tempInitialData["expectedDeliveryDate"] = moment(new Date()).add(7, 'days');
-            tempInitialData["receivingJobName"] = `${transferData?.transferAssetNumber}_${generateUniqueIdOnly()}`
-            tempInitialData["warehouse"] = transferData?.transferToPlant.optionValue
-            tempInitialData["receivingPlantAddress"] = transferData?.transferToPlant.address
-            if (transferData?.transferType === "External Customer") {
-              tempInitialData["customerAccount"] = transferData?.transferToCustomer?.optionValue;
-              tempInitialData["customerPickupAddress"] = transferData?.customerShipTo;
-            }
-            if (transferData?.transferType === "External Supplier") {
-              tempInitialData["supplierAccount"] = transferData?.transferToSupplier?.optionValue;
-              tempInitialData["supplierPickupAddress"] = transferData?.supplierShipTo;
-            }
-            setReceivingTicketData({
-              fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "transferAsset"),
-              initialValues: tempInitialData,
-            });
-            setFormValues(tempInitialData)
-
-          } else {
-            let initialData = getObjKeys('', fieldsDataForCreate);
-            setReceivingTicketData({
-              fields: fieldsDataForCreate,
-              initialValues: initialData
-            });
-            setFormValues(initialData);
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        if (productInventoryForReceivingTicket && rentalData) {
+          setDisableReceivingJobName(true);
+          const tempInitialData = getObjKeys("", fieldsDataForCreate)
+          tempInitialData["productInventory"] = productInventoryForReceivingTicket.map(d => d._id)
+          tempInitialData["rentalJob"] = rentalData._id
+          tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
+          tempInitialData["warehouse"] = rentalData?.warehouse?.optionValue
+          tempInitialData["pickupAddress"] = rentalData.shippingAddress
+          tempInitialData["customerPickupAddress"] = rentalData.shippingAddress
+          tempInitialData["type"] = "Rental Job"
+          tempInitialData["receivingJobName"] = `${rentalData?.rentalJobName}_${generateUniqueIdOnly()}`
+          setReceivingTicketData({
+            fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "rentalJob"),
+            initialValues: tempInitialData,
+          });
+          setFormValues(tempInitialData)
+        } else if (productInventoryForReceivingTicket && repairJobData) {
+          setDisableReceivingJobName(true);
+          const tempInitialData = getObjKeys("", fieldsDataForCreate)
+          tempInitialData["productInventory"] = productInventoryForReceivingTicket.map(d => d._id)
+          tempInitialData["repairJob"] = repairJobData._id
+          tempInitialData["type"] = "Repair Job"
+          tempInitialData["receivingJobName"] = `${repairJobData?.repairJobName}_${generateUniqueIdOnly()}`
+          if (repairJobData?.typeOfRepair === "Internal") {
+            // tempInitialData["customerAccount"] = repairJobData?.repairPlant?.optionValue;
+            tempInitialData["pickupAddress"] = repairJobData?.plantShipTo;
           }
-          setLoading(false);
+          if (repairJobData?.typeOfRepair === "External") {
+            tempInitialData["supplierAccount"] = repairJobData?.vendor?.optionValue;
+            tempInitialData["supplierShippingAddress"] = repairJobData?.supplierShipTo;
+          }
+          setReceivingTicketData({
+            fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "repairJob"),
+            initialValues: tempInitialData,
+          });
+          setFormValues(tempInitialData)
+        } else if (productInventoryForReceivingTicket && transferData) {
+          setDisableReceivingJobName(true);
+          const tempInitialData = getObjKeys("", fieldsDataForCreate)
+          tempInitialData["productInventory"] = productInventoryForReceivingTicket.map(d => d._id)
+          tempInitialData["transferAsset"] = transferData._id
+          tempInitialData["type"] = "Transfer Asset"
+          tempInitialData["expectedDeliveryDate"] = moment(new Date()).add(7, 'days');
+          tempInitialData["receivingJobName"] = `${transferData?.transferAssetNumber}_${generateUniqueIdOnly()}`
+          tempInitialData["warehouse"] = transferData?.transferToPlant.optionValue
+          tempInitialData["receivingPlantAddress"] = transferData?.transferToPlant.address
+          if (transferData?.transferType === "External Customer") {
+            tempInitialData["customerAccount"] = transferData?.transferToCustomer?.optionValue;
+            tempInitialData["customerPickupAddress"] = transferData?.customerShipTo;
+          }
+          if (transferData?.transferType === "External Supplier") {
+            tempInitialData["supplierAccount"] = transferData?.transferToSupplier?.optionValue;
+            tempInitialData["supplierPickupAddress"] = transferData?.supplierShipTo;
+          }
+          setReceivingTicketData({
+            fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "transferAsset"),
+            initialValues: tempInitialData,
+          });
+          setFormValues(tempInitialData)
+
+        } else {
+          let initialData = getObjKeys('', fieldsDataForCreate);
+          setReceivingTicketData({
+            fields: fieldsDataForCreate,
+            initialValues: initialData
+          });
+          setFormValues(initialData);
         }
-      })
+        setLoading(false);
+      }
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -329,6 +321,17 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
       ...data
     }));
   };
+
+  function validate(values) {
+    const errors = {};
+    let startDate = moment(values?.["pick-UpDate"]);
+    let endDate = moment(values?.deliveryDate);
+    if (endDate.diff(startDate, 'days') < 0) {
+      errors['pick-UpDate'] = 'Please enter valid pick-Up  date';
+    }
+    return errors;
+}
+
   return (
     <>
       <Dialog
@@ -378,7 +381,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
             </CustomDialogFooter>
           </>
         ) : (
-          <Formik initialValues={receivingTicketData.initialValues} validationSchema={yupSchema(receivingTicketData.fields)} validateOnMount onSubmit={() => { }}>
+          <Formik initialValues={receivingTicketData.initialValues} validationSchema={yupSchema(receivingTicketData.fields)} validate={validate} validateOnMount onSubmit={() => { }}>
             {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
               <>
                 <CustomDialogContent>
@@ -395,13 +398,12 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
                                 <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
                                 <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
                               </div>
-
                               <Box marginY={2}>
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field) => (
                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                       {
-                                        (rentalData && field.fieldName === "customerAccount") || (rentalData && field.fieldName === "pickupAddress") || field.fieldName === "deliveryType" ? (
+                                        (rentalData && field.fieldName === "customerAccount") || field.fieldName === "deliveryType" ? (
                                           <FormTypes
                                             {...field}
                                             disabled={true}
@@ -597,7 +599,6 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
                       })}
                   </Form>
                 </CustomDialogContent>
-
                 <CustomDialogFooter>
                   <Button
                     disabled={submitting}
@@ -612,7 +613,6 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
                   >
                     Cancel
                   </Button>
-
                   <CustomButton
                     loading={loading}
                     variant="contained"

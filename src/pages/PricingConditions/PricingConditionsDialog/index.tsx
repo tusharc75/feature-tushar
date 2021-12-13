@@ -17,6 +17,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import { Box } from '@material-ui/core';
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 import { startCase } from 'lodash';
+import { useHistory } from "react-router-dom";
 
 const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpdateDisabled = false, isClone = false }) => {
 
@@ -25,6 +26,7 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+    const history = useHistory();
 
     useEffect(() => {
         axiosInstance().get(`/field?resource=${startCase(pricingCondition.resource)}`).then(({ data: { data } }) => {
@@ -74,7 +76,7 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
         else {
             axiosInstance().post(`${pricingCondition.api}`, values).then(({ data: { data } }) => {
                 setLoading(false);
-                onSuccess(data)
+                history.push(`${pricingCondition.api}/detail/${data._id}`);
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
