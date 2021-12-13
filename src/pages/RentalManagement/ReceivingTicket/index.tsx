@@ -1,35 +1,36 @@
 import Box from "@material-ui/core/Box/Box";
 import { useState, useEffect, useReducer, useContext } from "react";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
+import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
+import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
 import { Link } from 'react-router-dom'
-import routes from "../../components/Helpers/Routes";
+import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import {
   Button, Tooltip, IconButton, Menu, MenuItem,
   Dialog, TextField, CircularProgress
 } from "@material-ui/core";
 import { AiFillFilePdf } from "react-icons/ai";
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import NoDataCell from "../../components/Helpers/NoDataCell";
+import axiosInstance from "../../../axios/axiosInstance";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import NoDataCell from "../../../components/Helpers/NoDataCell";
 import {
   gridLoadingTimeout, receivingTicket, rentalManagement,
   sidebarResource, productInventory as productInventoryHelperObject
-} from "../../constants/helpers";
+} from "../../../constants/helpers";
 import { groupBy } from "lodash";
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { makeStyles } from '@material-ui/core/styles';
-import {isMobile} from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import { useHistory } from "react-router-dom";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
+import ManageReceivingTicket from '../../ReceivingTicket/ManageReceivingTicket';
 
 const renderedFrom = "rentalManagementDetailsPageReceivingTicket"
 
@@ -45,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ReceivingTicket = ({ currentStep, handleReceivingTicketDialog, rentalManagementId }) => {
+const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -58,6 +59,9 @@ const ReceivingTicket = ({ currentStep, handleReceivingTicketDialog, rentalManag
 
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: "", message: "" })
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const [productInventoryForReceivingTicket, setProductInventoryForReceivingTicket] = useState<any[]>([]);
+  const [showReceivingTicketDialog, setShowReceivingTicketDialog] = useState(false);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -73,45 +77,45 @@ const ReceivingTicket = ({ currentStep, handleReceivingTicketDialog, rentalManag
   }, []);
 
   const fetchRecords = () => {
+    setNextStep(false)
     if (gridApi) {
       gridApi.deselectAll();
     }
-
     localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
-
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/inventory`)
+    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`)
       .then(({ data }) => {
-        let tempProductInventory = data.data.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
+        let productAssets = data.data.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
         dispatch({ type: "loading", loading: true });
         axiosInstance()
-          .get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/delivery-ticket`)
+          .get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/delivery-ticket`)
           .then(({ data }) => {
             data.data.map(obj => {
-              tempProductInventory.map((d, index) => {
+              productAssets.map((d, index) => {
                 if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                  tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
-                  tempProductInventory[index]["deliveryTicketId"] = obj?._id
+                  productAssets[index]["deliveryTicket"] = obj?.deliveryJobName
+                  productAssets[index]["deliveryTicketId"] = obj?._id
                 }
               })
             })
             axiosInstance()
-              .get(`${rentalManagement.rentalManagementApi}/${rentalManagementId}/receiving-ticket`)
+              .get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/receiving-ticket`)
               .then(({ data }) => {
                 data.data.map(obj => {
-                  tempProductInventory.map((d, index) => {
+                  productAssets.map((d, index) => {
                     if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                      tempProductInventory[index]["receivingTicket"] = obj?.receivingJobName
-                      tempProductInventory[index]["receivingTicketId"] = obj?._id
+                      productAssets[index]["receivingTicket"] = obj?.receivingJobName
+                      productAssets[index]["receivingTicketId"] = obj?._id
                     }
                   })
                 })
-
-                tempProductInventory.forEach((d) => {
+                productAssets.forEach((d) => {
                   d["hideSelection"] = d.status === "In-Transit";
                 })
-
+                if (productAssets.filter((e) => ["Under Review"].includes(e.status)).length === productAssets.length) {
+                  setNextStep(true)
+                }
                 dispatch({
-                  type: "initialize", data: tempProductInventory, count: tempProductInventory.length
+                  type: "initialize", data: productAssets, count: productAssets.length
                 });
                 setTimeout(() => {
                   dispatch({ type: "loading", loading: false });
@@ -188,9 +192,11 @@ const ReceivingTicket = ({ currentStep, handleReceivingTicketDialog, rentalManag
     });
   }
 
-  const updateStatusOfSelectedAssets = (status) => {
 
-  }
+  const handleReceivingTicketDialog = (selectedProductInventory) => {
+    setProductInventoryForReceivingTicket(selectedProductInventory);
+    setShowReceivingTicketDialog(true);
+  };
 
   return (<>
 
@@ -199,7 +205,7 @@ const ReceivingTicket = ({ currentStep, handleReceivingTicketDialog, rentalManag
         onClick={() => {
           setDownlodingFile(true);
 
-          axiosInstance().get(`/rental-management/${rentalManagementId}/pdf`)
+          axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
             .then(({ data }) => {
               axiosInstance()
                 .get(`user/download?fileName=${data.data.fileName}`, {
@@ -308,63 +314,77 @@ const ReceivingTicket = ({ currentStep, handleReceivingTicketDialog, rentalManag
     <Grid item xs={12} md={12} sm={12} className="mt-3">
 
       {columns ?
-          isMobile ?
-              <CustomSwipableList
-                  allowSelection={true}
-                  allowSwipe={true}
-                  permissions={true}
-                  primaryField={columns?.find(d => d.field)}
-                  onClick={(data) => {
-                    history.push(`${routes.productInventoryDetail.path}/${data._id}`)
-                  }}
-                  dataRows={dataRows}
-                  selectedRecords={selectedRecords}
-                  dispatch={dispatch}
-                  onEdit={false}
-                  extraParamsToCheckDelete={true}
-                  onDelete={false}
-                  rowCount={rowCount}
-                  page={page}
-                  loading={loading}
-                  additionalDetails={[
-                  ]}
-                  chips={[
-                    {
-                      label: "Asset number : ",
-                      field: "assetNumber",
-                    }
-                  ]}
-                  owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                  onCreate={false}
-                  showClone={false}
-                  onClone={() => { }}
-                  renderedFrom={renderedFrom}
-              /> :
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={false}
-          loading={loading}
-          renderedFrom={renderedFrom}
-          rowClassRules={{
-            "red-data-row":
-              function (params) {
-                return ["Scrap", "Lost"].some(s => s === params.data.status);
-              },
-          }}
-        />
+        isMobile ?
+          <CustomSwipableList
+            allowSelection={true}
+            allowSwipe={true}
+            permissions={true}
+            primaryField={columns?.find(d => d.field)}
+            onClick={(data) => {
+              history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+            }}
+            dataRows={dataRows}
+            selectedRecords={selectedRecords}
+            dispatch={dispatch}
+            onEdit={false}
+            extraParamsToCheckDelete={true}
+            onDelete={false}
+            rowCount={rowCount}
+            page={page}
+            loading={loading}
+            additionalDetails={[
+            ]}
+            chips={[
+              {
+                label: "Asset number : ",
+                field: "assetNumber",
+              }
+            ]}
+            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+            onCreate={false}
+            showClone={false}
+            onClone={() => { }}
+            renderedFrom={renderedFrom}
+          /> :
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            allowAction={false}
+            loading={loading}
+            renderedFrom={renderedFrom}
+            rowClassRules={{
+              "red-data-row":
+                function (params) {
+                  return ["Scrap", "Lost"].some(s => s === params.data.status);
+                },
+            }}
+            refreshGrid={fetchRecords}
+          />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-
       }
     </Grid>
-
+    {showReceivingTicketDialog && (
+      <ManageReceivingTicket
+        open={showReceivingTicketDialog}
+        isClone={false}
+        receivingTicketId={null}
+        productInventoryForReceivingTicket={productInventoryForReceivingTicket}
+        rentalData={rentalManagementData}
+        onClose={() => setShowReceivingTicketDialog(false)}
+        onSuccess={() => {
+          setShowReceivingTicketDialog(false);
+          fetchRecords();
+        }}
+        isRedirectToDetailPage={false}
+      />
+    )}
     {showRemoveAssetFromReceivingTicketDialog && (
       <ConfirmationDialog
         open={showRemoveAssetFromReceivingTicketDialog}
@@ -374,14 +394,11 @@ const ReceivingTicket = ({ currentStep, handleReceivingTicketDialog, rentalManag
         }}
         onOk={() => {
           setOkBtnLoading(true);
-
           const groupByCalls = groupBy(selectedRecords, "receivingTicketId");
           let apiCalls = [];
-
           Object.keys(groupByCalls).forEach((key) => {
             apiCalls.push(axiosInstance().put(`${receivingTicket.receivingTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
           })
-
           Promise.all(apiCalls).then(() => {
             toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged ${sidebarResource.receivingTicket}(s)` });
             fetchRecords();
@@ -391,12 +408,10 @@ const ReceivingTicket = ({ currentStep, handleReceivingTicketDialog, rentalManag
             setOkBtnLoading(false);
             setShowRemoveAssetFromReceivingTicketDialog(false);
           });
-
         }}
         okBtnLoading={okBtnLoading}
       />
     )}
-
     {
       statusToUpdate.open && <Dialog open
         classes={{
@@ -410,7 +425,6 @@ const ReceivingTicket = ({ currentStep, handleReceivingTicketDialog, rentalManag
 
         <CustomDialogContent>
           <Box className="my-2">
-
             {
               statusToUpdate.status === "Repair" ? <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
                 : <TextField
@@ -426,10 +440,8 @@ const ReceivingTicket = ({ currentStep, handleReceivingTicketDialog, rentalManag
                   }}
                 />
             }
-
           </Box>
         </CustomDialogContent>
-
         <CustomDialogFooter>
           <Button
             size="small"
@@ -445,7 +457,7 @@ const ReceivingTicket = ({ currentStep, handleReceivingTicketDialog, rentalManag
                 assets: selectedRecords.map(m => m?._id ?? m?.id),
                 status: statusToUpdate.status,
                 reference: {
-                  _id: rentalManagementId,
+                  _id: rentalManagementData._id,
                   type: "Rental"
                 }
               }).then(({ data }) => {
@@ -471,7 +483,6 @@ const ReceivingTicket = ({ currentStep, handleReceivingTicketDialog, rentalManag
         </CustomDialogFooter>
       </Dialog>
     }
-
   </>
   );
 }

@@ -276,10 +276,16 @@ const OpportunityDashboards = (props) => {
                 getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
                 onChange={(_, val) => {
                   let data = { ...salesFilter, customerAccount: val }
-                  if (val?.country) {
-                    let foundCountry = Countries.find(o => o.optionValue === val?.country)
+                  if (val?.countryBillTo) {
+                    let foundCountry = Countries.find(o => o.optionValue === val?.countryBillTo)
                     if (foundCountry) {
-                      data.country = foundCountry
+                      data.countryBillTo = foundCountry
+                    }
+                  }
+                  if (val?.countrySellTo) {
+                    let foundCountry = Countries.find(o => o.optionValue === val?.countrySellTo)
+                    if (foundCountry) {
+                      data.countrySellTo = foundCountry
                     }
                   }
                   setSalesFilter({ ...data });
@@ -336,11 +342,24 @@ const OpportunityDashboards = (props) => {
                 fullWidth
                 options={Countries}
                 autoHighlight
-                value={salesFilter.country}
+                value={salesFilter.countrySellTo}
                 getOptionLabel={(option) => option.optionLabel || ''}
                 getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
-                onChange={(_, val) => setSalesFilter({ ...salesFilter, country: val })}
-                renderInput={(params) => <TextField {...params} label="Country" variant="outlined" />}
+                onChange={(_, val) => setSalesFilter({ ...salesFilter, countrySellTo: val })}
+                renderInput={(params) => <TextField {...params} label="Country Sell To" variant="outlined" />}
+              />
+              <Box mt={1} />
+
+              <Autocomplete
+                size="small"
+                fullWidth
+                options={Countries}
+                autoHighlight
+                value={salesFilter?.countryBillTo}
+                getOptionLabel={(option) => option.optionLabel || ''}
+                getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
+                onChange={(_, val) => setSalesFilter({ ...salesFilter, countryBillTo: val })}
+                renderInput={(params) => <TextField {...params} label="Country Bill To" variant="outlined" />}
               />
             </Box>
           </Box>
@@ -365,6 +384,9 @@ const OpportunityDashboards = (props) => {
           </Paper>
           <Paper style={{ padding: '10px', marginBottom: '16px' }}>
             <Box>
+              <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
+                Filters
+              </Button>
               <FormControl size="small" variant="outlined">
                 <InputLabel id="status">Status</InputLabel>
                 <Select labelId="status" id="status" value={quoteStatus} onChange={(e) => setQuoteStatus(e.target.value.toString())}>
@@ -407,6 +429,9 @@ const OpportunityDashboards = (props) => {
           </Paper>
           <Paper elevation={2}>
             <Box p={2} >
+              <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
+                Filters
+              </Button>
               <FormControl size="small" variant="outlined">
                 <InputLabel id="status">Status</InputLabel>
                 <Select labelId="status" id="status" value={opp1Status} onChange={(e) => setOpp1Status(e.target.value.toString())}>
@@ -453,6 +478,9 @@ const OpportunityDashboards = (props) => {
         <Grid item xs={12} sm={4}>
           <Paper elevation={2}>
             <Box p={2}>
+              <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
+                Filters
+              </Button>
               <FormControl size="small" variant="outlined">
                 <InputLabel id="status">Status</InputLabel>
                 <Select labelId="status" id="status" value={opp2Status} onChange={(e) => setOpp2Status(e.target.value.toString())}>

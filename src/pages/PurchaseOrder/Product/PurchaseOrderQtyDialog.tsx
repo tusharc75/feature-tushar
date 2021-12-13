@@ -16,7 +16,7 @@ import {
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateUtils from '@date-io/date-fns';
 import moment from 'moment';
-import { dateFormatForInputControl } from '../../../constants/helpers';
+import { arrayToDropwdownOption, dateFormatForInputControl } from '../../../constants/helpers';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -55,44 +55,55 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
   useEffect(() => {
     axiosInstance().get("/field/child?resource=Purchase Order Product").then(({ data: { data } }) => {
       const poFields = CURReplaceByCurrencySingle(data, currency);
-      //Update Unit As Product Start
       setAllFields(JSON.parse(JSON.stringify(poFields)))
       if (bulkEdit) {
-        poFields.forEach((_f) => {
-          _f.required = false;
-          _f.isFormula = false;
-          _f.isMulitFormula = false;
+        let unitArray: any = []
+        productData?.forEach(element => {
+          if (element?.productDetail?.unit) {
+            unitArray.push([...element?.productDetail?.unit])
+          }
+        });
+        let unit: any = unitArray?.shift()?.filter(function (v) {
+          return unitArray.every(function (a) {
+            return a.indexOf(v) !== -1;
+          });
+        });
+        const unitOptions: any = arrayToDropwdownOption(unit)
+        poFields.forEach((element) => {
+          if (element.fieldName === "unit") {
+            element.option = unitOptions;
+          }
+          element.required = false;
+          element.isFormula = false;
+          element.isMulitFormula = false;
         })
+        setInitialData({
+          fields: poFields,
+          values: { ...getObjKeys("", poFields), expectedDelivery: "" },
+        });
       }
-      poFields.filter((_f) => {
-        if (["unit", "umo"].includes(_f.fieldName.toLowerCase())) {
-          if (!bulkEdit && (productData?.productDetail?.unit || productData?.productDetail?.umo)) {
-            let unitOption = productData?.productDetail?.unit || productData?.productDetail?.umo
-            if (unitOption) {
-              let newUnitOptions = unitOption?.map((item, index) => {
-                let res: any = {}
-                res.optionLabel = item
-                res.optionValue = item
-                res.order = index
-                return res;
-              });
-              _f.option = newUnitOptions;
+      else {
+
+        poFields.filter((_f) => {
+          if (["unit"].includes(_f.fieldName.toLowerCase())) {
+            if (productData?.productDetail?.unit) {
+              _f.option = arrayToDropwdownOption(productData?.productDetail?.unit)
             }
           }
+        })
+
+        let tempObjKeysWithValues = getObjKeysWithValues(productData, poFields)
+        if (!tempObjKeysWithValues["taxSchedule"] && purchaseOrderData["taxSchedule"]) {
+          tempObjKeysWithValues["taxSchedule"] = purchaseOrderData["taxSchedule"]
         }
-      })
-      //End
-      let tempObjKeysWithValues = getObjKeysWithValues(!bulkEdit ? productData : "", poFields)
-      if (!tempObjKeysWithValues["taxSchedule"] && purchaseOrderData["taxSchedule"]) {
-        tempObjKeysWithValues["taxSchedule"] = purchaseOrderData["taxSchedule"]
+        if (!tempObjKeysWithValues["expectedDelivery"] && purchaseOrderData["deliveryDate"]) {
+          tempObjKeysWithValues["expectedDelivery"] = purchaseOrderData["deliveryDate"]
+        }
+        setInitialData({
+          fields: poFields,
+          values: tempObjKeysWithValues,
+        });
       }
-      if (!tempObjKeysWithValues["expectedDelivery"] && purchaseOrderData["deliveryDate"]) {
-        tempObjKeysWithValues["expectedDelivery"] = purchaseOrderData["deliveryDate"]
-      }
-      setInitialData({
-        fields: poFields,
-        values: tempObjKeysWithValues,
-      });
       EvaluteproductFields(poFields);
     })
   }, []);

@@ -100,7 +100,7 @@ const PurchaseOrderDetailsPage = () => {
                 toastConfig.setToastConfig(error);
             });
         }
-        if (currentStep === 2) {
+        if (currentStep <= 2) {
             axiosInstance().get(`${purchaseOrder.api}/${id}/pdf`)
                 .then(({ data }) => {
                     axiosInstance()
@@ -123,8 +123,8 @@ const PurchaseOrderDetailsPage = () => {
                     setDownlodingFile(false);
                 })
         }
-        if (currentStep === 1 && purchaseOrderData?.status === "New") { handleUpdateData({ "status": "In Process" }) }
-        if (currentStep === 3 && purchaseOrderData?.status === "In Process") { handleUpdateData({ "status": "Issued" }) }
+        if (currentStep === 1 || currentStep === 2) { handleUpdateData({ "status": "In Process" }) }
+        if (currentStep === 3) { handleUpdateData({ "status": "Issued" }) }
     }, [currentStep]);
 
     const handleMainPoints = (data) => {

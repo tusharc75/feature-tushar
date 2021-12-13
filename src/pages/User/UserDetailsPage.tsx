@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, Fragment } from "react";
+import { useState, useEffect, useContext, Fragment } from "react";
 import {
   Grid,
   Box,
@@ -66,10 +66,6 @@ import { KeyboardDatePicker, MuiPickersUtilsProvider } from "@material-ui/picker
 import DateFnsUtils from "@date-io/date-fns";
 import { Line } from 'react-chartjs-2';
 import ResourceTransferDialog from "../../components/ResourceTransferDialog"
-import accountClass from "../Account/account.module.scss";
-import {BiReset} from "react-icons/all";
-import {BiEdit} from "react-icons/bi";
-import {MdDelete} from "react-icons/md";
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -648,36 +644,31 @@ const UserDetailsPage = () => {
                   {
                     isLoggedInUserBrandAdmin && (
                       <Button
-                          variant={isMobile ? "text" : "contained"}
+                        variant="contained"
                         color="primary"
                         size="small"
                         onClick={handleResetPassword}
-                        className={isMobile ? accountClass.mobile_button_layout : ""}
-                        style={isMobile ? {color:"var(--warning-darken)"} : {}}
                       >
-                        {isMobile ? <BiReset size={20}/> : "Reset Password"}
+                        Reset Password
                       </Button>
                     )
                   }
                   {permissions.user.isUpdate ? (
                     <Button
-                        variant={isMobile ? "text" : "contained"}
+                      variant="contained"
                       color="primary"
                       size="small"
                       onClick={handleOpenUpdateDialog}
                       disabled={!isLoggedInUserBrandAdmin && userData?.userType}
-                        className={isMobile ? accountClass.mobile_button_layout : ""}
-                        style={isMobile ? {color:"#43aeaa"} : {}}
                     >
-                      {isMobile ? <BiEdit size={20}/> : "Edit"}
+                      Edit
                     </Button>
                   ) : null}
                   {permissions.user.isDelete ? (
                     <DeleteButton
-                        text={isMobile ? <MdDelete size={20}/> : "Delete"}
+                      text="Delete"
                       disabled={user?.user?._id === id || userData?.userType === userType.brandAdmin}
-                      onClick={() => setShowConfirmBox(true)}
-                        className={isMobile ? accountClass.mobile_button_layout : ""}
+                      onClick={() => handleDeleteUser(true)}
                     />
                   ) : null}
                 </DetailsPageHeader>
@@ -1317,7 +1308,7 @@ const UserDetailsPage = () => {
         />
       }
       {
-        showConfirmBox ?
+        showConfirmBox && deleteUserRec ?
           <ResourceTransferDialog
             open={showConfirmBox}
             resource="User"

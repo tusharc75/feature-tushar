@@ -26,10 +26,10 @@ import useColumns, { getStaticFields, getFrameworkComponents } from "../../const
 import { prepareDataForGrid } from "../../constants/helpers"
 import ManageTransferAsset from "./ManageTransferAsset";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
-import {isMobile} from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import {FaSuitcase} from "react-icons/fa";
-import {MdAdd} from "react-icons/all";
+import { FaSuitcase } from "react-icons/fa";
+import { MdAdd } from "react-icons/all";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -48,7 +48,7 @@ const TransferAsset = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
   const {
-    state: { user, permissions },
+    state: { user, permissions, selectedEntity },
   }: any = useData();
   const { getColumnData } = useColumns();
   const history = useHistory();
@@ -59,7 +59,7 @@ const TransferAsset = () => {
 
   useEffect(() => {
     fetchTransferAsset()
-  }, [page, limit, filters, sorting, search]);
+  }, [page, limit, filters, sorting, search, selectedEntity]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -100,7 +100,7 @@ const TransferAsset = () => {
     axiosInstance().get(`${transferAsset.api}${queryString}`).then(({ data }) => {
       let rows = data.data?.map((u) => {
 
-        let finalObject = prepareDataForGrid(u,user);
+        let finalObject = prepareDataForGrid(u, user);
 
         finalObject["canDelete"] = permissions?.transferAsset?.isDelete;
 
@@ -285,66 +285,66 @@ const TransferAsset = () => {
           <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side} >
             <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
 
-              <Grid style={{display: "flex", flex:1}}>
-              <SearchBox
-                onSearch={handleSearch}
-                searchbox={styles.search_box_input}
-                width='242px'
-                style={isMobile ? {flex:1} : {}}
-                size="small"
-                value={search}
-              />
+              <Grid style={{ display: "flex", flex: 1 }}>
+                <SearchBox
+                  onSearch={handleSearch}
+                  searchbox={styles.search_box_input}
+                  width='242px'
+                  style={isMobile ? { flex: 1 } : {}}
+                  size="small"
+                  value={search}
+                />
 
               </Grid>
 
-              <Grid style={{display: "flex" , gap:"5px"}}>
-              {permissions?.transferAsset?.isCreate &&
-                <Button
-                        onClick={() => {
-                  setShowManageTransferAssetDialog({ open: true, isClone: false, idToClone: null })
-                }}
-                        variant={isMobile ? "text" : "contained"}
-                        size="small"
-                        color="primary"
-                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                        startIcon={isMobile ? null : <AddIcon />}
-                >
-                  {isMobile ? <MdAdd size={23}/> : "Add"}
-                </Button>
-              }
-
-              <HtmlTooltip title={selectedRecords.length > 0 ? "" : "Please select some records"}>
-                <span>
+              <Grid style={{ display: "flex", gap: "5px" }}>
+                {permissions?.transferAsset?.isCreate &&
                   <Button
-                      className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                    onClick={() => {
+                      setShowManageTransferAssetDialog({ open: true, isClone: false, idToClone: null })
+                    }}
                     variant={isMobile ? "text" : "contained"}
-                    color="default"
                     size="small"
-                    onClick={openActions}
-                    disabled={selectedRecords.length ? false : true}
-                    aria-controls="action-menu"
+                    color="primary"
+                    className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                    startIcon={isMobile ? null : <AddIcon />}
                   >
-                    {isMobile ? "" :  "Actions" } <ExpandMore/>
+                    {isMobile ? <MdAdd size={23} /> : "Add"}
                   </Button>
-                </span>
-              </HtmlTooltip>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
-                {permissions?.transferAsset?.isDelete && <MenuItem onClick={() => {
-                  closeActions()
-                  setShowDeleteConfirmBox(true)
-                }}>Delete</MenuItem>}
-              </Menu>
+                }
+
+                <HtmlTooltip title={selectedRecords.length > 0 ? "" : "Please select some records"}>
+                  <span>
+                    <Button
+                      className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                      variant={isMobile ? "text" : "contained"}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      disabled={selectedRecords.length ? false : true}
+                      aria-controls="action-menu"
+                    >
+                      {isMobile ? "" : "Actions"} <ExpandMore />
+                    </Button>
+                  </span>
+                </HtmlTooltip>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  {permissions?.transferAsset?.isDelete && <MenuItem onClick={() => {
+                    closeActions()
+                    setShowDeleteConfirmBox(true)
+                  }}>Delete</MenuItem>}
+                </Menu>
               </Grid>
             </Box>
           </Grid>
@@ -352,56 +352,56 @@ const TransferAsset = () => {
       </div>
       {columns ?
         Object.keys(frameWorkComponent).length > 0 ?
-            isMobile ?
-                <CustomSwipableList
-                    allowSelection={true}
-                    allowSwipe={true}
-                    permissions={permissions.transferAsset}
-                    primaryField={columns?.find(d => d.primaryField)}
-                    onClick={(data) => {
-                      history.push(`${routes.transferAssetDetail.path}/${data._id}`)
-                    }}
-                    dataRows={dataRows}
-                    selectedRecords={selectedRecords}
-                    dispatch={dispatch}
+          isMobile ?
+            <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={permissions.transferAsset}
+              primaryField={columns?.find(d => d.primaryField)}
+              onClick={(data) => {
+                history.push(`${routes.transferAssetDetail.path}/${data._id}`)
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
 
-                    onEdit={() => {}}
-                    extraParamsToCheckDelete={true}
-                    onDelete={(data) => {
-                      setDeleteRecord(data);
-                      setShowDeleteConfirmBox(true)
-                    }}
-                    rowCount={rowCount}
-                    page={page}
-                    loading={loading}
-                    chips={[
-                    ]}
-                    additionalDetails={[
-                    ]}
-                    owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                    onCreate={false}
-                    showClone={true}
-                    onClone={(data) => {
-                      setShowManageTransferAssetDialog({ open: true, isClone: true, idToClone: data._id })
-                    }}
-                    renderedFrom={routes.transferAsset?.title}
-                /> :
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={150}
-            loading={loading}
-            isClientSideGrid={true}
-            renderedFrom={routes.transferAsset?.title}
-            refreshGrid={fetchTransferAsset}
-          /> : null
+              onEdit={() => { }}
+              extraParamsToCheckDelete={true}
+              onDelete={(data) => {
+                setDeleteRecord(data);
+                setShowDeleteConfirmBox(true)
+              }}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              chips={[
+              ]}
+              additionalDetails={[
+              ]}
+              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+              onCreate={false}
+              showClone={true}
+              onClone={(data) => {
+                setShowManageTransferAssetDialog({ open: true, isClone: true, idToClone: data._id })
+              }}
+              renderedFrom={routes.transferAsset?.title}
+            /> :
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={150}
+              loading={loading}
+              isClientSideGrid={true}
+              renderedFrom={routes.transferAsset?.title}
+              refreshGrid={fetchTransferAsset}
+            /> : null
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
     </div>
     {

@@ -26,7 +26,7 @@ import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum }
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomRenderCell from "../../../components/Helpers/CustomRenderCell";
-
+import InfoIcon from "@material-ui/icons/Info";
 
 const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable, id, setPurchaseOrderProduct }) => {
 
@@ -53,9 +53,6 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     const [anchorEl, setAnchorEl] = useState(null);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deletePurchaseOrderProduct, setDeletePurchaseOrderProduct] = useState([]);
-
-
-
 
     useEffect(() => {
         fetchPurchaseOrderProduct();
@@ -116,7 +113,17 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
         }}>
             <CustomRenderCell value={params.value} />
         </span>
-
+        <HtmlTooltip title="Details">
+            <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                    window.open(`${routes.productDetail.path}/${params.data.productId}`);
+                }}
+            >
+                <InfoIcon color="primary" />
+            </IconButton>
+        </HtmlTooltip>
     </span >
 
     const ActionsRenderer = (params) => (
@@ -133,7 +140,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     <EditIcon color="primary" />
                 </IconButton>
             </HtmlTooltip>
-            <GridDeleteIcon
+            {(params.data?.actualReceived === undefined || params.data?.actualReceived === 0) && <GridDeleteIcon
                 hasDeletePermission={permissions?.purchaseOrder?.isUpdate}
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
@@ -144,6 +151,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                 }
                 entity="rentalManagement"
             />
+            }
         </>
     );
 
@@ -205,7 +213,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     return (
         <Fragment>
             <Box display="flex" justifyContent="space-between" m={1}>
-                <Box display="flex">
+                <Box display="flex" alignItems="center">
                     <Button
                         variant={isMobile ? "outlined" : "contained"}
                         color="primary"
@@ -228,9 +236,8 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                         {isMobile ? <FaCartArrowDown size={22} /> : `Add Existing ${routes.product.title}`}
                     </Button>
                 </Box>
-
                 <div className="d-flex gap-2">
-                    <Box display="flex" justifyContent="flex-end" p="4px">
+                    <Box display="flex" justifyContent="flex-end">
                         <Box mx={1} />
                         <Button
                             variant={isMobile ? "outlined" : "contained"}
@@ -246,17 +253,16 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                         </Button>
                     </Box>
                     <HtmlTooltip title="Please select some product">
-                        <span>
-                            <Button
-                                variant="outlined"
-                                color="default"
-                                size="small"
-                                onClick={openActions}
-                                disabled={selectedRecords.length ? false : true}
-                                aria-controls="action-menu"
-                            >Actions <ExpandMore />
-                            </Button>
-                        </span>
+                        <Button
+                            variant="outlined"
+                            color="default"
+                            size="small"
+                            onClick={openActions}
+                            disabled={selectedRecords.length ? false : true}
+                            aria-controls="action-menu"
+                        >Actions
+                            <ExpandMore />
+                        </Button>
                     </HtmlTooltip>
                     <Menu
                         anchorEl={anchorEl}

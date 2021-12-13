@@ -634,6 +634,7 @@ const RepairJobDetails = () => {
         <Box my={1} />
       </Grid>
 
+
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -723,10 +724,12 @@ const RepairJobDetails = () => {
           }}
           isAdding={isAdding}
           selectedProducts={[]}
-          queryString={`ignoreIds=${JSON.stringify(step1DataRows.map(m => m._id ?? m.id))}&repairable=true`}
-          filterByPlant={`filterById=[{"field":"warehouse", "term": "${repairJobData.plant?.optionValue}"}]`}
+          queryString={`ignoreIds=${JSON.stringify(step1DataRows.map(m => m._id ?? m.id))}&repairable=true&notScrapRepair=1`}
+          filterByPlant={repairJobData.plant?.optionValue}
         />
+      
       }
+     
 
       {
         showEditAssetDialog.open && (

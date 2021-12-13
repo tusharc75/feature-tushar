@@ -19,11 +19,8 @@ interface AssetsGridProps {
   permissions?: any;
   user?: any;
   currentStep: number | any;
-  plantId: string | any;
   setNextStep?: any;
   fetchAssets: any;
-  transferAssetId: string | any;
-  ownerId: string | any;
   updateTransferStatus?: any;
   transferAssetData?: any;
   handleViewPdf?: any;
@@ -31,7 +28,7 @@ interface AssetsGridProps {
 }
 
 const AssetsGrid: FC<AssetsGridProps> = (props) => {
-  const { permissions, user, plantId, fetchAssets, currentStep, transferAssetId, ownerId, setNextStep, updateTransferStatus, transferAssetData } = props
+  const { permissions, user, fetchAssets, currentStep, setNextStep, updateTransferStatus, transferAssetData } = props
   const toastConfig = useContext(CustomToastContext);
 
 
@@ -49,8 +46,10 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   const history = useHistory();
 
   useEffect(() => {
-    fetchGridColumns()
-  }, [])
+    if (transferAssetData) {
+      fetchGridColumns()
+    }
+  }, [transferAssetData])
   const fetchGridColumns = () => {
     axiosInstance()
       .get("/field?resource=Product Inventory")
@@ -86,7 +85,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     !params.data.hasOwnProperty("deliveryTicket") && <>
       <GridDeleteIcon
         hasDeletePermission={permissions?.transferAsset?.isUpdate}
-        ownerId={ownerId}
+        ownerId={transferAssetData?.createdBy.user._id}
         userId={user?.user?._id}
         onDelete={() => {
           setShowConfirmBox(true);
@@ -98,16 +97,16 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   );
 
   useEffect(() => {
-    if (transferAssetId) {
+    if (transferAssetData) {
       fetchAssetsData(true);
     }
     // eslint-disable-next-line
-  }, [transferAssetId])
+  }, [transferAssetData])
 
   const fetchLoadingTickets = () =>
     new Promise((resolve, reject) => {
       axiosInstance()
-        .get(`${routes.transferAsset.path}/${transferAssetId}/loading-ticket?limit=0`)
+        .get(`${routes.transferAsset.path}/${transferAssetData?._id}/loading-ticket?limit=0`)
         .then(({ data: { data } }) => {
           resolve(data);
         })
@@ -169,7 +168,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     if (removeData.length > 0) {
       setRemovingAssets(true)
       try {
-        await axiosInstance().put(`${routes.transferAsset.path}/remove-asset/${transferAssetId}`, {
+        await axiosInstance().put(`${routes.transferAsset.path}/remove-asset/${transferAssetData?._id}`, {
           assets: removeData
         })
         setRemoveData([])
@@ -288,8 +287,8 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       {/* Add Assets Dialog */}
       {openAddNewAssets &&
         <AddAssetsDialog
-          transferAssetId={transferAssetId ?? ""}
-          plantId={plantId ?? ""}
+          transferAssetId={transferAssetData?._id ?? ""}
+          plantId={transferAssetData?.transferFromPlant.optionValue ?? ""}
           closeDialog={() => setOpenAddNewAssets(false)}
           fetchAssets={() => fetchAssetsData(true)}
           existingAssets={dataRows.map(asset => asset._id)}

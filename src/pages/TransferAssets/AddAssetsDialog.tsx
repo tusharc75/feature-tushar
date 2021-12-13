@@ -86,7 +86,7 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
       gridApi.setRowData([]);
     }
 
-    let queryString = `?&filterById=${JSON.stringify([{ field: 'warehouse', term: plantId }])}&repairable=true&filterByIdType=or`;
+    let queryString = `?&filterById=${JSON.stringify([{ field: 'warehouse', term: plantId }])}&repairable=true&filterByIdType=or&notScrapRepair=0`;
 
     axiosInstance()
       .get(`${productInventory.api}${queryString}`)
