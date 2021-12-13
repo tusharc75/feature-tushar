@@ -897,6 +897,21 @@ const Header = ({ toggleDrawer }) => {
     if (history.location.pathname.includes(routes.purchaseOrderDetail.path)) {
       history.push({ pathname: routes.purchaseOrder.path });
     }
+    if (history.location.pathname.includes(routes.transferAssetDetail.path)) {
+      history.push({pathname: routes.transferAsset.path})
+    }
+    if (history.location.pathname.includes(routes.rentalManagementDetail.path)) {
+      history.push({pathname: routes.rentalManagement.path})
+    }
+    if (history.location.pathname.includes(routes.repairJobDetail.path)) {
+      history.push({pathname: routes.repairJob.path })
+    }
+    if (history.location.pathname.includes(routes.deliveryTicketDetail.path)) {
+      history.push({pathname: routes.deliveryTicket.path})
+    }
+    if (history.location.pathname.includes(routes.receivingTicketDetail.path)) {
+      history.push({pathname: routes.receivingTicket.path})
+    }
   }
 
   const startTour = () => {
