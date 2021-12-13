@@ -498,6 +498,7 @@ const RentalManagementDetailsPage = () => {
                     <ReceivingTicket
                       rentalManagementData={rentalManagementData}
                       currentStep={currentStep}
+                      setNextStep={setNextStep}
                     />
                   )}
                   {(currentStep === 5) && (

@@ -52,7 +52,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   }, []);
 
   const fetchRecords = () => {
-    //setNextStep(false)
+    setNextStep(false)
     if (gridApi) {
       gridApi.deselectAll();
     }
@@ -73,9 +73,9 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         productAssets.forEach((d) => {
           d["hideSelection"] = d.status === "In-Transit";
         })
-        // if (productAssets.filter((e) => ["In-Use", "Repair", "Scrap", "In-Transit"].includes(e.status)).length === productAssets.length) {
-        //   setNextStep(true)
-        // }
+        if (productAssets.filter((e) => ["In-Use", "Repair", "Scrap", "Lost", "In-Transit", "Under Review"].includes(e.status)).length === productAssets.length) {
+          setNextStep(true)
+        }
         dispatch({
           type: "initialize", data: productAssets, count: productAssets.length
         });
