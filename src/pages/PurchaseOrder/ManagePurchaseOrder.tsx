@@ -49,7 +49,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     setPurchaseOrderData(data)
                     if (isClone) {
                         const { _id, createdBy, updatedBy, serialNumber, ...rest } = data
-
+                        rest["status"] = "New"
                         setInitialData({
                             fields: fieldsDataForCreate,
                             values: getObjKeysWithValues(rest, fieldsDataForCreate),
@@ -282,8 +282,8 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                             {...field}
                                                                             disabled={Boolean(purchaseOrderId) && field.disableOnEdit && !isClone}
                                                                             values={values}
-                                                                            maxDate={deliveryDateMax ? deliveryDateMax : null}
-                                                                            minDate={deliveryDateMax ? null : moment(new Date())}
+                                                                            maxDate={deliveryDateMax ? deliveryDateMax : undefined}
+                                                                            minDate={deliveryDateMax ? undefined : moment(new Date())}
                                                                             errors={errors}
                                                                             touched={touched}
                                                                             label={field.fieldLabel}
