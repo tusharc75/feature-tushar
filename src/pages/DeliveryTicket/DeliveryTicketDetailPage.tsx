@@ -29,6 +29,7 @@ import { prepareDataForGrid } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { AiFillFilePdf } from "react-icons/ai";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -97,6 +98,7 @@ export default function DeliveryTicketDetail(props) {
   const [isAdding, setIsAdding] = useState(false);
 
   const [tabValue, setTabValue] = useState(0);
+  const [downlodingFile, setDownlodingFile] = useState(false)
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -384,6 +386,42 @@ export default function DeliveryTicketDetail(props) {
     }
   }
 
+  const handleViewPdf = (download) => {
+    axiosInstance().get(`${deliveryTicketApi}/${id}/pdf`)
+      .then(({ data }) => {
+        axiosInstance()
+          .get(`user/download?fileName=${data.data.fileName}`, {
+            responseType: "blob",
+          })
+          .then(({ data }) => {
+            if (download) {
+              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', `LoadingTicket-${deliveryTicketData.deliveryJobName || ""}.pdf`);
+              document.body.appendChild(link);
+              link.click();
+            }
+            else {
+              const file = new Blob([data], { type: "application/pdf" });
+              const fileURL = URL.createObjectURL(file);
+              const pdfWindow = window.open();
+              pdfWindow.location.href = fileURL;
+              toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+
+            }
+            setDownlodingFile(false);
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+            setDownlodingFile(false);
+          });
+      }).catch((err) => {
+        toastConfig.setToastConfig(err);
+        setDownlodingFile(false);
+      })
+  }
+
   return (
     <>
       <Fragment>
@@ -426,18 +464,6 @@ export default function DeliveryTicketDetail(props) {
                       Edit
                     </Button>
                   )}
-                  {/* 
-                  {(permissions?.deliveryTicket?.isDelete &&
-                    deliveryTicketData?.createdBy?.user?._id === user?.user._id) && (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => setShowConfirmBox(true)}
-                      >
-                        Delete
-                      </Button>
-                    )} */}
                   {
                     deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id || canEdit ?
                       label !== "" ?
@@ -566,7 +592,6 @@ export default function DeliveryTicketDetail(props) {
                             </Tooltip>
                           </IconButton>
                         }
-
                         {
                           deliveryTicketData?.status === "New" && <IconButton
                             disabled={selectedRecords.length === 0}
@@ -582,7 +607,33 @@ export default function DeliveryTicketDetail(props) {
                             </Tooltip>
                           </IconButton>
                         }
-
+                        <Box mx={1} />
+                        {permissions?.deliveryTicket?.isRead && (
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            type="button"
+                            size="small"
+                            startIcon={isMobile ? '' : <AiFillFilePdf />}
+                            disabled={downlodingFile}
+                            onClick={() => { handleViewPdf(false) }}
+                          >
+                            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Preview"}
+                          </Button>
+                        )}
+                        {permissions?.deliveryTicket?.isRead && (
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            type="button"
+                            size="small"
+                            startIcon={isMobile ? '' : <AiFillFilePdf />}
+                            disabled={downlodingFile}
+                            onClick={() => { handleViewPdf(true) }}
+                          >
+                            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
+                          </Button>
+                        )}
                       </Grid>
                       <Grid item xs={12}>
                         {isMobile ? <CustomSwipableList
