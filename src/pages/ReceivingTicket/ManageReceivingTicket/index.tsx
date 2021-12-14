@@ -218,14 +218,14 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
 
           if (transferData?.transferType === "External Customer") {
             tempInitialData["customerAccount"] = transferData?.transferToCustomer?.optionValue;
-            tempInitialData["customerPickupAddress"] = transferData?.customerShipTo;
+            tempInitialData["pickupAddress"] = transferData?.customerShipTo;
           }
           if (transferData?.transferType === "External Supplier") {
             tempInitialData["supplierAccount"] = transferData?.transferToSupplier?.optionValue;
-            tempInitialData["supplierPickupAddress"] = transferData?.supplierShipTo;
+            tempInitialData["supplierShippingAddress"] = transferData?.supplierShipTo;
           }
           setReceivingTicketData({
-            fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "transferAsset"),
+            fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "transferAsset"),
             initialValues: tempInitialData,
           });
           setFormValues(tempInitialData)
