@@ -58,6 +58,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 element.materialType = startCase(element.materialType)
                 element.conditionType = element.conditionType?.join(",")
                 element.unit = element.unit?.join(",")
+                element.pricingMethod = element.pricingMethod?.join(",")
             })
             dispatch({ type: "initialize", data: data, count: data.length });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
@@ -123,10 +124,11 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
     };
 
     const columns = [
-        { field: "materialType", headerName: "Type", show: true, cellRenderer: "commonRenderer" },
         { field: "detail", headerName: "Detail", show: true, cellRenderer: "commonRenderer" },
+        { field: "materialType", headerName: "Type", show: true, cellRenderer: "commonRenderer" },
         { field: "conditionType", headerName: "Condition Type", show: true, cellRenderer: "commonRenderer" },
         { field: "unit", headerName: "Unit", show: true, cellRenderer: "commonRenderer" },
+        { field: "pricingMethod", headerName: "Pricing Method", show: true, cellRenderer: "commonRenderer" },
     ];
 
     return (<Fragment>
