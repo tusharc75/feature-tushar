@@ -99,7 +99,7 @@ function QuoteHeader(props) {
 
 
               <Grid style={{display: "flex" , gap:"5px"}}>
-              {QuotePermissions.isCreate && QuotePermissions.isUpdate && (
+              {QuotePermissions.isCreate && (
                 <Button
                     variant={isMobile ? "text" : "contained"}
                   color="primary"
