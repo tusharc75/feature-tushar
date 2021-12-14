@@ -468,6 +468,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                                         {...field}
                                         minDate={field.fieldName === "endDate" ? moment(values?.startDate) : moment(rentalManagementData?.rentalStartDate)}
                                         maxDate={moment(rentalManagementData?.rentalEndDate)}
+                                        //disabled={true}
                                         fields={initialData.fields}
                                         fieldData={field}
                                         values={values}
@@ -511,6 +512,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                                         isTooltip={field.isTooltip}
                                         tooltipMessage={field.tooltipMessage}
                                         size="small"
+                                        disabled={field.fieldName === "qty" ? rowData?.hideSelection
+                                           : false}
                                       />
                                     </Box>
                                   </Box>

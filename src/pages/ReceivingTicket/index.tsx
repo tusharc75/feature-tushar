@@ -582,7 +582,7 @@ const ReceivingTicket = () => {
                   permissions={permissions.receivingTicket}
                   module="receivingTicket"
                   api={receivingTicket.receivingTicketApi}
-                  afterImportCompleted={() => { }}
+                  afterImportCompleted={() => { fetchReceivingTickets() }}
                   isExportAllOrSomeFeature={true}
                   total={rowCount}
                   recordsToExport={selectedRecords.length}
@@ -672,6 +672,8 @@ const ReceivingTicket = () => {
             renderedFrom={renderedFrom}
           /> : Object.keys(frameworkComponent).length > 0 ?
             <CustomAgGrid
+              allowAction={false}
+              allowSelection={true}
               columns={columns}
               dataRows={dataRows}
               frameworkComponents={frameworkComponent}

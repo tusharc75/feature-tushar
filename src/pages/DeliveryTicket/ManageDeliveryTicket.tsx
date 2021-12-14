@@ -271,7 +271,7 @@ const ManageDeliveryTicket = (props) => {
         let startDate = moment(values?.["pick-UpDate"]);
         let endDate = moment(values?.deliveryDate);
         if (endDate.diff(startDate, 'days') < 0) {
-          errors['pick-UpDate'] = 'Please enter valid pick-Up  date';
+            errors['pick-UpDate'] = 'Please enter valid pick-Up  date';
         }
         return errors;
     }
@@ -582,7 +582,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                 />
                                                                             ) : <FormTypes
                                                                                 {...field}
-                                                                                isNew={Boolean(deliveryTicketId) && field.disableOnEdit || (field.fieldName === "pickupPlantAddress" && true)}
+                                                                                isNew={Boolean(deliveryTicketId) && field.disableOnEdit}
                                                                                 values={values}
                                                                                 errors={errors}
                                                                                 touched={touched}

@@ -65,6 +65,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         data.data.map(obj => {
           productAssets.map((d, index) => {
             if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
+              productAssets[index]["type"] = obj?.type
               productAssets[index]["deliveryTicket"] = obj?.deliveryJobName
               productAssets[index]["deliveryTicketId"] = obj?._id
             }

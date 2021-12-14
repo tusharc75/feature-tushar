@@ -9,6 +9,7 @@ import MessageDialog from "../../components/Helpers/MessageDialog";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import {
   isObjectEmpty,
   gridLoadingTimeout,
@@ -322,22 +323,28 @@ const DeliveryTicket = () => {
           <Grid item md={4} sm={11} xs={10}>
             <CustomBreadCrumbs routes={[routes.deliveryTicket]} />
           </Grid>
-          {/* <Grid item md={8} sm={1} xs={2}>
+          <Grid item md={8} sm={1} xs={2}>
             <Grid container direction="row">
               <Grid item xs={12} sm={12}>
                 <Grid container justify="flex-end">
                   <ImportExportLinks
                     permissions={deliveryPermissions}
-                    module="quotes"
+                    module="deliveryTicket"
                     api={deliveryTicketApi}
-                    afterImportCompleted={() => {
-                      fetchDeliveryTicket();
+                    afterImportCompleted={fetchDeliveryTicket}
+                    isExportAllOrSomeFeature={true}
+                    total={rowCount}
+                    recordsToExport={selectedRecords.length}
+                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    onExportToExcelSuccess={() => {
+                      if (gridApi) { gridApi.deselectAll() }
+                      else { fetchDeliveryTicket(); }
                     }}
                   />
                 </Grid>
               </Grid>
             </Grid>
-          </Grid> */}
+          </Grid>
         </Grid>
 
         {/* Tables Begins Here */}
@@ -402,7 +409,7 @@ const DeliveryTicket = () => {
           {
             isMobile ?
               <CustomSwipableList
-                allowSelection={false}
+                allowSelection={true}
                 allowSwipe={true}
                 permissions={permissions.deliveryTicket}
                 primaryField={columns?.find(d => d.primaryField)}
@@ -446,7 +453,7 @@ const DeliveryTicket = () => {
                   page={page}
                   actionWidth={100}
                   loading={loading}
-                  allowSelection={false}
+                  allowSelection={true}
                   allowAction={false}
                   renderedFrom={deliveryTicketResource}
                   refreshGrid={fetchDeliveryTicket}

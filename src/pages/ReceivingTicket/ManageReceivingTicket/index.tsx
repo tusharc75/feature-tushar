@@ -216,7 +216,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
           tempInitialData["expectedDeliveryDate"] = moment(new Date()).add(7, 'days');
           tempInitialData["receivingJobName"] = `${transferData?.transferAssetNumber}_${generateUniqueIdOnly()}`
           tempInitialData["warehouse"] = transferData?.transferToPlant.optionValue
-          tempInitialData["receivingPlantAddress"] = transferData?.transferToPlant.address
+          // tempInitialData["receivingPlantAddress"] = transferData?.transferToPlant.address
           if (transferData?.transferType === "External Customer") {
             tempInitialData["customerAccount"] = transferData?.transferToCustomer?.optionValue;
             tempInitialData["customerPickupAddress"] = transferData?.customerShipTo;

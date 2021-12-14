@@ -46,12 +46,13 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             </p>
             {row.original?.type === "asset" &&
               <span className="d-flex align-items-center gap-2">
-                <IconButton size="small" onClick={() => {
-                  setShowConfirmBox(true)
-                  setDeleteData([row.original.inventory])
-                }}>
-                  <Delete color="error" />
-                </IconButton>
+                {row.original.status === "Reserved" &&
+                  <IconButton size="small" onClick={() => {
+                    setShowConfirmBox(true)
+                    setDeleteData([row.original.inventory])
+                  }}>
+                    <Delete color="error" />
+                  </IconButton>}
                 <Chip label="Asset" size="small" color="primary" />
               </span>}
           </div>)
@@ -148,7 +149,14 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         const subRows = []
         const inventory = data.inventory.filter((e) => e._id === parent._id);
         inventory?.forEach((_inventory, k) => {
-          subRows.push({ ..._inventory, detail: `${(i + 1)}.${(k + 1)} - ${_inventory.inventoryDetail?.assetNumber}`, type: "asset", _id: _inventory.inventory, isValid: true })
+          subRows.push({
+            ..._inventory,
+            detail: `${(i + 1)}.${(k + 1)} - ${_inventory.inventoryDetail?.assetNumber}`,
+            type: "asset",
+            status: _inventory.inventoryDetail?.status,
+            _id: _inventory.inventory,
+            isValid: true
+          })
         })
         parent.subRows = subRows;
         if (parent.type === "product") {
@@ -166,6 +174,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                 ..._inventory,
                 detail: `${(i + 1)}.${(j + 1)}.${(l + 1)} - ${_inventory.inventoryDetail?.assetNumber}`,
                 type: "asset",
+                status: _inventory.inventoryDetail?.status,
                 _id: _inventory.inventory,
                 isValid: true
               })
@@ -333,7 +342,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               color="primary"
               type="button"
               size="small"
-              disabled={(selectedProducts.filter(d => d.type === "asset").length === 0)}
+              disabled={(selectedProducts.filter(d => d.type === "asset" && d.status === "Reserved").length === 0)}
               onClick={() => {
                 setDeleteData(selectedProducts.filter(d => d.type === "asset").map(d => d?.inventory))
                 setShowConfirmBox(true)
