@@ -190,6 +190,10 @@ const ReceivingTicketDetails = () => {
                 return false
               }
             }
+
+            if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "rentalJob") {
+              return false
+            }
             return true
           })
 
@@ -199,11 +203,17 @@ const ReceivingTicketDetails = () => {
             if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Plant")) {
               return false
             }
+            if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "transferAsset") {
+              return false
+            }
             return true
           })
         } else {
           data = data.filter((fields: any) => {
             if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
+              return false
+            }
+            if (fields.fieldData.fieldName === "rentalJob" || fields.fieldData.fieldName === "transferAsset") {
               return false
             }
             return true

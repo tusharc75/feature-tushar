@@ -360,7 +360,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                 field.fieldName === "status" || field.fieldName === "actualDeliveredDate" || field.fieldName === "actualDispatchedDate" ? (
                                                                                 <FormTypes
                                                                                     {...field}
-                                                                                    disabled={transferData && false || rentalData && true || repairJobData && true}
+                                                                                    disabled={transferData && false || rentalData && true || repairJobData && true || Boolean(deliveryTicketId) && field.disableOnEdit}
                                                                                     isNew={Boolean(deliveryTicketId)}
                                                                                     values={values}
                                                                                     errors={errors}
@@ -383,7 +383,7 @@ const ManageDeliveryTicket = (props) => {
                                                                             ) : field.fieldName === "supplierAccount" ? (
                                                                                 <FormTypes
                                                                                     {...field}
-                                                                                    disabled={(repairJobData && repairJobData["typeOfRepair"] === "External") || field.disableOnEdit}
+                                                                                    disabled={(repairJobData && repairJobData["typeOfRepair"] === "External") || Boolean(deliveryTicketId) && field.disableOnEdit}
                                                                                     values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}
@@ -404,6 +404,8 @@ const ManageDeliveryTicket = (props) => {
                                                                             ) : field.fieldName === "pick-UpDate" ? (
                                                                                 <FormTypes
                                                                                     {...field}
+                                                                                    isNew={!Boolean(deliveryTicketId)}
+                                                                                    disabled={Boolean(deliveryTicketId) && field.disableOnEdit}
                                                                                     values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}
@@ -427,6 +429,8 @@ const ManageDeliveryTicket = (props) => {
                                                                             ) : field.fieldName === "deliveryDate" ? (
                                                                                 <FormTypes
                                                                                     {...field}
+                                                                                    isNew={!Boolean(deliveryTicketId)}
+                                                                                    disabled={Boolean(deliveryTicketId) && field.disableOnEdit}
                                                                                     values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}
@@ -562,7 +566,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                 <FormTypes
                                                                                     {...field}
                                                                                     disabled={(deliveryTicketId && field.disableOnEdit) || (repairJobData && warehouseId) || (transferData && warehouseId) || (rentalData && warehouseId)}
-                                                                                    isNew={Boolean(deliveryTicketId)}
+                                                                                    isNew={!Boolean(deliveryTicketId)}
                                                                                     values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}
@@ -582,7 +586,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                 />
                                                                             ) : <FormTypes
                                                                                 {...field}
-                                                                                isNew={Boolean(deliveryTicketId) && field.disableOnEdit}
+                                                                                isNew={!Boolean(deliveryTicketId)}
                                                                                 values={values}
                                                                                 errors={errors}
                                                                                 touched={touched}
