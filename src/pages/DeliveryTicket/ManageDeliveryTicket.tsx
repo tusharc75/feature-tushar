@@ -140,6 +140,7 @@ const ManageDeliveryTicket = (props) => {
                     const tempInitialData = getObjKeys("", fieldsDataForCreate)
                     tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
                     tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
+                    tempInitialData["pickupPlantAddress"] = rentalData.shippingAddress
                     tempInitialData["type"] = "Rental Job";
                     tempInitialData["rental"] = rentalData?._id
                     tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
