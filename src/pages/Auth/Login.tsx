@@ -73,11 +73,10 @@ const Login = () => {
           localStorage.setItem('gridMetaData', tempMetaData);
           dispatch({ type: SET_GRID_METADATA, payload: gridRequest.data.data?.gridMetaData });
 
-          const entityRequest = await axiosInstance().get(`${entityApi}`);
 
           let mappedEntities = [];
-          if (entityRequest.data.data && entityRequest.data.data.length) {
-            entityRequest.data.data.forEach((o) => {
+          if (data.entity && data.entity.length) {
+            data.entity.forEach((o) => {
               mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
             });
           }
@@ -130,7 +129,7 @@ const Login = () => {
           });
         }
         localStorage.setItem('mappedEntities', JSON.stringify(mappedEntities));
-        
+
         dispatch({ type: SET_USER, payload: data });
         if (data?.role?.selectedEntity?._id) {
           dispatch({
