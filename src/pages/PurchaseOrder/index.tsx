@@ -338,7 +338,7 @@ const PurchaseOrder = () => {
                                         startIcon={isMobile ? null : <AddOutlined />}> {isMobile ? <MdAdd size={23} /> : "Add"}</Button>
                                 }
 
-                                <HtmlTooltip title="Please select some purchase orders">
+                                {/* <HtmlTooltip title="Please select some purchase orders">
                                     <span>
                                         <Button
                                             variant={isMobile ? "text" : "contained"}
@@ -353,7 +353,7 @@ const PurchaseOrder = () => {
 
                                         </Button>
                                     </span>
-                                </HtmlTooltip>
+                                </HtmlTooltip> */}
                                 <Menu
                                     anchorEl={anchorEl}
                                     keepMounted
