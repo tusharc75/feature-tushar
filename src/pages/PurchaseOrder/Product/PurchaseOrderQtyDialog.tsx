@@ -130,13 +130,13 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
         returnData.push({ ...element, ...calValues })
       })
-      // returnData = productData.map(d => { return ({ ...values, _id: d._id || d.productDetail._id, productId: d.productId }) })
     }
     else {
-      returnData = [{ ...values, _id: productData._id || productData.productDetail._id, productId: productData.productId }]
+      returnData = [{ ...values, _id: productData._id, productId: productData.productId }]
     }
     onSubmit(returnData)
   };
+
   function validate(values) {
     const errors = {};
     if (values?.qty < values?.actualReceived) {
