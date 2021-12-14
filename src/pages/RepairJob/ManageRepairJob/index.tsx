@@ -26,6 +26,7 @@ import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne } from "react-icons/fa";
 import moment from 'moment';
+import { useData } from "../../../StateProvider/Provider";
 
 const ManageRepairJob = (props) => {
   const initialRender = useRef(true)
@@ -42,8 +43,14 @@ const ManageRepairJob = (props) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [allFields, setAllFields] = useState([]);
   const [title, setTitle] = useState("");
+  const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
 
   const [disableFieldsIfLoadingTicketIsCreated, setDisableFieldsIfLoadingTicketIsCreated] = useState(true)
+
+  const {
+    state: { user,selectedEntity },
+  }: any = useData();
+
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(repairJobData.fields));
@@ -55,8 +62,15 @@ const ManageRepairJob = (props) => {
     axiosInstance()
       .get('/field?resource=Repair Job')
       .then(({ data: { data } }) => {
+
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+        const plantsOptions = data.find((obj) => obj?.fieldData.fieldName === 'plant')?.fieldData.option;
+         const plantOptionsEntity = plantsOptions.filter((a)=>{if(a.entity==selectedEntity){return a}});;
+ 
+    
+        setOptionsPlantsEntity(plantOptionsEntity)
+
 
         if (repairJobId) {
           axiosInstance()
@@ -116,6 +130,7 @@ const ManageRepairJob = (props) => {
               }
             }).catch((error) => {
               toastConfig.setToastConfig(error);
+             
             });
         } else {
           setTitle('Create Repair Job')
@@ -502,7 +517,7 @@ const ManageRepairJob = (props) => {
                                                   label={field.fieldLabel}
                                                   name={field.fieldName}
                                                   type={field.type}
-                                                  options={field.option}
+                                                  options={optionsPlantsEntity}
                                                   setFieldValue={(name, value) => {
                                                     setFieldValue(name, value);
                                                   }}
