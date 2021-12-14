@@ -129,7 +129,7 @@ export default function ManageAccount(props) {
       (d) => d.fieldName === "billingAddress"
     );
     if (addressDropdownData) {
-      setAddressDataSource(addressDropdownData.option);
+      setAddressDataSource(addressDropdownData.option ?? []);
     }
 
     setFormsData(setFieldsInAscendingOrder(accountData.fields));
