@@ -26,20 +26,21 @@ import CreateProduct from "../../components/Product/CreateProduct";
 import ManageWarehouse from "../Warehouse/ManageWarehouse"
 import ManageAccountDialog from "../Account/ManageAccount/index";
 
-const ManageProductInventory = ({ isClone = false, productInventoryId = null, onClose, onSuccess, productId = null, productCategory = null,isNew=true }) => {
+const ManageProductInventory = ({ isClone = false, productInventoryId = null, onClose, onSuccess, productId = null, productCategory = null, isNew = true }) => {
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
+  const [isSubmitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [productCategoryOptions, setProductCategoryOptions] = useState([]);
   const [plantsCategoryOptions, setPlantsCategoryOptions] = useState([]);
-  const [productDescriptionOptions,setProductDescriptionOptions] = useState([]);
-  const [manufacturerCategoryOptions,setManufacturerCategoryOptions] = useState([]);
+  const [productDescriptionOptions, setProductDescriptionOptions] = useState([]);
+  const [manufacturerCategoryOptions, setManufacturerCategoryOptions] = useState([]);
   const [formValues, setFormValues] = useState({});
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [plantsOpen, setPlantsOpen] = useState({ open: false, isClone: false });
   const [productOpen, setProductOpen] = useState({ open: false, isClone: false });
-  const [manufacturerOpen, setManufacturerOpen] = useState({open: false, isClone: false})
+  const [manufacturerOpen, setManufacturerOpen] = useState({ open: false, isClone: false })
   // const desc = {
   //     productCategory: "",
   //     product: "",
@@ -48,7 +49,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const { permissions } = useData();
-  
+
 
   useEffect(() => {
     axiosInstance()
@@ -60,14 +61,14 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
         const plantsOptions = data.find((obj) => obj?.fieldData.fieldLabel === 'Plants')?.fieldData.option;
         const productOptions = data.find((obj) => obj?.fieldData.fieldName === 'product')?.fieldData.option;
         const manufacturerOptions = data.find((obj) => obj?.fieldData.fieldLabel === 'Manufacturer')?.fieldData.option;
-      
-      
+
+
 
         setProductCategoryOptions(categoryOptions);
         setPlantsCategoryOptions(plantsOptions);
         setProductDescriptionOptions(productOptions)
         setManufacturerCategoryOptions(manufacturerOptions)
-        
+
 
         if (productInventoryId) {
           axiosInstance()
@@ -117,28 +118,28 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
   const handleSubmit = (values) => {
     sessionStorage.removeItem('productCategoryId')
     sessionStorage.removeItem('productCategoryName')
-    setLoading(true);
+    setSubmitting(true);
     if (productInventoryId && isClone === false) {
       values._id = productInventoryId;
       axiosInstance()
         .put(`${productInventory.api}`, values)
         .then(({ data: { data } }) => {
-          setLoading(false);
+          setSubmitting(false);
           onSuccess();
         })
         .catch((error) => {
-          setLoading(false);
+          setSubmitting(false);
           toastConfig.setToastConfig(error);
         });
     } else {
       axiosInstance()
         .post(`${productInventory.api}`, values)
         .then(({ data: { data } }) => {
-          setLoading(false);
+          setSubmitting(false);
           onSuccess(data);
         })
         .catch((error) => {
-          setLoading(false);
+          setSubmitting(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -162,7 +163,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
     );
   };
 
-  
+
 
   return (
     <>
@@ -254,13 +255,13 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                               const productLabel = productCategory
                                                 ? productCategoryOptions.find((obj) => obj.optionValue === productCategory).optionLabel
                                                 : '';
-                                                const productValue = productCategory
+                                              const productValue = productCategory
                                                 ? productCategoryOptions.find((obj) => obj.optionValue === productCategory).optionValue
                                                 : '';
-                                                sessionStorage.setItem('productCategoryId',JSON.stringify(productValue))
-                                                sessionStorage.setItem('productCategoryName',JSON.stringify(productLabel))
-                                              
-                                              
+                                              sessionStorage.setItem('productCategoryId', JSON.stringify(productValue))
+                                              sessionStorage.setItem('productCategoryName', JSON.stringify(productLabel))
+
+
 
                                               // desc.product = label
                                               // desc.productCategory = productLabel
@@ -315,7 +316,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                             //             handleValuesChange({[name]: value })
                                             // setFieldValue(name, value)
                                             // }}
-                                            
+
                                             required={field.required}
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}
@@ -326,18 +327,19 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                               const label = val && val.optionLabel ? val.optionLabel : '';
                                               // desc.productCategory = label
                                               setFieldValue(field.fieldName, value);
-                                              setFieldValue("product","")
-                                              handleValuesChange({ [field.fieldName]: value && value.optionValue ? value.optionValue : "",
-                                              "product":""
-                                            });
-                                            sessionStorage.setItem('productCategoryId',JSON.stringify(value))
-                                            sessionStorage.setItem('productCategoryName',JSON.stringify(label))
-                                              
+                                              setFieldValue("product", "")
+                                              handleValuesChange({
+                                                [field.fieldName]: value && value.optionValue ? value.optionValue : "",
+                                                "product": ""
+                                              });
+                                              sessionStorage.setItem('productCategoryId', JSON.stringify(value))
+                                              sessionStorage.setItem('productCategoryName', JSON.stringify(label))
+
                                               // setDescription(setFieldValue)
                                             }}
                                           />
                                         </Grid>
-                                        
+
                                         <Grid item xs={1} sm={1} md={1}>
                                           <Tooltip title="Add Product Category" className="mt-1">
                                             <IconButton
@@ -351,7 +353,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                             </IconButton>
                                           </Tooltip>
                                         </Grid>
-                                        
+
 
                                         {field?.tooltipMessage ? (
                                           <Grid item xs={1} sm={1} md={1}>
@@ -379,7 +381,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                             errors={errors}
                                             touched={touched}
                                             label={field.fieldLabel}
-                                            name={field.fieldLabel}
+                                            name={field.fieldName}
                                             type={field.type}
                                             options={plantsCategoryOptions}
                                             required={field.required}
@@ -387,10 +389,10 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                             isTooltip={field?.isTooltip || false}
                                             tooltipMessage={field?.tooltipMessage}
                                             size="small"
-                                            onChange={(e) => {
-                                              const val = e.target.value.trim();
-                                              setFieldValue(field.fieldLabel, val);
-                                              handleValuesChange({ [field.fieldLabel]: val });
+                                            onChange={(_, newVal) => {
+                                              const val = newVal?.optionValue;
+                                              setFieldValue(field.fieldName, val);
+                                              handleValuesChange({ [field.fieldName]: val });
                                               // desc.serialNumber = val
                                               // setDescription(setFieldValue)
                                             }}
@@ -500,152 +502,153 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                       ))}
                   </Form>
                   {open?.open && (
-        <CreateProductCategory
-          // isUpdateDisabled={false}
-          // productCategoryId={productCategoryId}
-          isClone={open?.isClone}
-          onClose={() => setOpen({ open: false, isClone: false })}
-          onSuccess={(data) => {
-              
-
-            setOpen({ open: false, isClone: false });
-            if(data._id){
-                setFieldValue("productCategory", data._id);
-                sessionStorage.setItem('productCategoryId', JSON.stringify(data._id));
-                sessionStorage.setItem('productCategoryName', JSON.stringify(data.name));
-                setProductCategoryOptions((prevState) => {     
-                    return [
-                        ...prevState,
-                        {
-                            optionValue: data._id,
-                            optionLabel: data.name,
-                            order: productCategoryOptions.length,
-                            default: false
-                        },
-                    ];
-                });
-            }
-           
-          }}
-        />
-      )}
-
-{plantsOpen?.open && (
-        <ManageWarehouse
-          // isUpdateDisabled={false}
-          // productCategoryId={productCategoryId}
-          open = {plantsOpen?.open}
-         close={()=>setPlantsOpen({ open: false, isClone: false })}
-          isClone={plantsOpen?.isClone}
-         
-          onSuccess={({data}) => {
-        
-            setPlantsOpen({ open: false, isClone: false });
-            if(data._id){
-                setFieldValue("Plants", data._id);
-                setPlantsCategoryOptions((prevState) => {     
-                    return [
-                        ...prevState,
-                        {
-                            optionValue: data._id,
-                            optionLabel: data.warehouseName,
-                            order: plantsCategoryOptions.length,
-                            default: false
-                        },
-                    ];
-                });
-                
-            }
-           
-          }}
-        />
-      )}
-
-{productOpen?.open && (
-        <CreateProduct
-          // isUpdateDisabled={false}
-          // productCategoryId={productCategoryId}
-          open = {productOpen?.open}
-         handleClose={()=>setProductOpen({ open: false, isClone: false })}
-          isClone={productOpen?.isClone}
-         
-          onSuccess={(data) => {
-
-           
-            setProductOpen({ open: false, isClone: false });
-            if(data._id){
-
-                setFieldValue("product", data._id);
-                setProductDescriptionOptions((prevState) => {     
-                    return [
-                        ...prevState,
-                        {
-                            optionValue: data._id,
-                            optionLabel: data.productName,
-                            order: productDescriptionOptions.length,
-                            default: false
-                        },
-                    ];
-                });
-                setFieldValue("productCategory", data.productCategory);
-                setProductCategoryOptions((prevState) => {     
-                  return [
-                      ...prevState,
-                      {
-                          optionValue: data.productCategory,
-                          order: productDescriptionOptions.length,
-                          default: false
-                      },
-                  ];
-                 
-              });
-              sessionStorage.setItem('productCategoryId', JSON.stringify(data.productCategory));
+                    <CreateProductCategory
+                      // isUpdateDisabled={false}
+                      // productCategoryId={productCategoryId}
+                      isClone={open?.isClone}
+                      onClose={() => setOpen({ open: false, isClone: false })}
+                      onSuccess={(data) => {
 
 
-            }
+                        setOpen({ open: false, isClone: false });
+                        if (data._id) {
+                          setFieldValue("productCategory", data._id);
+                          sessionStorage.setItem('productCategoryId', JSON.stringify(data._id));
+                          sessionStorage.setItem('productCategoryName', JSON.stringify(data.name));
+                          setProductCategoryOptions((prevState) => {
+                            return [
+                              ...prevState,
+                              {
+                                optionValue: data._id,
+                                optionLabel: data.name,
+                                order: productCategoryOptions.length,
+                                default: false
+                              },
+                            ];
+                          });
+                        }
 
-           
-          }}
-        />
-      )}
-        
-{manufacturerOpen?.open && (
-        <ManageAccountDialog
-          // isUpdateDisabled={false}
-          // productCategoryId={productCategoryId}
-          open = {manufacturerOpen?.open}
-         onClose={()=>setManufacturerOpen({ open: false, isClone: false })}
-          isClone={manufacturerOpen?.isClone}
-          accountResource='supplierAccount'
-          accountApi='supplier-account'
-          isRedirectToDetailPage={false}
-          
-          onSuccess={({data}) => {
-            
-            setManufacturerOpen({ open: false, isClone: false });
-           
-            if(data._id){
-                setFieldValue("Manufacturer", data._id);
-                setManufacturerCategoryOptions((prevState) => {     
-                    return [
-                        ...prevState,
-                        {
-                            optionValue: data._id,
-                            optionLabel: data.accountName,
-                            order: manufacturerCategoryOptions.length,
-                            default: false
-                        },
-                    ];
-                });
-            }
-           
-          }}
-        />
-      )}
+                      }}
+                    />
+                  )}
+
+                  {plantsOpen?.open && (
+                    <ManageWarehouse
+                      // isUpdateDisabled={false}
+                      // productCategoryId={productCategoryId}
+                      open={plantsOpen?.open}
+                      close={() => setPlantsOpen({ open: false, isClone: false })}
+                      isClone={plantsOpen?.isClone}
+
+                      onSuccess={({ data }) => {
+
+                        setPlantsOpen({ open: false, isClone: false });
+                        if (data._id) {
+                          setFieldValue("plants", data._id);
+                          setPlantsCategoryOptions((prevState) => {
+                            return [
+                              ...prevState,
+                              {
+                                optionValue: data._id,
+                                optionLabel: data.warehouseName,
+                                order: plantsCategoryOptions.length,
+                                default: false
+                              },
+                            ];
+                          });
+
+                        }
+
+                      }}
+                    />
+                  )}
+
+                  {productOpen?.open && (
+                    <CreateProduct
+                      // isUpdateDisabled={false}
+                      // productCategoryId={productCategoryId}
+                      open={productOpen?.open}
+                      handleClose={() => setProductOpen({ open: false, isClone: false })}
+                      isClone={productOpen?.isClone}
+
+                      onSuccess={(data) => {
+
+
+                        setProductOpen({ open: false, isClone: false });
+                        if (data._id) {
+
+                          setFieldValue("product", data._id);
+                          setProductDescriptionOptions((prevState) => {
+                            return [
+                              ...prevState,
+                              {
+                                optionValue: data._id,
+                                optionLabel: data.productName,
+                                order: productDescriptionOptions.length,
+                                default: false
+                              },
+                            ];
+                          });
+                          setFieldValue("productCategory", data.productCategory);
+                          setProductCategoryOptions((prevState) => {
+                            return [
+                              ...prevState,
+                              {
+                                optionValue: data.productCategory,
+                                order: productDescriptionOptions.length,
+                                default: false
+                              },
+                            ];
+
+                          });
+                          sessionStorage.setItem('productCategoryId', JSON.stringify(data.productCategory));
+
+
+                        }
+
+
+                      }}
+                    />
+                  )}
+
+                  {manufacturerOpen?.open && (
+                    <ManageAccountDialog
+                      // isUpdateDisabled={false}
+                      // productCategoryId={productCategoryId}
+                      open={manufacturerOpen?.open}
+                      onClose={() => setManufacturerOpen({ open: false, isClone: false })}
+                      isClone={manufacturerOpen?.isClone}
+                      accountResource='supplierAccount'
+                      accountApi='supplier-account'
+                      isRedirectToDetailPage={false}
+
+                      onSuccess={({ data }) => {
+
+                        setManufacturerOpen({ open: false, isClone: false });
+
+                        if (data._id) {
+                          setFieldValue("Manufacturer", data._id);
+                          setManufacturerCategoryOptions((prevState) => {
+                            return [
+                              ...prevState,
+                              {
+                                optionValue: data._id,
+                                optionLabel: data.accountName,
+                                order: manufacturerCategoryOptions.length,
+                                default: false
+                              },
+                            ];
+                          });
+                        }
+
+                      }}
+                    />
+                  )}
 
                 </CustomDialogContent>
                 <CustomDialogFooter>
                   <Button
+                    disabled={isSubmitting}
                     size="small"
                     color="primary"
                     onClick={() => {
@@ -657,7 +660,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                   >
                     Cancel
                   </Button>
-                  <CustomButton loading={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                  <CustomButton disabled={isSubmitting} loading={isSubmitting} variant="contained" color="primary" type="submit" onClick={submitForm}>
                     {' '}
                     Save
                   </CustomButton>
@@ -689,7 +692,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
           </Box>
         )}
       </Dialog>
-     
+
     </>
   );
 };
