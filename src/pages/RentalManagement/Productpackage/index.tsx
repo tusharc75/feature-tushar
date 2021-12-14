@@ -271,15 +271,15 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             data.conditionType = ["Rent"]
             data.material = arr.map(ele => ({
                 materialId: ele?.materialId,
-                materialType: ele?.type.includes("roduct") ? "product" : "packages",
+                materialType: ele?.type,
                 qty: ele?.qty,
                 pricingMethod: ele?.pricingMethod,
                 unit: ele?.unit,
                 currency: rentalManagementData?.currency
             }))
             data.supplier = [];
-            data.customer = [rentalManagementData?.customerAccount.optionValue];
-            data.warehouse = [];
+            data.customer = [rentalManagementData?.customerAccount?.optionValue];
+            data.warehouse = [rentalManagementData?.warehouse?.optionValue];
             return new Promise((resolve, reject) => {
                 axiosInstance().post(pricingCondition.api + `/calculatePrice`, data)
                     .then(({ data: { data } }) => {

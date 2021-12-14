@@ -24,7 +24,7 @@ import { Link } from "react-router-dom";
 import { startCase } from "lodash";
 
 
-const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData }) => {
+const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJobStatus, statusOptions }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
@@ -52,6 +52,12 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData }) => {
       {params.value}
     </Link>
   );
+
+  useEffect(() => {
+    if (statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice") > statusOptions.findIndex(d => d.optionLabel === rentalManagementData?.status)) {
+      updateJobStatus("Ready to Invoice")
+    }
+  }, []);
 
   useEffect(() => {
     axiosInstance().get("/field/child?resource=Rental Management Product").then(({ data: { data } }) => {
@@ -106,16 +112,6 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData }) => {
     });
   };
 
-  const handleGenerateInvoice = () => {
-    axiosInstance().patch(`${rentalManagement.rentalManagementApi}/generate-invoice/${rentalManagementData._id}`, {}).then(() => {
-      toastConfig.setToastConfig({ open: true, type: "success", message: "Invoice Generated Successfully" })
-      fetchRentalData()
-    })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const onSendEmailSuccess = () => {
 
   };
@@ -159,18 +155,6 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData }) => {
         >
           {isMobile ? <MdEmail size={22} /> : `Send Email`}
         </Button>}
-      </Box>
-      <Box display="flex" justifyContent="flex-end" p="4px">
-        <Box mx={1} />
-        <Button
-          variant={isMobile ? "outlined" : "contained"}
-          color="primary"
-          size="small"
-          disabled={rentalManagementData?.status === "Invoiced"}
-          onClick={handleGenerateInvoice}
-        >
-          {isMobile ? <BiPurchaseTagAlt size={22} /> : `Generate Invoice`}
-        </Button>
       </Box>
     </Box>
     <Grid item xs={12} md={12} sm={12} className="mt-3">

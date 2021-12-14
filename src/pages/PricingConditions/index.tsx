@@ -67,7 +67,10 @@ const PricingConditions = () => {
     axiosInstance().get(`/field?resource=${startCase(pricingCondition.resource)}`).then(({ data: { data } }) => {
       let columns = [];
       let rendererNames = [];
-      data.forEach(o => {
+      data.forEach((o: any) => {
+        if (o?.fieldData?.fieldName === "conditionName") {
+          o.fieldData.primaryField = true
+        }
         let currentColumn = getColumnData(pricingCondition.resource, o?.fieldData, `${pricingCondition.route}/detail`)
         if (currentColumn !== null) {
           columns = [...columns, currentColumn?.columnData]
@@ -119,7 +122,7 @@ const PricingConditions = () => {
 
   const ActionsRenderer = params => (
     <>
-      <IconButton
+      {/* <IconButton
         size="small"
         aria-label="Edit"
         onClick={() => {
@@ -127,7 +130,7 @@ const PricingConditions = () => {
         }}
       >
         <EditIcon color="primary" />
-      </IconButton>
+      </IconButton> */}
       {
         permissions.pricingCondition.isDelete &&
         <Tooltip title="Delete">
