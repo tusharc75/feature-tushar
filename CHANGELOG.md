@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.18.4](https://github.com/vebholic/oms_frontend/compare/v2.18.3...v2.18.4) (2021-12-14)
+
+
+### Bug Fixes
+
+* bug fix ([2667672](https://github.com/vebholic/oms_frontend/commit/2667672cbbd1b1596bbb295dda87fe90a82719c3))
+* bug fix ([a1638c3](https://github.com/vebholic/oms_frontend/commit/a1638c37e57f8b814a8bc3f1c4f6e217f0dbca83))
+* bug fix ([57e6bbe](https://github.com/vebholic/oms_frontend/commit/57e6bbe9af80b7e7a12ef8c69db036a5a1e8ec69))
+* bug fix ([ae1ea19](https://github.com/vebholic/oms_frontend/commit/ae1ea191230e157667b408d784c5b6eff3aace92))
+* **new fix:** new fix ([b88b141](https://github.com/vebholic/oms_frontend/commit/b88b141dc355e835161fc19adeedcd9c7cd5bb67))
+* pO bugs ([cf2b1f6](https://github.com/vebholic/oms_frontend/commit/cf2b1f68872ce2b169ea2d5c6ce95103c54c8493))
+* pO changes bulk edit, address ([81f2251](https://github.com/vebholic/oms_frontend/commit/81f2251a5d4aabd64f8cff1bb49a9562dd8b1a4d))
+* **repair job add serialised invalid id error:** repair Job add serialised invalid id error ([9a61d35](https://github.com/vebholic/oms_frontend/commit/9a61d355abeaa49dda6751c42d2b6a4a57a5787e))
+
 ### [2.18.3](https://github.com/vebholic/oms_frontend/compare/v2.18.2...v2.18.3) (2021-12-13)
 
 
