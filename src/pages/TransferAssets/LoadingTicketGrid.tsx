@@ -14,8 +14,7 @@ import { CommonRenderer, DateRenderer } from '../../components/AgGridComponents/
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { AiFillFilePdf } from "react-icons/ai";
-
+import { AiFillFilePdf } from 'react-icons/ai';
 
 interface LoadingGridProps {
   fetchAssets: any;
@@ -172,7 +171,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       const inventoryDelivered = dataRows.filter((asset: any) => asset['deliveryTicketStatus'] === 'Delivered');
       const inventoryLost = dataRows.filter((asset: any) => asset?.status === 'Lost');
 
-
       if (inventoryDelivered.length > 0) {
         setNextStep(true);
       } else {
@@ -182,14 +180,12 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       if (transferAssetData?.transferType === 'Internal') {
         if (inventoryDelivered.length === dataRows.length || inventoryLost.length === dataRows.length) {
           setTransferIsEnded(true);
-          updateTransferStatus("Completed")
+          updateTransferStatus('Completed');
         } else {
           setTransferIsEnded(false);
         }
       }
-
     }
-
   }, [dataRows, selectedRecords]);
 
   const handleRemoveTicket = () => {
@@ -233,9 +229,11 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               size="small"
               startIcon={isMobile ? '' : <AiFillFilePdf />}
               disabled={fileDownloading}
-              onClick={() => { handleViewPdf(false) }}
+              onClick={() => {
+                handleViewPdf(false);
+              }}
             >
-              {isMobile ? <AiFillFilePdf size={22} /> : fileDownloading ? "Please wait..." : "Preview"}
+              {isMobile ? <AiFillFilePdf size={22} /> : fileDownloading ? 'Please wait...' : 'Preview'}
             </Button>
           )}
           <Box component="span" mx={1} />
@@ -247,35 +245,44 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               size="small"
               startIcon={isMobile ? '' : <AiFillFilePdf />}
               disabled={fileDownloading}
-              onClick={() => { handleViewPdf(true) }}
+              onClick={() => {
+                handleViewPdf(true);
+              }}
             >
-              {isMobile ? <AiFillFilePdf size={22} /> : fileDownloading ? "Please wait..." : "Download"}
+              {isMobile ? <AiFillFilePdf size={22} /> : fileDownloading ? 'Please wait...' : 'Download'}
             </Button>
           )}
           <Box component="span" mx={1} />
-          {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isCreate && <Button
-            variant="contained"
-            size="small"
-            color="primary"
-            disabled={selectedRecords.length === 0 || assetWithNoTicket.length === 0}
-            onClick={() => setOpenLoadingTicketDialog(true)}
-          >
-            Create Loading Ticket
-          </Button>}
+          {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isCreate && (
+            <Button
+              variant="contained"
+              size="small"
+              color="primary"
+              disabled={
+                selectedRecords.length === 0 ||
+                selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0
+              }
+              onClick={() => setOpenLoadingTicketDialog(true)}
+            >
+              Create Loading Ticket
+            </Button>
+          )}
           <Box component="span" mx={1} />
-          {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isUpdate && <Button
-            variant="contained"
-            size="small"
-            color="primary"
-            disabled={
-              assetsDelivered.length > 0 ||
-              assetsIntransit.length > 0 ||
-              selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length === 0
-            }
-            onClick={() => setShowConfirmBox(true)}
-          >
-            Remove Loading Ticket
-          </Button>}
+          {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isUpdate && (
+            <Button
+              variant="contained"
+              size="small"
+              color="primary"
+              disabled={
+                assetsDelivered.length > 0 ||
+                assetsIntransit.length > 0 ||
+                selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length === 0
+              }
+              onClick={() => setShowConfirmBox(true)}
+            >
+              Remove Loading Ticket
+            </Button>
+          )}
         </Box>
       </Box>
 
