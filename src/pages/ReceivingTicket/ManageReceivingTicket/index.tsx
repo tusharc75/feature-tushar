@@ -215,10 +215,14 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
           tempInitialData["type"] = "Transfer Asset"
           tempInitialData["expectedDeliveryDate"] = moment(new Date()).add(7, 'days');
           tempInitialData["receivingJobName"] = `${transferData?.transferAssetNumber}_${generateUniqueIdOnly()}`
-          tempInitialData["warehouse"] = transferData?.transferToPlant.optionValue
-          // tempInitialData["receivingPlantAddress"] = transferData?.transferToPlant.address
+
+          // tempInitialData["warehouse"] = transferData?.transferToPlant?.optionValue ?? ""
+
+
+
           if (transferData?.transferType === "External Customer") {
             tempInitialData["customerAccount"] = transferData?.transferToCustomer?.optionValue;
+            // tempInitialData["receivingPlantAddress"] = transferData?.transferToPlant?.address ?? ""
             tempInitialData["customerPickupAddress"] = transferData?.customerShipTo;
           }
           if (transferData?.transferType === "External Supplier") {
@@ -226,11 +230,11 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
             tempInitialData["supplierPickupAddress"] = transferData?.supplierShipTo;
           }
           setReceivingTicketData({
-            fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "transferAsset"),
+            fields: fieldsDataForCreate,
             initialValues: tempInitialData,
           });
           setFormValues(tempInitialData)
-
+          setLoading(false);
         } else {
           let initialData = getObjKeys('', fieldsDataForCreate);
           setReceivingTicketData({
