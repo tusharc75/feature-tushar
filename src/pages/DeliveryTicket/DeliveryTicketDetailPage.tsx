@@ -187,6 +187,11 @@ export default function DeliveryTicketDetail(props) {
                 return false
               }
             }
+
+            if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "rental") {
+              return false
+            }
+
             return true
           })
 
@@ -196,11 +201,17 @@ export default function DeliveryTicketDetail(props) {
             if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Plant")) {
               return false
             }
+            if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "transferAsset") {
+              return false
+            }
             return true
           })
         } else {
           data = data.filter((fields: any) => {
             if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
+              return false
+            }
+            if (fields.fieldData.fieldName === "rental" || fields.fieldData.fieldName === "transferAsset") {
               return false
             }
             return true
