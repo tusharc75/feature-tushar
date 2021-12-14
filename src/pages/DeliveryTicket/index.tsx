@@ -329,11 +329,9 @@ const DeliveryTicket = () => {
                 <Grid container justify="flex-end">
                   <ImportExportLinks
                     permissions={deliveryPermissions}
-                    module="quotes"
+                    module="deliveryTicket"
                     api={deliveryTicketApi}
-                    afterImportCompleted={() => {
-                      fetchDeliveryTicket();
-                    }}
+                    afterImportCompleted={fetchDeliveryTicket}
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
                     recordsToExport={selectedRecords.length}

@@ -260,7 +260,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               color="primary"
               disabled={
                 selectedRecords.length === 0 ||
-                selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0
+                selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0 ||
+                selectedRecords.filter((asset: any) => asset?.status === "Lost").length > 0
               }
               onClick={() => setOpenLoadingTicketDialog(true)}
             >
@@ -276,7 +277,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               disabled={
                 assetsDelivered.length > 0 ||
                 assetsIntransit.length > 0 ||
-                selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length === 0
+                selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length === 0 ||
+                selectedRecords.filter((asset) => !asset?.hasOwnProperty('deliveryTicket')).length > 0
               }
               onClick={() => setShowConfirmBox(true)}
             >
