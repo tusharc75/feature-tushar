@@ -255,8 +255,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" mx="4px">
-        <div></div>
+      <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} justifyContent="space-between" mx="4px">
         <Box>
           {permissions?.transferAsset?.isRead && (
             <Button
@@ -264,13 +263,13 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               color="primary"
               type="button"
               size="small"
-              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              startIcon={<AiFillFilePdf />}
               disabled={fileDownloading}
               onClick={() => {
                 handleViewPdf(false);
               }}
             >
-              {isMobile ? <AiFillFilePdf size={22} /> : fileDownloading ? 'Please wait...' : 'Preview'}
+              {fileDownloading ? 'Please wait...' : 'Preview'}
             </Button>
           )}
           <Box component="span" mx={1} />
@@ -280,16 +279,18 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               color="primary"
               type="button"
               size="small"
-              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              startIcon={<AiFillFilePdf />}
               disabled={fileDownloading}
               onClick={() => {
                 handleViewPdf(true);
               }}
             >
-              {isMobile ? <AiFillFilePdf size={22} /> : fileDownloading ? 'Please wait...' : 'Download'}
+              {fileDownloading ? 'Please wait...' : 'Download'}
             </Button>
           )}
-          <Box component="span" mx={1} />
+        </Box>
+
+        <Box marginTop={isMobile ? 2 : 0}>
           {permissions?.transferAsset.isUpdate && permissions?.receivingTicket.isCreate && (
             <Button
               variant="contained"
