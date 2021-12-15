@@ -146,8 +146,8 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
                     tempInitialData["shippingAddress"] = rentalData.shippingAddress
                     tempInitialData["deliveryJobName"] = `${rentalData?.rentalJobName}_${generateUniqueIdOnly()}`
-                    tempInitialData["pick-UpDate"] = moment(rentalData?.rentalStartDate).subtract(1, 'days');
-                    tempInitialData["deliveryDate"] = moment(rentalData?.rentalStartDate).subtract(1, 'days');
+                    tempInitialData["pick-UpDate"] = moment(rentalData?.estimateStartDate).subtract(1, 'days');
+                    tempInitialData["deliveryDate"] = moment(rentalData?.estimateStartDate).subtract(1, 'days');
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
                         values: tempInitialData,
@@ -425,7 +425,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                     size="small"
                                                                                     //minDate={new Date()}
                                                                                     //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
-                                                                                    maxDate={rentalData?.rentalStartDate ? moment(rentalData?.rentalStartDate) : moment().add(1, 'years').calendar()}
+                                                                                    maxDate={rentalData?.estimateStartDate ? moment(rentalData?.estimateStartDate) : moment().add(1, 'years').calendar()}
                                                                                 />
                                                                             ) : field.fieldName === "deliveryDate" ? (
                                                                                 <FormTypes
@@ -450,7 +450,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                     size="small"
                                                                                     //minDate={moment(values["pick-UpDate"]).add(7, 'days')}
                                                                                     //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
-                                                                                    maxDate={rentalData?.rentalStartDate ? moment(rentalData?.rentalStartDate) : moment().add(1, 'years').calendar()}
+                                                                                    maxDate={rentalData?.estimateStartDate ? moment(rentalData?.estimateStartDate) : moment().add(1, 'years').calendar()}
                                                                                 />
                                                                             ) : field.fieldName === "deliveryJobName" ? (
                                                                                 <FormTypes

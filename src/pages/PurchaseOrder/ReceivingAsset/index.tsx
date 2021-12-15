@@ -53,6 +53,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
     const [generatingPdfFile, setGeneratingFile] = useState(false);
+    const [disableCreateAsset, setDisableCreateAsset] = useState(false);
 
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
@@ -186,9 +187,12 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                 };
                 return res;
             });
-            if (rows.every(d => d.qty === d.actualReceived) && statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice") >= statusOptions.findIndex(d => d.optionLabel === purchaseOrderData?.status)) {
-                handleUpdateData({ "status": "Ready to Invoice" })
-                setCurrentStep(4)
+            if (rows.every(d => d.qty === d.actualReceived)) {
+                setDisableCreateAsset(true)
+                if (statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice") >= statusOptions.findIndex(d => d.optionLabel === purchaseOrderData?.status)) {
+                    handleUpdateData({ "status": "Ready to Invoice" })
+                    setCurrentStep(4)
+                }
             }
             axiosInstance().get(`${productInventory.api}?filterById=[{"field": "pONumber", "term": "${purchaseOrderData._id}"}]`)
                 .then(({ data }) => {
@@ -301,7 +305,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                     variant="contained"
                     color="primary"
                     size="small"
-                    disabled={selectedProducts.length === 0}
+                    disabled={selectedProducts.length === 0 || disableCreateAsset}
                     onClick={() => { setShowCreateAssetDialog(true) }}
                 >
                     {`Create Asset`}
