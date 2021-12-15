@@ -85,7 +85,7 @@ const AddExistingProduct = (props) => {
     }, [page, limit, filters, sorting, search, productColoums, productCategory, productTemplate, showFilteredRecordsOnly]);
 
     useEffect(() => {
-        axiosInstance().get("/field?resource=Product").then(({ data: { data } }) => {
+        axiosInstance().get("/field?resource=Product&view=true").then(({ data: { data } }) => {
             if (data.filter((e) => e.fieldData.fieldName === "productTemplate").length === 0) {
                 setIsProductTemplate(false)
             }

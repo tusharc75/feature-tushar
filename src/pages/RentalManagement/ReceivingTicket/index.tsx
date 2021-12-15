@@ -103,6 +103,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
                 data.data.map(obj => {
                   productAssets.map((d, index) => {
                     if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
+                      productAssets[index]["type"] = obj?.type
                       productAssets[index]["receivingTicket"] = obj?.receivingJobName
                       productAssets[index]["receivingTicketId"] = obj?._id
                     }

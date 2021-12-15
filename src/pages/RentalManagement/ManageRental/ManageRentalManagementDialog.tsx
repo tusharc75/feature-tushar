@@ -55,6 +55,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     const [customerContactDataSource, setCustomerContactDataSource] = useState([]);
     const [newAddedAccountId, setNewAddedAccountId] = useState(null);
 
+    const [rentalDetails, setRentalDetails] = useState(null);
 
     const updateAccountDropdown = (data) => {
         const entityFields = rentalData.fields;
@@ -82,7 +83,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
         const customerContactNameFieldIndex = entityFields.findIndex(
             (d) => d.fieldName === "customerContact"
         );
-
         if (customerContactNameFieldIndex > -1) {
             const newCustomer = {
                 optionValue: data._id,
@@ -137,19 +137,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                     )
                 );
             }
-
-            // if (isNew && contactId) {
-            //     setCustomerContactDataSource(
-            //         customerContactDropdownData.option.filter(
-            //             (d) =>
-            //                 d.parentAccount ===
-            //                 rentalData.initialValues["customerAccount"]
-            //         )
-            //     );
-            // }
         }
-
-
         setFormsData(setFieldsInAscendingOrder(rentalData.fields));
     }, [rentalData.fields]);
 
@@ -176,7 +164,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     useEffect(() => {
         setLoading(true);
         fetchFields();
-
     }, [rentalManagementId]);
 
     const fetchFields = async () => {
@@ -209,6 +196,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                         setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate))
                         setLoading(false)
                     } else {
+                        setRentalDetails(data)
                         setRentalData({
                             fields: fieldsDataForUpdate,
                             initialValues: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -352,6 +340,8 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             ...data
         }))
     }
+
+    console.log(rentalDetails)
     return (
         <>
             <Dialog
@@ -725,7 +715,10 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                     rentalManagementId={rentalManagementId}
                                                                                     {...field}
                                                                                     fieldData={field}
-                                                                                    disabled={(rentalManagementId && field.disableOnEdit)}
+                                                                                    disabled={
+                                                                                        field.fieldName === "currency" ? rentalDetails && rentalDetails?.material?.length ? true : false :
+                                                                                            field.fieldName === "warehouse" ? rentalDetails && rentalDetails?.productInventory?.length ? true : false :
+                                                                                                (rentalManagementId && field.disableOnEdit)}
                                                                                     values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}
