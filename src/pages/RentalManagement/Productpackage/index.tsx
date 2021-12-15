@@ -22,7 +22,6 @@ import {
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import RentalJobQtyDialog from './RentalJobQtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
-const { pricingConditionApi } = pricingCondition
 
 const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) => {
 
@@ -162,20 +161,25 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
     }, []);
 
     const fetchProductInventory = () => {
+        setNextStep(false)
         axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`).then(({ data: { data } }) => {
             setMaterial(JSON.parse(JSON.stringify(data.material)))
+            const inventory = data.inventory;
             const rows = data.material.filter((e) => e.parentId === null)
             rows.forEach((parent, i) => {
                 parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageDescription}`
                 parent.qtyDisplay = parent.qty;
                 parent.isValid = parent["finalPrice_" + rentalManagementData?.currency?.toLowerCase()] ? true : false;
+                parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
                 if (parent.type === "package") {
                     const subRows: any = data.material.filter((e) => e.parentId === parent._id);
                     subRows.forEach((_subRow, j) => {
                         _subRow.detail = (i + 1) + "." + (j + 1) + " - " + _subRow.productDetail?.productName
                         _subRow.qtyDisplay = `${parent.qty} x ${_subRow.qty} = ${parent.qty * _subRow.qty}`
                         _subRow.isValid = _subRow["finalPrice_" + rentalManagementData?.currency?.toLowerCase()] ? true : false;
+                        _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
                     })
+                    parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
                     parent.subRows = subRows
                 }
             });
@@ -191,7 +195,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
         });
     };
 
-    const handleAdd = (rows) => {
+    const handleAdd = async (rows) => {
         setAddingProducts(true)
         const material: any = []
         rows.forEach(d => {
@@ -200,7 +204,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             element.type = d.type.toLowerCase();
             element.unit = d.unit && d.unit.length ? d.unit[0] : "";
             element.pricingMethod = d.pricingMethod && d.pricingMethod.length ? d.pricingMethod[0] : "";
-            element.qty = d.qty ? d.qty : 1;
+            element.qty = d.qty ? parseFloat(d.qty) : 1;
             element.startDate = rentalManagementData ? rentalManagementData?.rentalStartDate : new Date();
             element.endDate = rentalManagementData ? rentalManagementData?.rentalEndDate : new Date();
             element.parentId = addExistingProductDialog.parentId;
@@ -211,6 +215,18 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             }
             material.push(element);
         });
+
+        const priceData: any = await calculatePrice(material);
+        material.forEach(element => {
+            const rateResult = priceData?.filter((e) => e.materialId === element.materialId &&
+                e.materialType === element.type && e.unit === element.unit && e.pricingMethod === element.pricingMethod)
+            if (rateResult.length && rateResult[0].mrp) {
+                const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`
+                element[priceFieldName] = rateResult[0].mrp;
+                const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields)
+                Object.assign(element, calValues);
+            }
+        })
 
         axiosInstance().post(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`, { material })
             .then(() => {
@@ -229,6 +245,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             delete element.detail
             delete element.qtyDisplay
             delete element.isValid
+            delete element.hideSelection
             delete element.productDetail
             delete element.packageDetail
             delete element.subRows
@@ -263,7 +280,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
         setRecordToUpdate(rowData)
     }
 
-    const calculatePricing = (arr: any[]) => {
+    const calculatePrice = (arr: any[]) => {
         //materialType can be =["product","packages","productCategory"]
         //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
         if (rentalManagementData) {
@@ -271,17 +288,17 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             data.conditionType = ["Rent"]
             data.material = arr.map(ele => ({
                 materialId: ele?.materialId,
-                materialType: ele?.type.includes("roduct") ? "product" : "packages",
+                materialType: ele?.type,
                 qty: ele?.qty,
                 pricingMethod: ele?.pricingMethod,
                 unit: ele?.unit,
                 currency: rentalManagementData?.currency
             }))
             data.supplier = [];
-            data.customer = [rentalManagementData?.customerAccount.optionValue];
-            data.warehouse = [];
+            data.customer = [rentalManagementData?.customerAccount?.optionValue];
+            data.warehouse = [rentalManagementData?.warehouse?.optionValue];
             return new Promise((resolve, reject) => {
-                axiosInstance().post(pricingConditionApi + `/calculatePrice`, data)
+                axiosInstance().post(pricingCondition.api + `/calculatePrice`, data)
                     .then(({ data: { data } }) => {
                         resolve(data)
                     }).catch(err => {
@@ -290,6 +307,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             })
         }
     };
+
+    console.log(rowsData)
 
     return (<Fragment>
         <Box display="flex" justifyContent="space-between" m={1}>
@@ -323,7 +342,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                             variant="contained"
                             color="primary"
                             size="small"
-                            disabled={!Boolean(selectedProducts && selectedProducts.length)}
+                            disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
                             onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
                         >
                             Bulk Edit
@@ -336,7 +355,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                         variant="contained"
                         color="primary"
                         size="small"
-                        disabled={!Boolean(selectedProducts && selectedProducts.length) || isDeleting}
+                        disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
                         onClick={() => {
                             const dataToDelete = selectedProducts && selectedProducts.map((rec: any) => {
                                 const obj: any = {};
@@ -392,7 +411,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
         />}
         {isProductEdit.open &&
             <RentalJobQtyDialog
-                calculatePrice={calculatePricing}
+                calculatePrice={calculatePrice}
                 onClose={() => {
                     setIsProductEdit({ open: false, isBulkedit: false })
                     setRecordToUpdate(null)

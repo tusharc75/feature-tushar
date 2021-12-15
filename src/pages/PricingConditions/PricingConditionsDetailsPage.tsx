@@ -31,7 +31,7 @@ import Select from '@material-ui/core/Select';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import TextField from '@material-ui/core/TextField';
-import MultipleEntry from './MultipleEntry';
+import MultipleEntry from './AddConditions/MultipleEntry';
 import { useParams, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from "../../components/Helpers/Routes";
@@ -41,7 +41,6 @@ import { Delete } from "@material-ui/icons";
 import Badge from '@material-ui/core/Badge';
 import { makeStyles } from '@material-ui/core/styles';
 import { FaDiceOne } from "react-icons/fa";
-
 
 const useStyles = makeStyles(() => ({
     screenHeightAuto: {
@@ -56,7 +55,6 @@ function PricingConditionsDetailsPage() {
 
     const history = useHistory();
     const { id } = useParams();
-    const { pricingConditionApi } = pricingCondition;
     const toastConfig = useContext(CustomToastContext);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const { state: { permissions } }: any = useData();
@@ -148,7 +146,7 @@ function PricingConditionsDetailsPage() {
             }
             else {
                 let newFields = [];
-                axiosInstance().get(`${pricingConditionApi}/${id}`).then(({ data: { data } }) => {
+                axiosInstance().get(`${pricingCondition.api}/${id}`).then(({ data: { data } }) => {
                     filterData.map((_f) => {
                         newFields.push(_f.fieldData);
                     });
@@ -187,7 +185,7 @@ function PricingConditionsDetailsPage() {
             delete values.tax;
         }
         if (id === "0") {
-            axiosInstance().post(pricingConditionApi, values).then(({ data }) => {
+            axiosInstance().post(pricingCondition.api, values).then(({ data }) => {
                 toastConfig.setToastConfig({
                     open: true,
                     type: "success",
@@ -202,7 +200,7 @@ function PricingConditionsDetailsPage() {
         }
         else {
             values._id = id;
-            axiosInstance().put(pricingConditionApi, values).then(({ data }) => {
+            axiosInstance().put(pricingCondition.api, values).then(({ data }) => {
                 toastConfig.setToastConfig({
                     open: true,
                     type: "success",

@@ -11,7 +11,7 @@ import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import { deliveryTicket, gridLoadingTimeout, rentalManagement, repairJob, sidebarResource } from "../../constants/helpers";
+import { deliveryTicket, gridLoadingTimeout, rentalManagement, repairJob, repairJobStatus, sidebarResource } from "../../constants/helpers";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import { groupBy } from 'lodash';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
@@ -231,7 +231,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
       </Button>
 
       {
-        repairJobData?.processStatus !== "End" &&
+        repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
         <IconButton
           disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId"))}
           onClick={() => {
@@ -248,8 +248,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
       }
 
       {
-        repairJobData?.processStatus !== "End" &&
-
+        repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
         <IconButton
           disabled={selectedRecords.length === 0 || selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId"))}
           onClick={() => {
@@ -337,7 +336,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
             limit={limit}
             pageSizes={pageSizes}
             page={page}
-            allowSelection={repairJobData?.processStatus !== "End"}
+            allowSelection={repairJobData && repairJobData["status"] === repairJobStatus[2] ? false : true}
             allowAction={false}
             loading={loading}
             renderedFrom={renderedFrom}

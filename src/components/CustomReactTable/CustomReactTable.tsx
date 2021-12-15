@@ -125,9 +125,10 @@ export default function CustomReactTable({
                 // The cell can use the individual row's getToggleRowSelectedProps method
                 // to the render a checkbox
                 Cell: ({ row }) => (
-                    <div style={{ paddingLeft: row.depth > 0 ? `${row.depth * 2}rem` : "" }}>
-                        <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-                    </div>
+                    row?.original?.hideSelection ? null :
+                        <div style={{ paddingLeft: row.depth > 0 ? `${row.depth * 2}rem` : "" }}>
+                            <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+                        </div>
                 ),
             },
             ...columns

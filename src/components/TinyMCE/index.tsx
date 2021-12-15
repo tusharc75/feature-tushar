@@ -507,7 +507,7 @@ export default function TinyMCE(props) {
                                                         variables && variables.map(o => {
                                                             return <MenuItem
                                                                 onClick={() => handleVaribleSelect(o)}
-                                                                value={o}>{startCase(o)}</MenuItem>
+                                                                value={o}>{o === "pDFTemplate" ? "PDF Template" : startCase(o)}</MenuItem>
                                                         })
                                                     }
                                                 </Menu>

@@ -43,6 +43,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
 };
 
 export const repairJobProcessSteps = ["Serialized Assets", "Loading Ticket", "Receiving Ticket", "End"];
+export const repairJobStatus = ["New", "In Progress", "Completed"];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -211,7 +212,7 @@ export const RESOURCE_LABEL = {
   salesOrder: 'Sales Order',
   eCommerce: 'e-Commerce',
   packages: 'Packages',
-  purchaseOrder: 'Purchase Order',
+  purchaseOrder: 'Purchase Orders',
   transferAsset: 'Transfer Assets',
   address: 'Address'
 };
@@ -369,13 +370,6 @@ export const budget = {
   resource: 'budget'
 };
 
-export const pricingCondition = {
-  pricingConditionApi: "/pricing-condition",
-  pricingConditionRoute: "pricing-condition",
-  pricingConditionPermission: "pricingCondition",
-
-};
-
 export const quotePdfTemplate = {
   quotePdfTemplateApi: '/quote-pdf-template',
   quotePdfTemplateRoute: '/quote-pdf-template',
@@ -405,6 +399,14 @@ export const transferAsset = {
   permission: 'transferAsset',
   resource: 'transferAsset'
 };
+
+
+export const pricingCondition = {
+  resource: 'pricingCondition',
+  api: '/pricing-condition',
+  route: 'pricing-condition'
+};
+
 
 export const profileMenuItems = {
   profile: 1,
@@ -1302,4 +1304,17 @@ export function treeToFlatArray(array, childrenProperty) {
   });
 
   return result;
+}
+
+
+export const arrayToDropwdownOption = (array) => {
+  const option: any = []
+  array?.forEach((element, index) => {
+    option.push({
+      "optionLabel": element,
+      "optionValue": element,
+      "order": index
+    })
+  });
+  return option;
 }

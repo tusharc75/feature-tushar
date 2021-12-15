@@ -38,7 +38,8 @@ const Dashboard = () => {
       from: new Date(moment().subtract(1, 'year').calendar()),
       to: new Date()
     },
-    country: {}
+    countrySellTo: {},
+    countryBillTo: {}
   });
   const getExchangeRates = async (date, amount) => {
     if (filterCurrency && filterCurrency !== currency) {
@@ -144,30 +145,61 @@ const Dashboard = () => {
                   setCurrency={setCurrency}
                   moment={moment}
                   getExchangeRates={getExchangeRates}
+                  salesReps={salesReps}
+                  customerAccounts={customerAccounts}
+                  marketSegments={marketSegments}
+                  subMarketSegments={subMarketSegments}
+                  productCategory={productCategory}
+                  setSubMarketSegment={setSubMarketSegments}
+                  setSalesFilter={setSalesFilter}
                 />
 
                 <Top2Dashboard
                   selectedEntity={selectedEntity}
                   getExchangeRates={getExchangeRates}
                   salesFilter={salesFilter}
-                  filterCurrency={filterCurrency}
-                  moment={moment}
                   currency={currency}
+                  setCurrency={setCurrency}
+                  moment={moment}
+                  salesReps={salesReps}
+                  customerAccounts={customerAccounts}
+                  marketSegments={marketSegments}
+                  subMarketSegments={subMarketSegments}
+                  productCategory={productCategory}
+                  setSubMarketSegment={setSubMarketSegments}
+                  setSalesFilter={setSalesFilter}
                 />
 
                 <OpportunityDashboards
                   selectedEntity={selectedEntity}
-                  moment={moment}
                   getExchangeRates={getExchangeRates}
-                  filterCurrency={filterCurrency}
-                  currency={currency}
                   salesFilter={salesFilter}
+                  currency={currency}
+                  setCurrency={setCurrency}
+                  moment={moment}
+                  salesReps={salesReps}
+                  customerAccounts={customerAccounts}
+                  marketSegments={marketSegments}
+                  subMarketSegments={subMarketSegments}
+                  productCategory={productCategory}
+                  setSubMarketSegment={setSubMarketSegments}
+                  setSalesFilter={setSalesFilter}
                 />
 
                 <OpportunityTrends
                   selectedEntity={selectedEntity}
-                  moment={moment}
+                  getExchangeRates={getExchangeRates}
                   salesFilter={salesFilter}
+                  currency={currency}
+                  setCurrency={setCurrency}
+                  moment={moment}
+                  salesReps={salesReps}
+                  customerAccounts={customerAccounts}
+                  marketSegments={marketSegments}
+                  subMarketSegments={subMarketSegments}
+                  productCategory={productCategory}
+                  setSubMarketSegment={setSubMarketSegments}
+                  setSalesFilter={setSalesFilter}
                 />
 
                 <Box my={2}>

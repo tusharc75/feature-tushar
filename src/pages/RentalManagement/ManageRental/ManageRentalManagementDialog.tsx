@@ -55,6 +55,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     const [customerContactDataSource, setCustomerContactDataSource] = useState([]);
     const [newAddedAccountId, setNewAddedAccountId] = useState(null);
 
+    const [rentalDetails, setRentalDetails] = useState(null);
 
     const updateAccountDropdown = (data) => {
         const entityFields = rentalData.fields;
@@ -82,7 +83,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
         const customerContactNameFieldIndex = entityFields.findIndex(
             (d) => d.fieldName === "customerContact"
         );
-
         if (customerContactNameFieldIndex > -1) {
             const newCustomer = {
                 optionValue: data._id,
@@ -103,7 +103,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     };
 
     useEffect(() => {
-
         const ownerCollabOptions = rentalData.fields.filter(
             (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
         );
@@ -112,21 +111,18 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             setOwnerData(ownerCollabOptions[0].option);
             setCollaboratorData(ownerCollabOptions[0].option);
         }
-
         let customerAccountOptions = rentalData.fields.find(
             (d) => d.fieldName === "customerAccount"
         );
         if (customerAccountOptions) {
             setAccountData(customerAccountOptions.option);
         }
-
         let customerContactOptions = rentalData.fields.find(
             (d) => d.fieldName === "customerContact"
         );
         if (customerContactOptions) {
             setContactData(customerContactOptions.option);
         }
-
         const customerContactDropdownData = rentalData.fields.find(
             (d) => d.fieldName === "customerContact"
         );
@@ -141,19 +137,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                     )
                 );
             }
-
-            // if (isNew && contactId) {
-            //     setCustomerContactDataSource(
-            //         customerContactDropdownData.option.filter(
-            //             (d) =>
-            //                 d.parentAccount ===
-            //                 rentalData.initialValues["customerAccount"]
-            //         )
-            //     );
-            // }
         }
-
-
         setFormsData(setFieldsInAscendingOrder(rentalData.fields));
     }, [rentalData.fields]);
 
@@ -180,13 +164,11 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     useEffect(() => {
         setLoading(true);
         fetchFields();
-
     }, [rentalManagementId]);
 
     const fetchFields = async () => {
         try {
             let fieldData;
-
             if (navigator.onLine) {
                 const response: any = await axiosInstance().get("/field?resource=Rental Management");
                 fieldData = response?.data?.data;
@@ -194,25 +176,19 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             else {
                 fieldData = offlineFieldsData?.rentalManagement || [];
             }
-
             const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
             if (rentalManagementId) {
-
                 try {
                     let data;
-
                     if (!isOffline) {
                         const response: any = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/` + rentalManagementId);
                         data = response?.data?.data;
                     } else {
                         data = offlineGridData?.rentalManagement?.find(d => d._id === rentalManagementId)
                     }
-
                     if (isClone) {
                         const { _id, brand, createdBy, entity, history, products, rentalJobName, updatedBy, ...rest } = data
-
                         setRentalData({
                             fields: fieldsDataForCreate,
                             initialValues: getObjKeysWithValues(rest, fieldsDataForCreate),
@@ -220,6 +196,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                         setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate))
                         setLoading(false)
                     } else {
+                        setRentalDetails(data)
                         setRentalData({
                             fields: fieldsDataForUpdate,
                             initialValues: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -234,12 +211,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             }
             else {
                 let initialData = { ...getObjKeys("", fieldsDataForCreate), rentalEndDate: "", currency: user.user?.brandCurrency || "" };
-
-                // var today = new Date();
-                // var tomorrow = new Date();
-                // initialData["rentalEndDate"] = "";  //  new Date(tomorrow.setDate(today.getDate() + 1));
-
-                // initialData["currency"] = user.user?.brandCurrency || "";
                 setRentalData({
                     fields: fieldsDataForCreate,
                     initialValues: initialData,
@@ -276,7 +247,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
         setLoading(true);
         if (rentalManagementId && isClone === false) {
             values._id = rentalManagementId
-
             if (!isOffline) {
                 axiosInstance().put(`${rentalManagement.rentalManagementApi}`, values).then(({ data }) => {
                     setLoading(false);
@@ -292,24 +262,19 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                 });
             } else {
                 let storedData = {};
-
                 if (localStorage.getItem("offlineDataToSave")) {
                     storedData = JSON.parse(localStorage.getItem("offlineDataToSave"));
                 }
-
                 const dataToSave = {
                     api: rentalManagement.rentalManagementApi,
                     method: "put",
                     values: values
                 };
-
                 if (!storedData["rentalManagement"]) {
                     storedData["rentalManagement"] = [];
                 }
                 storedData["rentalManagement"].push(dataToSave)
-
                 localStorage.setItem("offlineDataToSave", JSON.stringify(storedData));
-
                 setLoading(false);
                 toastConfig.setToastConfig({
                     open: true,
@@ -337,22 +302,18 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             }
             else {
                 let storedData = {};
-
                 if (localStorage.getItem("offlineDataToSave")) {
                     storedData = JSON.parse(localStorage.getItem("offlineDataToSave"));
                 }
-
                 const dataToSave = {
                     api: rentalManagement.rentalManagementApi,
                     method: "post",
                     values: values
                 };
-
                 if (!storedData["rentalManagement"]) {
                     storedData["rentalManagement"] = [];
                 }
                 storedData["rentalManagement"].push(dataToSave)
-
                 localStorage.setItem("offlineDataToSave", JSON.stringify(storedData));
                 onSuccess();
             }
@@ -365,7 +326,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             const input = document.querySelector(
                 `input[name=${err[0]}]`,
             );
-
             input.scrollIntoView({
                 behavior: 'smooth',
                 block: 'center',
@@ -380,6 +340,8 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             ...data
         }))
     }
+
+    console.log(rentalDetails)
     return (
         <>
             <Dialog
@@ -462,367 +424,330 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                 <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
                                                                 <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
                                                             </div>
-                                                            {/*<h2 className="form-label-style">{form.name}</h2>*/}
                                                             <Box marginY={2}>
                                                                 <Grid spacing={3} container>
                                                                     {form.sectionFields.map((field) => (
-                                                                        <Grid
-                                                                            key={field.fieldName}
-                                                                            item
-                                                                            xs={12}
-                                                                            sm={6}
-                                                                            md={6}
-                                                                        >
-                                                                            {
-                                                                                field.fieldName ==
-                                                                                    "customerAccount" ? (
-                                                                                    <Grid container spacing={1}>
-                                                                                        <Grid
-                                                                                            item
-                                                                                            xs={
-                                                                                                permissions.customerAccount
-                                                                                                    ?.isCreate
-                                                                                                    ? 11
-                                                                                                    : 11
-                                                                                            }
-                                                                                            sm={
-                                                                                                permissions.customerAccount
-                                                                                                    ?.isCreate
-                                                                                                    ? 11
-                                                                                                    : 11
-                                                                                            }
-                                                                                            md={
-                                                                                                permissions.customerAccount
-                                                                                                    ?.isCreate
-                                                                                                    ? 11
-                                                                                                    : 11
-                                                                                            }
-                                                                                        >
-                                                                                            <FormTypes
-                                                                                                {...field}
-                                                                                                isNew={!rentalManagementId}
-                                                                                                values={values}
-                                                                                                errors={errors}
-                                                                                                touched={touched}
-                                                                                                label={field.fieldLabel}
-                                                                                                name={field.fieldName}
-                                                                                                type={field.type}
-                                                                                                options={accountData}
-                                                                                                disabled={!isClone ? (rentalManagementId && field.disableOnEdit) : false}
-                                                                                                // setFieldValue={(name, value) => {
-                                                                                                //   handleValuesChange({ [name]: value })
-                                                                                                //   setFieldValue(name, value)
-                                                                                                // }}
-                                                                                                required={field.required}
-                                                                                                fullWidth
-                                                                                                isTooltip={
-                                                                                                    field?.isTooltip || false
-                                                                                                }
-                                                                                                tooltipMessage={
-                                                                                                    field?.tooltipMessage
-                                                                                                }
-                                                                                                size="small"
-                                                                                                doNotShowInfoTooltip={true}
-                                                                                                onChange={(e, value) => {
-                                                                                                    setFieldValue(
-                                                                                                        field.fieldName,
-                                                                                                        value && value.optionValue
-                                                                                                            ? value.optionValue
-                                                                                                            : ""
-                                                                                                    );
-                                                                                                    setFieldValue("customerContact", "");
-                                                                                                    handleValuesChange({
-                                                                                                        [field.fieldName]: value && value.optionValue ? value.optionValue : "",
-                                                                                                        "customerContact": "",
-                                                                                                    })
-                                                                                                }}
-                                                                                            />
-                                                                                        </Grid>
-                                                                                        {permissions.customerAccount?.isCreate &&
-                                                                                            <Grid item xs={1} sm={1} md={1}>
-                                                                                                <Tooltip
-                                                                                                    title="Create Account"
-                                                                                                    className="mt-1"
-                                                                                                >
-                                                                                                    <IconButton
-                                                                                                        onClick={() => {
-                                                                                                            setShowAddCustomerAccountDialog(
-                                                                                                                true
-                                                                                                            );
-                                                                                                        }}
-                                                                                                        disabled={!isClone ? (rentalManagementId && field.disableOnEdit) : false}
-                                                                                                        size="small"
-                                                                                                    >
-                                                                                                        <AddIcon color={isClone ? "primary" : rentalManagementId && field.disableOnEdit ? "disabled" : "primary"} />
-                                                                                                    </IconButton>
-                                                                                                </Tooltip>
-                                                                                            </Grid>
-                                                                                        }
-                                                                                        {field?.tooltipMessage ? (
-                                                                                            <Grid item xs={1} sm={1} md={1}>
-                                                                                                <Tooltip
-                                                                                                    title={
-                                                                                                        field?.tooltipMessage ?? ""
-                                                                                                    }
-                                                                                                >
-                                                                                                    <InfoIcon color="disabled" />
-                                                                                                </Tooltip>
-                                                                                            </Grid>
-                                                                                        ) : null}
-                                                                                    </Grid>
-                                                                                ) : field.fieldName ===
-                                                                                    "customerContact" ? (
-                                                                                    <Grid container spacing={1}>
-                                                                                        <Grid
-                                                                                            item
-                                                                                            xs={
-                                                                                                permissions.customerContact?.isCreate
-                                                                                                    ? 11
-                                                                                                    : 11
-                                                                                            }
-                                                                                            sm={
-                                                                                                permissions.customerContact?.isCreate
-                                                                                                    ? 11
-                                                                                                    : 11
-                                                                                            }
-                                                                                            md={
-                                                                                                permissions.customerContact?.isCreate
-                                                                                                    ? 11
-                                                                                                    : 11
-                                                                                            }
-                                                                                        >
-                                                                                            <FormTypes
-                                                                                                {...field}
-                                                                                                isNew={!rentalManagementId}
-                                                                                                values={values}
-                                                                                                errors={errors}
-                                                                                                touched={touched}
-                                                                                                label={field.fieldLabel}
-                                                                                                name={field.fieldName}
-                                                                                                type={field.type}
-                                                                                                options={customerContactDataSource}
-                                                                                                doNotShowInfoTooltip={true}
-                                                                                                setFieldValue={(name, value) => {
-                                                                                                    handleValuesChange({ [name]: value })
-                                                                                                    setFieldValue(name, value)
-                                                                                                }}
-                                                                                                disabled={!isClone ? (rentalManagementId && field.disableOnEdit) : false}
-                                                                                                required={field.required}
-                                                                                                fullWidth
-                                                                                                isTooltip={false}
-                                                                                                size="small"
-                                                                                                onOpen={() =>
-                                                                                                    onCustomerContactDropdownOpen(
-                                                                                                        values["customerAccount"]
-                                                                                                    )
-                                                                                                }
-                                                                                            // onChange={(e, value) => {
-                                                                                            //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-
+                                                                        <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
+                                                                            {field.fieldName == "customerAccount" ? (
+                                                                                <Grid container spacing={1}>
+                                                                                    <Grid item xs={permissions.customerAccount?.isCreate ? 11 : 11}
+                                                                                        sm={permissions.customerAccount?.isCreate ? 11 : 11}
+                                                                                        md={permissions.customerAccount?.isCreate ? 11 : 11}
+                                                                                    >
+                                                                                        <FormTypes
+                                                                                            {...field}
+                                                                                            isNew={!rentalManagementId}
+                                                                                            values={values}
+                                                                                            errors={errors}
+                                                                                            touched={touched}
+                                                                                            label={field.fieldLabel}
+                                                                                            name={field.fieldName}
+                                                                                            type={field.type}
+                                                                                            options={accountData}
+                                                                                            disabled={!isClone ? (rentalManagementId && field.disableOnEdit) : false}
+                                                                                            // setFieldValue={(name, value) => {
+                                                                                            //   handleValuesChange({ [name]: value })
+                                                                                            //   setFieldValue(name, value)
                                                                                             // }}
-                                                                                            />
-                                                                                        </Grid>
-                                                                                        {permissions.customerContact?.isCreate &&
-                                                                                            <Grid item xs={1} sm={1} md={1} >
-                                                                                                <Tooltip
-                                                                                                    title="Create Contact"
-                                                                                                    className="mt-1"
-                                                                                                >
-                                                                                                    <IconButton
-                                                                                                        onClick={() => {
-                                                                                                            setShowAddCustomerContactDialog(
-                                                                                                                true
-                                                                                                            );
-                                                                                                        }}
-                                                                                                        disabled={!isClone ? (rentalManagementId && field.disableOnEdit) : false}
-                                                                                                        size="small"
-                                                                                                    >
-                                                                                                        <AddIcon color={isClone ? "primary" : (rentalManagementId && field.disableOnEdit) ? "disabled" : "primary"} />
-                                                                                                    </IconButton>
-                                                                                                </Tooltip>
-                                                                                            </Grid>
-                                                                                        }
-                                                                                        {field?.tooltipMessage ? (
-                                                                                            <Grid item xs={1} sm={1} md={1}>
-                                                                                                <Tooltip
-                                                                                                    className="mt-2"
-                                                                                                    title={
-                                                                                                        field?.tooltipMessage ?? ""
-                                                                                                    }
-                                                                                                >
-                                                                                                    <InfoIcon color="disabled" />
-                                                                                                </Tooltip>
-                                                                                            </Grid>
-                                                                                        ) : null}
+                                                                                            required={field.required}
+                                                                                            fullWidth
+                                                                                            isTooltip={
+                                                                                                field?.isTooltip || false
+                                                                                            }
+                                                                                            tooltipMessage={
+                                                                                                field?.tooltipMessage
+                                                                                            }
+                                                                                            size="small"
+                                                                                            doNotShowInfoTooltip={true}
+                                                                                            onChange={(e, value) => {
+                                                                                                setFieldValue(
+                                                                                                    field.fieldName,
+                                                                                                    value && value.optionValue
+                                                                                                        ? value.optionValue
+                                                                                                        : ""
+                                                                                                );
+                                                                                                setFieldValue("customerContact", "");
+                                                                                                handleValuesChange({
+                                                                                                    [field.fieldName]: value && value.optionValue ? value.optionValue : "",
+                                                                                                    "customerContact": "",
+                                                                                                })
+                                                                                            }}
+                                                                                        />
                                                                                     </Grid>
-                                                                                ) : field.fieldName === "owner" ? (
-                                                                                    <FormTypes
-                                                                                        rentalManagementId={rentalManagementId}
-                                                                                        {...field}
-                                                                                        values={values}
-                                                                                        errors={errors}
-                                                                                        touched={touched}
-                                                                                        label={field.fieldLabel}
-                                                                                        name={field.fieldName}
-                                                                                        type={field.type}
-                                                                                        options={ownerData}
-                                                                                        onChange={(e, val) => {
-                                                                                            setFieldValue(
-                                                                                                field.fieldName,
-                                                                                                val && val.optionValue
-                                                                                                    ? val.optionValue
-                                                                                                    : ""
-                                                                                            );
-                                                                                            handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
+                                                                                    {permissions.customerAccount?.isCreate &&
+                                                                                        <Grid item xs={1} sm={1} md={1}>
+                                                                                            <Tooltip
+                                                                                                title="Create Account"
+                                                                                                className="mt-1"
+                                                                                            >
+                                                                                                <IconButton
+                                                                                                    onClick={() => {
+                                                                                                        setShowAddCustomerAccountDialog(
+                                                                                                            true
+                                                                                                        );
+                                                                                                    }}
+                                                                                                    disabled={!isClone ? (rentalManagementId && field.disableOnEdit) : false}
+                                                                                                    size="small"
+                                                                                                >
+                                                                                                    <AddIcon color={isClone ? "primary" : rentalManagementId && field.disableOnEdit ? "disabled" : "primary"} />
+                                                                                                </IconButton>
+                                                                                            </Tooltip>
+                                                                                        </Grid>
+                                                                                    }
+                                                                                    {field?.tooltipMessage ? (
+                                                                                        <Grid item xs={1} sm={1} md={1}>
+                                                                                            <Tooltip
+                                                                                                title={
+                                                                                                    field?.tooltipMessage ?? ""
+                                                                                                }
+                                                                                            >
+                                                                                                <InfoIcon color="disabled" />
+                                                                                            </Tooltip>
+                                                                                        </Grid>
+                                                                                    ) : null}
+                                                                                </Grid>
+                                                                            ) : field.fieldName === "customerContact" ? (
+                                                                                <Grid container spacing={1}>
+                                                                                    <Grid item xs={permissions.customerContact?.isCreate ? 11 : 11}
+                                                                                        sm={permissions.customerContact?.isCreate ? 11 : 11}
+                                                                                        md={permissions.customerContact?.isCreate ? 11 : 11}
+                                                                                    >
+                                                                                        <FormTypes
+                                                                                            {...field}
+                                                                                            isNew={!rentalManagementId}
+                                                                                            values={values}
+                                                                                            errors={errors}
+                                                                                            touched={touched}
+                                                                                            label={field.fieldLabel}
+                                                                                            name={field.fieldName}
+                                                                                            type={field.type}
+                                                                                            options={customerContactDataSource}
+                                                                                            doNotShowInfoTooltip={true}
+                                                                                            setFieldValue={(name, value) => {
+                                                                                                handleValuesChange({ [name]: value })
+                                                                                                setFieldValue(name, value)
+                                                                                            }}
+                                                                                            disabled={!isClone ? (rentalManagementId && field.disableOnEdit) : false}
+                                                                                            required={field.required}
+                                                                                            fullWidth
+                                                                                            isTooltip={false}
+                                                                                            size="small"
+                                                                                            onOpen={() =>
+                                                                                                onCustomerContactDropdownOpen(
+                                                                                                    values["customerAccount"]
+                                                                                                )
+                                                                                            }
+                                                                                        // onChange={(e, value) => {
+                                                                                        //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
 
+                                                                                        // }}
+                                                                                        />
+                                                                                    </Grid>
+                                                                                    {permissions.customerContact?.isCreate &&
+                                                                                        <Grid item xs={1} sm={1} md={1} >
+                                                                                            <Tooltip
+                                                                                                title="Create Contact"
+                                                                                                className="mt-1"
+                                                                                            >
+                                                                                                <IconButton
+                                                                                                    onClick={() => {
+                                                                                                        setShowAddCustomerContactDialog(
+                                                                                                            true
+                                                                                                        );
+                                                                                                    }}
+                                                                                                    disabled={!isClone ? (rentalManagementId && field.disableOnEdit) : false}
+                                                                                                    size="small"
+                                                                                                >
+                                                                                                    <AddIcon color={isClone ? "primary" : (rentalManagementId && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                                                                </IconButton>
+                                                                                            </Tooltip>
+                                                                                        </Grid>
+                                                                                    }
+                                                                                    {field?.tooltipMessage ? (
+                                                                                        <Grid item xs={1} sm={1} md={1}>
+                                                                                            <Tooltip
+                                                                                                className="mt-2"
+                                                                                                title={
+                                                                                                    field?.tooltipMessage ?? ""
+                                                                                                }
+                                                                                            >
+                                                                                                <InfoIcon color="disabled" />
+                                                                                            </Tooltip>
+                                                                                        </Grid>
+                                                                                    ) : null}
+                                                                                </Grid>
+                                                                            ) : field.fieldName === "owner" ? (
+                                                                                <FormTypes
+                                                                                    rentalManagementId={rentalManagementId}
+                                                                                    {...field}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={ownerData}
+                                                                                    onChange={(e, val) => {
+                                                                                        setFieldValue(
+                                                                                            field.fieldName,
+                                                                                            val && val.optionValue
+                                                                                                ? val.optionValue
+                                                                                                : ""
+                                                                                        );
+                                                                                        handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
+
+                                                                                        if (
+                                                                                            val &&
+                                                                                            val.optionValue !== user?.user?._id
+                                                                                        ) {
+                                                                                            const checkOwnerAddedInCollaborator =
+                                                                                                values["collaborator"].find(
+                                                                                                    (d) =>
+                                                                                                        d?.optionValue ===
+                                                                                                        user?.user?._id
+                                                                                                );
                                                                                             if (
-                                                                                                val &&
-                                                                                                val.optionValue !== user?.user?._id
+                                                                                                !checkOwnerAddedInCollaborator
                                                                                             ) {
-                                                                                                const checkOwnerAddedInCollaborator =
-                                                                                                    values["collaborator"].find(
+                                                                                                setFieldValue("collaborator", [
+                                                                                                    ...values["collaborator"],
+                                                                                                    collaboratorData.find(
                                                                                                         (d) =>
                                                                                                             d?.optionValue ===
                                                                                                             user?.user?._id
-                                                                                                    );
-                                                                                                if (
-                                                                                                    !checkOwnerAddedInCollaborator
-                                                                                                ) {
-                                                                                                    setFieldValue("collaborator", [
-                                                                                                        ...values["collaborator"],
-                                                                                                        collaboratorData.find(
-                                                                                                            (d) =>
-                                                                                                                d?.optionValue ===
-                                                                                                                user?.user?._id
-                                                                                                        ).optionValue,
-                                                                                                    ]);
-                                                                                                    handleValuesChange({
-                                                                                                        collaborator: collaboratorData.find(
-                                                                                                            (d) =>
-                                                                                                                d?.optionValue ===
-                                                                                                                user?.user?._id
-                                                                                                        ).optionValue
-                                                                                                    })
-                                                                                                }
+                                                                                                    ).optionValue,
+                                                                                                ]);
+                                                                                                handleValuesChange({
+                                                                                                    collaborator: collaboratorData.find(
+                                                                                                        (d) =>
+                                                                                                            d?.optionValue ===
+                                                                                                            user?.user?._id
+                                                                                                    ).optionValue
+                                                                                                })
                                                                                             }
-                                                                                        }}
-                                                                                        required={field.required}
-                                                                                        fullWidth
-                                                                                        isTooltip={field?.isTooltip || false}
-                                                                                        tooltipMessage={field?.tooltipMessage}
-                                                                                        size="small"
-                                                                                        disabled={(!rentalManagementId && field.disableOnEdit)}
-                                                                                        onOpen={() => {
-                                                                                            onOwnerDropdownOpen(
-                                                                                                values["collaborator"]
-                                                                                            );
-                                                                                        }}
-                                                                                    />
-                                                                                ) : field.fieldName === "collaborator" ? (
-                                                                                    <FormTypes
-                                                                                        rentalManagementId={rentalManagementId}
-                                                                                        {...field}
-                                                                                        disabled={!rentalManagementId && field.disableOnEdit}
-                                                                                        values={values}
-                                                                                        errors={errors}
-                                                                                        touched={touched}
-                                                                                        label={field.fieldLabel}
-                                                                                        name={field.fieldName}
-                                                                                        type={field.type}
-                                                                                        options={collaboratorData}
-                                                                                        setFieldValue={(name, value) => {
-                                                                                            handleValuesChange({ [name]: value })
-                                                                                            setFieldValue(name, value)
-                                                                                        }}
-
-                                                                                        required={field.required}
-                                                                                        fullWidth
-                                                                                        isTooltip={field?.isTooltip || false}
-                                                                                        tooltipMessage={field?.tooltipMessage}
-                                                                                        size="small"
-                                                                                        onOpen={() => {
-                                                                                            onCollabOwnerMultiselectOpen(
-                                                                                                values["owner"]
-                                                                                            );
-                                                                                        }}
-                                                                                    />
-                                                                                ) : field.fieldName === "rentalStartDate" ? (
-                                                                                    <FormTypes
-                                                                                        {...field}
-                                                                                        values={values}
-                                                                                        errors={errors}
-                                                                                        touched={touched}
-                                                                                        label={field.fieldLabel}
-                                                                                        name={field.fieldName}
-                                                                                        type={field.type}
-                                                                                        options={field.option}
-                                                                                        setFieldValue={(name, value) => {
-                                                                                            handleValuesChange({ [name]: value })
-                                                                                            setFieldValue(name, value)
-                                                                                        }}
-                                                                                        required={field.required}
-                                                                                        fullWidth
-                                                                                        isTooltip={field?.isTooltip || false}
-                                                                                        tooltipMessage={field?.tooltipMessage}
-                                                                                        size="small"
-                                                                                        minDate={new Date()}
-                                                                                        maxDate={values["rentalEndDate"] ? moment(values["rentalEndDate"]).subtract(1, "day") : moment().add(5, "years")}
-                                                                                    />
-                                                                                ) : field.fieldName === "rentalEndDate" ? (
-                                                                                    <FormTypes
-                                                                                        {...field}
-                                                                                        values={values}
-                                                                                        errors={errors}
-                                                                                        touched={touched}
-                                                                                        label={field.fieldLabel}
-                                                                                        name={field.fieldName}
-                                                                                        type={field.type}
-                                                                                        options={field.option}
-                                                                                        setFieldValue={(name, value) => {
-                                                                                            handleValuesChange({ [name]: value })
-                                                                                            setFieldValue(name, value)
-                                                                                        }}
-                                                                                        required={field.required}
-                                                                                        fullWidth
-                                                                                        isTooltip={field?.isTooltip || false}
-                                                                                        tooltipMessage={field?.tooltipMessage}
-                                                                                        size="small"
-                                                                                        minDate={moment(values["rentalStartDate"]).add(1, "day")}
-                                                                                    />
-                                                                                ) : (
-                                                                                    <FormTypes
-                                                                                        rentalManagementId={rentalManagementId}
-                                                                                        {...field}
-                                                                                        disabled={(rentalManagementId && field.disableOnEdit)}
-                                                                                        values={values}
-                                                                                        errors={errors}
-                                                                                        touched={touched}
-                                                                                        label={field.fieldLabel}
-                                                                                        name={field.fieldName}
-                                                                                        type={field.type}
-                                                                                        options={field.option}
-                                                                                        setFieldValue={(name, value) => {
-                                                                                            handleValuesChange({ [name]: value })
-                                                                                            setFieldValue(name, value)
-                                                                                        }}
-                                                                                        required={field.required}
-                                                                                        fullWidth
-                                                                                        isTooltip={field?.isTooltip || false}
-                                                                                        tooltipMessage={field?.tooltipMessage}
-                                                                                        size="small"
-                                                                                        imageOrFileUploadCompletePercentage={
-                                                                                            ["imageUpload", "fileUpload"].some(
-                                                                                                (s) => s === field.type
-                                                                                            )
-                                                                                                ? (completePercentage) => {
-                                                                                                    setUploadingImageOrFileProgress(
-                                                                                                        completePercentage
-                                                                                                    );
-                                                                                                }
-                                                                                                : null
                                                                                         }
-                                                                                    />
-                                                                                )}
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    disabled={(!rentalManagementId && field.disableOnEdit)}
+                                                                                    onOpen={() => {
+                                                                                        onOwnerDropdownOpen(
+                                                                                            values["collaborator"]
+                                                                                        );
+                                                                                    }}
+                                                                                />
+                                                                            ) : field.fieldName === "collaborator" ? (
+                                                                                <FormTypes
+                                                                                    rentalManagementId={rentalManagementId}
+                                                                                    {...field}
+                                                                                    disabled={!rentalManagementId && field.disableOnEdit}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={collaboratorData}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    onOpen={() => {
+                                                                                        onCollabOwnerMultiselectOpen(
+                                                                                            values["owner"]
+                                                                                        );
+                                                                                    }}
+                                                                                />
+                                                                            ) : field.fieldName === "rentalStartDate" ? (
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    minDate={new Date()}
+                                                                                    maxDate={values["rentalEndDate"] ? moment(values["rentalEndDate"]).subtract(1, "day") : moment().add(5, "years")}
+                                                                                />
+                                                                            ) : field.fieldName === "rentalEndDate" ? (
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    minDate={moment(values["rentalStartDate"]).add(1, "day")}
+                                                                                />
+                                                                            ) : (
+                                                                                <FormTypes
+                                                                                    rentalManagementId={rentalManagementId}
+                                                                                    {...field}
+                                                                                    fieldData={field}
+                                                                                    disabled={
+                                                                                        field.fieldName === "currency" ? rentalDetails && rentalDetails?.material?.length ? true : false :
+                                                                                            field.fieldName === "warehouse" ? rentalDetails && rentalDetails?.productInventory?.length ? true : false :
+                                                                                                (rentalManagementId && field.disableOnEdit)}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        handleValuesChange({ [name]: value })
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    imageOrFileUploadCompletePercentage={
+                                                                                        ["imageUpload", "fileUpload"].some(
+                                                                                            (s) => s === field.type
+                                                                                        )
+                                                                                            ? (completePercentage) => {
+                                                                                                setUploadingImageOrFileProgress(
+                                                                                                    completePercentage
+                                                                                                );
+                                                                                            }
+                                                                                            : null
+                                                                                    }
+                                                                                />
+                                                                            )}
                                                                         </Grid>
                                                                     ))}
                                                                 </Grid>
@@ -833,7 +758,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                             })}
                                     </Form>
                                 </CustomDialogContent>
-
                                 <CustomDialogFooter>
                                     <Button
                                         type="button"
@@ -847,7 +771,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                     >
                                         Cancel
                                     </Button>
-
                                     <CustomButton
                                         loading={loading}
                                         variant="contained"
@@ -895,8 +818,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                             }}
                                         /> : null
                                 }
-
-
                                 {showAddCustomerAccountDialog && (
                                     <ManageAccountDialog
                                         open={showAddCustomerAccountDialog}

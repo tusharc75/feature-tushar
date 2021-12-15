@@ -98,10 +98,6 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
 
           });
 
-        if (data.length === 0) {
-          updateTransferStatus("New")
-        }
-
         dispatch({ type: 'initialize', data: data, count: data.length });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });

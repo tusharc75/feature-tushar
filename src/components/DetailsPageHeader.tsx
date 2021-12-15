@@ -105,7 +105,7 @@ const DetailsPageHeader = (props) => {
               </>
             ) : null}
           </Grid>
-          <Grid id="detailHeaderPageActions" item className="d-flex align-items-center gap-2" justify="flex-end">{children}</Grid>
+          <Grid id="detailHeaderPageActions" item className={isMobile ? "d-flex align-items-center " : "d-flex align-items-center gap-2"} justify="flex-end">{children}</Grid>
         </Grid>
         <Box className="gap-2 detailHeaderDashboard">
           {loading ? (
