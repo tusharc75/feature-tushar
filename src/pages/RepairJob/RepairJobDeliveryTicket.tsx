@@ -148,47 +148,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
     });
   }
 
-  // useEffect(() => {
-  //   // updateStatus()
-  // }, [currentStep, dataRows])
-
-  // const updateStatus = () => {
-  //   if (dataRows.length > 0 && rentalManagementData) {
-  //     const leftItems = [];
-  //     for (const product of dataRows) {
-  //       if (!product.deliveryTicket) {
-  //         leftItems.push(product.id)
-  //       }
-  //     }
-
-  //     if (currentStep === 3 && leftItems.length === 0 && rentalManagementData) {
-  //       if (rentalManagementData.status === "New") {
-  //         const tempUpdateData = {
-  //           "_id": rentalManagementData._id,
-  //           "rentalJobName": rentalManagementData.rentalJobName,
-  //           "rentalJobID": rentalManagementData.rentalJobID,
-  //           "customerAccount": rentalManagementData.customerAccount?.optionValue,
-  //           "customerContact": rentalManagementData.customerContact?.optionValue,
-  //           "shippingAddress": rentalManagementData.shippingAddress,
-  //           "currency": rentalManagementData.currency,
-  //           "rentalStartDate": rentalManagementData.rentalStartDate,
-  //           "rentalEndDate": rentalManagementData.rentalEndDate,
-  //           "jobDescription": rentalManagementData.jobDescription,
-  //           "status": "Ready to Ship",
-  //           "owner": rentalManagementData.owner.optionValue,
-  //           // "collaborator": rentalManagementData.collaborator,
-
-  //         }
-  //         axiosInstance().put(repairJob.api, tempUpdateData)
-  //           .then(() => {
-  //             fetchRentalData()
-  //           }).catch((error) => {
-  //             toastConfig.setToastConfig(error);
-  //           });
-  //       }
-  //     }
-  //   }
-  // }
+ 
 
   return (<>
 

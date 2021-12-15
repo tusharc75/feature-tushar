@@ -95,10 +95,7 @@ const RentalManagementDetailsPage = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
-      axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/process-status`, { processStatus: rentalProcessSteps[currentStep] }).then(({ data }) => { })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
+      updateProcessStatus(rentalProcessSteps[currentStep])
     }
   }, [currentStep]);
 
@@ -209,9 +206,19 @@ const RentalManagementDetailsPage = () => {
     }
   }
 
+  const updateProcessStatus = (processStatus) => {
+    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   const updateJobStatus = (status) => {
     axiosInstance().patch(`${rentalManagement.rentalManagementApi}/status/${rentalManagementData._id}`, { status: status }).then(({ data: { data } }) => {
       fetchRentalManagementData();
+      if (status === "Invoiced") {
+        setCurrentStep(5)
+      }
       toastConfig.setToastConfig({
         open: true,
         type: 'success',

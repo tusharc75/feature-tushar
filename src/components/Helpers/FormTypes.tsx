@@ -1880,6 +1880,7 @@ const FormTypes = (props) => {
       <MuiPickersUtilsProvider utils={DateUtils}>
         <KeyboardDatePicker
           {...rest}
+          disabled={fieldData?.isUneditable || rest?.disabled}
           clearable
           autoOk
           required={required}

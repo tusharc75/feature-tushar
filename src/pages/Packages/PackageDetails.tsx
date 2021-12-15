@@ -98,7 +98,7 @@ const PackageDetails = () => {
   const fetchPackage = () => {
     setPackagesLoading(true);
     axiosInstance()
-      .get(`${routes.packages.path}/${id}`)
+      .get(`${packages.packageApi}/${id}`)
       .then(({ data: { data } }) => {
         setPackageData(data);
         setHeadingLabel(data.packageName);

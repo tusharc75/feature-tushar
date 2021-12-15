@@ -100,7 +100,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         })
         setInitialData({
           fields: data,
-          values: { ...getObjKeys("", data), startDate: "", endDate: "" },
+          values: { ...getObjKeys("", data), estimateStartDate: "", estimateEndDate: "", actualStartDate: "", actualEndDate: "", tenure: "" },
         });
       }
       else {
@@ -327,10 +327,15 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
 
   function validate(values) {
     const errors = {};
-    let startDate = moment(values?.startDate);
-    let endDate = moment(values?.endDate);
+    let startDate = moment(values?.estimateStartDate);
+    let endDate = moment(values?.estimateStartDate);
     if (endDate.diff(startDate, 'days') < 0) {
       errors['endDate'] = 'Please enter valid end date';
+    }
+    if (rowData && rowData.hideSelection) {
+      if (values.qty < rowData.assetQty) {
+        errors['qty'] = 'Qty is not less than assigned asset qty.';
+      }
     }
     return errors;
   }
@@ -460,64 +465,32 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                                   </Box>
                                 </Box>
                               </Grid>
-                              : ["startDate", "endDate"].includes(field.fieldName) ?
-                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                  <Box display="flex" >
-                                    <Box flexGrow={1}  >
-                                      <FormTypes
-                                        {...field}
-                                        minDate={field.fieldName === "endDate" ? moment(values?.startDate) : moment(rentalManagementData?.rentalStartDate)}
-                                        maxDate={moment(rentalManagementData?.rentalEndDate)}
-                                        //disabled={true}
-                                        fields={initialData.fields}
-                                        fieldData={field}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field.isTooltip}
-                                        tooltipMessage={field.tooltipMessage}
-                                        size="small"
-                                      />
-                                    </Box>
+                              : <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                <Box display="flex" >
+                                  <Box flexGrow={1}  >
+                                    <FormTypes
+                                      {...field}
+                                      fields={initialData.fields}
+                                      fieldData={field}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value)
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field.isTooltip}
+                                      tooltipMessage={field.tooltipMessage}
+                                      size="small"
+                                    />
                                   </Box>
-                                </Grid> :
-                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                  <Box display="flex" >
-                                    <Box flexGrow={1}  >
-                                      <FormTypes
-                                        {...field}
-                                        fields={initialData.fields}
-                                        fieldData={field}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field.isTooltip}
-                                        tooltipMessage={field.tooltipMessage}
-                                        size="small"
-                                        disabled={field.fieldName === "qty" ? rowData?.hideSelection
-                                           : false}
-                                      />
-                                    </Box>
-                                  </Box>
-                                </Grid>
+                                </Box>
+                              </Grid>
                         ))}
                       </Grid>
                     </Box>

@@ -237,7 +237,9 @@ function Dashboard() {
                               <Grid>
                                 {
                                   <Box height="215px" style={{ overflowY: 'auto' }} className={styles.back_box_content}>
-                                    {section.items.map((item) => (
+                                    {
+                                    section.items.
+                                    filter((item) => !(("hiddenResource" in item) && item?.hiddenResource)).map((item) => (
                                       <div key={item.name}>
                                         <Box marginY={1} component="div" className={styles.list_component}>
                                           <Typography paragraph className={styles.hover_list_box}>
