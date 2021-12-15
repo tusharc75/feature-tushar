@@ -1,10 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import {
-  Grid,
-  Box,
-  Button,
-  Paper, Tabs, Tab
-} from '@material-ui/core';
+import { Grid, Box, Button, Paper, Tabs, Tab } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
@@ -23,11 +18,11 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
 import ProductsTable from './ProductsTable';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import styles from './packages.module.scss'
-import { FaWpforms } from "react-icons/fa";
-import { BiFoodMenu } from "react-icons/bi";
+import styles from './packages.module.scss';
+import { FaWpforms } from 'react-icons/fa';
+import { BiFoodMenu } from 'react-icons/bi';
 
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -51,8 +46,6 @@ function a11yProps(index: any) {
     'aria-controls': `main-tabpanel-${index}`
   };
 }
-
-
 
 const PackageDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -136,28 +129,28 @@ const PackageDetails = () => {
   };
 
   const getProducts = () => {
-    setLoadingProducts(true)
+    setLoadingProducts(true);
     axiosInstance()
       .get(`${packages.packageApi}/get-products/${id}`)
       .then(({ data: { data } }) => {
         setProducts(data);
-        setLoadingProducts(false)
+        setLoadingProducts(false);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setLoadingProducts(false)
+        setLoadingProducts(false);
       });
   };
 
   const handleUpdateQuantity = (updatedNode) => {
     let productsToSend = [...products];
-    productsToSend = productsToSend.map(o => {
-      let res = { product: o?._id, qty: o?.qty }
+    productsToSend = productsToSend.map((o) => {
+      let res = { product: o?._id, qty: o?.qty };
       if (updatedNode?.data?._id === o?._id) {
-        res.qty = (updatedNode?.newValue * 1)
+        res.qty = updatedNode?.newValue * 1;
       }
-      return res
-    })
+      return res;
+    });
     setQuantityUpdateLoading(true);
     axiosInstance()
       .post(`${packages.packageApi}/add-products`, {
@@ -165,13 +158,13 @@ const PackageDetails = () => {
         products: [...productsToSend]
       })
       .then(() => {
-        setQuantityUpdateLoading(false)
-        getProducts()
+        setQuantityUpdateLoading(false);
+        getProducts();
       })
       .catch((err) => {
-        setQuantityUpdateLoading(false)
+        setQuantityUpdateLoading(false);
       });
-  }
+  };
   return (
     <>
       <Grid container className="headerbox">
@@ -207,7 +200,6 @@ const PackageDetails = () => {
                 </Grid>
               ) : (
                 <>
-
                   <Tabs
                     className="quote-tab"
                     value={tabValue}
@@ -219,7 +211,6 @@ const PackageDetails = () => {
                       }
                     }}
                   >
-
                     <Tab
                       className={'tabLayout'}
                       style={{
@@ -250,13 +241,10 @@ const PackageDetails = () => {
                   </Tabs>
 
                   <TabPanel value={tabValue} index={0}>
-
                     <DetailsPage data={packageData} fields={packageFields} />
-
                   </TabPanel>
 
                   <TabPanel value={tabValue} index={1}>
-
                     <Box mt={2} className="bg-white">
                       <Box mb={1}>
                         <div className={`p-2 gap-3 ${styles.package_grid_template}`}>
@@ -264,7 +252,7 @@ const PackageDetails = () => {
                           <ImportExportLinks
                             permissions={permissions?.packages}
                             module="packages-products"
-                            api={packages.packageApi}
+                            api={`${packages.packageApi}/package-products`}
                             afterImportCompleted={() => {
                               getProducts();
                             }}
@@ -275,29 +263,29 @@ const PackageDetails = () => {
                             additionalParams={`refrenceId=${id}`}
                             isBackgroundWhite={true}
                           />
-                          <Button className="text-transform-none" variant="outlined" color="primary" startIcon={<Add />} size="small" onClick={() => setShowProductAssignDialog(true)}>
+                          <Button
+                            className="text-transform-none"
+                            variant="outlined"
+                            color="primary"
+                            startIcon={<Add />}
+                            size="small"
+                            onClick={() => setShowProductAssignDialog(true)}
+                          >
                             Assign Product(s)
                           </Button>
                         </div>
                       </Box>
 
-                      {
-                        products.length ?
-                          <ProductsTable
-                            productList={products}
-                            handleUpdateQuantity={handleUpdateQuantity}
-                            handleAssignProduct={setShowProductAssignDialog}
-                            updateLoading={quantityUpdateLoading || packagesLoading}
-                          /> : null
-                      }
-
+                      {products.length ? (
+                        <ProductsTable
+                          productList={products}
+                          handleUpdateQuantity={handleUpdateQuantity}
+                          handleAssignProduct={setShowProductAssignDialog}
+                          updateLoading={quantityUpdateLoading || packagesLoading}
+                        />
+                      ) : null}
                     </Box>
-
-
-
                   </TabPanel>
-
-
                 </>
               )}
             </Box>
@@ -309,54 +297,47 @@ const PackageDetails = () => {
                 productList={packageData?.products}
               /> : null
           } */}
-
         </Grid>
       </Grid>
 
-      {
-        showConfirmBox && (
-          <ConfirmationDialog
-            open={showConfirmBox}
-            message={`Are you sure you want to delete this package: ${headingLabel} ?`}
-            onClose={() => {
-              setShowConfirmBox(false);
-            }}
-            onOk={handleDelete}
-          />
-        )
-      }
-      {
-        openUpdateDialog && (
-          <ManagePackageDialog
-            open={openUpdateDialog}
-            isClone={false}
-            packageId={id}
-            onClose={() => {
-              setOpenUpdateDialog(false);
-            }}
-            onSuccess={() => {
-              fetchPackage();
-              setOpenUpdateDialog(false);
-            }}
-          />
-        )
-      }
-      {
-        showProductAssignDialog && (
-          <AssignQuantityDialog
-            ids={[id]}
-            onClose={() => setShowProductAssignDialog(false)}
-            onSuccess={() => {
-              getProducts();
-              setShowProductAssignDialog(false);
-            }}
-            resource={product.api}
-            title="Assign Products"
-            label='Select Product'
-            resourceData={products}
-          />
-        )
-      }
+      {showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete this package: ${headingLabel} ?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={handleDelete}
+        />
+      )}
+      {openUpdateDialog && (
+        <ManagePackageDialog
+          open={openUpdateDialog}
+          isClone={false}
+          packageId={id}
+          onClose={() => {
+            setOpenUpdateDialog(false);
+          }}
+          onSuccess={() => {
+            fetchPackage();
+            setOpenUpdateDialog(false);
+          }}
+        />
+      )}
+      {showProductAssignDialog && (
+        <AssignQuantityDialog
+          ids={[id]}
+          onClose={() => setShowProductAssignDialog(false)}
+          onSuccess={() => {
+            getProducts();
+            setShowProductAssignDialog(false);
+          }}
+          resource={product.api}
+          title="Assign Products"
+          label="Select Product"
+          resourceData={products}
+        />
+      )}
     </>
   );
 };
