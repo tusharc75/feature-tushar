@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.19.0](https://github.com/vebholic/oms_frontend/compare/v2.18.4...v2.19.0) (2021-12-15)
+
+
+### Features
+
+* - notScrapRepair changed to notScrapLost ([54b061c](https://github.com/vebholic/oms_frontend/commit/54b061c5675bd07a9ce3d0614fef774656c288da))
+* pDF in loading ticket,receiving ticket ([c99feb6](https://github.com/vebholic/oms_frontend/commit/c99feb64a00605a6bc156f2f0b9bda2b9723abd7))
+
+
+### Bug Fixes
+
+* bug fix ([bb4e7d9](https://github.com/vebholic/oms_frontend/commit/bb4e7d95e8a74acfaae7769bd14664b7f1e56584))
+* **loadingticket:** fix in dialog ([0feae88](https://github.com/vebholic/oms_frontend/commit/0feae886652d979b44f3fdf15c63f9a6d6b4703e))
+* login entity api issue ([e2dd1d1](https://github.com/vebholic/oms_frontend/commit/e2dd1d103df06ed871903f62615d1cd047351557))
+* login fix ([24d8db2](https://github.com/vebholic/oms_frontend/commit/24d8db29faa5e076bc0d54cc5225475be0346456))
+* manage PO date issue ([cd73a4f](https://github.com/vebholic/oms_frontend/commit/cd73a4f79aad29dd27a3c7fc130ba6b59af711f4))
+* **pdftemplate:** rename resources ([d6ec6ad](https://github.com/vebholic/oms_frontend/commit/d6ec6ade01b86bb13e150cbc963970bf7396c225))
+* product changes ([e59d70c](https://github.com/vebholic/oms_frontend/commit/e59d70c38611c3225d09da16054efa44edc19431))
+* **productinventory:** fix and change ([1e31b66](https://github.com/vebholic/oms_frontend/commit/1e31b667efb1b414b899eb71d5457cba9557c0b5))
+* **receivingticket:** dialog data fix ([19912ea](https://github.com/vebholic/oms_frontend/commit/19912ea6cde283848462a32df550e74f9798a4f1))
+* **receivingticket:** fix form ([3ea6b76](https://github.com/vebholic/oms_frontend/commit/3ea6b76da0d1954e8d20f87293dbf869edd6e9be))
+* **receivingticket:** form keep loading issue ([4c161dd](https://github.com/vebholic/oms_frontend/commit/4c161ddf36df0d2197c7b84f29522d5ec5761dd4))
+* **receivingticket:** hide actions from grid ([7233df4](https://github.com/vebholic/oms_frontend/commit/7233df4552e17c2bb7834fd09321ab609d23a2e7))
+* rental bu fix ([963f10f](https://github.com/vebholic/oms_frontend/commit/963f10f2c0d54bc5cc96073bfb3d830e52a76a9f))
+* **serializedassets:** fix plant issue ([10c418e](https://github.com/vebholic/oms_frontend/commit/10c418e65258fef05436ffb5277c5313313948e0))
+* **transferasset:** changes and fix ([29dc688](https://github.com/vebholic/oms_frontend/commit/29dc688a8cf1db4656ccf973e634306fc150d501))
+* **transferasset:** fix in form ([a5426ea](https://github.com/vebholic/oms_frontend/commit/a5426ea8f7a694fd27d9add29b4613249fd43fee))
+
 ### [2.18.4](https://github.com/vebholic/oms_frontend/compare/v2.18.3...v2.18.4) (2021-12-14)
 
 
