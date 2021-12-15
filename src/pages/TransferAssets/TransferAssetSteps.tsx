@@ -123,9 +123,9 @@ const TransferSteps = (props) => {
                 hidden={currentStep >= 2 || (currentStep === 0 && isNextStep)}
                 disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
                 onClick={goNext}
-                endIcon={currentStep < 2 && <KeyboardArrowRight />}
+                endIcon={currentStep < (isInternal ? 1 : 2) && <KeyboardArrowRight />}
               >
-                {steps[currentStep + 1] ?? 'Reciving Ticket'}
+                {isInternal && currentStep === steps.length - 1 ? "Loading Ticket" : steps[currentStep + 1] ?? 'Receiving Ticket'}
               </Button>
               // : <Button size="small" disabled={loading} color="primary" onClick={handleNext} variant="contained" endIcon={<KeyboardArrowRight />}>
               //   {steps[activeStep + 1]?.label ?? ""}
@@ -153,63 +153,38 @@ const TransferSteps = (props) => {
         <div className="position-relative">
           <Grid container xs={12}>
             <Grid item xs={12} sm={2} md={1} className="d-flex align-items-center justify-content-center mt-2">
-              {!isMobile && (
-                <>
-                  <div>
-                    {
-                      <div>
-                        <IconButton disabled={currentStep === 0 || !isPrevStep || isTransferEnded} onClick={goPrev} className="stepperButton">
-                          <TiArrowBack size={30} />
-                        </IconButton>
-                      </div>
-                    }
-                  </div>
-                </>
+              {!isMobile && !isTransferEnded && (
+                <div>
+                  <IconButton disabled={currentStep === 0 || !isPrevStep || isTransferEnded} onClick={goPrev} className="stepperButton">
+                    <TiArrowBack size={30} />
+                  </IconButton>
+                </div>
               )}
             </Grid>
             <Grid item xs={12} sm={8} md={10}>
               <div className={classes.pStepper}>
                 <Grid container>
                   <Grid item xs={6}>
-                    {isMobile && (
-                      <>
-                        <div>
-                          {
-                            <div>
-                              <IconButton
-                                color="primary"
-                                disabled={currentStep === 0 || !isPrevStep || isTransferEnded}
-                                onClick={goNext}
-                                size="small"
-                              >
-                                <IoIosArrowDropleftCircle />
-                              </IconButton>
-                            </div>
-                          }
-                        </div>
-                      </>
+                    {isMobile && !isTransferEnded && (
+                      <div>
+                        <IconButton color="primary" disabled={currentStep === 0 || !isPrevStep || isTransferEnded} onClick={goNext} size="small">
+                          <IoIosArrowDropleftCircle />
+                        </IconButton>
+                      </div>
                     )}
                   </Grid>
                   <Grid item xs={6} className="d-flex align-items-center justify-content-end mt-1 mb-1">
-                    {isMobile && (
-                      <>
-                        <div>
-                          {
-                            <div>
-                              {
-                                <IconButton
-                                  color="primary"
-                                  onClick={goNext}
-                                  size="small"
-                                  disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
-                                >
-                                  Next
-                                </IconButton>
-                              }
-                            </div>
-                          }
-                        </div>
-                      </>
+                    {isMobile && !isTransferEnded && (
+                      <div>
+                        <IconButton
+                          color="primary"
+                          onClick={goNext}
+                          size="small"
+                          disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
+                        >
+                          Next
+                        </IconButton>
+                      </div>
                     )}
                   </Grid>
                 </Grid>
@@ -232,25 +207,18 @@ const TransferSteps = (props) => {
               </div>
             </Grid>
             <Grid item xs={12} sm={2} md={1} className="d-flex align-items-center justify-content-center mt-2 ">
-              {!isMobile && (
-                <>
+              {!isMobile &&
+                !isTransferEnded && (
                   <div>
-                    {
-                      <div>
-                        {
-                          <IconButton
-                            onClick={goNext}
-                            disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
-                            className="stepperButtonNext"
-                          >
-                            <RiShareForwardFill />
-                          </IconButton>
-                        }
-                      </div>
-                    }
+                    <IconButton
+                      onClick={goNext}
+                      disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
+                      className="stepperButtonNext"
+                    >
+                      <RiShareForwardFill />
+                    </IconButton>
                   </div>
-                </>
-              )}
+                )}
             </Grid>
           </Grid>
         </div>
