@@ -207,6 +207,13 @@ const Header = ({ toggleDrawer }) => {
     fetchCart();
   }, []);
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+    saveEntity()
+    }
+  },[selectedEntity])
+  
   const fetchCart = () => {
     axiosInstance()
       .get(`/user/cart`)
@@ -216,6 +223,16 @@ const Header = ({ toggleDrawer }) => {
         }
       });
   };
+
+  const saveEntity = () => {
+    axiosInstance()
+      .put(`/user/save-selected-entity?selectedEntity=${selectedEntity}`)
+      .then(({ data }) => {
+  })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+  });
+  }
 
   const handleFullScreenNotificationClick = (event) => {
     setFullScreenNotificationAnchorEl(event.currentTarget);
@@ -911,6 +928,12 @@ const Header = ({ toggleDrawer }) => {
     }
     if (history.location.pathname.includes(routes.receivingTicketDetail.path)) {
       history.push({pathname: routes.receivingTicket.path})
+    }
+    if (history.location.pathname.includes(routes.productInventoryDetail.path)) {
+      history.push({pathname: routes.productInventory.path})
+    }
+    if (history.location.pathname.includes(routes.pricingConditionDetail.path)) {
+      history.push({pathname: routes.pricingCondition.path})
     }
   }
 
