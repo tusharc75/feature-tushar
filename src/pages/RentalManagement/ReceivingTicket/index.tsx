@@ -112,7 +112,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
                 productAssets.forEach((d) => {
                   d["hideSelection"] = d.status === "In-Transit";
                 })
-                if (productAssets.filter((e) => ["Under Review"].includes(e.status)).length === productAssets.length) {
+                if (productAssets.filter((e) => ["Under Review", "Scrap", "Lost"].includes(e.status)).length === productAssets.length) {
                   setNextStep(true)
                 }
                 dispatch({
@@ -264,10 +264,10 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           horizontal: 'right',
         }}
       >
-        <MenuItem onClick={() => {
+        {/* <MenuItem onClick={() => {
           setAnchorEl(null)
           setStatusToUpdate({ open: true, isUpdating: false, status: "Repair", message: "" })
-        }}>Repair</MenuItem>
+        }}>Repair</MenuItem> */}
         <MenuItem onClick={() => {
           setAnchorEl(null)
           setStatusToUpdate({ open: true, isUpdating: false, status: "Scrap", message: "" })
@@ -280,7 +280,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
 
       <Box mx={1} />
       <IconButton
-        disabled={(selectedRecords.length === 0) || currentStep === 5 || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId")))}
+        disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || ["Lost"].includes(f.status)))}
         onClick={() => {
           handleReceivingTicketDialog(selectedRecords)
         }}
@@ -292,11 +292,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           <AddBoxRoundedIcon />
         </Tooltip>
       </IconButton>
-
       <Box mx={1} />
-
       <IconButton
-        disabled={(selectedRecords.length === 0) || currentStep === 5 || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId")))}
+        disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId") || ["Under Review"].includes(f.status)))}
         onClick={() => {
           setShowRemoveAssetFromReceivingTicketDialog(true)
         }}
@@ -308,12 +306,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           <RemoveCircleRoundedIcon />
         </Tooltip>
       </IconButton>
-
       <Box mx={1} />
     </Box>
-
     <Grid item xs={12} md={12} sm={12} className="mt-3">
-
       {columns ?
         isMobile ?
           <CustomSwipableList

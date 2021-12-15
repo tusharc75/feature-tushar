@@ -210,7 +210,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                 }
             }
             else {
-                let initialData = { ...getObjKeys("", fieldsDataForCreate), rentalEndDate: "", currency: user.user?.brandCurrency || "" };
+                let initialData = { ...getObjKeys("", fieldsDataForCreate), estimateEndDate: "", actualEndDate: "", currency: user.user?.brandCurrency || "" };
                 setRentalData({
                     fields: fieldsDataForCreate,
                     initialValues: initialData,
@@ -667,7 +667,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                         );
                                                                                     }}
                                                                                 />
-                                                                            ) : field.fieldName === "rentalStartDate" ? (
+                                                                            ) : field.fieldName === "estimateStartDate" ? (
                                                                                 <FormTypes
                                                                                     {...field}
                                                                                     values={values}
@@ -680,6 +680,9 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                     setFieldValue={(name, value) => {
                                                                                         handleValuesChange({ [name]: value })
                                                                                         setFieldValue(name, value)
+                                                                                        if (!rentalManagementId) {
+                                                                                            setFieldValue("actualStartDate", value)
+                                                                                        }
                                                                                     }}
                                                                                     required={field.required}
                                                                                     fullWidth
@@ -687,9 +690,9 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
                                                                                     minDate={new Date()}
-                                                                                    maxDate={values["rentalEndDate"] ? moment(values["rentalEndDate"]).subtract(1, "day") : moment().add(5, "years")}
+                                                                                    maxDate={values["estimateEndDate"] ? moment(values["estimateEndDate"]).subtract(1, "day") : moment().add(5, "years")}
                                                                                 />
-                                                                            ) : field.fieldName === "rentalEndDate" ? (
+                                                                            ) : field.fieldName === "estimateEndDate" ? (
                                                                                 <FormTypes
                                                                                     {...field}
                                                                                     values={values}
@@ -702,13 +705,16 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                     setFieldValue={(name, value) => {
                                                                                         handleValuesChange({ [name]: value })
                                                                                         setFieldValue(name, value)
+                                                                                        if (!rentalManagementId) {
+                                                                                            setFieldValue("actualEndDate", value)
+                                                                                        }
                                                                                     }}
                                                                                     required={field.required}
                                                                                     fullWidth
                                                                                     isTooltip={field?.isTooltip || false}
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
-                                                                                    minDate={moment(values["rentalStartDate"]).add(1, "day")}
+                                                                                    minDate={moment(values["estimateStartDate"]).add(1, "day")}
                                                                                 />
                                                                             ) : (
                                                                                 <FormTypes
