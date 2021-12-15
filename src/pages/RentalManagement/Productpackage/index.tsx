@@ -22,6 +22,7 @@ import {
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import RentalJobQtyDialog from './RentalJobQtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
+import InfoIcon from "@material-ui/icons/Info";
 
 const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) => {
 
@@ -78,6 +79,17 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                                 </HtmlTooltip>
                             </Box>
                         }
+                        <HtmlTooltip title="Details">
+                            <IconButton
+                                size="small"
+                                aria-label="Details"
+                                onClick={() => {
+                                    window.open(`${row.original.type === "product" ? routes.productDetail.path : routes.packages.path}/${row.original.materialId}`);
+                                }}
+                            >
+                                <InfoIcon fontSize="small" />
+                            </IconButton>
+                        </HtmlTooltip>
                     </div>
                 )
             }]
@@ -171,6 +183,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                 parent.qtyDisplay = parent.qty;
                 parent.isValid = parent["finalPrice_" + rentalManagementData?.currency?.toLowerCase()] ? true : false;
                 parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
+                parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
                 if (parent.type === "package") {
                     const subRows: any = data.material.filter((e) => e.parentId === parent._id);
                     subRows.forEach((_subRow, j) => {
@@ -178,6 +191,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                         _subRow.qtyDisplay = `${parent.qty} x ${_subRow.qty} = ${parent.qty * _subRow.qty}`
                         _subRow.isValid = _subRow["finalPrice_" + rentalManagementData?.currency?.toLowerCase()] ? true : false;
                         _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
+                        _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
                     })
                     parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
                     parent.subRows = subRows
@@ -205,8 +219,10 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             element.unit = d.unit && d.unit.length ? d.unit[0] : "";
             element.pricingMethod = d.pricingMethod && d.pricingMethod.length ? d.pricingMethod[0] : "";
             element.qty = d.qty ? parseFloat(d.qty) : 1;
-            element.startDate = rentalManagementData ? rentalManagementData?.rentalStartDate : new Date();
-            element.endDate = rentalManagementData ? rentalManagementData?.rentalEndDate : new Date();
+            element.estimateStartDate = rentalManagementData ? rentalManagementData?.estimateStartDate : new Date();
+            element.estimateEndDate = rentalManagementData ? rentalManagementData?.estimateEndDate : new Date();
+            element.actualStartDate = rentalManagementData ? rentalManagementData?.actualStartDate : new Date();
+            element.actualEndDate = rentalManagementData ? rentalManagementData?.actualEndDate : new Date();
             element.parentId = addExistingProductDialog.parentId;
             const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields)
             element.tenure = 1;
@@ -246,6 +262,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             delete element.qtyDisplay
             delete element.isValid
             delete element.hideSelection
+            delete element.assetQty
             delete element.productDetail
             delete element.packageDetail
             delete element.subRows
@@ -307,8 +324,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             })
         }
     };
-
-    console.log(rowsData)
 
     return (<Fragment>
         <Box display="flex" justifyContent="space-between" m={1}>
