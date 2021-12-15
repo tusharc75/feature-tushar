@@ -125,7 +125,7 @@ const Product = () => {
     }, [page, limit, filters, sorting, search, selectedEntity, productColoums, productCategory, productTemplate]);
 
     useEffect(() => {
-        axiosInstance().get("/field?resource=Product").then(({ data: { data } }) => {
+        axiosInstance().get("/field?resource=Product&view=true").then(({ data: { data } }) => {
             if (data.filter((e) => e.fieldData.fieldName === "productTemplate").length === 0) {
                 setIsProductTemplate(false)
             }

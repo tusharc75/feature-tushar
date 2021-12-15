@@ -23,12 +23,12 @@ import { isMobile, isTablet } from "react-device-detect";
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
-import {FaFileSignature, FaWpforms} from "react-icons/fa";
-import {BiEdit, BiFoodMenu} from "react-icons/bi";
+import { FaWpforms } from "react-icons/fa";
+import { BiFoodMenu } from "react-icons/bi";
 import { prepareDataForGrid } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import accountClass from "../Account/account.module.scss";
+import { AiFillFilePdf } from "react-icons/ai";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -101,6 +101,7 @@ const ReceivingTicketDetails = () => {
   const [transferData, setTransferData] = useState(null);
 
   const [isAdding, setIsAdding] = useState(false);
+  const [downlodingFile, setDownlodingFile] = useState(false)
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -189,6 +190,10 @@ const ReceivingTicketDetails = () => {
                 return false
               }
             }
+
+            if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "rentalJob") {
+              return false
+            }
             return true
           })
 
@@ -198,11 +203,17 @@ const ReceivingTicketDetails = () => {
             if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Plant")) {
               return false
             }
+            if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "transferAsset") {
+              return false
+            }
             return true
           })
         } else {
           data = data.filter((fields: any) => {
             if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
+              return false
+            }
+            if (fields.fieldData.fieldName === "rentalJob" || fields.fieldData.fieldName === "transferAsset") {
               return false
             }
             return true
@@ -373,6 +384,44 @@ const ReceivingTicketDetails = () => {
     });
   };
 
+
+  const handleViewPdf = (download) => {
+    axiosInstance().get(`${receivingTicket.receivingTicketApi}/${id}/pdf`)
+      .then(({ data }) => {
+        axiosInstance()
+          .get(`user/download?fileName=${data.data.fileName}`, {
+            responseType: "blob",
+          })
+          .then(({ data }) => {
+            if (download) {
+              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', `LoadingTicket-${receivingTicketData.receivingJobName || ""}.pdf`);
+              document.body.appendChild(link);
+              link.click();
+            }
+            else {
+              const file = new Blob([data], { type: "application/pdf" });
+              const fileURL = URL.createObjectURL(file);
+              const pdfWindow = window.open();
+              pdfWindow.location.href = fileURL;
+              toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+
+            }
+            setDownlodingFile(false);
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+            setDownlodingFile(false);
+          });
+      }).catch((err) => {
+        toastConfig.setToastConfig(err);
+        setDownlodingFile(false);
+      })
+  }
+
+
   return (
     <>
       <Fragment>
@@ -394,15 +443,8 @@ const ReceivingTicketDetails = () => {
               ) : (
                 <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
                   {permissions?.receivingTicket?.isUpdate && canEdit && (
-                    <Button
-                        variant={isMobile ? "text" : "contained" }
-                        color="primary"
-                        size="small"
-                        onClick={handleOpenUpdateDialog}
-                        className={isMobile ? accountClass.mobile_button_layout : ""}
-                        style={isMobile ? {color:"#43aeaa"} : {}}
-                    >
-                      {isMobile ? <BiEdit size={20}/> : "Edit"}
+                    <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                      Edit
                     </Button>
                   )}
                   {/* {permissions?.receivingTicket?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />} */}
@@ -410,15 +452,12 @@ const ReceivingTicketDetails = () => {
                     receivingTicketData?.deliveryPerson?.optionValue === user?.user?._id || canEdit ?
                       label !== "" ?
                         <Button
-                          variant={isMobile ? "text" : "contained" }
+                          variant="contained"
                           color="primary"
                           size="small"
                           disabled={loading}
-                          onClick={() => setOpenSignatureDialog(true)}
-                          style={isMobile ? {color:"var(--info-darken)"} : {}}
-                        >
-                          {isMobile ? <FaFileSignature size={20}/> : {label} }
-
+                          onClick={() => setOpenSignatureDialog(true)}>
+                          {label}
                         </Button> : null : null
                   }
                   {
@@ -526,7 +565,33 @@ const ReceivingTicketDetails = () => {
                               </Tooltip>
                             </IconButton>
                           }
-
+                          <Box mx={1} />
+                          {permissions?.receivingTicket?.isRead && (
+                            <Button
+                              variant="outlined"
+                              color="primary"
+                              type="button"
+                              size="small"
+                              startIcon={isMobile ? '' : <AiFillFilePdf />}
+                              disabled={downlodingFile}
+                              onClick={() => { handleViewPdf(false) }}
+                            >
+                              {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Preview"}
+                            </Button>
+                          )}
+                          {permissions?.receivingTicket?.isRead && (
+                            <Button
+                              variant="outlined"
+                              color="primary"
+                              type="button"
+                              size="small"
+                              startIcon={isMobile ? '' : <AiFillFilePdf />}
+                              disabled={downlodingFile}
+                              onClick={() => { handleViewPdf(true) }}
+                            >
+                              {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
+                            </Button>
+                          )}
                         </Grid>
                         <Grid item xs={12}>
                           {isMobile ? <CustomSwipableList

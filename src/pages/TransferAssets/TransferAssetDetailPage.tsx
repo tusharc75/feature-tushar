@@ -23,12 +23,11 @@ import HideWhenOffline from '../../components/HideWhenOffline';
 import { MdEdit, MdDelete } from 'react-icons/md';
 import TabPanel from '../../components/TabPanel';
 import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from "react-icons/fa";
-
+import { FaWpforms } from 'react-icons/fa';
 
 const transferSteps = ['Add Assets', 'Loading Ticket'];
 const transferSteps1 = ['Add Assets', 'Loading Ticket', 'Receiving Ticket'];
-const status = ["New", "In Progress", "Completed"]
+const status = ['New', 'In Progress', 'Completed'];
 
 const TransferAssetDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -36,7 +35,7 @@ const TransferAssetDetailPage = () => {
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { openEdit, tab }: any = parsed;
-  const parsedTab = tab !== undefined ? parseInt(tab) : 1
+  const parsedTab = tab !== undefined ? parseInt(tab) : 1;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -59,7 +58,7 @@ const TransferAssetDetailPage = () => {
   const [plantId, setPlantId] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
-  const [isTransferEnded, setTransferIsEnded] = useState(false)
+  const [isTransferEnded, setTransferIsEnded] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -212,7 +211,7 @@ const TransferAssetDetailPage = () => {
    */
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
-    history.push(`?tab=${newValue}`)
+    history.push(`?tab=${newValue}`);
   };
   function a11yProps(index: any) {
     return {
@@ -225,18 +224,20 @@ const TransferAssetDetailPage = () => {
     axiosInstance()
       .put(`${routes.transferAsset.path}/${id}/status`, {
         status
-      }).then(() => fetchTransferAssetData())
+      })
+      .then(() => fetchTransferAssetData())
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const handleViewPdf = (download) => {
-    axiosInstance().get(`${transferAsset.api}/${id}/pdf`)
-      .then(({ data }) => {
+    axiosInstance()
+      .put(`quote-pdf-template/pdf-column`, { id, resourceName: 'transferAsset', acceptedColumn: ['Asset Number', 'Product Description', 'Status'] })
+      .then(({ data: { data } }) => {
         axiosInstance()
-          .get(`user/download?fileName=${data.data.fileName}`, {
-            responseType: "blob",
+          .get(`user/download?fileName=${data.pdf}`, {
+            responseType: 'blob'
           })
           .then(({ data }) => {
             if (download) {
@@ -246,14 +247,12 @@ const TransferAssetDetailPage = () => {
               link.setAttribute('download', `TransferAsset-${transferAssetData.purchaseOrderNumber}.pdf`);
               document.body.appendChild(link);
               link.click();
-            }
-            else {
-              const file = new Blob([data], { type: "application/pdf" });
+            } else {
+              const file = new Blob([data], { type: 'application/pdf' });
               const fileURL = URL.createObjectURL(file);
               const pdfWindow = window.open();
               pdfWindow.location.href = fileURL;
-              toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
-
+              toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
             }
             setFileDownloading(false);
           })
@@ -261,12 +260,12 @@ const TransferAssetDetailPage = () => {
             toastConfig.setToastConfig(err);
             setFileDownloading(false);
           });
-      }).catch((err) => {
+      })
+      .catch((err) => {
         toastConfig.setToastConfig(err);
         setFileDownloading(false);
-      })
-  }
-
+      });
+  };
 
   return (
     <>
@@ -297,21 +296,23 @@ const TransferAssetDetailPage = () => {
                     <MdEdit size={24} />
                   </Button>
                 )}
-                {permissions?.transferAsset?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 <HideWhenOffline>
-                  {permissions?.transferAsset?.isDelete &&
-                    transferAssetData?.owner?.optionValue &&
-                    user?.user?._id &&
-                    transferAssetData?.owner.optionValue === user.user._id ? (
-                    <DeleteButton text="Delete" className="buttonDeleteBigScreen" onClick={() => setShowConfirmBox(true)} />
+                  {permissions?.transferAsset?.isDelete && transferAssetData?.user === user?.user._id ? (
+                    <DeleteButton
+                      disabled={transferAssetData?.status !== 'New'}
+                      text="Delete"
+                      className="buttonDeleteBigScreen"
+                      onClick={() => setShowConfirmBox(true)}
+                    />
                   ) : null}
                 </HideWhenOffline>
                 <HideWhenOffline>
-                  {permissions?.transferAsset?.isDelete &&
-                    transferAssetData?.owner?.optionValue &&
-                    user?.user?._id &&
-                    transferAssetData?.owner.optionValue === user.user._id ? (
-                    <Button className="buttonDeleteSmallScreen" onClick={() => setShowConfirmBox(true)}>
+                  {permissions?.transferAsset?.isDelete && transferAssetData?.user === user?.user._id ? (
+                    <Button
+                      disabled={transferAssetData?.status !== 'New'}
+                      className="buttonDeleteSmallScreen"
+                      onClick={() => setShowConfirmBox(true)}
+                    >
                       <MdDelete size={24} />
                     </Button>
                   ) : null}
@@ -433,44 +434,40 @@ const TransferAssetDetailPage = () => {
                     />
                   )}
                 </Box>
-              </Box >
-            </TabPanel >
-          </Paper >
-        </div >
-      </Fragment >
+              </Box>
+            </TabPanel>
+          </Paper>
+        </div>
+      </Fragment>
       {/* Confirm Delete Dialog */}
-      {
-        showConfirmBox && (
-          <ConfirmationDialog
-            okBtnLoading={isDeleting}
-            open={showConfirmBox}
-            message={`Are you sure you want to delete this transfer asset: ${headingLabel} ?`}
-            onClose={() => {
-              setShowConfirmBox(false);
-            }}
-            onOk={handleDelete}
-          />
-        )
-      }
+      {showConfirmBox && (
+        <ConfirmationDialog
+          okBtnLoading={isDeleting}
+          open={showConfirmBox}
+          message={`Are you sure you want to delete this transfer asset: ${headingLabel} ?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={handleDelete}
+        />
+      )}
       {/* Manage Transfer Asset Data */}
-      {
-        openUpdateDialog && (
-          <ManageTransferAsset
-            isEditable={existingAssets.length > 0}
-            isMainInfoEditable={currentStep >= 1 && (loadingTickets.length > 0 || receivingTickets.length > 0)}
-            number={transferAssetData?.transferAssetNumber}
-            isClone={false}
-            transferAssetId={id}
-            onClose={() => {
-              setOpenUpdateDialog(false);
-            }}
-            onSuccess={() => {
-              fetchTransferAssetData();
-              setOpenUpdateDialog(false);
-            }}
-          />
-        )
-      }
+      {openUpdateDialog && (
+        <ManageTransferAsset
+          isEditable={existingAssets.length > 0}
+          isMainInfoEditable={currentStep >= 1 && (loadingTickets.length > 0 || receivingTickets.length > 0)}
+          number={transferAssetData?.transferAssetNumber}
+          isClone={false}
+          transferAssetId={id}
+          onClose={() => {
+            setOpenUpdateDialog(false);
+          }}
+          onSuccess={() => {
+            fetchTransferAssetData();
+            setOpenUpdateDialog(false);
+          }}
+        />
+      )}
     </>
   );
 };
