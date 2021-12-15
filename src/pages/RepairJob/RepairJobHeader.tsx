@@ -84,7 +84,7 @@ function RepairJobHeader(props) {
                   {isMobile ? <MdAdd size={23}/> : "Add"}
                 </Button>
               )}
-              {RepairJobPermissions?.isDelete && (
+              {/* {RepairJobPermissions?.isDelete && (
                 <>
                   <Button
                     disabled={canDelete}
@@ -92,7 +92,6 @@ function RepairJobHeader(props) {
                     color="default"
                     size="small"
                     onClick={openActions}
-                    //  className={styles.action_submit_btn}
                     aria-controls="action-menu"
                     className={isMobile ? "mobile_button" : styles.action_submit_btn}
                   >
@@ -118,29 +117,9 @@ function RepairJobHeader(props) {
                     >
                       Delete
                     </MenuItem>
-                    {/* {RepairJobPermissions.isUpdate && (
-                  <MenuItem
-                    disabled={selectedRecords.find((d) => d.canDelete === false)}
-                    onClick={() => {
-                      closeActions();
-                      showTransferEntityDialog();
-                    }}
-                  >
-                    Transfer Entity
-                  </MenuItem>
-                )} */}
-                    {/* <MenuItem
-                  disabled={selectedRecords.length !== 1}
-                  onClick={() => {
-                    closeActions();
-                    showCloneRentalManagementDialog()
-                  }}
-                >
-                  Clone
-                </MenuItem> */}
                   </Menu>
                 </>
-              )}
+              )} */}
               </Grid>
         </Box>
       </Grid>

@@ -157,18 +157,27 @@ const ManageDeliveryTicket = (props) => {
                 else if (productInventoryForDeliveryTicket && repairJobData) {
                     const tempInitialData = getObjKeys("", fieldsDataForCreate)
                     tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
-                    tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
                     tempInitialData["deliveryJobName"] = `${repairJobData?.repairJobName}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = "Repair Job";
                     tempInitialData["repairJob"] = repairJobData?._id
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
+                    
+                    tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
+                    const pickupPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "warehouse")?.option;
+
+                    if (pickupPlantAddresses && tempInitialData["warehouse"]) {
+                        const address = pickupPlantAddresses.find(f => f.optionValue === tempInitialData["warehouse"]);
+                        if (address) {
+                            tempInitialData["pickupPlantAddress"] = address.address;
+                        }
+                    }
 
                     if (repairJobData?.typeOfRepair === "Internal") {
                         tempInitialData["receivingPlant"] = repairJobData?.repairPlant?.optionValue;
                         tempInitialData["plantShipTo"] = repairJobData?.plantShipTo;
                     }
                     if (repairJobData?.typeOfRepair === "External") {
-                        // tempInitialData["supplierAccount"] = repairJobData?.vendor?.optionValue;
+                        tempInitialData["supplierAccount"] = repairJobData?.vendor?.optionValue;
                         tempInitialData["supplierShippingAddress"] = repairJobData?.supplierShipTo;
                     }
 
