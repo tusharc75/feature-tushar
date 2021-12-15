@@ -120,7 +120,7 @@ const TransferSteps = (props) => {
                 size="small"
                 color="primary"
                 variant="contained"
-                hidden={currentStep >= 2 || (currentStep === 0 && isNextStep)}
+                hidden={currentStep >= 2 || (currentStep === 0 && isNextStep) || isTransferEnded}
                 disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
                 onClick={goNext}
                 endIcon={currentStep < 2 && <KeyboardArrowRight />}
@@ -137,7 +137,7 @@ const TransferSteps = (props) => {
                 disabled={currentStep === 0 || !isPrevStep || isTransferEnded}
                 variant="contained"
                 color="primary"
-                hidden={currentStep <= 0 || (currentStep === 0 && isPrevStep)}
+                hidden={currentStep <= 0 || (currentStep === 0 && isPrevStep) || isTransferEnded}
                 onClick={goPrev}
                 startIcon={currentStep > 0 && <KeyboardArrowLeft />}
               >
@@ -158,7 +158,7 @@ const TransferSteps = (props) => {
                   <div>
                     {
                       <div>
-                        <IconButton disabled={currentStep === 0 || !isPrevStep || isTransferEnded} onClick={goPrev} className="stepperButton">
+                        <IconButton hidden={isTransferEnded} disabled={currentStep === 0 || !isPrevStep || isTransferEnded} onClick={goPrev} className="stepperButton">
                           <TiArrowBack size={30} />
                         </IconButton>
                       </div>
@@ -177,6 +177,7 @@ const TransferSteps = (props) => {
                           {
                             <div>
                               <IconButton
+                                hidden={isTransferEnded}
                                 color="primary"
                                 disabled={currentStep === 0 || !isPrevStep || isTransferEnded}
                                 onClick={goNext}
@@ -198,6 +199,7 @@ const TransferSteps = (props) => {
                             <div>
                               {
                                 <IconButton
+                                  hidden={isTransferEnded}
                                   color="primary"
                                   onClick={goNext}
                                   size="small"
@@ -239,6 +241,7 @@ const TransferSteps = (props) => {
                       <div>
                         {
                           <IconButton
+                            hidden={isTransferEnded}
                             onClick={goNext}
                             disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
                             className="stepperButtonNext"
