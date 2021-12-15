@@ -233,7 +233,7 @@ const TransferAssetDetailPage = () => {
 
   const handleViewPdf = (download) => {
     axiosInstance()
-      .get(`${transferAsset.api}/${id}/pdf`)
+      .put(`quote-pdf-template/pdf-column`, { id, resourceName: 'transferAsset', acceptedColumn: ['Asset Number', 'Product Description', 'Status'] })
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -297,8 +297,7 @@ const TransferAssetDetailPage = () => {
                   </Button>
                 )}
                 <HideWhenOffline>
-                  {permissions?.transferAsset?.isDelete &&
-                    transferAssetData?.user === user?.user._id ? (
+                  {permissions?.transferAsset?.isDelete && transferAssetData?.user === user?.user._id ? (
                     <DeleteButton
                       disabled={transferAssetData?.status !== 'New'}
                       text="Delete"
@@ -308,8 +307,7 @@ const TransferAssetDetailPage = () => {
                   ) : null}
                 </HideWhenOffline>
                 <HideWhenOffline>
-                  {permissions?.transferAsset?.isDelete &&
-                    transferAssetData?.user === user?.user._id ? (
+                  {permissions?.transferAsset?.isDelete && transferAssetData?.user === user?.user._id ? (
                     <Button
                       disabled={transferAssetData?.status !== 'New'}
                       className="buttonDeleteSmallScreen"

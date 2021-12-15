@@ -213,8 +213,8 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
           tempInitialData["productInventory"] = productInventoryForReceivingTicket.map(d => d._id)
           tempInitialData["transferAsset"] = transferData._id
           tempInitialData["type"] = "Transfer Asset"
-          tempInitialData["warehouse"] = transferData?.transferFromPlant.optionValue;
-          tempInitialData["receivingPlantAddress"] = transferData?.transferFromPlant.address;
+          tempInitialData["warehouse"] = transferData?.transferFromPlant.optionValue ?? "";
+          tempInitialData["receivingPlantAddress"] = transferData?.transferFromPlant.address ?? "";
           tempInitialData["expectedDeliveryDate"] = moment(new Date()).add(7, 'days');
           tempInitialData["receivingJobName"] = `${transferData?.transferAssetNumber}_${generateUniqueIdOnly()}`
           if (transferData?.transferType === "External Customer") {
