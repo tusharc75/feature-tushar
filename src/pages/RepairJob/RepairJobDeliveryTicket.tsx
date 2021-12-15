@@ -11,7 +11,7 @@ import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import { deliveryTicket, gridLoadingTimeout, rentalManagement, repairJob, sidebarResource } from "../../constants/helpers";
+import { deliveryTicket, gridLoadingTimeout, rentalManagement, repairJob, repairJobStatus, sidebarResource } from "../../constants/helpers";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import { groupBy } from 'lodash';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
@@ -148,47 +148,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
     });
   }
 
-  // useEffect(() => {
-  //   // updateStatus()
-  // }, [currentStep, dataRows])
-
-  // const updateStatus = () => {
-  //   if (dataRows.length > 0 && rentalManagementData) {
-  //     const leftItems = [];
-  //     for (const product of dataRows) {
-  //       if (!product.deliveryTicket) {
-  //         leftItems.push(product.id)
-  //       }
-  //     }
-
-  //     if (currentStep === 3 && leftItems.length === 0 && rentalManagementData) {
-  //       if (rentalManagementData.status === "New") {
-  //         const tempUpdateData = {
-  //           "_id": rentalManagementData._id,
-  //           "rentalJobName": rentalManagementData.rentalJobName,
-  //           "rentalJobID": rentalManagementData.rentalJobID,
-  //           "customerAccount": rentalManagementData.customerAccount?.optionValue,
-  //           "customerContact": rentalManagementData.customerContact?.optionValue,
-  //           "shippingAddress": rentalManagementData.shippingAddress,
-  //           "currency": rentalManagementData.currency,
-  //           "rentalStartDate": rentalManagementData.rentalStartDate,
-  //           "rentalEndDate": rentalManagementData.rentalEndDate,
-  //           "jobDescription": rentalManagementData.jobDescription,
-  //           "status": "Ready to Ship",
-  //           "owner": rentalManagementData.owner.optionValue,
-  //           // "collaborator": rentalManagementData.collaborator,
-
-  //         }
-  //         axiosInstance().put(repairJob.api, tempUpdateData)
-  //           .then(() => {
-  //             fetchRentalData()
-  //           }).catch((error) => {
-  //             toastConfig.setToastConfig(error);
-  //           });
-  //       }
-  //     }
-  //   }
-  // }
+ 
 
   return (<>
 
@@ -231,7 +191,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
       </Button>
 
       {
-        repairJobData?.processStatus !== "End" &&
+        repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
         <IconButton
           disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId"))}
           onClick={() => {
@@ -248,8 +208,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
       }
 
       {
-        repairJobData?.processStatus !== "End" &&
-
+        repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
         <IconButton
           disabled={selectedRecords.length === 0 || selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId"))}
           onClick={() => {
@@ -337,7 +296,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
             limit={limit}
             pageSizes={pageSizes}
             page={page}
-            allowSelection={repairJobData?.processStatus !== "End"}
+            allowSelection={repairJobData && repairJobData["status"] === repairJobStatus[2] ? false : true}
             allowAction={false}
             loading={loading}
             renderedFrom={renderedFrom}

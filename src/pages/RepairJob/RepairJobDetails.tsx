@@ -13,13 +13,14 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import {
   gridLoadingTimeout, prepareDataForGrid, productInventory, repairJob, sidebarResource,
-  repairJobProcessSteps
+  repairJobProcessSteps,
+  repairJobStatus
 } from '../../constants/helpers';
 import ManageRepairJob from './ManageRepairJob';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import queryString from "query-string";
 import { BiFoodMenu } from 'react-icons/bi';
-import {FaSuitcase, FaWpforms} from 'react-icons/fa';
+import { FaSuitcase, FaWpforms } from 'react-icons/fa';
 import TabPanel from '../../components/TabPanel';
 import CustomCommonSteps from '../../components/CustomCommonSteps/CustomCommonSteps';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
@@ -32,12 +33,13 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import RepairJobReceivingTicket from './RepairJobReceivingTicket';
 import RepairJobDeliveryTicket from './RepairJobDeliveryTicket';
 import ManageAssetDialog from './ManageAssetDialog';
-import {isMobile} from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 const reservedStatus = "Reserved";
 const renderedFrom = "repairJobDetails"
 const step1RenderedFrom = `${renderedFrom}_assets`
+const completedStatus = repairJobStatus[2];
 
 function a11yProps(index: any) {
   return {
@@ -64,6 +66,7 @@ const RepairJobDetails = () => {
   const [repairJobFields, setRepairJobFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
+  const [showRepairJobCompleteConfirmationDialog, setShowRepairJobCompleteConfirmationDialog] = useState(false);
 
   const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
 
@@ -144,7 +147,6 @@ const RepairJobDetails = () => {
           type: "initialize", data: [], count: 0
         });
 
-
         let rows = data.map((u, index) => {
 
           // let finalObject = prepareDataForGrid(u);
@@ -152,16 +154,13 @@ const RepairJobDetails = () => {
           // finalObject["isChecked"] = step1SelectedRecords.some(s => s._id === u._id);
           // finalObject["allowedToEdit"] = permissions.rentalJob.isUpdate;
 
-
           u["_id"] = u["id"];
           u["index"] = `${index + 1}.0`;
 
-          return prepareDataForGrid(u, user) ;
+          return prepareDataForGrid(u, user);
         });
 
         let foundBlankValue = false;
-
-
 
         if (passedColumns) {
 
@@ -247,12 +246,17 @@ const RepairJobDetails = () => {
     </span>
   );
 
-  const getResourceFields = () => {
+  const getResourceFields = (repairJobData) => {
     setShowLoading(true);
     axiosInstance()
       .get(`/field?resource=${sidebarResource.repairJob}`)
       .then(({ data: { data } }) => {
-        setRepairJobFields(data)
+        if (repairJobData["typeOfRepair"] === "Internal") {
+          setRepairJobFields(data.filter(f => ["vendor", "supplierShipTo"].indexOf(f?.fieldData?.fieldName) === -1));
+        }
+        else if (repairJobData["typeOfRepair"] === "External") {
+          setRepairJobFields(data.filter(f => ["repairPlant", "plantShipTo"].indexOf(f?.fieldData?.fieldName) === -1));
+        }
         setShowLoading(false);
       })
       .catch((err) => {
@@ -263,6 +267,7 @@ const RepairJobDetails = () => {
 
   const fetchRepairJobData = () => {
     setShowLoading(true);
+
     axiosInstance()
       .get(`${routes.repairJob.path}/${id}`)
       .then(({ data: { data } }) => {
@@ -270,12 +275,18 @@ const RepairJobDetails = () => {
         setRepairJobData(data)
         if (data.processStatus) {
           const step = repairJobProcessSteps.findIndex(f => f === data.processStatus);
-          if (step > -1)
-            setCurrentStep(step);
+
+          if (step > -1) {
+            if (data.processStatus === "End") {
+              setCurrentStep(step - 1);
+            } else {
+              setCurrentStep(step);
+            }
+          }
         }
         setHeadingLabel(data.repairJobName);
         setCustomizedRoutes([routes.repairJob, { title: data.repairJobName }]);
-        getResourceFields();
+        getResourceFields(data);
 
         if (permissions?.repairJob?.isUpdate && openEdit === "true") {
           setOpenUpdateDialog(true)
@@ -311,18 +322,44 @@ const RepairJobDetails = () => {
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
+
+    if (newValue === 0) {
+      fetchRepairJobData();
+    }
   };
 
-  const onNextButtonClick = (oldStep, nextStep) => {
-    axiosInstance()
-      .put(`${repairJob.repairJobApi}/${id}/process-status`, {
-        "processStatus": repairJobProcessSteps[nextStep]
-      })
-      .then(() => {
+  const onNextButtonClick = (oldStep, nextStep, showConfirmationDialog) => {
+    if (showConfirmationDialog) {
+      setShowRepairJobCompleteConfirmationDialog(true);
+    } else {
+      axiosInstance()
+        .put(`${repairJob.repairJobApi}/${id}/process-status`, {
+          "processStatus": repairJobProcessSteps[nextStep]
+        })
+        .then(() => {
+          //  Update status to Complete when finished steps
+          if (repairJobProcessSteps[nextStep] === repairJobProcessSteps[repairJobProcessSteps.length - 1]) {
+            axiosInstance().put(`${repairJob.repairJobApi}/${id}/status`, { "status": completedStatus }).then(() => {
+              setCurrentStep(nextStep);
+              fetchRepairJobData();
 
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+              toastConfig.setToastConfig({
+                open: true,
+                type: "success",
+                message: "Repair job completed successfully."
+              });
+
+            })
+          }
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+        }).finally(() => {
+          if (showRepairJobCompleteConfirmationDialog === true) {
+            setShowRepairJobCompleteConfirmationDialog(false);
+            setOkBtnLoading(false)
+          }
+        });
+    }
   }
 
   const onPreviousButtonClick = (oldStep, previousStep) => {
@@ -444,118 +481,122 @@ const RepairJobDetails = () => {
                     <Paper>
                       <CustomCommonSteps
                         disableNextStep={disableNextStep}
-                        disablePreviousStep={disablePreviousStep}
+                        disablePreviousStep={false}
                         steps={repairJobProcessSteps.filter(f => f !== "End")}
                         currentStep={currentStep}
                         setCurrentStep={setCurrentStep}
                         onNextButtonClick={onNextButtonClick}
                         onPreviousButtonClick={onPreviousButtonClick}
+                        forViewOnly={repairJobData && repairJobData["status"] === completedStatus}
                       />
 
                       <Grid container spacing={2}>
                         <Grid item xs={12} sm={12} md={12} lg={12}>
                           {(currentStep === 0) && (
                             <>
-                              <Box display="flex" mt={2} mb={2} pr={1} justifyContent="flex-end" alignItems="center" className="gap-2">
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  type="button"
-                                  size="small"
-                                  onClick={() => {
-                                    setAddSerializedAssetDialog(true)
-                                  }}
-                                >
-                                  {`Add ${routes.productInventory.title}`}
-                                </Button>
+                              {
+                                repairJobData && repairJobData["status"] !== completedStatus && <Box display="flex" mt={2} mb={2} pr={1} justifyContent="flex-end" alignItems="center" className="gap-2">
+                                  <Button
+                                    variant="contained"
+                                    color="primary"
+                                    type="button"
+                                    size="small"
+                                    onClick={() => {
+                                      setAddSerializedAssetDialog(true)
+                                    }}
+                                  >
+                                    {`Add ${routes.productInventory.title}`}
+                                  </Button>
 
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  type="button"
-                                  size="small"
-                                  disabled={step1SelectedRecords.length === 0}
-                                  onClick={() => {
-                                    setShowEditAssetDialog({ open: true, asset: null, selectedRecords: step1SelectedRecords })
-                                  }}
-                                >
-                                  Bulk Edit
-                                </Button>
+                                  <Button
+                                    variant="contained"
+                                    color="primary"
+                                    type="button"
+                                    size="small"
+                                    disabled={step1SelectedRecords.length === 0}
+                                    onClick={() => {
+                                      setShowEditAssetDialog({ open: true, asset: null, selectedRecords: step1SelectedRecords })
+                                    }}
+                                  >
+                                    Bulk Edit
+                                  </Button>
 
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  type="button"
-                                  size="small"
-                                  disabled={step1SelectedRecords.length === 0 || step1SelectedRecords.some(s => s.status !== reservedStatus)}
-                                  onClick={() => {
-                                    setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: step1SelectedRecords.map(m => m._id ?? m.id) });
-                                  }}
-                                >
-                                  Delete
-                                </Button>
-                              </Box>
+                                  <Button
+                                    variant="contained"
+                                    color="primary"
+                                    type="button"
+                                    size="small"
+                                    disabled={step1SelectedRecords.length === 0 || step1SelectedRecords.some(s => s.status !== reservedStatus)}
+                                    onClick={() => {
+                                      setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: step1SelectedRecords.map(m => m._id ?? m.id) });
+                                    }}
+                                  >
+                                    Delete
+                                  </Button>
+                                </Box>
+                              }
 
                               <Grid item xs={12} md={12} sm={12} className="mt-3">
 
                                 {step1Columns ?
-                                    isMobile ?
-                                        <CustomSwipableList
-                                            allowSelection={true}
-                                            allowSwipe={true}
-                                            permissions={permissions}
-                                            primaryField={step1Columns?.find(d => d.field)}
-                                            onClick={(data) => {
-                                              history.push(`${routes.productInventoryDetail.path}/${data._id}`)
-                                            }}
-                                            dataRows={step1DataRows}
-                                            selectedRecords={true}
-                                            dispatch={step1Dispatch}
-                                            onEdit={(data) => {
-                                              history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
-                                            }}
-                                            extraParamsToCheckDelete={true}
-                                            onDelete={(data) => {
-                                              setShowAssetRemoveConfirmationDialog({ open: true, id: data._id ?? data.id, ids: [] });
+                                  isMobile ?
+                                    <CustomSwipableList
+                                      allowSelection={true}
+                                      allowSwipe={true}
+                                      permissions={permissions}
+                                      primaryField={step1Columns?.find(d => d.field)}
+                                      onClick={(data) => {
+                                        history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                                      }}
+                                      dataRows={step1DataRows}
+                                      selectedRecords={true}
+                                      dispatch={step1Dispatch}
+                                      onEdit={(data) => {
+                                        history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
+                                      }}
+                                      extraParamsToCheckDelete={true}
+                                      onDelete={(data) => {
+                                        setShowAssetRemoveConfirmationDialog({ open: true, id: data._id ?? data.id, ids: [] });
 
-                                            }}
-                                            rowCount={step1RowCount}
-                                            page={step1Page}
-                                            loading={step1Loading}
-                                            chips={[
-                                              {
-                                                label: "Product Desc. : ",
-                                                field: "product",
-                                              }
-                                            ]}
-                                            additionalDetails={[
-                                              // {
-                                              //   icon: <FaSuitcase size={18} />,
-                                              //   field: "customerAccount"
-                                              // },
-                                            ]}
-                                            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                                            onCreate={false}
-                                            showClone={false}
-                                            onClone={() => {} }
-                                            renderedFrom={step1RenderedFrom}
-                                        /> :
-                                  <CustomAgGrid
-                                    columns={step1Columns}
-                                    dataRows={step1DataRows}
-                                    frameworkComponents={step1FrameworkComponent}
-                                    setGridApi={setStep1GridApi}
-                                    dispatch={step1Dispatch}
-                                    rowCount={step1RowCount}
-                                    limit={step1Limit}
-                                    pageSizes={step1PageSizes}
-                                    page={step1Page}
-                                    allowAction={true}
-                                    actionWidth={150}
-                                    loading={step1Loading}
-                                    allowSelection={true}
-                                    renderedFrom={step1RenderedFrom}
-                                  />
+                                      }}
+                                      rowCount={step1RowCount}
+                                      page={step1Page}
+                                      loading={step1Loading}
+                                      chips={[
+                                        {
+                                          label: "Product Desc. : ",
+                                          field: "product",
+                                        }
+                                      ]}
+                                      additionalDetails={[
+                                        // {
+                                        //   icon: <FaSuitcase size={18} />,
+                                        //   field: "customerAccount"
+                                        // },
+                                      ]}
+                                      owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                                      onCreate={false}
+                                      showClone={false}
+                                      onClone={() => { }}
+                                      renderedFrom={step1RenderedFrom}
+                                    /> :
+                                    <CustomAgGrid
+                                      columns={step1Columns}
+                                      dataRows={step1DataRows}
+                                      frameworkComponents={step1FrameworkComponent}
+                                      setGridApi={setStep1GridApi}
+                                      dispatch={step1Dispatch}
+                                      rowCount={step1RowCount}
+                                      limit={step1Limit}
+                                      pageSizes={step1PageSizes}
+                                      page={step1Page}
+                                      allowAction={repairJobData && repairJobData["status"] === completedStatus ? false : true}
+                                      actionWidth={150}
+                                      loading={step1Loading}
+                                      allowSelection={repairJobData && repairJobData["status"] === completedStatus ? false : true}
+                                      renderedFrom={step1RenderedFrom}
+                                      isClientSideGrid={true}
+                                    />
                                   : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                                 }
                               </Grid>
@@ -593,6 +634,7 @@ const RepairJobDetails = () => {
         <Box my={1} />
       </Grid>
 
+
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -618,6 +660,19 @@ const RepairJobDetails = () => {
         )
       }
 
+      {
+        showRepairJobCompleteConfirmationDialog && <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to complete this repair job ?`}
+          onClose={() => {
+            setShowRepairJobCompleteConfirmationDialog(false)
+          }}
+          onOk={() => {
+            onNextButtonClick(repairJobProcessSteps.length - 2, repairJobProcessSteps.length - 1, false)
+          }}
+          okBtnLoading={okBtnLoading}
+        />
+      }
 
       {openUpdateDialog && (
         <ManageRepairJob
@@ -651,6 +706,12 @@ const RepairJobDetails = () => {
                   type: "success",
                   message: data.message,
                 });
+
+                //  Update status from new to In Progress when assets are created
+                if (repairJobData.status === repairJobStatus[0]) {
+                  axiosInstance().put(`${repairJob.repairJobApi}/${id}/status`, { "status": repairJobStatus[1] })
+                }
+
               }).catch((error) => {
                 setAddSerializedAssetDialog(false)
                 setIsAdding(false)
@@ -663,10 +724,12 @@ const RepairJobDetails = () => {
           }}
           isAdding={isAdding}
           selectedProducts={[]}
-          queryString={`ignoreIds=${JSON.stringify(step1DataRows.map(m => m._id ?? m.id))}&repairable=true`}
-          filterByPlant={`filterById=[{"field":"warehouse", "term": "${repairJobData.plant?.optionValue}"}]`}
+          queryString={`ignoreIds=${JSON.stringify(step1DataRows.map(m => m._id ?? m.id))}&repairable=true&notScrapLost=1`}
+          filterByPlant={repairJobData.plant?.optionValue}
         />
+      
       }
+     
 
       {
         showEditAssetDialog.open && (

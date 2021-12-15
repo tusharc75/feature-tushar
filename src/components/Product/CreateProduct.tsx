@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, Fragment, useContext } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { Box, Tooltip, Grid, Button, InputAdornment, Collapse } from '@material-ui/core';
 import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
@@ -27,16 +27,22 @@ import { autoCalculateSpecificFields, handleAutoCalculation } from "../../consta
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLess from '@material-ui/icons/ExpandLess';
-import {FaDiceOne} from "react-icons/fa";
+import { FaDiceOne } from "react-icons/fa";
 
 const ignoreField = ["priceTemplate"]
 
 const CreateProduct = (props) => {
+    const location = useLocation();
+    const pathName = location.pathname;
+
+    const sessionproductCategoryId = JSON.parse(sessionStorage.getItem('productCategoryId'))
+
+
 
     const { state: { permissions, user, selectedEntity } }: any = useData();
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
-    const { productId, handleClose, isClone, isAddInBuilder, addProductInBuilder, openFrom, isRedirectToDetailPage, fromQuote } = props;
+    const { productId, handleClose, isClone, isAddInBuilder, addProductInBuilder, openFrom, isRedirectToDetailPage, fromQuote, onSuccess } = props;
     const [masterFields, setMasterFields] = useState([]);
     const [productFields, setProductFields] = useState([]);
     const [submitting, setSubmitting] = useState(false);
@@ -60,6 +66,25 @@ const CreateProduct = (props) => {
 
     const [expanded, setExpanded] = useState({});
     const [fieldChanges, setFieldChanges] = useState([]);
+
+
+
+    useEffect(() => {
+        if (pathName !== '/product-inventory') {
+            sessionStorage.removeItem('productCategoryId')
+            sessionStorage.removeItem('productCategoryName')
+        }
+
+    }, [pathName])
+
+    useEffect(() => {
+        if (sessionproductCategoryId === "") {
+            sessionStorage.removeItem('productCategoryId')
+            sessionStorage.removeItem('productCategoryName')
+        }
+
+    }, [sessionproductCategoryId])
+
 
 
     useEffect(() => {
@@ -155,6 +180,33 @@ const CreateProduct = (props) => {
                         setProductCategoryDataSource(currentContactRemovedDataSource);
                     }
                 }
+                if (JSON.parse(sessionStorage.getItem('productCategoryId')) !== null && (JSON.parse(sessionStorage.getItem('productCategoryName')) !== null)) {
+                    let ProductCategoryId = JSON.parse(sessionStorage.getItem('productCategoryId'));
+                    let ProductCategoryName = JSON.parse(sessionStorage.getItem('productCategoryName'));
+
+                    setProductCategoryDataSource((prevState) => {
+                        return [
+                            ...prevState,
+                            {
+                                optionValue: ProductCategoryId,
+                                optionLabel: ProductCategoryName,
+                                order: productCategoryDataSource.length,
+                                default: false,
+                            },
+                        ];
+                    });
+                    setNewProductCategoryId(ProductCategoryId);
+                    // if (isProductTemplate) {
+                    //     handleChangeCategory(data._id, data.name, true, null)
+                    // }
+                }
+
+                if (JSON.parse(sessionStorage.getItem('productCategoryId')) !== null) {
+                    let ProductCategoryId = JSON.parse(sessionStorage.getItem('productCategoryId'));
+                    setNewProductCategoryId(ProductCategoryId);
+
+                }
+
             }
         }).catch((error) => {
             toastConfig.setToastConfig(error);
@@ -195,6 +247,12 @@ const CreateProduct = (props) => {
                 if (isRedirectToDetailPage) {
                     history.push(`/product/detail/${productId}`)
                 }
+                onSuccess(data)
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: "Product Created Successfully",
+                });
             }).catch((error) => {
                 setSubmitting(false);
                 toastConfig.setToastConfig(error);
@@ -492,7 +550,7 @@ const CreateProduct = (props) => {
                 }) => (
                     <Fragment>
                         <CustomDialogHeader
-                            title={`${(productId && !isClone) ? "Edit" : "New"} Product`}
+                            title={`${(productId && !isClone) ? "Edit" : "New"} Product - ${values?.productName}`}
                             isMinimized={!fullScreen}
                             onMinimizeMaximize={() => {
                                 setFullScreen(prevState => !prevState)
@@ -514,16 +572,16 @@ const CreateProduct = (props) => {
                                         <div key={i}>
                                             <div className={"detail-box-content detail-product-box"}>
                                                 <div className={"product-form-layout"}>
-                                                <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
-                                                <h2 className={`${"form-label-style"} ${"form-label-product"}`} >
-                                                    {section.name}
-                                                </h2>
-                                                <IconButton className="p-0" style={{ marginTop: "-5px", color:"white" }} size="small" onClick={() => handleExpand(i)} >
-                                                    {expanded[i] ? <ExpandLess fontSize="medium" style={{ paddingTop: "5px", color:"white" }}/> : <ExpandMoreIcon fontSize="medium" style={{ paddingTop: "5px", color:"white" }}/>}
-                                                </IconButton>
+                                                    <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                                                    <h2 className={`${"form-label-style"} ${"form-label-product"}`} >
+                                                        {section.name}
+                                                    </h2>
+                                                    <IconButton className="p-0" style={{ marginTop: "-5px", color: "white" }} size="small" onClick={() => handleExpand(i)} >
+                                                        {expanded[i] ? <ExpandLess fontSize="medium" style={{ paddingTop: "5px", color: "white" }} /> : <ExpandMoreIcon fontSize="medium" style={{ paddingTop: "5px", color: "white" }} />}
+                                                    </IconButton>
                                                 </div>
-                                                <IconButton style={{ padding:"0px" , marginTop: "-5px" }} color="primary" size="small" onClick={(e) => handleOpenAddField(e, section.name)} >
-                                                    <ControlPointIcon style={{ paddingTop:"2px" , color:"white" }}/>
+                                                <IconButton style={{ padding: "0px", marginTop: "-5px" }} color="primary" size="small" onClick={(e) => handleOpenAddField(e, section.name)} >
+                                                    <ControlPointIcon style={{ paddingTop: "2px", color: "white" }} />
                                                 </IconButton>
                                             </div>
                                             {/*<h2 className="form-label-style" >*/}
@@ -550,7 +608,7 @@ const CreateProduct = (props) => {
                                                                         >
                                                                             <FormTypes
                                                                                 isNew={Boolean(productId)}
-                                                                                disabled={(Boolean(productId) && field.disableOnEdit)}
+                                                                                disabled={(Boolean(productId) && field.disableOnEdit) || JSON.parse(sessionStorage.getItem('productCategoryId')) !== null}
                                                                                 fields={initialData.fields}
                                                                                 fieldData={field}
                                                                                 errors={errors}
@@ -602,10 +660,12 @@ const CreateProduct = (props) => {
                                                                                     >
                                                                                         <IconButton
                                                                                             onClick={() => { setShowAddProductCategoryDialog(true); }}
-                                                                                            disabled={(Boolean(productId) && field.disableOnEdit)}
+
+                                                                                            disabled={(Boolean(productId) && field.disableOnEdit) || JSON.parse(sessionStorage.getItem('productCategoryId')) !== null}
+                                                                                            //   disabled={JSON.parse(sessionStorage.getItem('productCategoryId')) !== null}
                                                                                             size="small"
                                                                                         >
-                                                                                            <AddIcon color={(Boolean(productId) && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                                                            <AddIcon color={(Boolean(productId) && field.disableOnEdit) || JSON.parse(sessionStorage.getItem('productCategoryId')) !== null ? "disabled" : "primary"} />
                                                                                         </IconButton>
                                                                                     </Tooltip>
                                                                                 </Grid>

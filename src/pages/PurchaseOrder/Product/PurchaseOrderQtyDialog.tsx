@@ -16,7 +16,7 @@ import {
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateUtils from '@date-io/date-fns';
 import moment from 'moment';
-import { dateFormatForInputControl } from '../../../constants/helpers';
+import { arrayToDropwdownOption, dateFormatForInputControl } from '../../../constants/helpers';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -33,49 +33,77 @@ import CustomButton from '../../../components/Helpers/CustomButton'
 import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
+import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 
 interface PurchaseOrderQtyDialogProps {
   onClose: VoidFunction | any;
   currency: string;
   onSubmit: VoidFunction | any;
   productData?: object | any;
+  purchaseOrderData?: object | any;
   bulkEdit?: boolean | any;
 }
 
-const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, currency, onSubmit, productData, bulkEdit }) => {
+const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, currency, onSubmit, productData, bulkEdit, purchaseOrderData }) => {
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
+  const [allFields, setAllFields] = useState([]);
 
   useEffect(() => {
     axiosInstance().get("/field/child?resource=Purchase Order Product").then(({ data: { data } }) => {
       const poFields = CURReplaceByCurrencySingle(data, currency);
-      //Update Unit As Product Start
-      poFields.filter((_f) => {
-        if (["unit", "umo"].includes(_f.fieldName.toLowerCase())) {
-          if (!bulkEdit && (productData?.productDetail?.unit || productData?.productDetail?.umo)) {
-            let unitOption = productData?.productDetail?.unit || productData?.productDetail?.umo
-            if (unitOption) {
-              let newUnitOptions = unitOption?.map((item, index) => {
-                let res: any = {}
-                res.optionLabel = item
-                res.optionValue = item
-                res.order = index
-                return res;
-              });
-              _f.option = newUnitOptions;
+      setAllFields(JSON.parse(JSON.stringify(poFields)))
+      if (bulkEdit) {
+        let unitArray: any = []
+        productData?.forEach(element => {
+          if (element?.productDetail?.unit) {
+            unitArray.push([...element?.productDetail?.unit])
+          }
+        });
+        let unit: any = unitArray?.shift()?.filter(function (v) {
+          return unitArray.every(function (a) {
+            return a.indexOf(v) !== -1;
+          });
+        });
+        const unitOptions: any = arrayToDropwdownOption(unit)
+        poFields.forEach((element) => {
+          if (element.fieldName === "unit") {
+            element.option = unitOptions;
+          }
+          element.required = false;
+          element.isFormula = false;
+          element.isMulitFormula = false;
+        })
+        setInitialData({
+          fields: poFields,
+          values: { ...getObjKeys("", poFields), expectedDelivery: "" },
+        });
+      }
+      else {
+
+        poFields.filter((_f) => {
+          if (["unit"].includes(_f.fieldName.toLowerCase())) {
+            if (productData?.productDetail?.unit) {
+              _f.option = arrayToDropwdownOption(productData?.productDetail?.unit)
             }
           }
+        })
+
+        let tempObjKeysWithValues = getObjKeysWithValues(productData, poFields)
+        if (!tempObjKeysWithValues["taxSchedule"] && purchaseOrderData["taxSchedule"]) {
+          tempObjKeysWithValues["taxSchedule"] = purchaseOrderData["taxSchedule"]
         }
-      })
-      //End
-      setInitialData({
-        fields: poFields,
-        values: getObjKeysWithValues(!bulkEdit ? productData : productData[0], poFields),
-      });
+        if (!tempObjKeysWithValues["expectedDelivery"] && purchaseOrderData["deliveryDate"]) {
+          tempObjKeysWithValues["expectedDelivery"] = purchaseOrderData["deliveryDate"]
+        }
+        setInitialData({
+          fields: poFields,
+          values: tempObjKeysWithValues,
+        });
+      }
       EvaluteproductFields(poFields);
     })
   }, []);
@@ -93,13 +121,22 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
   const handleSubmit = (values) => {
     let returnData = []
     if (bulkEdit) {
-      returnData = productData.map(d => { return ({ ...values, _id: d._id || d.productDetail._id, productId: d.productId }) })
+      for (const x in values) {
+        if (values[x] === "" || values[x] === 0 || (Array.isArray(values[x]) && values[x].length === 0)) {
+          delete values[x]
+        }
+      }
+      productData.forEach(element => {
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
+        returnData.push({ ...element, ...calValues })
+      })
     }
     else {
-      returnData = [{ ...values, _id: productData._id || productData.productDetail._id, productId: productData.productId }]
+      returnData = [{ ...values, _id: productData._id, productId: productData.productId }]
     }
     onSubmit(returnData)
   };
+
   function validate(values) {
     const errors = {};
     if (values?.qty < values?.actualReceived) {
@@ -131,7 +168,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
         }) => (
           <Fragment>
             <CustomDialogHeader
-              title={bulkEdit ? "Bulk Edit" : `Edit ${productData.productName || ""}`}
+              title={bulkEdit ? "Bulk Edit" : `Edit ${productData?.productName || ""}`}
               onClose={() => {
                 onClose()
               }}

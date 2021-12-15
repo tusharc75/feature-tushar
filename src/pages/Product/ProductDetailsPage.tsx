@@ -703,7 +703,7 @@ const ProductDetailsPage = () => {
                                                             <Box p={1}>
                                                                 {selectedWarehouse === warehouse && inventory?.slice(0, 6).map((i, index) => (
                                                                     <Fragment key={i._id}>
-                                                                        {i?.serialNumber ? index === 5 ?
+                                                                        {i?.asssetNumber ? index === 5 ?
                                                                             <Button
                                                                                 fullWidth
                                                                                 className="mt-2"
@@ -728,7 +728,7 @@ const ProductDetailsPage = () => {
                                                                             //         })
                                                                             //     }} />
                                                                             : <Chip
-                                                                                label={i?.serialNumber}
+                                                                                label={i?.asssetNumber}
                                                                                 // color="secondary"
                                                                                 style={{ marginRight: '2px', background: ["New", "Available"].indexOf(i?.status) >= 0 ? "#b9ffce" : "#ffb4b4" }}
                                                                                 onClick={() => {

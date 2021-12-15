@@ -142,10 +142,30 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
       }
       json_data.push(ele);
     });
+    const header = []
+    if (json_data.length) {
+      for (var key in json_data[0]) {
+        if (key === "option") {
+          header.push(values["fieldLabel"]);
+        }
+        else {
+          const filter = fields.filter((_f) => _f.fieldName === key)
+          if (filter.length) {
+            header.push(filter[0]["fieldLabel"]);
+          }
+          else {
+            header.push(key);
+          }
+        }
+      }
+    }
     var ws = utils.json_to_sheet(json_data);
+    if (header.length) {
+      utils.sheet_add_aoa(ws, [header]);
+    }
     var wb = utils.book_new();
     utils.book_append_sheet(wb, ws, "Sheet1");
-    writeFile(wb, "dropdown options.xlsx");
+    writeFile(wb, `${values["fieldLabel"]} Dropdown Options.xlsx`);
   };
 
   const moveCard = useCallback(

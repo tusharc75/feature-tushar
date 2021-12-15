@@ -246,7 +246,7 @@ const Roles: FC = () => {
   }
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&type=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}&type=2`;
 
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
@@ -390,7 +390,7 @@ const Roles: FC = () => {
           open={isOpen?.open}
           close={handleClose}
           fetchData={fetchRoles}
-          roleType={selectedType}
+          roleType={2}
           setToastConfig={toastConfig.setToastConfig}
           selectedEntity={selectedEntity}
           roleId={isOpen?.idToClone}

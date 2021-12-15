@@ -904,6 +904,7 @@ const FormTypes = (props) => {
         <Grid item xs={!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12}>
           <Autocomplete
             {...rest}
+            disabled={fieldData?.isUneditable || rest?.disabled}
             options={fieldData && fieldData.isDependentDropdown ?
               option.filter((_f) => _f[fieldData.dropdowDependentOn] === values[fieldData.dropdowDependentOn]) :
               option.filter(f => f.optionLabel)}
@@ -1879,6 +1880,7 @@ const FormTypes = (props) => {
       <MuiPickersUtilsProvider utils={DateUtils}>
         <KeyboardDatePicker
           {...rest}
+          disabled={fieldData?.isUneditable || rest?.disabled}
           clearable
           autoOk
           required={required}

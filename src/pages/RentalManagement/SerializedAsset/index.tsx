@@ -9,12 +9,13 @@ import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray, generateUniqueId } from "../../../constants/helpers";
+import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray, productInventory } from "../../../constants/helpers";
 import moment from "moment";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
 import ManagePurchaseOrder from "../../PurchaseOrder/ManagePurchaseOrder";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
+import { uniqBy } from 'lodash';
 
 const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
 
@@ -24,11 +25,15 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const [showConfirmBox, setShowConfirmBox] = useState(false)
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState([])
+  const [assetAssignedProduct, setAssetAssignedProduct] = useState([])
+
   const [deleteData, setDeleteData] = useState([])
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, products: [] });
+
+
 
   useEffect(() => {
     axiosInstance().get("/field/child?resource=Rental Management Product").then(({ data: { data } }) => {
@@ -40,16 +45,19 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         Cell: ({ row }) => (
           <div className="d-flex gap-2 align-items-center">
             <p className="text-truncate" title={row.original.detail}  >
-              {row.original.detail}
+              {row.original?.type === "asset" ?
+                <a className="link text-truncate" href={`${productInventory.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
+                row.original.detail}
             </p>
             {row.original?.type === "asset" &&
               <span className="d-flex align-items-center gap-2">
-                <IconButton size="small" onClick={() => {
-                  setShowConfirmBox(true)
-                  setDeleteData([row.original.inventory])
-                }}>
-                  <Delete color="error" />
-                </IconButton>
+                {row.original.status === "Reserved" &&
+                  <IconButton size="small" onClick={() => {
+                    setShowConfirmBox(true)
+                    setDeleteData([row.original.inventory])
+                  }}>
+                    <Delete color="error" />
+                  </IconButton>}
                 <Chip label="Asset" size="small" color="primary" />
               </span>}
           </div>)
@@ -138,6 +146,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   }, []);
 
   const fetchProductInventory = () => {
+    setNextStep(false)
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`).then(({ data: { data } }) => {
       const rows = data.material.filter((e) => e.parentId === null)
       rows.forEach((parent, i) => {
@@ -145,7 +154,14 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         const subRows = []
         const inventory = data.inventory.filter((e) => e._id === parent._id);
         inventory?.forEach((_inventory, k) => {
-          subRows.push({ ..._inventory, detail: `${(i + 1)}.${(k + 1)} - ${_inventory.inventoryDetail?.assetNumber}`, type: "asset", _id: _inventory.inventory, isValid: true })
+          subRows.push({
+            ..._inventory,
+            detail: `${(i + 1)}.${(k + 1)} - ${_inventory.inventoryDetail?.assetNumber}`,
+            type: "asset",
+            status: _inventory.inventoryDetail?.status,
+            _id: _inventory.inventory,
+            isValid: true
+          })
         })
         parent.subRows = subRows;
         if (parent.type === "product") {
@@ -155,10 +171,18 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           const child: any = [...data.material.filter((e) => e.parentId === parent._id)];
           child.forEach((_child, j) => {
             _child.detail = `${(i + 1)}.${(j + 1)} - ${_child.productDetail?.productName}`
+            _child.qty = _child.qty * parent.qty
             const subRows = []
             const inventory = data.inventory.filter((e) => e._id === _child._id);
             inventory?.forEach((_inventory, l) => {
-              subRows.push({ ..._inventory, detail: `${(i + 1)}.${(j + 1)}.${(l + 1)} - ${_inventory.inventoryDetail?.assetNumber}`, type: "asset", _id: _inventory.inventory, isValid: true })
+              subRows.push({
+                ..._inventory,
+                detail: `${(i + 1)}.${(j + 1)}.${(l + 1)} - ${_inventory.inventoryDetail?.assetNumber}`,
+                type: "asset",
+                status: _inventory.inventoryDetail?.status,
+                _id: _inventory.inventory,
+                isValid: true
+              })
             })
             _child.subRows = subRows;
             _child.isValid = _child?.qty === subRows?.length ? true : false;
@@ -201,16 +225,33 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
 
   const handleAddSerializedAsset = (assets) => {
     let data = [];
-    assets.forEach(d => {
-      const result = selectedProducts.find(f => d.product?.optionValue === f.materialId);
-      if (result) {
-        let obj: any = {};
-        obj._id = result._id
-        obj.inventory = d.id;
-        obj.product = result.materialId
-        data.push(obj)
+    selectedProducts?.forEach((e: any) => {
+      if (e.type === "product") {
+        let qty = e.qty - e.subRows.length;
+        while (qty) {
+          const result = assets.filter(f => f.productId === e.materialId && !f.isCounted);
+          if (result.length) {
+            let obj: any = {};
+            obj._id = e._id
+            obj.inventory = result[0].id;
+            obj.product = e.materialId
+            data.push(obj)
+            result[0].isCounted = true;
+          }
+          qty--;
+        }
       }
     })
+    // assets.forEach(d => {
+    //   const result = selectedProducts.find(f => d.productId === f.id);
+    //   if (result) {
+    //     let obj: any = {};
+    //     obj._id = result._id
+    //     obj.inventory = d.id;
+    //     obj.product = result.materialId
+    //     data.push(obj)
+    //   }
+    // })
     if (data.length) {
       setAdding(true)
       axiosInstance().post(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`, { "products": data })
@@ -218,6 +259,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           setAddSerializedAssetDialog(false)
           fetchProductInventory()
           setSelectedProducts([])
+          setAssetAssignedProduct([])
           setAdding(false)
           toastConfig.setToastConfig({
             open: true,
@@ -250,19 +292,40 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   }
 
   useEffect(() => {
-    const flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty !== f.subRows?.length);
+    let flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty !== f.subRows?.length);
+    flatArray = uniqBy(flatArray, '_id')
+    const products = flatArray.map(m => { return { _id: m.materialId, unit: m.unit, assetsCount: m.qty - (m.subRows?.length ?? 0) } })
     setShowManagePurchaseOrderDialog(prevState => {
       return {
         ...prevState,
-        products: flatArray.map(m => { return { _id: m.materialId, assetsCount: m.qty - (m.subRows?.length ?? 0) } })
+        products: products
       }
     });
+    const assetProduct = []
+    flatArray.forEach((element) => {
+      if (element.type === "product" && element.qty > element?.subRows?.length) {
+        const foundProduct = assetProduct.filter((e) => e.materialId === element.materialId)
+        if (foundProduct.length) {
+          foundProduct[0].qty += element.qty - element?.subRows?.length
+        }
+        else {
+          assetProduct.push({
+            ...element,
+            _id: element.materialId,
+            id: element.materialId,
+            productName: element.productDetail?.productName,
+            qty: element.qty - element?.subRows?.length
+          })
+        }
+      }
+    })
+    setAssetAssignedProduct(assetProduct)
   }, [selectedProducts])
 
   const disableAssignSerializedAssets = () => {
-    if (selectedProducts.length === 0 || selectedProducts.some(s => s.type === "asset"))
+    if (selectedProducts.length === 0)
       return true;
-    const flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty !== f.subRows?.length);
+    const flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty > f.subRows?.length);
     return flatArray.length === 0;
   }
 
@@ -305,7 +368,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               color="primary"
               type="button"
               size="small"
-              disabled={(selectedProducts.filter(d => d.type === "asset").length === 0)}
+              disabled={(selectedProducts.filter(d => d.type === "asset" && d.status === "Reserved").length === 0)}
               onClick={() => {
                 setDeleteData(selectedProducts.filter(d => d.type === "asset").map(d => d?.inventory))
                 setShowConfirmBox(true)
@@ -350,7 +413,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           setAddSerializedAssetDialog(false);
         }}
         isAdding={isAdding}
-        selectedProducts={[...selectedProducts.filter(p => p.type === "product").map(m => { return { ...m, _id: m.materialId, productName: m.productDetail?.productName } })]}
+        selectedProducts={assetAssignedProduct}
+        filterByPlant={rentalManagementData?.warehouse?.optionValue ? rentalManagementData?.warehouse?.optionValue : null}
       />
     }
     {showConfirmBox && (
@@ -372,7 +436,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         purchaseOrderId={null}
         onClose={() => setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: false }))}
         onSuccess={() => {
-          setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: false }))
+          setShowManagePurchaseOrderDialog(({ open: false, products: [] }))
+          setSelectedProducts([])
+          fetchProductInventory()
           toastConfig.setToastConfig({
             open: true,
             type: "success",
@@ -383,6 +449,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         isFromSerializedAssetStepFromRental={true}
         currency={rentalManagementData.currencyCode}
         rentalManagementId={rentalManagementData._id}
+        deliveryDateMax={rentalManagementData.estimateStartDate}
       />
     }
   </Fragment>

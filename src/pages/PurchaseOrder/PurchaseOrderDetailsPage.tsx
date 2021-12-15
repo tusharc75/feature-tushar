@@ -99,7 +99,7 @@ const PurchaseOrderDetailsPage = () => {
                 toastConfig.setToastConfig(error);
             });
         }
-        if (currentStep === 2) {
+        if (currentStep <= 2) {
             axiosInstance().get(`${purchaseOrder.api}/${id}/pdf`)
                 .then(({ data }) => {
                     axiosInstance()
@@ -122,8 +122,8 @@ const PurchaseOrderDetailsPage = () => {
                     setDownlodingFile(false);
                 })
         }
-        if (currentStep === 1 && purchaseOrderData?.status === "New") { handleUpdateData({ "status": "In Process" }) }
-        if (currentStep === 3 && purchaseOrderData?.status === "In Process") { handleUpdateData({ "status": "Issued" }) }
+        if (currentStep === 1 || currentStep === 2) { handleUpdateData({ "status": "In Process" }) }
+        if (currentStep === 3) { handleUpdateData({ "status": "Issued" }) }
     }, [currentStep]);
 
     const handleMainPoints = (data) => {
@@ -148,6 +148,9 @@ const PurchaseOrderDetailsPage = () => {
             { title: `${data?.purchaseOrderNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
             setPurchaseOrderData(data);
             setCurrentStep(purchaseOrderSteps.indexOf(data?.processStatus) !== -1 ? purchaseOrderSteps.indexOf(data?.processStatus) : 0)
+            if (data?.status === "Ready to Invoice" || data?.status === "Invoiced" || data?.status === "Closed") {
+                setCurrentStepDisable(true)
+            }
             setCurrencySymbol(
                 getUniqueCurrencies().find(
                     (d) => d.currencyCode === data["currency"]
@@ -346,7 +349,7 @@ const PurchaseOrderDetailsPage = () => {
                                             </Button>
                                         </>
                                     )}
-                                    {permissions?.purchaseOrder?.isUpdate && purchaseOrderData?.status === "Ready to Invoice" && (
+                                    {permissions?.purchaseOrder?.isUpdate && (purchaseOrderData?.status === "Ready to Invoice" || purchaseOrderData?.status === "Invoiced" || purchaseOrderData?.status === "Closed") && (
                                         <>
                                             <Button
                                                 variant="outlined"
@@ -464,7 +467,7 @@ const PurchaseOrderDetailsPage = () => {
                                             <Paper>
                                                 <Steps
                                                     // className={styles.steps_box}
-                                                    isNextStep={!Boolean(purchaseOrderProduct.length) || currentStepDisable}
+                                                    currentStepDisable={currentStepDisable}
                                                     steps={purchaseOrderSteps.slice(0, 4)}
                                                     currentStep={currentStep}
                                                     setCurrentStep={setCurrentStep}
@@ -503,6 +506,10 @@ const PurchaseOrderDetailsPage = () => {
                                                         setCurrentStep={setCurrentStep}
                                                         handleUpdateData={handleUpdateData}
                                                         statusOptions={statusOptions}
+                                                        handleViewPdf={handleViewPdf}
+                                                        pdfFileBase64={pdfFileBase64}
+                                                        downlodingFile={downlodingFile}
+                                                        handleAttachments={handleAttachments}
                                                     />
                                                 }
                                             </Paper>

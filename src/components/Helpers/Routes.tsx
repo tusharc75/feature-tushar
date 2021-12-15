@@ -291,7 +291,7 @@ const routes = {
   },
   packages: {
     title: storedRoutes ? storedRoutes.packages?.title : RESOURCE_LABEL.packages,
-    path: "/packages",
+    path: "/packages/detail",
   },
   packagesDetail: {
     title: storedRoutes ? storedRoutes.packages?.title : RESOURCE_LABEL.packages,

@@ -1,16 +1,29 @@
 import { useState, useEffect, useCallback } from 'react';
 import Chart from 'react-chartjs-2';
-import { Box, Paper, Typography, Button, Menu, MenuItem, TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
-import { ImportExport, TableChart, Timeline } from '@material-ui/icons';
+import { Box, Paper, Typography, Button, Menu, MenuItem, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Popover, TextField } from '@material-ui/core';
+import { FilterList, ImportExport, TableChart, Timeline } from '@material-ui/icons';
 import PptxGenJs from 'pptxgenjs';
 import jsPDF from 'jspdf';
 import { saveAs } from "file-saver";
 import { utils, write } from "xlsx";
 import axiosInstance from '../../axios/axiosInstance';
 import Loader from '../../components/Loader';
+import { Autocomplete } from '@material-ui/lab';
+import Countries from "../../constants/Country.json"
 
 const Top2Dashboard = (props) => {
-  const { currency, salesFilter, moment, filterCurrency, getExchangeRates } = props;
+  const { currency,
+    salesFilter,
+    moment,
+    filterCurrency,
+    getExchangeRates,
+    marketSegments,
+    subMarketSegments,
+    productCategory,
+    setSubMarketSegments,
+    setSalesFilter,
+    salesReps,
+    customerAccounts, } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [tableView, setTableView] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -20,6 +33,9 @@ const Top2Dashboard = (props) => {
     datasets: [],
     allData: []
   });
+
+  const [filterAnchor, setFilterAnchor] = useState(null);
+  const [openFilter, setOpenFilter] = useState(false);
 
   const fetchAllEntitiesData = useCallback(() => {
     let params = {
@@ -193,10 +209,160 @@ const Top2Dashboard = (props) => {
     setAnchorEl(null);
   };
 
+  const handleClickFilter = (event) => {
+    setFilterAnchor(event.currentTarget);
+    setOpenFilter((prev) => !prev);
+  };
+
   return allEntitySalesData.labels.length > 0 && (
     <Paper elevation={2}>
+      <Popover
+        open={openFilter}
+        anchorEl={filterAnchor}
+        onClose={handleClickFilter}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center'
+        }}
+      >
+        <Box p={2}>
+          <Box width="250px">
+            {/* <Autocomplete
+              fullWidth
+              size="small"
+              disabled={salesFilter.allEntity}
+              options={entities}
+              autoHighlight
+              value={salesFilter.entity}
+              getOptionLabel={(option) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                setSalesFilter({ ...salesFilter, entity: val });
+              }}
+              renderInput={(params) => <TextField {...params} label="Entity" variant="outlined" />}
+            /> */}
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={salesReps}
+              autoHighlight
+              value={salesFilter.salesRep}
+              getOptionLabel={(option) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                setSalesFilter({ ...salesFilter, salesRep: val });
+              }}
+              renderInput={(params) => <TextField {...params} label="Sales Rep" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={customerAccounts}
+              autoHighlight
+              value={salesFilter.customerAccount}
+              getOptionLabel={(option) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                let data = { ...salesFilter, customerAccount: val }
+                if (val?.countryBillTo) {
+                  let foundCountry = Countries.find(o => o.optionValue === val?.countryBillTo)
+                  if (foundCountry) {
+                    data.countryBillTo = foundCountry
+                  }
+                }
+                if (val?.countrySellTo) {
+                  let foundCountry = Countries.find(o => o.optionValue === val?.countrySellTo)
+                  if (foundCountry) {
+                    data.countrySellTo = foundCountry
+                  }
+                }
+                setSalesFilter({ ...data });
+              }}
+              renderInput={(params) => <TextField {...params} label="Customer Account" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={marketSegments}
+              autoHighlight
+              value={salesFilter.marketSegment}
+              getOptionLabel={(option) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                setSalesFilter({ ...salesFilter, marketSegment: val });
+                if (val) {
+                  setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
+                } else {
+                  setSubMarketSegments([]);
+                }
+              }}
+              renderInput={(params) => <TextField {...params} label="Market Segment" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={subMarketSegments}
+              autoHighlight
+              value={salesFilter.subMarketSegment}
+              getOptionLabel={(option) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => setSalesFilter({ ...salesFilter, subMarketSegment: val })}
+              renderInput={(params) => <TextField {...params} label="Sub-Market Segment" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={productCategory}
+              autoHighlight
+              value={salesFilter.productCategory}
+              getOptionLabel={(option) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => setSalesFilter({ ...salesFilter, productCategory: val })}
+              renderInput={(params) => <TextField {...params} label="Product Category" variant="outlined" />}
+            />
+            <Box mt={1} />
+
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={Countries}
+              autoHighlight
+              value={salesFilter.countrySellTo}
+              getOptionLabel={(option) => option.optionLabel || ''}
+              getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
+              onChange={(_, val) => setSalesFilter({ ...salesFilter, countrySellTo: val })}
+              renderInput={(params) => <TextField {...params} label="Country Sell To" variant="outlined" />}
+            />
+            <Box mt={1} />
+
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={Countries}
+              autoHighlight
+              value={salesFilter?.countryBillTo}
+              getOptionLabel={(option) => option.optionLabel || ''}
+              getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
+              onChange={(_, val) => setSalesFilter({ ...salesFilter, countryBillTo: val })}
+              renderInput={(params) => <TextField {...params} label="Country Bill To" variant="outlined" />}
+            />
+          </Box>
+        </Box>
+      </Popover>
       <Box my={2} p={2}>
         <Box display="flex" justifyContent="space-between">
+          <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
+            Filters
+          </Button>
           <Button onClick={handleClick} startIcon={<ImportExport />}>
             Export to
           </Button>

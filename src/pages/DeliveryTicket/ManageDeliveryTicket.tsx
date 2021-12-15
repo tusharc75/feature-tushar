@@ -140,12 +140,14 @@ const ManageDeliveryTicket = (props) => {
                     const tempInitialData = getObjKeys("", fieldsDataForCreate)
                     tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
                     tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
+                    tempInitialData["pickupPlantAddress"] = rentalData.shippingAddress
                     tempInitialData["type"] = "Rental Job";
                     tempInitialData["rental"] = rentalData?._id
                     tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
                     tempInitialData["shippingAddress"] = rentalData.shippingAddress
                     tempInitialData["deliveryJobName"] = `${rentalData?.rentalJobName}_${generateUniqueIdOnly()}`
-                    tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
+                    tempInitialData["pick-UpDate"] = moment(rentalData?.estimateStartDate).subtract(1, 'days');
+                    tempInitialData["deliveryDate"] = moment(rentalData?.estimateStartDate).subtract(1, 'days');
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
                         values: tempInitialData,
@@ -180,6 +182,8 @@ const ManageDeliveryTicket = (props) => {
                     const tempInitialData = getObjKeys("", fieldsDataForCreate)
                     tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
                     tempInitialData["deliveryJobName"] = `${transferData?.transferAssetNumber}_${generateUniqueIdOnly()}`
+                    tempInitialData["warehouse"] = warehouseId;
+                    tempInitialData["pickupPlantAddress"] = transferData?.transferFromPlant.address ?? "";
                     tempInitialData["type"] = "Transfer Asset";
                     tempInitialData["transferAsset"] = transferData?._id;
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
@@ -196,7 +200,7 @@ const ManageDeliveryTicket = (props) => {
                         tempInitialData["supplierShippingAddress"] = transferData?.supplierShipTo;
                     }
                     setInitialData({
-                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "rental"),
+                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "transferAsset"),
                         values: tempInitialData,
                     });
                     setFormValues(tempInitialData)
@@ -263,6 +267,17 @@ const ManageDeliveryTicket = (props) => {
         }))
     }
 
+    function validate(values) {
+        const errors = {};
+        let startDate = moment(values?.["pick-UpDate"]);
+        let endDate = moment(values?.deliveryDate);
+        if (endDate.diff(startDate, 'days') < 0) {
+            errors['pick-UpDate'] = 'Please enter valid pick-Up  date';
+        }
+        return errors;
+    }
+
+
     return (<Dialog
         maxWidth="md"
         fullScreen={fullScreen || (isMobile || isTablet)}
@@ -319,6 +334,7 @@ const ManageDeliveryTicket = (props) => {
                 initialValues={initialData.values}
                 validationSchema={yupSchema(initialData.fields)}
                 onSubmit={handleSubmit}
+                validate={validate}
             >
                 {({ values, errors, setFieldValue, touched, submitForm }) => (
                     <>
@@ -345,7 +361,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                 field.fieldName === "status" || field.fieldName === "actualDeliveredDate" || field.fieldName === "actualDispatchedDate" ? (
                                                                                 <FormTypes
                                                                                     {...field}
-                                                                                    disabled={transferData && false || rentalData && true || repairJobData && true}
+                                                                                    disabled={transferData && false || rentalData && true || repairJobData && true || Boolean(deliveryTicketId) && field.disableOnEdit}
                                                                                     isNew={Boolean(deliveryTicketId)}
                                                                                     values={values}
                                                                                     errors={errors}
@@ -368,7 +384,7 @@ const ManageDeliveryTicket = (props) => {
                                                                             ) : field.fieldName === "supplierAccount" ? (
                                                                                 <FormTypes
                                                                                     {...field}
-                                                                                    disabled={(repairJobData && repairJobData["typeOfRepair"] === "External") || field.disableOnEdit}
+                                                                                    disabled={(repairJobData && repairJobData["typeOfRepair"] === "External") || Boolean(deliveryTicketId) && field.disableOnEdit}
                                                                                     values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}
@@ -385,12 +401,12 @@ const ManageDeliveryTicket = (props) => {
                                                                                     isTooltip={field?.isTooltip || false}
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
-                                                                                    minDate={new Date()}
-                                                                                    maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
                                                                                 />
                                                                             ) : field.fieldName === "pick-UpDate" ? (
                                                                                 <FormTypes
                                                                                     {...field}
+                                                                                    isNew={!Boolean(deliveryTicketId)}
+                                                                                    disabled={Boolean(deliveryTicketId) && field.disableOnEdit}
                                                                                     values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}
@@ -407,12 +423,15 @@ const ManageDeliveryTicket = (props) => {
                                                                                     isTooltip={field?.isTooltip || false}
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
-                                                                                    minDate={new Date()}
-                                                                                    maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
+                                                                                    //minDate={new Date()}
+                                                                                    //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
+                                                                                    maxDate={rentalData?.estimateStartDate ? moment(rentalData?.estimateStartDate) : moment().add(1, 'years').calendar()}
                                                                                 />
                                                                             ) : field.fieldName === "deliveryDate" ? (
                                                                                 <FormTypes
                                                                                     {...field}
+                                                                                    isNew={!Boolean(deliveryTicketId)}
+                                                                                    disabled={Boolean(deliveryTicketId) && field.disableOnEdit}
                                                                                     values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}
@@ -429,7 +448,9 @@ const ManageDeliveryTicket = (props) => {
                                                                                     isTooltip={field?.isTooltip || false}
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
-                                                                                    minDate={moment(values["pick-UpDate"]).add(7, 'days')}
+                                                                                    //minDate={moment(values["pick-UpDate"]).add(7, 'days')}
+                                                                                    //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
+                                                                                    maxDate={rentalData?.estimateStartDate ? moment(rentalData?.estimateStartDate) : moment().add(1, 'years').calendar()}
                                                                                 />
                                                                             ) : field.fieldName === "deliveryJobName" ? (
                                                                                 <FormTypes
@@ -545,8 +566,8 @@ const ManageDeliveryTicket = (props) => {
                                                                             ) : field.fieldName === "warehouse" ? (
                                                                                 <FormTypes
                                                                                     {...field}
-                                                                                    disabled={(deliveryTicketId && field.disableOnEdit) || (repairJobData && warehouseId)}
-                                                                                    isNew={Boolean(deliveryTicketId)}
+                                                                                    disabled={(deliveryTicketId && field.disableOnEdit) || (repairJobData && warehouseId) || (transferData && warehouseId) || (rentalData && warehouseId)}
+                                                                                    isNew={!Boolean(deliveryTicketId)}
                                                                                     values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}
@@ -566,7 +587,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                 />
                                                                             ) : <FormTypes
                                                                                 {...field}
-                                                                                isNew={Boolean(deliveryTicketId)}
+                                                                                isNew={!Boolean(deliveryTicketId)}
                                                                                 values={values}
                                                                                 errors={errors}
                                                                                 touched={touched}

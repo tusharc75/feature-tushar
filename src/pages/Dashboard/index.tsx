@@ -85,28 +85,28 @@ function Dashboard() {
 
         case 'Accounts':
           icon = <RiAccountPinCircleFill size={32} />;
-          text = 'Powerful financial platform to grow more your business.';
+          text = 'Customer and Supplier Account Management at your fingertips.';
           break;
 
         case 'Activities':
           icon = <MdLocalActivity size={32} />;
-          text = 'We Need to Talk About Budgeting. It’s a Necessary Evil.';
+          text = 'Assign and Access Activities related to an Order.';
           break;
 
         case 'Product Setup':
           icon = <RiFolderSettingsFill size={32} />;
-          text = 'You’ll Kick Yourself if You Miss This Chance to Try Our New Activities.';
+          text = 'Product and Pricing Setup.';
           break;
 
         case 'Admin Portal':
           icon = <BsCalendarFill size={32} style={{ padding: '4px' }} />;
 
-          text = 'Try to Change Your Work Patterns and Get More Done with us.';
+          text = 'Build your own Template, Manage Roles and Entities.';
           break;
 
         case 'ROM':
           icon = <FaRegistered size={32} />;
-          text = 'The Guaranteed Method For Avoiding Client Lag with Rentals.';
+          text = 'Fulfill Rental Orders Faster.';
           break;
       }
 
@@ -158,7 +158,7 @@ function Dashboard() {
         <Grid className={styles.dashboard_layout}>
           <div className={styles.all_content_box}>
             <h1 className="mb-2">Raising resiliency in a rapidly transforming business environment</h1>
-            <p>Managing your customer leads, opportunities, complex projects, and quotes just got easier</p>
+            <p>Simplify orders and lifecycle management for your rental assets and services</p>
             <img src={crmImage} alt="Logo" className={styles.set_crm_image} />
           </div>
           <div>
@@ -237,7 +237,9 @@ function Dashboard() {
                               <Grid>
                                 {
                                   <Box height="215px" style={{ overflowY: 'auto' }} className={styles.back_box_content}>
-                                    {section.items.map((item) => (
+                                    {
+                                    section.items.
+                                    filter((item) => !(("hiddenResource" in item) && item?.hiddenResource)).map((item) => (
                                       <div key={item.name}>
                                         <Box marginY={1} component="div" className={styles.list_component}>
                                           <Typography paragraph className={styles.hover_list_box}>

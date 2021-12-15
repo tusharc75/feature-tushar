@@ -125,12 +125,6 @@ export default function ManageAccount(props) {
       );
     }
 
-    const addressDropdownData = accountData.fields.find(
-      (d) => d.fieldName === "billingAddress"
-    );
-    if (addressDropdownData) {
-      setAddressDataSource(addressDropdownData.option);
-    }
 
     setFormsData(setFieldsInAscendingOrder(accountData.fields));
 
@@ -558,15 +552,15 @@ export default function ManageAccount(props) {
                                           <Grid
                                             item
                                             xs={
-                                              permissions.marketSegment?.isCreate ? 10
+                                              permissions[accountResource]?.isCreate ? 10
                                                 : 11
                                             }
                                             sm={
-                                              permissions.marketSegment?.isCreate ? 10
+                                              permissions[accountResource]?.isCreate ? 10
                                                 : 11
                                             }
                                             md={
-                                              permissions.marketSegment?.isCreate ? 10
+                                              permissions[accountResource]?.isCreate ? 10
                                                 : 11
                                             }
                                           >
@@ -618,26 +612,25 @@ export default function ManageAccount(props) {
                                             // }}
                                             />
                                           </Grid>
-                                          {
-                                            permissions.marketSegment?.isCreate && (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip
-                                                  title="Add Address"
-                                                  className="mt-1"
+                                          {(
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <Tooltip
+                                                title="Add Address"
+                                                className="mt-1"
+                                              >
+                                                <IconButton
+                                                  onClick={() => {
+                                                    setShowAddAddresstDialog(true);
+                                                    setAddressType({ account: accountResource, address: "billingAddress" })
+                                                  }}
+                                                  disabled={field.disableOnEdit}
+                                                  size="small"
                                                 >
-                                                  <IconButton
-                                                    onClick={() => {
-                                                      setShowAddAddresstDialog(true);
-                                                      setAddressType({ account: accountResource, address: "billingAddress" })
-                                                    }}
-                                                    disabled={field.disableOnEdit}
-                                                    size="small"
-                                                  >
-                                                    <AddIcon color={field.disableOnEdit ? "disabled" : "primary"} />
-                                                  </IconButton>
-                                                </Tooltip>
-                                              </Grid>
-                                            )
+                                                  <AddIcon color={field.disableOnEdit ? "disabled" : "primary"} />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </Grid>
+                                          )
                                           }
                                           {field?.tooltipMessage ? (
                                             <Grid item xs={1} sm={1} md={1}>
@@ -658,15 +651,15 @@ export default function ManageAccount(props) {
                                             <Grid
                                               item
                                               xs={
-                                                permissions.marketSegment?.isCreate ? 10
+                                                permissions[accountResource]?.isCreate ? 10
                                                   : 11
                                               }
                                               sm={
-                                                permissions.marketSegment?.isCreate ? 10
+                                                permissions[accountResource]?.isCreate ? 10
                                                   : 11
                                               }
                                               md={
-                                                permissions.marketSegment?.isCreate ? 10
+                                                permissions[accountResource]?.isCreate ? 10
                                                   : 11
                                               }
                                             >
@@ -695,27 +688,26 @@ export default function ManageAccount(props) {
                                                 }
                                               />
                                             </Grid>
-                                            {
-                                              permissions.marketSegment?.isCreate && (
-                                                <Grid item xs={1} sm={1} md={1}>
-                                                  <Tooltip
-                                                    title="Add Address"
-                                                    className="mt-1"
-                                                  >
-                                                    <IconButton
-                                                      onClick={() => {
-                                                        setShowAddAddresstDialog(true);
-                                                        setAddressType({ account: accountResource, address: "shippingAddress" })
+                                            {(
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip
+                                                  title="Add Address"
+                                                  className="mt-1"
+                                                >
+                                                  <IconButton
+                                                    onClick={() => {
+                                                      setShowAddAddresstDialog(true);
+                                                      setAddressType({ account: accountResource, address: "shippingAddress" })
 
-                                                      }}
-                                                      disabled={field.disableOnEdit}
-                                                      size="small"
-                                                    >
-                                                      <AddIcon color={field.disableOnEdit ? "disabled" : "primary"} />
-                                                    </IconButton>
-                                                  </Tooltip>
-                                                </Grid>
-                                              )
+                                                    }}
+                                                    disabled={field.disableOnEdit}
+                                                    size="small"
+                                                  >
+                                                    <AddIcon color={field.disableOnEdit ? "disabled" : "primary"} />
+                                                  </IconButton>
+                                                </Tooltip>
+                                              </Grid>
+                                            )
                                             }
                                             {field?.tooltipMessage ? (
                                               <Grid item xs={1} sm={1} md={1}>

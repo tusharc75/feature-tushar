@@ -25,14 +25,15 @@ import { prepareDataForGrid } from "../../../constants/helpers";
 import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "../../../constants/columns"
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
-
+import CustomRenderCell from "../../../components/Helpers/CustomRenderCell";
+import InfoIcon from "@material-ui/icons/Info";
 
 const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable, id, setPurchaseOrderProduct }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
 
-    const [columns, setColumns] = useState([{ field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    const [columns, setColumns] = useState([{ field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" }])
 
 
@@ -53,18 +54,18 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deletePurchaseOrderProduct, setDeletePurchaseOrderProduct] = useState([]);
 
-
     useEffect(() => {
         fetchPurchaseOrderProduct();
     }, [id]);
 
     useEffect(() => {
         axiosInstance().get("/field/child?resource=Purchase Order Product").then(({ data: { data } }) => {
-            const fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
+            const fields = CURReplaceByCurrencySingle(data, purchaseOrderData?.currency)
             let rendererNames = [];
             genrateColoum(fields, columns, rendererNames, false);
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
             tempFrameworkComponent = {
+                nameRenderer: NameRenderer,
                 commonRenderer: CommonRenderer,
                 actionsRenderer: ActionsRenderer,
                 ...tempFrameworkComponent,
@@ -82,7 +83,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
         setCurrentStepDisable(false)
         axiosInstance().get(`${purchaseOrder.api}/product/${id}`).then(({ data: { data } }) => {
             setPurchaseOrderProduct(JSON.parse(JSON.stringify(data)))
-            let rows = data?.map((item) => {
+            let rows = data?.map((item, index) => {
                 if ((!currentStepDisable) && (
                     item.qty === 0
                     || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === 0
@@ -92,7 +93,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                 let res: any = {
                     ...prepareDataForGrid(item),
                 };
-                res.productName = item.productDetail?.productName
+                res.productName = `${index + 1}. ${item.productDetail?.productName}`
                 res.productNumber = item.productDetail?.productNumber
                 res.productDetail = item.productDetail
                 return res;
@@ -104,6 +105,26 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
             dispatch({ type: "loading", loading: false });
         });
     };
+
+    const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
+        <span className="link" onClick={() => {
+            setShowProductDialog(true)
+            setSelectedProductData(params.data)
+        }}>
+            <CustomRenderCell value={params.value} />
+        </span>
+        <HtmlTooltip title="Details">
+            <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                    window.open(`${routes.productDetail.path}/${params.data.productId}`);
+                }}
+            >
+                <InfoIcon color="primary" />
+            </IconButton>
+        </HtmlTooltip>
+    </span >
 
     const ActionsRenderer = (params) => (
         <>
@@ -119,7 +140,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     <EditIcon color="primary" />
                 </IconButton>
             </HtmlTooltip>
-            <GridDeleteIcon
+            {(params.data?.actualReceived === undefined || params.data?.actualReceived === 0) && <GridDeleteIcon
                 hasDeletePermission={permissions?.purchaseOrder?.isUpdate}
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
@@ -130,6 +151,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                 }
                 entity="rentalManagement"
             />
+            }
         </>
     );
 
@@ -166,8 +188,10 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
             .then(() => {
                 setAddProductDialog(false)
                 fetchPurchaseOrderProduct()
+                setSelectedProductData(null)
                 setAddingProducts(false)
                 setShowProductDialog(false)
+                setIsBulkEdit(false)
             }).catch((error) => {
                 setAddProductDialog(false)
                 toastConfig.setToastConfig(error)
@@ -189,7 +213,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     return (
         <Fragment>
             <Box display="flex" justifyContent="space-between" m={1}>
-                <Box display="flex">
+                <Box display="flex" alignItems="center">
                     <Button
                         variant={isMobile ? "outlined" : "contained"}
                         color="primary"
@@ -212,9 +236,8 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                         {isMobile ? <FaCartArrowDown size={22} /> : `Add Existing ${routes.product.title}`}
                     </Button>
                 </Box>
-
                 <div className="d-flex gap-2">
-                    <Box display="flex" justifyContent="flex-end" p="4px">
+                    <Box display="flex" justifyContent="flex-end">
                         <Box mx={1} />
                         <Button
                             variant={isMobile ? "outlined" : "contained"}
@@ -230,17 +253,16 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                         </Button>
                     </Box>
                     <HtmlTooltip title="Please select some product">
-                        <span>
-                            <Button
-                                variant="outlined"
-                                color="default"
-                                size="small"
-                                onClick={openActions}
-                                disabled={selectedRecords.length ? false : true}
-                                aria-controls="action-menu"
-                            >Actions <ExpandMore />
-                            </Button>
-                        </span>
+                        <Button
+                            variant="outlined"
+                            color="default"
+                            size="small"
+                            onClick={openActions}
+                            disabled={selectedRecords.length ? false : true}
+                            aria-controls="action-menu"
+                        >Actions
+                            <ExpandMore />
+                        </Button>
                     </HtmlTooltip>
                     <Menu
                         anchorEl={anchorEl}
@@ -355,12 +377,14 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                 <PurchaseOrderQtyDialog
                     onClose={() => {
                         setShowProductDialog(false)
+                        setIsBulkEdit(false)
                         setSelectedProductData(null)
                     }}
                     onSubmit={handleUpdateQty}
                     currency={purchaseOrderData?.currency}
                     productData={!isBulkEdit ? selectedProductData : selectedRecords}
                     bulkEdit={isBulkEdit}
+                    purchaseOrderData={purchaseOrderData}
                 />
             }
             {

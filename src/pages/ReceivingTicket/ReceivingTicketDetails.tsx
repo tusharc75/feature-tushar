@@ -28,6 +28,7 @@ import { BiFoodMenu } from "react-icons/bi";
 import { prepareDataForGrid } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { AiFillFilePdf } from "react-icons/ai";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -97,7 +98,10 @@ const ReceivingTicketDetails = () => {
   const { dataRows, rowCount, page, limit, pageSizes, selectedRecords } = state;
 
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
+  const [transferData, setTransferData] = useState(null);
+
   const [isAdding, setIsAdding] = useState(false);
+  const [downlodingFile, setDownlodingFile] = useState(false)
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -166,6 +170,8 @@ const ReceivingTicketDetails = () => {
 
           const { data: { data: transferData } } = await axiosInstance()
             .get(`${routes.transferAsset.path}/${record.transferAsset?.optionValue}`)
+          setTransferData(transferData)
+
 
           data = data.filter((fields: any) => {
             if (transferData?.transferType === "Internal") {
@@ -184,6 +190,10 @@ const ReceivingTicketDetails = () => {
                 return false
               }
             }
+
+            if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "rentalJob") {
+              return false
+            }
             return true
           })
 
@@ -193,11 +203,17 @@ const ReceivingTicketDetails = () => {
             if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Plant")) {
               return false
             }
+            if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "transferAsset") {
+              return false
+            }
             return true
           })
         } else {
           data = data.filter((fields: any) => {
             if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
+              return false
+            }
+            if (fields.fieldData.fieldName === "rentalJob" || fields.fieldData.fieldName === "transferAsset") {
               return false
             }
             return true
@@ -291,26 +307,38 @@ const ReceivingTicketDetails = () => {
     (receivingTicketData?.status === "In-Transit") ? "Sign-off - Delivery" : "" : ""
 
   const handleSignature = (signedData) => {
-    const { type, sign: newSign } = signedData;
-    let stateArr = signatures;
-    stateArr.push({ type, signature: newSign, status: label === "Sign-off - Dispatch" ? "Start Delivery" : "Sign-Off" });
-    setSignatures(stateArr)
+    let signaturesToSend = [...signatures];
+    const status = label === "Sign-off - Dispatch" ? "Start Delivery" : "Sign-Off";
 
-    if (stateArr.length === 2 || stateArr.length === 4) {
+    const { type, sign: newSign } = signedData;
+    const indexOfExistingSignature = signatures.findIndex((sign) => sign.type === type && sign.status === status);
+
+    if (indexOfExistingSignature === -1) {
+      signaturesToSend = [...signatures, { type, signature: newSign, status: status }];
+    } else {
+      signaturesToSend[indexOfExistingSignature] = {
+        ...signaturesToSend[indexOfExistingSignature],
+        type,
+        signature: newSign,
+        status: status
+      }
+    }
+
+    setSignatures([...signaturesToSend]);
+
+    if (signaturesToSend.length === 2 || signaturesToSend.length === 4) {
       setSubmittingSign(true)
       axiosInstance().put(`${receivingTicket.receivingTicketApi}/signature`, {
         _id: id,
-        signatures: stateArr
+        signatures: [...signaturesToSend]
       }).then(() => {
         handleChangeStatus(label)
         setOpenSignatureDialog(false)
         setSubmittingSign(false)
-        setSignatures([])
       }).catch((error) => {
         toastConfig.setToastConfig(error);
         setOpenSignatureDialog(false)
         setSubmittingSign(false)
-        setSignatures([])
       });
     }
   }
@@ -356,6 +384,44 @@ const ReceivingTicketDetails = () => {
     });
   };
 
+
+  const handleViewPdf = (download) => {
+    axiosInstance().get(`${receivingTicket.receivingTicketApi}/${id}/pdf`)
+      .then(({ data }) => {
+        axiosInstance()
+          .get(`user/download?fileName=${data.data.fileName}`, {
+            responseType: "blob",
+          })
+          .then(({ data }) => {
+            if (download) {
+              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', `LoadingTicket-${receivingTicketData.receivingJobName || ""}.pdf`);
+              document.body.appendChild(link);
+              link.click();
+            }
+            else {
+              const file = new Blob([data], { type: "application/pdf" });
+              const fileURL = URL.createObjectURL(file);
+              const pdfWindow = window.open();
+              pdfWindow.location.href = fileURL;
+              toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+
+            }
+            setDownlodingFile(false);
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+            setDownlodingFile(false);
+          });
+      }).catch((err) => {
+        toastConfig.setToastConfig(err);
+        setDownlodingFile(false);
+      })
+  }
+
+
   return (
     <>
       <Fragment>
@@ -395,7 +461,8 @@ const ReceivingTicketDetails = () => {
                         </Button> : null : null
                   }
                   {
-                    receivingTicketData?.deliveryPerson?.optionValue === user?.user?._id && (receivingTicketData?.status === "In-Transit" || receivingTicketData?.status === "Delivered") ?
+                    // receivingTicketData?.deliveryPerson?.optionValue === user?.user?._id && 
+                    (receivingTicketData?.status === "In-Transit" || receivingTicketData?.status === "Delivered") ?
                       <Button
                         variant="contained"
                         color="primary"
@@ -498,7 +565,33 @@ const ReceivingTicketDetails = () => {
                               </Tooltip>
                             </IconButton>
                           }
-
+                          <Box mx={1} />
+                          {permissions?.receivingTicket?.isRead && (
+                            <Button
+                              variant="outlined"
+                              color="primary"
+                              type="button"
+                              size="small"
+                              startIcon={isMobile ? '' : <AiFillFilePdf />}
+                              disabled={downlodingFile}
+                              onClick={() => { handleViewPdf(false) }}
+                            >
+                              {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Preview"}
+                            </Button>
+                          )}
+                          {permissions?.receivingTicket?.isRead && (
+                            <Button
+                              variant="outlined"
+                              color="primary"
+                              type="button"
+                              size="small"
+                              startIcon={isMobile ? '' : <AiFillFilePdf />}
+                              disabled={downlodingFile}
+                              onClick={() => { handleViewPdf(true) }}
+                            >
+                              {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
+                            </Button>
+                          )}
                         </Grid>
                         <Grid item xs={12}>
                           {isMobile ? <CustomSwipableList
@@ -617,6 +710,9 @@ const ReceivingTicketDetails = () => {
       )}
       {openUpdateDialog && (
         <ManageReceivingTicket
+          rentalData={receivingTicketData?.type === "Rental Job" ? receivingTicketData?.rentalJob?.optionValue : null}
+          repairJobData={receivingTicketData?.type === "Repair Job" ? receivingTicketData?.repairJob?.optionValue : null}
+          transferData={receivingTicketData?.type === "Transfer Asset" ? transferData : null}
           open={openUpdateDialog}
           isClone={false}
           receivingTicketId={id}
@@ -639,7 +735,6 @@ const ReceivingTicketDetails = () => {
           open={true}
           onClose={() => {
             setOpenSignatureDialog(false)
-            setSignatures([])
           }}
           onSigned={handleSignature}
         />}

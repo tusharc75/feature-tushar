@@ -597,7 +597,7 @@ export const autoCalculateSpecificFields = (inputValues: any, values: any, field
                     }
                 }
             }
-            const calValues = handleAutoCalculation(fieldData, fieldList, values, _fieldName, currency?.toUpperCase(), unit, inputValues[_fieldName]);
+            const calValues = handleAutoCalculation(fieldData, fieldList, { ...values, ...returnvalues }, _fieldName, currency?.toUpperCase(), unit, inputValues[_fieldName]);
             Object.assign(returnvalues, calValues);
         }
     }

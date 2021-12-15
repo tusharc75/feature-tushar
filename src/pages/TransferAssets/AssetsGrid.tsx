@@ -1,6 +1,6 @@
-import React, { useReducer, useState, useEffect, Fragment, FC, useContext } from 'react'
+import { useReducer, useState, useEffect, Fragment, FC, useContext } from 'react'
 import { Button, Box, } from '@material-ui/core'
-import { Link, useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 
 import routes from '../../components/Helpers/Routes';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
@@ -19,16 +19,16 @@ interface AssetsGridProps {
   permissions?: any;
   user?: any;
   currentStep: number | any;
-  plantId: string | any;
   setNextStep?: any;
   fetchAssets: any;
-  transferAssetId: string | any;
-  ownerId: string | any;
   updateTransferStatus?: any;
+  transferAssetData?: any;
+  handleViewPdf?: any;
+  fileDownloading?: boolean
 }
 
 const AssetsGrid: FC<AssetsGridProps> = (props) => {
-  const { permissions, user, plantId, fetchAssets, transferAssetId, ownerId, setNextStep, updateTransferStatus } = props
+  const { permissions, user, fetchAssets, currentStep, setNextStep, updateTransferStatus, transferAssetData } = props
   const toastConfig = useContext(CustomToastContext);
 
 
@@ -46,8 +46,10 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   const history = useHistory();
 
   useEffect(() => {
-    fetchGridColumns()
-  }, [])
+    if (transferAssetData) {
+      fetchGridColumns()
+    }
+  }, [transferAssetData])
   const fetchGridColumns = () => {
     axiosInstance()
       .get("/field?resource=Product Inventory")
@@ -83,7 +85,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     !params.data.hasOwnProperty("deliveryTicket") && <>
       <GridDeleteIcon
         hasDeletePermission={permissions?.transferAsset?.isUpdate}
-        ownerId={ownerId}
+        ownerId={transferAssetData?.createdBy.user._id}
         userId={user?.user?._id}
         onDelete={() => {
           setShowConfirmBox(true);
@@ -95,16 +97,16 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   );
 
   useEffect(() => {
-    if (transferAssetId) {
+    if (transferAssetData) {
       fetchAssetsData(true);
     }
     // eslint-disable-next-line
-  }, [transferAssetId])
+  }, [transferAssetData])
 
   const fetchLoadingTickets = () =>
     new Promise((resolve, reject) => {
       axiosInstance()
-        .get(`${routes.transferAsset.path}/${transferAssetId}/loading-ticket?limit=0`)
+        .get(`${routes.transferAsset.path}/${transferAssetData?._id}/loading-ticket?limit=0`)
         .then(({ data: { data } }) => {
           resolve(data);
         })
@@ -124,6 +126,14 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       let data = await fetchAssets(forceRefresh)
       let ticketData: any = await fetchLoadingTickets();
 
+      if (currentStep === 0) {
+        if (data.length === 0 && transferAssetData?.status !== "New") {
+          updateTransferStatus("New")
+        } else if (data.length > 0 && transferAssetData?.status !== "In Progress") {
+          updateTransferStatus("In Progress")
+        }
+      }
+
       for (let i = 0; i < ticketData.length; i++) {
         for (let j = 0; j < data.length; j++) {
           if (ticketData[i]?.productInventory.some((asset: any) => data[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
@@ -141,6 +151,8 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
         }
       })
 
+
+
       gridDispatch({ type: "initialize", data: data, count: data.length })
       gridDispatch({ type: "loading", loading: false });
     } catch (error) {
@@ -156,7 +168,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     if (removeData.length > 0) {
       setRemovingAssets(true)
       try {
-        await axiosInstance().put(`${routes.transferAsset.path}/remove-asset/${transferAssetId}`, {
+        await axiosInstance().put(`${routes.transferAsset.path}/remove-asset/${transferAssetData?._id}`, {
           assets: removeData
         })
         setRemoveData([])
@@ -184,7 +196,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" mx="4px">
-        <Button
+        {permissions?.transferAsset.isUpdate && <Button
           variant={isMobile ? 'outlined' : 'contained'}
           color="primary"
           size="small"
@@ -193,8 +205,8 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           }}
         >
           {`Add ${routes.productInventory.title}`}
-        </Button>
-        <Button
+        </Button>}
+        {permissions?.transferAsset.isUpdate && <Button
           variant="contained"
           size="small"
           color="primary"
@@ -207,7 +219,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
 
           Remove Assets
 
-        </Button>
+        </Button>}
       </Box>
 
       <Box mt={1}>
@@ -275,8 +287,8 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       {/* Add Assets Dialog */}
       {openAddNewAssets &&
         <AddAssetsDialog
-          transferAssetId={transferAssetId ?? ""}
-          plantId={plantId ?? ""}
+          transferAssetId={transferAssetData?._id ?? ""}
+          plantId={transferAssetData?.transferFromPlant.optionValue ?? ""}
           closeDialog={() => setOpenAddNewAssets(false)}
           fetchAssets={() => fetchAssetsData(true)}
           existingAssets={dataRows.map(asset => asset._id)}

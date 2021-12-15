@@ -23,7 +23,7 @@ import { prepareDataForGrid } from "../../../constants/helpers";
 import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "../../../constants/columns"
 import { GrBusinessService } from "react-icons/all";
 
-const AdditionalCost = ({ rentalManagementData }) => {
+const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -69,6 +69,7 @@ const AdditionalCost = ({ rentalManagementData }) => {
                 };
                 return res;
             });
+            setNextStep(true)
             dispatch({ type: "initialize", data: rows, count: rows.length });
             dispatch({ type: "loading", loading: false });
         }).catch((error) => {
@@ -154,7 +155,7 @@ const AdditionalCost = ({ rentalManagementData }) => {
                     allowSelection={true}
                     allowSwipe={true}
                     permissions={permissions}
-                    primaryField={columns?.find(d => d.field === "description")}
+                    primaryField={columns?.find(d => d.field)}
                     onClick={(data) => {
                         setShowCostDialog(true)
                         setSelectedCostData(data)
