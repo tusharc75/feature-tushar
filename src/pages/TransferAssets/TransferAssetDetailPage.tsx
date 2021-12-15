@@ -234,9 +234,9 @@ const TransferAssetDetailPage = () => {
   const handleViewPdf = (download) => {
     axiosInstance()
       .put(`quote-pdf-template/pdf-column`, { id, resourceName: 'transferAsset', acceptedColumn: ['Asset Number', 'Product Description', 'Status'] })
-      .then(({ data }) => {
+      .then(({ data: { data } }) => {
         axiosInstance()
-          .get(`user/download?fileName=${data.data.fileName}`, {
+          .get(`user/download?fileName=${data.pdf}`, {
             responseType: 'blob'
           })
           .then(({ data }) => {
