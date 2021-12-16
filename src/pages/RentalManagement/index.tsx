@@ -56,14 +56,14 @@ const RentalManagement = () => {
 
   const pageTitle = camelCase(`${routes.rentalManagement.title}`)
   const history = useHistory();
-
+  const { type }: any = queryString.parse(history.location.search);
 
   const {
     state: { user, permissions, selectedEntity },
   }: any = useData();
   const { getColumnData } = useColumns();
   const [locationKeys, setLocationKeys] = useState([])
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
