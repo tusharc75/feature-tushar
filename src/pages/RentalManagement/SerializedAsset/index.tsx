@@ -449,6 +449,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         isFromSerializedAssetStepFromRental={true}
         currency={rentalManagementData.currencyCode}
         rentalManagementId={rentalManagementData._id}
+        warehouseId={rentalManagementData?.warehouse?.optionValue}
         deliveryDateMax={rentalManagementData.estimateStartDate}
       />
     }
