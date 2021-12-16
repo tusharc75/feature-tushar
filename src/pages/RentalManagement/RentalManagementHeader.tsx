@@ -17,7 +17,7 @@ import styles from "../Leads/Header.module.scss";
 import HideWhenOffline from "../../components/HideWhenOffline";
 import routes from "../../components/Helpers/Routes";
 import { isMobile } from 'react-device-detect';
-import {MdAdd} from "react-icons/all";
+import { MdAdd } from "react-icons/all";
 
 function RentalManagementHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -53,6 +53,7 @@ function RentalManagementHeader(props) {
     heading,
     children,
     showTransferEntityDialog,
+    selectedType
     // showCloneRentalManagementDialog
 
   } = props;
@@ -65,7 +66,7 @@ function RentalManagementHeader(props) {
             <ToggleButtonGroup
               size="small"
               className="ml-2"
-              value={filter}
+              value={options[selectedType - 1].key}
               exclusive
               onChange={handleFilter}
             >
@@ -84,7 +85,7 @@ function RentalManagementHeader(props) {
       </Grid>
       <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-          <Grid style={{display: "flex", flex:1}}>
+          <Grid style={{ display: "flex", flex: 1 }}>
             <HideWhenOffline>
               <SearchBox
                 onSearch={onSearch}
@@ -92,74 +93,74 @@ function RentalManagementHeader(props) {
                 value={searchVal}
                 size="small"
                 placeholder={`Search ${routes.rentalManagement.title}`}
-                style={isMobile ? {flex:1} : {}}
+                style={isMobile ? { flex: 1 } : {}}
               />
             </HideWhenOffline>
 
           </Grid>
 
 
-          <Grid style={{display: "flex" , gap:"5px"}}>
-              {RentalManagementPermissions.isCreate && RentalManagementPermissions.isUpdate && (
-                <Button
-                    variant={isMobile ? "text" : "contained"}
-                  color="primary"
-                  size="small"
-                 // className={styles.add_submit_btn}
-                  onClick={onCreate}
-                    className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                    startIcon={isMobile ? null : <AddOutlined />}
-                >
-                  {isMobile ? <MdAdd size={23}/> : "Add"}
-                </Button>
-              )}
+          <Grid style={{ display: "flex", gap: "5px" }}>
+            {RentalManagementPermissions.isCreate && RentalManagementPermissions.isUpdate && (
+              <Button
+                variant={isMobile ? "text" : "contained"}
+                color="primary"
+                size="small"
+                // className={styles.add_submit_btn}
+                onClick={onCreate}
+                className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                startIcon={isMobile ? null : <AddOutlined />}
+              >
+                {isMobile ? <MdAdd size={23} /> : "Add"}
+              </Button>
+            )}
 
-              <HideWhenOffline>
-                {
-                  RentalManagementPermissions.isDelete && (
-                    <>
-                      <Button
-                        disabled={canDelete}
-                        variant={isMobile ? "text" : "outlined"}
-                        color="default"
-                        size="small"
-                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
-                        onClick={openActions}
-                        // className={styles.action_submit_btn}
-                        aria-controls="action-menu"
-                      >
-                        {isMobile ? "" : "Actions"} <ExpandMore />
-                      </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: "bottom",
-                          horizontal: "left",
+            <HideWhenOffline>
+              {
+                RentalManagementPermissions.isDelete && (
+                  <>
+                    <Button
+                      disabled={canDelete}
+                      variant={isMobile ? "text" : "outlined"}
+                      color="default"
+                      size="small"
+                      className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                      onClick={openActions}
+                      // className={styles.action_submit_btn}
+                      aria-controls="action-menu"
+                    >
+                      {isMobile ? "" : "Actions"} <ExpandMore />
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: "bottom",
+                        horizontal: "left",
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          closeActions();
+                          showConfirmBox(null);
                         }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
                       >
-                        <MenuItem
+                        Delete
+                      </MenuItem>
+                      {
+                        RentalManagementPermissions.isUpdate && <MenuItem
+                          disabled={selectedRecords.find((d) => d.canDelete === false)}
                           onClick={() => {
                             closeActions();
-                            showConfirmBox(null);
+                            showTransferEntityDialog();
                           }}
-                        >
-                          Delete
-                        </MenuItem>
-                        {
-                          RentalManagementPermissions.isUpdate && <MenuItem
-                            disabled={selectedRecords.find((d) => d.canDelete === false)}
-                            onClick={() => {
-                              closeActions();
-                              showTransferEntityDialog();
-                            }}
-                          >Transfer Entity</MenuItem>
-                        }
-                        {/* <MenuItem
+                        >Transfer Entity</MenuItem>
+                      }
+                      {/* <MenuItem
                   disabled={selectedRecords.length !== 1}
                   onClick={() => {
                     closeActions();
@@ -168,11 +169,11 @@ function RentalManagementHeader(props) {
                 >
                   Clone
                 </MenuItem> */}
-                      </Menu>
-                    </>
-                  )
-                }
-              </HideWhenOffline>
+                    </Menu>
+                  </>
+                )
+              }
+            </HideWhenOffline>
           </Grid>
 
         </Box>
