@@ -23,7 +23,7 @@ import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgG
 import { Link } from "react-router-dom";
 
 
-const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBase64, downlodingFile, setCurrentStep, currentStep, handleAttachments }) => {
+const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrentStep, currentStep, handleAttachments }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -43,6 +43,9 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBas
         { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" }
     ])
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
+    const [downlodingFile, setDownlodingFile] = useState(false)
+    const [pdfFileBase64, setPdfFileBase64] = useState(null);
+    const [emailButtonLoading, setEmailButtonLoading] = useState(false)
 
     const NameRenderer = (params) => (
         <Link
@@ -151,6 +154,43 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBas
         handleAttachments();
     };
 
+    const fetchEmailAttachment = () => {
+        axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData._id}/pdf`)
+            .then(({ data }) => {
+                axiosInstance()
+                    .get(`user/download?fileName=${data.data.fileName}`, {
+                        responseType: "blob",
+                    })
+                    .then(({ data }) => {
+                        const file = new Blob([data], { type: 'application/pdf' });
+                        generateBase64forFile(file, 'pdf');
+                    })
+                    .catch((err) => {
+                        toastConfig.setToastConfig({
+                            open: true,
+                            type: 'error',
+                            message: 'PDF generating error'
+                        });
+                    });
+            }).catch((err) => {
+                toastConfig.setToastConfig(err);
+                setDownlodingFile(false);
+            })
+    }
+
+    const generateBase64forFile = (blobData, type) => {
+        let reader = new FileReader();
+        reader.readAsDataURL(blobData);
+        reader.onloadend = function () {
+            let base64data = reader.result;
+            if (type === 'pdf') {
+                setPdfFileBase64(base64data);
+                setSendEmail(true)
+                setEmailButtonLoading(false)
+            }
+        };
+    };
+
     return (<>
         <Box display="flex" justifyContent="space-between" m={1}>
             <Box display="flex" alignItems="center">
@@ -187,7 +227,8 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, pdfFileBas
                     color="primary"
                     size="small"
                     onClick={() => {
-                        setSendEmail(true)
+                        fetchEmailAttachment()
+                        setEmailButtonLoading(true)
                     }}
                 >
                     {isMobile ? <MdEmail size={22} /> : `Send Email`}
