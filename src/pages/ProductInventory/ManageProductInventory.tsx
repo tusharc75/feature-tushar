@@ -33,10 +33,11 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [productCategoryOptions, setProductCategoryOptions] = useState([]);
+  const [allFields, setAllFields] = useState([]);
   const [plantsCategoryOptions, setPlantsCategoryOptions] = useState([]);
   const [productDescriptionOptions, setProductDescriptionOptions] = useState([]);
   const [manufacturerCategoryOptions, setManufacturerCategoryOptions] = useState([]);
- 
+
   const [formValues, setFormValues] = useState({});
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [plantsOpen, setPlantsOpen] = useState({ open: false, isClone: false });
@@ -59,30 +60,31 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
       .then(({ data: { data } }) => {
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+        setAllFields(productInventoryId ? fieldsDataForUpdate : fieldsDataForCreate)
         const categoryOptions = data.find((obj) => obj?.fieldData.fieldName === 'productCategory')?.fieldData.option;
         const plantsOptions = data.find((obj) => obj?.fieldData.fieldLabel === 'Plants')?.fieldData.option;
         const productOptions = data.find((obj) => obj?.fieldData.fieldName === 'product')?.fieldData.option;
         const manufacturerOptions = data.find((obj) => obj?.fieldData.fieldLabel === 'Manufacturer')?.fieldData.option;
         const statusOptions = data.find((obj) => obj?.fieldData.fieldName === 'status')?.fieldData.option;
         const statusCloneDefault = statusOptions[1].optionValue;
-       
+
 
         setProductCategoryOptions(categoryOptions);
         setPlantsCategoryOptions(plantsOptions);
         setProductDescriptionOptions(productOptions)
         setManufacturerCategoryOptions(manufacturerOptions)
-        
+
 
 
         if (productInventoryId) {
           axiosInstance()
             .get(`${productInventory.api}/` + productInventoryId)
             .then(({ data: { data } }) => {
-            
+
               if (isClone) {
                 const { _id, createdBy, updatedBy, serialNumber, ...rest } = data;
-                let oldValues = {...rest};
-                oldValues.status="New";
+                let oldValues = { ...rest };
+                oldValues.status = "New";
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                   values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
@@ -122,7 +124,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
   }, [productInventoryId]);
 
   const handleSubmit = (values) => {
-    
+
     sessionStorage.removeItem('productCategoryId')
     sessionStorage.removeItem('productCategoryName')
     setSubmitting(true);
@@ -187,7 +189,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
         fullWidth
       >
         {initialData && initialData.fields.length ? (
-          <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
+          <Formik initialValues={initialData.values} validationSchema={yupSchema(allFields)} onSubmit={handleSubmit}>
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Fragment>
                 <CustomDialogHeader
@@ -395,17 +397,17 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                             isTooltip={field?.isTooltip || false}
                                             tooltipMessage={field?.tooltipMessage}
                                             size="small"
-                                             setFieldValue={(name, value) => {
-                                        handleValuesChange({ [name]: value });
-                                        setFieldValue(name, value);
-                                      }}
-                                            // onChange={(e) => {
-                                            //   const val = e.target.value.trim();
-                                            //   setFieldValue(field.fieldLabel, val);
-                                            //   handleValuesChange({ [field.fieldLabel]: val });
-                                            //   // desc.serialNumber = val
-                                            //   // setDescription(setFieldValue)
-                                            // }}
+                                            setFieldValue={(name, value) => {
+                                              handleValuesChange({ [name]: value });
+                                              setFieldValue(name, value);
+                                            }}
+                                          // onChange={(e) => {
+                                          //   const val = e.target.value.trim();
+                                          //   setFieldValue(field.fieldLabel, val);
+                                          //   handleValuesChange({ [field.fieldLabel]: val });
+                                          //   // desc.serialNumber = val
+                                          //   // setDescription(setFieldValue)
+                                          // }}
                                           />
                                         </Grid>
                                         <Grid item xs={1} sm={1} md={1}>
@@ -414,7 +416,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                               onClick={() => {
                                                 setPlantsOpen({ open: true, isClone: false });
                                               }}
-                                               disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                              disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
                                               size="small"
                                             >
                                               <AddIcon color={Boolean(productInventoryId) && field.disableOnEdit && !isClone ? 'disabled' : 'primary'} />
@@ -486,14 +488,14 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                       isNew={Boolean(productInventoryId)}
                                       {...field}
                                       disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
-                                      values={values} 
+                                      values={values}
                                       errors={errors}
                                       touched={touched}
                                       label={field.fieldLabel}
-                                      name={ field.fieldName}
+                                      name={field.fieldName}
                                       type={field.type}
                                       options={field.option}
-                                   
+
                                       // setFieldValue={(name, value) => {
                                       //   handleValuesChange({ [name]: value });
                                       //   setFieldValue(name, value);
@@ -504,28 +506,28 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                       tooltipMessage={field?.tooltipMessage}
                                       size="small"
                                     />
-                                  ):(
+                                  ) : (
                                     <FormTypes
-                                    isNew={Boolean(productInventoryId)}
-                                    {...field}
-                                    disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={(name, value) => {
-                                      handleValuesChange({ [name]: value });
-                                      setFieldValue(name, value);
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                  />
+                                      isNew={Boolean(productInventoryId)}
+                                      {...field}
+                                      disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        handleValuesChange({ [name]: value });
+                                        setFieldValue(name, value);
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                    />
                                   )}
                                 </Grid>
                               ))}
