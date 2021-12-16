@@ -68,7 +68,6 @@ const PurchaseOrderDetailsPage = () => {
     const [currentStepDisable, setCurrentStepDisable] = useState(false)
     const [currentStep, setCurrentStep] = useState(0);
     const [downlodingFile, setDownlodingFile] = useState(false)
-    const [pdfFileBase64, setPdfFileBase64] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
 
     const [tabValue, setTabValue] = useState(0);
@@ -98,29 +97,6 @@ const PurchaseOrderDetailsPage = () => {
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
             });
-        }
-        if (currentStep <= 2) {
-            axiosInstance().get(`${purchaseOrder.api}/${id}/pdf`)
-                .then(({ data }) => {
-                    axiosInstance()
-                        .get(`user/download?fileName=${data.data.fileName}`, {
-                            responseType: "blob",
-                        })
-                        .then(({ data }) => {
-                            const file = new Blob([data], { type: 'application/pdf' });
-                            generateBase64forFile(file, 'pdf');
-                        })
-                        .catch((err) => {
-                            toastConfig.setToastConfig({
-                                open: true,
-                                type: 'error',
-                                message: 'PDF generating error'
-                            });
-                        });
-                }).catch((err) => {
-                    toastConfig.setToastConfig(err);
-                    setDownlodingFile(false);
-                })
         }
         if (currentStep === 1 || currentStep === 2) { handleUpdateData({ "status": "In Process" }) }
         if (currentStep === 3) { handleUpdateData({ "status": "Issued" }) }
@@ -272,16 +248,7 @@ const PurchaseOrderDetailsPage = () => {
             })
     }
 
-    const generateBase64forFile = (blobData, type) => {
-        let reader = new FileReader();
-        reader.readAsDataURL(blobData);
-        reader.onloadend = function () {
-            let base64data = reader.result;
-            if (type === 'pdf') {
-                setPdfFileBase64(base64data);
-            }
-        };
-    };
+
 
     const handleAttachments = () => {
         let request;
@@ -492,11 +459,9 @@ const PurchaseOrderDetailsPage = () => {
                                                         purchaseOrderData={purchaseOrderData}
                                                         handleViewPdf={handleViewPdf}
                                                         handleUpdateData={handleUpdateData}
-                                                        downlodingFile={downlodingFile}
                                                         setCurrentStep={setCurrentStep}
                                                         currentStep={currentStep}
                                                         handleAttachments={handleAttachments}
-                                                        pdfFileBase64={pdfFileBase64}
                                                     />
                                                 }
                                                 {(currentStep === 3 || currentStep === 4) &&
@@ -507,8 +472,6 @@ const PurchaseOrderDetailsPage = () => {
                                                         handleUpdateData={handleUpdateData}
                                                         statusOptions={statusOptions}
                                                         handleViewPdf={handleViewPdf}
-                                                        pdfFileBase64={pdfFileBase64}
-                                                        downlodingFile={downlodingFile}
                                                         handleAttachments={handleAttachments}
                                                     />
                                                 }

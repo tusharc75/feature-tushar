@@ -35,7 +35,7 @@ const useStyles = makeStyles(() => ({
 
 }));
 
-const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, handleUpdateData, statusOptions, handleViewPdf, pdfFileBase64, downlodingFile, handleAttachments }) => {
+const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, handleUpdateData, statusOptions, handleViewPdf, handleAttachments }) => {
     const toastConfig = useContext(CustomToastContext);
     const {
         state: { user, permissions }
@@ -54,7 +54,9 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
     const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
     const [generatingPdfFile, setGeneratingFile] = useState(false);
     const [disableCreateAsset, setDisableCreateAsset] = useState(false);
-
+    const [emailButtonLoading, setEmailButtonLoading] = useState(false)
+    const [downlodingFile, setDownlodingFile] = useState(false)
+    const [pdfFileBase64, setPdfFileBase64] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
@@ -252,6 +254,43 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
         });
     }
 
+    const fetchEmailAttachment = () => {
+        axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData._id}/pdf`)
+            .then(({ data }) => {
+                axiosInstance()
+                    .get(`user/download?fileName=${data.data.fileName}`, {
+                        responseType: "blob",
+                    })
+                    .then(({ data }) => {
+                        const file = new Blob([data], { type: 'application/pdf' });
+                        generateBase64forFile(file, 'pdf');
+                    })
+                    .catch((err) => {
+                        toastConfig.setToastConfig({
+                            open: true,
+                            type: 'error',
+                            message: 'PDF generating error'
+                        });
+                    });
+            }).catch((err) => {
+                toastConfig.setToastConfig(err);
+                setDownlodingFile(false);
+            })
+    }
+
+    const generateBase64forFile = (blobData, type) => {
+        let reader = new FileReader();
+        reader.readAsDataURL(blobData);
+        reader.onloadend = function () {
+            let base64data = reader.result;
+            if (type === 'pdf') {
+                setPdfFileBase64(base64data);
+                setSendEmail(true)
+                setEmailButtonLoading(false)
+            }
+        };
+    };
+
     const onSendEmailSuccess = () => {
         setSendEmail(false);
         handleAttachments();
@@ -293,8 +332,10 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                         variant={isMobile ? "outlined" : "contained"}
                         color="primary"
                         size="small"
+                        disabled={emailButtonLoading}
                         onClick={() => {
-                            setSendEmail(true)
+                            setEmailButtonLoading(true)
+                            fetchEmailAttachment()
                         }}
                     >
                         {isMobile ? <MdEmail size={22} /> : `Send Email`}
@@ -387,6 +428,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                 }}
                 title="Create Asset"
                 productList={selectedProducts.filter(d => d.hasOwnProperty("productDetail"))}
+                purchaseOrderData={purchaseOrderData}
                 handleUpdateData={handleUpdateData}
             />
         }
