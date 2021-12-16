@@ -750,12 +750,12 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
       }
     }
 
+    const sidebarFieldsKeys = Object.keys(sidebarResource);
+    const sidebarFieldsValues = Object.values(sidebarResource);
+
     if (data) {
       const hasApproveAccountPermission = user.user.permissions.approveAccount;
       const accounts = [sidebarResource.customerAccount, sidebarResource.supplierAccount];
-
-      const sidebarFieldsKeys = Object.keys(sidebarResource);
-      const sidebarFieldsValues = Object.values(sidebarResource);
 
       data.forEach((d) => {
         const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
@@ -782,6 +782,18 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
         }
       });
     }
+
+    sidebarFieldsKeys.forEach(d => {
+      if (!permissions.hasOwnProperty(d)) {
+        permissions[d] = {
+          isCreate: false,
+          isRead: false,
+          isUpdate: false,
+          isDelete: false
+        }
+      }
+    })
+
     localStorage.setItem('routes', JSON.stringify(routesAndTitle));
     return permissions;
   }

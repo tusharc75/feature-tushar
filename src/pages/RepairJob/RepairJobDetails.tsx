@@ -398,7 +398,7 @@ const RepairJobDetails = () => {
                     Edit
                   </Button>
                 )}
-                {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {/* {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />} */}
               </DetailsPageHeader>
             )}
 
