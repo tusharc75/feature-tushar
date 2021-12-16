@@ -50,6 +50,10 @@ const FormBuilder = () => {
     }
 
     axiosInstance().get(`/sa-formbuilder/resource`).then(({ data: { data } }) => {
+      data.forEach(d => {
+        d["_id"] = d.id;
+      })
+
       dispatch({ type: "initialize", data: data, count: data.length });
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });

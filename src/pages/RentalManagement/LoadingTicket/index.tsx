@@ -72,7 +72,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           })
         })
         productAssets.forEach((d) => {
-          d["hideSelection"] = d.status === "In-Transit";
+          d["hideSelection"] = ["In-Use", "In-Transit", "Repair", "Scrap", "Lost", "Under Review"].includes(d.status);
         })
         if (productAssets.filter((e) => ["In-Use", "Repair", "Scrap", "Lost", "In-Transit", "Under Review"].includes(e.status)).length === productAssets.length) {
           setNextStep(true)
@@ -140,46 +140,6 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       });
     });
   }
-
-  // useEffect(() => {
-  //   updateStatus()
-  // }, [currentStep, dataRows])
-
-  // const updateStatus = () => {
-  //   if (dataRows.length > 0 && rentalManagementData) {
-  //     const leftItems = [];
-  //     for (const product of dataRows) {
-  //       if (!product.deliveryTicket) {
-  //         leftItems.push(product.id)
-  //       }
-  //     }
-  //     if (currentStep === 3 && leftItems.length === 0 && rentalManagementData) {
-  //       if (rentalManagementData.status === "New") {
-  //         const tempUpdateData = {
-  //           "_id": rentalManagementData._id,
-  //           "rentalJobName": rentalManagementData.rentalJobName,
-  //           "rentalJobID": rentalManagementData.rentalJobID,
-  //           "customerAccount": rentalManagementData.customerAccount?.optionValue,
-  //           "customerContact": rentalManagementData.customerContact?.optionValue,
-  //           "shippingAddress": rentalManagementData.shippingAddress,
-  //           "currency": rentalManagementData.currency,
-  //           "rentalStartDate": rentalManagementData.rentalStartDate,
-  //           "rentalEndDate": rentalManagementData.rentalEndDate,
-  //           "jobDescription": rentalManagementData.jobDescription,
-  //           "status": "Ready to Ship",
-  //           "owner": rentalManagementData.owner.optionValue,
-  //           // "collaborator": rentalManagementData.collaborator,
-  //         }
-  //         axiosInstance().put(`${rentalManagement.rentalManagementApi}`, tempUpdateData)
-  //           .then(() => {
-  //             fetchRentalData()
-  //           }).catch((error) => {
-  //             toastConfig.setToastConfig(error);
-  //           });
-  //       }
-  //     }
-  //   }
-  // }
 
   const handleDeliveryTicketDialog = (selectedProductInventory, warehouse) => {
     setProductInventoryForDeliveryTicket(selectedProductInventory);
