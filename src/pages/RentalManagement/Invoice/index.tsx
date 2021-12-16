@@ -43,6 +43,9 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
   ])
   const [frameWorkComponent, setFrameWorkComponent] = useState(null)
 
+  const [downlodingFile, setDownlodingFile] = useState(null)
+  const [emailAttachments, setEmailAttachments] = useState([]);
+
   const NameRenderer = (params) => (
     <Link
       className="link"
@@ -116,6 +119,67 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
 
   };
 
+  const handlePDF = (type) => {
+    setDownlodingFile(type);
+    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/pdf`).then(({ data }) => {
+      axiosInstance().get(`user/download?fileName=${data.data.fileName}`, {
+        responseType: "blob",
+      })
+        .then(({ data }) => {
+          if (type === "Download") {
+            const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Rental-${rentalManagementData.rentalJobName}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            setDownlodingFile(null);
+          }
+          else if (type === "Preview") {
+            const file = new Blob([data], { type: "application/pdf" });
+            const fileURL = URL.createObjectURL(file);
+            const pdfWindow = window.open();
+            pdfWindow.location.href = fileURL;
+            setDownlodingFile(null);
+          }
+          else {
+            const file = new Blob([data], { type: 'application/pdf' });
+            generateBase64forFile(file, 'pdf');
+          }
+        })
+        .catch((err) => {
+          if (type === "Email") {
+            setSendEmail(true)
+          }
+          toastConfig.setToastConfig(err);
+          setDownlodingFile(null);
+        });
+    }).catch((err) => {
+      if (type === "Email") {
+        setSendEmail(true)
+      }
+      toastConfig.setToastConfig(err);
+      setDownlodingFile(null);
+    })
+  }
+
+  const generateBase64forFile = (blobData, type) => {
+    let reader = new FileReader();
+    reader.readAsDataURL(blobData);
+    reader.onloadend = function () {
+      let base64data: any = reader.result;
+      if (type === 'pdf') {
+        const attachments = [{
+          base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+          contentType: base64data.split(';')[0].split(':')[1],
+          name: `Rental-${rentalManagementData.rentalJobName}`
+        }];
+        setEmailAttachments(attachments)
+        setSendEmail(true)
+      }
+    };
+  };
+
   return (<>
     <Box display="flex" justifyContent="space-between" m={1}>
       <Box display="flex" alignItems="center">
@@ -125,10 +189,11 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             color="primary"
             type="button"
             size="small"
+            disabled={downlodingFile === "Preview" ? true : false}
             startIcon={isMobile ? '' : <AiFillFilePdf />}
-            onClick={() => { }}
+            onClick={() => handlePDF("Preview")}
           >
-            {isMobile ? <AiFillFilePdf size={22} /> : "Preview"}
+            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === "Preview" ? "Please wait..." : "Preview"}
           </Button>
         )}
         <Box mx={1} />
@@ -138,10 +203,11 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             color="primary"
             type="button"
             size="small"
+            disabled={downlodingFile === "Download" ? true : false}
             startIcon={isMobile ? '' : <AiFillFilePdf />}
-            onClick={() => { }}
+            onClick={() => handlePDF("Download")}
           >
-            {isMobile ? <AiFillFilePdf size={22} /> : "Download"}
+            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === "Download" ? "Please wait..." : "Download"}
           </Button>
         )}
         <Box mx={1} />
@@ -149,11 +215,12 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
           variant={isMobile ? "outlined" : "contained"}
           color="primary"
           size="small"
+          disabled={downlodingFile === "Email" ? true : false}
           onClick={() => {
-            setSendEmail(true)
+            handlePDF("Email")
           }}
         >
-          {isMobile ? <MdEmail size={22} /> : `Send Email`}
+          {isMobile ? <MdEmail size={22} /> : downlodingFile === "Email" ? "Please wait..." : `Send Email`}
         </Button>}
       </Box>
     </Box>
@@ -209,7 +276,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
           options={userEmails?.to}
           cc={userEmails?.cc ?? []}
           emailId={null}
-          qouteBuilderAttachments={[]}
+          qouteBuilderAttachments={emailAttachments}
           subject={`${user?.user?.brandName ?? 'Brand'} Invoice - ${rentalManagementData?.rentalJobName ?? ''}`}
           fromQuote={true}
           isMinimized={!fullScreen}
