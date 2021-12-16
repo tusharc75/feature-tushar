@@ -36,6 +36,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
   const [plantsCategoryOptions, setPlantsCategoryOptions] = useState([]);
   const [productDescriptionOptions, setProductDescriptionOptions] = useState([]);
   const [manufacturerCategoryOptions, setManufacturerCategoryOptions] = useState([]);
+ 
   const [formValues, setFormValues] = useState({});
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [plantsOpen, setPlantsOpen] = useState({ open: false, isClone: false });
@@ -51,6 +52,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
   const { permissions } = useData();
 
 
+
   useEffect(() => {
     axiosInstance()
       .get('/field?resource=Product Inventory')
@@ -61,27 +63,31 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
         const plantsOptions = data.find((obj) => obj?.fieldData.fieldLabel === 'Plants')?.fieldData.option;
         const productOptions = data.find((obj) => obj?.fieldData.fieldName === 'product')?.fieldData.option;
         const manufacturerOptions = data.find((obj) => obj?.fieldData.fieldLabel === 'Manufacturer')?.fieldData.option;
-
-
+        const statusOptions = data.find((obj) => obj?.fieldData.fieldName === 'status')?.fieldData.option;
+        const statusCloneDefault = statusOptions[1].optionValue;
+       
 
         setProductCategoryOptions(categoryOptions);
         setPlantsCategoryOptions(plantsOptions);
         setProductDescriptionOptions(productOptions)
         setManufacturerCategoryOptions(manufacturerOptions)
+        
 
 
         if (productInventoryId) {
           axiosInstance()
             .get(`${productInventory.api}/` + productInventoryId)
             .then(({ data: { data } }) => {
+            
               if (isClone) {
                 const { _id, createdBy, updatedBy, serialNumber, ...rest } = data;
-
+                let oldValues = {...rest};
+                oldValues.status="New";
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate)
+                  values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
                 });
-                setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
+                setFormValues(getObjKeysWithValues(oldValues, fieldsDataForCreate));
 
                 setLoading(false);
               } else {
@@ -116,6 +122,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
   }, [productInventoryId]);
 
   const handleSubmit = (values) => {
+    
     sessionStorage.removeItem('productCategoryId')
     sessionStorage.removeItem('productCategoryName')
     setSubmitting(true);
@@ -162,7 +169,6 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
       Object.values(simplifyValues(values, initialData?.fields[0]?.sectionFields || [])).toString()
     );
   };
-
 
 
   return (
@@ -275,10 +281,10 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                               onClick={() => {
                                                 setProductOpen({ open: true, isClone: false });
                                               }}
-                                              // disabled={!isNew && field.disableOnEdit}
+                                              disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
                                               size="small"
                                             >
-                                              <AddIcon color={'primary'} />
+                                              <AddIcon color={Boolean(productInventoryId) && field.disableOnEdit && !isClone ? 'disabled' : 'primary'} />
                                             </IconButton>
                                           </Tooltip>
                                         </Grid>
@@ -346,10 +352,10 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                               onClick={() => {
                                                 setOpen({ open: true, isClone: false });
                                               }}
-                                              // disabled={!isNew && field.disableOnEdit}
+                                              disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
                                               size="small"
                                             >
-                                              <AddIcon color={'primary'} />
+                                              <AddIcon color={Boolean(productInventoryId) && field.disableOnEdit && !isClone ? 'disabled' : 'primary'} />
                                             </IconButton>
                                           </Tooltip>
                                         </Grid>
@@ -389,13 +395,17 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                             isTooltip={field?.isTooltip || false}
                                             tooltipMessage={field?.tooltipMessage}
                                             size="small"
-                                            onChange={(_, newVal) => {
-                                              const val = newVal?.optionValue;
-                                              setFieldValue(field.fieldName, val);
-                                              handleValuesChange({ [field.fieldName]: val });
-                                              // desc.serialNumber = val
-                                              // setDescription(setFieldValue)
-                                            }}
+                                             setFieldValue={(name, value) => {
+                                        handleValuesChange({ [name]: value });
+                                        setFieldValue(name, value);
+                                      }}
+                                            // onChange={(e) => {
+                                            //   const val = e.target.value.trim();
+                                            //   setFieldValue(field.fieldLabel, val);
+                                            //   handleValuesChange({ [field.fieldLabel]: val });
+                                            //   // desc.serialNumber = val
+                                            //   // setDescription(setFieldValue)
+                                            // }}
                                           />
                                         </Grid>
                                         <Grid item xs={1} sm={1} md={1}>
@@ -404,10 +414,10 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                               onClick={() => {
                                                 setPlantsOpen({ open: true, isClone: false });
                                               }}
-                                              // disabled={!isNew && field.disableOnEdit}
+                                               disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
                                               size="small"
                                             >
-                                              <AddIcon color={'primary'} />
+                                              <AddIcon color={Boolean(productInventoryId) && field.disableOnEdit && !isClone ? 'disabled' : 'primary'} />
                                             </IconButton>
                                           </Tooltip>
                                         </Grid>
@@ -454,7 +464,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                               onClick={() => {
                                                 setManufacturerOpen({ open: true, isClone: false });
                                               }}
-                                              // disabled={!isNew && field.disableOnEdit}
+                                              disabled={!isNew && field.disableOnEdit}
                                               size="small"
                                             >
                                               <AddIcon color={'primary'} />
@@ -471,28 +481,51 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                         ) : null}
                                       </Grid>
                                     </Grid>
-                                  ) : (
+                                  ) : field.fieldName === 'status' ? (
                                     <FormTypes
                                       isNew={Boolean(productInventoryId)}
                                       {...field}
                                       disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
-                                      values={values}
+                                      values={values} 
                                       errors={errors}
                                       touched={touched}
                                       label={field.fieldLabel}
-                                      name={field.fieldName}
+                                      name={ field.fieldName}
                                       type={field.type}
                                       options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        handleValuesChange({ [name]: value });
-                                        setFieldValue(name, value);
-                                      }}
+                                   
+                                      // setFieldValue={(name, value) => {
+                                      //   handleValuesChange({ [name]: value });
+                                      //   setFieldValue(name, value);
+                                      // }}
                                       required={field.required}
                                       fullWidth
                                       isTooltip={field?.isTooltip || false}
                                       tooltipMessage={field?.tooltipMessage}
                                       size="small"
                                     />
+                                  ):(
+                                    <FormTypes
+                                    isNew={Boolean(productInventoryId)}
+                                    {...field}
+                                    disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={(name, value) => {
+                                      handleValuesChange({ [name]: value });
+                                      setFieldValue(name, value);
+                                    }}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                  />
                                   )}
                                 </Grid>
                               ))}
