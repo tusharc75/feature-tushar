@@ -138,9 +138,18 @@ const ManageDeliveryTicket = (props) => {
             else {
                 if (productInventoryForDeliveryTicket && rentalData) {
                     const tempInitialData = getObjKeys("", fieldsDataForCreate)
+                    //Code for find Plant Address Start
+                    fieldsDataForCreate?.forEach((e) => {
+                        if (e.fieldName === "warehouse") {
+                            const plantAddress = e?.option?.filter((e) => e.optionValue === warehouseId?.optionValue)
+                            if (plantAddress.length) {
+                                tempInitialData["pickupPlantAddress"] = plantAddress[0].address
+                            }
+                        }
+                    })
+                    //End
                     tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
                     tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
-                    tempInitialData["pickupPlantAddress"] = rentalData.shippingAddress
                     tempInitialData["type"] = "Rental Job";
                     tempInitialData["rental"] = rentalData?._id
                     tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
@@ -161,7 +170,7 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["type"] = "Repair Job";
                     tempInitialData["repairJob"] = repairJobData?._id
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
-                    
+
                     tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
                     const pickupPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "warehouse")?.option;
 

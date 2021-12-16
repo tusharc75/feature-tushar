@@ -383,7 +383,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                         size="small"
                         disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
                         onClick={() => {
-                            const dataToDelete = selectedProducts && selectedProducts.map((rec: any) => {
+                            const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection).map((rec: any) => {
                                 const obj: any = {};
                                 obj.id = rec._id;
                                 obj.type = rec?.type;
