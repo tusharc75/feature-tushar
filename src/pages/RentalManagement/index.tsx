@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
-import { Grid, Chip, IconButton, Tooltip, Fab } from "@material-ui/core";
-import { Link } from "react-router-dom";
+import { Grid, Chip, IconButton, Tooltip } from "@material-ui/core";
+import queryString from 'query-string';
 import { useData } from "../../StateProvider/Provider";
 import axiosInstance from "../../axios/axiosInstance";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -10,8 +10,6 @@ import routes from "./../../components/Helpers/Routes";
 import { getLocalStorageArrayData, prepareDataForGrid } from "../../constants/helpers"
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FaRegistered, FaSuitcase } from "react-icons/fa";
-import AddIcon from "@material-ui/icons/Add";
-
 import {
   isObjectEmpty,
   customerAccount,
@@ -22,18 +20,11 @@ import {
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import { useHistory } from "react-router-dom";
-import {
-  CommonRenderer,
-  CreatedByRenderer,
-  DateRenderer,
-  UpdatedByRenderer,
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CustomAgGrid, {
   reducer,
   intialState,
 } from "../../components/AgGridComponents/CustomAgGrid";
-import NoDataCell from "../../components/Helpers/NoDataCell";
 import RentalManagementHeader from "./RentalManagementHeader";
 import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementDialog";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -65,11 +56,14 @@ const RentalManagement = () => {
 
   const pageTitle = camelCase(`${routes.rentalManagement.title}`)
   const history = useHistory();
+  const { type }: any = queryString.parse(history.location.search);
+
   const {
     state: { user, permissions, selectedEntity },
   }: any = useData();
   const { getColumnData } = useColumns();
-  const [selectedType, setSelectedType] = useState(1);
+  const [locationKeys, setLocationKeys] = useState([])
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -117,6 +111,28 @@ const RentalManagement = () => {
   useEffect(() => {
     fetchGridColumns()
   }, [])
+
+  useEffect(() => {
+    return history.listen(location => {
+      const { type }: any = queryString.parse(history.location.search);
+      if (history.action === 'PUSH') {
+        setLocationKeys([location.key])
+      }
+      if (history.action === 'POP') {
+        if (locationKeys[1] === location.key) {
+          setLocationKeys(([_, ...keys]) => keys)
+          // Handle forward event
+          setSelectedType(type ? parseInt(type) : 1)
+
+        } else {
+          setLocationKeys((keys) => [location.key, ...keys])
+          // Handle back event
+          setSelectedType(type ? parseInt(type) : 1)
+
+        }
+      }
+    })
+  }, [locationKeys,])
 
   const fetchGridColumns = async () => {
     let data
@@ -402,6 +418,7 @@ const RentalManagement = () => {
 
   const handleRentalManagementTypeSel = (filterValues) => {
     setSelectedType(filterValues);
+    history.push(`?type=${filterValues}`)
   }
 
   const handleTransferEntityDialog = () => {
@@ -502,6 +519,7 @@ const RentalManagement = () => {
         <CustomContainer>
           <div className="header-panel">
             <RentalManagementHeader
+              selectedType={selectedType}
               selectedRecords={selectedRecords}
               onTypeChange={handleRentalManagementTypeSel}
               options={RentalManagementType}

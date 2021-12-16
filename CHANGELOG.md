@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.20.0](https://github.com/vebholic/oms_frontend/compare/v2.19.0...v2.20.0) (2021-12-16)
+
+
+### Features
+
+* - Address code done in repair job ([f9ee116](https://github.com/vebholic/oms_frontend/commit/f9ee11606bf7310124ca73da2578aaad9e270b71))
+* - Repair job dropdown fixed ([986a0fb](https://github.com/vebholic/oms_frontend/commit/986a0fbf84f79efd07550477740b5ddd42a6b921))
+
+
+### Bug Fixes
+
+* disable create asset and manage account address issue ([4c1ada6](https://github.com/vebholic/oms_frontend/commit/4c1ada6e9ac31f7199192193dc5f815f4829b9ea))
+* pricingSetup and packages api connection fix PO-631 ([03c7101](https://github.com/vebholic/oms_frontend/commit/03c71018d7273cc58ae46b389c6b4db57bdd0e69))
+* primary field in form builder ([7a1054c](https://github.com/vebholic/oms_frontend/commit/7a1054cb93b0b10b1ff9bb05244953770d361811))
+* rental bug ([7763cbc](https://github.com/vebholic/oms_frontend/commit/7763cbcfa53e18310feef9d58d18d4206581a8ed))
+* supplier account in product ([cfcc550](https://github.com/vebholic/oms_frontend/commit/cfcc5506319c20880719869414f82bd9399b59fb))
+* **transferasset:** pdf fix ([eb43e93](https://github.com/vebholic/oms_frontend/commit/eb43e933f1ae5ad123cd43a9afcdefa8a5bf38d1))
+* **transferasset:** pdf temlpate api change ([18e7a4c](https://github.com/vebholic/oms_frontend/commit/18e7a4cb3881a9f95c263cec0e93648c39d5729d))
+* **transferasset:** ui tweaks ([9548595](https://github.com/vebholic/oms_frontend/commit/95485954e01e50bcb97fcbf73ed91948c118a86b))
+
 ## [2.19.0](https://github.com/vebholic/oms_frontend/compare/v2.18.4...v2.19.0) (2021-12-15)
 
 

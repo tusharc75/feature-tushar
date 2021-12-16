@@ -68,6 +68,9 @@ function Dashboard() {
         if (u?.name === 'Product Builder' && process.env.REACT_APP_ENV === 'staging') {
           return false;
         }
+        if (("hiddenResource" in u) && u?.hiddenResource) {
+          return false
+        }
 
         return sec === u.sectionName && u.isRead;
       });

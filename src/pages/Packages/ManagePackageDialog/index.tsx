@@ -508,7 +508,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                                         disabled={
                                             // loading || Object.keys(errors).length > 0 ? true : false
                                             uploadingImageOrFileProgress > 0 ||
-                                            isFieldNotTouched(packageData, values) ||
+                                            // isFieldNotTouched(packageData, values) ||
                                             submitting
                                         }
                                         onClick={(e) => {
