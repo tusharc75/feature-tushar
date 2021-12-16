@@ -636,7 +636,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
                     startIcon={submitting && <CircularProgress size={20} color='inherit' />}
                     disabled={
                       // loading || Object.keys(errors).length > 0 ? true : false
-                      uploadingImageOrFileProgress > 0 || isFieldNotTouched(receivingTicketData, values) || submitting || loading
+                      uploadingImageOrFileProgress > 0 || submitting || loading
                     }
                     onClick={(e) => {
                       e.preventDefault();
@@ -646,6 +646,8 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
                   >
                     Save
                   </CustomButton>
+
+
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog
@@ -672,3 +674,6 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
 };
 
 export default ManageReceivingTicket;
+
+
+ //   isFieldNotTouched(receivingTicketData, values) 
