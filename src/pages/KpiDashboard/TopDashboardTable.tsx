@@ -15,6 +15,7 @@ import { Skeleton } from '@material-ui/lab';
 
 const useStyles = makeStyles((theme) => ({
   regionTable: {
+    width: "100%",
     height: '625px',
     [theme.breakpoints.down('xs')]: {
       height: 'auto'
@@ -180,11 +181,11 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates 
                   </TableRow>
                 ))
               ) : (
-                <Box component="span" p={2} width="100%">
+                <Box p={2}>
                   {loading ? (
                     [...Array(10).keys()].map((_, i) => (
-                      <Box component="span" m={1} key={i} width="100%">
-                        <Skeleton variant="text" width="100%" />
+                      <Box component="span" m={1} key={i}>
+                        <Skeleton variant="text" width="300px" />
                       </Box>
                     ))
                   ) : (

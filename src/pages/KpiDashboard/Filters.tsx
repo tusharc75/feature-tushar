@@ -7,6 +7,7 @@ import { FilterList } from '@material-ui/icons';
 import FormTypes from '../../components/Helpers/FormTypes';
 import { dateFormatForInputControl } from '../../constants/helpers';
 import Countries from "../../constants/Country.json"
+import { useData } from '../../StateProvider/Provider'
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -52,8 +53,11 @@ const Filters = (props) => {
     salesReps,
     customerAccounts,
     currency,
-    setCurrency
+    setCurrency,
+    setDashboardType,
+    dashboardType
   } = props;
+  const { state: { user } } = useData()
   const [filterAnchor, setFilterAnchor] = useState(null);
   const [openFilter, setOpenFilter] = useState(false);
   const [timeFrame, setTimeFrame] = useState<any>('1-year');
@@ -62,6 +66,13 @@ const Filters = (props) => {
     setFilterAnchor(event.currentTarget);
     setOpenFilter((prev) => !prev);
   };
+
+  useEffect(() => {
+    if (user && user.user) {
+      setDashboardType(user.user?.dashboards[0])
+
+    }
+  }, [])
 
   useEffect(() => {
     switch (timeFrame) {
@@ -254,6 +265,16 @@ const Filters = (props) => {
                   </Select>
                 </FormControl>
               </Grid> */}
+              <Grid item xs={6} sm={4} md={3}>
+                <FormControl fullWidth size="small" variant="outlined">
+                  <InputLabel id="dashboard-type">Dashboard</InputLabel>
+                  <Select labelId="dashboard-type" id="type" value={dashboardType ? dashboardType : user.user?.dashboards[0]} onChange={(e) => setDashboardType(e.target.value)}>
+                    {user && user.user?.dashboards.map(type => (
+                      <MenuItem value={type}>{type}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
               <Grid item xs={6} sm={4} md={3}>
                 <FormTypes
                   fullWidth={false}
