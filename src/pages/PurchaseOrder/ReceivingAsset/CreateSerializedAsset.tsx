@@ -73,7 +73,7 @@ const CreateSerializedAsset = (props) => {
         if (values.length > 0) {
             values.map(d => {
                 let tempProduct = productList.find(u => u.productId === d.productId)
-                if (tempProduct && d.quantity > (tempProduct.qty - tempProduct.actualReceived)) {
+                if (tempProduct && d.quantity > (tempProduct.qty - (tempProduct.actualReceived || 0))) {
                     errors.quantity = "should be greater"
                 }
                 if (tempProduct && !d.warehouse) {

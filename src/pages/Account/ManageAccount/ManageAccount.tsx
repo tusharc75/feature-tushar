@@ -158,6 +158,13 @@ export default function ManageAccount(props) {
       setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === marketSegmentId));
     }
 
+    const addressDataDropdown = accountData.fields.find(
+      (d) => d.fieldName === "billingAddress"
+    );
+    if (accountId && addressDataDropdown) {
+      setAddressDataSource(addressDataDropdown.option.filter(d => accountData?.initialValues?.billingAddress?.includes(d.optionValue) || accountData?.initialValues?.shippingAddress?.includes(d.optionValue)))
+    }
+
     return () => {
       setOwnerCollaboratorCommonDataSource([]);
       setOwnerDataSource([]);
