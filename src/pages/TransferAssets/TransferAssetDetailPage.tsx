@@ -257,12 +257,11 @@ const TransferAssetDetailPage = () => {
   };
 
   const handleViewPdf = (download) => {
-    axiosInstance()
-      .put(`quote-pdf-template/pdf-column`, { id, resourceName: 'transferAsset', acceptedColumn: ['Asset Number', 'Product Description', 'Status'] })
+    axiosInstance().get(`${transferAsset.api}/${id}/pdf`)
       .then(({ data: { data } }) => {
         if (data && data.hasOwnProperty("pdf")) {
           axiosInstance()
-            .get(`user/download?fileName=${data.pdf}`, {
+            .get(`user/download?fileName=${data.fileName}`, {
               responseType: 'blob'
             })
             .then(({ data }) => {
