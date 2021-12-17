@@ -253,7 +253,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       let packageProducts = selectedProducts.filter((ele) => ele.parentId !== null && !selectedProducts.some(f => f._id === ele.parentId));
       if (packageProducts.length) {
         const packageIds = uniq(map(packageProducts, 'parentId'))
-        console.log(packageIds)
         packageIds.forEach((_packageId) => {
           const packages: any = material.filter((e) => e._id === _packageId)
           const product: any = material.filter((e) => e.parentId === _packageId)

@@ -174,11 +174,20 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
         if (productInventoryForReceivingTicket && rentalData) {
           setDisableReceivingJobName(true);
           const tempInitialData = getObjKeys("", fieldsDataForCreate)
+          //Code for find Plant Address Start
+          fieldsDataForCreate?.forEach((e) => {
+            if (e.fieldName === "warehouse") {
+              const plantAddress = e?.option?.filter((e) => e.optionValue === rentalData?.warehouse?.optionValue)
+              if (plantAddress.length) {
+                tempInitialData["receivingPlantAddress"] = plantAddress[0].address
+              }
+            }
+          })
+          //End
           tempInitialData["productInventory"] = productInventoryForReceivingTicket.map(d => d._id)
           tempInitialData["rentalJob"] = rentalData._id
           tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
           tempInitialData["warehouse"] = rentalData?.warehouse?.optionValue
-          tempInitialData["receivingPlantAddress"] = rentalData.shippingAddress
           tempInitialData["pickupAddress"] = rentalData.shippingAddress
           tempInitialData["type"] = "Rental Job"
           tempInitialData["receivingJobName"] = `${rentalData?.rentalJobName}_${generateUniqueIdOnly()}`
@@ -194,7 +203,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
           tempInitialData["repairJob"] = repairJobData._id
           tempInitialData["type"] = "Repair Job"
           tempInitialData["receivingJobName"] = `${repairJobData?.repairJobName}_${generateUniqueIdOnly()}`
-          
+
           tempInitialData["warehouse"] = repairJobData?.plant?.optionValue ?? "";
           const receivingPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "warehouse")?.option;
 
@@ -627,7 +636,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
                     startIcon={submitting && <CircularProgress size={20} color='inherit' />}
                     disabled={
                       // loading || Object.keys(errors).length > 0 ? true : false
-                      uploadingImageOrFileProgress > 0 || isFieldNotTouched(receivingTicketData, values) || submitting || loading
+                      uploadingImageOrFileProgress > 0 || submitting || loading
                     }
                     onClick={(e) => {
                       e.preventDefault();
@@ -637,6 +646,8 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
                   >
                     Save
                   </CustomButton>
+
+
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog
@@ -663,3 +674,6 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
 };
 
 export default ManageReceivingTicket;
+
+
+ //   isFieldNotTouched(receivingTicketData, values) 

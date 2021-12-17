@@ -291,7 +291,7 @@ export default function ManageContact(props) {
           title={
             isClone ? "Clone" :
               isNew
-                ? "Add Contact"
+                ? contactResource === "customerContact" ?   "Add Customer Contact" : "Add Supplier Contact"
                 : `Editing ${contactData.initialValues?.firstName ?? ""} ${contactData.initialValues?.lastName ?? ""}`
           }
           isMinimized={!fullScreen}
@@ -724,8 +724,8 @@ export default function ManageContact(props) {
                       size="small"
                       disabled={
                         loading ||
-                        uploadingImageOrFileProgress > 0 ||
-                        isFieldNotTouched(contactData, values)
+                        uploadingImageOrFileProgress > 0 
+                        // isFieldNotTouched(contactData, values)
                       }
                       onClick={(e) => {
                         e.preventDefault();

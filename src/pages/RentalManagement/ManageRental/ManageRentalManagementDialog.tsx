@@ -784,7 +784,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                         disabled={
                                             // loading || Object.keys(errors).length > 0 ? true : false
                                             uploadingImageOrFileProgress > 0 ||
-                                            isFieldNotTouched(rentalData, values) ||
+                                            // isFieldNotTouched(rentalData, values) ||
                                             loading
                                         }
                                         onClick={(e) => {

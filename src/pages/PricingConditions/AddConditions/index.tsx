@@ -24,6 +24,7 @@ import { GrBusinessService } from "react-icons/all";
 import AddExistingMaterialDialog from "../AddExistingMaterialDialog";
 import ConditionDialog from "./ConditionDialog";
 import { startCase } from 'lodash';
+import InfoIcon from "@material-ui/icons/Info";
 
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
@@ -35,10 +36,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
     const [addMaterialDialog, setAddMaterialDialog] = useState({ open: false, materialType: "" });
-    const [selectedMaterial, setSelectedMaterial] = useState([]);
 
     const [condition, setCondition] = useState(null)
-    const [showDialog, setShowDialog] = useState(false)
+    const [showDialog, setShowDialog] = useState({ open: false, isBulkedit: false })
     const [conditionData, setConditionData] = useState(null)
 
     useEffect(() => {
@@ -89,19 +89,44 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             });
     }
 
+    const handleOpen = (id) => {
+        const result = condition.filter((e) => e._id === id);
+        if (result.length) {
+            setShowDialog({ open: true, isBulkedit: false })
+            setConditionData(result[0])
+        }
+    }
+
+    const DetailRenderer = (params) => (
+        <Fragment>
+            <p
+                onClick={() => { handleOpen(params.data._id) }}
+                className="link text-truncate"
+                title={params.data.detail}
+            >
+                {params.data.detail}
+            </p>
+            <HtmlTooltip title="Details">
+                <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                        window.open(`${params.data.materialType === "Product" ? routes.productDetail.path : routes.packages.path}/${params.data.materialId}`);
+                    }}
+                >
+                    <InfoIcon fontSize="small" />
+                </IconButton>
+            </HtmlTooltip>
+        </Fragment>
+    );
+
     const ActionsRenderer = (params) => (
         <>
             <HtmlTooltip title="Edit">
                 <IconButton
                     size="small"
                     aria-label="Edit"
-                    onClick={() => {
-                        const result = condition.filter((e) => e._id === params.data._id);
-                        if (result.length) {
-                            setShowDialog(true)
-                            setConditionData(result[0])
-                        }
-                    }}
+                    onClick={() => { handleOpen(params.data._id) }}
                 >
                     <EditIcon color="primary" />
                 </IconButton>
@@ -119,12 +144,13 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
     );
 
     const frameworkComponents = {
+        detailRenderer: DetailRenderer,
         actionsRenderer: ActionsRenderer,
         commonRenderer: CommonRenderer,
     };
 
     const columns = [
-        { field: "detail", headerName: "Detail", show: true, cellRenderer: "commonRenderer" },
+        { field: "detail", headerName: "Detail", show: true, cellRenderer: "detailRenderer" },
         { field: "materialType", headerName: "Type", show: true, cellRenderer: "commonRenderer" },
         { field: "conditionType", headerName: "Condition Type", show: true, cellRenderer: "commonRenderer" },
         { field: "unit", headerName: "Unit", show: true, cellRenderer: "commonRenderer" },
@@ -157,14 +183,17 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 </Button>
             </Box>
             <Box display="flex">
-                <HtmlTooltip title={Boolean(selectedMaterial && selectedMaterial.length) ? "Buld edit selected records" : "Select records to edit"}>
+                <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length > 1) ? "Buld edit selected records" : "Select records to edit"}>
                     <span>
                         <Button
                             variant="contained"
                             color="primary"
                             size="small"
-                            disabled={!Boolean(selectedMaterial && selectedMaterial.length)}
-                        //onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
+                            disabled={!Boolean(selectedRecords && selectedRecords.length > 1)}
+                            onClick={() => {
+                                setShowDialog({ open: true, isBulkedit: true })
+                                setConditionData(condition.filter((data) => selectedRecords.some((rec) => rec._id === data._id)))
+                            }}
                         >
                             Bulk Edit
                         </Button>
@@ -218,16 +247,17 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 handleAdd={handleAdd}
             />
         )}
-        {showDialog && (
+        {(showDialog.open && conditionData) && (
             <ConditionDialog
                 conditionData={conditionData}
                 detailData={detailData}
+                isBulkedit={showDialog.isBulkedit}
                 pricingConditionId={pricingConditionId}
                 handleClose={() => {
-                    setShowDialog(false)
+                    setShowDialog({ open: false, isBulkedit: false })
                 }}
                 handleSuccess={() => {
-                    setShowDialog(false)
+                    setShowDialog({ open: false, isBulkedit: false })
                     fetchCondition()
                 }}
             />

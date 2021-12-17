@@ -307,10 +307,8 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                   color="primary"
                   size="small"
                   onClick={submitForm}
-                  disabled={isSubmitting || loading || uploadingImageOrFileProgress > 0 || isFieldNotTouched({
-                    ...initialData,
-                    initialValues: initialData.values
-                  }, values)}
+                  disabled={isSubmitting || loading || 
+                    uploadingImageOrFileProgress > 0}
                 >
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
                 </Button>
