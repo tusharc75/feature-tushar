@@ -47,7 +47,7 @@ const RentalManagementDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
+  const { openEdit, tab }: any = parsed;
 
   const { state: { user, permissions } }: any = useData();
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
@@ -69,7 +69,31 @@ const RentalManagementDetailsPage = () => {
 
   const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false);
   const [nextStep, setNextStep] = useState(true);
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
+  const [locationKeys, setLocationKeys] = useState([])
+
+  useEffect(() => {
+    return history.listen(location => {
+      const { tab }: any = queryString.parse(history.location.search);
+      if (history.action === 'PUSH') {
+        setLocationKeys([location.key])
+      }
+      if (history.action === 'POP') {
+        if (locationKeys[1] === location.key) {
+          setLocationKeys(([_, ...keys]) => keys)
+          // Handle forward event
+          setTabValue(tab ? parseInt(tab) : 0)
+
+        } else {
+          setLocationKeys((keys) => [location.key, ...keys])
+          console.log(tab)
+          // Handle back event
+          setTabValue(tab ? parseInt(tab) : 0)
+
+        }
+      }
+    })
+  }, [locationKeys,])
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity);
@@ -77,6 +101,7 @@ const RentalManagementDetailsPage = () => {
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
+    history.push(`?tab=${newValue}`);
   };
 
   function a11yProps(index: any) {
@@ -259,7 +284,7 @@ const RentalManagementDetailsPage = () => {
                       <BiEdit size={20}/>
                     </Button>
                   )}
-                  <HideWhenOffline>
+                  {/* <HideWhenOffline>
                     {permissions?.rentalManagement?.isDelete &&
                       rentalManagementData?.owner?.optionValue &&
                       user?.user?._id &&
@@ -276,7 +301,7 @@ const RentalManagementDetailsPage = () => {
                         <MdDelete size={20} />
                       </Button>
                     ) : null}
-                  </HideWhenOffline>
+                  </HideWhenOffline> */}
                   {permissions?.rentalManagement?.isUpdate && (["Ready to Invoice", "Invoiced", "Closed"].includes(rentalManagementData?.status)) && (
                     <>
                       <Button
@@ -473,17 +498,17 @@ const RentalManagementDetailsPage = () => {
                     currentStep={currentStep}
                     setCurrentStep={setCurrentStep}
                   />
-                  {currentStep === 0 && (
+                  {currentStep === 0 && rentalManagementData && (
                     <Productpackage
                       rentalManagementData={rentalManagementData}
                       setNextStep={setNextStep}
                       currencySymbol={currencySymbol} />
                   )}
-                  {currentStep === 1 &&
+                  {currentStep === 1 && rentalManagementData &&
                     <AdditionalCost
                       rentalManagementData={rentalManagementData}
                       setNextStep={setNextStep} />}
-                  {currentStep === 2 && (
+                  {currentStep === 2 && rentalManagementData && (
                     <SerializedAsset
                       rentalManagementData={rentalManagementData}
                       setNextStep={setNextStep}
@@ -493,7 +518,7 @@ const RentalManagementDetailsPage = () => {
                       currencySymbol={currencySymbol}
                     />
                   )}
-                  {currentStep === 3 && (
+                  {currentStep === 3 && rentalManagementData && (
                     <LoadingTicket
                       fetchRentalData={fetchRentalManagementData}
                       rentalManagementData={rentalManagementData}
@@ -501,14 +526,14 @@ const RentalManagementDetailsPage = () => {
                       setNextStep={setNextStep}
                     />
                   )}
-                  {(currentStep === 4) && (
+                  {(currentStep === 4) && rentalManagementData && (
                     <ReceivingTicket
                       rentalManagementData={rentalManagementData}
                       currentStep={currentStep}
                       setNextStep={setNextStep}
                     />
                   )}
-                  {(currentStep === 5) && (
+                  {(currentStep === 5) && rentalManagementData && (
                     <Invoice
                       rentalManagementData={rentalManagementData}
                       setNextStep={setNextStep}

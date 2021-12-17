@@ -4,6 +4,7 @@ import { Paper, Box, Grid, Button, Typography, IconButton, Tooltip, Tabs, Tab } 
 import { Skeleton } from "@material-ui/lab";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
+import queryString from 'query-string';
 import { yyyyMMDD, deliveryTicket, sidebarResource, getObjKeysWithValues, defaultActivityShow, dateTimeFormat } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -71,6 +72,7 @@ export default function DeliveryTicketDetail(props) {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
+  const { tab }: any = queryString.parse(history.location.search);
   const [deliveryTicketData, setDeliveryTicketData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [openSigns, setOpenSigns] = useState(false);
@@ -98,11 +100,37 @@ export default function DeliveryTicketDetail(props) {
   const [signOffDate, setSignOffDate] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
 
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [downlodingFile, setDownlodingFile] = useState(false)
+  const [locationKeys, setLocationKeys] = useState([])
+
+  useEffect(() => {
+    return history.listen(location => {
+      const { tab }: any = queryString.parse(history.location.search);
+      if (history.action === 'PUSH') {
+        setLocationKeys([location.key])
+      }
+      if (history.action === 'POP') {
+        if (locationKeys[1] === location.key) {
+          setLocationKeys(([_, ...keys]) => keys)
+          // Handle forward event
+          setTabValue(tab ? parseInt(tab) : 1)
+
+        } else {
+          setLocationKeys((keys) => [location.key, ...keys])
+          console.log(tab)
+          // Handle back event
+          setTabValue(tab ? parseInt(tab) : 1)
+
+        }
+      }
+    })
+  }, [locationKeys,])
+
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
+    history.push(`?tab=${newValue}`);
   };
 
 

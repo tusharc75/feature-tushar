@@ -54,7 +54,7 @@ const RepairJobDetails = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
+  const { openEdit, tab }: any = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -70,7 +70,7 @@ const RepairJobDetails = () => {
 
   const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
 
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [currentStep, setCurrentStep] = useState(0);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
@@ -99,6 +99,31 @@ const RepairJobDetails = () => {
   const [disablePreviousStep, setDisablePreviousStep] = useState(false)
 
   const [unmodifiedColumns, setUnmodifiedColumns] = useState([]);
+
+  const [locationKeys, setLocationKeys] = useState([])
+
+  useEffect(() => {
+    return history.listen(location => {
+      const { tab }: any = queryString.parse(history.location.search);
+      if (history.action === 'PUSH') {
+        setLocationKeys([location.key])
+      }
+      if (history.action === 'POP') {
+        if (locationKeys[1] === location.key) {
+          setLocationKeys(([_, ...keys]) => keys)
+          // Handle forward event
+          setTabValue(tab ? parseInt(tab) : 1)
+
+        } else {
+          setLocationKeys((keys) => [location.key, ...keys])
+          console.log(tab)
+          // Handle back event
+          setTabValue(tab ? parseInt(tab) : 1)
+
+        }
+      }
+    })
+  }, [locationKeys,])
 
   useEffect(() => {
     if (id) {
@@ -322,7 +347,7 @@ const RepairJobDetails = () => {
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
-
+    history.push(`?tab=${newValue}`);
     if (newValue === 0) {
       fetchRepairJobData();
     }
@@ -398,7 +423,7 @@ const RepairJobDetails = () => {
                     Edit
                   </Button>
                 )}
-                {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {/* {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />} */}
               </DetailsPageHeader>
             )}
 
@@ -727,9 +752,9 @@ const RepairJobDetails = () => {
           queryString={`ignoreIds=${JSON.stringify(step1DataRows.map(m => m._id ?? m.id))}&repairable=true&notScrapLost=1`}
           filterByPlant={repairJobData.plant?.optionValue}
         />
-      
+
       }
-     
+
 
       {
         showEditAssetDialog.open && (

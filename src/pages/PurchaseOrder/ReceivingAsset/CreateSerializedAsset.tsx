@@ -12,9 +12,10 @@ import { Formik, Form, FieldArray, Field } from 'formik';
 import { useData } from '../../../StateProvider/Provider';
 
 const CreateSerializedAsset = (props) => {
-    const { purchaseOrderID, onClose, onSuccess, title, productList, handleUpdateData } = props;
+    const { purchaseOrderID, onClose, onSuccess, title, productList, handleUpdateData, purchaseOrderData } = props;
     const [constProductList, setConstProductList] = useState(productList);
     const [wareHouseList, setwareHouseList] = useState([]);
+    const [defaultWareHouse, setDefaultWareHouse] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const toastConfig = useContext(CustomToastContext);
     const {
@@ -25,6 +26,7 @@ const CreateSerializedAsset = (props) => {
             .get(`/warehouse?filterById=[{"field": "entity", "term": "${selectedEntity}"}]`)
             .then(({ data: { data, count } }) => {
                 setwareHouseList(data)
+                setDefaultWareHouse(data.find(d => d?._id === purchaseOrderData?.warehouse?.optionValue))
             })
     }, []);
 
@@ -71,7 +73,7 @@ const CreateSerializedAsset = (props) => {
         if (values.length > 0) {
             values.map(d => {
                 let tempProduct = productList.find(u => u.productId === d.productId)
-                if (tempProduct && d.quantity > (tempProduct.qty - tempProduct.actualReceived)) {
+                if (tempProduct && d.quantity > (tempProduct.qty - (tempProduct.actualReceived || 0))) {
                     errors.quantity = "should be greater"
                 }
                 if (tempProduct && !d.warehouse) {
@@ -87,7 +89,7 @@ const CreateSerializedAsset = (props) => {
         <Dialog open fullWidth maxWidth="md" onClose={onClose}>
             <CustomDialogHeader title={title} onClose={onClose} />
             <Formik
-                initialValues={{ seriaizedAsset: productList.map(d => ({ "product": d.description, "productId": d.productId, "warehouse": "", "quantity": d.qty - d.actualReceived, "row": d })) }}
+                initialValues={{ seriaizedAsset: productList.map(d => ({ "product": d.description, "productId": d.productId, "warehouse": defaultWareHouse || "", "quantity": d.qty - (d.actualReceived || 0), "row": d })) }}
                 enableReinitialize={true}
                 onSubmit={() => { }}>
                 {({ values }) => (

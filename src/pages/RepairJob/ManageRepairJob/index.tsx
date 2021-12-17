@@ -45,32 +45,38 @@ const ManageRepairJob = (props) => {
   const [title, setTitle] = useState("");
   const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
 
+  const [disablePlantIfAssetAdded, setDisablePlantIfAssetAdded] = useState(true)
   const [disableFieldsIfLoadingTicketIsCreated, setDisableFieldsIfLoadingTicketIsCreated] = useState(true)
 
-  const {
-    state: { user,selectedEntity },
-  }: any = useData();
+  const [supplierShipToAddresses, setSupplierShipToAddresses] = useState([]);
+  const [supplierShipToAddressesDataSource, setSupplierShipToAddressesDataSource] = useState([]);
+  const [repairPlantDataSource, setRepairPlantDataSource] = useState([]);
 
+  const {
+    state: { user, selectedEntity },
+  }: any = useData();
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(repairJobData.fields));
   }, [repairJobData.fields]);
-
 
   useEffect(() => {
     setLoading(true);
     axiosInstance()
       .get('/field?resource=Repair Job')
       .then(({ data: { data } }) => {
-
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
         const plantsOptions = data.find((obj) => obj?.fieldData.fieldName === 'plant')?.fieldData.option;
-         const plantOptionsEntity = plantsOptions.filter((a)=>{if(a.entity==selectedEntity){return a}});;
- 
-    
-        setOptionsPlantsEntity(plantOptionsEntity)
+        const plantOptionsEntity = plantsOptions.filter((a) => { if (a.entity == selectedEntity) { return a } });
 
+        const commonDataSource = [...data.find((obj) => obj?.fieldData.fieldName === 'supplierShipTo')?.fieldData?.option] ?? [];
+        const commonRepairPlantDataSource = [...data.find((obj) => obj?.fieldData.fieldName === 'repairPlant')?.fieldData?.option] ?? [];
+
+        setSupplierShipToAddressesDataSource([...commonDataSource]);
+        setRepairPlantDataSource([...commonRepairPlantDataSource]);
+
+        setOptionsPlantsEntity(plantOptionsEntity)
 
         if (repairJobId) {
           axiosInstance()
@@ -79,6 +85,7 @@ const ManageRepairJob = (props) => {
               if (isClone) {
                 const { _id, brand, createdBy, history, repairJobName, updatedBy, ...rest } = data;
                 setTitle('Clone')
+                setDisablePlantIfAssetAdded(false);
 
                 setRepairJobData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -100,17 +107,18 @@ const ManageRepairJob = (props) => {
                 // setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
                 setLoading(false);
 
-
                 //  If loading ticket is created, then we need to disable some controls in update dialog
                 axiosInstance().get(`${repairJob.repairJobApi}/${repairJobId}/get-assets`)
                   .then(({ data: { data } }) => {
                     let tempProductInventory = data.map(u => ({ ...u, _id: u?.id, productName: u?.product?.optionLabel }))
+                    setDisablePlantIfAssetAdded(data.length > 0)
 
                     let isLoadingTicketFound = false;
 
                     axiosInstance()
                       .get(`${repairJob.repairJobApi}/${repairJobId}/delivery-ticket`)
                       .then(({ data }) => {
+
                         data.data.map(obj => {
                           tempProductInventory.map((d, index) => {
                             if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
@@ -128,13 +136,28 @@ const ManageRepairJob = (props) => {
                       });
                   });
               }
+
+              if (data["typeOfRepair"] === "External") {
+                const vendorOptions = isClone ? fieldsDataForCreate.find(option => option.fieldName === "vendor")?.option : fieldsDataForUpdate.find(option => option.fieldName === "vendor")?.option;
+                const options = vendorOptions.find(option => option.optionValue === data.vendor?.optionValue)?.shippingAddress ?? [];
+                let newDataSource = [];
+
+                options.forEach((d) => {
+                  const getAddress = commonDataSource.find(s => s.optionValue === d);
+                  if (getAddress) {
+                    newDataSource = [...newDataSource, getAddress];
+                  }
+                  setSupplierShipToAddresses([...newDataSource])
+                })
+              }
+
             }).catch((error) => {
               toastConfig.setToastConfig(error);
-             
+
             });
         } else {
           setTitle('Create Repair Job')
-
+          setDisablePlantIfAssetAdded(false);
           let initialData = { ...getObjKeys('', fieldsDataForCreate), expectedCompletionDate: "" };
           setDisableFieldsIfLoadingTicketIsCreated(false);
           setAllFields(fieldsDataForCreate);
@@ -372,9 +395,29 @@ const ManageRepairJob = (props) => {
                                             label={field.fieldLabel}
                                             name={field.fieldName}
                                             type={field.type}
-                                            options={field.option}
+                                            options={field.fieldName === 'supplierShipTo' ? supplierShipToAddresses : field.option}
                                             setFieldValue={(name, value) => {
                                               setFieldValue(name, value);
+
+                                              if (field.fieldName === 'vendor') {
+                                                setFieldValue("supplierShipTo", "");
+                                                if (value) {
+                                                  const options = field.option.find(option => option.optionValue === value)?.shippingAddress ?? [];
+                                                  let newDataSource = [];
+
+                                                  options.forEach((d) => {
+                                                    const getAddress = supplierShipToAddressesDataSource.find(s => s.optionValue === d);
+                                                    if (getAddress) {
+                                                      newDataSource = [...newDataSource, getAddress];
+                                                    }
+                                                    setSupplierShipToAddresses([...newDataSource])
+                                                  })
+                                                }
+                                                else {
+                                                  setSupplierShipToAddresses([])
+                                                }
+                                              }
+
                                             }}
                                             required={values["typeOfRepair"] === "External"}
                                             fullWidth
@@ -453,10 +496,23 @@ const ManageRepairJob = (props) => {
                                             setFieldValue={(name, value) => {
                                               setFieldValue(name, value);
 
-                                              setFieldValue("vendor", "");
-                                              setFieldValue("supplierShipTo", "");
-                                              setFieldValue("repairPlant", "");
-                                              setFieldValue("plantShipTo", "");
+                                              if (value) {
+                                                if (value === "Internal") {
+                                                  setFieldValue("repairPlant", values["plant"]);
+                                                  setFieldValue("plantShipTo", repairPlantDataSource.find(d => d.optionValue === values["plant"])?.address ?? "");
+                                                } else {
+                                                  setFieldValue("repairPlant", "");
+                                                  setFieldValue("plantShipTo", "");
+                                                }
+                                                setFieldValue("vendor", "");
+                                                setFieldValue("supplierShipTo", "");
+                                              }
+                                              else {
+                                                setFieldValue("repairPlant", "");
+                                                setFieldValue("plantShipTo", "");
+                                                setFieldValue("vendor", "");
+                                                setFieldValue("supplierShipTo", "");
+                                              }
                                             }}
                                             required={field.required}
                                             fullWidth
@@ -510,7 +566,7 @@ const ManageRepairJob = (props) => {
                                                 ? <FormTypes
                                                   repairJobId={repairJobId}
                                                   {...field}
-                                                  disabled={disableFieldsIfLoadingTicketIsCreated || (!repairJobId && field.disableOnEdit)}
+                                                  disabled={disablePlantIfAssetAdded || (!repairJobId && field.disableOnEdit)}
                                                   values={values}
                                                   errors={errors}
                                                   touched={touched}
@@ -520,6 +576,12 @@ const ManageRepairJob = (props) => {
                                                   options={optionsPlantsEntity}
                                                   setFieldValue={(name, value) => {
                                                     setFieldValue(name, value);
+
+                                                    if (values["typeOfRepair"] === "Internal") {
+                                                      setFieldValue("repairPlant", value);
+                                                      setFieldValue("plantShipTo", repairPlantDataSource.find(d => d.optionValue === value)?.address ?? "");
+                                                    }
+
                                                   }}
                                                   required={field.required}
                                                   fullWidth

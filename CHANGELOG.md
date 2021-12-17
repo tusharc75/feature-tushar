@@ -2,6 +2,51 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.21.0](https://github.com/vebholic/oms_frontend/compare/v2.20.0...v2.21.0) (2021-12-17)
+
+
+### Features
+
+* - Plant selection disabled issue fixed ([6254771](https://github.com/vebholic/oms_frontend/commit/6254771da1f4a06747b2155929316da4e93655f1))
+* - PO-638 - Issue coming on lead list screen when logged in using jujar@vebholic.com ([e6d3230](https://github.com/vebholic/oms_frontend/commit/e6d3230409956b64d619980c85645fc18f0ab5d9))
+* **a:** a ([db5812d](https://github.com/vebholic/oms_frontend/commit/db5812d9e7275359398427bd5cd229eb9c0e303f))
+* color change contast and plant field value ([8b6a3f7](https://github.com/vebholic/oms_frontend/commit/8b6a3f77b96c4102377c89a4d79ee7c4c46f4940))
+* **rentalmanagement:** persist the current tab ([a864f1a](https://github.com/vebholic/oms_frontend/commit/a864f1a4973251c3f44699e187d5edeb1c4e5079))
+
+
+### Bug Fixes
+
+* bug fix ([ad2f814](https://github.com/vebholic/oms_frontend/commit/ad2f814e22086c54ee220ebdcbcef8a68164eebe))
+* **bug:** bug ([d16e399](https://github.com/vebholic/oms_frontend/commit/d16e399f5ddfa8a7f738dcf1d025332bb3f28c5a))
+* next ([e680833](https://github.com/vebholic/oms_frontend/commit/e680833deba1ff6687fa56622bb816882b11e2cb))
+* **plant setfield issue:** plant setfield issue ([e0ca8ab](https://github.com/vebholic/oms_frontend/commit/e0ca8abc87c457834da6db6ecc2d892a0b816141))
+* pO changes and address changes ([909ff2e](https://github.com/vebholic/oms_frontend/commit/909ff2ede2f44a73c203d30c360d5f4e361c4dc4))
+* **productinventory:** reason dialog size fix ([f9b17d4](https://github.com/vebholic/oms_frontend/commit/f9b17d4c6de5adf1b556299676a74190fc480df3))
+* rental bug fix ([0388628](https://github.com/vebholic/oms_frontend/commit/0388628a4c6d0a9054c60a94cf66f01889f3ea67))
+* rental fix ([3361f15](https://github.com/vebholic/oms_frontend/commit/3361f1517f9a9e7fbd0a3af50370560e441b9334))
+* **rentalmanagement:** type persist ([93601b5](https://github.com/vebholic/oms_frontend/commit/93601b5692cd0fa507f853286427ec6747d4f11f))
+* **serializedassets:** fix for required fields ([b4e9503](https://github.com/vebholic/oms_frontend/commit/b4e95030199da40e87690c6d47f4fde5799cf4f2))
+
+## [2.20.0](https://github.com/vebholic/oms_frontend/compare/v2.19.0...v2.20.0) (2021-12-16)
+
+
+### Features
+
+* - Address code done in repair job ([f9ee116](https://github.com/vebholic/oms_frontend/commit/f9ee11606bf7310124ca73da2578aaad9e270b71))
+* - Repair job dropdown fixed ([986a0fb](https://github.com/vebholic/oms_frontend/commit/986a0fbf84f79efd07550477740b5ddd42a6b921))
+
+
+### Bug Fixes
+
+* disable create asset and manage account address issue ([4c1ada6](https://github.com/vebholic/oms_frontend/commit/4c1ada6e9ac31f7199192193dc5f815f4829b9ea))
+* pricingSetup and packages api connection fix PO-631 ([03c7101](https://github.com/vebholic/oms_frontend/commit/03c71018d7273cc58ae46b389c6b4db57bdd0e69))
+* primary field in form builder ([7a1054c](https://github.com/vebholic/oms_frontend/commit/7a1054cb93b0b10b1ff9bb05244953770d361811))
+* rental bug ([7763cbc](https://github.com/vebholic/oms_frontend/commit/7763cbcfa53e18310feef9d58d18d4206581a8ed))
+* supplier account in product ([cfcc550](https://github.com/vebholic/oms_frontend/commit/cfcc5506319c20880719869414f82bd9399b59fb))
+* **transferasset:** pdf fix ([eb43e93](https://github.com/vebholic/oms_frontend/commit/eb43e933f1ae5ad123cd43a9afcdefa8a5bf38d1))
+* **transferasset:** pdf temlpate api change ([18e7a4c](https://github.com/vebholic/oms_frontend/commit/18e7a4cb3881a9f95c263cec0e93648c39d5729d))
+* **transferasset:** ui tweaks ([9548595](https://github.com/vebholic/oms_frontend/commit/95485954e01e50bcb97fcbf73ed91948c118a86b))
+
 ## [2.19.0](https://github.com/vebholic/oms_frontend/compare/v2.18.4...v2.19.0) (2021-12-15)
 
 

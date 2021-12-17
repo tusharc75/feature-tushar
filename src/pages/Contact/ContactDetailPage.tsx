@@ -753,6 +753,7 @@ const ContactDetailsPage = (props) => {
                       }}
                       updateChart={handleUpdateChart}
                       setShowAddContact={setShowAddContact}
+                      isInContact={true}
                     />
                   </Box>
                 </>

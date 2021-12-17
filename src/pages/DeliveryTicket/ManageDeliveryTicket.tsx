@@ -138,9 +138,18 @@ const ManageDeliveryTicket = (props) => {
             else {
                 if (productInventoryForDeliveryTicket && rentalData) {
                     const tempInitialData = getObjKeys("", fieldsDataForCreate)
+                    //Code for find Plant Address Start
+                    fieldsDataForCreate?.forEach((e) => {
+                        if (e.fieldName === "warehouse") {
+                            const plantAddress = e?.option?.filter((e) => e.optionValue === warehouseId?.optionValue)
+                            if (plantAddress.length) {
+                                tempInitialData["pickupPlantAddress"] = plantAddress[0].address
+                            }
+                        }
+                    })
+                    //End
                     tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
                     tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
-                    tempInitialData["pickupPlantAddress"] = rentalData.shippingAddress
                     tempInitialData["type"] = "Rental Job";
                     tempInitialData["rental"] = rentalData?._id
                     tempInitialData["customerAccount"] = rentalData.customerAccount.optionValue
@@ -157,18 +166,27 @@ const ManageDeliveryTicket = (props) => {
                 else if (productInventoryForDeliveryTicket && repairJobData) {
                     const tempInitialData = getObjKeys("", fieldsDataForCreate)
                     tempInitialData["productInventory"] = productInventoryForDeliveryTicket?.map(d => d?._id)
-                    tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
                     tempInitialData["deliveryJobName"] = `${repairJobData?.repairJobName}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = "Repair Job";
                     tempInitialData["repairJob"] = repairJobData?._id
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
+
+                    tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
+                    const pickupPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "warehouse")?.option;
+
+                    if (pickupPlantAddresses && tempInitialData["warehouse"]) {
+                        const address = pickupPlantAddresses.find(f => f.optionValue === tempInitialData["warehouse"]);
+                        if (address) {
+                            tempInitialData["pickupPlantAddress"] = address.address;
+                        }
+                    }
 
                     if (repairJobData?.typeOfRepair === "Internal") {
                         tempInitialData["receivingPlant"] = repairJobData?.repairPlant?.optionValue;
                         tempInitialData["plantShipTo"] = repairJobData?.plantShipTo;
                     }
                     if (repairJobData?.typeOfRepair === "External") {
-                        // tempInitialData["supplierAccount"] = repairJobData?.vendor?.optionValue;
+                        tempInitialData["supplierAccount"] = repairJobData?.vendor?.optionValue;
                         tempInitialData["supplierShippingAddress"] = repairJobData?.supplierShipTo;
                     }
 
@@ -243,7 +261,9 @@ const ManageDeliveryTicket = (props) => {
         }
         else {
             setSubmitting(true);
-            axiosInstance().post(`${deliveryTicketApi}`, values).then(({ data }) => {
+            let updatedValues = { ...values }
+            updatedValues["status"] = "New";
+            axiosInstance().post(`${deliveryTicketApi}`, updatedValues).then(({ data }) => {
                 setLoading(false);
                 onSuccess()
                 setSubmitting(false);
@@ -425,7 +445,8 @@ const ManageDeliveryTicket = (props) => {
                                                                                     size="small"
                                                                                     //minDate={new Date()}
                                                                                     //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
-                                                                                    maxDate={rentalData?.estimateStartDate ? moment(rentalData?.estimateStartDate) : moment().add(1, 'years').calendar()}
+                                                                                    maxDate={rentalData ? rentalData.estimateStartDate ? moment(rentalData?.estimateStartDate) : moment().add(1, 'years').calendar()
+                                                                                        : transferData ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()} // Please, whoever changing this ask Gagan before any change 
                                                                                 />
                                                                             ) : field.fieldName === "deliveryDate" ? (
                                                                                 <FormTypes
@@ -448,9 +469,10 @@ const ManageDeliveryTicket = (props) => {
                                                                                     isTooltip={field?.isTooltip || false}
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
-                                                                                    //minDate={moment(values["pick-UpDate"]).add(7, 'days')}
+                                                                                    minDate={moment(values["pick-UpDate"])} // Please, whoever changing this ask Gagan before any change 
                                                                                     //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
-                                                                                    maxDate={rentalData?.estimateStartDate ? moment(rentalData?.estimateStartDate) : moment().add(1, 'years').calendar()}
+                                                                                    maxDate={rentalData ? rentalData.estimateStartDate ? moment(rentalData?.estimateStartDate) : moment().add(1, 'years').calendar() :
+                                                                                        transferData ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
                                                                                 />
                                                                             ) : field.fieldName === "deliveryJobName" ? (
                                                                                 <FormTypes

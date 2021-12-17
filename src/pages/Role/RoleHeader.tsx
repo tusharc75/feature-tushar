@@ -54,7 +54,7 @@ const RoleHeader = (props) => {
     <Grid container className={styles.filter_side_container}>
       <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
         <BsPersonBoundingBox /> <span className="listingHeader">{routes.role.title}</span>
-        {options && (
+        {/* {options && (
           <ToggleButtonGroup
             size="small"
             value={filter}
@@ -69,7 +69,7 @@ const RoleHeader = (props) => {
               );
             })}
           </ToggleButtonGroup>
-        )}
+        )} */}
       </Grid>
       <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side}>
         <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header}>

@@ -56,6 +56,7 @@ export default function ManageAccount(props) {
   const [disableOwnerSelection] = useState(
     !isNew && user.user._id !== accountData.initialValues.owner
   );
+ 
 
   //  Owner, Collaborator Code - Start
   const [formsData, setFormsData] = useState([]);
@@ -155,6 +156,13 @@ export default function ManageAccount(props) {
 
     if (marketSegmentId && marketSegmentDropdownData) {
       setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === marketSegmentId));
+    }
+
+    const addressDataDropdown = accountData.fields.find(
+      (d) => d.fieldName === "billingAddress"
+    );
+    if (accountId && addressDataDropdown) {
+      setAddressDataSource(addressDataDropdown.option.filter(d => accountData?.initialValues?.billingAddress?.includes(d.optionValue) || accountData?.initialValues?.shippingAddress?.includes(d.optionValue)))
     }
 
     return () => {
@@ -325,7 +333,7 @@ export default function ManageAccount(props) {
               `Clone ${accountNameForClone}`
               :
               isNew
-                ? "Add Account"
+                ?  accountResource === "customerAccount" ? "Add Customer Account" : "Add Supplier Account"
                 : `Editing ${accountData.initialValues.accountName
                   ? accountData.initialValues.accountName
                   : ""
@@ -1063,8 +1071,8 @@ export default function ManageAccount(props) {
                       loading={loading}
                       disabled={
                         loading ||
-                        uploadingImageOrFileProgress > 0 ||
-                        isFieldNotTouched(accountData, values)
+                        uploadingImageOrFileProgress > 0 
+                        // isFieldNotTouched(accountData, values)
                         // || Object.keys(errors).length > 0 ? true : false
                       }
                       onClick={(e) => {

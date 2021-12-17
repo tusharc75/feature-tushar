@@ -39,7 +39,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     const [ownerData, setOwnerData] = useState([]);
     const [collaboratorData, setCollaboratorData] = useState([]);
     const {
-        state: { user, permissions },
+        state: { user, permissions, selectedEntity },
     }: any = useData();
     const [formValues, setFormValues] = useState({})
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -128,12 +128,13 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
         );
         if (customerContactDropdownData) {
             setCustomerContactMainDataSource(customerContactDropdownData.option);
+      
 
             if (rentalManagementId) {
                 setCustomerContactDataSource(
                     customerContactDropdownData.option.filter(
                         (d) =>
-                            d.parentAccount === rentalManagementData.customerAccount.optionValue
+                            d.parentAccount === rentalManagementData?.customerAccount.optionValue
                     )
                 );
             }
@@ -176,8 +177,14 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             else {
                 fieldData = offlineFieldsData?.rentalManagement || [];
             }
+            fieldData?.forEach((e: any) => {
+                if (e?.fieldData?.fieldName === "warehouse" && e?.fieldData?.option) {
+                    e.fieldData.option = e?.fieldData?.option?.filter((a) => a.entity?.includes(selectedEntity));
+                }
+            })
             const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+
             if (rentalManagementId) {
                 try {
                     let data;
@@ -784,7 +791,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                         disabled={
                                             // loading || Object.keys(errors).length > 0 ? true : false
                                             uploadingImageOrFileProgress > 0 ||
-                                            isFieldNotTouched(rentalData, values) ||
+                                            // isFieldNotTouched(rentalData, values) ||
                                             loading
                                         }
                                         onClick={(e) => {

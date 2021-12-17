@@ -84,7 +84,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                                 size="small"
                                 aria-label="Details"
                                 onClick={() => {
-                                    window.open(`${row.original.type === "product" ? routes.productDetail.path : routes.packages.path}/${row.original.materialId}`);
+                                    window.open(`${row.original.type === "product" ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`);
                                 }}
                             >
                                 <InfoIcon fontSize="small" />
@@ -126,7 +126,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                                     accessor: fieldName,
                                     Header: fieldLabel,
                                     Cell: ({ row }) => (
-                                        row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />
+                                        row.original[fieldName] ? <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
                                     )
                                 })
                             })
@@ -140,7 +140,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                                 accessor: fieldName,
                                 Header: fieldLabel,
                                 Cell: ({ row }) => (
-                                    row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />
+                                    row.original[fieldName] ? <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
                                 )
                             })
                         })
@@ -160,7 +160,18 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                 }
             });
             coloum.forEach(element => {
-                if (element.accessor.includes("finalPrice")) {
+                if (element.accessor.includes("detail")) {
+                    element["Footer"] = () => {
+                        return <>Total</>
+                    }
+                }
+                else if (element.accessor === "qtyDisplay") {
+                    element["Footer"] = (info) => {
+                        const qtyTotal = info.rows.filter(f => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor])).reduce((sum, row) => row.values[element.accessor] + sum, 0)
+                        return <>{qtyTotal}</>
+                    }
+                }
+                else if (element.accessor.includes("finalPrice")) {
                     element["Footer"] = (info) => {
                         const total = info.rows.filter(f => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor])).reduce((sum, row) => row.values[element.accessor] + sum, 0)
                         return <>{currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
@@ -179,7 +190,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             const inventory = data.inventory;
             const rows = data.material.filter((e) => e.parentId === null)
             rows.forEach((parent, i) => {
-                parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageDescription}`
+                parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
                 parent.qtyDisplay = parent.qty;
                 parent.isValid = parent["finalPrice_" + rentalManagementData?.currency?.toLowerCase()] ? true : false;
                 parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
@@ -372,7 +383,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                         size="small"
                         disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
                         onClick={() => {
-                            const dataToDelete = selectedProducts && selectedProducts.map((rec: any) => {
+                            const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection).map((rec: any) => {
                                 const obj: any = {};
                                 obj.id = rec._id;
                                 obj.type = rec?.type;
