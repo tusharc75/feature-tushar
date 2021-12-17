@@ -56,6 +56,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     setPurchaseOrderData(data)
                     if (isClone) {
                         const { _id, createdBy, updatedBy, serialNumber, ...rest } = data
+                        rest['purchaseOrderNumber'] = `PO_${generateUniqueIdOnly()}`
                         rest["status"] = "New"
                         setInitialData({
                             fields: fieldsDataForCreate,
@@ -510,7 +511,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                 type="submit"
                                 onClick={submitForm}
                                 disabled={
-                                    loading 
+                                    loading
                                     // isFieldNotTouched(initialData, values)
                                 }
                             > Save</CustomButton>
