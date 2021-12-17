@@ -216,26 +216,47 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
                             <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                               <Box display="flex" >
                                 <Box flexGrow={1}  >
-                                  <FormTypes
-                                    {...field}
-                                    fields={initialData.fields}
-                                    fieldData={field}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value)
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field.isTooltip}
-                                    tooltipMessage={field.tooltipMessage}
-                                    size="small"
-                                  />
+                                  {(field.fieldName === "expectedDelivery") ?
+                                    < FormTypes
+                                      {...field}
+                                      values={values}
+                                      minDate={moment(new Date())}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value)
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                    /> :
+                                    <FormTypes
+                                      {...field}
+                                      fields={initialData.fields}
+                                      fieldData={field}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value)
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field.isTooltip}
+                                      tooltipMessage={field.tooltipMessage}
+                                      size="small"
+                                    />
+                                  }
                                 </Box>
                               </Box>
                             </Grid>

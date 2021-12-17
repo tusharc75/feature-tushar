@@ -87,7 +87,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`).then(({ data: { data } }) => {
       data?.material?.forEach((item) => {
         if (!item.parentId) {
-          item.description = `${item.type === "product" ? item.productDetail?.productName : item.packageDetail?.packageDescription}`
+          item.description = `${item.type === "product" ? item.productDetail?.productName : item.packageDetail?.packageName}`
           item.type = startCase(item.type);
           combinedData.push(item);
         }

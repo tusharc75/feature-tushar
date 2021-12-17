@@ -54,7 +54,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
         axiosInstance().get(`${pricingCondition.api}/condition/${pricingConditionId}`).then(({ data: { data } }) => {
             setCondition(JSON.parse(JSON.stringify(data)));
             data.forEach((element) => {
-                element.detail = `${element.materialType === "product" ? element.productDetail?.productName : element.packageDetail?.packageDescription}`
+                element.detail = `${element.materialType === "product" ? element.productDetail?.productName : element.packageDetail?.packageName}`
                 element.materialType = startCase(element.materialType)
                 element.conditionType = element.conditionType?.join(",")
                 element.unit = element.unit?.join(",")
@@ -111,7 +111,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                     size="small"
                     aria-label="Details"
                     onClick={() => {
-                        window.open(`${params.data.materialType === "Product" ? routes.productDetail.path : routes.packages.path}/${params.data.materialId}`);
+                        window.open(`${params.data.materialType === "Product" ? routes.productDetail.path : routes.packagesDetail.path}/${params.data.materialId}`);
                     }}
                 >
                     <InfoIcon fontSize="small" />
