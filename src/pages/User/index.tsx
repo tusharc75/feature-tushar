@@ -78,13 +78,13 @@ const User: FC = () => {
     },
     { field: "email", headerName: "Email", show: true, cellRenderer: "emailRenderer" },
     { field: "status", headerName: "Status", show: true, filter: false, sortable: false, cellRenderer: "statusRenderer" },
+    // {
+    //   field: "companyWideRole", headerName: "Company Wide Role(s)", filter: false, show: true,
+    //   cellRenderer: "companyWideRoleRenderer", width: 300
+    // },
     {
-      field: "companyWideRole", headerName: "Company Wide Role(s)", filter: false, show: true,
-      cellRenderer: "companyWideRoleRenderer", width: 300
-    },
-    {
-      field: "regionalWideRole", headerName: "Region Wide Functional Role(s)", filter: false, sortable: false, show: true,
-      cellRenderer: "regionalWideRoleRenderer", width: 350
+      field: "regionalWideRole", headerName: "Assigned Roles", filter: false, sortable: false, show: true,
+      cellRenderer: "regionalWideRoleRenderer"
     },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },

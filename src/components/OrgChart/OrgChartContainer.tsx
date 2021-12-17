@@ -12,7 +12,7 @@ import { Grid, TextField, FormControl, InputLabel, Select, Button, Popover, Box,
 
 import './OrgChartContainer.scss';
 
-export default function OrgChartContainer({ data, onClick, updateChart = null, setShowAddContact = null }) {
+export default function OrgChartContainer({ data, onClick, updateChart = null, setShowAddContact = null, isInContact = false }) {
 
     const chartId = `chart-${generateUniqueId()}`;
     const google = window.google;
@@ -129,14 +129,17 @@ export default function OrgChartContainer({ data, onClick, updateChart = null, s
         <Fragment>
             <div className="custom-orgchart">
 
-                <div style={{ float: "right" }}>
-                    <Box p={2}>
-                        <Button
-                            onClick={setShowAddContact} color="primary" endIcon={null}>
-                            Add Contacts
-                        </Button>
-                    </Box>
-                </div>
+                {
+                isInContact &&
+                    (<div style={{ float: "right" }}>
+                        <Box p={2}>
+                            <Button
+                                onClick={setShowAddContact} color="primary" endIcon={null}>
+                                Add Contacts
+                            </Button>
+                        </Box>
+                    </div>)
+                }
 
                 <OrgChart
                     positions={positions}

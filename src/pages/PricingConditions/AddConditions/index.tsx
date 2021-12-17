@@ -111,7 +111,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                     size="small"
                     aria-label="Details"
                     onClick={() => {
-                        window.open(`${params.data.materialType === "Product" ? routes.productDetail.path : routes.packages.path}/${params.data.materialId}`);
+                        window.open(`${params.data.materialType === "Product" ? routes.productDetail.path : routes.packagesDetail.path}/${params.data.materialId}`);
                     }}
                 >
                     <InfoIcon fontSize="small" />
