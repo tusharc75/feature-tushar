@@ -284,7 +284,7 @@ const RentalManagementDetailsPage = () => {
                       <MdEdit size={24} />
                     </Button>
                   )}
-                  <HideWhenOffline>
+                  {/* <HideWhenOffline>
                     {permissions?.rentalManagement?.isDelete &&
                       rentalManagementData?.owner?.optionValue &&
                       user?.user?._id &&
@@ -301,7 +301,7 @@ const RentalManagementDetailsPage = () => {
                         <MdDelete size={24} />
                       </Button>
                     ) : null}
-                  </HideWhenOffline>
+                  </HideWhenOffline> */}
                   {permissions?.rentalManagement?.isUpdate && (["Ready to Invoice", "Invoiced", "Closed"].includes(rentalManagementData?.status)) && (
                     <>
                       <Button
