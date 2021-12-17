@@ -261,7 +261,9 @@ const ManageDeliveryTicket = (props) => {
         }
         else {
             setSubmitting(true);
-            axiosInstance().post(`${deliveryTicketApi}`, values).then(({ data }) => {
+            let updatedValues = {...values}
+            updatedValues["status"] = "New";
+            axiosInstance().post(`${deliveryTicketApi}`, updatedValues).then(({ data }) => {
                 setLoading(false);
                 onSuccess()
                 setSubmitting(false);
