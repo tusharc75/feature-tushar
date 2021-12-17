@@ -15,6 +15,7 @@ import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
 import ManagePurchaseOrder from "../../PurchaseOrder/ManagePurchaseOrder";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
+import { uniqBy } from 'lodash';
 
 const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
 
@@ -24,11 +25,15 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const [showConfirmBox, setShowConfirmBox] = useState(false)
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState([])
+  const [assetAssignedProduct, setAssetAssignedProduct] = useState([])
+
   const [deleteData, setDeleteData] = useState([])
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, products: [] });
+
+
 
   useEffect(() => {
     axiosInstance().get("/field/child?resource=Rental Management Product").then(({ data: { data } }) => {
@@ -254,6 +259,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           setAddSerializedAssetDialog(false)
           fetchProductInventory()
           setSelectedProducts([])
+          setAssetAssignedProduct([])
           setAdding(false)
           toastConfig.setToastConfig({
             open: true,
@@ -286,20 +292,40 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   }
 
   useEffect(() => {
-    const flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty !== f.subRows?.length);
-    const products = flatArray.map(m => { return { _id: m.materialId, assetsCount: m.qty - (m.subRows?.length ?? 0) } })
+    let flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty !== f.subRows?.length);
+    flatArray = uniqBy(flatArray, '_id')
+    const products = flatArray.map(m => { return { _id: m.materialId, unit: m.unit, assetsCount: m.qty - (m.subRows?.length ?? 0) } })
     setShowManagePurchaseOrderDialog(prevState => {
       return {
         ...prevState,
         products: products
       }
     });
+    const assetProduct = []
+    flatArray.forEach((element) => {
+      if (element.type === "product" && element.qty > element?.subRows?.length) {
+        const foundProduct = assetProduct.filter((e) => e.materialId === element.materialId)
+        if (foundProduct.length) {
+          foundProduct[0].qty += element.qty - element?.subRows?.length
+        }
+        else {
+          assetProduct.push({
+            ...element,
+            _id: element.materialId,
+            id: element.materialId,
+            productName: element.productDetail?.productName,
+            qty: element.qty - element?.subRows?.length
+          })
+        }
+      }
+    })
+    setAssetAssignedProduct(assetProduct)
   }, [selectedProducts])
 
   const disableAssignSerializedAssets = () => {
-    if (selectedProducts.length === 0 || selectedProducts.some(s => s.type === "asset"))
+    if (selectedProducts.length === 0)
       return true;
-    const flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty !== f.subRows?.length);
+    const flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty > f.subRows?.length);
     return flatArray.length === 0;
   }
 
@@ -387,7 +413,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           setAddSerializedAssetDialog(false);
         }}
         isAdding={isAdding}
-        selectedProducts={[...selectedProducts.filter(p => p.type === "product").map(m => { return { ...m, _id: m.materialId, id: m.materialId, productName: m.productDetail?.productName } })]}
+        selectedProducts={assetAssignedProduct}
         filterByPlant={rentalManagementData?.warehouse?.optionValue ? rentalManagementData?.warehouse?.optionValue : null}
       />
     }
@@ -410,7 +436,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         purchaseOrderId={null}
         onClose={() => setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: false }))}
         onSuccess={() => {
-          setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: false }))
+          setShowManagePurchaseOrderDialog(({ open: false, products: [] }))
+          setSelectedProducts([])
+          fetchProductInventory()
           toastConfig.setToastConfig({
             open: true,
             type: "success",
@@ -421,7 +449,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         isFromSerializedAssetStepFromRental={true}
         currency={rentalManagementData.currencyCode}
         rentalManagementId={rentalManagementData._id}
-        deliveryDateMax={rentalManagementData.rentalStartDate}
+        deliveryDateMax={rentalManagementData.estimateStartDate}
       />
     }
   </Fragment>

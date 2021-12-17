@@ -398,7 +398,7 @@ const RepairJobDetails = () => {
                     Edit
                   </Button>
                 )}
-                {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {/* {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />} */}
               </DetailsPageHeader>
             )}
 
@@ -724,7 +724,7 @@ const RepairJobDetails = () => {
           }}
           isAdding={isAdding}
           selectedProducts={[]}
-          queryString={`ignoreIds=${JSON.stringify(step1DataRows.map(m => m._id ?? m.id))}&repairable=true&notScrapRepair=1`}
+          queryString={`ignoreIds=${JSON.stringify(step1DataRows.map(m => m._id ?? m.id))}&repairable=true&notScrapLost=1`}
           filterByPlant={repairJobData.plant?.optionValue}
         />
       

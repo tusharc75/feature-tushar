@@ -14,7 +14,7 @@ import { CommonRenderer, DateRenderer } from '../../components/AgGridComponents/
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { AiFillFilePdf } from "react-icons/ai";
+import { AiFillFilePdf } from 'react-icons/ai';
 
 interface ReceivingGridProps {
   fetchAssets: any;
@@ -193,19 +193,20 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   useEffect(() => {
     if (selectedRecords.length > 0) {
-      const inventoryWithNoTicket = selectedRecords.filter((asset: any) => !asset?.hasOwnProperty('receivingTicket') && asset?.deliveryTicketStatus === "Delivered");
-      const loadingTicketsNotDelivered = selectedRecords.filter((asset: any) => asset?.deliveryTicketStatus !== "Delivered");
+      const inventoryWithNoTicket = selectedRecords.filter(
+        (asset: any) => !asset?.hasOwnProperty('receivingTicket') && asset?.deliveryTicketStatus === 'Delivered'
+      );
+      const loadingTicketsNotDelivered = selectedRecords.filter((asset: any) => asset?.deliveryTicketStatus !== 'Delivered');
       const selectedInventoryDelivered = selectedRecords.filter(
         (asset: any) => asset?.receivingTicketStatus === 'Delivered' || asset?.receivingTicketStatus === 'In-Transit'
       );
 
-      setLoadingTicketsDelivered(loadingTicketsNotDelivered)
+      setLoadingTicketsDelivered(loadingTicketsNotDelivered);
       setAssetsDelivered(selectedInventoryDelivered);
       setAssetWithNoTicket(inventoryWithNoTicket);
     }
 
     if (dataRows.length > 0) {
-
       const inventoryWithNoTicket = dataRows.filter((asset: any) => !asset?.hasOwnProperty('receivingTicket'));
       const inventoryDelivered = dataRows.filter((asset: any) => asset?.receivingTicketStatus === 'Delivered');
       if (inventoryWithNoTicket.length > 0) {
@@ -216,7 +217,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       if (transferAssetData?.transferType.includes('External')) {
         if (inventoryDelivered.length === dataRows.length) {
           setTransferIsEnded(true);
-          updateTransferStatus("Completed")
+          updateTransferStatus('Completed');
         } else {
           setTransferIsEnded(false);
         }
@@ -254,8 +255,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" mx="4px">
-        <div></div>
+      <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} justifyContent="space-between" mx="4px">
         <Box>
           {permissions?.transferAsset?.isRead && (
             <Button
@@ -263,11 +263,13 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               color="primary"
               type="button"
               size="small"
-              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              startIcon={<AiFillFilePdf />}
               disabled={fileDownloading}
-              onClick={() => { handleViewPdf(false) }}
+              onClick={() => {
+                handleViewPdf(false);
+              }}
             >
-              {isMobile ? <AiFillFilePdf size={22} /> : fileDownloading ? "Please wait..." : "Preview"}
+              {fileDownloading ? 'Please wait...' : 'Preview'}
             </Button>
           )}
           <Box component="span" mx={1} />
@@ -277,33 +279,46 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               color="primary"
               type="button"
               size="small"
-              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              startIcon={<AiFillFilePdf />}
               disabled={fileDownloading}
-              onClick={() => { handleViewPdf(true) }}
+              onClick={() => {
+                handleViewPdf(true);
+              }}
             >
-              {isMobile ? <AiFillFilePdf size={22} /> : fileDownloading ? "Please wait..." : "Download"}
+              {fileDownloading ? 'Please wait...' : 'Download'}
+            </Button>
+          )}
+        </Box>
+
+        <Box marginTop={isMobile ? 2 : 0}>
+          {permissions?.transferAsset.isUpdate && permissions?.receivingTicket.isCreate && (
+            <Button
+              variant="contained"
+              size="small"
+              color="primary"
+              disabled={
+                selectedRecords.length === 0 ||
+                assetWithNoTicket.length === 0 ||
+                loadingTicketsNotDelivered.length > 0 ||
+                selectedRecords.filter((asset: any) => asset?.status === 'Lost').length > 0
+              }
+              onClick={() => setOpenReceivingTicketDialog(true)}
+            >
+              Create Receiving Ticket
             </Button>
           )}
           <Box component="span" mx={1} />
-          {permissions?.transferAsset.isUpdate && permissions?.receivingTicket.isCreate && <Button
-            variant="contained"
-            size="small"
-            color="primary"
-            disabled={selectedRecords.length === 0 || assetWithNoTicket.length === 0 || loadingTicketsNotDelivered.length > 0}
-            onClick={() => setOpenReceivingTicketDialog(true)}
-          >
-            Create Receiving Ticket
-          </Button>}
-          <Box component="span" mx={1} />
-          {permissions?.transferAsset.isUpdate && permissions?.receivingTicket.isUpdate && <Button
-            variant="contained"
-            size="small"
-            color="primary"
-            disabled={assetsDelivered.length > 0 || selectedRecords.filter((asset) => asset?.hasOwnProperty('receivingTicket')).length === 0}
-            onClick={() => setShowConfirmBox(true)}
-          >
-            Remove Receiving Ticket
-          </Button>}
+          {permissions?.transferAsset.isUpdate && permissions?.receivingTicket.isUpdate && (
+            <Button
+              variant="contained"
+              size="small"
+              color="primary"
+              disabled={assetsDelivered.length > 0 || selectedRecords.filter((asset) => asset?.hasOwnProperty('receivingTicket')).length === 0}
+              onClick={() => setShowConfirmBox(true)}
+            >
+              Remove Receiving Ticket
+            </Button>
+          )}
         </Box>
       </Box>
 

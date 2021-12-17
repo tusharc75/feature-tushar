@@ -98,12 +98,12 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
       }
       if (repairJobData) {
         if (repairJobData?.typeOfRepair === "Internal") {
-          if (formData.name.includes("Supplier")) {
+          if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
             return false
           }
         }
         if (repairJobData?.typeOfRepair === "External") {
-          if (formData.name.includes("Customer")) {
+          if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
             return false
           }
         }
@@ -194,16 +194,27 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
           tempInitialData["repairJob"] = repairJobData._id
           tempInitialData["type"] = "Repair Job"
           tempInitialData["receivingJobName"] = `${repairJobData?.repairJobName}_${generateUniqueIdOnly()}`
+          
+          tempInitialData["warehouse"] = repairJobData?.plant?.optionValue ?? "";
+          const receivingPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "warehouse")?.option;
+
+          if (receivingPlantAddresses && tempInitialData["warehouse"]) {
+            const address = receivingPlantAddresses.find(f => f.optionValue === tempInitialData["warehouse"]);
+            if (address) {
+              tempInitialData["receivingPlantAddress"] = address.address;
+            }
+          }
+
           if (repairJobData?.typeOfRepair === "Internal") {
-            // tempInitialData["customerAccount"] = repairJobData?.repairPlant?.optionValue;
-            tempInitialData["pickupAddress"] = repairJobData?.plantShipTo;
+            tempInitialData["pickupPlant"] = repairJobData?.repairPlant?.optionValue;
+            tempInitialData["pickupPlantAddress"] = repairJobData?.plantShipTo;
           }
           if (repairJobData?.typeOfRepair === "External") {
             tempInitialData["supplierAccount"] = repairJobData?.vendor?.optionValue;
             tempInitialData["supplierShippingAddress"] = repairJobData?.supplierShipTo;
           }
           setReceivingTicketData({
-            fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "repairJob"),
+            fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "repairJob"),
             initialValues: tempInitialData,
           });
           setFormValues(tempInitialData)
@@ -213,24 +224,24 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
           tempInitialData["productInventory"] = productInventoryForReceivingTicket.map(d => d._id)
           tempInitialData["transferAsset"] = transferData._id
           tempInitialData["type"] = "Transfer Asset"
+          tempInitialData["warehouse"] = transferData?.transferFromPlant.optionValue ?? "";
+          tempInitialData["receivingPlantAddress"] = transferData?.transferFromPlant.address ?? "";
           tempInitialData["expectedDeliveryDate"] = moment(new Date()).add(7, 'days');
           tempInitialData["receivingJobName"] = `${transferData?.transferAssetNumber}_${generateUniqueIdOnly()}`
-          tempInitialData["warehouse"] = transferData?.transferToPlant.optionValue
-          tempInitialData["receivingPlantAddress"] = transferData?.transferToPlant.address
           if (transferData?.transferType === "External Customer") {
             tempInitialData["customerAccount"] = transferData?.transferToCustomer?.optionValue;
-            tempInitialData["customerPickupAddress"] = transferData?.customerShipTo;
+            tempInitialData["pickupAddress"] = transferData?.customerShipTo;
           }
           if (transferData?.transferType === "External Supplier") {
             tempInitialData["supplierAccount"] = transferData?.transferToSupplier?.optionValue;
-            tempInitialData["supplierPickupAddress"] = transferData?.supplierShipTo;
+            tempInitialData["supplierShippingAddress"] = transferData?.supplierShipTo;
           }
           setReceivingTicketData({
             fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "transferAsset"),
             initialValues: tempInitialData,
           });
           setFormValues(tempInitialData)
-
+          setLoading(false);
         } else {
           let initialData = getObjKeys('', fieldsDataForCreate);
           setReceivingTicketData({
@@ -395,7 +406,7 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
                             </div>
                             <Box marginY={2}>
                               <Grid spacing={3} container>
-                                {form.sectionFields.map((field) => (
+                                {form.sectionFields.filter(field => (repairJobData ? field.fieldName !== "customerAccount" : true)).map((field) => (
                                   <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                     {
                                       (rentalData && field.fieldName === "customerAccount") || field.fieldName === "deliveryType" ? (

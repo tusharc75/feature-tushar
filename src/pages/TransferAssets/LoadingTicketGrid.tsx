@@ -218,8 +218,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" mx="4px">
-        <div></div>
+      <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} justifyContent="space-between" mx="4px">
         <Box>
           {permissions?.transferAsset?.isRead && (
             <Button
@@ -227,13 +226,13 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               color="primary"
               type="button"
               size="small"
-              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              startIcon={<AiFillFilePdf />}
               disabled={fileDownloading}
               onClick={() => {
                 handleViewPdf(false);
               }}
             >
-              {isMobile ? <AiFillFilePdf size={22} /> : fileDownloading ? 'Please wait...' : 'Preview'}
+              {fileDownloading ? 'Please wait...' : 'Preview'}
             </Button>
           )}
           <Box component="span" mx={1} />
@@ -243,16 +242,17 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               color="primary"
               type="button"
               size="small"
-              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              startIcon={<AiFillFilePdf />}
               disabled={fileDownloading}
               onClick={() => {
                 handleViewPdf(true);
               }}
             >
-              {isMobile ? <AiFillFilePdf size={22} /> : fileDownloading ? 'Please wait...' : 'Download'}
+              {fileDownloading ? 'Please wait...' : 'Download'}
             </Button>
           )}
-          <Box component="span" mx={1} />
+        </Box>
+        <Box marginTop={isMobile ? 2 : 0}>
           {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isCreate && (
             <Button
               variant="contained"
@@ -260,7 +260,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               color="primary"
               disabled={
                 selectedRecords.length === 0 ||
-                selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0
+                selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0 ||
+                selectedRecords.filter((asset: any) => asset?.status === 'Lost').length > 0
               }
               onClick={() => setOpenLoadingTicketDialog(true)}
             >
@@ -276,7 +277,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               disabled={
                 assetsDelivered.length > 0 ||
                 assetsIntransit.length > 0 ||
-                selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length === 0
+                selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length === 0 ||
+                selectedRecords.filter((asset) => !asset?.hasOwnProperty('deliveryTicket')).length > 0
               }
               onClick={() => setShowConfirmBox(true)}
             >

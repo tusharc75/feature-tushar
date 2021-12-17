@@ -195,6 +195,10 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             if (item?.name === "Product Builder" && process.env.REACT_APP_ENV === 'staging') {
               return false
             }
+
+            if (("hiddenResource" in item) && item?.hiddenResource) {
+              return false
+            }
             return item.isRead === true
           }
         );

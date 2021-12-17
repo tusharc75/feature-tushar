@@ -230,7 +230,7 @@ const RepairJob = () => {
         </Tooltip>
       )}
 
-      <GridDeleteIcon
+      {/* <GridDeleteIcon
         hasDeletePermission={permissions.repairJob?.isDelete}
         ownerId={params.data.ownerId}
         userId={user?.user?._id}
@@ -242,7 +242,7 @@ const RepairJob = () => {
           })
         }
         entity="repair job"
-      />
+      /> */}
     </>
   );
 

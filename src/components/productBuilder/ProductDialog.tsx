@@ -31,7 +31,11 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import { Collapse } from '@material-ui/core';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { useData } from "../../StateProvider/Provider";
 import { FaDiceOne } from "react-icons/fa";
+import ManageAccountDialog from "../../pages/Account/ManageAccount";
+import AddIcon from "@material-ui/icons/AddCircle";
+import InfoIcon from "@material-ui/icons/Info";
 
 var levalOrderBy = [
   "product",
@@ -60,6 +64,11 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
   const [expanded, setExpanded] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
+
+
+  const [showAccountCreateDialog, setShowAccountCreateDialog] = useState(false);
+
+  const { state: { permissions } }: any = useData();
 
   useEffect(() => {
     axiosInstance().get(`/productbuilder/getoneproduct/${productBuilderId}/${productId}`).then(({ data: { data } }) => {
@@ -376,88 +385,163 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                         ["productCategory", "productTemplate", "entity"].includes(field.fieldName) ? true : false
                                         : ["productCategory", "productTemplate", "entity", "priceTemplate"].includes(field.fieldName) ? true : false}
                                     />
-                                  ) : (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
-                                      <Box display="flex">
-                                        <Box flexGrow={1}>
+                                  ) :
+                                    field.fieldName === 'supplier' ? (
+                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
+                                        <Box display="flex">
                                           <FormTypes
                                             {...field}
-                                            style={{ background: field?.isUneditable ? "#1e768221" : "" }}
-                                            productTemplateId={values?.productTemplate}
-                                            priceTemplateId={values?.priceTemplate}
-                                            fields={initialData.fields}
-                                            fieldData={field}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
-                                            label={
-                                              field.isUneditable
-                                                ? `${replaceUnit(
-                                                  field.fieldLabel,
-                                                  values?.unit,
-                                                  values?.secondaryUnit
-                                                )} (Auto Calculated Field)`
-                                                : replaceUnit(
-                                                  field.fieldLabel,
-                                                  values?.unit,
-                                                  values?.secondaryUnit
-                                                )
-                                            }
+                                            label={field.fieldLabel}
                                             name={field.fieldName}
                                             type={field.type}
                                             options={field.option}
-                                            setFieldValue={setFieldValue}
+                                            onChange={(e, value) => {
+                                              setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "")
+                                            }}
                                             required={field.required}
                                             fullWidth
-                                            isTooltip={field.isTooltip}
-                                            tooltipMessage={
-                                              field.tooltipMessage
+                                            isTooltip={
+                                              field?.isTooltip || false
                                             }
-                                            decimalPlaces={field.decimalPlaces}
-                                            isvlookupReverse={
-                                              field.isvlookupReverse
+                                            tooltipMessage={
+                                              field?.tooltipMessage
                                             }
                                             size="small"
-                                            disabled={stage === "product" ?
-                                              ["productCategory", "productTemplate", "entity"].includes(field.fieldName) ? true : false
-                                              : ["productCategory", "productTemplate", "entity", "priceTemplate"].includes(field.fieldName) ? true : false}
-                                            imageOrFileUploadCompletePercentage={
-                                              ["imageUpload", "fileUpload"].some((s) => s === field.type)
-                                                ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(
-                                                    completePercentage
-                                                  );
-                                                }
-                                                : null
-                                            }
-                                            setValues={setValues}
+                                            doNotShowInfoTooltip={true}
                                           />
+                                          {permissions.supplierAccount.isCreate && (
+                                            <Grid>
+                                              <Tooltip title="Create Account" className="mt-1"   >
+                                                <IconButton
+                                                  onClick={() => { setShowAccountCreateDialog(true); }}
+                                                  size="small"
+                                                >
+                                                  <AddIcon color={"primary"} />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </Grid>
+                                          )}
+                                          {field?.tooltipMessage ? (
+                                            <Grid>
+                                              <Tooltip title={field?.tooltipMessage ?? ""}  >
+                                                <InfoIcon color="disabled" />
+                                              </Tooltip>
+                                            </Grid>
+                                          ) : null}
                                         </Box>
-                                        {(field.leval === "product-builder-custom" || field.leval === "price-builder-custom") && (
-                                          <Box>
-                                            <Tooltip
-                                              title="Remove"
-                                              className="mt-1"
-                                            >
-                                              <IconButton
-                                                onClick={() => handleRemoveField(field)}
-                                                color="primary"
-                                                size="small"
-                                              >
-                                                <HighlightOffIcon color="error" />
-                                              </IconButton>
-                                            </Tooltip>
+                                      </Grid>
+                                    ) : (
+                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
+                                        <Box display="flex">
+                                          <Box flexGrow={1}>
+                                            <FormTypes
+                                              {...field}
+                                              style={{ background: field?.isUneditable ? "#1e768221" : "" }}
+                                              productTemplateId={values?.productTemplate}
+                                              priceTemplateId={values?.priceTemplate}
+                                              fields={initialData.fields}
+                                              fieldData={field}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={
+                                                field.isUneditable
+                                                  ? `${replaceUnit(
+                                                    field.fieldLabel,
+                                                    values?.unit,
+                                                    values?.secondaryUnit
+                                                  )} (Auto Calculated Field)`
+                                                  : replaceUnit(
+                                                    field.fieldLabel,
+                                                    values?.unit,
+                                                    values?.secondaryUnit
+                                                  )
+                                              }
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={field.option}
+                                              setFieldValue={setFieldValue}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field.isTooltip}
+                                              tooltipMessage={
+                                                field.tooltipMessage
+                                              }
+                                              decimalPlaces={field.decimalPlaces}
+                                              isvlookupReverse={
+                                                field.isvlookupReverse
+                                              }
+                                              size="small"
+                                              disabled={stage === "product" ?
+                                                ["productCategory", "productTemplate", "entity"].includes(field.fieldName) ? true : false
+                                                : ["productCategory", "productTemplate", "entity", "priceTemplate"].includes(field.fieldName) ? true : false}
+                                              imageOrFileUploadCompletePercentage={
+                                                ["imageUpload", "fileUpload"].some((s) => s === field.type)
+                                                  ? (completePercentage) => {
+                                                    setUploadingImageOrFileProgress(
+                                                      completePercentage
+                                                    );
+                                                  }
+                                                  : null
+                                              }
+                                              setValues={setValues}
+                                            />
                                           </Box>
-                                        )}
-                                      </Box>
-                                    </Grid>
-                                  )
+                                          {(field.leval === "product-builder-custom" || field.leval === "price-builder-custom") && (
+                                            <Box>
+                                              <Tooltip
+                                                title="Remove"
+                                                className="mt-1"
+                                              >
+                                                <IconButton
+                                                  onClick={() => handleRemoveField(field)}
+                                                  color="primary"
+                                                  size="small"
+                                                >
+                                                  <HighlightOffIcon color="error" />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </Box>
+                                          )}
+                                        </Box>
+                                      </Grid>
+                                    )
                                 )}
                             </Grid>
                           </Collapse>
                         </Box>
                       </div>
                     ))}
+                    {showAccountCreateDialog && (
+                      <ManageAccountDialog
+                        open={showAccountCreateDialog}
+                        onClose={() => { setShowAccountCreateDialog(false); }}
+                        accountResource={"supplierAccount"}
+                        accountApi={"supplier-account"}
+                        isRedirectToDetailPage={false}
+                        onSuccess={({ data }) => {
+                          setShowAccountCreateDialog(false);
+                          if (data._id) {
+                            setFieldValue("supplier", data._id);
+                            const fields = [...productFields];
+                            fields.forEach((s) => {
+                              s.sectionFields.forEach((f: any) => {
+                                if (f.fieldName === "supplier") {
+                                  f.option = [...f.option, {
+                                    optionLabel: data?.accountName,
+                                    optionValue: data?._id
+                                  }]
+                                }
+                              })
+                            })
+                            setProductFields(fields)
+                          }
+                        }}
+                      />
+                    )}
                   </Form>
                 </Box>
               </CustomDialogContent>
@@ -483,6 +567,7 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
               </CustomDialogFooter>
             </Fragment>
           )}
+
         </Formik>
       ) : (
         <Box p={2} height={500} bgcolor="white">
