@@ -67,7 +67,7 @@ const ReceivingTicketDetails = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
+  const { openEdit, tab }: any = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -88,7 +88,7 @@ const ReceivingTicketDetails = () => {
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false)
 
   const [canEdit, setCanEdit] = useState(false)
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
 
   const { getColumnData } = useColumns();
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
@@ -102,9 +102,35 @@ const ReceivingTicketDetails = () => {
 
   const [isAdding, setIsAdding] = useState(false);
   const [downlodingFile, setDownlodingFile] = useState(false)
+  const [locationKeys, setLocationKeys] = useState([])
+
+  useEffect(() => {
+    return history.listen(location => {
+      const { tab }: any = queryString.parse(history.location.search);
+      if (history.action === 'PUSH') {
+        setLocationKeys([location.key])
+      }
+      if (history.action === 'POP') {
+        if (locationKeys[1] === location.key) {
+          setLocationKeys(([_, ...keys]) => keys)
+          // Handle forward event
+          setTabValue(tab ? parseInt(tab) : 1)
+
+        } else {
+          setLocationKeys((keys) => [location.key, ...keys])
+          console.log(tab)
+          // Handle back event
+          setTabValue(tab ? parseInt(tab) : 1)
+
+        }
+      }
+    })
+  }, [locationKeys,])
+
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
+    history.push(`?tab=${newValue}`);
   };
 
   useEffect(() => {

@@ -7,7 +7,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import styles from '../Leads/Header.module.scss';
 import { isMobile } from 'react-device-detect';
-import {MdAdd} from "react-icons/all";
+import { MdAdd } from "react-icons/all";
 
 function RepairJobHeader(props) {
   const {
@@ -23,7 +23,8 @@ function RepairJobHeader(props) {
     icon,
     heading,
     children,
-    showTransferEntityDialog
+    showTransferEntityDialog,
+    selectedType
     // showCloneRentalManagementDialog
   } = props;
 
@@ -51,7 +52,7 @@ function RepairJobHeader(props) {
       <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
         {icon} <span className="listingHeader">{heading}</span>
         {options && (
-          <ToggleButtonGroup size="small" className="ml-2" value={filter} exclusive onChange={handleFilter}>
+          <ToggleButtonGroup size="small" className="ml-2" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
             {options.map((k, index) => {
               return (
                 <ToggleButton value={k.key} key={index}>
@@ -66,25 +67,25 @@ function RepairJobHeader(props) {
       <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
 
-            <Grid style={{display: "flex", flex:1}}>
+          <Grid style={{ display: "flex", flex: 1 }}>
             <SearchBox
               onSearch={onSearch}
               searchbox={styles.search_box_input}
               value={searchVal}
               size="small"
               placeholder="Search Repair Jobs"
-              style={isMobile ? {flex:1} : {}}
+              style={isMobile ? { flex: 1 } : {}}
             />
 
-            </Grid>
+          </Grid>
 
-              <Grid style={{display: "flex" , gap:"5px"}}>
-              {RepairJobPermissions?.isCreate && RepairJobPermissions?.isUpdate &&  (
-                <Button variant={isMobile ? "text" : "contained"} color="primary" size="small" className={isMobile ? "mobile_button" : styles.add_submit_btn} onClick={onCreate} >
-                  {isMobile ? <MdAdd size={23}/> : "Add"}
-                </Button>
-              )}
-              {/* {RepairJobPermissions?.isDelete && (
+          <Grid style={{ display: "flex", gap: "5px" }}>
+            {RepairJobPermissions?.isCreate && RepairJobPermissions?.isUpdate && (
+              <Button variant={isMobile ? "text" : "contained"} color="primary" size="small" className={isMobile ? "mobile_button" : styles.add_submit_btn} onClick={onCreate} >
+                {isMobile ? <MdAdd size={23} /> : "Add"}
+              </Button>
+            )}
+            {/* {RepairJobPermissions?.isDelete && (
                 <>
                   <Button
                     disabled={canDelete}
@@ -120,7 +121,7 @@ function RepairJobHeader(props) {
                   </Menu>
                 </>
               )} */}
-              </Grid>
+          </Grid>
         </Box>
       </Grid>
     </Grid>

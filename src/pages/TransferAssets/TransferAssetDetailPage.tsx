@@ -260,31 +260,33 @@ const TransferAssetDetailPage = () => {
     axiosInstance()
       .put(`quote-pdf-template/pdf-column`, { id, resourceName: 'transferAsset', acceptedColumn: ['Asset Number', 'Product Description', 'Status'] })
       .then(({ data: { data } }) => {
-        axiosInstance()
-          .get(`user/download?fileName=${data.pdf}`, {
-            responseType: 'blob'
-          })
-          .then(({ data }) => {
-            if (download) {
-              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-              const link = document.createElement('a');
-              link.href = url;
-              link.setAttribute('download', `TransferAsset-${transferAssetData.purchaseOrderNumber}.pdf`);
-              document.body.appendChild(link);
-              link.click();
-            } else {
-              const file = new Blob([data], { type: 'application/pdf' });
-              const fileURL = URL.createObjectURL(file);
-              const pdfWindow = window.open();
-              pdfWindow.location.href = fileURL;
-              toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-            }
-            setFileDownloading(false);
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-            setFileDownloading(false);
-          });
+        if (data && data.hasOwnProperty("pdf")) {
+          axiosInstance()
+            .get(`user/download?fileName=${data.pdf}`, {
+              responseType: 'blob'
+            })
+            .then(({ data }) => {
+              if (download) {
+                const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `TransferAsset-${transferAssetData.purchaseOrderNumber}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+              } else {
+                const file = new Blob([data], { type: 'application/pdf' });
+                const fileURL = URL.createObjectURL(file);
+                const pdfWindow = window.open();
+                pdfWindow.location.href = fileURL;
+                toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+              }
+              setFileDownloading(false);
+            })
+            .catch((err) => {
+              toastConfig.setToastConfig(err);
+              setFileDownloading(false);
+            });
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -405,7 +407,7 @@ const TransferAssetDetailPage = () => {
                   isTransferEnded={isTransferEnded}
                   isNextStep={isNextStep}
                   isPrevStep={isPrevStep}
-                  steps={transferAssetData?.transferType === 'Internal' ? transferSteps : transferSteps1}
+                  steps={transferAssetData ? transferAssetData.transferType === 'Internal' ? transferSteps : transferSteps1 : transferSteps}
                   currentStep={currentStep}
                   setCurrentStep={setCurrentStep}
                   updateStatus={updateStatus}

@@ -93,7 +93,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                 let res: any = {
                     ...prepareDataForGrid(item),
                 };
-                res.productName = `${index + 1}. ${item.productDetail?.productName}`
+                res.productName = `${index + 1}- ${item.productDetail?.productName}`
                 res.productNumber = item.productDetail?.productNumber
                 res.productDetail = item.productDetail
                 return res;
@@ -121,7 +121,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     window.open(`${routes.productDetail.path}/${params.data.productId}`);
                 }}
             >
-                <InfoIcon color="primary" />
+                <InfoIcon fontSize="small" />
             </IconButton>
         </HtmlTooltip>
     </span >
