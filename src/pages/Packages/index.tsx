@@ -102,7 +102,7 @@ const PackageList = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-            let currentColumn = getColumnData(pageTitle, o?.fieldData, `${routes.packages.path}`);
+            let currentColumn = getColumnData(pageTitle, o?.fieldData, `${routes.packagesDetail.path}`);
             if (currentColumn !== null) {
                 if (isOffline) {
                     currentColumn.columnData['filter'] = false;
