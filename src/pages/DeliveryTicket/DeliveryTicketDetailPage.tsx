@@ -23,13 +23,14 @@ import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import moment from 'moment';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
-import { FaWpforms } from "react-icons/fa";
+import {FaFileSignature, FaWpforms} from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import { prepareDataForGrid } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { AiFillFilePdf } from "react-icons/ai";
+import {FcSignature} from "react-icons/all";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -494,11 +495,13 @@ export default function DeliveryTicketDetail(props) {
                     // deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id && 
                     (deliveryTicketData?.status === "In-Transit" || deliveryTicketData?.status === "Delivered") ?
                       <Button
-                        variant="contained"
+                          variant={isMobile ? "text" : "contained" }
                         color="primary"
                         size="small"
-                        onClick={() => setOpenSigns(true)}>
-                        View Signatures
+                        onClick={() => setOpenSigns(true)}
+                          style={isMobile ? {color:"var(--info-darken)"} : {}}
+                      >
+                        {isMobile ? <FaFileSignature size={20}/> : "View Signatures" }
                       </Button> : null
                   }
                 </DetailsPageHeader>

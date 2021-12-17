@@ -20,25 +20,34 @@
   font-size: 0.8rem;
 }
 .detail_view{
+  display: flex;
+  gap: 5px;
   padding: 12px !important;
   padding-bottom: 0 !important;
-  background-color: #E6E6E6;
+  background-color: #C8E9CE;
 }
 .delete_contact{
   display: flex !important;
   justify-content: flex-end;
 }
 .delete_contact_icon{
-  svg{
-    width: 20px;
-    height: 20px;
-  }
 
+
+}
+.delete_icon_button{
+  width: 20px !important;
+  height: auto;
 }
 .detail_account{
   ul{
     padding-top: 0 !important;
   }
+}
+.list_start_icon{
+  min-width: 26px !important;
+}
+.label_size{
+  font-size: 10px !important;
 }
 .opportunity_layout{
   display: grid !important;
