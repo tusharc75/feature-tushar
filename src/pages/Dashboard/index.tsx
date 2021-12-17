@@ -161,7 +161,7 @@ function Dashboard() {
         <Grid className={styles.dashboard_layout}>
           <div className={styles.all_content_box}>
             <h1 className="mb-2">Raising resiliency in a rapidly transforming business environment</h1>
-            <p>Simplify orders and lifecycle management for your rental assets and services</p>
+            <p>Simplify and accelerate your B2B transactions.</p>
             <img src={crmImage} alt="Logo" className={styles.set_crm_image} />
           </div>
           <div>

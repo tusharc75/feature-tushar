@@ -356,7 +356,7 @@ const CreateFormBuilder = () => {
                                             else {
                                                 history.push({ pathname: routes.formBuilder.path })
                                             }
-                                        }} >  {isMobile ? <RiCloseCircleFill size={24}/> : "Save"}
+                                        }} >  {isMobile ? <RiCloseCircleFill size={24}/> : "Close"}
                                     </Button>
                                 </Box>
                             </Grid>

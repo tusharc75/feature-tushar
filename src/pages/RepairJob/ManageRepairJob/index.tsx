@@ -80,6 +80,7 @@ const ManageRepairJob = (props) => {
               if (isClone) {
                 const { _id, brand, createdBy, history, repairJobName, updatedBy, ...rest } = data;
                 setTitle('Clone')
+                setDisablePlantIfAssetAdded(false);
 
                 setRepairJobData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -151,7 +152,7 @@ const ManageRepairJob = (props) => {
             });
         } else {
           setTitle('Create Repair Job')
-
+          setDisablePlantIfAssetAdded(false);
           let initialData = { ...getObjKeys('', fieldsDataForCreate), expectedCompletionDate: "" };
           setDisableFieldsIfLoadingTicketIsCreated(false);
           setAllFields(fieldsDataForCreate);
