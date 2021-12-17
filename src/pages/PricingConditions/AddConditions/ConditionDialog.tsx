@@ -23,14 +23,12 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { Delete } from "@material-ui/icons";
 import MultipleEntry from './MultipleEntry';
 
-const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handleSuccess, detailData }) => {
+const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handleSuccess, detailData, isBulkedit }) => {
 
     const toastConfig = useContext(CustomToastContext)
     const [loading, setLoading] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
-
     const [headerLabel, setHeaderLabel] = useState("");
 
     //["Price", "Rent", "Discount", "Charge", "Tax"]
@@ -43,28 +41,57 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
     const [tax, setTax] = useState([]);
     const [charge, setCharge] = useState([]);
 
-    const [initialData, setInitialData] = useState(detailData);
-
+    const [initialData, setInitialData] = useState(null);
+    console.log(conditionData)
     useEffect(() => {
-        setInitialData(conditionData)
-        let details: any = {}
-        if (conditionData?.materialType === "product") {
-            details = conditionData?.productDetail
+        if (isBulkedit) {
+            let unitArray: any = []
+            let pricingMethodArray: any = []
+            conditionData?.forEach(element => {
+                if (element?.[`${element.materialType}Detail`]?.unit) {
+                    unitArray.push([...element?.[`${element.materialType}Detail`].unit])
+                }
+                if (element?.[`${element.materialType}Detail`].pricingMethod) {
+                    pricingMethodArray.push([...element?.[`${element.materialType}Detail`].pricingMethod])
+                }
+            });
+            let unit: any = unitArray?.shift().filter(function (v) {
+                return unitArray?.every(function (a) {
+                    return a.indexOf(v) !== -1;
+                });
+            });
+            let pricingMethod: any = pricingMethodArray?.shift().filter(function (v) {
+                return pricingMethodArray?.every(function (a) {
+                    return a.indexOf(v) !== -1;
+                });
+            });
+            setUnits(unit)
+            setPricingMethod(pricingMethod)
+            setHeaderLabel("Bulk Edit")
+            setInitialData({})
         }
         else {
-            details = conditionData?.packageDetail
+            setInitialData(conditionData)
+            let details: any = {}
+            if (conditionData?.materialType === "product") {
+                details = conditionData?.productDetail
+            }
+            else {
+                details = conditionData?.packageDetail
+            }
+            if (details?.unit) {
+                setUnits(details.unit)
+            }
+            if (details?.pricingMethod) {
+                setPricingMethod(details.pricingMethod)
+            }
+            setHeaderLabel(startCase(conditionData?.materialType) + " - " + (conditionData?.materialType === "product" ? details?.productName : details?.packageDescription))
         }
-        if (details?.unit) {
-            setUnits(details.unit)
-        }
-        if (details?.pricingMethod) {
-            setPricingMethod(details.pricingMethod)
-        }
-        setHeaderLabel(startCase(conditionData?.materialType) + " - " + (conditionData?.materialType === "product" ? details?.productName : details?.packageDescription))
     }, [conditionData]);
 
     const handleSubmit = (values) => {
         setLoading(true);
+        let data = []
         if (values.conditionType.includes("Discount")) {
             values.discount = discount;
         }
@@ -85,7 +112,16 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
         }
         delete values.productDetail;
         delete values.packageDetail;
-        axiosInstance().put(`${pricingCondition.api}/condition/${pricingConditionId}`, { condition: [values] }).then(({ data }) => {
+        console.log(values)
+        if (isBulkedit) {
+            conditionData.forEach(element => {
+                data.push({ ...element, ...values })
+            });
+        }
+        else {
+            data = [values]
+        }
+        axiosInstance().put(`${pricingCondition.api}/condition/${pricingConditionId}`, { condition: data }).then(({ data }) => {
             toastConfig.setToastConfig({
                 open: true,
                 type: "success",
@@ -166,8 +202,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                             <Grid item xs={12} sm={6} md={6}>
                                                 <Autocomplete
                                                     multiple
-                                                    freeSolo
-                                                    disableCloseOnSelect={true}
+                                                    //disableCloseOnSelect={true}
                                                     id="conditionType"
                                                     options={conditionType}
                                                     value={values['conditionType'] ? values['conditionType'] : []}
@@ -190,7 +225,6 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                             <Grid item xs={12} sm={6} md={6}>
                                                 <Autocomplete
                                                     multiple
-                                                    freeSolo
                                                     disableCloseOnSelect={true}
                                                     id="autocompleteunits"
                                                     options={unit}

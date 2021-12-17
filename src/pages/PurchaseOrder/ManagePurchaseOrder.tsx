@@ -21,7 +21,7 @@ import { useHistory } from "react-router-dom";
 import moment from "moment";
 
 const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, productId = null, productCategory = null,
-    productsToSave = [], isFromSerializedAssetStepFromRental = false, currency = null, rentalManagementId = null
+    productsToSave = [], isFromSerializedAssetStepFromRental = false, currency = null, rentalManagementId = null, warehouseId = null
     , deliveryDateMax = null }) => {
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
@@ -76,6 +76,9 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                 }
                 if (rentalManagementId) {
                     createValues["rentalJob"] = rentalManagementId
+                }
+                if (warehouseId) {
+                    createValues["warehouse"] = warehouseId
                 }
                 if (currency) {
                     createValues["currency"] = currency
