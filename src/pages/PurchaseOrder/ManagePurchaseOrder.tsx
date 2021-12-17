@@ -392,8 +392,8 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                 type="submit"
                                 onClick={submitForm}
                                 disabled={
-                                    loading ||
-                                    isFieldNotTouched(initialData, values)
+                                    loading 
+                                    // isFieldNotTouched(initialData, values)
                                 }
                             > Save</CustomButton>
                         </CustomDialogFooter>
