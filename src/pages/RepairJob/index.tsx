@@ -3,7 +3,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
-
+import queryString from 'query-string';
 import ManageRepairJobDialog from './ManageRepairJob';
 import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, repairJob } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
@@ -43,7 +43,8 @@ const RepairJob = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [selectedType, setSelectedType] = useState(1);
+  const { type }: any = queryString.parse(history.location.search);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
@@ -122,6 +123,29 @@ const RepairJob = () => {
     }
   ];
   //  Grid Variables - End
+  const [locationKeys, setLocationKeys] = useState([])
+  useEffect(() => {
+    return history.listen(location => {
+      const { type }: any = queryString.parse(history.location.search);
+      if (history.action === 'PUSH') {
+        setLocationKeys([location.key])
+      }
+      if (history.action === 'POP') {
+        if (locationKeys[1] === location.key) {
+          setLocationKeys(([_, ...keys]) => keys)
+          // Handle forward event
+          setSelectedType(type ? parseInt(type) : 1)
+
+        } else {
+          setLocationKeys((keys) => [location.key, ...keys])
+          // Handle back event
+          setSelectedType(type ? parseInt(type) : 1)
+
+        }
+      }
+    })
+  }, [locationKeys,])
+
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -390,6 +414,8 @@ const RepairJob = () => {
 
   const handleRepairJobTypeSel = (filterValues) => {
     setSelectedType(filterValues);
+    history.push(`?type=${filterValues}`)
+
   };
 
   const handleTransferEntityDialog = () => {
@@ -481,6 +507,7 @@ const RepairJob = () => {
       <CustomContainer>
         <div className="header-panel">
           <RepairJobHeader
+            selectedType={selectedType}
             selectedRecords={selectedRecords}
             onTypeChange={handleRepairJobTypeSel}
             options={RepairJobType}
