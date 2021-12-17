@@ -468,7 +468,7 @@ const Roles: FC = () => {
             additionalDetails={[]}
             chips={[]}
             owerCollaboratorInitialsOrImages=""
-            onCreate={() => { }}
+            onCreate={false}
             showClone={false}
             onClone={() => { }}
             renderedFrom={"role"} /> : <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}

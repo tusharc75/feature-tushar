@@ -28,11 +28,12 @@ import CustomContainer from "../../components/CustomContainer";
 import DeleteIcon from '@material-ui/icons/Delete';
 import { GiAbstract055 } from 'react-icons/gi';
 import SearchBox from '../../components/Helpers/SearchBox'
-import { ExpandMore } from "@material-ui/icons";
+import {AddOutlined, ExpandMore} from "@material-ui/icons";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { isMobile } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import {MdAdd} from "react-icons/all";
 
 let quotePdfTemplateTimeout;
 
@@ -311,26 +312,42 @@ const QuotePdfTemplate: FC = () => {
                             <GiAbstract055 /> <span className="listingHeader">{routes.quotePdfTemplate.title}</span>
                         </Grid>
                         <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
-                            <Box className={styles.filter_side_header} component="div" >
+                            <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
+                                <Grid style={{display: "flex", flex:1}}>
                                 <SearchBox
                                     onSearch={handleSearch}
                                     searchbox={styles.search_box_input}
-                                    width="242px"
+                                    width={isMobile ? "200px" : "242px"}
+                                    style={isMobile ? {flex:1} : {}}
                                     value={search}
                                 />
+                                </Grid>
+
+                                <Grid style={{display: "flex" , gap:"5px"}}>
                                 {permissions.quotePdfTemplate.isCreate &&
-                                    <Button className={styles.add_submit_btn} onClick={() => CreateNew("0", false)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                    <Button
+                                        onClick={() => CreateNew("0", false)}
+                                        variant={isMobile ? "text" : "contained"}
+                                        size="small"
+                                        color="primary"
+                                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                                        startIcon={isMobile ? null : <AddOutlined />}
+                                    >
+                                        {isMobile ? <MdAdd size={23}/> : "Add"}
+
+                                    </Button>
                                 }
                                 {permissions.quotePdfTemplate.isDelete &&
                                     <Button
-                                        className={styles.action_submit_btn}
-                                        variant="outlined"
+                                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                                        variant={isMobile ? "text" : "contained"}
                                         color="default"
                                         size="small"
                                         onClick={openActions}
                                         disabled={selectedRecords.length ? false : true}
                                         aria-controls="action-menu"
-                                    >Actions <ExpandMore />
+                                    >
+                                        {isMobile ? "" :  "Actions" } <ExpandMore/>
                                     </Button>
                                 }
                                 <Menu
@@ -347,6 +364,7 @@ const QuotePdfTemplate: FC = () => {
                                 >
                                     <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
                                 </Menu>
+                                </Grid>
                             </Box>
                         </Grid>
                     </Grid>
@@ -377,7 +395,7 @@ const QuotePdfTemplate: FC = () => {
                     additionalDetails={[]}
                     chips={[]}
                     owerCollaboratorInitialsOrImages=""
-                    onCreate={() => { }}
+                    onCreate={false}
                     showClone={false}
                     onClone={() => { }}
                     renderedFrom={"quotePdfTmeplate"} /> : <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
