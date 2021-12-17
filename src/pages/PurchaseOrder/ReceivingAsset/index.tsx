@@ -21,6 +21,7 @@ import { Link } from "react-router-dom";
 import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
 import { AiFillFilePdf } from "react-icons/ai";
 import { MdEmail } from "react-icons/md";
+import CustomReactTableLazyLoading from "../../../components/CustomReactTable/CustomReactTableLazyLoading";
 
 const useStyles = makeStyles(() => ({
     equal: {
@@ -185,7 +186,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                 let res: any = {
                     ...item,
                     description: item?.productDetail?.productName,
-                    treeId: item?.productDetail?._id,
+                    productId: item?.productDetail?._id,
                 };
                 return res;
             });
@@ -196,33 +197,43 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                     setCurrentStep(4)
                 }
             }
-            axiosInstance().get(`${productInventory.api}?filterById=[{"field": "pONumber", "term": "${purchaseOrderData._id}"}]`)
-                .then(({ data }) => {
-                    data.data = data.data.map((u) => {
-                        let tempProduct = rows.find(obj => obj.treeId === u?.product?.optionValue)
-                        if (tempProduct && !rows.some(obj => obj.treeId === u._id)) {
-                            rows.push({
-                                ...u,
-                                description: u.assetNumber,
-                                treeId: u._id,
-                                parent: tempProduct.treeId,
-                                actualDelivery: u.createdBy?.date,
-                                expectedDelivery: tempProduct.expectedDelivery
-                            })
-                        }
-                    }
-                    );
-                    const newDataForReactTable = [...translateDataToTree(rows ? [...rows] : [], "parent", "treeId", "subRows")];
-                    dispatch({
-                        type: "initialize", data: newDataForReactTable, count: newDataForReactTable.length
-                    });
-                    setTimeout(() => {
-                        dispatch({ type: "loading", loading: false });
-                    }, gridLoadingTimeout);
-                }).catch((error) => {
-                    dispatch({ type: "loading", loading: false });
-                    toastConfig.setToastConfig(error)
-                });
+            dispatch({
+                type: "initialize", data: rows, count: rows.length
+            });
+            setTimeout(() => {
+                dispatch({ type: "loading", loading: false });
+            }, gridLoadingTimeout);
+            // axiosInstance().get(`${productInventory.api}?filterById=[{"field": "pONumber", "term": "${purchaseOrderData._id}"}]`)
+            //     .then(({ data }) => {
+            //         console.time("data")
+            //         data.data = data.data.map((u) => {
+            //             let tempProduct = rows.find(obj => obj.treeId === u?.product?.optionValue)
+            //             if (tempProduct && !rows.some(obj => obj.treeId === u._id)) {
+            //                 rows.push({
+            //                     ...u,
+            //                     description: u.assetNumber,
+            //                     treeId: u._id,
+            //                     parent: tempProduct.treeId,
+            //                     actualDelivery: u.createdBy?.date,
+            //                     expectedDelivery: tempProduct.expectedDelivery
+            //                 })
+            //             }
+            //         }
+            //         );
+            //         console.timeEnd("data")
+            //         console.time("Initialize")
+            //         const newDataForReactTable = [...translateDataToTree(rows ? [...rows] : [], "parent", "treeId", "subRows")];
+            //         console.timeEnd("Initialize")
+            //         dispatch({
+            //             type: "initialize", data: newDataForReactTable, count: newDataForReactTable.length
+            //         });
+            //         setTimeout(() => {
+            //             dispatch({ type: "loading", loading: false });
+            //         }, gridLoadingTimeout);
+            //     }).catch((error) => {
+            //         dispatch({ type: "loading", loading: false });
+            //         toastConfig.setToastConfig(error)
+            //     });
         }).catch((error) => {
             dispatch({ type: "loading", loading: false });
             toastConfig.setToastConfig(error)
@@ -398,9 +409,14 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                         renderedFrom={routes.purchaseOrderDetail.title}
                         onClone={() => { }}
 
-                    /> : <CustomReactTable
+                    /> : <CustomReactTableLazyLoading
                         columns={columns}
-                        data={dataRows}
+                        data={dataRows.map(d => {
+                            return ({
+                                ...d,
+                                poId: purchaseOrderData._id,
+                            })
+                        })}
                         isInValidCheck={(rowData) => rowData?.type?.includes("roduct") && (isNaN(rowData?.finalPrice) || rowData?.finalPrice === 0)}
                         onSelect={setSelectedProducts}
                         childrenProperty="subRows"
