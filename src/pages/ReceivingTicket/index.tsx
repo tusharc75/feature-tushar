@@ -3,7 +3,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
-
+import queryString from 'query-string';
 import ManageReceivingTicketDialog from './ManageReceivingTicket';
 import {
   isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout,
@@ -48,7 +48,8 @@ const ReceivingTicket = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [selectedType, setSelectedType] = useState(1);
+  const { type }: any = queryString.parse(history.location.search);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
@@ -159,6 +160,28 @@ const ReceivingTicket = () => {
   //   commonRenderer: CommonRenderer,
   //   dateRenderer: DateRenderer
   // };
+  const [locationKeys, setLocationKeys] = useState([])
+  useEffect(() => {
+    return history.listen(location => {
+      const { type }: any = queryString.parse(history.location.search);
+      if (history.action === 'PUSH') {
+        setLocationKeys([location.key])
+      }
+      if (history.action === 'POP') {
+        if (locationKeys[1] === location.key) {
+          setLocationKeys(([_, ...keys]) => keys)
+          // Handle forward event
+          setSelectedType(type ? parseInt(type) : 1)
+
+        } else {
+          setLocationKeys((keys) => [location.key, ...keys])
+          // Handle back event
+          setSelectedType(type ? parseInt(type) : 1)
+
+        }
+      }
+    })
+  }, [locationKeys,])
 
 
   const fetchGridMetadata = () => {
@@ -233,73 +256,6 @@ const ReceivingTicket = () => {
       });
   };
 
-  const ReceivingJobNameRenderer = (params) => (
-    <>
-      <Link className="text-truncate link" title={params.value} to={`${routes.receivingTicket.path}/detail/${params.data._id}`}>
-        {params.value}
-      </Link>
-    </>
-  );
-
-  const DeliveryPersonRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" title={params.value} to={`${routes.userDetail.path}/${params.data.deliveryPersonId}`}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
-  const CustomerAccountRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" title={params.value} to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-  const WarehouseRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" title={params.value} to={`${routes.warehouse.path}/detail/${params.data.warehouseId}`}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
-  // const ProductInventoryRenderer = (params) => (
-  //   <>
-  //     {params.value ? (
-  //       <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
-  //         {params.value}
-  //       </Link>
-  //     ) : (
-  //       <NoDataCell />
-  //     )}
-  //   </>
-  // );
-
-  const OwnerRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" to={`${routes.userDetail.path}/${params.data.ownerId}`} title={params.owner}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
   const ActionsRenderer = (params) => (
     <>
       {permissions.receivingTicket?.isCreate ? (
@@ -338,19 +294,6 @@ const ReceivingTicket = () => {
     </>
   );
 
-  // const frameworkComponents = {
-  //   receivingJobNameRenderer: ReceivingJobNameRenderer,
-  //   deliveryPersonRenderer: DeliveryPersonRenderer,
-  //   customerAccountRenderer: CustomerAccountRenderer,
-  //   warehouseRenderer: WarehouseRenderer,
-  //   // productInventoryRenderer: ProductInventoryRenderer,
-  //   ownerRenderer: OwnerRenderer,
-  //   createdByRenderer: CreatedByRenderer,
-  //   updatedByRenderer: UpdatedByRenderer,
-  //   actionsRenderer: ActionsRenderer,
-  //   commonRenderer: CommonRenderer,
-  //   dateRenderer: DateRenderer
-  // };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -511,6 +454,7 @@ const ReceivingTicket = () => {
 
   const handleReceivingTicketTypeSel = (filterValues) => {
     setSelectedType(filterValues);
+    history.push(`?type=${filterValues}`)
   };
 
   const handleTransferEntityDialog = () => {
@@ -605,6 +549,7 @@ const ReceivingTicket = () => {
             selectedRecords={selectedRecords}
             onTypeChange={handleReceivingTicketTypeSel}
             options={ReceivingTicketType}
+            selectedType={selectedType}
             onSearch={handleSearch}
             searchVal={search}
             ReceivingTicketPermissions={permissions.receivingTicket}
