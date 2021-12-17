@@ -780,7 +780,7 @@ const UserDetailsPage = () => {
                 )}
               </Box>
 
-              <Box style={{ padding: "0px", minHeight: "300px" }}>
+              {/* <Box style={{ padding: "0px", minHeight: "300px" }}>
                 <Box display="flex" padding={1} bgcolor="grey.200">
                   <Grid container>
                     <Grid item xs={8}>
@@ -874,7 +874,7 @@ const UserDetailsPage = () => {
                     </BoxWithBorder>
                   </Grid>
                 </Grid>
-              </Box>
+              </Box> */}
 
               <Box>
                 <Box
