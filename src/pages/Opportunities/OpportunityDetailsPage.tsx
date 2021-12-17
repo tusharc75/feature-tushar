@@ -40,6 +40,9 @@ import { SVG } from '../../assets';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
 import {MdDelete, MdEdit} from "react-icons/md";
+import {BiEdit} from "react-icons/bi";
+import contactClass from "../Contact/contact.module.scss";
+import accountClass from "../Account/account.module.scss";
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -569,7 +572,7 @@ function OpportunityDetailsPage() {
       </Grid>
       <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
         <div>
-          <Paper>
+          <Paper style={isMobile ?{width:"98%"} : {}}>
             {!opportunityData ? (
               <div>
                 <Skeleton variant="text" width="150px" height="40px" />
@@ -587,15 +590,26 @@ function OpportunityDetailsPage() {
                 showHeading={true}
               >
                 {allowedToEdit ? (
-                  <Button variant={isMobile ? "outlined" : "contained"} color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                    {isMobile ? <MdEdit/> : "Edit"}
+                  <Button variant={isMobile ? "text" : "contained"}
+                          color="primary"
+                          size="small"
+                          onClick={handleOpenUpdateDialog}
+                          className={isMobile ? accountClass.mobile_button_layout : ""}
+                          style={isMobile ? {color:"#43aeaa"} : {}}
+                  >
+                    {isMobile ? <BiEdit size={20}/> : "Edit"}
                   </Button>
                 ) : null}
                 {opportunityPermissions.isDelete &&
                   opportunityData?.owner.optionValue &&
                   user?.user?._id &&
                   opportunityData.owner.optionValue === user.user._id ? (
-                  <DeleteButton text={isMobile ? <MdDelete/> : "Delete"} onClick={() => setShowConfirmBox(true)} />
+                  <DeleteButton
+                      text={isMobile ? <MdDelete size={20}/> : "Delete"}
+                      onClick={() => setShowConfirmBox(true)}
+                      className={isMobile ? accountClass.mobile_button_layout : ""}
+
+                  />
                 ) : null}
               </DetailsPageHeader>
             )}

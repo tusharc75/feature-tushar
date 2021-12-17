@@ -23,7 +23,7 @@ import HideWhenOffline from '../../components/HideWhenOffline';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
-import { BiFoodMenu } from 'react-icons/bi';
+import {BiEdit, BiFoodMenu} from 'react-icons/bi';
 import TabPanel from '../../components/TabPanel';
 import Menu from "@material-ui/core/Menu"
 import { isMobile } from "react-device-detect";
@@ -280,11 +280,11 @@ const RentalManagementDetailsPage = () => {
                     </Button>
                   )}
                   {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
-                    <Button className="buttonStyleSmallScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                      <MdEdit size={24} />
+                    <Button className="buttonStyleSmallScreen" variant="text" color="primary" size="small" onClick={handleOpenUpdateDialog} style={isMobile ? {color:"#43aeaa"} : {}}>
+                      <BiEdit size={20}/>
                     </Button>
                   )}
-                  <HideWhenOffline>
+                  {/* <HideWhenOffline>
                     {permissions?.rentalManagement?.isDelete &&
                       rentalManagementData?.owner?.optionValue &&
                       user?.user?._id &&
@@ -297,11 +297,11 @@ const RentalManagementDetailsPage = () => {
                       rentalManagementData?.owner?.optionValue &&
                       user?.user?._id &&
                       rentalManagementData.owner.optionValue === user.user._id ? (
-                      <Button className="buttonDeleteSmallScreen" onClick={() => setShowConfirmBox(true)}>
-                        <MdDelete size={24} />
+                      <Button variant="text" className="buttonDeleteSmallScreen" onClick={() => setShowConfirmBox(true)}>
+                        <MdDelete size={20} />
                       </Button>
                     ) : null}
-                  </HideWhenOffline>
+                  </HideWhenOffline> */}
                   {permissions?.rentalManagement?.isUpdate && (["Ready to Invoice", "Invoiced", "Closed"].includes(rentalManagementData?.status)) && (
                     <>
                       <Button
