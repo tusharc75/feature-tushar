@@ -84,7 +84,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                                 size="small"
                                 aria-label="Details"
                                 onClick={() => {
-                                    window.open(`${row.original.type === "product" ? routes.productDetail.path : routes.packages.path}/${row.original.materialId}`);
+                                    window.open(`${row.original.type === "product" ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`);
                                 }}
                             >
                                 <InfoIcon fontSize="small" />
