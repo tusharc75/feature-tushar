@@ -128,12 +128,13 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
         );
         if (customerContactDropdownData) {
             setCustomerContactMainDataSource(customerContactDropdownData.option);
+      
 
             if (rentalManagementId) {
                 setCustomerContactDataSource(
                     customerContactDropdownData.option.filter(
                         (d) =>
-                            d.parentAccount === rentalManagementData.customerAccount.optionValue
+                            d.parentAccount === rentalManagementData?.customerAccount.optionValue
                     )
                 );
             }
