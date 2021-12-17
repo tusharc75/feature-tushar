@@ -147,7 +147,7 @@ const ProductCategory = () => {
   const [productCategoryId, setProductCategoryId] = useState(null);
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [contrastValues,setContrastValues] = useState([]);
+  const [contrastValues, setContrastValues] = useState([]);
 
   // const [selectedCategory, setSelectedCategory] = useState([]);
 
@@ -160,7 +160,6 @@ const ProductCategory = () => {
   const columnState = JSON.parse(localStorage.getItem('productCategoryPage'));
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
-  const [isLowContrast, setIsLowContrast] = useState(false);
   const localStorageSelectedRecords = `${routes.productCategory.title}_selected`;
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -174,36 +173,6 @@ const ProductCategory = () => {
     });
   }
   //  Grid Variables - End
-
-  useEffect(() => {
-    const queryString = getQueryString();
-    axiosInstance()
-    .get(`/product-category${queryString}`)
-    .then(({ data: { data, count } }) => {
-      let result = data.map(function (a) {
-        return a.chipColour;
-      });      
-      console.log(result,"result")
-       for (let index = 0; index < result.length; index++) {
-          let hex = result[index];
-          let rgb = hexToRgb(hex);
-          // console.log(rgb,"rgb")
-          let splitRgb = rgb.split(",");
-          let rgbNum = splitRgb.map(function (x) { 
-            return parseInt(x, 10); 
-          });
-        //  console.log(rgbNum);
-         let contrastRatio = contrast(rgbNum,[0, 0, 238]); 
-         if(contrastRatio < 3){
-          setIsLowContrast(true)
-         }
-      
-         console.log(contrastRatio,"contrastRatio"); 
-         
-       }
-  })
-},[])
-
 
   useEffect(() => {
     const parsedParams = queryString.parse(location?.search);
@@ -229,7 +198,6 @@ const ProductCategory = () => {
 
 
   const fetchGridColumns = () => {
-    console.log(isLowContrast,"isLowContrat");
     axiosInstance()
       .get('/field?resource=Product Category')
       .then(({ data: { data } }) => {
@@ -285,7 +253,7 @@ const ProductCategory = () => {
         <Chip
           className="ml-3 link"
           style={{ backgroundColor: `${params.data.chipColour}` }}
-          label={<p style={{color:isLowContrast ? "white" : "black"}}>{params.value}</p>}
+          label={<p style={{ color: params.data.isLowContrast ? "white" : "black" }}>{params.value}</p>}
           onClick={() => {
             setProductCategoryId(params.data.id);
             setOpen({ open: true, isClone: false });
@@ -395,34 +363,46 @@ const ProductCategory = () => {
 
   function luminance(r, g, b) {
     var a = [r, g, b].map(function (v) {
-        v /= 255;
-        return v <= 0.03928
-            ? v / 12.92
-            : Math.pow( (v + 0.055) / 1.055, 2.4 );
+      v /= 255;
+      return v <= 0.03928
+        ? v / 12.92
+        : Math.pow((v + 0.055) / 1.055, 2.4);
     });
     return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
-}
-function contrast(rgb1, rgb2) {
+  }
+  function contrast(rgb1, rgb2) {
     var lum1 = luminance(rgb1[0], rgb1[1], rgb1[2]);
     var lum2 = luminance(rgb2[0], rgb2[1], rgb2[2]);
     var brightest = Math.max(lum1, lum2);
     var darkest = Math.min(lum1, lum2);
     return (brightest + 0.05)
-         / (darkest + 0.05);
-}
-
-
-
+      / (darkest + 0.05);
+  }
 
   function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    if(result){
-        var r= parseInt(result[1], 16);
-        var g= parseInt(result[2], 16);
-        var b= parseInt(result[3], 16);
-        return r+","+g+","+b;//return 23,14,45 -> reformat if needed 
-    } 
+    if (result) {
+      var r = parseInt(result[1], 16);
+      var g = parseInt(result[2], 16);
+      var b = parseInt(result[3], 16);
+      return r + "," + g + "," + b;//return 23,14,45 -> reformat if needed 
+    }
     return null;
+  }
+
+  const isContrastRatioLow = (hexColor) => {
+    let rgb = hexToRgb(hexColor);
+    let splitRgb = rgb.split(",");
+    let rgbNum = splitRgb.map(function (x) {
+      return parseInt(x, 10);
+    });
+    let contrastRatio = contrast(rgbNum, [0, 0, 238]);
+
+    if (contrastRatio < 3) {
+      return true
+    } else {
+      return false
+    }
   }
 
   const fetchProductCategory = () => {
@@ -436,30 +416,15 @@ function contrast(rgb1, rgb2) {
     axiosInstance()
       .get(`/product-category${queryString}`)
       .then(({ data: { data, count } }) => {
-        // let result = data.map(function (a) {
-        //   return a.chipColour;
-        // });      
-        // console.log(result,"result")
-        // for (let index = 0; index < result.length; index++) {
-        //   let hex = result[index];
-        //   let rgb = hexToRgb(hex);
-        //   let splitRgb = rgb.split(",");
-        //   let rgbNum = splitRgb.map(function (x) { 
-        //     return parseInt(x, 10); 
-        //   });
-        //  console.log(rgbNum);
-        //  let contrastRatio = contrast(rgbNum,[0, 0, 238]); 
-        //  console.log(contrastRatio,"contrastRatio"); 
-        // }
-        let rows = data.map((u) => {
+        let rows = data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions.productCategory.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions.productCategory.isUpdate;
-          finalObject['isLowContrast'] = permissions.productCategory.isUpdate;
+          finalObject['isLowContrast'] = isContrastRatioLow(u.chipColour);
           return {
             ...finalObject
-           
+
           };
         });
         setIsAllChecked(false);
@@ -497,7 +462,7 @@ function contrast(rgb1, rgb2) {
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);     
+        }, gridLoadingTimeout);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
