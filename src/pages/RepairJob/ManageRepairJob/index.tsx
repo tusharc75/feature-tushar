@@ -48,11 +48,13 @@ const ManageRepairJob = (props) => {
   const [disablePlantIfAssetAdded, setDisablePlantIfAssetAdded] = useState(true)
   const [disableFieldsIfLoadingTicketIsCreated, setDisableFieldsIfLoadingTicketIsCreated] = useState(true)
 
+  const [supplierShipToAddresses, setSupplierShipToAddresses] = useState([]);
+  const [supplierShipToAddressesDataSource, setSupplierShipToAddressesDataSource] = useState([]);
+  const [repairPlantDataSource, setRepairPlantDataSource] = useState([]);
+
   const {
     state: { user, selectedEntity },
   }: any = useData();
-  const [supplierShipToAddresses, setSupplierShipToAddresses] = useState([]);
-  const [supplierShipToAddressesDataSource, setSupplierShipToAddressesDataSource] = useState([]);
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(repairJobData.fields));
@@ -69,7 +71,10 @@ const ManageRepairJob = (props) => {
         const plantOptionsEntity = plantsOptions.filter((a) => { if (a.entity == selectedEntity) { return a } });
 
         const commonDataSource = [...data.find((obj) => obj?.fieldData.fieldName === 'supplierShipTo')?.fieldData?.option] ?? [];
-        setSupplierShipToAddressesDataSource([...commonDataSource])
+        const commonRepairPlantDataSource = [...data.find((obj) => obj?.fieldData.fieldName === 'repairPlant')?.fieldData?.option] ?? [];
+
+        setSupplierShipToAddressesDataSource([...commonDataSource]);
+        setRepairPlantDataSource([...commonRepairPlantDataSource]);
 
         setOptionsPlantsEntity(plantOptionsEntity)
 
@@ -80,6 +85,7 @@ const ManageRepairJob = (props) => {
               if (isClone) {
                 const { _id, brand, createdBy, history, repairJobName, updatedBy, ...rest } = data;
                 setTitle('Clone')
+                setDisablePlantIfAssetAdded(false);
 
                 setRepairJobData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -151,7 +157,7 @@ const ManageRepairJob = (props) => {
             });
         } else {
           setTitle('Create Repair Job')
-
+          setDisablePlantIfAssetAdded(false);
           let initialData = { ...getObjKeys('', fieldsDataForCreate), expectedCompletionDate: "" };
           setDisableFieldsIfLoadingTicketIsCreated(false);
           setAllFields(fieldsDataForCreate);
@@ -490,10 +496,23 @@ const ManageRepairJob = (props) => {
                                             setFieldValue={(name, value) => {
                                               setFieldValue(name, value);
 
-                                              setFieldValue("vendor", "");
-                                              setFieldValue("supplierShipTo", "");
-                                              setFieldValue("repairPlant", "");
-                                              setFieldValue("plantShipTo", "");
+                                              if (value) {
+                                                if (value === "Internal") {
+                                                  setFieldValue("repairPlant", values["plant"]);
+                                                  setFieldValue("plantShipTo", repairPlantDataSource.find(d => d.optionValue === values["plant"])?.address ?? "");
+                                                } else {
+                                                  setFieldValue("repairPlant", "");
+                                                  setFieldValue("plantShipTo", "");
+                                                }
+                                                setFieldValue("vendor", "");
+                                                setFieldValue("supplierShipTo", "");
+                                              }
+                                              else {
+                                                setFieldValue("repairPlant", "");
+                                                setFieldValue("plantShipTo", "");
+                                                setFieldValue("vendor", "");
+                                                setFieldValue("supplierShipTo", "");
+                                              }
                                             }}
                                             required={field.required}
                                             fullWidth
@@ -557,6 +576,12 @@ const ManageRepairJob = (props) => {
                                                   options={optionsPlantsEntity}
                                                   setFieldValue={(name, value) => {
                                                     setFieldValue(name, value);
+
+                                                    if (values["typeOfRepair"] === "Internal") {
+                                                      setFieldValue("repairPlant", value);
+                                                      setFieldValue("plantShipTo", repairPlantDataSource.find(d => d.optionValue === value)?.address ?? "");
+                                                    }
+
                                                   }}
                                                   required={field.required}
                                                   fullWidth

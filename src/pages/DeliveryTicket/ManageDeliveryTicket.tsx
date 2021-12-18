@@ -261,7 +261,9 @@ const ManageDeliveryTicket = (props) => {
         }
         else {
             setSubmitting(true);
-            axiosInstance().post(`${deliveryTicketApi}`, values).then(({ data }) => {
+            let updatedValues = { ...values }
+            updatedValues["status"] = "New";
+            axiosInstance().post(`${deliveryTicketApi}`, updatedValues).then(({ data }) => {
                 setLoading(false);
                 onSuccess()
                 setSubmitting(false);
@@ -443,7 +445,8 @@ const ManageDeliveryTicket = (props) => {
                                                                                     size="small"
                                                                                     //minDate={new Date()}
                                                                                     //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
-                                                                                    maxDate={rentalData?.estimateStartDate ? moment(rentalData?.estimateStartDate) : moment().add(1, 'years').calendar()}
+                                                                                    maxDate={rentalData ? rentalData.estimateStartDate ? moment(rentalData?.estimateStartDate) : moment().add(1, 'years').calendar()
+                                                                                        : transferData ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()} // Please, whoever changing this ask Gagan before any change 
                                                                                 />
                                                                             ) : field.fieldName === "deliveryDate" ? (
                                                                                 <FormTypes
@@ -466,9 +469,10 @@ const ManageDeliveryTicket = (props) => {
                                                                                     isTooltip={field?.isTooltip || false}
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
-                                                                                    //minDate={moment(values["pick-UpDate"]).add(7, 'days')}
+                                                                                    minDate={moment(values["pick-UpDate"])} // Please, whoever changing this ask Gagan before any change 
                                                                                     //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
-                                                                                    maxDate={rentalData?.estimateStartDate ? moment(rentalData?.estimateStartDate) : moment().add(1, 'years').calendar()}
+                                                                                    maxDate={rentalData ? rentalData.estimateStartDate ? moment(rentalData?.estimateStartDate) : moment().add(1, 'years').calendar() :
+                                                                                        transferData ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
                                                                                 />
                                                                             ) : field.fieldName === "deliveryJobName" ? (
                                                                                 <FormTypes

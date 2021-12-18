@@ -85,7 +85,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
             if (details?.pricingMethod) {
                 setPricingMethod(details.pricingMethod)
             }
-            setHeaderLabel(startCase(conditionData?.materialType) + " - " + (conditionData?.materialType === "product" ? details?.productName : details?.packageDescription))
+            setHeaderLabel(startCase(conditionData?.materialType) + " - " + (conditionData?.materialType === "product" ? details?.productName : details?.packageName))
         }
     }, [conditionData]);
 

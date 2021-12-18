@@ -161,7 +161,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`).then(({ data: { data } }) => {
       const rows = data.material.filter((e) => e.parentId === null)
       rows.forEach((parent, i) => {
-        parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageDescription}`
+        parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
         const subRows = []
         const inventory = data.inventory.filter((e) => e._id === parent._id);
         inventory?.forEach((_inventory, k) => {

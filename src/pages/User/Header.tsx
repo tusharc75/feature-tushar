@@ -102,7 +102,7 @@ const Header = (props) => {
                 open={Boolean(anchorEl)}
                 onClose={closeActions}
               >
-                {userPermissions.isDelete && selectedRecordsLength && (
+                {userPermissions.isDelete && selectedRecordsLength > 0 && (
                   <MenuItem
                     disabled={Boolean(canDelete)}
                     onClick={() => {
@@ -126,7 +126,7 @@ const Header = (props) => {
                   </MenuItem>
                 }
 
-                {
+                {/* {
                   userPermissions.isUpdate && <MenuItem
                     disabled={rolesActionDisabled}
                     onClick={() => {
@@ -136,7 +136,7 @@ const Header = (props) => {
                   >
                     Assign Company Wide Roles
                   </MenuItem>
-                }
+                } */}
 
                 {
                   userPermissions.isUpdate && <MenuItem
@@ -146,7 +146,7 @@ const Header = (props) => {
                       closeActions();
                     }}
                   >
-                    Assign Region Wide Functional Roles
+                    Assign Roles
                   </MenuItem>
                 }
 

@@ -303,7 +303,7 @@ const TransferAsset = () => {
                     </Button>
                   )}
 
-                  <HtmlTooltip title={selectedRecords.length > 0 ? '' : 'Please select some records'}>
+                  {/* <HtmlTooltip title={selectedRecords.length > 0 ? '' : 'Please select some records'}>
                     <span>
                       <Button
                         className={isMobile ? 'mobile_button' : styles.action_submit_btn}
@@ -340,7 +340,7 @@ const TransferAsset = () => {
                         Delete
                       </MenuItem>
                     )}
-                  </Menu>
+                  </Menu> */}
                 </Grid>
               </Box>
             </Grid>

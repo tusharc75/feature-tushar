@@ -82,10 +82,13 @@ const ManageTransferAsset: FC<Props> = (props) => {
             .then(({ data: { data } }) => {
               if (isClone) {
                 const { _id, createdBy, updatedBy, entity, ...rest } = data;
+                let oldValues = { ...rest }
+                oldValues.transferAssetNumber = `TA_${generateUniqueIdOnly()}`;
+                oldValues.status = "New"
 
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate)
+                  values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
                 });
               } else {
                 setInitialData({
