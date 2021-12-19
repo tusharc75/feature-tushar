@@ -66,6 +66,8 @@ import { MdDeleteSweep } from 'react-icons/md';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { AiFillPlusCircle } from 'react-icons/ai';
 import { MdLibraryAdd } from 'react-icons/md';
+import {IoArrowDownCircleSharp} from "react-icons/all";
+import contactClass from "../../Contact/contact.module.scss";
 interface TabPanelProps {
   children?: React.ReactNode;
   index: any;
@@ -726,16 +728,17 @@ export default function QuoteDetail() {
                     )}
                     <Tooltip title={`Version : ${currentVersion}`}>
                       <Button
-                        variant="outlined"
+                        variant={isMobile ? "text" : "outlined"}
                         color="primary"
                         size="small"
-                        className="mx-1"
+                        className={isMobile ? contactClass.mobile_button_layout :  "mx-1"}
                         onClick={() => {
                           setShowAllVersionStatus(true);
                         }}
-                        startIcon={<VscVersions />}
+                        style={isMobile ? {color:"#43aeaa"} : {}}
+                        startIcon={isMobile ? null : <VscVersions />}
                       >
-                        {isMobile ? '' : `Version : ${currentVersion}`}
+                        {isMobile ? <VscVersions size={20}/> : `Version : ${currentVersion}`}
                       </Button>
                     </Tooltip>
                     {DOAApproved && versionStatus === 'Sent for DOA' && (
@@ -773,16 +776,16 @@ export default function QuoteDetail() {
                     )}
                     <>
                       <Button
-                        variant="outlined"
+                        variant={isMobile ? "text" : "outlined"}
                         color="default"
                         size="small"
-                        className="mx-1"
-                        endIcon={<ExpandMore />}
+                        className={isMobile ? contactClass.mobile_button_layout :  "mx-1"}
+                        endIcon={isMobile ? null : <ExpandMore />}
                         onClick={openActions}
                         // className={styles.action_submit_btn}
                         aria-controls="action-menu"
                       >
-                        {isMobile ? '' : 'Actions '}
+                        {isMobile ? <IoArrowDownCircleSharp size={20}/> : 'Actions '}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}

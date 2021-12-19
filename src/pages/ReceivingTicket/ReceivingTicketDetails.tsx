@@ -23,12 +23,13 @@ import { isMobile, isTablet } from "react-device-detect";
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
-import { FaWpforms } from "react-icons/fa";
-import { BiFoodMenu } from "react-icons/bi";
+import {FaFileSignature, FaWpforms} from "react-icons/fa";
+import {BiEdit, BiFoodMenu} from "react-icons/bi";
 import { prepareDataForGrid } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { AiFillFilePdf } from "react-icons/ai";
+import accountClass from "../Account/account.module.scss";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -469,8 +470,17 @@ const ReceivingTicketDetails = () => {
               ) : (
                 <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
                   {permissions?.receivingTicket?.isUpdate && canEdit && (
-                    <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                      Edit
+                    <Button
+                        variant={isMobile ? "text" : "contained" }
+                            color="primary"
+                            size="small"
+                            onClick={handleOpenUpdateDialog}
+                        className={isMobile ? accountClass.mobile_button_layout : ""}
+                        style={isMobile ? {color:"#43aeaa"} : {}}
+
+                    >
+                      {isMobile ? <BiEdit size={20}/> : "Edit"}
+
                     </Button>
                   )}
                   {/* {permissions?.receivingTicket?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />} */}
@@ -478,12 +488,14 @@ const ReceivingTicketDetails = () => {
                     receivingTicketData?.deliveryPerson?.optionValue === user?.user?._id || canEdit ?
                       label !== "" ?
                         <Button
-                          variant="contained"
-                          color="primary"
+                            variant={isMobile ? "text" : "contained" }
+                            color="primary"
                           size="small"
                           disabled={loading}
-                          onClick={() => setOpenSignatureDialog(true)}>
-                          {label}
+                          onClick={() => setOpenSignatureDialog(true)}
+                            style={isMobile ? {color:"var(--info-darken)"} : {}}
+                        >
+                          {isMobile ? <FaFileSignature size={20}/> : {label} }
                         </Button> : null : null
                   }
                   {

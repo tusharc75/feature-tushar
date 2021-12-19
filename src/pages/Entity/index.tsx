@@ -365,7 +365,7 @@ const Entity: FC = () => {
             additionalDetails={[]}
             chips={[]}
             owerCollaboratorInitialsOrImages=""
-            onCreate={() => { }}
+            onCreate={false}
             showClone={false}
             onClone={() => { }}
             renderedFrom={"entity"} />
