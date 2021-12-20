@@ -216,13 +216,11 @@ const DeliveryTicket = () => {
             };
             return res;
           });
-
           if (appendRows) {
             dispatch({ type: 'initialize', data: [...dataRows, ...rows], count: count });
           } else {
             dispatch({ type: 'initialize', data: rows, count: count });
           }
-
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
           }, gridLoadingTimeout);
