@@ -213,16 +213,16 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["transferAsset"] = refrenceData?._id;
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
                     if (refrenceData?.transferType === "Internal") {
-                        tempInitialData["receivingPlant"] = refrenceData?.transferToPlant?.optionValue;
-                        tempInitialData["plantShipTo"] = refrenceData?.plantShipTo;
+                        tempInitialData["receivingPlant"] = refrenceData?.transfertoPlant?.optionValue;
+                        tempInitialData["receivingPlantAddress"] = refrenceData?.plantShipTo?.optionValue;
                     }
                     if (refrenceData?.transferType === "External Customer") {
                         tempInitialData["customerAccount"] = refrenceData?.transferToCustomer?.optionValue;
-                        tempInitialData["customerShippingAddress"] = refrenceData?.customerShipTo;
+                        tempInitialData["customerShippingAddress"] = refrenceData?.customerShipTo?.optionValue;
                     }
                     if (refrenceData?.transferType === "External Supplier") {
-                        tempInitialData["supplierAccount"] = refrenceData?.transferToSupplier?.optionValue;
-                        tempInitialData["supplierShippingAddress"] = refrenceData?.supplierShipTo;
+                        tempInitialData["supplierAccount"] = refrenceData?.transfertoSupplier?.optionValue;
+                        tempInitialData["supplierShippingAddress"] = refrenceData?.supplierShipTo?.optionValue;
                     }
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "transferAsset"),
@@ -326,7 +326,7 @@ const ManageDeliveryTicket = (props) => {
                 }, formValues)) onClose()
                 else setShowConfirmDialog(true)
             }}
-            title={`${deliveryTicketId ? `Update ${initialData.values?.deliveryJobName ? `(${initialData.values?.deliveryJobName})` : ""}` : "Create Loading Ticket"}`}
+            title={`${deliveryTicketId ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ""}` : "Create Delivery Ticket"}`}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
                 setFullScreen(prevState => !prevState)
@@ -367,7 +367,6 @@ const ManageDeliveryTicket = (props) => {
                     <>
                         <CustomDialogContent>
                             <Form noValidate>
-                                {/* <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2> */}
                                 {formsData &&
                                     formsData.map((form, index1) => {
                                         return form.name ? (
@@ -376,7 +375,6 @@ const ManageDeliveryTicket = (props) => {
                                                     <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
                                                     <h2 className="form-label-style form-label-quotes">{form.name}</h2>
                                                 </div>
-
                                                 <Box marginY={2}>
                                                     <Grid spacing={3} container>
                                                         {form.sectionFields.map((field, index2) => (
@@ -388,6 +386,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                 field.fieldName === "status" || field.fieldName === "actualDeliveredDate" || field.fieldName === "actualDispatchedDate" ? (
                                                                                 <FormTypes
                                                                                     {...field}
+                                                                                    fieldData={field}
                                                                                     disabled={transferData && false || rentalData && true || repairJobData && true || Boolean(deliveryTicketId) && field.disableOnEdit}
                                                                                     isNew={Boolean(deliveryTicketId)}
                                                                                     values={values}
@@ -411,6 +410,7 @@ const ManageDeliveryTicket = (props) => {
                                                                             ) : field.fieldName === "supplierAccount" ? (
                                                                                 <FormTypes
                                                                                     {...field}
+                                                                                    fieldData={field}
                                                                                     disabled={(repairJobData && repairJobData["typeOfRepair"] === "External") || Boolean(deliveryTicketId) && field.disableOnEdit}
                                                                                     values={values}
                                                                                     errors={errors}
@@ -432,6 +432,7 @@ const ManageDeliveryTicket = (props) => {
                                                                             ) : field.fieldName === "pick-UpDate" ? (
                                                                                 <FormTypes
                                                                                     {...field}
+                                                                                    fieldData={field}
                                                                                     isNew={!Boolean(deliveryTicketId)}
                                                                                     disabled={Boolean(deliveryTicketId) && field.disableOnEdit}
                                                                                     values={values}
@@ -458,6 +459,7 @@ const ManageDeliveryTicket = (props) => {
                                                                             ) : field.fieldName === "deliveryDate" ? (
                                                                                 <FormTypes
                                                                                     {...field}
+                                                                                    fieldData={field}
                                                                                     isNew={!Boolean(deliveryTicketId)}
                                                                                     disabled={Boolean(deliveryTicketId) && field.disableOnEdit}
                                                                                     values={values}
@@ -481,9 +483,10 @@ const ManageDeliveryTicket = (props) => {
                                                                                     maxDate={rentalData ? rentalData.estimateStartDate ? moment(rentalData?.estimateStartDate) : moment().add(1, 'years').calendar() :
                                                                                         transferData ? moment().add(1, 'years').calendar() : moment().add(1, 'years').calendar()}
                                                                                 />
-                                                                            ) : field.fieldName === "deliveryJobName" ? (
+                                                                            ) : field.fieldName === "ticketName" ? (
                                                                                 <FormTypes
                                                                                     {...field}
+                                                                                    fieldData={field}
                                                                                     disabled={true}
                                                                                     values={values}
                                                                                     errors={errors}
@@ -504,6 +507,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                 />
                                                                             ) : field.fieldName === "owner" ? (
                                                                                 <FormTypes
+                                                                                    fieldData={field}
                                                                                     isNew={!deliveryTicketId}
                                                                                     {...field}
                                                                                     values={values}
@@ -567,6 +571,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                 />
                                                                             ) : field.fieldName === "collaborator" ? (
                                                                                 <FormTypes
+                                                                                    fieldData={field}
                                                                                     isNew={!deliveryTicketId}
                                                                                     {...field}
                                                                                     disabled={deliveryTicketId && field.disableOnEdit}
@@ -595,6 +600,7 @@ const ManageDeliveryTicket = (props) => {
                                                                             ) : field.fieldName === "warehouse" ? (
                                                                                 <FormTypes
                                                                                     {...field}
+                                                                                    fieldData={field}
                                                                                     disabled={(deliveryTicketId && field.disableOnEdit) || (repairJobData && warehouseId) || (transferData && warehouseId) || (rentalData && warehouseId)}
                                                                                     isNew={!Boolean(deliveryTicketId)}
                                                                                     values={values}
@@ -616,6 +622,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                 />
                                                                             ) : <FormTypes
                                                                                 {...field}
+                                                                                fieldData={field}
                                                                                 isNew={!Boolean(deliveryTicketId)}
                                                                                 values={values}
                                                                                 errors={errors}
@@ -646,6 +653,7 @@ const ManageDeliveryTicket = (props) => {
                                             form.sectionFields.map((field) => (
                                                 <FormTypes
                                                     {...field}
+                                                    fieldData={field}
                                                     disabled={Boolean(deliveryTicketId) && field.disableOnEdit}
                                                     isNew={Boolean(deliveryTicketId)}
                                                     values={values}
