@@ -241,18 +241,14 @@ const DeliveryTicket = () => {
           let rows = data.map((u) => {
             let res = {
               ...prepareDataForGrid(u, user),
-              //  Commenting canDelete because right now we are neither showing checkbox for multiple delete nor delete icon in row
-              //  canDelete: u?.createdBy?.user?._id === user?.user._id,
             };
             return res;
           });
-
           if (appendRows) {
             dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
           } else {
             dispatch({ type: "initialize", data: rows, count: count });
           }
-
           setTimeout(() => {
             dispatch({ type: "loading", loading: false });
           }, gridLoadingTimeout);

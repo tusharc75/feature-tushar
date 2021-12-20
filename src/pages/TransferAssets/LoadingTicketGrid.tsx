@@ -347,8 +347,11 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       {/* Loading ticket create dialog */}
       {openLoadingTicketDialog && (
         <ManageDeliveryTicket
+          ticketType="Loading"
+          refrenceType="Transfer Asset"
+          refrenceData={transferAssetData}
           onClose={() => setOpenLoadingTicketDialog(false)}
-          productInventoryForDeliveryTicket={assetWithNoTicket}
+          productInventory={assetWithNoTicket}
           transferData={transferAssetData}
           warehouseId={transferAssetData?.transferFromPlant?.optionValue}
           onSuccess={() => {
