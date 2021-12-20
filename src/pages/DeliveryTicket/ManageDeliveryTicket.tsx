@@ -443,7 +443,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                     isTooltip={field?.isTooltip || false}
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
-                                                                                    //minDate={new Date()}
+                                                                                    minDate={new Date()}
                                                                                     //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
                                                                                     maxDate={rentalData ? rentalData.estimateStartDate ? moment(rentalData?.estimateStartDate) : moment().add(1, 'years').calendar()
                                                                                         : transferData ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()} // Please, whoever changing this ask Gagan before any change 
@@ -472,7 +472,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                     minDate={moment(values["pick-UpDate"])} // Please, whoever changing this ask Gagan before any change 
                                                                                     //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
                                                                                     maxDate={rentalData ? rentalData.estimateStartDate ? moment(rentalData?.estimateStartDate) : moment().add(1, 'years').calendar() :
-                                                                                        transferData ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
+                                                                                        transferData ? moment().add(1, 'years').calendar() : moment().add(1, 'years').calendar()}
                                                                                 />
                                                                             ) : field.fieldName === "deliveryJobName" ? (
                                                                                 <FormTypes
