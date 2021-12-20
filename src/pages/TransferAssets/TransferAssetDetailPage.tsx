@@ -257,6 +257,7 @@ const TransferAssetDetailPage = () => {
   };
 
   const handleViewPdf = (download) => {
+    setFileDownloading(true)
     axiosInstance().get(`${transferAsset.api}/${id}/pdf`)
       .then(({ data: { data } }) => {
         axiosInstance()
