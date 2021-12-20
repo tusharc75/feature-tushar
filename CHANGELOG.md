@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.22.2](https://github.com/vebholic/oms_frontend/compare/v2.22.1...v2.22.2) (2021-12-20)
+
+### [2.22.1](https://github.com/vebholic/oms_frontend/compare/v2.22.0...v2.22.1) (2021-12-19)
+
+## [2.22.0](https://github.com/vebholic/oms_frontend/compare/v2.21.0...v2.22.0) (2021-12-18)
+
+
+### Features
+
+* - PO-639 - If Plant is selected and type of repair is internal ([b7c72b0](https://github.com/vebholic/oms_frontend/commit/b7c72b00b370de45d677e89599c6cfc7611defb9))
+* - Repair job changes done ([aa6c292](https://github.com/vebholic/oms_frontend/commit/aa6c29224150a390dd957ce5c0fe10c548ff3467))
+* **adresses:** get all the detail for place in address ([abfa876](https://github.com/vebholic/oms_frontend/commit/abfa876a2e028dfe653fa85252d4c1486560d54a))
+* **dashboard:** dashboard type selection ([ef35b23](https://github.com/vebholic/oms_frontend/commit/ef35b23e03e0267b158e8531830a10ab54bda193))
+* **repairjob:** persit details tab ([c07da19](https://github.com/vebholic/oms_frontend/commit/c07da198cdcfde8ffc78a3da723afb73ec795208))
+
+
+### Bug Fixes
+
+* address issue is fix in PO ([07a9159](https://github.com/vebholic/oms_frontend/commit/07a91590208f0a243173f8b9126c061484ac4d5c))
+* bug fix ([9d740b5](https://github.com/vebholic/oms_frontend/commit/9d740b5046d28e9faba49ca1a43a134fc726a20e))
+* bug fix ([722d358](https://github.com/vebholic/oms_frontend/commit/722d3581fccc5fa3c8e75d5d7948a46d61b73726))
+* **rental job clone issue:** rental Job Clone issue ([989b3c4](https://github.com/vebholic/oms_frontend/commit/989b3c4f48f5ec9ed83001b62280b452d310291e))
+* **transferasset:** changes and bug fix ([a258eda](https://github.com/vebholic/oms_frontend/commit/a258eda0aa5a6d45db0c2390211865c5a41dc5d0))
+
 ## [2.21.0](https://github.com/vebholic/oms_frontend/compare/v2.20.0...v2.21.0) (2021-12-17)
 
 

@@ -16,7 +16,8 @@ import {
   repairJob,
   setFieldsInAscendingOrder,
   yupSchema,
-  repairJobProcessSteps
+  repairJobProcessSteps,
+  repairJobStatus
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -46,7 +47,7 @@ const ManageRepairJob = (props) => {
   const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
 
   const [disablePlantIfAssetAdded, setDisablePlantIfAssetAdded] = useState(true)
-  const [disableFieldsIfLoadingTicketIsCreated, setDisableFieldsIfLoadingTicketIsCreated] = useState(true)
+  const [disableFields, setDisableFields] = useState(true)
 
   const [supplierShipToAddresses, setSupplierShipToAddresses] = useState([]);
   const [supplierShipToAddressesDataSource, setSupplierShipToAddressesDataSource] = useState([]);
@@ -89,10 +90,10 @@ const ManageRepairJob = (props) => {
 
                 setRepairJobData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                  initialValues: getObjKeysWithValues(rest, fieldsDataForCreate)
+                  initialValues: { ...getObjKeysWithValues(rest, fieldsDataForCreate), status: repairJobStatus[0] }
                 });
                 setAllFields(fieldsDataForCreate);
-                setDisableFieldsIfLoadingTicketIsCreated(false);
+                setDisableFields(false);
 
                 // setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
                 setLoading(false);
@@ -113,27 +114,31 @@ const ManageRepairJob = (props) => {
                     let tempProductInventory = data.map(u => ({ ...u, _id: u?.id, productName: u?.product?.optionLabel }))
                     setDisablePlantIfAssetAdded(data.length > 0)
 
-                    let isLoadingTicketFound = false;
+                    if (data.some(s => s["repaired"] === true)) {
+                      setDisableFields(true);
+                    } else {
+                      let isLoadingTicketFound = false;
 
-                    axiosInstance()
-                      .get(`${repairJob.repairJobApi}/${repairJobId}/delivery-ticket`)
-                      .then(({ data }) => {
+                      axiosInstance()
+                        .get(`${repairJob.repairJobApi}/${repairJobId}/delivery-ticket`)
+                        .then(({ data }) => {
 
-                        data.data.map(obj => {
-                          tempProductInventory.map((d, index) => {
-                            if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                              tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
-                              tempProductInventory[index]["deliveryTicketId"] = obj?._id
+                          data.data.map(obj => {
+                            tempProductInventory.map((d, index) => {
+                              if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
+                                tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
+                                tempProductInventory[index]["deliveryTicketId"] = obj?._id
 
-                              if (isLoadingTicketFound === false) {
-                                isLoadingTicketFound = true;
+                                if (isLoadingTicketFound === false) {
+                                  isLoadingTicketFound = true;
+                                }
                               }
-                            }
+                            })
                           })
-                        })
 
-                        setDisableFieldsIfLoadingTicketIsCreated(isLoadingTicketFound);
-                      });
+                          setDisableFields(isLoadingTicketFound);
+                        });
+                    }
                   });
               }
 
@@ -159,7 +164,7 @@ const ManageRepairJob = (props) => {
           setTitle('Create Repair Job')
           setDisablePlantIfAssetAdded(false);
           let initialData = { ...getObjKeys('', fieldsDataForCreate), expectedCompletionDate: "" };
-          setDisableFieldsIfLoadingTicketIsCreated(false);
+          setDisableFields(false);
           setAllFields(fieldsDataForCreate);
           setRepairJobData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -433,7 +438,7 @@ const ManageRepairJob = (props) => {
                                           <FormTypes
                                             repairJobId={repairJobId}
                                             {...field}
-                                            disabled={disableFieldsIfLoadingTicketIsCreated || (!repairJobId && field.disableOnEdit)}
+                                            disabled={disableFields || (!repairJobId && field.disableOnEdit)}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -485,7 +490,7 @@ const ManageRepairJob = (props) => {
                                           ? <FormTypes
                                             repairJobId={repairJobId}
                                             {...field}
-                                            disabled={disableFieldsIfLoadingTicketIsCreated || (!repairJobId && field.disableOnEdit)}
+                                            disabled={disableFields || (!repairJobId && field.disableOnEdit)}
                                             values={getValues(values)}
                                             errors={errors}
                                             touched={touched}
@@ -612,7 +617,7 @@ const ManageRepairJob = (props) => {
                                                     ? <FormTypes
                                                       repairJobId={repairJobId}
                                                       {...field}
-                                                      disabled={disableFieldsIfLoadingTicketIsCreated || (!repairJobId && field.disableOnEdit)}
+                                                      disabled={disableFields || (!repairJobId && field.disableOnEdit)}
                                                       values={values}
                                                       errors={errors}
                                                       touched={touched}
