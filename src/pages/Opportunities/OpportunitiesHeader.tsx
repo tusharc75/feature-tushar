@@ -9,16 +9,42 @@ import {
   MenuItem,
   Button,
   Menu,
+  MenuProps,
+  styled, 
+  alpha
 } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import styles from "../Leads/Header.module.scss";
 import { isMobile } from "react-device-detect";
-import {MdAdd} from "react-icons/all";
+import {IoFilterCircle, MdAdd, MdFilterList, MdSort} from "react-icons/all";
+
+const StyledMenu = styled((props: MenuProps) => (
+  <Menu
+    elevation={0}
+    anchorOrigin={{
+      vertical: 'bottom',
+      horizontal: 'right',
+    }}
+    transformOrigin={{
+      vertical: 'top',
+      horizontal: 'right',
+    }}
+    {...props}
+  />
+))
 
 function OpportunitiesHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -36,6 +62,7 @@ function OpportunitiesHeader(props) {
       onTypeChange(options.find((d) => d.key === newFilter).value);
     }
   };
+ 
 
   const {
     selectedRecords,
@@ -54,9 +81,37 @@ function OpportunitiesHeader(props) {
   } = props;
   return (
     <Grid className={styles.filter_side_container} container>
-      <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+      <Grid item xs={12} md={6} sm={6} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+        <div className="d-flex align-items-center">
         {icon} <span className="listingHeader">{heading}</span>
-        {options && (
+        </div>
+        {isMobile ? <div className="d-flex ">
+        <Button
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        color="secondary"
+        variant="text"
+        disableElevation
+        startIcon={<MdSort />}
+      >
+        Sort 
+        </Button>
+
+        <Button
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        variant="text"
+        color="secondary"
+        disableElevation
+        startIcon={<MdFilterList />}
+      >
+        Filter 
+        </Button>
+        </div> : options && (
           <ToggleButtonGroup
             size="small"
             className="ml-2"
@@ -73,6 +128,8 @@ function OpportunitiesHeader(props) {
             })}
           </ToggleButtonGroup>
         )}
+        
+        
         {children}
       </Grid>
       <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side}>
