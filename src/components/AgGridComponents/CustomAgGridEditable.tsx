@@ -155,6 +155,7 @@ export default function CustomAgGridEditable({
   fromPurchaseOrderGrid = false,
   saveColumnOptions = false,
   showOnlyShowFilteredRecordSwitch = false,
+  priceTemplateField = [],
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -228,6 +229,9 @@ export default function CustomAgGridEditable({
           obj[k] = v
         }
         else if (typeof v === "number" && k.includes(currency && currency.toLowerCase())) {
+          obj[k] = v
+        }
+        else if (typeof v === "number" && priceTemplateField.length > 0 && priceTemplateField.includes(k)) {
           obj[k] = v
         }
       })

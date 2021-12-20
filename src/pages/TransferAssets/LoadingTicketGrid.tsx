@@ -178,7 +178,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       }
 
       if (transferAssetData?.transferType === 'Internal') {
-        if (inventoryDelivered.length === dataRows.length || inventoryLost.length === dataRows.length) {
+        if (inventoryDelivered.length === dataRows.filter(d => d.status !== "Lost").length || inventoryLost.length === dataRows.length) {
           setTransferIsEnded(true);
           updateTransferStatus('Completed');
         } else {

@@ -263,7 +263,7 @@ const RentalManagement = () => {
           </Tooltip>
         )}
 
-      <HideWhenOffline>
+      {/* <HideWhenOffline>
         <GridDeleteIcon
           hasDeletePermission={permissions.rentalManagement.isDelete}
           ownerId={params.data.ownerId}
@@ -277,7 +277,7 @@ const RentalManagement = () => {
           }
           entity="rentalManagement"
         />
-      </HideWhenOffline>
+      </HideWhenOffline> */}
     </>
   );
 

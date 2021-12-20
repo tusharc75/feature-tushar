@@ -190,7 +190,7 @@ const ContactDetailsPage = (props) => {
           });
         }
         excludeContacts.push(data._id);
-        getContacts(excludeContacts);
+        getContacts(excludeContacts, data);
 
         orgChartData.push({
           id: data._id,
@@ -218,7 +218,7 @@ const ContactDetailsPage = (props) => {
       });
   };
 
-  const getContacts = (excludeContacts = []) => {
+  const getContacts = (excludeContacts = [], contactData) => {
     axiosInstance()
       .get(`${contactApi}?entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
@@ -685,7 +685,7 @@ const ContactDetailsPage = (props) => {
                   color="primary"
                   size="small"
                   onClick={handleOpneUpdateDialog}
-                  className={contactClass.mobile_button_layout}
+                  className={isMobile ? accountClass.mobile_button_layout : ""}
                   style={isMobile ? { color: '#43aeaa' } : {}}
                 >
                   {isMobile ? <BiEdit size={20} /> : 'Edit'}

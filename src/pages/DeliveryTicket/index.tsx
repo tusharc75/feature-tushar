@@ -1,34 +1,27 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from "react";
-import Grid from "@material-ui/core/Grid";
-import Box from "@material-ui/core/Box";
-import { useHistory } from "react-router-dom";
-import { useData } from "../../StateProvider/Provider";
-import axiosInstance from "../../axios/axiosInstance";
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import MessageDialog from "../../components/Helpers/MessageDialog";
-import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
-import routes from "./../../components/Helpers/Routes";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import Grid from '@material-ui/core/Grid';
+import Box from '@material-ui/core/Box';
+import { useHistory } from 'react-router-dom';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import {
-  isObjectEmpty,
-  gridLoadingTimeout,
-  deliveryTicket,
-} from "../../constants/helpers";
-import CustomContainer from "../../components/CustomContainer";
-import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import CustomAgGrid, {
-  reducer,
-  intialState,
-} from "../../components/AgGridComponents/CustomAgGrid";
-import styles from "../Leads/Header.module.scss";
+import { isObjectEmpty, gridLoadingTimeout, deliveryTicket } from '../../constants/helpers';
+import CustomContainer from '../../components/CustomContainer';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import styles from '../Leads/Header.module.scss';
 import { GiAbstract055 } from 'react-icons/gi';
-import SearchBox from '../../components/Helpers/SearchBox'
-import ManageDeliveryTicket from "./ManageDeliveryTicket"
-import { sidebarResource, prepareDataForGrid } from "../../constants/helpers"
-import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
+import SearchBox from '../../components/Helpers/SearchBox';
+import ManageDeliveryTicket from './ManageDeliveryTicket';
+import { sidebarResource, prepareDataForGrid } from '../../constants/helpers';
+import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { isMobile } from 'react-device-detect';
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 
 let deliveryTicketTimeout;
 
@@ -36,7 +29,7 @@ const DeliveryTicket = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, selectedEntity, permissions },
+    state: { user, selectedEntity, permissions }
   }: any = useData();
   const { getColumnData } = useColumns();
   const [renderCount, setRenderCount] = useState(0);
@@ -47,63 +40,51 @@ const DeliveryTicket = () => {
     isCreate: permissions?.deliveryTicket?.isCreate,
     isUpdate: permissions?.deliveryTicket?.isUpdate,
     isRead: permissions?.deliveryTicket?.isRead,
-    isDelete: permissions?.deliveryTicket?.isDelete,
+    isDelete: permissions?.deliveryTicket?.isDelete
   });
 
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showManageDeliveryTicket, setShowManageDeliveryTicket] = useState(false);
-  const [columns, setColumns] = useState([])
-  const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [columns, setColumns] = useState([]);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({});
 
   const { deliveryTicketApi, deliveryTicketResource } = deliveryTicket;
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const {
-    dataRows,
-    rowCount,
-    loading,
-    page,
-    limit,
-    pageSizes,
-    search,
-    filters,
-    sorting,
-    selectedRecords,
-    appendRows
-  } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
 
   const fetchGridMetadata = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource["deliveryTicket"]}&entity=${selectedEntity}&view=true&showHiddenFields=true`)
+      .get(`/field?resource=${sidebarResource['deliveryTicket']}&entity=${selectedEntity}&view=true&showHiddenFields=true`)
       .then(({ data: { data } }) => {
-        let columns = []
-        let rendererNames = []
-        data.forEach(o => {
-          let currentColumn = getColumnData(deliveryTicketResource, o?.fieldData, `${routes.deliveryTicket.path}/detail`)
+        let columns = [];
+        let rendererNames = [];
+        data.forEach((o) => {
+          let currentColumn = getColumnData(deliveryTicketResource, o?.fieldData, `${routes.deliveryTicket.path}/detail`);
           if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData]
+            columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName)
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
-          return o?.fieldData
-        })
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+          return o?.fieldData;
+        });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
           actionsRenderer: ActionsRenderer
-        }
-        setFrameWorkComponent({ ...tempFrameworkComponent })
-        columns = [...columns, ...getStaticFields()]
-        setColumns([...columns])
-      })
-  }
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent });
+        columns = [...columns, ...getStaticFields()];
+        setColumns([...columns]);
+      });
+  };
 
   useEffect(() => {
-    fetchGridMetadata()
-  }, [])
+    fetchGridMetadata();
+  }, []);
 
   const columnState = JSON.parse(localStorage.getItem(deliveryTicketResource));
   if (columnState) {
@@ -141,13 +122,7 @@ const DeliveryTicket = () => {
     if (renderCount > 0) {
       fetchDeliveryTicket();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [
-    page,
-    limit,
-    filters,
-    sorting,
-    selectedEntity,
-  ]);
+  }, [page, limit, filters, sorting, selectedEntity]);
 
   const ActionsRenderer = (params) => (
     <>
@@ -156,10 +131,9 @@ const DeliveryTicket = () => {
         ownerId={params.data.ownerId}
         userId={user?.user?._id}
         onDelete={() => {
-          setDeleteRecord(params.data)
-          setIsConformDialogVisible(true)
-        }
-        }
+          setDeleteRecord(params.data);
+          setIsConformDialogVisible(true);
+        }}
         entity="Delivery Ticket"
       />
     </>
@@ -167,11 +141,11 @@ const DeliveryTicket = () => {
 
   const replaceFieldName = (field) => {
     switch (field) {
-      case "createdBy":
-        return "createdBy.user.concatedName";
+      case 'createdBy':
+        return 'createdBy.user.concatedName';
 
-      case "updatedBy":
-        return "updatedBy.user.concatedName";
+      case 'updatedBy':
+        return 'updatedBy.user.concatedName';
 
       default:
         return field;
@@ -184,8 +158,8 @@ const DeliveryTicket = () => {
     if (field !== updatedField) return updatedField;
 
     switch (field) {
-      case "customerAccount":
-        return "customerAccount.optionLabel";
+      case 'customerAccount':
+        return 'customerAccount.optionLabel';
 
       default:
         return field;
@@ -205,18 +179,14 @@ const DeliveryTicket = () => {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
-          term: filters[field].filter,
+          term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(
-        updatedFilters
-      )}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(
-        sorting[0].colId
-      )}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {
@@ -228,7 +198,7 @@ const DeliveryTicket = () => {
 
   const fetchDeliveryTicket = async () => {
     if (selectedEntity) {
-      dispatch({ type: "loading", loading: true });
+      dispatch({ type: 'loading', loading: true });
       const queryString = getQueryString();
 
       if (gridApi) {
@@ -240,28 +210,30 @@ const DeliveryTicket = () => {
         .then(({ data: { data, count } }) => {
           let rows = data.map((u) => {
             let res = {
-              ...prepareDataForGrid(u, user),
+              ...prepareDataForGrid(u, user)
+              //  Commenting canDelete because right now we are neither showing checkbox for multiple delete nor delete icon in row
+              //  canDelete: u?.createdBy?.user?._id === user?.user._id,
             };
             return res;
           });
           if (appendRows) {
-            dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
+            dispatch({ type: 'initialize', data: [...dataRows, ...rows], count: count });
           } else {
-            dispatch({ type: "initialize", data: rows, count: count });
+            dispatch({ type: 'initialize', data: rows, count: count });
           }
           setTimeout(() => {
-            dispatch({ type: "loading", loading: false });
+            dispatch({ type: 'loading', loading: false });
           }, gridLoadingTimeout);
         })
         .catch((error) => {
-          dispatch({ type: "loading", loading: false });
+          dispatch({ type: 'loading', loading: false });
           toastConfig.setToastConfig(error);
         });
     }
   };
 
   const handleSearch = (e) => {
-    dispatch({ type: "search", search: e.target.value });
+    dispatch({ type: 'search', search: e.target.value });
   };
 
   const showConfirmBox = (row) => {
@@ -290,13 +262,13 @@ const DeliveryTicket = () => {
     if (recordsToDelete.length > 0) {
       axiosInstance()
         .put(`${deliveryTicketApi}/remove?entity=${selectedEntity}`, {
-          ids: recordsToDelete,
+          ids: recordsToDelete
         })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: data.message,
+            type: 'success',
+            message: data.message
           });
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
@@ -308,7 +280,6 @@ const DeliveryTicket = () => {
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
         });
-
     }
   };
 
@@ -329,12 +300,16 @@ const DeliveryTicket = () => {
                     api={deliveryTicketApi}
                     afterImportCompleted={fetchDeliveryTicket}
                     isExportAllOrSomeFeature={true}
+                    onlyExport={true}
                     total={rowCount}
                     recordsToExport={selectedRecords.length}
                     ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
                     onExportToExcelSuccess={() => {
-                      if (gridApi) { gridApi.deselectAll() }
-                      else { fetchDeliveryTicket(); }
+                      if (gridApi) {
+                        gridApi.deselectAll();
+                      } else {
+                        fetchDeliveryTicket();
+                      }
                     }}
                   />
                 </Grid>
@@ -351,9 +326,9 @@ const DeliveryTicket = () => {
                 <GiAbstract055 className="headerLogo" />
                 <span className="listingHeader">{routes.deliveryTicket.title} </span>
               </Grid>
-              <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side} >
-                <Box className={styles.filter_side_header} component="div" >
-                  <Grid style={{ display: "flex", flex: 1 }}>
+              <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side}>
+                <Box className={styles.filter_side_header} component="div">
+                  <Grid style={{ display: 'flex', flex: 1 }}>
                     <SearchBox
                       onSearch={handleSearch}
                       searchbox={styles.search_box_input}
@@ -402,59 +377,58 @@ const DeliveryTicket = () => {
             </Grid>
           </div>
 
-          {
-            isMobile ?
-              <CustomSwipableList
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={permissions.deliveryTicket}
-                primaryField={columns?.find(d => d.primaryField)}
-                onClick={(data) => {
-                  history.push(`${routes.deliveryTicketDetail.path}/${data._id}`)
-                }}
-                dataRows={dataRows}
-                selectedRecords={selectedRecords}
-                dispatch={dispatch}
-                onEdit={() => { }}
-                extraParamsToCheckDelete={true}
-                onDelete={() => { }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                chips={[
-                  {
-                    label: "Status: ",
-                    field: "status"
-                  },
-                  {
-                    label: "Job Name: ",
-                    field: "deliveryJobName"
-                  }
-                ]}
-                onCreate={null}
-                showClone={false}
-                onClone={() => { }}
-                renderedFrom={deliveryTicketResource}
-              />
-              : Object.keys(frameWorkComponent).length > 0 ?
-                <CustomAgGrid
-                  columns={columns}
-                  dataRows={dataRows}
-                  frameworkComponents={frameWorkComponent}
-                  setGridApi={setGridApi}
-                  dispatch={dispatch}
-                  rowCount={rowCount}
-                  limit={limit}
-                  pageSizes={pageSizes}
-                  page={page}
-                  actionWidth={100}
-                  loading={loading}
-                  allowSelection={true}
-                  allowAction={false}
-                  renderedFrom={deliveryTicketResource}
-                  refreshGrid={fetchDeliveryTicket}
-                /> : null
-          }
+          {isMobile ? (
+            <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={permissions.deliveryTicket}
+              primaryField={columns?.find((d) => d.primaryField)}
+              onClick={(data) => {
+                history.push(`${routes.deliveryTicketDetail.path}/${data._id}`);
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={() => {}}
+              extraParamsToCheckDelete={true}
+              onDelete={() => {}}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              chips={[
+                {
+                  label: 'Status: ',
+                  field: 'status'
+                },
+                {
+                  label: 'Job Name: ',
+                  field: 'deliveryJobName'
+                }
+              ]}
+              onCreate={null}
+              showClone={false}
+              onClone={() => {}}
+              renderedFrom={deliveryTicketResource}
+            />
+          ) : Object.keys(frameWorkComponent).length > 0 ? (
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={100}
+              loading={loading}
+              allowSelection={true}
+              allowAction={false}
+              renderedFrom={deliveryTicketResource}
+              refreshGrid={fetchDeliveryTicket}
+            />
+          ) : null}
 
           {showDeleteWarningConfirmBox ? (
             <MessageDialog
@@ -466,8 +440,9 @@ const DeliveryTicket = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${deleteRecord?.deliveryJobName ? "Delivery Ticket" : "Delivery Tickets"
-                }   ${deleteRecord.deliveryJobName || ""}?`}
+              message={`Are you sure you want to delete ${deleteRecord?.deliveryJobName ? 'Delivery Ticket' : 'Delivery Tickets'}   ${
+                deleteRecord.deliveryJobName || ''
+              }?`}
               onClose={() => {
                 if (deleteRecord) setDeleteRecord({});
                 setIsConformDialogVisible(false);
@@ -477,17 +452,15 @@ const DeliveryTicket = () => {
             />
           ) : null}
 
-          {
-            showManageDeliveryTicket ?
-              <ManageDeliveryTicket
-                onClose={() => setShowManageDeliveryTicket(false)}
-                onSuccess={() => {
-                  fetchDeliveryTicket()
-                  setShowManageDeliveryTicket(false)
-                }}
-              />
-              : null
-          }
+          {showManageDeliveryTicket ? (
+            <ManageDeliveryTicket
+              onClose={() => setShowManageDeliveryTicket(false)}
+              onSuccess={() => {
+                fetchDeliveryTicket();
+                setShowManageDeliveryTicket(false);
+              }}
+            />
+          ) : null}
         </CustomContainer>
       </Fragment>
     </>

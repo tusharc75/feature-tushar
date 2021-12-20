@@ -215,7 +215,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         setNextStep(true);
       }
       if (transferAssetData?.transferType.includes('External')) {
-        if (inventoryDelivered.length === dataRows.length) {
+        if (inventoryDelivered.length === dataRows.filter(d => d.status !== "Lost").length) {
           setTransferIsEnded(true);
           updateTransferStatus('Completed');
         } else {
