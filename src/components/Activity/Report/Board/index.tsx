@@ -169,7 +169,7 @@ const Board = ({ type, filter }) => {
         };
       case "loading-ticket":
         return {
-          name: `${data.deliveryJobName}`,
+          name: `${data.ticketName}`,
           id: data._id,
         };
       case "quote":

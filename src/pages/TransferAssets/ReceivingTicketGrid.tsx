@@ -9,7 +9,6 @@ import { receivingTicket, sidebarResource } from '../../constants/helpers';
 import { isMobile } from 'react-device-detect';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { groupBy } from 'lodash';
-import ManageReceivingTicket from '../ReceivingTicket/ManageReceivingTicket';
 import ManageDeliveryTicket from '../DeliveryTicket/ManageDeliveryTicket';
 import { CommonRenderer, DateRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -148,7 +147,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           if (
             loadingTicketData[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))
           ) {
-            assetData[j].deliveryTicket = loadingTicketData[i].deliveryJobName;
+            assetData[j].deliveryTicket = loadingTicketData[i].ticketName;
             assetData[j].deliveryTicketId = loadingTicketData[i]._id;
             assetData[j].deliveryTicketStatus = loadingTicketData[i].status;
           }

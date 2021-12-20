@@ -213,16 +213,16 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["transferAsset"] = refrenceData?._id;
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
                     if (refrenceData?.transferType === "Internal") {
-                        tempInitialData["receivingPlant"] = refrenceData?.transferToPlant?.optionValue;
-                        tempInitialData["plantShipTo"] = refrenceData?.plantShipTo;
+                        tempInitialData["receivingPlant"] = refrenceData?.transfertoPlant?.optionValue;
+                        tempInitialData["receivingPlantAddress"] = refrenceData?.plantShipTo?.optionValue;
                     }
                     if (refrenceData?.transferType === "External Customer") {
                         tempInitialData["customerAccount"] = refrenceData?.transferToCustomer?.optionValue;
-                        tempInitialData["customerShippingAddress"] = refrenceData?.customerShipTo;
+                        tempInitialData["customerShippingAddress"] = refrenceData?.customerShipTo?.optionValue;
                     }
                     if (refrenceData?.transferType === "External Supplier") {
-                        tempInitialData["supplierAccount"] = refrenceData?.transferToSupplier?.optionValue;
-                        tempInitialData["supplierShippingAddress"] = refrenceData?.supplierShipTo;
+                        tempInitialData["supplierAccount"] = refrenceData?.transfertoSupplier?.optionValue;
+                        tempInitialData["supplierShippingAddress"] = refrenceData?.supplierShipTo?.optionValue;
                     }
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "transferAsset"),

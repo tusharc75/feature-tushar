@@ -263,7 +263,7 @@ export default function DeliveryTicketDetail(props) {
       mainPoint["delivery Person"] = deliveryTicketData?.deliveryPerson?.optionLabel || ""
     }
     return mainPoint;
-  }, [deliveryTicketData?.deliveryJobName, deliveryTicketData?.deliveryPerson, deliveryTicketData?.deliveryDate]);
+  }, [deliveryTicketData?.ticketName, deliveryTicketData?.deliveryPerson, deliveryTicketData?.deliveryDate]);
 
   const fetchDeliveryTicketData = () => {
     if (gridApi) {
@@ -437,7 +437,7 @@ export default function DeliveryTicketDetail(props) {
               const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
               const link = document.createElement('a');
               link.href = url;
-              link.setAttribute('download', `LoadingTicket-${deliveryTicketData.deliveryJobName || ""}.pdf`);
+              link.setAttribute('download', `LoadingTicket-${deliveryTicketData.ticketName || ""}.pdf`);
               document.body.appendChild(link);
               link.click();
             }
@@ -489,7 +489,7 @@ export default function DeliveryTicketDetail(props) {
                 </div>
               ) : (
                 <DetailsPageHeader
-                  heading={deliveryTicketData ? deliveryTicketData?.deliveryJobName : ""}
+                  heading={deliveryTicketData ? deliveryTicketData?.ticketName : ""}
                   mainPoints={deliveryTicketData ? getMainPoints : ""}
                   showHeading={true}
                 >
