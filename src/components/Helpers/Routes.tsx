@@ -259,11 +259,11 @@ const routes = {
   },
   deliveryTicket: {
     title: storedRoutes ? storedRoutes.deliveryTicket?.title : RESOURCE_LABEL.deliveryTicket,
-    path: "/loading-ticket",
+    path: "/delivery-ticket",
   },
   deliveryTicketDetail: {
     title: storedRoutes ? storedRoutes.deliveryTicket?.title : RESOURCE_LABEL.deliveryTicket,
-    path: "/loading-ticket/detail",
+    path: "/delivery-ticket/detail",
   },
   repairJob: {
     title: storedRoutes ? storedRoutes.repairJob?.title : RESOURCE_LABEL.repairJob,
