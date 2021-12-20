@@ -10,6 +10,7 @@ import { isMobile } from 'react-device-detect';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { groupBy } from 'lodash';
 import ManageReceivingTicket from '../ReceivingTicket/ManageReceivingTicket';
+import ManageDeliveryTicket from '../DeliveryTicket/ManageDeliveryTicket';
 import { CommonRenderer, DateRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
@@ -380,18 +381,19 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
       {/* Receiving ticket create dialog */}
       {openReceivingTicketDialog && (
-        <ManageReceivingTicket
-          receivingTicketId={null}
-          open={true}
-          isClone={false}
-          isRedirectToDetailPage={false}
+        <ManageDeliveryTicket
+          ticketType="Receiving"
+          refrenceType="Transfer Asset"
+          refrenceData={transferAssetData}
           onClose={() => setOpenReceivingTicketDialog(false)}
-          productInventoryForReceivingTicket={assetWithNoTicket}
+          productInventory={assetWithNoTicket}
           transferData={transferAssetData}
+          warehouseId={transferAssetData?.transferFromPlant?.optionValue}
           onSuccess={() => {
             setOpenReceivingTicketDialog(false);
             fetchAssetsData(true);
           }}
+
         />
       )}
       {/* Confirm Delete Dialog */}
