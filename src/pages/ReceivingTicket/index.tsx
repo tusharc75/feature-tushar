@@ -6,8 +6,13 @@ import { FaRegistered } from 'react-icons/fa';
 import queryString from 'query-string';
 import ManageReceivingTicketDialog from './ManageReceivingTicket';
 import {
-  isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout,
-  receivingTicket, sidebarResource, prepareDataForGrid
+  isObjectEmpty,
+  customerAccount,
+  supplierAccount,
+  gridLoadingTimeout,
+  receivingTicket,
+  sidebarResource,
+  prepareDataForGrid
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
@@ -25,7 +30,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import useColumns, { getFrameworkComponents, getStaticFields } from '../../constants/useColumns';
 
 const renderedFrom = 'receivingTicketPage';
@@ -71,8 +76,8 @@ const ReceivingTicket = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
 
-  const [frameworkComponent, setFrameworkComponent] = useState({})
-  const [columns, setColumns] = useState([])
+  const [frameworkComponent, setFrameworkComponent] = useState({});
+  const [columns, setColumns] = useState([]);
 
   const { receivingTicketResource } = receivingTicket;
 
@@ -160,60 +165,57 @@ const ReceivingTicket = () => {
   //   commonRenderer: CommonRenderer,
   //   dateRenderer: DateRenderer
   // };
-  const [locationKeys, setLocationKeys] = useState([])
+  const [locationKeys, setLocationKeys] = useState([]);
   useEffect(() => {
-    return history.listen(location => {
+    return history.listen((location) => {
       const { type }: any = queryString.parse(history.location.search);
       if (history.action === 'PUSH') {
-        setLocationKeys([location.key])
+        setLocationKeys([location.key]);
       }
       if (history.action === 'POP') {
         if (locationKeys[1] === location.key) {
-          setLocationKeys(([_, ...keys]) => keys)
+          setLocationKeys(([_, ...keys]) => keys);
           // Handle forward event
-          setSelectedType(type ? parseInt(type) : 1)
-
+          setSelectedType(type ? parseInt(type) : 1);
         } else {
-          setLocationKeys((keys) => [location.key, ...keys])
+          setLocationKeys((keys) => [location.key, ...keys]);
           // Handle back event
-          setSelectedType(type ? parseInt(type) : 1)
-
+          setSelectedType(type ? parseInt(type) : 1);
         }
       }
-    })
-  }, [locationKeys,])
-
+    });
+  }, [locationKeys]);
 
   const fetchGridMetadata = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource["receivingTicket"]}&entity=${selectedEntity}&view=true&showHiddenFields=true`)
+      .get(`/field?resource=${sidebarResource['receivingTicket']}&entity=${selectedEntity}&view=true&showHiddenFields=true`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
-        data.forEach(o => {
-          let currentColumn = getColumnData(receivingTicketResource, o?.fieldData, `${routes.receivingTicket.path}/detail`)
+        data.forEach((o) => {
+          let currentColumn = getColumnData(receivingTicketResource, o?.fieldData, `${routes.receivingTicket.path}/detail`);
           if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData]
+            columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName)
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
-          return o?.fieldData
-        })
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+          return o?.fieldData;
+        });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
           actionsRenderer: ActionsRenderer
-        }
-        setFrameworkComponent({ ...tempFrameworkComponent })
-        columns = [...columns, ...getStaticFields()]
-        setColumns([...columns])
-      })
-  }
+        };
+        setFrameworkComponent({ ...tempFrameworkComponent });
+        columns = [...columns, ...getStaticFields()];
+        setColumns([...columns]);
+      });
+  };
 
   useEffect(() => {
-    fetchGridMetadata()
-  }, [])
+    fetchGridMetadata();
+  }, []);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -293,7 +295,6 @@ const ReceivingTicket = () => {
       />
     </>
   );
-
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -387,7 +388,6 @@ const ReceivingTicket = () => {
     axiosInstance()
       .get(`${receivingTicket.receivingTicketApi}${queryString}`)
       .then(({ data: { data, count } }) => {
-
         let rows = data.map((u) => {
           let res = {
             ...prepareDataForGrid(u, user),
@@ -433,9 +433,9 @@ const ReceivingTicket = () => {
         // });
 
         if (appendRows) {
-          dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
+          dispatch({ type: 'initialize', data: [...dataRows, ...rows], count: count });
         } else {
-          dispatch({ type: "initialize", data: rows, count: count });
+          dispatch({ type: 'initialize', data: rows, count: count });
         }
 
         setTimeout(() => {
@@ -454,7 +454,7 @@ const ReceivingTicket = () => {
 
   const handleReceivingTicketTypeSel = (filterValues) => {
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`)
+    history.push(`?type=${filterValues}`);
   };
 
   const handleTransferEntityDialog = () => {
@@ -526,13 +526,16 @@ const ReceivingTicket = () => {
                   permissions={permissions.receivingTicket}
                   module="receivingTicket"
                   api={receivingTicket.receivingTicketApi}
-                  afterImportCompleted={() => { fetchReceivingTickets() }}
+                  afterImportCompleted={() => {
+                    fetchReceivingTickets();
+                  }}
                   isExportAllOrSomeFeature={true}
+                  onlyExport={true}
                   total={rowCount}
                   recordsToExport={selectedRecords.length}
                   ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
                   onExportToExcelSuccess={() => {
-                    if (gridApi) gridApi.deselectAll()
+                    if (gridApi) gridApi.deselectAll();
                     else fetchReceivingTickets();
                   }}
                 />
@@ -559,9 +562,9 @@ const ReceivingTicket = () => {
             icon={<FaRegistered className="headerLogo" />}
             heading={routes.receivingTicket.title}
             showTransferEntityDialog={handleTransferEntityDialog}
-          // showCloneReceivingTicketDialog={() => {
-          //   handleShowCloneReceivingTicketDialog()
-          // }}
+            // showCloneReceivingTicketDialog={() => {
+            //   handleShowCloneReceivingTicketDialog()
+            // }}
           >
             {accountDetails.accountId && (
               <Chip
@@ -579,20 +582,20 @@ const ReceivingTicket = () => {
             )}
           </ReceivingTicketHeader>
         </div>
-        {isMobile ?
+        {isMobile ? (
           <CustomSwipableList
             allowSelection={true}
             allowSwipe={true}
             permissions={permissions.receivingTicket}
-            primaryField={columns?.find(d => d.primaryField)}
+            primaryField={columns?.find((d) => d.primaryField)}
             onClick={(data) => {
-              history.push(`${routes.receivingTicketDetail.path}/${data._id}`)
+              history.push(`${routes.receivingTicketDetail.path}/${data._id}`);
             }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
             onEdit={(data) => {
-              history.push(`${routes.receivingTicketDetail.path}/${data._id}?openEdit=true`)
+              history.push(`${routes.receivingTicketDetail.path}/${data._id}?openEdit=true`);
             }}
             extraParamsToCheckDelete={true}
             onDelete={(data) => {
@@ -600,40 +603,41 @@ const ReceivingTicket = () => {
                 show: true,
                 id: data._id,
                 receivingJobName: data.receivingJobName
-              })
+              });
             }}
             rowCount={rowCount}
             page={page}
             loading={loading}
             chips={[
               {
-                label: "Status: ",
-                field: "status",
+                label: 'Status: ',
+                field: 'status'
               }
             ]}
             onCreate={false}
             showClone={false}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
-          /> : Object.keys(frameworkComponent).length > 0 ?
-            <CustomAgGrid
-              allowAction={false}
-              allowSelection={true}
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={100}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchReceivingTickets}
-            /> : null
-        }
+          />
+        ) : Object.keys(frameworkComponent).length > 0 ? (
+          <CustomAgGrid
+            allowAction={false}
+            allowSelection={true}
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponent}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={100}
+            loading={loading}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchReceivingTickets}
+          />
+        ) : null}
 
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
@@ -645,8 +649,9 @@ const ReceivingTicket = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.receivingJobName ? 'Receiving Ticket' : 'Receiving Tickets'}   ${deleteRecord.receivingJobName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.receivingJobName ? 'Receiving Ticket' : 'Receiving Tickets'}   ${
+              deleteRecord.receivingJobName || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

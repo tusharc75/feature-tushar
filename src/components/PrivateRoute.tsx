@@ -57,7 +57,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'product-inventory',
         'equiptment-rental-master',
         'rental-management',
-        'loading-ticket',
+        'delivery-ticket',
         'entity',
         'logout'
       ].indexOf(pathnames[0]) >= 0

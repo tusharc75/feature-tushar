@@ -116,8 +116,8 @@ const ProductInventoryDetailsPage = () => {
   const NameRenderer = (params) => (
     <>{
       params.value ? (
-        params.data.type === "Receiving Ticket" ?
-          <Link className="link" title={params.value} to={`${routes.receivingTicketDetail.path}/${params.data.referenceId}`}>
+        params.data.type === "Loading Ticket" || params.data.type === "Receiving Ticket" ?
+          <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.referenceId}`}>
             {params.value}
           </Link> : params.data.type.toLowerCase() === "repair" ?
             <Link className="link" title={params.value} to={`${routes.repairJobDetail.path}/${params.data.referenceId}`}>
@@ -126,14 +126,11 @@ const ProductInventoryDetailsPage = () => {
             : params.data.type.toLowerCase() === "rental" ?
               <Link className="link" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`}>
                 {params.value}
-              </Link> : params.data.type === sidebarResource.deliveryTicket ?
-                <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.referenceId}`}>
+              </Link> : params.data.type === "Transfer Assets" ?
+                <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
                   {params.value}
-                </Link> : params.data.type === "Transfer Assets" ?
-                  <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
-                    {params.value}
-                  </Link>
-                  : params.value
+                </Link>
+                : params.value
       ) : (
         <NoDataCell />
       )
