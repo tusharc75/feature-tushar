@@ -300,7 +300,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                         {
                           iconMapping.find((mapping) => {
                             return mapping.key === listItem.section;
-                          })?.icon || <AiFillAccountBook size={17} className="sidebar-icon" /> || <AiFillSetting size={18} className="sidebar-icon" />
+                          })?.icon || <FaRegistered size={16} className="sidebar-icon" /> || <AiFillSetting size={18} className="sidebar-icon" />
                         }
                       </ListItemIcon>
                       <ListItemText primary={listItem.section} />

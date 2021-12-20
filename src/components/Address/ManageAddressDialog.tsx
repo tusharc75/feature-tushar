@@ -28,6 +28,8 @@ const ManageAddressDialog = (props) => {
   const [formsData, setFormsData] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [placeId, setPlaceId] = useState(null)
+  const [formikRef, setFormikRef] = useState(null)
 
   useEffect(() => {
     if (initialData.fields.length > 0) {
@@ -66,15 +68,45 @@ const ManageAddressDialog = (props) => {
 
 
   const fetchPlace = useMemo(() => throttle((req, cb) => {
-    // placesService.current
+    placesService.current.getDetails(req, cb)
   }, 200), [])
 
+
   useEffect(() => {
-    if (!placesService.current && window.google) {
-      const root: HTMLDivElement | any = document.getElementById("#root")
-      placesService.current = new window.google.maps.places.PlacesService(root)
+    let active = true
+
+    if (placeId) {
+      if (!placesService.current && window.google) {
+        const element = document.createElement('div')
+        placesService.current = new window.google.maps.places.PlacesService(element)
+      }
+
+      if (!placesService.current && !placeId) {
+        return undefined
+      }
+
+      fetchPlace({ placeId }, (results) => {
+        if (active) {
+          type addressType = {
+            long_name: string,
+            short_name: string,
+            types: any[]
+          }
+          const fullAddress = {}
+          const addressess = results.address_components
+
+          addressess.forEach((address: addressType) => {
+            fullAddress[address.types[0]] = address.long_name;
+          })
+
+        }
+      });
     }
-  }, [])
+
+    return () => {
+      active = false
+    }
+  }, [placeId])
 
 
   return (
@@ -91,7 +123,7 @@ const ManageAddressDialog = (props) => {
       }}
       fullWidth
     >
-      {initialData && initialData.fields.length ? (
+      {initialData.fields.length ? (
         <Formik
           enableReinitialize={true}
           initialValues={initialData.values}
@@ -154,6 +186,13 @@ const ManageAddressDialog = (props) => {
                                       tooltipMessage={field?.tooltipMessage}
                                       size="small"
                                       imageOrFileUploadCompletePercentage={null}
+                                      onChange={(_, val) => {
+                                        if (field.fieldName === "fullAddress" && typeof val === 'object') {
+                                          setPlaceId(val?.place_id ?? null)
+                                        } else {
+                                          return null
+                                        }
+                                      }}
                                     />
                                   }
                                 </Grid>

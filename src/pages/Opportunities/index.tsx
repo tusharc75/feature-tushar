@@ -557,7 +557,7 @@ const Opportunities = () => {
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions[opportunityResource]}
-              primaryField={columns?.find(d => d.primaryField)}
+              primaryField={columns?.find(d => d.field)}
               onClick={(data) => {
                 history.push(`${routes.opportunityDetail.path}/${data._id}`)
               }}
@@ -583,12 +583,23 @@ const Opportunities = () => {
                   icon: <FaSuitcase size={18} />,
                   field: "customerAccountName"
                 },
+                
+
               ]}
               chips={[
                 {
-                  label: "Probability",
+                  label: "Probability :",
                   field: "probability",
                 },
+                {
+                  label:"Market:",
+                  field:"marketSegment"
+                },
+                {
+                  label:"Sub-Market:",
+                  field:"subMarketSegment"
+                },
+              
               ]}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
