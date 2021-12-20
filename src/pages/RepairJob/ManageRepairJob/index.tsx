@@ -143,8 +143,8 @@ const ManageRepairJob = (props) => {
               }
 
               if (data["typeOfRepair"] === "External") {
-                const vendorOptions = isClone ? fieldsDataForCreate.find(option => option.fieldName === "vendor")?.option : fieldsDataForUpdate.find(option => option.fieldName === "vendor")?.option;
-                const options = vendorOptions.find(option => option.optionValue === data.vendor?.optionValue)?.shippingAddress ?? [];
+                const supplierOptions = isClone ? fieldsDataForCreate.find(option => option.fieldName === "supplier")?.option : fieldsDataForUpdate.find(option => option.fieldName === "supplier")?.option;
+                const options = supplierOptions.find(option => option.optionValue === data.supplier?.optionValue)?.shippingAddress ?? [];
                 let newDataSource = [];
 
                 options.forEach((d) => {
@@ -197,7 +197,7 @@ const ManageRepairJob = (props) => {
               }
             }
 
-            if (_f.fieldName === "vendor" || _f.fieldName === "supplierShipTo") {
+            if (_f.fieldName === "supplier" || _f.fieldName === "supplierShipTo") {
               if (formValues && formValues["typeOfRepair"] === "External") {
                 _f.required = true
               } else {
@@ -387,7 +387,7 @@ const ManageRepairJob = (props) => {
                               <Box marginY={2}>
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field) =>
-                                    field.fieldName === 'vendor' || field.fieldName === 'supplierShipTo' ? (
+                                    field.fieldName === 'supplier' || field.fieldName === 'supplierShipTo' ? (
                                       values["typeOfRepair"] === "External" && (
                                         <Grid item xs={12} sm={6} md={6}>
                                           <FormTypes
@@ -395,7 +395,7 @@ const ManageRepairJob = (props) => {
                                             {...field}
                                             disabled={(!repairJobId && field.disableOnEdit)}
                                             values={values}
-                                            errors={errors}
+                                            errors={errors} 
                                             touched={touched}
                                             label={field.fieldLabel}
                                             name={field.fieldName}
@@ -404,7 +404,7 @@ const ManageRepairJob = (props) => {
                                             setFieldValue={(name, value) => {
                                               setFieldValue(name, value);
 
-                                              if (field.fieldName === 'vendor') {
+                                              if (field.fieldName === 'supplier') {
                                                 setFieldValue("supplierShipTo", "");
                                                 if (value) {
                                                   const options = field.option.find(option => option.optionValue === value)?.shippingAddress ?? [];
@@ -509,14 +509,18 @@ const ManageRepairJob = (props) => {
                                                   setFieldValue("repairPlant", "");
                                                   setFieldValue("plantShipTo", "");
                                                 }
-                                                setFieldValue("vendor", "");
+                                                setFieldValue("supplier", "");
                                                 setFieldValue("supplierShipTo", "");
+                                                
+                                                setSupplierShipToAddresses([]);
                                               }
                                               else {
                                                 setFieldValue("repairPlant", "");
                                                 setFieldValue("plantShipTo", "");
-                                                setFieldValue("vendor", "");
+                                                setFieldValue("supplier", "");
                                                 setFieldValue("supplierShipTo", "");
+
+                                                setSupplierShipToAddresses([]);
                                               }
                                             }}
                                             required={field.required}

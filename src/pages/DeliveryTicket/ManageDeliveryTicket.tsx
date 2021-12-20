@@ -193,8 +193,8 @@ const ManageDeliveryTicket = (props) => {
                         tempInitialData["plantShipTo"] = refrenceData?.plantShipTo;
                     }
                     if (refrenceData?.typeOfRepair === "External") {
-                        tempInitialData["supplierAccount"] = refrenceData?.vendor?.optionValue;
-                        tempInitialData["supplierShippingAddress"] = refrenceData?.supplierShipTo;
+                        tempInitialData["supplierAccount"] = refrenceData?.supplier?.optionValue;
+                        tempInitialData["supplierShippingAddress"] = refrenceData?.supplierShipTo?.optionValue;
                     }
                     setInitialData({
                         fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "repairJob"),

@@ -31,6 +31,7 @@ import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { FaSuitcase } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
+import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
 
 const renderedFrom = "repairJob_receiving_ticket"
 
@@ -490,23 +491,39 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
         }
 
         {
-            showReceivingTicketDialog.open && <ManageReceivingTicket
-                open={showReceivingTicketDialog.open}
-                isClone={false}
-                receivingTicketId={null}
-                productInventoryForReceivingTicket={showReceivingTicketDialog.selectedAssets}
-                repairJobData={repairJobData}
+            showReceivingTicketDialog.open && <ManageDeliveryTicket
+                ticketType="Receiving"
+                refrenceType="Repair Job"
+                refrenceData={repairJobData}
+                // productInventory={productInventoryForReceivingTicket}
                 onClose={() => setShowReceivingTicketDialog({ open: false, selectedAssets: [] })}
                 onSuccess={() => {
                     setShowReceivingTicketDialog({ open: false, selectedAssets: [] })
                     fetchRecords();
                 }}
-                // onSuccess={() => {
-                //     setShowReceivingTicketDialog(false)
-                //     fetchProductInventory()
-                // }}
-                isRedirectToDetailPage={false}
+                productInventoryForReceivingTicket={showReceivingTicketDialog.selectedAssets}
+                // warehouseId={rentalManagementData?.warehouse}
+                repairJobData={repairJobData}
             />
+
+
+            // <ManageReceivingTicket
+            //     open={showReceivingTicketDialog.open}
+            //     isClone={false}
+            //     receivingTicketId={null}
+            //     productInventoryForReceivingTicket={showReceivingTicketDialog.selectedAssets}
+            //     repairJobData={repairJobData}
+            //     onClose={() => setShowReceivingTicketDialog({ open: false, selectedAssets: [] })}
+            //     onSuccess={() => {
+            //         setShowReceivingTicketDialog({ open: false, selectedAssets: [] })
+            //         fetchRecords();
+            //     }}
+            //     // onSuccess={() => {
+            //     //     setShowReceivingTicketDialog(false)
+            //     //     fetchProductInventory()
+            //     // }}
+            //     isRedirectToDetailPage={false}
+            // />
         }
 
     </>
