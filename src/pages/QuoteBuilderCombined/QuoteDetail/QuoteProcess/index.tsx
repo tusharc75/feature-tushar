@@ -425,7 +425,7 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -1352,8 +1352,8 @@ export default function QuoteProcess(props) {
               DOAneeded
                 ? DOASteps.findIndex((d) => d?.key === ProcessStatus)
                 : ProcessStatus === 'DOA Process'
-                ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
-                : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
+                  ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
+                  : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
             }
             id={quoteData._id}
             version={currentVersion}
@@ -1415,7 +1415,7 @@ export default function QuoteProcess(props) {
                 </span>
               ) : null}
               {(ProcessStatus === 'DOA Process' && versionStatus === 'Building Quote' && DOAneeded) ||
-              (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
+                (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
                 <div className={`d-flex align-items-center justify-content-end doaAction ${isMobile ? 'actio-pos-quote' : ''}`}>
                   {!ifQuoteApproved.approved && (
                     <Button
@@ -1793,17 +1793,31 @@ export default function QuoteProcess(props) {
                     multiple
                     value={showPDFArrangeColumns ? visibleColumns : visibleColumnsExcel}
                     onChange={(e, val) => {
-                      showPDFArrangeColumns ? setVisibleColumns(val) : setVisibleColumnsExcel(val);
-                      showPDFArrangeColumns
-                        ? handleVersionUpdate(val, visibleColumnsExcel, versionStatus, state?.selectedRecords)
-                        : handleVersionUpdate(visibleColumns, val, versionStatus, state?.selectedRecords);
+                      if (val.includes("Select All") && ["Select All", ...ColumnName].sort().toString() !== val.sort().toString()) {
+                        showPDFArrangeColumns ? setVisibleColumns(ColumnName) : setVisibleColumnsExcel(ColumnName);
+                        showPDFArrangeColumns
+                          ? handleVersionUpdate(ColumnName, visibleColumnsExcel, versionStatus, state?.selectedRecords)
+                          : handleVersionUpdate(visibleColumns, ColumnName, versionStatus, state?.selectedRecords);
+                      }
+                      else if (["Select All", ...ColumnName].sort().toString() === val.sort().toString()) {
+                        showPDFArrangeColumns ? setVisibleColumns(defaultSelectColumns) : setVisibleColumnsExcel(defaultSelectColumns);
+                        showPDFArrangeColumns
+                          ? handleVersionUpdate(defaultSelectColumns, visibleColumnsExcel, versionStatus, state?.selectedRecords)
+                          : handleVersionUpdate(visibleColumns, defaultSelectColumns, versionStatus, state?.selectedRecords);
+                      }
+                      else {
+                        showPDFArrangeColumns ? setVisibleColumns(val) : setVisibleColumnsExcel(val);
+                        showPDFArrangeColumns
+                          ? handleVersionUpdate(val, visibleColumnsExcel, versionStatus, state?.selectedRecords)
+                          : handleVersionUpdate(visibleColumns, val, versionStatus, state?.selectedRecords);
+                      }
                     }}
-                    options={ColumnName}
+                    options={["Select All", ...ColumnName]}
                     disableCloseOnSelect
                     getOptionLabel={(option) => option}
                     renderOption={(option, { selected }) => (
                       <React.Fragment>
-                        <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={selected} />
+                        <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={["Select All", ...ColumnName].sort().toString() === ["Select All", ...visibleColumnsExcel].sort().toString() || ["Select All", ...ColumnName].sort().toString() === ["Select All", ...visibleColumns].sort().toString() ? true : selected} />
                         {option}
                       </React.Fragment>
                     )}
