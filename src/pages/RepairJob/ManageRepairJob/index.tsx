@@ -68,7 +68,7 @@ const ManageRepairJob = (props) => {
       .then(({ data: { data } }) => {
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        const plantsOptions = data.find((obj) => obj?.fieldData.fieldName === 'plant')?.fieldData.option;
+        const plantsOptions = data.find((obj) => ["plant", "warehouse"].indexOf(obj?.fieldData.fieldName) > -1)?.fieldData?.option ?? [];
         const plantOptionsEntity = plantsOptions.filter((a) => { if (a.entity == selectedEntity) { return a } });
 
         const commonDataSource = [...data.find((obj) => obj?.fieldData.fieldName === 'supplierShipTo')?.fieldData?.option] ?? [];
@@ -395,7 +395,7 @@ const ManageRepairJob = (props) => {
                                             {...field}
                                             disabled={(!repairJobId && field.disableOnEdit)}
                                             values={values}
-                                            errors={errors} 
+                                            errors={errors}
                                             touched={touched}
                                             label={field.fieldLabel}
                                             name={field.fieldName}
@@ -503,15 +503,15 @@ const ManageRepairJob = (props) => {
 
                                               if (value) {
                                                 if (value === "Internal") {
-                                                  setFieldValue("repairPlant", values["plant"]);
-                                                  setFieldValue("plantShipTo", repairPlantDataSource.find(d => d.optionValue === values["plant"])?.address ?? "");
+                                                  setFieldValue("repairPlant", values["plant"] ?? values["warehouse"]);
+                                                  setFieldValue("plantShipTo", repairPlantDataSource.find(d => d.optionValue === values["plant"] || d.optionValue === values["warehouse"])?.address ?? "");
                                                 } else {
                                                   setFieldValue("repairPlant", "");
                                                   setFieldValue("plantShipTo", "");
                                                 }
                                                 setFieldValue("supplier", "");
                                                 setFieldValue("supplierShipTo", "");
-                                                
+
                                                 setSupplierShipToAddresses([]);
                                               }
                                               else {
@@ -571,7 +571,7 @@ const ManageRepairJob = (props) => {
                                                 tooltipMessage={field?.tooltipMessage}
                                                 size="small"
                                                 minDate={values["startDate"]}
-                                              /> : field.fieldName === "plant"
+                                              /> : field.fieldName === "plant" || field.fieldName === "warehouse"
                                                 ? <FormTypes
                                                   repairJobId={repairJobId}
                                                   {...field}
