@@ -198,9 +198,9 @@
         background-color: transparent !important;
         box-shadow: none !important;
         display: flex !important;
-        padding: 3px 0px !important;
+        padding: 5px !important;
         min-width: 40px !important;
-        color: var(--primary) !important;
+        color: var(--primary) ;
     }
     .buttonDeleteBigScreen {
         display: none !important;
@@ -209,7 +209,7 @@
         background-color: transparent !important;
         box-shadow: none !important;
         display: flex !important;
-        padding: 3px 0px !important;
+        padding: 5px !important;
         min-width: 40px !important;
         color: var(--danger-light) !important;
     }

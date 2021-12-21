@@ -257,11 +257,11 @@ const TransferAssetDetailPage = () => {
   };
 
   const handleViewPdf = (download) => {
-    axiosInstance()
-      .put(`quote-pdf-template/pdf-column`, { id, resourceName: 'transferAsset', acceptedColumn: ['Asset Number', 'Product Description', 'Status'] })
+    setFileDownloading(true)
+    axiosInstance().get(`${transferAsset.api}/${id}/pdf`)
       .then(({ data: { data } }) => {
         axiosInstance()
-          .get(`user/download?fileName=${data.pdf}`, {
+          .get(`user/download?fileName=${data.fileName}`, {
             responseType: 'blob'
           })
           .then(({ data }) => {
@@ -269,7 +269,7 @@ const TransferAssetDetailPage = () => {
               const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
               const link = document.createElement('a');
               link.href = url;
-              link.setAttribute('download', `TransferAsset-${transferAssetData.purchaseOrderNumber}.pdf`);
+              link.setAttribute('download', `TransferAsset-${transferAssetData.transferAssetNumber}.pdf`);
               document.body.appendChild(link);
               link.click();
             } else {
@@ -285,6 +285,7 @@ const TransferAssetDetailPage = () => {
             toastConfig.setToastConfig(err);
             setFileDownloading(false);
           });
+
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -405,7 +406,7 @@ const TransferAssetDetailPage = () => {
                   isTransferEnded={isTransferEnded}
                   isNextStep={isNextStep}
                   isPrevStep={isPrevStep}
-                  steps={transferAssetData?.transferType === 'Internal' ? transferSteps : transferSteps1}
+                  steps={transferAssetData ? transferAssetData.transferType === 'Internal' ? transferSteps : transferSteps1 : transferSteps}
                   currentStep={currentStep}
                   setCurrentStep={setCurrentStep}
                   updateStatus={updateStatus}

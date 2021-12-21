@@ -16,18 +16,19 @@ import { BsPerson } from "react-icons/bs";
 import { BiFace } from "react-icons/bi";
 import { Delete } from "@material-ui/icons";
 import styles from "./ProjectSales.module.scss";
+import React from "react";
 
 function DisplayData({ key, label, value, icon }) {
   return (
     <div style={{ flexGrow: 1 }}>
-      <List>
-        <ListItem key={key}>
-          <ListItemAvatar>{icon}</ListItemAvatar>
+      <List >
+        <ListItem key={key} className="px-0 pt-0 pb-0 contact-accodian">
+          <ListItemAvatar className={styles.list_start_icon}>{icon}</ListItemAvatar>
           <ListItemText  primary={<>
                     <Grid container>
                         <Grid item xs={12} md={11} sm={11} className="text-truncate">{value ? value : '-'} </Grid>
                     </Grid> </>
-                } secondary={label} />
+                } secondary={label} className={styles.label_size} />
         </ListItem>
       </List>
     </div>
@@ -57,19 +58,21 @@ function RelatedContacts({
                     key={obj?._id ?? `contact${index}`}
                     className="detailCard"
                    >
-                    <CardContent className={styles.detail_view} >
-                      <Grid container className={styles.detail_header}>
-                        <Grid
-                        >
+
+                    <CardContent className={styles.detail_view}  >
+                        <div className="cardStyle"> </div>
+                        <Grid item xs={12}>
+                      <Grid container className={`${"detailCardHeader"} `}>
+                          <Grid item xs={6}>
                           <Link
-                            className="account_name_link f_size"
+                            className="account_name_link f_size contact_detailName"
                             to={`/${contactRoute}/detail/${obj._id}`}
                           >
                             {`${obj.firstName || ""}  ${obj.lastName || ""}`}
                           </Link>
                         </Grid>
 
-                        <Grid item xs={1}  className={styles.delete_contact}>
+                        <Grid item xs={6}  className={styles.delete_contact}>
                           <IconButton
                               className={"delete_contact_icon"}
                             title={`Remove contact: ${obj?.firstName} ${obj?.lastName}`}
@@ -80,10 +83,12 @@ function RelatedContacts({
                               handleRemoveContact(obj);
                             }}
                           >
-                            <Delete color="error" />
+                            <Delete color="error" className={styles.delete_icon_button}/>
                           </IconButton>
                         </Grid>
                       </Grid>
+
+
                       <Grid container>
                         <Grid item xs={6} sm={6} md={6} className={styles.detail_account}>
                           {
@@ -107,6 +112,10 @@ function RelatedContacts({
                           }
                         </Grid>
                       </Grid>
+
+                      </Grid>
+
+
                     </CardContent>
                   </Card>
                   </div>
@@ -139,6 +148,9 @@ function RelatedContacts({
             </Box>
         </div>
     </div>
+
+
+
 
 
   );

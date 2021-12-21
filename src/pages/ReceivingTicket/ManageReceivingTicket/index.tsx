@@ -300,8 +300,10 @@ const ManageReceivingTicket = ({ isClone, receivingTicketId, productInventoryFor
           toastConfig.setToastConfig(error);
         });
     } else {
+      let updatedValues = {...values}
+      updatedValues["status"] = "New";
       axiosInstance()
-        .post(`${receivingTicket.receivingTicketApi}`, values)
+        .post(`${receivingTicket.receivingTicketApi}`, updatedValues)
         .then(({ data: { data, message } }) => {
           if (isRedirectToDetailPage) {
             history.push(`${routes.receivingTicketDetail.path}/${data._id}`);

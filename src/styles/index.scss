@@ -473,10 +473,10 @@ body::-webkit-scrollbar-thumb {
 
 
 }
-.MuiTable-root {
-  width: calc(100vw - 92px ) !important;
-  display: block !important;
-}
+// .MuiTable-root {
+//   width: calc(100vw - 92px ) !important;
+//   display: block !important;
+// }
 
 .link:hover {
   text-decoration: underline !important;
@@ -667,19 +667,42 @@ body::-webkit-scrollbar-thumb {
 }
 
 .oms-tab {
+  gap:5px;
   border-bottom: 1px solid #ecf1f3;
-  background: #f5f5f5;
+  //background: #f5f5f5;
   min-height: auto !important;
   //margin-left: 4px;
+  &.MuiTab-textColorPrimary.Mui-selected{
+    border-bottom: 1px solid black !important;
+  }
+
+
+}
+.dynamic-vertical-tab{
+  border: 1px solid grey;
+  padding:15px 0 ;
+  margin-right: -1px ;
+ 
 }
 .mobile_button_layout{
-  padding: 5px 10px !important;
+  padding: 5px !important;
 }
+
+.tabProject{
+  .MuiTab-textColorPrimary.Mui-selected{
+    border-top: 0px !important
+  }
+}
+
 
 .quote-tab {
   //border-bottom: 3px solid #163340;
   background: #f5f5f5;
   min-height: auto !important;
+}
+.uionp{
+  position: absolute;
+  left:100px
 }
 
 .detail-box {
@@ -809,6 +832,9 @@ body::-webkit-scrollbar-thumb {
 }
 .detailName{
   line-height: 24px;
+}
+.contact_detailName{
+  font-weight: bold;
 }
 .cardStyle{
   width: 5px;
@@ -1203,6 +1229,28 @@ body::-webkit-scrollbar-thumb {
 
 .description_layout_mobile{
 
+}
+.tab_Box_layout{
+    display: flex;
+    // grid-template-columns: minmax(150px,300px) minmax(300px,1fr);
+    flex:1;
+    // gap:10px;
+
+  
+}
+.pannel_layout{
+  background-color: f5f5f5 !important;
+}
+.tabpanel_layout{
+  flex:1;
+  padding: 0 10px;
+  border: 1px solid #808080 ;
+  margin-left: -0.4px;
+
+}
+.customer_account_box{
+  border: 2px solid #43ADAA;
+  border-radius: 10px;
 }
 
 

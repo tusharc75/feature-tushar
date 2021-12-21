@@ -51,6 +51,9 @@ const ManageTransferAsset: FC<Props> = (props) => {
   const [plantsToCategoryOptions, setPlantsToCategoryOptions] = useState([]);
   const [supplierToCategoryOptions, setSupplierToCategoryOptions] = useState([]);
   const [customerToCategoryOptions, setCustomerToCategoryOptions] = useState([]);
+  const [plantShipToOptions, setPlantShipToOptions] = useState([])
+  const [supplierShipToOptions, setSupplierShipToOptions] = useState([])
+  const [customerShipToOptions, setCustomerShipToOptions] = useState([])
 
   const [customerOpen, setCustomerOpen] = useState({ open: false, isClone: false });
   const [transferToPlantOpen, setTransferToPlantOpen] = useState({ open: false, isClone: false });
@@ -67,14 +70,20 @@ const ManageTransferAsset: FC<Props> = (props) => {
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
         const plantsOptions = data.find((obj) => obj?.fieldData.fieldName === 'transferFromPlant')?.fieldData.option;
-        const plantsToOptions = data.find((obj) => obj?.fieldData.fieldName === 'transferToPlant')?.fieldData.option;
-        const supplierToOptions = data.find((obj) => obj?.fieldData.fieldName === 'transferToSupplier')?.fieldData.option;
-        const cusomerToOptions = data.find((obj) => obj?.fieldData.fieldName === 'transferToCustomer')?.fieldData.option;
+        const plantsToOptions = data.find((obj) => obj?.fieldData.fieldName === 'transfertoPlant')?.fieldData.option;
+        const supplierToOptions = data.find((obj) => obj?.fieldData.fieldName === 'transfertoSupplier')?.fieldData.option;
+        const cusomerToOptions = data.find((obj) => obj?.fieldData.fieldName === 'transfertoCustomer')?.fieldData.option;
+        const plantToOptions = data.find((obj) => obj?.fieldData.fieldName === 'plantShipTo')?.fieldData.option;
+        const customerShipToOptions = data.find((obj) => obj?.fieldData.fieldName === 'customerShipTo')?.fieldData.option;
+        const supplierShipToOptions = data.find((obj) => obj?.fieldData.fieldName === 'supplierShipTo')?.fieldData.option;
 
         setPlantsCategoryOptions(plantsOptions);
         setPlantsToCategoryOptions(plantsToOptions);
         setSupplierToCategoryOptions(supplierToOptions);
         setCustomerToCategoryOptions(cusomerToOptions);
+        setPlantShipToOptions(plantToOptions)
+        setCustomerShipToOptions(customerShipToOptions)
+        setSupplierShipToOptions(supplierShipToOptions)
 
         if (transferAssetId) {
           axiosInstance()
@@ -82,10 +91,13 @@ const ManageTransferAsset: FC<Props> = (props) => {
             .then(({ data: { data } }) => {
               if (isClone) {
                 const { _id, createdBy, updatedBy, entity, ...rest } = data;
+                let oldValues = { ...rest }
+                oldValues.transferAssetNumber = `TA_${generateUniqueIdOnly()}`;
+                oldValues.status = "New"
 
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate)
+                  values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
                 });
               } else {
                 setInitialData({
@@ -122,21 +134,21 @@ const ManageTransferAsset: FC<Props> = (props) => {
       if (fields.length > 0 && formValues) {
         fields = fields.map((field) => {
           const sectionFields = field.sectionFields.map((_f) => {
-            if (_f.fieldName === 'transferToPlant' || _f.fieldName === 'plantShipTo') {
+            if (_f.fieldName === 'transfertoPlant' || _f.fieldName === 'plantShipTo') {
               if (formValues.transferType === 'Internal') {
                 _f.required = true;
               } else {
                 _f.required = false;
               }
             }
-            if (_f.fieldName === 'transferToCustomer' || _f.fieldName === 'customerShipTo') {
+            if (_f.fieldName === 'transfertoCustomer' || _f.fieldName === 'customerShipTo') {
               if (formValues.transferType === 'External Customer') {
                 _f.required = true;
               } else {
                 _f.required = false;
               }
             }
-            if (_f.fieldName === 'transferToSupplier' || _f.fieldName === 'supplierShipTo') {
+            if (_f.fieldName === 'transfertoSupplier' || _f.fieldName === 'supplierShipTo') {
               if (formValues.transferType === 'External Supplier') {
                 _f.required = true;
               } else {
@@ -247,11 +259,11 @@ const ManageTransferAsset: FC<Props> = (props) => {
                         <Box marginY={2}>
                           <Grid spacing={3} container alignItems="center">
                             {form.sectionFields.map((field, index2) =>
-                              field.fieldName === 'transferToPlant' || field.fieldName === 'plantShipTo' ? (
+                              field.fieldName === 'transfertoPlant' || field.fieldName === 'plantShipTo' ? (
                                 values?.transferType.includes('Internal') && (
-                                  <>
-                                    {field.fieldName === 'transferToPlant' && (
-                                      <Grid key={index2} item xs={12} sm={6} md={6}>
+                                  <Fragment key={index2}>
+                                    {field.fieldName === 'transfertoPlant' && (
+                                      <Grid item xs={12} sm={6} md={6}>
                                         <Grid container spacing={1} alignItems="center">
                                           <Grid item xs={isMainInfoEditable ? 12 : !isMainInfoEditable && permissions?.warehouse.isCreate ? 11 : 12}>
                                             <FormTypes
@@ -270,6 +282,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                                 setFieldValue(name, value);
 
                                                 const address = field.option?.find((_d: any) => _d?.optionValue === value)?.address ?? '';
+                                                setPlantShipToOptions((prevState => prevState.filter((option: any) => option.optionValue === address)))
                                                 setFieldValue('plantShipTo', address);
                                               }}
                                               required={values?.transferType.includes('Internal')}
@@ -281,7 +294,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                           </Grid>
                                           {!isMainInfoEditable && permissions?.warehouse.isCreate && (
                                             <Grid item xs={1}>
-                                              <HtmlTooltip title="Add new supplier account">
+                                              <HtmlTooltip title="Add new plant">
                                                 <IconButton size="small" onClick={() => setTransferToPlantOpen({ open: true, isClone: false })}>
                                                   <AddIcon fontSize="small" color={'primary'} />
                                                 </IconButton>
@@ -303,7 +316,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                           label={field.fieldLabel}
                                           name={field.fieldName}
                                           type={field.type}
-                                          options={field.option.filter((val) => val.optionValue !== values?.transferFromPlant) ?? []}
+                                          options={plantShipToOptions ?? []}
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
@@ -315,12 +328,12 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                         />
                                       </Grid>
                                     )}
-                                  </>
+                                  </Fragment>
                                 )
-                              ) : field.fieldName === 'transferToSupplier' || field.fieldName === 'supplierShipTo' ? (
+                              ) : field.fieldName === 'transfertoSupplier' || field.fieldName === 'supplierShipTo' ? (
                                 values?.transferType.includes('Supplier') && (
-                                  <>
-                                    {field.fieldName === 'transferToSupplier' && (
+                                  <Fragment key={index2}>
+                                    {field.fieldName === 'transfertoSupplier' && (
                                       <Grid key={index2} item xs={12} sm={6} md={6}>
                                         <Grid container spacing={1} alignItems="center">
                                           <Grid
@@ -340,7 +353,10 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                               options={supplierToCategoryOptions}
                                               setFieldValue={(name, value) => {
                                                 setFieldValue(name, value);
-                                                setFieldValue('supplierShipTo', '');
+                                                const address = field.option?.find((_d: any) => _d?.optionValue === value)?.shippingAddress ?? [];
+                                                const options = supplierShipToOptions.filter(option => address.includes(option.optionValue))
+                                                setSupplierShipToOptions(options)
+                                                setFieldValue('supplierShipTo', "");
                                               }}
                                               required={values?.transferType.includes('Supplier')}
                                               fullWidth
@@ -373,7 +389,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                           label={field.fieldLabel}
                                           name={field.fieldName}
                                           type={field.type}
-                                          options={field.option}
+                                          options={supplierShipToOptions}
                                           setFieldValue={(name, value) => setFieldValue(name, value)}
                                           required={values?.transferType.includes('Supplier')}
                                           fullWidth
@@ -383,12 +399,12 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                         />
                                       </Grid>
                                     )}
-                                  </>
+                                  </Fragment>
                                 )
-                              ) : field.fieldName === 'transferToCustomer' || field.fieldName === 'customerShipTo' ? (
+                              ) : field.fieldName === 'transfertoCustomer' || field.fieldName === 'customerShipTo' ? (
                                 values?.transferType.includes('Customer') && (
-                                  <>
-                                    {field.fieldName === 'transferToCustomer' && (
+                                  <Fragment key={index2}>
+                                    {field.fieldName === 'transfertoCustomer' && (
                                       <Grid key={index2} item xs={12} sm={6} md={6}>
                                         <Grid container spacing={1} alignItems="center">
                                           <Grid
@@ -408,7 +424,9 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                               options={customerToCategoryOptions}
                                               setFieldValue={(name, value) => {
                                                 setFieldValue(name, value);
-
+                                                const address = field.option?.find((_d: any) => _d?.optionValue === value)?.shippingAddress ?? [];
+                                                const options = customerShipToOptions.filter(option => address.includes(option.optionValue))
+                                                setCustomerShipToOptions(options)
                                                 setFieldValue('customerShipTo', '');
                                               }}
                                               required={values?.transferType.includes('Customer')}
@@ -442,7 +460,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                           label={field.fieldLabel}
                                           name={field.fieldName}
                                           type={field.type}
-                                          options={field.option}
+                                          options={customerShipToOptions}
                                           setFieldValue={(name, value) => setFieldValue(name, value)}
                                           required={values?.transferType.includes('Customer')}
                                           fullWidth
@@ -452,7 +470,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                         />
                                       </Grid>
                                     )}
-                                  </>
+                                  </Fragment>
                                 )
                               ) : field.fieldName === 'transferType' ? (
                                 <Grid key={index2} item xs={12} sm={6} md={6}>
@@ -476,9 +494,9 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       setFieldValue(field.fieldName, val?.optionValue ?? '');
 
                                       // DO THIS WHEN CHANGING TYPE
-                                      setFieldValue('transferToCustomer', '');
-                                      setFieldValue('transferToSupplier', '');
-                                      setFieldValue('transferToPlant', '');
+                                      setFieldValue('transfertoCustomer', '');
+                                      setFieldValue('transfertoSupplier', '');
+                                      setFieldValue('transfertoPlant', '');
                                       setFieldValue('customerShipTo', '');
                                       setFieldValue('supplierShipTo', '');
                                       setFieldValue('plantShipTo', '');
@@ -488,7 +506,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                               ) : field.fieldName === 'transferFromPlant' ? (
                                 <Grid key={index2} item xs={12} sm={6} md={6}>
                                   <Grid container spacing={1} alignItems="center">
-                                    <Grid xs={isMainInfoEditable ? 12 : !isMainInfoEditable && permissions?.warehouse.isCreate ? 11 : 12}>
+                                    <Grid item xs={isMainInfoEditable ? 12 : !isMainInfoEditable && permissions?.warehouse.isCreate ? 11 : 12}>
                                       <FormTypes
                                         isNew={Boolean(transferAssetId)}
                                         {...field}
@@ -510,7 +528,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                           const address = field.option?.find((_d: any) => _d?.optionValue === value)?.address ?? '';
                                           if (address === values?.plantShipTo) {
                                             setFieldValue('plantShipTo', '');
-                                            setFieldValue('transferToPlant', '');
+                                            setFieldValue('transfertoPlant', '');
                                           }
                                         }}
                                       />
@@ -570,7 +588,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                               console.log("TRANSFER TO", JSON.stringify(data))
                               setTransferToPlantOpen({ open: false, isClone: false });
 
-                              setFieldValue('transferToPlant', data._id);
+                              setFieldValue('transfertoPlant', data._id);
                               setFieldValue('plantShipTo', data.address);
                               setPlantsToCategoryOptions((prevState) => {
                                 return [
@@ -633,7 +651,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                               setSupplierOpen({ open: false, isClone: false });
 
                               if (data._id) {
-                                setFieldValue('transferToSupplier', data._id);
+                                setFieldValue('transfertoSupplier', data._id);
                                 setSupplierToCategoryOptions((prevState) => {
                                   return [
                                     ...prevState,
@@ -664,7 +682,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                               setCustomerOpen({ open: false, isClone: false });
 
                               if (data._id) {
-                                setFieldValue('transferToCustomer', data._id);
+                                setFieldValue('transfertoCustomer', data._id);
                                 setCustomerToCategoryOptions((prevState) => {
                                   return [
                                     ...prevState,

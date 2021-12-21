@@ -148,7 +148,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
     });
   }
 
- 
+
 
   return (<>
 
@@ -344,8 +344,11 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
     {
       showDeliveryTicketDialog.open &&
       <ManageDeliveryTicket
+        ticketType="Loading"
+        refrenceType="Repair Job"
+        refrenceData={repairJobData}
         onClose={() => setShowDeliveryTicketDialog({ open: false, selectedAssets: [] })}
-        productInventoryForDeliveryTicket={showDeliveryTicketDialog.selectedAssets}
+        productInventory={showDeliveryTicketDialog.selectedAssets}
         warehouseId={repairJobData?.plant}
         repairJobData={repairJobData}
         onSuccess={() => {

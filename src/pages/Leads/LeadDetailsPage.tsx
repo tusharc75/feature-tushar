@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, Button, Grid, Paper, useMediaQuery } from '@material-ui/core';
 import { useHistory, useParams } from 'react-router-dom';
 import { Skeleton } from '@material-ui/lab';
@@ -24,6 +24,9 @@ import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
 import {MdDelete, MdEdit} from "react-icons/md";
 import {FaFunnelDollar} from "react-icons/all";
+import {BiEdit} from "react-icons/bi";
+import contactClass from "../Contact/contact.module.scss";
+import accountClass from "../Account/account.module.scss";
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -370,7 +373,7 @@ const LeadDetailsPage = () => {
         </Grid>
         <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
           <div>
-            <Paper>
+            <Paper style={isMobile ?{width:"98%"} : {}}>
               {!leadData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
@@ -389,17 +392,24 @@ const LeadDetailsPage = () => {
                   showHeading={true}
                 >
                   {leadsPermissions.isUpdate && allowedToEdit && (
-                    <Button variant={isMobile ? "outlined" : "contained"} color="primary" size="small" onClick={handleOpneUpdateDialog}>
-                      {isMobile ? <MdEdit/> : "Edit"}
+                    <Button
+                        variant={isMobile ? "text" : "contained"}
+                        color="primary"
+                        size="small"
+                        onClick={handleOpneUpdateDialog}
+                        className={isMobile ? accountClass.mobile_button_layout : ""}
+                        style={isMobile ? {color:"#43aeaa"} : {}}
+                    >
+                      {isMobile ? <BiEdit size={20}/> : "Edit"}
                     </Button>
                   )}
                   {!isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && (
                     <>
                       <Button
-                          variant={isMobile ? "outlined" : "contained"}
+                          variant={isMobile ? "text" : "contained"}
                         color="primary"
                         size="small"
-                          className="mobile_button_layout"
+                          className={isMobile ? accountClass.mobile_button_layout : ""}
                           style={isMobile ? {color:"var(--warning-light)" , borderColor:"var(--warning-light)"} : {}}
                         onClick={() => {
                           const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter((d) => d).join(' ');
@@ -411,11 +421,11 @@ const LeadDetailsPage = () => {
                           });
                         }}
                       >
-                        {isMobile ? <FaFunnelDollar/> : "Convert Lead To Opportunity"}
+                        {isMobile ? <FaFunnelDollar size={19}/> : "Convert Lead To Opportunity"}
                       </Button>
                     </>
                   )}
-                  {leadsPermissions.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                  {leadsPermissions.isDelete && allowedToDelete && <DeleteButton text={isMobile ? <MdDelete size={20}/> : "Delete"} onClick={() => setShowConfirmBox(true)} className={isMobile ? accountClass.mobile_button_layout : ""}/>}
                 </DetailsPageHeader>
               )}
 

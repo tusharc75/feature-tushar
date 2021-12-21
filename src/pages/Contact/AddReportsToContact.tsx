@@ -22,7 +22,9 @@ const ReportsToContact = object().shape({
 export default function AddReportsToContact({ open, isSubmitting, onClose,
     contactsList, onSubmit }) {
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
+    const reportsToOption =
+        [...new Map(contactsList?.filter(o => Boolean(o.isExclude)).map(item =>
+            [item['_id'], item])).values()];
     return (
         <Dialog
             open={open}
@@ -85,7 +87,7 @@ export default function AddReportsToContact({ open, isSubmitting, onClose,
                                             size="small"
                                             fullWidth
                                             freeSolo
-                                            options={contactsList.filter(o => Boolean(o.isExclude))}
+                                            options={reportsToOption}
                                             autoHighlight
                                             getOptionLabel={(option: any) => option?.concatedName || ''}
                                             getOptionSelected={(option: any, val: any) => (option ? option?._id === val?._id : false)}

@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useReducer } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, IconButton, Tooltip } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Tab, Tabs, IconButton } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory, Link } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -12,15 +12,14 @@ import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import {
-  gridLoadingTimeout, prepareDataForGrid, productInventory, repairJob, sidebarResource,
+  gridLoadingTimeout, prepareDataForGrid, repairJob, sidebarResource,
   repairJobProcessSteps,
   repairJobStatus
 } from '../../constants/helpers';
 import ManageRepairJob from './ManageRepairJob';
-import DeleteButton from '../../components/Helpers/DeleteButton';
 import queryString from "query-string";
 import { BiFoodMenu } from 'react-icons/bi';
-import { FaSuitcase, FaWpforms } from 'react-icons/fa';
+import { FaWpforms } from 'react-icons/fa';
 import TabPanel from '../../components/TabPanel';
 import CustomCommonSteps from '../../components/CustomCommonSteps/CustomCommonSteps';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
@@ -28,13 +27,15 @@ import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCe
 import { getFrameworkComponents, genrateColoum } from '../../constants/columns';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import useColumns from '../../constants/useColumns';
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import RepairJobReceivingTicket from './RepairJobReceivingTicket';
 import RepairJobDeliveryTicket from './RepairJobDeliveryTicket';
 import ManageAssetDialog from './ManageAssetDialog';
 import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import HtmlTooltip from '../../components/CustomTooltipTitle';
+import InfoIcon from "@material-ui/icons/Info";
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 const reservedStatus = "Reserved";
 const renderedFrom = "repairJobDetails"
@@ -54,7 +55,7 @@ const RepairJobDetails = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
+  const { openEdit, tab }: any = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -70,11 +71,10 @@ const RepairJobDetails = () => {
 
   const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
 
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [currentStep, setCurrentStep] = useState(0);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
-  const [columns, setColumns] = useState([])
 
   const [okBtnLoading, setOkBtnLoading] = useState(false)
 
@@ -85,12 +85,14 @@ const RepairJobDetails = () => {
     limit: step1Limit, pageSizes: step1PageSizes, search: step1Search, filters: step1Filters, sorting: step1Sorting,
     selectedRecords: step1SelectedRecords } = step1State;
 
-  const [step1Columns, setStep1Columns] = useState([
-    { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "assetNumberRenderer", required: false },
+  const [step1Columns, setStep1Columns] = useState([])
+
+  const commonStep1Columns = [
+    { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "assetNumberRenderer", width: 300, required: false },
     { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer", required: false },
     { field: "product", headerName: "Product Description", show: true, cellRenderer: "commonRenderer", required: false },
     { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer", required: false },
-  ])
+  ];
 
   const [showEditAssetDialog, setShowEditAssetDialog] = useState({ open: false, asset: null, selectedRecords: [] })
   const [serializedAssetFields, setSerializedAssetFields] = useState(null)
@@ -99,27 +101,61 @@ const RepairJobDetails = () => {
   const [disablePreviousStep, setDisablePreviousStep] = useState(false)
 
   const [unmodifiedColumns, setUnmodifiedColumns] = useState([]);
+  const [repairAssetDialog, setRepairAssetDialog] = useState({ open: false, assetId: null, assetName: null, assetIds: [] })
+
+  const [locationKeys, setLocationKeys] = useState([])
+
+  useEffect(() => {
+    return history.listen(location => {
+      const { tab }: any = queryString.parse(history.location.search);
+      if (history.action === 'PUSH') {
+        setLocationKeys([location.key])
+      }
+      if (history.action === 'POP') {
+        if (locationKeys[1] === location.key) {
+          setLocationKeys(([_, ...keys]) => keys)
+          // Handle forward event
+          setTabValue(tab ? parseInt(tab) : 1)
+
+        } else {
+          setLocationKeys((keys) => [location.key, ...keys])
+          console.log(tab)
+          // Handle back event
+          setTabValue(tab ? parseInt(tab) : 1)
+
+        }
+      }
+    })
+  }, [locationKeys,])
 
   useEffect(() => {
     if (id) {
-      fetchAssignedSerializedAssetsFields();
+      // fetchAssignedSerializedAssetsFields();
       fetchRepairJobData();
       // fetchAssignedSerializedAssets();
     }
     // eslint-disable-next-line
   }, [id]);
 
+  useEffect(() => {
+    if (repairJobData) {
+      fetchAssignedSerializedAssetsFields();
+    }
+  }, [repairJobData]);
+
   const fetchAssignedSerializedAssetsFields = () => {
     step1Dispatch({ type: "loading", loading: true });
 
     axiosInstance().get(`/field/child?resource=Repair Job Asset`).then(({ data: { data } }) => {
 
-      const formBuilderColumns = [...step1Columns, ...data];
+      const columns = [...commonStep1Columns];
+
+      const formBuilderColumns = [...columns, ...data];
       setUnmodifiedColumns([...formBuilderColumns]);
 
       setSerializedAssetFields(data)
       let rendererNames = [];
-      genrateColoum(data, step1Columns, rendererNames, false);
+      genrateColoum(data, columns, rendererNames, false);
       let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
       tempFrameworkComponent = {
         assetNumberRenderer: AssetNumberRenderer,
@@ -128,7 +164,7 @@ const RepairJobDetails = () => {
         ...tempFrameworkComponent,
       }
       setStep1FrameworkComponent({ ...tempFrameworkComponent })
-      setStep1Columns([...step1Columns])
+      setStep1Columns([...columns])
 
       fetchAssignedSerializedAssets([...formBuilderColumns])
     })
@@ -155,7 +191,11 @@ const RepairJobDetails = () => {
           // finalObject["allowedToEdit"] = permissions.rentalJob.isUpdate;
 
           u["_id"] = u["id"];
-          u["index"] = `${index + 1}.0`;
+          u["index"] = `${index + 1}`;
+
+          u["typeOfRepair"] = repairJobData["typeOfRepair"];
+          u["plant"] = u["typeOfRepair"] === "Internal" ? repairJobData["plant"]?.optionValue : "";
+          u["repairPlant"] = u["typeOfRepair"] === "Internal" ? repairJobData["repairPlant"]?.optionValue : "";
 
           return prepareDataForGrid(u, user);
         });
@@ -183,7 +223,6 @@ const RepairJobDetails = () => {
         }
 
         setDisableNextStep(data.length === 0 ? true : foundBlankValue);
-
         step1Dispatch({
           type: "initialize", data: [...rows], count: rows.length
         });
@@ -199,16 +238,65 @@ const RepairJobDetails = () => {
       });
   }
 
+  const AssetNumberRenderer = (params) => (
+    <span className="d-flex gap-2 align-items-center">
+
+      <span className="link cursor-pointer" onClick={() => setShowEditAssetDialog({ open: true, asset: params.data, selectedRecords: [] })}>
+        {params.data.index} - {params.value}
+      </span>
+
+      <HtmlTooltip title="Details">
+        <IconButton
+          size="small"
+          aria-label="Details"
+          onClick={() => {
+            window.open(`${routes.productInventoryDetail.path}/${params.data._id}`);
+          }}
+        >
+          <InfoIcon fontSize="small" />
+        </IconButton>
+      </HtmlTooltip>
+
+      {
+        params.data.repaired && <HtmlTooltip title="Repaired">
+          <CheckCircleIcon color="primary" fontSize="small" />
+        </HtmlTooltip>
+      }
+
+    </span>
+  );
+
   const ActionsRenderer = (params) => (
-    params.data?.status === reservedStatus ? <GridDeleteIcon
-      hasDeletePermission={permissions?.repairJob?.isUpdate}
-      ownerId={user?.user?._id}
-      userId={user?.user?._id}
-      onDelete={() => {
-        setShowAssetRemoveConfirmationDialog({ open: true, id: params.data._id ?? params.data.id, ids: [] });
-      }}
-      entity={sidebarResource.productInventory}
-    /> : ""
+    <div className="d-flex gap-1">
+
+      {
+        params.data["typeOfRepair"] === "Internal" && params.data["plant"] === params.data["repairPlant"] &&
+        !params.data.repaired && <HtmlTooltip title="Repair Asset">
+          <IconButton
+            size="small"
+            aria-label="Repair Asset"
+            color="primary"
+            onClick={() => {
+              setRepairAssetDialog({ open: true, assetId: params.data._id, assetName: `${params.data.index} - ${params.data.assetNumber}`, assetIds: [] })
+            }}
+          >
+            <CheckCircleOutlineIcon fontSize="small" />
+          </IconButton>
+        </HtmlTooltip>
+      }
+
+      {
+        params.data?.status === reservedStatus ? <GridDeleteIcon
+          hasDeletePermission={permissions?.repairJob?.isUpdate}
+          ownerId={user?.user?._id}
+          userId={user?.user?._id}
+          onDelete={() => {
+            setShowAssetRemoveConfirmationDialog({ open: true, id: params.data._id ?? params.data.id, ids: [] });
+          }}
+          entity={sidebarResource.productInventory}
+        /> : ""
+      }
+    </div>
   );
 
   const deleteRepairJobAssets = () => {
@@ -233,18 +321,6 @@ const RepairJobDetails = () => {
         setShowLoading(false);
       })
   }
-
-  const AssetNumberRenderer = (params) => (
-    <span className="d-flex gap-2 align-items-center">
-      <span className="link cursor-pointer" onClick={() => setShowEditAssetDialog({ open: true, asset: params.data, selectedRecords: [] })}>
-        {params.data.index}
-      </span>
-      -
-      <Link className="link" to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
-        <CustomRenderCell value={params.value} />
-      </Link>
-    </span>
-  );
 
   const getResourceFields = (repairJobData) => {
     setShowLoading(true);
@@ -272,15 +348,20 @@ const RepairJobDetails = () => {
       .get(`${routes.repairJob.path}/${id}`)
       .then(({ data: { data } }) => {
 
-        setRepairJobData(data)
+        setRepairJobData({ ...data })
         if (data.processStatus) {
-          const step = repairJobProcessSteps.findIndex(f => f === data.processStatus);
+          if (data["typeOfRepair"] === "Internal" && data["plant"].optionValue === data["repairPlant"].optionValue) {
+            setCurrentStep(0)
+          }
+          else {
+            const step = repairJobProcessSteps.findIndex(f => f === data.processStatus);
 
-          if (step > -1) {
-            if (data.processStatus === "End") {
-              setCurrentStep(step - 1);
-            } else {
-              setCurrentStep(step);
+            if (step > -1) {
+              if (data.processStatus === "End") {
+                setCurrentStep(step - 1);
+              } else {
+                setCurrentStep(step);
+              }
             }
           }
         }
@@ -299,7 +380,6 @@ const RepairJobDetails = () => {
       .catch((err) => {
         toastConfig.setToastConfig(err);
         setShowLoading(false);
-
       });
   };
 
@@ -322,7 +402,7 @@ const RepairJobDetails = () => {
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
-
+    history.push(`?tab=${newValue}`);
     if (newValue === 0) {
       fetchRepairJobData();
     }
@@ -482,7 +562,7 @@ const RepairJobDetails = () => {
                       <CustomCommonSteps
                         disableNextStep={disableNextStep}
                         disablePreviousStep={false}
-                        steps={repairJobProcessSteps.filter(f => f !== "End")}
+                        steps={repairJobData && repairJobData["typeOfRepair"] === "Internal" && repairJobData["plant"].optionValue === repairJobData["repairPlant"].optionValue ? repairJobProcessSteps.filter(f => f === "Serialized Assets") : repairJobProcessSteps.filter(f => f !== "End")}
                         currentStep={currentStep}
                         setCurrentStep={setCurrentStep}
                         onNextButtonClick={onNextButtonClick}
@@ -507,6 +587,22 @@ const RepairJobDetails = () => {
                                   >
                                     {`Add ${routes.productInventory.title}`}
                                   </Button>
+
+                                  {
+                                    repairJobData && repairJobData["typeOfRepair"] === "Internal" &&
+                                    repairJobData["plant"].optionValue === repairJobData["repairPlant"].optionValue && <Button
+                                      variant="contained"
+                                      color="primary"
+                                      type="button"
+                                      size="small"
+                                      disabled={step1SelectedRecords.length === 0 || step1SelectedRecords.some(s => s.repaired === true)}
+                                      onClick={() => {
+                                        setRepairAssetDialog({ open: true, assetId: null, assetName: null, assetIds: [...step1SelectedRecords.map(m => m._id)] })
+                                      }}
+                                    >
+                                      Complete Repair
+                                    </Button>
+                                  }
 
                                   <Button
                                     variant="contained"
@@ -538,7 +634,7 @@ const RepairJobDetails = () => {
 
                               <Grid item xs={12} md={12} sm={12} className="mt-3">
 
-                                {step1Columns ?
+                                {step1Columns && step1FrameworkComponent ?
                                   isMobile ?
                                     <CustomSwipableList
                                       allowSelection={true}
@@ -674,6 +770,34 @@ const RepairJobDetails = () => {
         />
       }
 
+      {
+        repairAssetDialog.open && <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to complete repair of ${repairAssetDialog.assetId ? repairAssetDialog.assetName : "selected asset(s)"} ?`}
+          onClose={() => {
+            setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] })
+          }}
+          onOk={() => {
+            setOkBtnLoading(true)
+            axiosInstance().put(`${repairJob.repairJobApi}/${id}/assets-repaired`, { assets: repairAssetDialog.assetId ? [repairAssetDialog.assetId] : repairAssetDialog.assetIds, repaired: true }).then(({ data }) => {
+              toastConfig.setToastConfig({
+                open: true,
+                type: "success",
+                message: data.message,
+              });
+              setOkBtnLoading(false)
+              setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] });
+              fetchAssignedSerializedAssets();
+            }).catch((error) => {
+              toastConfig.setToastConfig(error);
+              setOkBtnLoading(false)
+            })
+          }}
+          okBtnLoading={okBtnLoading}
+        />
+      }
+
+
       {openUpdateDialog && (
         <ManageRepairJob
           open={openUpdateDialog}
@@ -727,9 +851,7 @@ const RepairJobDetails = () => {
           queryString={`ignoreIds=${JSON.stringify(step1DataRows.map(m => m._id ?? m.id))}&repairable=true&notScrapLost=1`}
           filterByPlant={repairJobData.plant?.optionValue}
         />
-      
       }
-     
 
       {
         showEditAssetDialog.open && (

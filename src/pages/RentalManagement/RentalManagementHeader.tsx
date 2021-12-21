@@ -143,14 +143,14 @@ function RentalManagementHeader(props) {
                       open={Boolean(anchorEl)}
                       onClose={closeActions}
                     >
-                      <MenuItem
+                      {/* <MenuItem
                         onClick={() => {
                           closeActions();
                           showConfirmBox(null);
                         }}
                       >
                         Delete
-                      </MenuItem>
+                      </MenuItem> */}
                       {
                         RentalManagementPermissions.isUpdate && <MenuItem
                           disabled={selectedRecords.find((d) => d.canDelete === false)}

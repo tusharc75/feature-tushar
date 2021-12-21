@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-const stepsLabel = ["Set Approval Process", "Assign Regional Roles", "Assign Company Wide Role"]
+const stepsLabel = ["Set Approval Process", "Assign Roles"]
 
 const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, userPermissions = null, fetchUsers, userList, selectedRecords }) => {
     const { state: { user, permissions }, } = useData();
@@ -68,20 +68,6 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                         assignedEntity={[]}
                         regionalRole={false}
                         onSuccess={() => {
-                            setActiveStep((prevStep) => prevStep + 1)
-
-                        }}
-                        isRenderedFromUserSetUp={true}
-                    />
-                )
-            case 2:
-                return (
-                    <AssignRolesDialog
-                        rolesDialogOpen={open}
-                        handleCloseDialog={close}
-                        userIds={userIds}
-                        assignedRoles={null}
-                        onSuccess={() => {
                             close()
                             fetchUsers()
 
@@ -89,6 +75,21 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                         isRenderedFromUserSetUp={true}
                     />
                 )
+            // case 2:
+            //     return (
+            //         <AssignRolesDialog
+            //             rolesDialogOpen={open}
+            //             handleCloseDialog={close}
+            //             userIds={userIds}
+            //             assignedRoles={null}
+            //             onSuccess={() => {
+            //                 close()
+            //                 fetchUsers()
+
+            //             }}
+            //             isRenderedFromUserSetUp={true}
+            //         />
+            //     )
             default:
                 return "Unknown step";
         }
