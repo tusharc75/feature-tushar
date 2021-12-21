@@ -90,7 +90,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   const ReceivingTicketRenderer = (params) =>
     params.value ? (
-      <Link className="link cursor-pointer" to={`${routes.receivingTicketDetail.path}/${params.data.receivingTicketId}`}>
+      <Link className="link cursor-pointer" to={`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`}>
         <p title={params.value}>{params.value}</p>
       </Link>
     ) : (
