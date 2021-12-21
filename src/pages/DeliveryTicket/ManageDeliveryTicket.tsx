@@ -78,26 +78,26 @@ const ManageDeliveryTicket = (props) => {
                         }
                     }
                 }
-                if (refrenceType === "Repair Job") {
-                    if (ticketType === "Loading") {
-                        if (repairJobData?.typeOfRepair === "Internal") {
+                if (type === "Repair Job") {
+                    if (ticket_type === "Loading") {
+                        if (typeOfRepair === "Internal") {
                             if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
                                 return false
                             }
                         }
-                        if (repairJobData?.typeOfRepair === "External") {
+                        if (typeOfRepair === "External") {
                             if (formData.name.includes("Customer") || formData.name.includes("Receiving Plant")) {
                                 return false
                             }
                         }
                     }
-                    else if (ticketType === "Receiving") {
-                        if (repairJobData?.typeOfRepair === "Internal") {
+                    else if (ticket_type === "Receiving") {
+                        if (typeOfRepair === "Internal") {
                             if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
                                 return false
                             }
                         }
-                        if (repairJobData?.typeOfRepair === "External") {
+                        if (typeOfRepair === "External") {
                             if (formData.name.includes("Customer") || formData.name.includes("Pickup Plant")) {
                                 return false
                             }
@@ -180,17 +180,10 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["productInventory"] = productInventory?.map(d => d?._id)
                     tempInitialData["repairJob"] = refrenceData?._id
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
-
-                    tempInitialData["pickupPlant"] = refrenceData?.repairPlant?.optionValue;
-                    tempInitialData["pickupPlantAddress"] = refrenceData?.plantShipTo?.optionValue;
-
                     if (ticketType === "Loading") {
-
                         if (refrenceData?.typeOfRepair === "Internal") {
                             tempInitialData["receivingPlant"] = refrenceData?.plant?.optionValue;
-
                             const receivingPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "receivingPlant")?.option;
-
                             if (receivingPlantAddresses && refrenceData["plant"]) {
                                 const address = receivingPlantAddresses.find(f => f.optionValue === refrenceData["plant"]?.optionValue);
                                 if (address) {
@@ -198,69 +191,45 @@ const ManageDeliveryTicket = (props) => {
                                 }
                             }
                         }
-                        if (refrenceData?.typeOfRepair === "External") {
+                        else if (refrenceData?.typeOfRepair === "External") {
+                            tempInitialData["pickupPlant"] = refrenceData?.warehouse?.optionValue;
+                            fieldsDataForCreate?.forEach((e) => {
+                                if (e.fieldName === "pickupPlant") {
+                                    const plantAddress = e?.option?.filter((e) => e.optionValue === refrenceData?.warehouse?.optionValue)
+                                    if (plantAddress.length) {
+                                        tempInitialData["pickupPlantAddress"] = plantAddress[0].address
+                                    }
+                                }
+                            })
                             tempInitialData["supplierAccount"] = refrenceData?.supplier?.optionValue;
                             tempInitialData["supplierShippingAddress"] = refrenceData?.supplierShipTo?.optionValue;
                         }
-
-                        // tempInitialData["pickupPlant"] = refrenceData?.warehouse?.optionValue ? refrenceData?.warehouse?.optionValue : ""
-                        // fieldsDataForCreate?.forEach((e) => {
-                        //     if (e.fieldName === "pickupPlant") {
-                        //         const plantAddress = e?.option?.filter((e) => e.optionValue === refrenceData?.warehouse?.optionValue)
-                        //         if (plantAddress.length) {
-                        //             tempInitialData["pickupPlantAddress"] = plantAddress[0].address
-                        //         }
-                        //     }
-                        // })
-
-                        // tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
-                        // const pickupPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "warehouse")?.option;
-                        // if (pickupPlantAddresses && tempInitialData["warehouse"]) {
-                        //     const address = pickupPlantAddresses.find(f => f.optionValue === tempInitialData["warehouse"]);
-                        //     if (address) {
-                        //         tempInitialData["pickupPlantAddress"] = address.address;
-                        //     }
-                        // }
                     }
                     else if (ticketType === "Receiving") {
-                        // tempInitialData["warehouse"] = repairJobData?.plant?.optionValue ?? "";
-
                         if (repairJobData?.typeOfRepair === "Internal") {
-                            // tempInitialData["pickupPlant"] = repairJobData?.repairPlant?.optionValue;
-                            // tempInitialData["pickupPlantAddress"] = repairJobData?.plantShipTo?.optionValue;
                             tempInitialData["receivingPlant"] = refrenceData?.plant?.optionValue;
-
                             const receivingPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "receivingPlant")?.option;
-
                             if (receivingPlantAddresses && refrenceData["plant"]) {
                                 const address = receivingPlantAddresses.find(f => f.optionValue === refrenceData["plant"]?.optionValue);
                                 if (address) {
                                     tempInitialData["receivingPlantAddress"] = address.address;
                                 }
                             }
-
                         }
                         if (repairJobData?.typeOfRepair === "External") {
+                            tempInitialData["receivingPlant"] = refrenceData?.warehouse?.optionValue;
+                            fieldsDataForCreate?.forEach((e) => {
+                                if (e.fieldName === "pickupPlant") {
+                                    const plantAddress = e?.option?.filter((e) => e.optionValue === refrenceData?.warehouse?.optionValue)
+                                    if (plantAddress.length) {
+                                        tempInitialData["receivingPlantAddress"] = plantAddress[0].address
+                                    }
+                                }
+                            })
                             tempInitialData["supplierAccount"] = refrenceData?.supplier?.optionValue;
                             tempInitialData["supplierShippingAddress"] = refrenceData?.supplierShipTo?.optionValue;
                         }
-
-
-                        // tempInitialData["receivingPlant"] = refrenceData?.warehouse?.optionValue ? refrenceData?.warehouse?.optionValue : ""
-                        // fieldsDataForCreate?.forEach((e) => {
-                        //     if (e.fieldName === "pickupPlant") {
-                        //         const plantAddress = e?.option?.filter((e) => e.optionValue === refrenceData?.warehouse?.optionValue)
-                        //         if (plantAddress.length) {
-                        //             tempInitialData["receivingPlantAddress"] = plantAddress[0].address
-                        //         }
-                        //     }
-                        // })
                     }
-
-                    setInitialData({
-                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "repairJob"),
-                        values: tempInitialData,
-                    });
                 }
                 else if (productInventory && refrenceType === "Transfer Asset" && refrenceData) {
                     tempInitialData["ticketName"] = `${refrenceData?.transferAssetNumber}_${generateUniqueIdOnly()}`
