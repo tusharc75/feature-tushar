@@ -189,68 +189,67 @@ export default function DeliveryTicketDetail(props) {
   }
 
   const getDeliveryTicketFields = (ticket: any) => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource["deliveryTicket"]}&showHiddenFields=true`)
-      .then(async ({ data: { data } }) => {
-        if (ticket?.type === "Transfer Asset") {
+    axiosInstance().get(`/field?resource=${sidebarResource["deliveryTicket"]}&showHiddenFields=true`).then(async ({ data: { data } }) => {
+      if (ticket?.type === "Transfer Asset") {
+        const { data: { data: transferData } } = await axiosInstance()
+          .get(`${routes.transferAsset.path}/${ticket.transferAsset?.optionValue}`)
 
-          const { data: { data: transferData } } = await axiosInstance()
-            .get(`${routes.transferAsset.path}/${ticket.transferAsset?.optionValue}`)
+        setTransferData(transferData)
 
-          setTransferData(transferData)
-
-          data = data.filter((fields: any) => {
-            if (transferData?.transferType === "Internal") {
-              if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Supplier")) {
-                return false
-              }
-            }
-
-            if (transferData?.transferType.includes("External Supplier")) {
-              if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
-                return false
-              }
-            }
-            if (transferData?.transferType.includes("External Customer")) {
-              if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Plant")) {
-                return false
-              }
-            }
-
-            if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "rental") {
+        data = data.filter((fields: any) => {
+          if (transferData?.transferType === "Internal") {
+            if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Supplier")) {
               return false
             }
-
-            return true
-          })
-
-
-        } else if (ticket?.type === "Rental Job") {
-          data = data.filter((fields: any) => {
-            if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Plant")) {
-              return false
-            }
-            if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "transferAsset") {
-              return false
-            }
-            return true
-          })
-        } else {
-          data = data.filter((fields: any) => {
+          }
+          if (transferData?.transferType.includes("External Supplier")) {
             if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
               return false
             }
-            if (fields.fieldData.fieldName === "rental" || fields.fieldData.fieldName === "transferAsset") {
+          }
+          if (transferData?.transferType.includes("External Customer")) {
+            if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Plant")) {
               return false
             }
-            return true
-          })
-        }
-
-
-        setDeliveryTicketFields(data);
-        setLoading(false);
-      })
+          }
+          if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "rental") {
+            return false
+          }
+          return true
+        })
+      }
+      else if (ticket?.type === "Rental Job") {
+        data = data.filter((fields: any) => {
+          if (ticket.ticketType === "Loading") {
+            if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Receiving Plant")) {
+              return false
+            }
+          }
+          else {
+            if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Pickup Plant")) {
+              return false
+            }
+          }
+          if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "transferAsset") {
+            return false
+          }
+          return true
+        })
+      }
+      else {
+        data = data.filter((fields: any) => {
+          if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
+            return false
+          }
+          if (fields.fieldData.fieldName === "rental" || fields.fieldData.fieldName === "transferAsset") {
+            return false
+          }
+          return true
+        })
+      }
+      setDeliveryTicketFields(data);
+      setLoading(false);
+    })
       .catch((err) => {
         setLoading(false);
         toastConfig.setToastConfig(err);
@@ -264,7 +263,7 @@ export default function DeliveryTicketDetail(props) {
       mainPoint["delivery Person"] = deliveryTicketData?.deliveryPerson?.optionLabel || ""
     }
     return mainPoint;
-  }, [deliveryTicketData?.deliveryJobName, deliveryTicketData?.deliveryPerson, deliveryTicketData?.deliveryDate]);
+  }, [deliveryTicketData?.ticketName, deliveryTicketData?.deliveryPerson, deliveryTicketData?.deliveryDate]);
 
   const fetchDeliveryTicketData = () => {
     if (gridApi) {
@@ -438,7 +437,7 @@ export default function DeliveryTicketDetail(props) {
               const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
               const link = document.createElement('a');
               link.href = url;
-              link.setAttribute('download', `LoadingTicket-${deliveryTicketData.deliveryJobName || ""}.pdf`);
+              link.setAttribute('download', `LoadingTicket-${deliveryTicketData.ticketName || ""}.pdf`);
               document.body.appendChild(link);
               link.click();
             }
@@ -466,7 +465,7 @@ export default function DeliveryTicketDetail(props) {
     <>
       <Fragment>
         <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={[routes.deliveryTicket, { title: deliveryTicketData?.deliveryJobName }]} />
+          <CustomBreadCrumbs routes={[routes.deliveryTicket, { title: deliveryTicketData?.ticketName }]} />
         </Grid >
         <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
           <div>
@@ -490,7 +489,7 @@ export default function DeliveryTicketDetail(props) {
                 </div>
               ) : (
                 <DetailsPageHeader
-                  heading={deliveryTicketData ? deliveryTicketData?.deliveryJobName : ""}
+                  heading={deliveryTicketData ? deliveryTicketData?.ticketName : ""}
                   mainPoints={deliveryTicketData ? getMainPoints : ""}
                   showHeading={true}
                 >

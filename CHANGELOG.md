@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.23.0](https://github.com/vebholic/oms_frontend/compare/v2.22.2...v2.23.0) (2021-12-21)
+
+
+### Features
+
+* **addressess:** auto fill address for selected address ([88fb436](https://github.com/vebholic/oms_frontend/commit/88fb43625aca0a7c6b390406f64c08242974c7c1))
+* **addresses:** working on addressess ([8123da4](https://github.com/vebholic/oms_frontend/commit/8123da463a8d1979031ce4cf1b925dbebf158994))
+* receiving ticket & loading ticket only export button show PO-665 ([a556174](https://github.com/vebholic/oms_frontend/commit/a55617435b021dce889e4e78afcc56e17124dc03))
+
+
+### Bug Fixes
+
+* bug fix ([1c55dff](https://github.com/vebholic/oms_frontend/commit/1c55dffab1e7d98718d70173f26e9aad847fc0d2))
+* bug fix ([31d7303](https://github.com/vebholic/oms_frontend/commit/31d730397118ce1ae735252ed480fd2600f14eeb))
+* **CustomAgGridEditable:** Grid footer total for converter type fileds ([31e449b](https://github.com/vebholic/oms_frontend/commit/31e449bb48c95f8517a8d7fbe6c671590d142ef6))
+* delivery ticket ([f32200f](https://github.com/vebholic/oms_frontend/commit/f32200fc5a4e251aa2df75c633dbe34d397e19bd))
+* delivery ticket ([8024ae4](https://github.com/vebholic/oms_frontend/commit/8024ae4efd2cb1f4f13d9d21fec9da2ced76eed1))
+* **loadingticket:** date fix ([37c6a5b](https://github.com/vebholic/oms_frontend/commit/37c6a5b5bb7240c488734f3c5e238a8c77b6bb3c))
+* **rental:** status fix for clone ([6a3fd8b](https://github.com/vebholic/oms_frontend/commit/6a3fd8be96d68a917b89e97dc42f402647ee25aa))
+* **transferasset:** pdf fix ([61a57ba](https://github.com/vebholic/oms_frontend/commit/61a57ba5eb2434ebc2ae9a337adf18b3f4541239))
+* **transferasset:** pdf fix ([ce140c8](https://github.com/vebholic/oms_frontend/commit/ce140c89a54ceae793c9a472864cd83e894fe514))
+* **transferasset:** receiving step change ([f9e224d](https://github.com/vebholic/oms_frontend/commit/f9e224d8c9c87a8c9b29ebb814b1b47aa9d4e6d6))
+
+### [2.22.2](https://github.com/vebholic/oms_frontend/compare/v2.22.1...v2.22.2) (2021-12-20)
+
 ### [2.22.1](https://github.com/vebholic/oms_frontend/compare/v2.22.0...v2.22.1) (2021-12-19)
 
 ## [2.22.0](https://github.com/vebholic/oms_frontend/compare/v2.21.0...v2.22.0) (2021-12-18)

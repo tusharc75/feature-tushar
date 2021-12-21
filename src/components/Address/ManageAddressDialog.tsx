@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment, useContext, useRef, useMemo } from 'react';
+import { useState, useEffect, Fragment, useContext, useCallback } from 'react';
 import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -8,8 +8,6 @@ import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
-import routes from '../../components/Helpers/Routes';
-import { throttle } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
 import { address, CustomDialogTransition, setFieldsInAscendingOrder } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema, isFieldNotTouched } from '../../constants/helpers';
@@ -21,13 +19,17 @@ import { FaDiceOne } from 'react-icons/fa';
 
 const ManageAddressDialog = (props) => {
   const toastConfig = useContext(CustomToastContext);
-  const placesService = useRef(null)
   const { onClose, onSuccess } = props;
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [formsData, setFormsData] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [addressData, setAddressData] = useState(null)
+
+  const formikRef = {
+    current: null
+  }
 
   useEffect(() => {
     if (initialData.fields.length > 0) {
@@ -64,18 +66,96 @@ const ManageAddressDialog = (props) => {
       });
   };
 
+  const getFullAddress = (placeId) => {
+    if (placeId && window.google) {
+      const element = document.createElement('div');
+      let placesService = new window.google.maps.places.PlacesService(element);
 
-  const fetchPlace = useMemo(() => throttle((req, cb) => {
-    // placesService.current
-  }, 200), [])
+      placesService.getDetails({ placeId }, (results) => {
+        type addressType = {
+          long_name: string;
+          short_name: string;
+          types: any[];
+        };
+
+        const addressess = results.address_components;
+        let fullAddress: any = {}
+
+        addressess.forEach((address: addressType) => {
+          const type = address.types[0];
+
+          if (type === 'locality') {
+            fullAddress.city = address.long_name;
+          }
+
+          if (type === 'administrative_area_level_1') {
+            fullAddress['state/Province'] = address.long_name;
+          }
+
+          if (type === 'administrative_area_level_2') {
+            fullAddress.county = address.long_name;
+          }
+
+          if (type === 'country') {
+            fullAddress.country = address.long_name;
+          }
+
+          if (type === 'postal_code') {
+            fullAddress['zipCode/PostalCode'] = address.long_name;
+          }
+        });
+
+        fullAddress.lat = results.geometry.location.lat().toLocaleString();
+        fullAddress.lon = results.geometry.location.lng().toLocaleString();
+        fullAddress.streetAddress = results.formatted_address
+
+        setAddressData(fullAddress)
+      });
+
+    }
+
+  };
 
   useEffect(() => {
-    if (!placesService.current && window.google) {
-      const root: HTMLDivElement | any = document.getElementById("#root")
-      placesService.current = new window.google.maps.places.PlacesService(root)
+    if (formikRef.current && addressData) {
+      const setFieldValue = formikRef.current.setFieldValue
+      if (addressData?.streetAddress) {
+        setFieldValue("streetAddress", addressData.streetAddress)
+      } else {
+        setFieldValue("city", "")
+      }
+      if (addressData?.city) {
+        setFieldValue("city", addressData.city)
+      } else {
+        setFieldValue("city", "")
+      }
+      if (addressData['state/Province']) {
+        setFieldValue("state/Province", addressData['state/Province'])
+      } else {
+        setFieldValue("state/Province", '')
+      }
+      if (addressData?.country) {
+        setFieldValue("country", addressData.country)
+      } else {
+        setFieldValue("country", '')
+      }
+      if (addressData['zipCode/PostalCode']) {
+        setFieldValue("zipCode/PostalCode", addressData['zipCode/PostalCode'])
+      } else {
+        setFieldValue("zipCode/PostalCode", '')
+      }
+      if (addressData?.lat) {
+        setFieldValue("lat", addressData.lat)
+      } else {
+        setFieldValue("lat", '')
+      }
+      if (addressData?.lon) {
+        setFieldValue("lon", addressData.lon)
+      } else {
+        setFieldValue("lon", '')
+      }
     }
-  }, [])
-
+  }, [addressData])
 
   return (
     <Dialog
@@ -91,8 +171,13 @@ const ManageAddressDialog = (props) => {
       }}
       fullWidth
     >
-      {initialData && initialData.fields.length ? (
+      {initialData.fields.length ? (
         <Formik
+          innerRef={(ref) => {
+            if (ref) {
+              formikRef.current = ref
+            }
+          }}
           enableReinitialize={true}
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
@@ -154,6 +239,17 @@ const ManageAddressDialog = (props) => {
                                       tooltipMessage={field?.tooltipMessage}
                                       size="small"
                                       imageOrFileUploadCompletePercentage={null}
+                                      onChange={(_, val) => {
+                                        if (field.fieldName === 'fullAddress' && typeof val === 'object') {
+                                          const placeId = val?.place_id ?? null;
+                                          getFullAddress(placeId);
+                                          if (!placeId) {
+                                            setAddressData(null)
+                                          }
+                                        } else {
+                                          return null;
+                                        }
+                                      }}
                                     />
                                   }
                                 </Grid>

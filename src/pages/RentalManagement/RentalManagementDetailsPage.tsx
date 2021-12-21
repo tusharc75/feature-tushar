@@ -412,7 +412,69 @@ const RentalManagementDetailsPage = () => {
                     </>
                   )}
                 </Box>
-                <div className="position-relative">
+
+              </TabPanel>
+              <TabPanel value={tabValue} index={1}>
+                <Paper>
+                  <Steps
+                    isNextStep={false}
+                    nextStep={nextStep}
+                    steps={rentalProcessSteps}
+                    currentStep={currentStep}
+                    setCurrentStep={setCurrentStep}
+                  />
+                  {currentStep === 0 && rentalManagementData && (
+                    <Productpackage
+                      rentalManagementData={rentalManagementData}
+                      setNextStep={setNextStep}
+                      currencySymbol={currencySymbol} />
+                  )}
+                  {currentStep === 1 && rentalManagementData &&
+                    <AdditionalCost
+                      rentalManagementData={rentalManagementData}
+                      setNextStep={setNextStep} />}
+                  {currentStep === 2 && rentalManagementData && (
+                    <SerializedAsset
+                      rentalManagementData={rentalManagementData}
+                      setNextStep={setNextStep}
+                      isSmallScreen={isSmallScreen}
+                      isTabletScreen={isTabletScreen}
+                      showActivity={showActivity}
+                      currencySymbol={currencySymbol}
+                    />
+                  )}
+                  {currentStep === 3 && rentalManagementData && (
+                    <LoadingTicket
+                      fetchRentalData={fetchRentalManagementData}
+                      rentalManagementData={rentalManagementData}
+                      currentStep={currentStep}
+                      setNextStep={setNextStep}
+                    />
+                  )}
+                  {(currentStep === 4) && rentalManagementData && (
+                    <ReceivingTicket
+                      rentalManagementData={rentalManagementData}
+                      currentStep={currentStep}
+                      setNextStep={setNextStep}
+                    />
+                  )}
+                  {(currentStep === 5) && rentalManagementData && (
+                    <Invoice
+                      rentalManagementData={rentalManagementData}
+                      setNextStep={setNextStep}
+                      fetchRentalData={fetchRentalManagementData}
+                      updateJobStatus={updateJobStatus}
+                      statusOptions={statusOptions}
+                    />
+                  )}
+                </Paper>
+              </TabPanel>
+            </Paper>
+          </div>
+          <Box my={1} />
+        </div>
+
+        <div className="position-relative">
                   <HideWhenOffline>
                     {/* {showActivity ?
                 <Paper>
@@ -488,66 +550,6 @@ const RentalManagementDetailsPage = () => {
                     </Paper>
                   </HideWhenOffline>
                 </div>
-              </TabPanel>
-              <TabPanel value={tabValue} index={1}>
-                <Paper>
-                  <Steps
-                    isNextStep={false}
-                    nextStep={nextStep}
-                    steps={rentalProcessSteps}
-                    currentStep={currentStep}
-                    setCurrentStep={setCurrentStep}
-                  />
-                  {currentStep === 0 && rentalManagementData && (
-                    <Productpackage
-                      rentalManagementData={rentalManagementData}
-                      setNextStep={setNextStep}
-                      currencySymbol={currencySymbol} />
-                  )}
-                  {currentStep === 1 && rentalManagementData &&
-                    <AdditionalCost
-                      rentalManagementData={rentalManagementData}
-                      setNextStep={setNextStep} />}
-                  {currentStep === 2 && rentalManagementData && (
-                    <SerializedAsset
-                      rentalManagementData={rentalManagementData}
-                      setNextStep={setNextStep}
-                      isSmallScreen={isSmallScreen}
-                      isTabletScreen={isTabletScreen}
-                      showActivity={showActivity}
-                      currencySymbol={currencySymbol}
-                    />
-                  )}
-                  {currentStep === 3 && rentalManagementData && (
-                    <LoadingTicket
-                      fetchRentalData={fetchRentalManagementData}
-                      rentalManagementData={rentalManagementData}
-                      currentStep={currentStep}
-                      setNextStep={setNextStep}
-                    />
-                  )}
-                  {(currentStep === 4) && rentalManagementData && (
-                    <ReceivingTicket
-                      rentalManagementData={rentalManagementData}
-                      currentStep={currentStep}
-                      setNextStep={setNextStep}
-                    />
-                  )}
-                  {(currentStep === 5) && rentalManagementData && (
-                    <Invoice
-                      rentalManagementData={rentalManagementData}
-                      setNextStep={setNextStep}
-                      fetchRentalData={fetchRentalManagementData}
-                      updateJobStatus={updateJobStatus}
-                      statusOptions={statusOptions}
-                    />
-                  )}
-                </Paper>
-              </TabPanel>
-            </Paper>
-          </div>
-          <Box my={1} />
-        </div>
       </div>
       {showConfirmBox && (
         <ConfirmationDialog

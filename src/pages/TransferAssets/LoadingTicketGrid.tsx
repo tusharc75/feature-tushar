@@ -122,7 +122,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       for (let i = 0; i < ticketData.length; i++) {
         for (let j = 0; j < assetData.length; j++) {
           if (ticketData[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
-            assetData[j].deliveryTicket = ticketData[i].deliveryJobName;
+            assetData[j].deliveryTicket = ticketData[i].ticketName;
             assetData[j].deliveryTicketId = ticketData[i]._id;
             assetData[j].deliveryTicketStatus = ticketData[i].status;
           }
@@ -347,8 +347,11 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       {/* Loading ticket create dialog */}
       {openLoadingTicketDialog && (
         <ManageDeliveryTicket
+          ticketType="Loading"
+          refrenceType="Transfer Asset"
+          refrenceData={transferAssetData}
           onClose={() => setOpenLoadingTicketDialog(false)}
-          productInventoryForDeliveryTicket={assetWithNoTicket}
+          productInventory={assetWithNoTicket}
           transferData={transferAssetData}
           warehouseId={transferAssetData?.transferFromPlant?.optionValue}
           onSuccess={() => {
