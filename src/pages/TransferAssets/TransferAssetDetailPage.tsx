@@ -322,7 +322,7 @@ const TransferAssetDetailPage = () => {
                     <MdEdit size={24} />
                   </Button>
                 )}
-                <HideWhenOffline>
+                {/* <HideWhenOffline>
                   {permissions?.transferAsset?.isDelete && transferAssetData?.user === user?.user._id ? (
                     <DeleteButton
                       disabled={transferAssetData?.status !== 'New'}
@@ -331,7 +331,7 @@ const TransferAssetDetailPage = () => {
                       onClick={() => setShowConfirmBox(true)}
                     />
                   ) : null}
-                </HideWhenOffline>
+                </HideWhenOffline> */}
                 {/* <HideWhenOffline>
                   {permissions?.transferAsset?.isDelete && transferAssetData?.user === user?.user._id ? (
                     <Button
