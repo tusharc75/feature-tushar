@@ -269,7 +269,7 @@ const TransferAssetDetailPage = () => {
               const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
               const link = document.createElement('a');
               link.href = url;
-              link.setAttribute('download', `TransferAsset-${transferAssetData.purchaseOrderNumber}.pdf`);
+              link.setAttribute('download', `TransferAsset-${transferAssetData.transferAssetNumber}.pdf`);
               document.body.appendChild(link);
               link.click();
             } else {
