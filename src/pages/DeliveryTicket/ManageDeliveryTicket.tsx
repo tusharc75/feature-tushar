@@ -68,12 +68,12 @@ const ManageDeliveryTicket = (props) => {
                         }
                     }
                     if (transferType.includes("External Supplier")) {
-                        if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
+                        if (formData.name.includes("Customer") || formData.name.includes(ticketType === "Loading" ? "Receiving Plant" : "Pickup Plant")) {
                             return false
                         }
                     }
                     if (transferType.includes("External Customer")) {
-                        if (formData.name.includes("Supplier") || formData.name.includes("Plant")) {
+                        if (formData.name.includes("Supplier") || formData.name.includes(ticketType === "Loading" ? "Receiving Plant" : "Pickup Plant")) {
                             return false
                         }
                     }
@@ -267,22 +267,30 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["type"] = refrenceType;
                     tempInitialData["ticketType"] = ticketType;
                     tempInitialData["productInventory"] = productInventory?.map(d => d?._id)
-                    tempInitialData["pickupPlant"] = warehouseId;
-                    tempInitialData["pickupPlantAddress"] = refrenceData?.transferFromPlant.address ?? "";
                     tempInitialData["transferAsset"] = refrenceData?._id;
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
-                    if (refrenceData?.transferType === "Internal") {
-                        tempInitialData["receivingPlant"] = refrenceData?.transfertoPlant?.optionValue;
-                        tempInitialData["receivingPlantAddress"] = refrenceData?.plantShipTo?.optionValue;
+                    if (ticketType === "Loading") {
+                        tempInitialData["pickupPlant"] = warehouseId;
+                        tempInitialData["pickupPlantAddress"] = refrenceData?.transferFromPlant.address ?? "";
+                        if (refrenceData?.transferType === "Internal") {
+                            tempInitialData["receivingPlant"] = refrenceData?.transfertoPlant?.optionValue;
+                            tempInitialData["receivingPlantAddress"] = refrenceData?.plantShipTo?.optionValue;
+                        }
+
+                    } else {
+                        tempInitialData["receivingPlant"] = warehouseId;
+                        tempInitialData["receivingPlantAddress"] = refrenceData?.transferFromPlant.address
                     }
+
                     if (refrenceData?.transferType === "External Customer") {
-                        tempInitialData["customerAccount"] = refrenceData?.transferToCustomer?.optionValue;
+                        tempInitialData["customerAccount"] = refrenceData?.transfertoCustomer?.optionValue;
                         tempInitialData["customerShippingAddress"] = refrenceData?.customerShipTo?.optionValue;
                     }
                     if (refrenceData?.transferType === "External Supplier") {
                         tempInitialData["supplierAccount"] = refrenceData?.transfertoSupplier?.optionValue;
                         tempInitialData["supplierShippingAddress"] = refrenceData?.supplierShipTo?.optionValue;
                     }
+
                 }
                 setInitialData({
                     fields: fieldsDataForCreate,
