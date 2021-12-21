@@ -534,7 +534,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                     setShowReceivingTicketDialog({ open: false, selectedAssets: [] })
                     fetchRecords();
                 }}
-                warehouseId={repairJobData?.plant}
+                warehouseId={repairJobData?.plant?.optionValue}
                 repairJobData={repairJobData}
             />
 
