@@ -210,7 +210,8 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                         data = offlineGridData?.rentalManagement?.find(d => d._id === rentalManagementId)
                     }
                     if (isClone) {
-                        const { _id, brand, createdBy, entity, history, products, rentalJobName, updatedBy, ...rest } = data
+                        const { _id, brand, createdBy, entity, history, products, status, rentalJobName, updatedBy, ...rest } = data
+                        rest.status = "New"
                         setRentalData({
                             fields: fieldsDataForCreate,
                             initialValues: getObjKeysWithValues(rest, fieldsDataForCreate),
@@ -817,7 +818,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                             disabled={
                                                                                                 field.fieldName === "currency" ? rentalDetails && rentalDetails?.material?.length ? true : false :
                                                                                                     field.fieldName === "warehouse" ? rentalDetails && rentalDetails?.productInventory?.length ? true : false :
-                                                                                                        (rentalManagementId && field.disableOnEdit)}
+                                                                                                        (rentalManagementId && field.disableOnEdit && !isClone)}
                                                                                             values={values}
                                                                                             errors={errors}
                                                                                             touched={touched}

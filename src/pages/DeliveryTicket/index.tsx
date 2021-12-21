@@ -402,7 +402,7 @@ const DeliveryTicket = () => {
                 },
                 {
                   label: 'Job Name: ',
-                  field: 'deliveryJobName'
+                  field: 'ticketName'
                 }
               ]}
               onCreate={null}
@@ -440,8 +440,8 @@ const DeliveryTicket = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${deleteRecord?.deliveryJobName ? 'Delivery Ticket' : 'Delivery Tickets'}   ${
-                deleteRecord.deliveryJobName || ''
+              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : 'Delivery Tickets'}   ${
+                deleteRecord.ticketName || ''
               }?`}
               onClose={() => {
                 if (deleteRecord) setDeleteRecord({});

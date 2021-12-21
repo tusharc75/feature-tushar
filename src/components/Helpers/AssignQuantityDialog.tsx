@@ -97,7 +97,7 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
         allResourceData.length > 0
           ? allResourceData.filter((d) => !customFormArr.includes(d?.id))
           : resourceData.filter((d) => !customFormArr.includes(d?.id));
-      console.log(customFormArr, filteredData)
+      console.log(customFormArr, filteredData);
       setResourceData(filteredData);
     }
   }, [formData]);
@@ -243,16 +243,6 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
                 </Grid>
                 <Grid item xs={2} sm={2}>
                   <Box display="flex" justifyContent="flex-end" alignItems="center">
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      disabled={!Boolean(form.resource) || !Boolean(form.qty)}
-                      onClick={() => {
-                        setFormData((prevState) => [...prevState, { id: generateUniqueId(), resource: null, qty: 0 }]);
-                      }}
-                    >
-                      <Add color={!Boolean(form.resource) || !Boolean(form.qty) ? 'disabled' : `primary`} />
-                    </IconButton>
                     {/* {indx !== 0 && ( */}
                     <Box ml={2}>
                       <IconButton
@@ -273,6 +263,18 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
             ))}
           </Grid>
         </Box>
+        <Button
+          size="small"
+          color="primary"
+          // disabled={!Boolean(form.resource) || !Boolean(form.qty)}
+          variant="outlined"
+          onClick={() => {
+            setFormData((prevState) => [...prevState, { id: generateUniqueId(), resource: null, qty: 0 }]);
+          }}
+        >
+          Add Products
+          <Add color={`primary`} />
+        </Button>
       </CustomDialogContent>
       <CustomDialogFooter>
         <Button variant="outlined" disabled={isSubmitting} color="primary" onClick={onClose}>
