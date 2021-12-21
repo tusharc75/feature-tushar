@@ -332,7 +332,7 @@ const TransferAssetDetailPage = () => {
                     />
                   ) : null}
                 </HideWhenOffline>
-                <HideWhenOffline>
+                {/* <HideWhenOffline>
                   {permissions?.transferAsset?.isDelete && transferAssetData?.user === user?.user._id ? (
                     <Button
                       disabled={transferAssetData?.status !== 'New'}
@@ -342,7 +342,7 @@ const TransferAssetDetailPage = () => {
                       <MdDelete size={24} />
                     </Button>
                   ) : null}
-                </HideWhenOffline>
+                </HideWhenOffline> */}
               </DetailsPageHeader>
             )}
 
