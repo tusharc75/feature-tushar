@@ -204,9 +204,18 @@ export default function DeliveryTicketDetail(props) {
               return false
             }
           }
-          if (ticket?.typeDetails?.typeOfRepair === "External") {
-            if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
-              return false
+          if (ticket.ticketType === "Loading") {
+            if (ticket?.typeDetails?.typeOfRepair === "External") {
+              if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Receiving Plant")) {
+                return false
+              }
+            }
+          }
+          else {
+            if (ticket?.typeDetails?.typeOfRepair === "External") {
+              if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Pickup Plant")) {
+                return false
+              }
             }
           }
           if (fields.fieldData.fieldName === "rentalJob" || fields.fieldData.fieldName === "transferAsset" || fields.fieldData.fieldName === "productInventory") {
