@@ -16,7 +16,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import {
     gridLoadingTimeout, receivingTicket, repairJob,
-    sidebarResource, productInventory as productInventoryHelperObject, repairJobStatus
+    sidebarResource, productInventory as productInventoryHelperObject, repairJobStatus, deliveryTicket
 } from "../../constants/helpers";
 import { groupBy } from "lodash";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -31,6 +31,7 @@ import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { FaSuitcase } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
+import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
 
 const renderedFrom = "repairJob_receiving_ticket"
 
@@ -93,45 +94,78 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                 axiosInstance()
                     .get(`${repairJob.repairJobApi}/${repairJobData._id}/delivery-ticket`)
                     .then(({ data }) => {
+
                         data.data.map(obj => {
                             tempProductInventory.map((d, index) => {
                                 if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                                    tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
-                                    tempProductInventory[index]["deliveryTicketId"] = obj?._id
+                                    tempProductInventory[index]["type"] = obj?.type
+                                    if (obj.ticketType === "Loading") {
+                                        tempProductInventory[index]["deliveryTicket"] = obj?.ticketName
+                                        tempProductInventory[index]["deliveryTicketId"] = obj?._id
+                                    }
+                                    if (obj.ticketType === "Receiving") {
+                                        tempProductInventory[index]["receivingTicket"] = obj?.ticketName
+                                        tempProductInventory[index]["receivingTicketId"] = obj?._id
+                                        tempProductInventory[index]["isDelivered"] = obj?.status === "Delivered";
+                                    }
                                 }
                             })
+                        });
+
+                        tempProductInventory.forEach((d) => {
+                            d["_id"] = d["id"];
+                            d["hideSelection"] = d.status === "In-Transit" || d.status === "Lost" || (d.hasOwnProperty("isDelivered") && d["isDelivered"] === true);
                         })
-                        axiosInstance()
-                            .get(`${repairJob.repairJobApi}/${repairJobData._id}/receiving-ticket`)
-                            .then(({ data }) => {
-                                data.data.map(obj => {
-                                    tempProductInventory.map((d, index) => {
-                                        if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                                            tempProductInventory[index]["receivingTicket"] = obj?.receivingJobName
-                                            tempProductInventory[index]["receivingTicketId"] = obj?._id
-                                            tempProductInventory[index]["isDelivered"] = obj?.status === "Delivered";
-                                        }
-                                    })
-                                })
 
-                                tempProductInventory.forEach((d) => {
-                                    d["_id"] = d["id"];
-                                    d["hideSelection"] = d.status === "In-Transit" || d.status === "Lost" || (d.hasOwnProperty("isDelivered") && d["isDelivered"] === true);
-                                })
+                        setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))
+                        setPreviousButtonDisabled(tempProductInventory.some(s => s["receivingTicketId"]));
 
-                                setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))
-                                setPreviousButtonDisabled(tempProductInventory.some(s => s["receivingTicketId"]));
+                        dispatch({
+                            type: "initialize", data: tempProductInventory, count: tempProductInventory.length
+                        });
+                        setTimeout(() => {
+                            dispatch({ type: "loading", loading: false });
+                        }, gridLoadingTimeout);
 
-                                dispatch({
-                                    type: "initialize", data: tempProductInventory, count: tempProductInventory.length
-                                });
-                                setTimeout(() => {
-                                    dispatch({ type: "loading", loading: false });
-                                }, gridLoadingTimeout);
-                            })
-                            .catch((err) => {
-                                toastConfig.setToastConfig(err);
-                            });
+                        // data.data.map(obj => {
+                        //     tempProductInventory.map((d, index) => {
+                        //         if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
+                        //             tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
+                        //             tempProductInventory[index]["deliveryTicketId"] = obj?._id
+                        //         }
+                        //     })
+                        // })
+                        // axiosInstance()
+                        //     .get(`${repairJob.repairJobApi}/${repairJobData._id}/receiving-ticket`)
+                        //     .then(({ data }) => {
+                        //         data.data.map(obj => {
+                        //             tempProductInventory.map((d, index) => {
+                        //                 if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
+                        //                     tempProductInventory[index]["receivingTicket"] = obj?.receivingJobName
+                        //                     tempProductInventory[index]["receivingTicketId"] = obj?._id
+                        //                     tempProductInventory[index]["isDelivered"] = obj?.status === "Delivered";
+                        //                 }
+                        //             })
+                        //         })
+
+                        //         tempProductInventory.forEach((d) => {
+                        //             d["_id"] = d["id"];
+                        //             d["hideSelection"] = d.status === "In-Transit" || d.status === "Lost" || (d.hasOwnProperty("isDelivered") && d["isDelivered"] === true);
+                        //         })
+
+                        //         setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))
+                        //         setPreviousButtonDisabled(tempProductInventory.some(s => s["receivingTicketId"]));
+
+                        //         dispatch({
+                        //             type: "initialize", data: tempProductInventory, count: tempProductInventory.length
+                        //         });
+                        //         setTimeout(() => {
+                        //             dispatch({ type: "loading", loading: false });
+                        //         }, gridLoadingTimeout);
+                        //     })
+                        //     .catch((err) => {
+                        //         toastConfig.setToastConfig(err);
+                        //     });
                     })
                     .catch((err) => {
                         toastConfig.setToastConfig(err);
@@ -166,7 +200,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
 
     const ReceivingTicketRenderer = (params) => (
         params?.value ? (
-            <Link className="link" title={params.value} to={`${routes.receivingTicketDetail.path}/${params.data.receivingTicketId}`}>
+            <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`}>
                 {params.value}
             </Link>
         ) : (
@@ -395,7 +429,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                         let apiCalls = [];
 
                         Object.keys(groupByCalls).forEach((key) => {
-                            apiCalls.push(axiosInstance().put(`${receivingTicket.receivingTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
+                            apiCalls.push(axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
                         })
 
                         Promise.all(apiCalls).then(() => {
@@ -490,23 +524,38 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
         }
 
         {
-            showReceivingTicketDialog.open && <ManageReceivingTicket
-                open={showReceivingTicketDialog.open}
-                isClone={false}
-                receivingTicketId={null}
-                productInventoryForReceivingTicket={showReceivingTicketDialog.selectedAssets}
-                repairJobData={repairJobData}
+            showReceivingTicketDialog.open && <ManageDeliveryTicket
+                ticketType="Receiving"
+                refrenceType="Repair Job"
+                refrenceData={repairJobData}
+                productInventory={showReceivingTicketDialog.selectedAssets}
                 onClose={() => setShowReceivingTicketDialog({ open: false, selectedAssets: [] })}
                 onSuccess={() => {
                     setShowReceivingTicketDialog({ open: false, selectedAssets: [] })
                     fetchRecords();
                 }}
-                // onSuccess={() => {
-                //     setShowReceivingTicketDialog(false)
-                //     fetchProductInventory()
-                // }}
-                isRedirectToDetailPage={false}
+                warehouseId={repairJobData?.plant}
+                repairJobData={repairJobData}
             />
+
+
+            // <ManageReceivingTicket
+            //     open={showReceivingTicketDialog.open}
+            //     isClone={false}
+            //     receivingTicketId={null}
+            //     productInventoryForReceivingTicket={showReceivingTicketDialog.selectedAssets}
+            //     repairJobData={repairJobData}
+            //     onClose={() => setShowReceivingTicketDialog({ open: false, selectedAssets: [] })}
+            //     onSuccess={() => {
+            //         setShowReceivingTicketDialog({ open: false, selectedAssets: [] })
+            //         fetchRecords();
+            //     }}
+            //     // onSuccess={() => {
+            //     //     setShowReceivingTicketDialog(false)
+            //     //     fetchProductInventory()
+            //     // }}
+            //     isRedirectToDetailPage={false}
+            // />
         }
 
     </>

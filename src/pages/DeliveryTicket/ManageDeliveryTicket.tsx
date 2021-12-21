@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef, Fragment } from "react";
 import { Box, Dialog, Button, Grid, CircularProgress } from '@material-ui/core';
 import { Formik, Form } from "formik";
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -12,20 +12,18 @@ import {
     getCollaboratorDropdownDataSource,
     CustomDialogTransition, setFieldsInAscendingOrder, generateUniqueIdOnly
 } from "./../../constants/helpers";
-import { getObjKeysWithValues, getObjKeys, yupSchema, deliveryTicket, isFieldNotTouched, sidebarResource } from "../../constants/helpers";
+import { getObjKeysWithValues, getObjKeys, yupSchema, deliveryTicket, sidebarResource } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
-import Skeleton from "@material-ui/lab/Skeleton/Skeleton";
 import FormTypes from "../../components/Helpers/FormTypes";
 import { FaDiceOne } from "react-icons/fa";
 import moment from "moment";
 import { useData } from "../../StateProvider/Provider";
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
+import { isEqual } from 'lodash';
 
 const ManageDeliveryTicket = (props) => {
 
-    const {
-        state: { user },
-    }: any = useData();
-
+    const { state: { user } }: any = useData();
     const toastConfig = useContext(CustomToastContext)
     const { deliveryTicketApi } = deliveryTicket;
     const { deliveryTicketId = null, ticketType, refrenceType = null, refrenceData = null, productInventory = null, onClose, onSuccess,
@@ -33,15 +31,16 @@ const ManageDeliveryTicket = (props) => {
 
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
+    const [deliveryTicketData, setDeliveryTicketData] = useState<any>(null);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [formsData, setFormsData] = useState([]);
     const [isSubmitting, setSubmitting] = useState(false);
-    const [formValues, setFormValues] = useState({})
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
     const [ownerData, setOwnerData] = useState([]);
     const [collaboratorData, setCollaboratorData] = useState([]);
     const [disableOwnerSelection, setDisableOwnerSelection] = useState(false);
+    const ref = useRef(null);
 
     useEffect(() => {
         const fields = initialData.fields
@@ -55,43 +54,63 @@ const ManageDeliveryTicket = (props) => {
                 setCollaboratorData(ownerCollabOptions[0].option);
             }
             const modifiedData = setFieldsInAscendingOrder(fields)
+
+            let type = deliveryTicketData ? deliveryTicketData?.type : refrenceType
+            let ticket_type = deliveryTicketData ? deliveryTicketData?.ticketType : ticketType
+            let transferType = deliveryTicketData ? deliveryTicketData?.typeDetails?.transferType : refrenceData.transferType
+            let typeOfRepair = deliveryTicketData ? deliveryTicketData?.typeDetails?.typeOfRepair : refrenceData.typeOfRepair
+
             const newFilteredData = modifiedData.filter((formData) => {
-                if (refrenceType === "Transfer Asset") {
-                    if (refrenceData?.transferType === "Internal") {
+                if (type === "Transfer Asset") {
+                    if (transferType === "Internal") {
                         if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
                             return false
                         }
                     }
-                    if (refrenceData?.transferType.includes("External Supplier")) {
-                        if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
+                    if (transferType.includes("External Supplier")) {
+                        if (formData.name.includes("Customer") || formData.name.includes(ticketType === "Loading" ? "Receiving Plant" : "Pickup Plant")) {
                             return false
                         }
                     }
-                    if (refrenceData?.transferType.includes("External Customer")) {
-                        if (formData.name.includes("Supplier") || formData.name.includes("Plant")) {
-                            return false
-                        }
-                    }
-                }
-                if (refrenceType === "Repair Job") {
-                    if (refrenceData?.typeOfRepair === "Internal") {
-                        if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
-                            return false
-                        }
-                    }
-                    if (refrenceData?.typeOfRepair === "External") {
-                        if (formData.name.includes("Customer") || formData.name.includes("Plant")) {
+                    if (transferType.includes("External Customer")) {
+                        if (formData.name.includes("Supplier") || formData.name.includes(ticketType === "Loading" ? "Receiving Plant" : "Pickup Plant")) {
                             return false
                         }
                     }
                 }
-                if (refrenceType === "Rental Job") {
-                    if (ticketType === "Loading") {
+                if (type === "Repair Job") {
+                    if (ticket_type === "Loading") {
+                        if (typeOfRepair === "Internal") {
+                            if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
+                                return false
+                            }
+                        }
+                        if (typeOfRepair === "External") {
+                            if (formData.name.includes("Customer") || formData.name.includes("Receiving Plant")) {
+                                return false
+                            }
+                        }
+                    }
+                    else if (ticket_type === "Receiving") {
+                        if (typeOfRepair === "Internal") {
+                            if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
+                                return false
+                            }
+                        }
+                        if (typeOfRepair === "External") {
+                            if (formData.name.includes("Customer") || formData.name.includes("Pickup Plant")) {
+                                return false
+                            }
+                        }
+                    }
+                }
+                if (type === "Rental Job") {
+                    if (ticket_type === "Loading") {
                         if (formData.name.includes("Supplier") || formData.name.includes("Receiving Plant")) {
                             return false
                         }
                     }
-                    else if (ticketType === "Receiving") {
+                    else if (ticket_type === "Receiving") {
                         if (formData.name.includes("Supplier") || formData.name.includes("Pickup Plant")) {
                             return false
                         }
@@ -103,38 +122,25 @@ const ManageDeliveryTicket = (props) => {
         }
     }, [initialData.fields, refrenceData]);
 
-    const onOwnerDropdownOpen = (selectedCollaborator) => {
-        setOwnerData(
-            getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData)
-        );
-    };
-
-    const onCollabOwnerMultiselectOpen = (selectedOwnerId) => {
-        setCollaboratorData(
-            getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData)
-        );
-    };
-
     useEffect(() => {
         axiosInstance().get(`/field?resource=${sidebarResource["deliveryTicket"]}`).then(({ data: { data } }) => {
             const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             if (deliveryTicketId) {
-                axiosInstance().get(`${deliveryTicketApi}/` + deliveryTicketId).then(({ data: { data } }) => {
+                axiosInstance().get(`${deliveryTicketApi}/${deliveryTicketId}`).then(({ data: { data } }) => {
+                    setDeliveryTicketData(data)
                     setDisableOwnerSelection(deliveryTicketId && user.user._id !== data?.owner?.optionValue);
                     setInitialData({
                         fields: fieldsDataForUpdate,
                         values: getObjKeysWithValues(data, fieldsDataForUpdate),
                     });
-                    setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate))
                 }).catch((error) => {
                     toastConfig.setToastConfig(error);
                 });
             }
             else {
+                const tempInitialData = getObjKeys("", fieldsDataForCreate)
                 if (productInventory && refrenceType === "Rental Job" && refrenceData) {
-                    console.log(refrenceData)
-                    const tempInitialData = getObjKeys("", fieldsDataForCreate)
                     tempInitialData["ticketName"] = `${refrenceData?.rentalJobName}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = refrenceType;
                     tempInitialData["ticketType"] = ticketType;
@@ -166,77 +172,99 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["customerShippingAddress"] = refrenceData.shippingAddress?.optionValue
                     tempInitialData["pick-UpDate"] = moment(refrenceData?.estimateStartDate).subtract(1, 'days');
                     tempInitialData["deliveryDate"] = moment(refrenceData?.estimateStartDate).subtract(1, 'days');
-                    setInitialData({
-                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "rental"),
-                        values: tempInitialData,
-                    });
-                    setFormValues(tempInitialData)
                 }
                 else if (productInventory && refrenceType === "Repair Job" && refrenceData) {
-                    const tempInitialData = getObjKeys("", fieldsDataForCreate)
                     tempInitialData["ticketName"] = `${refrenceData?.repairJobName}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = refrenceType;
                     tempInitialData["ticketType"] = ticketType;
                     tempInitialData["productInventory"] = productInventory?.map(d => d?._id)
                     tempInitialData["repairJob"] = refrenceData?._id
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
-                    tempInitialData["warehouse"] = warehouseId?.optionValue ? warehouseId?.optionValue : ""
-                    const pickupPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "warehouse")?.option;
-                    if (pickupPlantAddresses && tempInitialData["warehouse"]) {
-                        const address = pickupPlantAddresses.find(f => f.optionValue === tempInitialData["warehouse"]);
-                        if (address) {
-                            tempInitialData["pickupPlantAddress"] = address.address;
+                    if (ticketType === "Loading") {
+                        if (refrenceData?.typeOfRepair === "Internal") {
+                            tempInitialData["receivingPlant"] = refrenceData?.plant?.optionValue;
+                            const receivingPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "receivingPlant")?.option;
+                            if (receivingPlantAddresses && refrenceData["plant"]) {
+                                const address = receivingPlantAddresses.find(f => f.optionValue === refrenceData["plant"]?.optionValue);
+                                if (address) {
+                                    tempInitialData["receivingPlantAddress"] = address.address;
+                                }
+                            }
+                        }
+                        else if (refrenceData?.typeOfRepair === "External") {
+                            tempInitialData["pickupPlant"] = refrenceData?.warehouse?.optionValue;
+                            fieldsDataForCreate?.forEach((e) => {
+                                if (e.fieldName === "pickupPlant") {
+                                    const plantAddress = e?.option?.filter((e) => e.optionValue === refrenceData?.warehouse?.optionValue)
+                                    if (plantAddress.length) {
+                                        tempInitialData["pickupPlantAddress"] = plantAddress[0].address
+                                    }
+                                }
+                            })
+                            tempInitialData["supplierAccount"] = refrenceData?.supplier?.optionValue;
+                            tempInitialData["supplierShippingAddress"] = refrenceData?.supplierShipTo?.optionValue;
                         }
                     }
-                    if (refrenceData?.typeOfRepair === "Internal") {
-                        tempInitialData["receivingPlant"] = refrenceData?.repairPlant?.optionValue;
-                        tempInitialData["plantShipTo"] = refrenceData?.plantShipTo;
+                    else if (ticketType === "Receiving") {
+                        if (repairJobData?.typeOfRepair === "Internal") {
+                            tempInitialData["receivingPlant"] = refrenceData?.plant?.optionValue;
+                            const receivingPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "receivingPlant")?.option;
+                            if (receivingPlantAddresses && refrenceData["plant"]) {
+                                const address = receivingPlantAddresses.find(f => f.optionValue === refrenceData["plant"]?.optionValue);
+                                if (address) {
+                                    tempInitialData["receivingPlantAddress"] = address.address;
+                                }
+                            }
+                        }
+                        if (repairJobData?.typeOfRepair === "External") {
+                            tempInitialData["receivingPlant"] = refrenceData?.warehouse?.optionValue;
+                            fieldsDataForCreate?.forEach((e) => {
+                                if (e.fieldName === "pickupPlant") {
+                                    const plantAddress = e?.option?.filter((e) => e.optionValue === refrenceData?.warehouse?.optionValue)
+                                    if (plantAddress.length) {
+                                        tempInitialData["receivingPlantAddress"] = plantAddress[0].address
+                                    }
+                                }
+                            })
+                            tempInitialData["supplierAccount"] = refrenceData?.supplier?.optionValue;
+                            tempInitialData["supplierShippingAddress"] = refrenceData?.supplierShipTo?.optionValue;
+                        }
                     }
-                    if (refrenceData?.typeOfRepair === "External") {
-                        tempInitialData["supplierAccount"] = refrenceData?.vendor?.optionValue;
-                        tempInitialData["supplierShippingAddress"] = refrenceData?.supplierShipTo;
-                    }
-                    setInitialData({
-                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "warehouse" && d.fieldName !== "repairJob"),
-                        values: tempInitialData,
-                    });
-                    setFormValues(tempInitialData)
                 }
-                if (productInventory && refrenceType === "Transfer Asset" && refrenceData) {
-                    const tempInitialData = getObjKeys("", fieldsDataForCreate)
+                else if (productInventory && refrenceType === "Transfer Asset" && refrenceData) {
                     tempInitialData["ticketName"] = `${refrenceData?.transferAssetNumber}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = refrenceType;
                     tempInitialData["ticketType"] = ticketType;
                     tempInitialData["productInventory"] = productInventory?.map(d => d?._id)
-                    tempInitialData["pickupPlant"] = warehouseId;
-                    tempInitialData["pickupPlantAddress"] = refrenceData?.transferFromPlant.address ?? "";
                     tempInitialData["transferAsset"] = refrenceData?._id;
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
-                    if (refrenceData?.transferType === "Internal") {
-                        tempInitialData["receivingPlant"] = refrenceData?.transfertoPlant?.optionValue;
-                        tempInitialData["receivingPlantAddress"] = refrenceData?.plantShipTo?.optionValue;
+                    if (ticketType === "Loading") {
+                        tempInitialData["pickupPlant"] = warehouseId;
+                        tempInitialData["pickupPlantAddress"] = refrenceData?.transferFromPlant.address ?? "";
+                        if (refrenceData?.transferType === "Internal") {
+                            tempInitialData["receivingPlant"] = refrenceData?.transfertoPlant?.optionValue;
+                            tempInitialData["receivingPlantAddress"] = refrenceData?.plantShipTo?.optionValue;
+                        }
+
+                    } else {
+                        tempInitialData["receivingPlant"] = warehouseId;
+                        tempInitialData["receivingPlantAddress"] = refrenceData?.transferFromPlant.address
                     }
+
                     if (refrenceData?.transferType === "External Customer") {
-                        tempInitialData["customerAccount"] = refrenceData?.transferToCustomer?.optionValue;
+                        tempInitialData["customerAccount"] = refrenceData?.transfertoCustomer?.optionValue;
                         tempInitialData["customerShippingAddress"] = refrenceData?.customerShipTo?.optionValue;
                     }
                     if (refrenceData?.transferType === "External Supplier") {
                         tempInitialData["supplierAccount"] = refrenceData?.transfertoSupplier?.optionValue;
                         tempInitialData["supplierShippingAddress"] = refrenceData?.supplierShipTo?.optionValue;
                     }
-                    setInitialData({
-                        fields: fieldsDataForCreate.filter(d => d.fieldName !== "productInventory" && d.fieldName !== "transferAsset"),
-                        values: tempInitialData,
-                    });
-                    setFormValues(tempInitialData)
+
                 }
-                else {
-                    setInitialData({
-                        fields: fieldsDataForCreate,
-                        values: getObjKeys("", fieldsDataForCreate),
-                    });
-                    setFormValues(getObjKeys("", fieldsDataForCreate))
-                }
+                setInitialData({
+                    fields: fieldsDataForCreate,
+                    values: tempInitialData,
+                });
             }
         })
             .catch((error) => {
@@ -244,6 +272,17 @@ const ManageDeliveryTicket = (props) => {
             });
     }, [deliveryTicketId, refrenceData]);
 
+    const onOwnerDropdownOpen = (selectedCollaborator) => {
+        setOwnerData(
+            getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData)
+        );
+    };
+
+    const onCollabOwnerMultiselectOpen = (selectedOwnerId) => {
+        setCollaboratorData(
+            getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData)
+        );
+    };
 
     const handleSubmit = (values) => {
         if (deliveryTicketId) {
@@ -287,13 +326,6 @@ const ManageDeliveryTicket = (props) => {
         }
     };
 
-    const handleValuesChange = (data) => {
-        setFormValues((prevState) => ({
-            ...prevState,
-            ...data
-        }))
-    }
-
     function validate(values) {
         const errors = {};
         let startDate = moment(values?.["pick-UpDate"]);
@@ -303,7 +335,6 @@ const ManageDeliveryTicket = (props) => {
         }
         return errors;
     }
-
 
     return (<Dialog
         maxWidth="md"
@@ -318,53 +349,32 @@ const ManageDeliveryTicket = (props) => {
             }
         }}
     >
-        <CustomDialogHeader
-            onClose={() => {
-                if (isFieldNotTouched({
-                    initialValues: initialData.values,
-                    fields: initialData.fields
-                }, formValues)) onClose()
-                else setShowConfirmDialog(true)
-            }}
-            title={`${deliveryTicketId ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ""}` : "Create Delivery Ticket"}`}
-            isMinimized={!fullScreen}
-            onMinimizeMaximize={() => {
-                setFullScreen(prevState => !prevState)
-            }}
-            showManimizeMaximize={true}
-        />
-
-        {loading || !initialData.fields.length ? (
-            <>
-                <CustomDialogContent>
-                    <Skeleton width="100%" height="70px" />
-                    <Grid container spacing={2}>
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
-                            <Grid key={i} item xs={12} sm={6} md={6}>
-                                <Skeleton width="100%" height="60px" />
-                            </Grid>
-                        ))}
-                    </Grid>
-                </CustomDialogContent>
-                <CustomDialogFooter>
-                    <Button variant="outlined" size="small" color="primary" disabled
-                    >
-                        Cancel
-                    </Button>
-                    <Button variant="contained" size="small" color="primary" disabled>
-                        Submit
-                    </Button>
-                </CustomDialogFooter>
-            </>
-        ) : (
+        {initialData.fields.length ? (
             <Formik
                 initialValues={initialData.values}
                 validationSchema={yupSchema(initialData.fields)}
                 onSubmit={handleSubmit}
                 validate={validate}
+                innerRef={ref}
             >
                 {({ values, errors, setFieldValue, touched, submitForm }) => (
-                    <>
+                    <Fragment>
+                        <CustomDialogHeader
+                            onClose={() => {
+                                if (!isEqual(ref.current.values, initialData.values)) {
+                                    setShowConfirmDialog(true)
+                                }
+                                else {
+                                    onClose()
+                                }
+                            }}
+                            title={`${deliveryTicketId ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ""}` : "Create Delivery Ticket"}`}
+                            isMinimized={!fullScreen}
+                            onMinimizeMaximize={() => {
+                                setFullScreen(prevState => !prevState)
+                            }}
+                            showManimizeMaximize={true}
+                        />
                         <CustomDialogContent>
                             <Form noValidate>
                                 {formsData &&
@@ -397,7 +407,6 @@ const ManageDeliveryTicket = (props) => {
                                                                                     type={field.type}
                                                                                     options={field.option}
                                                                                     setFieldValue={(name, value) => {
-                                                                                        handleValuesChange({ [name]: value })
                                                                                         setFieldValue(name, value)
                                                                                     }}
                                                                                     required={field.required}
@@ -420,7 +429,6 @@ const ManageDeliveryTicket = (props) => {
                                                                                     type={field.type}
                                                                                     options={field.option}
                                                                                     setFieldValue={(name, value) => {
-                                                                                        handleValuesChange({ [name]: value })
                                                                                         setFieldValue(name, value)
                                                                                     }}
                                                                                     required={field.required}
@@ -443,7 +451,6 @@ const ManageDeliveryTicket = (props) => {
                                                                                     type={field.type}
                                                                                     options={field.option}
                                                                                     setFieldValue={(name, value) => {
-                                                                                        handleValuesChange({ [name]: value })
                                                                                         setFieldValue(name, value)
                                                                                     }}
                                                                                     required={field.required}
@@ -470,7 +477,6 @@ const ManageDeliveryTicket = (props) => {
                                                                                     type={field.type}
                                                                                     options={field.option}
                                                                                     setFieldValue={(name, value) => {
-                                                                                        handleValuesChange({ [name]: value })
                                                                                         setFieldValue(name, value)
                                                                                     }}
                                                                                     required={field.required}
@@ -496,7 +502,6 @@ const ManageDeliveryTicket = (props) => {
                                                                                     type={field.type}
                                                                                     options={field.option}
                                                                                     setFieldValue={(name, value) => {
-                                                                                        handleValuesChange({ [name]: value })
                                                                                         setFieldValue(name, value)
                                                                                     }}
                                                                                     required={field.required}
@@ -518,7 +523,6 @@ const ManageDeliveryTicket = (props) => {
                                                                                     type={field.type}
                                                                                     options={ownerData}
                                                                                     onChange={(e, val) => {
-                                                                                        handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
                                                                                         setFieldValue(
                                                                                             field.fieldName,
                                                                                             val && val.optionValue
@@ -547,13 +551,6 @@ const ManageDeliveryTicket = (props) => {
                                                                                                             user?.user?._id
                                                                                                     ).optionValue,
                                                                                                 ]);
-                                                                                                handleValuesChange({
-                                                                                                    "collaborator": collaboratorData.find(
-                                                                                                        (d) =>
-                                                                                                            d?.optionValue ===
-                                                                                                            user?.user?._id
-                                                                                                    ).optionValue
-                                                                                                })
                                                                                             }
                                                                                         }
                                                                                     }}
@@ -583,7 +580,6 @@ const ManageDeliveryTicket = (props) => {
                                                                                     type={field.type}
                                                                                     options={collaboratorData}
                                                                                     setFieldValue={(name, value) => {
-                                                                                        handleValuesChange({ [name]: value });
                                                                                         setFieldValue(name, value)
                                                                                     }}
                                                                                     required={field.required}
@@ -597,7 +593,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                         );
                                                                                     }}
                                                                                 />
-                                                                            ) : field.fieldName === "warehouse" ? (
+                                                                            ) : field.fieldName === "warehouse" || field.fieldName === "plant" ? (
                                                                                 <FormTypes
                                                                                     {...field}
                                                                                     fieldData={field}
@@ -611,7 +607,6 @@ const ManageDeliveryTicket = (props) => {
                                                                                     type={field.type}
                                                                                     options={field.option}
                                                                                     setFieldValue={(name, value) => {
-                                                                                        handleValuesChange({ [name]: value })
                                                                                         setFieldValue(name, value)
                                                                                     }}
                                                                                     required={field.required}
@@ -632,7 +627,6 @@ const ManageDeliveryTicket = (props) => {
                                                                                 type={field.type}
                                                                                 options={field.option}
                                                                                 setFieldValue={(name, value) => {
-                                                                                    handleValuesChange({ [name]: value })
                                                                                     setFieldValue(name, value)
                                                                                 }}
                                                                                 required={field.required}
@@ -664,7 +658,6 @@ const ManageDeliveryTicket = (props) => {
                                                     type={field.type}
                                                     options={field.option}
                                                     setFieldValue={(name, value) => {
-                                                        handleValuesChange({ [name]: value })
                                                         setFieldValue(name, value)
                                                     }}
                                                     required={field.required}
@@ -686,11 +679,12 @@ const ManageDeliveryTicket = (props) => {
                                 size="small"
                                 disabled={isSubmitting || loading}
                                 onClick={() => {
-                                    if (isFieldNotTouched({
-                                        initialValues: initialData.values,
-                                        fields: initialData.fields
-                                    }, values)) onClose()
-                                    else setShowConfirmDialog(true)
+                                    if (!isEqual(ref.current.values, initialData.values)) {
+                                        setShowConfirmDialog(true)
+                                    }
+                                    else {
+                                        onClose()
+                                    }
                                 }}
                             >
                                 Cancel
@@ -719,10 +713,14 @@ const ManageDeliveryTicket = (props) => {
                                     }}
                                 /> : null
                         }
-                    </>
+                    </Fragment>
                 )}
             </Formik>
-        )}
+        ) :
+            <Box p={2} height={500} bgcolor="white">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+        }
     </Dialog>
     );
 }

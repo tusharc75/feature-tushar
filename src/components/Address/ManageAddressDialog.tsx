@@ -105,8 +105,8 @@ const ManageAddressDialog = (props) => {
           }
         });
 
-        fullAddress.lat = results.geometry.location.lat().toLocaleString();
-        fullAddress.lon = results.geometry.location.lng().toLocaleString();
+        fullAddress.latitude = results.geometry.location.lat().toLocaleString();
+        fullAddress.longitude = results.geometry.location.lng().toLocaleString();
         fullAddress.streetAddress = results.formatted_address
 
         setAddressData(fullAddress)
@@ -144,15 +144,15 @@ const ManageAddressDialog = (props) => {
       } else {
         setFieldValue("zipCode/PostalCode", '')
       }
-      if (addressData?.lat) {
-        setFieldValue("lat", addressData.lat)
+      if (addressData?.latitude) {
+        setFieldValue("latitude", addressData.latitude)
       } else {
-        setFieldValue("lat", '')
+        setFieldValue("latitude", '')
       }
-      if (addressData?.lon) {
-        setFieldValue("lon", addressData.lon)
+      if (addressData?.longitude) {
+        setFieldValue("longitude", addressData.longitude)
       } else {
-        setFieldValue("lon", '')
+        setFieldValue("longitude", '')
       }
     }
   }, [addressData])

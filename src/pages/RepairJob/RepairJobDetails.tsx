@@ -328,7 +328,7 @@ const RepairJobDetails = () => {
       .get(`/field?resource=${sidebarResource.repairJob}`)
       .then(({ data: { data } }) => {
         if (repairJobData["typeOfRepair"] === "Internal") {
-          setRepairJobFields(data.filter(f => ["vendor", "supplierShipTo"].indexOf(f?.fieldData?.fieldName) === -1));
+          setRepairJobFields(data.filter(f => ["supplier", "supplierShipTo"].indexOf(f?.fieldData?.fieldName) === -1));
         }
         else if (repairJobData["typeOfRepair"] === "External") {
           setRepairJobFields(data.filter(f => ["repairPlant", "plantShipTo"].indexOf(f?.fieldData?.fieldName) === -1));
@@ -347,6 +347,12 @@ const RepairJobDetails = () => {
     axiosInstance()
       .get(`${routes.repairJob.path}/${id}`)
       .then(({ data: { data } }) => {
+
+        if (data.hasOwnProperty("plant")) {
+          data["warehouse"] = data["plant"]
+        } else if (data.hasOwnProperty("warehouse")) {
+          data["plant"] = data["warehouse"]
+        }
 
         setRepairJobData({ ...data })
         if (data.processStatus) {
