@@ -23,7 +23,7 @@ import HideWhenOffline from '../../components/HideWhenOffline';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
-import {BiEdit, BiFoodMenu} from 'react-icons/bi';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import TabPanel from '../../components/TabPanel';
 import Menu from "@material-ui/core/Menu"
 import { isMobile } from "react-device-detect";
@@ -280,8 +280,8 @@ const RentalManagementDetailsPage = () => {
                     </Button>
                   )}
                   {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
-                    <Button className="buttonStyleSmallScreen" variant="text" color="primary" size="small" onClick={handleOpenUpdateDialog} style={isMobile ? {color:"#43aeaa"} : {}}>
-                      <BiEdit size={20}/>
+                    <Button className="buttonStyleSmallScreen" variant="text" color="primary" size="small" onClick={handleOpenUpdateDialog} style={isMobile ? { color: "#43aeaa" } : {}}>
+                      <BiEdit size={20} />
                     </Button>
                   )}
                   {/* <HideWhenOffline>
@@ -302,7 +302,7 @@ const RentalManagementDetailsPage = () => {
                       </Button>
                     ) : null}
                   </HideWhenOffline> */}
-                  {permissions?.rentalManagement?.isUpdate && (["Ready to Invoice", "Invoiced", "Closed"].includes(rentalManagementData?.status)) && (
+                  {permissions?.rentalManagement?.isUpdate && (["Ready to Invoice", "Invoiced"].includes(rentalManagementData?.status)) && (
                     <>
                       <Button
                         variant="outlined"
@@ -327,7 +327,7 @@ const RentalManagementDetailsPage = () => {
                         onClose={closeActions}>
                         {statusOptions?.map((o, index) => {
                           return <MenuItem
-                            disabled={index <= statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice")}
+                            disabled={index <= statusOptions.findIndex(d => d.optionLabel === rentalManagementData?.status)}
                             onClick={() => {
                               closeActions()
                               handleStatusChange(o)
@@ -475,8 +475,8 @@ const RentalManagementDetailsPage = () => {
         </div>
 
         <div className="position-relative">
-                  <HideWhenOffline>
-                    {/* {showActivity ?
+          <HideWhenOffline>
+            {/* {showActivity ?
                 <Paper>
                   {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                     <IoIosArrowDropright className="icon" />
@@ -513,43 +513,43 @@ const RentalManagementDetailsPage = () => {
                 !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
                   <IoIosArrowDropleft className="icon" />
                 </span>} */}
-                    <Paper>
-                      {!isSmallScreen && (
-                        <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                          {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                        </span>
-                      )}
-                      <div style={{ display: showActivity ? 'block' : 'none' }}>
-                        <Grid container>
-                          <Grid item xs={12}>
-                            {rentalManagementData && (
-                              <div>
-                                <Activity
-                                  resourceId={rentalManagementData._id}
-                                  resource={rentalManagement.resource}
-                                  restrictedAddActivities={
-                                    permissions && permissions['rentalManagement'] && permissions['rentalManagement'].isUpdate
-                                      ? []
-                                      : ['Attachment', 'Case']
-                                  }
-                                  relatedTo={[
-                                    {
-                                      type: rentalManagement,
-                                      referenceId: rentalManagementData._id,
-                                      access: true
-                                    }
-                                  ]}
-                                  handleActivityRefresh={() => { }}
-                                  emails={[]}
-                                />
-                              </div>
-                            )}
-                          </Grid>
-                        </Grid>
+            <Paper>
+              {!isSmallScreen && (
+                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
+                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+                </span>
+              )}
+              <div style={{ display: showActivity ? 'block' : 'none' }}>
+                <Grid container>
+                  <Grid item xs={12}>
+                    {rentalManagementData && (
+                      <div>
+                        <Activity
+                          resourceId={rentalManagementData._id}
+                          resource={rentalManagement.resource}
+                          restrictedAddActivities={
+                            permissions && permissions['rentalManagement'] && permissions['rentalManagement'].isUpdate
+                              ? []
+                              : ['Attachment', 'Case']
+                          }
+                          relatedTo={[
+                            {
+                              type: rentalManagement,
+                              referenceId: rentalManagementData._id,
+                              access: true
+                            }
+                          ]}
+                          handleActivityRefresh={() => { }}
+                          emails={[]}
+                        />
                       </div>
-                    </Paper>
-                  </HideWhenOffline>
-                </div>
+                    )}
+                  </Grid>
+                </Grid>
+              </div>
+            </Paper>
+          </HideWhenOffline>
+        </div>
       </div>
       {showConfirmBox && (
         <ConfirmationDialog
