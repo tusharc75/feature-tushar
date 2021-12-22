@@ -247,7 +247,7 @@ const ManageAddressDialog = (props) => {
                                             setAddressData(null)
                                           }
                                         } else {
-                                          return null;
+                                          setFieldValue(field.fieldName, val)
                                         }
                                       }}
                                     />
