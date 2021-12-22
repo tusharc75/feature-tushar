@@ -6,6 +6,8 @@ import { FaUsers } from "react-icons/fa";
 
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
+import {isMobile} from "react-device-detect";
+import {MdAdd} from "react-icons/all";
 
 const Header = (props) => {
   const {
@@ -55,40 +57,43 @@ const Header = (props) => {
           />
         )}
       </Grid>
-      <Grid item xs={6} className={styles.filter_side}>
-        <Box component="div" className={styles.filter_side_header} id="resourceOperations">
+      <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side}>
+        <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} id="resourceOperations">
+          <Grid style={{display: "flex", flex:1}}>
           <SearchBox
             searchbox={styles.search_box_input}
             onSearch={onSearch}
             value={searchVal}
             size="small"
             placeholder="Search Users"
-            width="242px"
+            width={isMobile ? "200px" : "242px"}
+            style={isMobile ? {flex:1} : {}}
           />
+          </Grid>
           {userPermissions.isCreate && (
             <Button
-              className={styles.add_submit_btn}
-              variant="contained"
+              variant={isMobile ? "text" : "contained"}
               color="primary"
               size="small"
               onClick={onCreate}
-              startIcon={<AddOutlined />}
+              className={isMobile ? "mobile_button" : styles.add_submit_btn}
+              startIcon={isMobile ? null : <AddOutlined />}
             >
-              Add
+              {isMobile ? <MdAdd size={23}/> : "Add"}
             </Button>
           )}
 
           {userPermissions.isDelete || userPermissions.isUpdate ? (
             <>
               <Button
-                className={styles.action_submit_btn}
-                variant="outlined"
+                  className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                  variant={isMobile ? "text" : "contained"}
                 color="default"
                 size="small"
                 onClick={openActions}
                 aria-controls="action-menu"
               >
-                Actions <ExpandMore />
+                {isMobile ? "" :  "Actions" } <ExpandMore/>
               </Button>
               <Menu
                 anchorEl={anchorEl}
@@ -102,7 +107,7 @@ const Header = (props) => {
                 open={Boolean(anchorEl)}
                 onClose={closeActions}
               >
-                {userPermissions.isDelete && selectedRecordsLength && (
+                {userPermissions.isDelete && selectedRecordsLength > 0 && (
                   <MenuItem
                     disabled={Boolean(canDelete)}
                     onClick={() => {
@@ -126,7 +131,7 @@ const Header = (props) => {
                   </MenuItem>
                 }
 
-                {
+                {/* {
                   userPermissions.isUpdate && <MenuItem
                     disabled={rolesActionDisabled}
                     onClick={() => {
@@ -136,7 +141,7 @@ const Header = (props) => {
                   >
                     Assign Company Wide Roles
                   </MenuItem>
-                }
+                } */}
 
                 {
                   userPermissions.isUpdate && <MenuItem
@@ -146,7 +151,7 @@ const Header = (props) => {
                       closeActions();
                     }}
                   >
-                    Assign Region Wide Functional Roles
+                    Assign Roles
                   </MenuItem>
                 }
 

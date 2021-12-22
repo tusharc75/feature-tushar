@@ -29,7 +29,7 @@ import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
 import Steps from "./Steps";
 import { FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms } from "react-icons/fa";
-import { BiFoodMenu } from "react-icons/bi";
+import { BiEdit, BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
 import queryString from 'query-string';
 import { isMobile } from "react-device-detect";
@@ -37,7 +37,8 @@ import Product from "./Product";
 import Service from "./Service";
 import IssuePo from "./IssuePo";
 import ReceivingAsset from "./ReceivingAsset";
-import { GrStatusInfo } from "react-icons/all";
+import { GrStatusGood, GrStatusInfo } from "react-icons/all";
+import accountClass from "../Account/account.module.scss";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -100,6 +101,7 @@ const PurchaseOrderDetailsPage = () => {
         }
         if (currentStep === 1 || currentStep === 2) { handleUpdateData({ "status": "In Process" }) }
         if (currentStep === 3) { handleUpdateData({ "status": "Issued" }) }
+
     }, [currentStep]);
 
     const handleMainPoints = (data) => {
@@ -304,22 +306,24 @@ const PurchaseOrderDetailsPage = () => {
                                     mainPoints={mainPoints}
                                     showHeading={true}
                                 >
-                                    {permissions?.purchaseOrder?.isUpdate && (
+                                    {permissions?.purchaseOrder?.isUpdate && (purchaseOrderData?.status !== "Ready to Invoice" && purchaseOrderData?.status !== "Invoiced" && purchaseOrderData?.status !== "Closed") && (
                                         <>
                                             <Button
-                                                variant="contained"
+                                                variant={isMobile ? "text" : "contained"}
                                                 color="primary"
                                                 size="small"
                                                 onClick={handleOpenUpdateDialog}
+                                                className={isMobile ? accountClass.mobile_button_layout : ""}
+                                                style={isMobile ? { color: "#43aeaa" } : {}}
                                             >
-                                                Edit
+                                                {isMobile ? <BiEdit size={20} /> : "Edit"}
                                             </Button>
                                         </>
                                     )}
                                     {permissions?.purchaseOrder?.isUpdate && (purchaseOrderData?.status === "Ready to Invoice" || purchaseOrderData?.status === "Invoiced" || purchaseOrderData?.status === "Closed") && (
                                         <>
                                             <Button
-                                                variant="outlined"
+                                                variant={isMobile ? "text" : "contained"}
                                                 color="default"
                                                 size="small"
                                                 onClick={openActions}
@@ -327,7 +331,7 @@ const PurchaseOrderDetailsPage = () => {
                                                 aria-controls="action-menu"
                                                 endIcon={isMobile ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
                                             >
-                                                {isMobile ? <GrStatusInfo size={20} /> : "Change Status"}
+                                                {isMobile ? <GrStatusGood size={18} style={{ color: "var(--warning-darken)" }} /> : "Change Status"}
                                             </Button>
                                             <Menu
                                                 anchorEl={anchorEl}

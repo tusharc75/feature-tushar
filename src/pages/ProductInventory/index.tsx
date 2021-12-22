@@ -9,7 +9,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import axiosInstance from "../../axios/axiosInstance";
 import { GiStockpiles } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import {AddOutlined, ExpandMore} from "@material-ui/icons";
+import { AddOutlined, ExpandMore } from "@material-ui/icons";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
@@ -27,7 +27,7 @@ import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers"
 import { MdAccountCircle } from "react-icons/md";
-import {AiFillCrown, MdAdd} from "react-icons/all";
+import { AiFillCrown, MdAdd } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 
@@ -57,6 +57,12 @@ const ProductInventory = () => {
     const history = useHistory();
 
     const [warehouse, setWarehouse] = useState(history.location?.state?.warehouse);
+    const [fromPurchaseOrder, setFromPurchaseOrder] = useState({
+        productId: history.location?.state?.productId,
+        productName: history.location?.state?.productName,
+        pOId: history.location?.state?.pOId,
+        pOName: history.location?.state?.pOName,
+    });
     const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
 
     useEffect(() => {
@@ -65,7 +71,7 @@ const ProductInventory = () => {
 
     useEffect(() => {
         fetchProductInventory()
-    }, [page, limit, filters, sorting, search, warehouse, redirectProduct]);
+    }, [page, limit, filters, sorting, search, warehouse, redirectProduct, fromPurchaseOrder]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -151,7 +157,10 @@ const ProductInventory = () => {
         if (redirectProduct?.id) {
             filterById.push({ field: "product", term: redirectProduct?.id });
         }
-
+        if (fromPurchaseOrder?.pOId && fromPurchaseOrder?.productId) {
+            filterById.push({ field: "pONumber", term: fromPurchaseOrder.pOId });
+            filterById.push({ field: "product", term: fromPurchaseOrder.productId });
+        }
         if (filterById.length > 0) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
         }
@@ -176,7 +185,7 @@ const ProductInventory = () => {
             deepFilter = `${deepFilter}&search=${search}`;
         }
 
-        return `${deepFilter}&filterType=and`;
+        return `${deepFilter}&filterType=and&filterByIdType=and`;
     };
 
     const handleDelete = () => {
@@ -302,73 +311,95 @@ const ProductInventory = () => {
                                 }}
                             />
                         )}
+                        {fromPurchaseOrder?.pOId && (
+                            <>
+                                <Chip
+                                    className="ml-3"
+                                    color="primary"
+                                    label={`Product : ${fromPurchaseOrder.productName}`}
+                                    onDelete={() => {
+                                        setFromPurchaseOrder(null);
+                                    }}
+                                />
+                                <Chip
+                                    className="ml-3"
+                                    color="primary"
+                                    label={`Purchase Order : ${fromPurchaseOrder.pOName}`}
+                                    onDelete={() => {
+                                        setFromPurchaseOrder(null);
+                                    }}
+                                />
+                            </>
+                        )
+
+                        }
                     </Grid>
                     <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side} >
                         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
 
-                            <Grid style={{display: "flex", flex:1}}>
-                            <SearchBox
-                                onSearch={handleSearch}
-                                searchbox={styles.search_box_input}
-                                width={isMobile ? "200px" : "242px"}
-                                style={isMobile ? {flex:1} : {}}
-                                size="small"
-                                value={search}
-                            />
+                            <Grid style={{ display: "flex", flex: 1 }}>
+                                <SearchBox
+                                    onSearch={handleSearch}
+                                    searchbox={styles.search_box_input}
+                                    width={isMobile ? "200px" : "242px"}
+                                    style={isMobile ? { flex: 1 } : {}}
+                                    size="small"
+                                    value={search}
+                                />
                             </Grid>
 
-                            <Grid style={{display: "flex" , gap:"5px"}}>
-                            {permissions?.productInventory?.isCreate &&
-                                <Button
-                                    onClick={() => {
-                                    setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null })
-                                }}
-                                    variant={isMobile ? "text" : "contained"}
-                                    size="small"
-                                    color="primary"
-                                    className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                                    startIcon={isMobile ? null : <AddOutlined />}
-                                >
-                                    {isMobile ? <MdAdd size={23}/> : "Add"}
-                                </Button>
-                            }
-
-                            <HtmlTooltip title="Please select some inventories">
-                                <span>
+                            <Grid style={{ display: "flex", gap: "5px" }}>
+                                {permissions?.productInventory?.isCreate &&
                                     <Button
-                                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                                        onClick={() => {
+                                            setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null })
+                                        }}
                                         variant={isMobile ? "text" : "contained"}
-                                        color="default"
                                         size="small"
-                                        onClick={openActions}
-                                        disabled={selectedRecords.length ? false : true}
-                                        aria-controls="action-menu"
+                                        color="primary"
+                                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                                        startIcon={isMobile ? null : <AddOutlined />}
                                     >
-                                        {isMobile ? "" :  "Actions" } <ExpandMore/>
+                                        {isMobile ? <MdAdd size={23} /> : "Add"}
                                     </Button>
-                                </span>
-                            </HtmlTooltip>
-                            <Menu
-                                anchorEl={anchorEl}
-                                keepMounted
-                                getContentAnchorEl={null}
-                                anchorOrigin={{
-                                    vertical: "bottom",
-                                    horizontal: "left",
-                                }}
-                                id="action-menu"
-                                open={Boolean(anchorEl)}
-                                onClose={closeActions}
-                            >
-                                {permissions?.productInventory?.isDelete && <MenuItem onClick={() => {
-                                    closeActions()
-                                    setShowDeleteConfirmBox(true)
-                                }}>Delete</MenuItem>}
-                                {permissions?.repairJob?.isCreate && permissions?.productInventory?.isUpdate && <MenuItem onClick={() => {
-                                    closeActions()
-                                    setShowRepairJobDialog(true)
-                                }}>Create Repair Job</MenuItem>}
-                            </Menu>
+                                }
+
+                                <HtmlTooltip title="Please select some inventories">
+                                    <span>
+                                        <Button
+                                            className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                                            variant={isMobile ? "text" : "contained"}
+                                            color="default"
+                                            size="small"
+                                            onClick={openActions}
+                                            disabled={selectedRecords.length ? false : true}
+                                            aria-controls="action-menu"
+                                        >
+                                            {isMobile ? "" : "Actions"} <ExpandMore />
+                                        </Button>
+                                    </span>
+                                </HtmlTooltip>
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    keepMounted
+                                    getContentAnchorEl={null}
+                                    anchorOrigin={{
+                                        vertical: "bottom",
+                                        horizontal: "left",
+                                    }}
+                                    id="action-menu"
+                                    open={Boolean(anchorEl)}
+                                    onClose={closeActions}
+                                >
+                                    {permissions?.productInventory?.isDelete && <MenuItem onClick={() => {
+                                        closeActions()
+                                        setShowDeleteConfirmBox(true)
+                                    }}>Delete</MenuItem>}
+                                    {permissions?.repairJob?.isCreate && permissions?.productInventory?.isUpdate && <MenuItem onClick={() => {
+                                        closeActions()
+                                        setShowRepairJobDialog(true)
+                                    }}>Create Repair Job</MenuItem>}
+                                </Menu>
                             </Grid>
                         </Box>
                     </Grid>
@@ -429,7 +460,7 @@ const ProductInventory = () => {
         {
             showManageProductInventoryDialog.open &&
             <ManageProductInventory
-                isNew = {true}
+                isNew={true}
                 isClone={showManageProductInventoryDialog.isClone}
                 productInventoryId={showManageProductInventoryDialog.idToClone}
                 onClose={() => setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null })}

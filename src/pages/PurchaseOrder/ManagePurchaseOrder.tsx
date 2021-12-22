@@ -10,7 +10,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, generateUniqueIdOnly, purchaseOrder, setFieldsInAscendingOrder } from "../../constants/helpers";
+import { CustomDialogTransition, generateUniqueIdOnly, getCollaboratorDropdownDataSource, getOwnerDropdownDataSource, purchaseOrder, setFieldsInAscendingOrder } from "../../constants/helpers";
 import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { Box, Grid } from '@material-ui/core';
@@ -19,12 +19,17 @@ import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { FaDiceOne } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
 import moment from "moment";
+import { useData } from "../../StateProvider/Provider";
 
 const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, productId = null, productCategory = null,
     productsToSave = [], isFromSerializedAssetStepFromRental = false, currency = null, rentalManagementId = null, warehouseId = null
     , deliveryDateMax = null }) => {
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
+    const {
+        state: { user, selectedEntity, permissions },
+    }: any = useData();
+
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -38,7 +43,9 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
     const [countrySellToDropDown, setCountrySellToDropDown] = useState([]);
     const [countryBillToMainData, setCountryBillToMainData] = useState([]);
     const [countrySellToMainData, setCountrySellToMainData] = useState([]);
-
+    const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
+    const [ownerData, setOwnerData] = useState([]);
+    const [collaboratorData, setCollaboratorData] = useState([]);
     useEffect(() => {
         axiosInstance().get("/field?resource=Purchase Order").then(({ data: { data } }) => {
             const fieldsDataForCreate = data.filter((obj) => obj.isCreate)
@@ -49,6 +56,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     setPurchaseOrderData(data)
                     if (isClone) {
                         const { _id, createdBy, updatedBy, serialNumber, ...rest } = data
+                        rest['purchaseOrderNumber'] = `PO_${generateUniqueIdOnly()}`
                         rest["status"] = "New"
                         setInitialData({
                             fields: fieldsDataForCreate,
@@ -61,6 +69,8 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                             values: getObjKeysWithValues(data, fieldsDataForUpdate),
                         });
                     }
+
+
                 }).catch((error) => {
                     toastConfig.setToastConfig(error);
                 });
@@ -100,13 +110,25 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
             );
             if (countryBillToDropdownData) {
                 setCountryBillToMainData(countryBillToDropdownData.option)
+                setCountryBillToDropDown(countryBillToDropdownData.option)
             }
             const countrySellToDropdownData = fieldsDataForCreate.find(
                 (d) => d.fieldName === "countrySellTo"
             );
             if (countryBillToDropdownData) {
                 setCountrySellToMainData(countrySellToDropdownData.option)
+                setCountrySellToDropDown(countrySellToDropdownData.option)
             }
+            let ownerCollaboratorOptions = fieldsDataForCreate.filter(
+                (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
+            );
+            if (ownerCollaboratorOptions.length > 0) {
+                setOwnerCollaboratorData(ownerCollaboratorOptions[0].option);
+                setOwnerData(ownerCollaboratorOptions[0].option);
+                setCollaboratorData(ownerCollaboratorOptions[0].option);
+            }
+
+
         })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
@@ -188,6 +210,17 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
 
     };
 
+    const onOwnerDropdownOpen = (selectedCollaborator) => {
+        setOwnerData(
+            getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData)
+        );
+    };
+
+    const onCollabOwnerMultiselectOpen = (selectedOwnerId) => {
+        setCollaboratorData(
+            getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData)
+        );
+    };
 
     return (<Dialog
         maxWidth="md"
@@ -352,26 +385,109 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                         onCountrySellToDropDownOpen(values.supplier)
                                                                                     }
                                                                                 />)
-                                                                                : <FormTypes
-                                                                                    isNew={Boolean(purchaseOrderId)}
-                                                                                    {...field}
-                                                                                    disabled={(Boolean(purchaseOrderId) && field.disableOnEdit && !isClone) || field.fieldName === "purchaseOrderNumber" || field.fieldName === "status"}
-                                                                                    values={values}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    label={field.fieldLabel}
-                                                                                    name={field.fieldName}
-                                                                                    type={field.type}
-                                                                                    options={field.option}
-                                                                                    setFieldValue={(name, value) => {
-                                                                                        setFieldValue(name, value)
-                                                                                    }}
-                                                                                    required={field.required}
-                                                                                    fullWidth
-                                                                                    isTooltip={field?.isTooltip || false}
-                                                                                    tooltipMessage={field?.tooltipMessage}
-                                                                                    size="small"
-                                                                                />
+                                                                                : field.fieldName === "owner" ? (
+                                                                                    <FormTypes
+                                                                                        {...field}
+                                                                                        values={values}
+                                                                                        errors={errors}
+                                                                                        touched={touched}
+                                                                                        label={field.fieldLabel}
+                                                                                        name={field.fieldName}
+                                                                                        type={field.type}
+                                                                                        options={ownerData}
+                                                                                        onChange={(e, val) => {
+                                                                                            setFieldValue(
+                                                                                                field.fieldName,
+                                                                                                val && val.optionValue
+                                                                                                    ? val.optionValue
+                                                                                                    : ""
+                                                                                            );
+                                                                                            // handleValuesChange({
+                                                                                            //     [field.fieldName]: val && val.optionValue ? val.optionValue : ""
+                                                                                            // })
+
+                                                                                            if (
+                                                                                                val &&
+                                                                                                val.optionValue !== user?.user?._id
+                                                                                            ) {
+                                                                                                const checkOwnerAddedInCollaborator =
+                                                                                                    values["collaborator"].find(
+                                                                                                        (d) =>
+                                                                                                            d?.optionValue ===
+                                                                                                            user?.user?._id
+                                                                                                    );
+                                                                                                if (
+                                                                                                    !checkOwnerAddedInCollaborator
+                                                                                                ) {
+                                                                                                    setFieldValue("collaborator", [
+                                                                                                        ...values["collaborator"],
+                                                                                                        collaboratorData.find(
+                                                                                                            (d) =>
+                                                                                                                d?.optionValue ===
+                                                                                                                user?.user?._id
+                                                                                                        ).optionValue,
+                                                                                                    ]);
+                                                                                                }
+                                                                                            }
+                                                                                        }}
+                                                                                        required={field.required}
+                                                                                        fullWidth
+                                                                                        isTooltip={field?.isTooltip || false}
+                                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                                        size="small"
+                                                                                        disabled={(field.disableOnEdit)}
+                                                                                        onOpen={() => {
+                                                                                            onOwnerDropdownOpen(
+                                                                                                values["collaborator"]
+                                                                                            );
+                                                                                        }}
+                                                                                    />
+                                                                                ) : field.fieldName === "collaborator" ? (
+                                                                                    <FormTypes
+                                                                                        {...field}
+                                                                                        values={values}
+                                                                                        errors={errors}
+                                                                                        touched={touched}
+                                                                                        label={field.fieldLabel}
+                                                                                        name={field.fieldName}
+                                                                                        type={field.type}
+                                                                                        options={collaboratorData}
+                                                                                        setFieldValue={(name, value) => {
+                                                                                            // handleValuesChange({ [name]: value })
+                                                                                            setFieldValue(name, value)
+                                                                                        }}
+                                                                                        required={field.required}
+                                                                                        fullWidth
+                                                                                        isTooltip={field?.isTooltip || false}
+                                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                                        size="small"
+                                                                                        onOpen={() => {
+                                                                                            onCollabOwnerMultiselectOpen(
+                                                                                                values["owner"]
+                                                                                            );
+                                                                                        }}
+                                                                                    />
+                                                                                )
+                                                                                    : <FormTypes
+                                                                                        isNew={Boolean(purchaseOrderId)}
+                                                                                        {...field}
+                                                                                        disabled={(Boolean(purchaseOrderId) && field.disableOnEdit && !isClone) || field.fieldName === "purchaseOrderNumber" || field.fieldName === "status"}
+                                                                                        values={values}
+                                                                                        errors={errors}
+                                                                                        touched={touched}
+                                                                                        label={field.fieldLabel}
+                                                                                        name={field.fieldName}
+                                                                                        type={field.type}
+                                                                                        options={field.option}
+                                                                                        setFieldValue={(name, value) => {
+                                                                                            setFieldValue(name, value)
+                                                                                        }}
+                                                                                        required={field.required}
+                                                                                        fullWidth
+                                                                                        isTooltip={field?.isTooltip || false}
+                                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                                        size="small"
+                                                                                    />
                                                             }
                                                         </Grid>
                                                     ))}
@@ -395,7 +511,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                 type="submit"
                                 onClick={submitForm}
                                 disabled={
-                                    loading 
+                                    loading
                                     // isFieldNotTouched(initialData, values)
                                 }
                             > Save</CustomButton>

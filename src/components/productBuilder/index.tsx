@@ -78,6 +78,7 @@ const ProductBuilder = (props) => {
   //   useState({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
 
   const [dataToShowForMobile, setDataToShowForMobile] = useState([]);
+  const [priceTemplateField, setPriceTemplateField] = useState(null)
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -120,13 +121,23 @@ const ProductBuilder = (props) => {
         },
       ];
       let rendererNames = [];
+      let priceTemplateField = [];
       let fields = data.productFields
       data.productTemplate?.forEach((ele) => {
         fields = [...fields, ...ele.fields]
       })
       data.priceTemplate?.forEach((ele) => {
         fields = [...fields, ...ele.fields]
+        ele.fields.map((item) => {
+          if(item.type === 'converter') {
+            item.displayUnits.map((unit) => {
+              priceTemplateField.push(`${item.fieldName}_${unit.toLowerCase()}`)
+            })
+          }
+        })
+        
       })
+      setPriceTemplateField(priceTemplateField)
       GenrateColoum(fields, columns, rendererNames);
       columns = sortBy(columns, function (item: any) {
         return levalOrderBy.indexOf(item.leval)
@@ -664,6 +675,7 @@ const ProductBuilder = (props) => {
               className="product-builder-edit-grid"
               renderedFrom={routes.productBuilder.title}
               saveColumnOptions={true}
+              priceTemplateField={priceTemplateField}
             /> : (
               <Loader style={{ minHeight: 300 }} text="Loading..." />
             ))

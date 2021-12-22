@@ -219,12 +219,14 @@ export default function ManageOpportunityDialog({
         );
         if (countryBillToDropdownData) {
           setCountryBillToMainData(countryBillToDropdownData.option)
+          setCountryBillToDropDown(countryBillToDropdownData.option)
         }
         const countrySellToDropdownData = filterData.map(m => m.fieldData).find(
           (d) => d.fieldName === "countrySellTo"
         );
-        if (countryBillToDropdownData) {
+        if (countrySellToDropdownData) {
           setCountrySellToMainData(countrySellToDropdownData.option)
+          setCountrySellToDropDown(countrySellToDropdownData.option)
         }
 
 

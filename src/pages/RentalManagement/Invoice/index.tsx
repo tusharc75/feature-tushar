@@ -43,6 +43,9 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
   ])
   const [frameWorkComponent, setFrameWorkComponent] = useState(null)
 
+  const [downlodingFile, setDownlodingFile] = useState(null)
+  const [emailAttachments, setEmailAttachments] = useState([]);
+
   const NameRenderer = (params) => (
     <Link
       className="link"
@@ -84,7 +87,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`).then(({ data: { data } }) => {
       data?.material?.forEach((item) => {
         if (!item.parentId) {
-          item.description = `${item.type === "product" ? item.productDetail?.productName : item.packageDetail?.packageDescription}`
+          item.description = `${item.type === "product" ? item.productDetail?.productName : item.packageDetail?.packageName}`
           item.type = startCase(item.type);
           combinedData.push(item);
         }
@@ -112,9 +115,81 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
     });
   };
 
-  const onSendEmailSuccess = () => {
+  const handlePDF = (type) => {
+    setDownlodingFile(type);
+    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/pdf`).then(({ data }) => {
+      axiosInstance().get(`user/download?fileName=${data.data.fileName}`, {
+        responseType: "blob",
+      })
+        .then(({ data }) => {
+          if (type === "Download") {
+            const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Rental-${rentalManagementData.rentalJobName}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            setDownlodingFile(null);
+          }
+          else if (type === "Preview") {
+            const file = new Blob([data], { type: "application/pdf" });
+            const fileURL = URL.createObjectURL(file);
+            const pdfWindow = window.open();
+            pdfWindow.location.href = fileURL;
+            setDownlodingFile(null);
+          }
+          else {
+            const file = new Blob([data], { type: 'application/pdf' });
+            generateBase64forFile(file, 'pdf');
+          }
+        })
+        .catch((err) => {
+          if (type === "Email") {
+            setSendEmail(true)
+          }
+          toastConfig.setToastConfig(err);
+          setDownlodingFile(null);
+        });
+    }).catch((err) => {
+      if (type === "Email") {
+        setSendEmail(true)
+      }
+      toastConfig.setToastConfig(err);
+      setDownlodingFile(null);
+    })
+  }
 
+  const generateBase64forFile = (blobData, type) => {
+    let reader = new FileReader();
+    reader.readAsDataURL(blobData);
+    reader.onloadend = function () {
+      let base64data: any = reader.result;
+      if (type === 'pdf') {
+        const attachments = [{
+          base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+          contentType: base64data.split(';')[0].split(':')[1],
+          name: `Rental-${rentalManagementData.rentalJobName}`
+        }];
+        setEmailAttachments(attachments)
+        setSendEmail(true)
+      }
+    };
   };
+
+  const fetchEmailsData = () => {
+    let ownerCollaboratorEmails = [];
+    if (rentalManagementData?.collaborator && rentalManagementData.collaborator.length) {
+      ownerCollaboratorEmails = rentalManagementData.collaborator.filter((o) => o?.email).map((o) => o?.email);
+    }
+    if (rentalManagementData?.owner?.email) {
+      ownerCollaboratorEmails.push(rentalManagementData.owner.email);
+    }
+    let toEmails = [];
+    if (rentalManagementData?.customerAccount?.email) {
+      toEmails.push(rentalManagementData.customerAccount.email);
+    }
+    setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
+  }
 
   return (<>
     <Box display="flex" justifyContent="space-between" m={1}>
@@ -125,10 +200,11 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             color="primary"
             type="button"
             size="small"
+            disabled={downlodingFile === "Preview" ? true : false}
             startIcon={isMobile ? '' : <AiFillFilePdf />}
-            onClick={() => { }}
+            onClick={() => handlePDF("Preview")}
           >
-            {isMobile ? <AiFillFilePdf size={22} /> : "Preview"}
+            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === "Preview" ? "Please wait..." : "Preview"}
           </Button>
         )}
         <Box mx={1} />
@@ -138,10 +214,11 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             color="primary"
             type="button"
             size="small"
+            disabled={downlodingFile === "Download" ? true : false}
             startIcon={isMobile ? '' : <AiFillFilePdf />}
-            onClick={() => { }}
+            onClick={() => handlePDF("Download")}
           >
-            {isMobile ? <AiFillFilePdf size={22} /> : "Download"}
+            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === "Download" ? "Please wait..." : "Download"}
           </Button>
         )}
         <Box mx={1} />
@@ -149,11 +226,13 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
           variant={isMobile ? "outlined" : "contained"}
           color="primary"
           size="small"
+          disabled={downlodingFile === "Email" ? true : false}
           onClick={() => {
-            setSendEmail(true)
+            fetchEmailsData()
+            handlePDF("Email")
           }}
         >
-          {isMobile ? <MdEmail size={22} /> : `Send Email`}
+          {isMobile ? <MdEmail size={22} /> : downlodingFile === "Email" ? "Please wait..." : `Send Email`}
         </Button>}
       </Box>
     </Box>
@@ -192,6 +271,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
         maxWidth="md"
         onClose={() => {
           setSendEmail(false);
+          setDownlodingFile(null);
           setFullScreen(false);
         }}
         fullWidth
@@ -200,16 +280,21 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
           generatingFile={generatingPdfFile}
           handleClose={() => {
             setSendEmail(false);
+            setDownlodingFile(null);
             setFullScreen(false);
           }}
-          fetchData={onSendEmailSuccess}
+          fetchData={() => {
+            setSendEmail(false);
+            setDownlodingFile(null);
+            setFullScreen(false);
+          }}
           id={rentalManagementData._id}
           showESign={true}
           isQuoteBuilder={true}
           options={userEmails?.to}
           cc={userEmails?.cc ?? []}
           emailId={null}
-          qouteBuilderAttachments={[]}
+          qouteBuilderAttachments={emailAttachments}
           subject={`${user?.user?.brandName ?? 'Brand'} Invoice - ${rentalManagementData?.rentalJobName ?? ''}`}
           fromQuote={true}
           isMinimized={!fullScreen}
@@ -217,7 +302,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             setFullScreen((prevState) => !prevState);
           }}
           showManimizeMaximize={true}
-          fromPurchaseOrder={true}
+          refrenceType="rentalJob"
         />
       </Dialog>
     )}

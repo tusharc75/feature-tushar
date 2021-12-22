@@ -29,7 +29,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     const [gridApi, setGridApi] = useState(null);
     const { getColumnData } = useColumns();
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
-    const [columns, setColumns] = useState([])
+    const [columns, setColumns] = useState(null)
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
     const { state: { permissions } }: any = useData();
@@ -44,6 +44,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
 
     const fetchGridColumns = () => {
         axiosInstance().get("/field?resource=Product Inventory").then(({ data: { data } }) => {
+            console.log(data)
             let columns = []
             let rendererNames = []
             data.forEach(o => {
@@ -64,6 +65,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
             }
             setFrameWorkComponent({ ...tempFrameworkComponent })
             columns = [...columns, ...getStaticFields()]
+            console.log(columns)
             setColumns([...columns])
         })
     }
@@ -269,7 +271,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                             </Grid>
                         </Grid>
                     </Box>
-                    {Object.keys(frameWorkComponent).length > 0 ?
+                    {Object.keys(frameWorkComponent).length > 0 && columns ?
                         <CustomAgGrid
                             columns={columns}
                             dataRows={dataRows}

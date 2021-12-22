@@ -63,14 +63,29 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
 
             // let disableNextButtonIfNonDeliveredFound = true;
 
+            // data.data.map(obj => {
+            //   if (obj.ticketType === "Loading") {
+            //     productAssets.map((d, index) => {
+            //       if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
+            //         productAssets[index]["type"] = obj?.type
+            //         productAssets[index]["deliveryTicket"] = obj?.ticketName
+            //         productAssets[index]["deliveryTicketId"] = obj?._id
+            //       }
+            //     })
+            //   }
+            // })
+
             data.data.map(obj => {
-              tempProductInventory.map((d, index) => {
-                if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                  tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
-                  tempProductInventory[index]["deliveryTicketId"] = obj?._id;
-                  tempProductInventory[index]["isDelivered"] = obj?.status === "Delivered";
-                }
-              })
+              if (obj.ticketType === "Loading") {
+                tempProductInventory.map((d, index) => {
+                  if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
+                    tempProductInventory[index]["type"] = obj?.type
+                    tempProductInventory[index]["deliveryTicket"] = obj?.ticketName;
+                    tempProductInventory[index]["deliveryTicketId"] = obj?._id
+                    tempProductInventory[index]["isDelivered"] = obj?.status === "Delivered";
+                  }
+                })
+              }
             })
 
             tempProductInventory.forEach((d) => {
@@ -148,7 +163,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
     });
   }
 
- 
+
 
   return (<>
 
@@ -344,10 +359,12 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
     {
       showDeliveryTicketDialog.open &&
       <ManageDeliveryTicket
+        ticketType="Loading"
+        refrenceType="Repair Job"
+        refrenceData={repairJobData}
         onClose={() => setShowDeliveryTicketDialog({ open: false, selectedAssets: [] })}
-        productInventoryForDeliveryTicket={showDeliveryTicketDialog.selectedAssets}
-        warehouseId={repairJobData?.plant}
-        repairJobData={repairJobData}
+        productInventory={showDeliveryTicketDialog.selectedAssets}
+        warehouseId={repairJobData?.plant?.optionValue ?? repairJobData?.warehouse?.optionValue}
         onSuccess={() => {
           setShowDeliveryTicketDialog({ open: false, selectedAssets: [] })
           fetchRecords();

@@ -40,7 +40,8 @@ function ReceivingTicketHeader(props) {
     icon,
     heading,
     children,
-    showTransferEntityDialog
+    showTransferEntityDialog,
+    selectedType
     // showCloneRentalManagementDialog
   } = props;
 
@@ -51,7 +52,7 @@ function ReceivingTicketHeader(props) {
       <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
         {icon} <span className="listingHeader">{heading}</span>
         {options && (
-          <ToggleButtonGroup size="small" className="ml-2" value={filter} exclusive onChange={handleFilter}>
+          <ToggleButtonGroup size="small" className="ml-2" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
             {options.map((k, index) => {
               return (
                 <ToggleButton value={k.key} key={index}>

@@ -63,13 +63,15 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       dispatch({ type: "loading", loading: true });
       axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/delivery-ticket`).then(({ data }) => {
         data.data.map(obj => {
-          productAssets.map((d, index) => {
-            if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-              productAssets[index]["type"] = obj?.type
-              productAssets[index]["deliveryTicket"] = obj?.deliveryJobName
-              productAssets[index]["deliveryTicketId"] = obj?._id
-            }
-          })
+          if (obj.ticketType === "Loading") {
+            productAssets.map((d, index) => {
+              if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
+                productAssets[index]["type"] = obj?.type
+                productAssets[index]["deliveryTicket"] = obj?.ticketName
+                productAssets[index]["deliveryTicketId"] = obj?._id
+              }
+            })
+          }
         })
         productAssets.forEach((d) => {
           d["hideSelection"] = ["In-Use", "In-Transit", "Repair", "Scrap", "Lost", "Under Review"].includes(d.status);
@@ -268,10 +270,12 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     </Grid>
     {showDeliveryTicketDialog && (
       <ManageDeliveryTicket
+        ticketType="Loading"
+        refrenceType="Rental Job"
+        refrenceData={rentalManagementData}
         onClose={() => setShowDeliveryTicketDialog(false)}
-        productInventoryForDeliveryTicket={productInventoryForDeliveryTicket}
+        productInventory={productInventoryForDeliveryTicket}
         warehouseId={rentalManagementData?.warehouse}
-        rentalData={rentalManagementData}
         onSuccess={() => {
           setShowDeliveryTicketDialog(false);
           fetchRecords();

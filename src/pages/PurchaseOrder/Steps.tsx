@@ -254,7 +254,7 @@ const Steps = (props) => {
                                                             <div>
                                                                 <IconButton
                                                                     color="primary"
-                                                                    disabled={currentStep === 5 || currentStep === 0}
+                                                                    disabled={currentStep >= 3 || currentStep === 0}
                                                                     onClick={() => {
                                                                         setCurrentStep(currentStep + 1)
                                                                     }}
@@ -285,7 +285,7 @@ const Steps = (props) => {
                                                                             setCurrentStep(currentStep + 1)
                                                                         }}
                                                                         size="small"
-                                                                        disabled={currentStep >= 5 || currentStepDisable}
+                                                                        disabled={currentStep >= 3 || currentStepDisable}
 
                                                                     >
                                                                         Next
@@ -341,7 +341,7 @@ const Steps = (props) => {
                                                             onClick={() => {
                                                                 setCurrentStep(currentStep + 1)
                                                             }}
-                                                            disabled={currentStep >= 5 || currentStepDisable}
+                                                            disabled={currentStep >= 3 || currentStepDisable}
                                                             className="stepperButtonNext"
                                                         >
                                                             <RiShareForwardFill />

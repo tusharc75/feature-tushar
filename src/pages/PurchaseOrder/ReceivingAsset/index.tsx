@@ -21,6 +21,10 @@ import { Link } from "react-router-dom";
 import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
 import { AiFillFilePdf } from "react-icons/ai";
 import { MdEmail } from "react-icons/md";
+import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
+import { genrateColoum, getFrameworkComponents } from "../../../constants/columns";
+import { useHistory } from "react-router-dom";
+import HtmlTooltip from "../../../components/CustomTooltipTitle";
 
 const useStyles = makeStyles(() => ({
     equal: {
@@ -42,13 +46,13 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
     }: any = useData();
 
     const classes = useStyles();
+    const history = useHistory();
 
     const [showCreateAssetDialog, setShowCreateAssetDialog] = useState(false)
     const [loadingColumns, setLoadingColumns] = useState(false)
     const isSmallScreen = useMediaQuery('(max-width:1300px)');
     const isTabletScreen = useMediaQuery('(max-width:960px)');
     const [showActivity, setActivityShow] = useState(defaultActivityShow);
-    const [selectedProducts, setSelectedProducts] = useState([])
     const [sendEmail, setSendEmail] = useState(false);
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
@@ -59,133 +63,77 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
     const [pdfFileBase64, setPdfFileBase64] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+    const [gridApi, setGridApi] = useState(null);
+    const [frameWorkComponent, setFrameWorkComponent] = useState(null)
 
-    const [columns, setColumns] = useState([{
-        accessor: 'description',
-        Header: 'Product Description',
-        Cell: ({ row }) => (
-            <div className="d-flex gap-2 align-items-center">
-                <p
-                    className="text-truncate"
-                    title={row.original.description}
-                >
-                    {row.original.hasOwnProperty("assetNumber") ? <Link className="link"
-                        to={`${routes.productInventoryDetail.path}/${row.original.treeId}`} title={row.original.description}>
-                        {row.original.description}
-                    </Link>
-                        : <Link className="link"
-                            to={`${routes.productDetail.path}/${row.original.treeId}`} title={row.original.description}>
-                            {row.original.description}
-                        </Link>}
-                </p>
-                {row.original.hasOwnProperty("assetNumber") &&
-                    <span className="d-flex align-items-center gap-2">
-                        <Chip label="Asset" size="small" color="primary" />
-                    </span>
-                }
-            </div>
-        )
-    },
-    {
-        accessor: 'actualDelivery',
-        Header: 'Actual Delivery Date',
-        Cell: ({ row }) => (
-            row.original.actualDelivery ? <h5 className="createBy text-truncate" title={`${moment(row.original.actualDelivery.slice(0, 10)).format(dateFormat)}`}>
-                <span className="">
-                    <Chip
-                        label={`${moment(row.original.actualDelivery.slice(0, 10)).format("MM/DD/YYYY")}`}
+    const [columns, setColumns] = useState([
+        { field: "productDescription", headerName: "Product Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    ])
+
+    const NameRenderer = (params) => (
+        <>
+            <Link
+                className="link"
+                title={params.value}
+                to={`${routes.productDetail.path}/${params.data.productId}`}
+            >
+                {params.value}
+            </Link>
+            <HtmlTooltip title="Serialized Asset">
+            {
+                (params.data.actualReceived !== 0 || params.data.actualReceived !== undefined) &&
+                <span className="d-flex align-items-center gap-2">
+                    <Chip label="Asset"
                         size="small"
-                        className={
-                            moment(row.original.actualDelivery).diff(moment(row.original.expectedDelivery), 'days') > 0 ?
-                                moment(row.original.actualDelivery).diff(moment(row.original.expectedDelivery), 'days') > 7 ?
-                                    classes.muchLater
-                                    : classes.later
-                                : classes.equal}
+                        color="primary"
+                        onClick={() => history.push(`${routes.productInventory.path}`, {
+                            productId: params.data?.productId,
+                            productName: params.data?.productDescription,
+                            pOId: purchaseOrderData?._id,
+                            pOName: purchaseOrderData?.purchaseOrderNumber,
+                        })}
                     />
                 </span>
-            </h5> : <NoDataCell />
-        )
-    },
-    ])
+            }
+            </HtmlTooltip>
+
+        </>
+    );
 
     useEffect(() => {
         fetchColumns()
-        fetchSerializedAsset()
+        fetchProduct()
         fetchEmailsData()
     }, []);
 
     const fetchColumns = () => {
         setLoadingColumns(true)
         axiosInstance().get("/field/child?resource=Purchase Order Product").then(({ data: { data } }) => {
-            const fieldsList = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
-            let tempColumns = [];
-            fieldsList.map(fields => {
-
-                if (fields.type === "date") {
-                    tempColumns.push({
-                        accessor: fields.fieldName,
-                        Header: fields.fieldLabel,
-                        Cell: ({ row }) => (
-                            row.original[`${fields.fieldName}`] ? <h5 className="createBy text-truncate" title={`${moment(row.original[`${fields.fieldName}`].slice(0, 10)).format(dateFormat)}`}>
-                                <span className="">
-                                    {moment(row.original[`${fields.fieldName}`].slice(0, 10)).format("MM/DD/YYYY")}</span>
-                            </h5> : <NoDataCell />
-                        )
-
-                    })
+            let fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
+            axiosInstance().get("/field/child?resource=Purchase Order Service").then(({ data: { data } }) => {
+                fields = [...fields, ...CURReplaceByCurrencySingle(data, purchaseOrderData.currency)]
+                let rendererNames = [];
+                genrateColoum(fields, columns, rendererNames, false);
+                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+                tempFrameworkComponent = {
+                    nameRenderer: NameRenderer,
+                    ...tempFrameworkComponent,
                 }
-                else if (fields.type === "decimal" || fields.type === "percent") {
-                    tempColumns.push({
-                        accessor: fields.fieldName,
-                        Header: fields.fieldLabel,
-                        Cell: ({ row }) => (
-                            row.original[`${fields.fieldName}`] ? <p className="text-truncate">
-                                {row.original[`${fields.fieldName}`]}
-                            </p> : <NoDataCell />
-                        )
-
-                    })
-                }
-                else if (fields.type === "currencyAmount") {
-                    fields.displayCurrency.map(currency => {
-                        tempColumns.push({
-                            accessor: `${fields.fieldName}_${currency.toLowerCase()}`,
-                            Header: `${fields.fieldLabel} ${currency}`,
-                            Cell: ({ row }) => (
-                                row.original[`${fields.fieldName}_${currency.toLowerCase()}`] ? <p className="text-truncate">
-                                    {row.original[`${fields.fieldName}_${currency.toLowerCase()}`]}
-                                </p> : <NoDataCell />
-                            )
-
-                        })
-                    })
-
-                }
-                else {
-                    tempColumns.push({
-                        accessor: fields.fieldName,
-                        Header: fields.fieldLabel,
-                        Cell: ({ row }) => (
-                            row.original[`${fields.fieldName}`] ? <p>{startCase(row.original[`${fields.fieldName}`])}</p> : <NoDataCell />
-                        )
-
-                    })
-                }
+                setFrameWorkComponent({ ...tempFrameworkComponent })
+                setColumns([...columns])
+                setLoadingColumns(false)
             })
-            // columns length check with 2 because sometimes it call twice making double entry
-            if (columns.length === 2) setColumns(prevState => { return [...prevState, ...tempColumns] })
-            setLoadingColumns(false)
         })
     }
 
-    const fetchSerializedAsset = () => {
+    const fetchProduct = () => {
         dispatch({ type: "loading", loading: true });
         axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`).then(({ data: { data } }) => {
             let rows = data?.map((item) => {
                 let res: any = {
                     ...item,
-                    description: item?.productDetail?.productName,
-                    treeId: item?.productDetail?._id,
+                    productDescription: item?.productDetail?.productName,
+                    productId: item?.productDetail?._id,
                 };
                 return res;
             });
@@ -196,33 +144,12 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                     setCurrentStep(4)
                 }
             }
-            axiosInstance().get(`${productInventory.api}?filterById=[{"field": "pONumber", "term": "${purchaseOrderData._id}"}]`)
-                .then(({ data }) => {
-                    data.data = data.data.map((u) => {
-                        let tempProduct = rows.find(obj => obj.treeId === u?.product?.optionValue)
-                        if (tempProduct && !rows.some(obj => obj.treeId === u._id)) {
-                            rows.push({
-                                ...u,
-                                description: u.assetNumber,
-                                treeId: u._id,
-                                parent: tempProduct.treeId,
-                                actualDelivery: u.createdBy?.date,
-                                expectedDelivery: tempProduct.expectedDelivery
-                            })
-                        }
-                    }
-                    );
-                    const newDataForReactTable = [...translateDataToTree(rows ? [...rows] : [], "parent", "treeId", "subRows")];
-                    dispatch({
-                        type: "initialize", data: newDataForReactTable, count: newDataForReactTable.length
-                    });
-                    setTimeout(() => {
-                        dispatch({ type: "loading", loading: false });
-                    }, gridLoadingTimeout);
-                }).catch((error) => {
-                    dispatch({ type: "loading", loading: false });
-                    toastConfig.setToastConfig(error)
-                });
+            dispatch({
+                type: "initialize", data: rows, count: rows.length
+            });
+            setTimeout(() => {
+                dispatch({ type: "loading", loading: false });
+            }, gridLoadingTimeout);
         }).catch((error) => {
             dispatch({ type: "loading", loading: false });
             toastConfig.setToastConfig(error)
@@ -346,7 +273,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                     variant="contained"
                     color="primary"
                     size="small"
-                    disabled={selectedProducts.length === 0 || disableCreateAsset}
+                    disabled={selectedRecords.length === 0 || disableCreateAsset}
                     onClick={() => { setShowCreateAssetDialog(true) }}
                 >
                     {`Create Asset`}
@@ -367,45 +294,59 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                     }
                     height={"calc(100vh - 330px)"}
                 >
-                    {isMobile ? <CustomSwipableList
-                        allowSelection={true}
-                        allowSwipe={true}
-                        permissions={permissions}
-                        primaryField={columns?.find(d => d.Header === "productDescription")}
-                        onClick={() => {
-                        }}
-                        dataRows={dataRows}
-                        selectedRecords={selectedRecords}
-                        dispatch={dispatch}
-                        onEdit={() => {
-                        }}
-                        extraParamsToCheckDelete={true}
-                        onDelete={() => {
-                        }}
-                        rowCount={rowCount}
-                        page={page}
-                        loading={loading}
-                        chips={
-                            [{
-                                label: `Product Description: `,
-                                field: "productName",
-                                forceShow: true
-                            }]
-                        }
-                        onCreate={null}
-                        showClone={false}
-                        fullHeight={true}
-                        renderedFrom={routes.purchaseOrderDetail.title}
-                        onClone={() => { }}
+                    {columns && frameWorkComponent ?
+                        isMobile ? <CustomSwipableList
+                            allowSelection={true}
+                            allowSwipe={true}
+                            permissions={permissions}
+                            primaryField={columns?.find(d => d.field === "productDescription")}
+                            onClick={() => {
+                            }}
+                            dataRows={dataRows}
+                            selectedRecords={selectedRecords}
+                            dispatch={dispatch}
+                            onEdit={() => {
+                            }}
+                            extraParamsToCheckDelete={true}
+                            onDelete={() => {
+                            }}
+                            rowCount={rowCount}
+                            page={page}
+                            loading={loading}
+                            chips={
+                                [{
+                                    label: `Product Description: `,
+                                    field: "productName",
+                                    forceShow: true
+                                }]
+                            }
+                            onCreate={null}
+                            showClone={false}
+                            fullHeight={true}
+                            renderedFrom={routes.purchaseOrderDetail.title}
+                            onClone={() => { }}
 
-                    /> : <CustomReactTable
-                        columns={columns}
-                        data={dataRows}
-                        isInValidCheck={(rowData) => rowData?.type?.includes("roduct") && (isNaN(rowData?.finalPrice) || rowData?.finalPrice === 0)}
-                        onSelect={setSelectedProducts}
-                        childrenProperty="subRows"
-                        uniqueKey="_id"
-                    />
+                        /> : <CustomAgGridEditable
+                            columns={columns}
+                            dataRows={dataRows}
+                            frameworkComponents={frameWorkComponent}
+                            setGridApi={setGridApi}
+                            dispatch={dispatch}
+                            rowCount={rowCount}
+                            limit={limit}
+                            pageSizes={pageSizes}
+                            page={page}
+                            allowAction={false}
+                            loading={loading}
+                            allowSelection={true}
+                            isClientSideGrid={true}
+                            renderedFrom="purchaseOrderDetailsPageReceivingAsset"
+                            onCellValueChanged={(row) => {
+                            }}
+                            fromPurchaseOrderGrid={true}
+                            currency={purchaseOrderData?.currency?.toLowerCase()}
+                        />
+                        : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                     }
 
                 </Box>
@@ -424,10 +365,10 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                 onClose={() => setShowCreateAssetDialog(false)}
                 onSuccess={() => {
                     setShowCreateAssetDialog(false)
-                    fetchSerializedAsset()
+                    fetchProduct()
                 }}
                 title="Create Asset"
-                productList={selectedProducts.filter(d => d.hasOwnProperty("productDetail"))}
+                productList={selectedRecords.filter(d => d.hasOwnProperty("productDetail") && (d.qty !== d.actualReceived))}
                 purchaseOrderData={purchaseOrderData}
                 handleUpdateData={handleUpdateData}
             />
@@ -466,7 +407,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                         setFullScreen((prevState) => !prevState);
                     }}
                     showManimizeMaximize={true}
-                    fromPurchaseOrder={true}
+                    refrenceType="purchaseOrder"
                 />
             </Dialog>
         )}

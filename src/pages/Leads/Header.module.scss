@@ -30,6 +30,15 @@
 .rental_header_layout{
   row-gap: 5px;
 }
+.mobile_panel{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.font_size_header_mobile{
+  padding-top: 2px;
+  font-size: 12px;
+}
 
 @supports (not (gap:0.25rem)) and (not (-webkit-gap: 0.25rem)){
   .filter_side_header > *:not(:nth-child(1)) {

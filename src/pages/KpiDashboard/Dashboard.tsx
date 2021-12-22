@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Grid, Paper } from '@material-ui/core';
+import { Box, Grid, Paper, Typography } from '@material-ui/core';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import moment from 'moment';
@@ -10,6 +10,7 @@ import { marketSegment, customerAccount } from '../../constants/helpers';
 import OpportunityDashboards from './OpportunityDashboards';
 import Filters from './Filters';
 import styles from './dashboard.module.scss';
+import { SVG } from '../../assets'
 
 import TopDashboard from './TopDasboard';
 import Top2Dashboard from './Top2Dashboard';
@@ -26,6 +27,7 @@ const Dashboard = () => {
   const [productCategory, setProductCategory] = useState([]);
   const [marketSegments, setMarketSegments] = useState([]);
   const [subMarketSegments, setSubMarketSegments] = useState([]);
+  const [dashboardType, setDashboardType] = useState("");
 
 
   const [salesFilter, setSalesFilter] = useState({
@@ -118,7 +120,7 @@ const Dashboard = () => {
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <Layout>
         <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={[{ title: 'Dashboard', path: '/dashboard' }]} />
+          <CustomBreadCrumbs routes={[{ title: 'Dashboard', }]} />
         </Grid>
         <div className="detail-container">
           <Paper>
@@ -135,8 +137,10 @@ const Dashboard = () => {
                 setSubMarketSegment={setSubMarketSegments}
                 salesFilter={salesFilter}
                 setSalesFilter={setSalesFilter}
+                setDashboardType={setDashboardType}
+                dashboardType={dashboardType}
               />
-              <Box className={styles.dashboard_container}>
+              {dashboardType.includes("CRM") && <Box className={styles.dashboard_container}>
                 <TopDashboard
                   selectedEntity={selectedEntity}
                   filterCurrency={filterCurrency}
@@ -205,11 +209,16 @@ const Dashboard = () => {
                 <Box my={2}>
                   <OpportunitiesDashboard />
                 </Box>
-              </Box>
+              </Box>}
+              {dashboardType.includes("Asset") && <Box mt={10} p={10} display="flex" flexDirection='column' justifyContent="center" alignItems="center">
+
+                <img width={200} height={200} src={SVG("Dashboard")} alt="Placeholder" />
+
+                <Box mt={5}>
+                  <Typography variant='h4' color='textSecondary'>We're working on it</Typography>
+                </Box>
+              </Box>}
             </div>
-            <Box p={2} display="flex" alignItems="center" flexDirection="column">
-              <Box my={2} p={2} width="100%" maxWidth="800px" textAlign="center"></Box>
-            </Box>
           </Paper>
         </div>
       </Layout>

@@ -62,7 +62,7 @@ const AssignEntityDialog = ({
   const [isAssigning, setAssigning] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [, setCheckAll] = useState(false);
-  const steps = [`Select ${type}`, 'Select Regional Wide Functional Role']
+  const steps = [`Select ${type}`, 'Select Role']
   const [search, setSearch] = useState("");
   const classes = useStyles();
 

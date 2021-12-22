@@ -14,7 +14,8 @@ import {
   Tabs,
   Tab,
   Menu,
-  MenuItem,
+  MenuItem, Button,
+
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { Delete, ExpandMore, MoreVert } from "@material-ui/icons";
@@ -30,11 +31,35 @@ import ConfirmationDialogRaw from "../../components/Helpers/ConfirmationDialog";
 import QuotesAccordionInProjectSale from "./QuotesAccordionInProjectSale";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import PropTypes from 'prop-types';
+import { MdDelete } from "react-icons/md";
+
+
+function TabPanel(props) {
+  const { children, value, index, classes, ...other  } = props;
+
+  return <div {...other}>{value === index && <Box p={3}>{children}</Box>}</div>;
+}
+
+TabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
+};
+
+function a11yProps(index) {
+  return {
+    id: `vertical-tab-${index}`,
+    'aria-controls': `vertical-tabpanel-${index}`,
+  };
+}
+
 
 const Accordion = withStyles({
   root: {
     border: "1px solid rgba(0, 0, 0, .125)",
-    boxShadow: "none",
+    backgroundColor:"#F6F6F6",
+    // boxShadow: "none",
     "&:not(:last-child)": {
       borderBottom: 0,
     },
@@ -51,8 +76,9 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
   root: {
-    backgroundColor: "rgba(0, 0, 0, .03)",
-    borderBottom: "1px solid rgba(0, 0, 0, .125)",
+    backgroundColor: "f5f5f5",
+    borderRadius:"10px 10px 0 0",
+    // borderBottom: "1px solid rgba(0, 0, 0, .125)",
     marginBottom: -1,
     minHeight: 46,
     "&$expanded": {
@@ -71,12 +97,13 @@ const AccordionDetails = withStyles((theme) => ({
   root: {
     padding: theme.spacing(2),
     backgroundColor: "#fff",
+    borderRadius:"0 0 10px 10px"
   },
 }))(MuiAccordionDetails);
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    background: "#FFF",
+    background: "#f5f5f5",
     marginBottom: 12,
   },
   expand: {
@@ -89,8 +116,33 @@ const useStyles = makeStyles((theme) => ({
     transform: "rotate(180deg)",
   },
   addBtn: {
-    marginLeft: "auto",
+    // marginLeft: "auto",
   },
+  cusName:{
+    fontWeight: 700,
+    color: "#43ADAA"
+  },
+  tabProject:{
+    // borderRadius:"40px !important",
+    // backgroundColor:"#F5F5F5 !important",
+    "&.Mui-selected":{
+      borderRight: "5px solid #047D1C !important",
+      color:"#047D1C !important",
+        borderBottom:"0px solid #808080 !important",
+      borderTop:"0px solid #808080 !important"
+
+    },
+    margin:"0 -1px",
+    borderBottom:"0px solid #808080 !important",
+      borderTop:"0px solid #808080 !important",
+    tab:{
+       "&.MuiTabPanel-root":{
+      flex: 1
+  }	
+    }
+  },
+  
+
 }));
 
 const CustomerAccounts = (props) => {
@@ -130,6 +182,16 @@ const CustomerAccounts = (props) => {
   const [isRemoving, setRemoving] = useState(false);
   const [accountDeleteRec, setAccountDeleteRec] = useState(null);
   const [contactDeleteRec, setContactDeleteRec] = useState(null);
+
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+  
+
+
+  
 
   useEffect(() => {
     if (!users.length) return;
@@ -367,7 +429,7 @@ const CustomerAccounts = (props) => {
             handleClose();
           }}
         >
-          Add Exisiting
+          Add Existing
         </MenuItem>
       </Menu>
     );
@@ -424,102 +486,156 @@ const CustomerAccounts = (props) => {
           fromProject={true}
         />
       )}
-      <Paper className={classes.root} >
-        <Accordion
-          square={false}
-          expanded={expandedParent}
-          onChange={() => setExpandedParent(!expandedParent)}
-        >
-          <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
-            <Box
+      <Paper className={`${classes.root} ${"p-3 pannel_layout"}`} >
+
+        {/*<Accordion*/}
+        {/*  square={false}*/}
+        {/*  expanded={expandedParent}*/}
+        {/*  onChange={() => setExpandedParent(!expandedParent)}*/}
+        {/*>*/}
+        <div className="customer_account_box">
+        <AccordionSummary aria-controls="panel1d-content" id="panel1d-header" style={{background:"white"}}>
+          <Box
               display="flex"
               alignItems="center"
               className={clsx(classes.expand, {
                 [classes.expandOpen]: expandedParent,
               })}
-            >
-              <ExpandMore />
-            </Box>
-            <Box component="span" mx={1} />
-            <Typography variant="subtitle1">Customer Accounts</Typography>
-            {(permissions?.isUpdate && isTeamMember) || isManager ? (
+          >
+            {/*<ExpandMore />*/}
+          </Box>
+          <Box component="span" mx={1} />
+          <Typography variant="subtitle1" className={classes.cusName}>Customer Accounts</Typography>
+          {(permissions?.isUpdate && isTeamMember) || isManager ? (
               <>
-                <IconButton
-                  aria-haspopup="true"
+              {customerAccounts.length > 0 &&
+                opportunities.filter(
+                    (o) => o.customerAccountName === currentAccount?._id
+                ).length < 1 ? (
+                      
+                        <IconButton
+                            title={`Remove Account: ${currentAccount?.accountName}`}
+                            aria-haspopup="true"
+                            color="primary"
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveAccount();
+                            }}
+                            style={{paddingBottom:"5px" , paddingLeft:"10px" }}
+                        >
+                          <Delete color="error" style={{fontSize:"20px"}}/>
+                        </IconButton>
+                    ) :
+                  
+                    <IconButton
+                        aria-haspopup="true"
+                        color="primary"
+                        size="small"
+                        className="cursor-stop"
+                    >
+                      <Delete color="disabled" />
+                    </IconButton>
+                }
+
+                <Button
+                  variant="contained"
                   color="primary"
                   size="small"
-                  className={classes.addBtn}
-                  onClick={(e) => {
-                    handleClick(e, "customer-account");
+                  style={{marginLeft:"auto"}}
+                  onClick={() => {
+                      setShowAccountCreateDialog(true);
+
                   }}
                 >
-                  <MoreVert />
-                </IconButton>
+                  Create New
 
-                <Box component="span" mx={1} />
-                {customerAccounts.length > 0 &&
-                  opportunities.filter(
-                    (o) => o.customerAccountName === currentAccount?._id
-                  ).length < 1 ? (
-                  <IconButton
-                    title={`Remove Account: ${currentAccount?.accountName}`}
-                    aria-haspopup="true"
+                </Button>
+
+                <Button
+                    variant="contained"
                     color="primary"
                     size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveAccount();
+                    style={{marginLeft:"10px"}}
+                    onClick={() => {
+                      handleOpenDialog(dialogType);
+
                     }}
-                  >
-                    <Delete color="error" />
-                  </IconButton>
-                ) :
-                  <IconButton
-                    aria-haspopup="true"
-                    color="primary"
-                    size="small"
-                    className="cursor-stop"
-                  >
-                    <Delete color="disabled" />
-                  </IconButton>
-                }
+                >
+                  Add Existing
+
+                </Button>
+
+
+                {/*<IconButton*/}
+                {/*    aria-haspopup="true"*/}
+                {/*    color="primary"*/}
+                {/*    size="small"*/}
+                {/*    className={classes.addBtn}*/}
+                {/*    onClick={(e) => {*/}
+                {/*      handleClick(e, "customer-account");*/}
+                {/*    }}*/}
+                {/*>*/}
+                {/*  <MoreVert />*/}
+                {/*</IconButton>*/}
+
+                {/*<Box component="span" mx={1} />*/}
+             
               </>
-            ) : null}
-          </AccordionSummary>
-          <AccordionDetails>
+          ) : null}
+        </AccordionSummary>
+
+
+
+        <AccordionDetails>
             {loading ? (
               <Typography>Loading...</Typography>
             ) : customerAccounts.length ? (
-              <Box width="100%">
+              <Box width="100%" className="tab_Box_layout">
                 <>
+              
                   <Tabs
-                    variant="scrollable"
+
+                     orientation="vertical"
+                     variant="scrollable"
                     scrollButtons="auto"
-                    className="oms-tab"
+                    className="oms-tab dynamic-vertical-tab"
                     value={currentTabIndex}
                     onChange={(index, newValue) => {
                       setCurrentTabIndex(newValue);
                     }}
                     indicatorColor="primary"
                     textColor="primary"
-                    aria-label="icon tabs example"
+                    aria-label="Vertical-tabs-example"
+                    TabIndicatorProps={{
+                      style: {
+                        display: 'none'
+                      }
+                    }}
                   >
+                    
                     {customerAccounts.map((c, i) => (
                       <Tab
                         key={i}
                         tabIndex={i}
                         label={c.accountName}
-                        aria-controls={`a11y-tabpanel-${i}`}
-                        id={`a11y-tab-${i}`}
+                        aria-controls={`vertical-tabpanel-${i}`}
+                        id={`vertical-tab-${i}`}
+                        className={classes.tabProject}
+                        style={{borderRight:"5px" , borderColor:"green" , marginRight:"-1px" }}
                       />
                     ))}
                   </Tabs>
 
-                  {customerAccounts.map((c, i) => (
-                    <Box hidden={currentTabIndex !== i} key={c._id}>
-                      <Grid container spacing={1}>
-                        <Grid item xs={12} sm={12} md={12} lg={12}>
+                  {/* <Box component="span" mx={1} /> */}
 
+                  
+                  {customerAccounts.map((c, i) => (
+  
+                    <Box hidden={currentTabIndex !== i} key={c._id} className="tabpanel_layout">
+                      <Grid container >
+                        <Grid item xs={12} style={{marginTop:"15px"}}>
+                          
                           <Accordion
                             expanded={expandCustomerContact}
 
@@ -694,14 +810,19 @@ const CustomerAccounts = (props) => {
                         </Grid>
                       </Grid>
                     </Box>
+                
                   ))}
+                  
+
+
                 </>
               </Box>
             ) : (
               <Typography>No Customer Accounts</Typography>
             )}
           </AccordionDetails>
-        </Accordion>
+          </div>
+        {/*</Accordion>*/}
       </Paper>
       {
         showConfirmBox && (

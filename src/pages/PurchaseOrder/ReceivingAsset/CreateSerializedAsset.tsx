@@ -73,7 +73,7 @@ const CreateSerializedAsset = (props) => {
         if (values.length > 0) {
             values.map(d => {
                 let tempProduct = productList.find(u => u.productId === d.productId)
-                if (tempProduct && d.quantity > (tempProduct.qty - tempProduct.actualReceived)) {
+                if (tempProduct && d.quantity > (tempProduct.qty - (tempProduct.actualReceived || 0))) {
                     errors.quantity = "should be greater"
                 }
                 if (tempProduct && !d.warehouse) {
@@ -89,7 +89,7 @@ const CreateSerializedAsset = (props) => {
         <Dialog open fullWidth maxWidth="md" onClose={onClose}>
             <CustomDialogHeader title={title} onClose={onClose} />
             <Formik
-                initialValues={{ seriaizedAsset: productList.map(d => ({ "product": d.description, "productId": d.productId, "warehouse": defaultWareHouse || "", "quantity": d.qty - (d.actualReceived || 0), "row": d })) }}
+                initialValues={{ seriaizedAsset: productList.map(d => ({ "product": d.productDescription, "productId": d.productId, "warehouse": defaultWareHouse || "", "quantity": d.qty - (d.actualReceived || 0), "row": d })) }}
                 enableReinitialize={true}
                 onSubmit={() => { }}>
                 {({ values }) => (

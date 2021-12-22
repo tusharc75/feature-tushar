@@ -4,6 +4,7 @@ import { Paper, Box, Grid, Button, Typography, IconButton, Tooltip, Tabs, Tab } 
 import { Skeleton } from "@material-ui/lab";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
+import queryString from 'query-string';
 import { yyyyMMDD, deliveryTicket, sidebarResource, getObjKeysWithValues, defaultActivityShow, dateTimeFormat } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -23,7 +24,7 @@ import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import moment from 'moment';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
-import { FaWpforms } from "react-icons/fa";
+import { FaFileSignature, FaWpforms } from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import { prepareDataForGrid } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
@@ -39,7 +40,6 @@ interface TabPanelProps {
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
-
   return (
     <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
       {children}
@@ -47,14 +47,12 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-
 function a11yProps(index: any) {
   return {
     id: `main-tab-${index}`,
     'aria-controls': `main-tabpanel-${index}`
   };
 }
-
 
 const renderedFrom = "deliveryTicketDetailInventoryPage"
 
@@ -70,6 +68,7 @@ export default function DeliveryTicketDetail(props) {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
+  const { tab }: any = queryString.parse(history.location.search);
   const [deliveryTicketData, setDeliveryTicketData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [openSigns, setOpenSigns] = useState(false);
@@ -92,61 +91,75 @@ export default function DeliveryTicketDetail(props) {
   const [canEdit, setCanEdit] = useState(false)
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
 
-  const [transferData, setTransferData] = useState(null);
   const [startDeliveryDate, setStartDeliveryDate] = useState(null);
   const [signOffDate, setSignOffDate] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
 
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [downlodingFile, setDownlodingFile] = useState(false)
+  const [locationKeys, setLocationKeys] = useState([])
+
+  useEffect(() => {
+    return history.listen(location => {
+      const { tab }: any = queryString.parse(history.location.search);
+      if (history.action === 'PUSH') {
+        setLocationKeys([location.key])
+      }
+      if (history.action === 'POP') {
+        if (locationKeys[1] === location.key) {
+          setLocationKeys(([_, ...keys]) => keys)
+          // Handle forward event
+          setTabValue(tab ? parseInt(tab) : 1)
+
+        } else {
+          setLocationKeys((keys) => [location.key, ...keys])
+          console.log(tab)
+          // Handle back event
+          setTabValue(tab ? parseInt(tab) : 1)
+
+        }
+      }
+    })
+  }, [locationKeys])
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
+    history.push(`?tab=${newValue}`);
   };
-
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity)
   }
   useEffect(() => {
     fetchDeliveryTicketData();
-
   }, [id]);
 
   useEffect(() => {
     fetchGridColumns()
   }, [])
+
   const fetchGridColumns = () => {
-    axiosInstance()
-      .get("/field?resource=Product Inventory")
-      .then(({ data: { data } }) => {
-        let columns = []
-        let rendererNames = []
-        data.forEach(o => {
-          if (o?.fieldData?.fieldName === "serialNumber") {
-            o.fieldData.primaryField = true
+    axiosInstance().get("/field?resource=Product Inventory").then(({ data: { data } }) => {
+      let columns = []
+      let rendererNames = []
+      data.forEach(o => {
+        let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
+        if (currentColumn !== null) {
+          columns = [...columns, currentColumn?.columnData]
+          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+            rendererNames.push(currentColumn?.rendererName)
           }
-          let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
-
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData]
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName)
-            }
-          }
-        })
-
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
         }
-        setFrameWorkComponent({ ...tempFrameworkComponent })
-        columns = [...columns, ...getStaticFields()]
-        setColumns([...columns])
       })
+      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+      tempFrameworkComponent = {
+        ...tempFrameworkComponent,
+      }
+      setFrameWorkComponent({ ...tempFrameworkComponent })
+      columns = [...columns, ...getStaticFields()]
+      setColumns([...columns])
+    })
   }
-
-
 
   const columnState = JSON.parse(localStorage.getItem("deliveryTicketDetailInventoryPage"));
   if (columnState) {
@@ -160,73 +173,84 @@ export default function DeliveryTicketDetail(props) {
   }
 
   const getDeliveryTicketFields = (ticket: any) => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource["deliveryTicket"]}&showHiddenFields=true`)
-      .then(async ({ data: { data } }) => {
-        if (ticket?.type === "Transfer Asset") {
-
-          const { data: { data: transferData } } = await axiosInstance()
-            .get(`${routes.transferAsset.path}/${ticket.transferAsset?.optionValue}`)
-
-          setTransferData(transferData)
-
-          data = data.filter((fields: any) => {
-            if (transferData?.transferType === "Internal") {
-              if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Supplier")) {
+    axiosInstance().get(`/field?resource=${sidebarResource["deliveryTicket"]}&showHiddenFields=true`).then(async ({ data: { data } }) => {
+      if (ticket?.type === "Transfer Asset") {
+        data = data.filter((fields: any) => {
+          if (ticket?.typeDetails?.transferType === "Internal") {
+            if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Supplier")) {
+              return false
+            }
+          }
+          if (ticket?.typeDetails?.transferType.includes("External Supplier")) {
+            if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes(ticket?.ticketType === "Loading" ? "Receiving Plant" : "Pickup Plant")) {
+              return false
+            }
+          }
+          if (ticket?.typeDetails?.transferType.includes("External Customer")) {
+            if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes(ticket?.ticketType === "Loading" ? "Receiving Plant" : "Pickup Plant")) {
+              return false
+            }
+          }
+          if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "rentalJob" || fields.fieldData.fieldName === "productInventory") {
+            return false
+          }
+          return true
+        })
+      }
+      else if (ticket?.type === "Repair Job") {
+        data = data.filter((fields: any) => {
+          if (ticket?.typeDetails?.typeOfRepair === "Internal") {
+            if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Supplier")) {
+              return false
+            }
+          }
+          if (ticket.ticketType === "Loading") {
+            if (ticket?.typeDetails?.typeOfRepair === "External") {
+              if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Receiving Plant")) {
                 return false
               }
             }
-
-            if (transferData?.transferType.includes("External Supplier")) {
-              if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
+          }
+          else {
+            if (ticket?.typeDetails?.typeOfRepair === "External") {
+              if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Pickup Plant")) {
                 return false
               }
             }
-            if (transferData?.transferType.includes("External Customer")) {
-              if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Plant")) {
-                return false
-              }
-            }
-
-            if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "rental") {
+          }
+          if (fields.fieldData.fieldName === "rentalJob" || fields.fieldData.fieldName === "transferAsset" || fields.fieldData.fieldName === "productInventory") {
+            return false
+          }
+          return true
+        })
+      }
+      else if (ticket?.type === "Rental Job") {
+        data = data.filter((fields: any) => {
+          if (ticket.ticketType === "Loading") {
+            if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Receiving Plant")) {
               return false
             }
-
-            return true
-          })
-
-
-        } else if (ticket?.type === "Rental Job") {
-          data = data.filter((fields: any) => {
-            if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Plant")) {
+          }
+          else {
+            if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Pickup Plant")) {
               return false
             }
-            if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "transferAsset") {
-              return false
-            }
-            return true
-          })
-        } else {
-          data = data.filter((fields: any) => {
-            if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
-              return false
-            }
-            if (fields.fieldData.fieldName === "rental" || fields.fieldData.fieldName === "transferAsset") {
-              return false
-            }
-            return true
-          })
-        }
-
-
-        setDeliveryTicketFields(data);
-        setLoading(false);
-      })
+          }
+          if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "transferAsset" || fields.fieldData.fieldName === "productInventory") {
+            return false
+          }
+          return true
+        })
+      }
+      setDeliveryTicketFields(data);
+      setLoading(false);
+    })
       .catch((err) => {
         setLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
+
   const getMainPoints = useMemo(() => {
     let mainPoint = {};
     if (deliveryTicketData) {
@@ -235,14 +259,13 @@ export default function DeliveryTicketDetail(props) {
       mainPoint["delivery Person"] = deliveryTicketData?.deliveryPerson?.optionLabel || ""
     }
     return mainPoint;
-  }, [deliveryTicketData?.deliveryJobName, deliveryTicketData?.deliveryPerson, deliveryTicketData?.deliveryDate]);
+  }, [deliveryTicketData?.ticketName, deliveryTicketData?.deliveryPerson, deliveryTicketData?.deliveryDate]);
 
   const fetchDeliveryTicketData = () => {
     if (gridApi) {
       gridApi.deselectAll();
     }
     localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
-
     if (selectedEntity) {
       setLoading(true);
       axiosInstance()
@@ -250,23 +273,19 @@ export default function DeliveryTicketDetail(props) {
         .then(({ data: { data } }) => {
           getDeliveryTicketFields(data)
           setDeliveryTicketData(data)
-
           const startDeliverySignatures = data?.signatures.filter(f => f.status === "Start Delivery" && f.date);
           if (startDeliverySignatures && startDeliverySignatures.length > 0) {
             setStartDeliveryDate(moment(startDeliverySignatures[startDeliverySignatures.length - 1].date).format(dateTimeFormat));
           }
-
           const signOffSignatures = data?.signatures.filter(f => f.status === "Sign-Off" && f.date);
           if (signOffSignatures && signOffSignatures.length > 0) {
             setSignOffDate(moment(signOffSignatures[signOffSignatures.length - 1].date).format(dateTimeFormat));
           }
-
           setCanEdit(
             [...(data?.collaborator ?? []), data?.owner ?? {}].some(
               (obj) => obj.optionValue === user.user._id
             )
           );
-
           setSignatures(data?.signatures || []);
           if (data?.productInventory && data?.productInventory.length) {
             let ids = data?.productInventory.map(o => o?.optionValue)
@@ -274,7 +293,6 @@ export default function DeliveryTicketDetail(props) {
           } else {
             dispatch({ type: "initialize", data: [], count: 0 });
           }
-
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -409,7 +427,7 @@ export default function DeliveryTicketDetail(props) {
               const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
               const link = document.createElement('a');
               link.href = url;
-              link.setAttribute('download', `LoadingTicket-${deliveryTicketData.deliveryJobName || ""}.pdf`);
+              link.setAttribute('download', `LoadingTicket-${deliveryTicketData.ticketName || ""}.pdf`);
               document.body.appendChild(link);
               link.click();
             }
@@ -437,7 +455,7 @@ export default function DeliveryTicketDetail(props) {
     <>
       <Fragment>
         <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={[routes.deliveryTicket, { title: deliveryTicketData?.deliveryJobName }]} />
+          <CustomBreadCrumbs routes={[routes.deliveryTicket, { title: deliveryTicketData?.ticketName }]} />
         </Grid >
         <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
           <div>
@@ -461,7 +479,7 @@ export default function DeliveryTicketDetail(props) {
                 </div>
               ) : (
                 <DetailsPageHeader
-                  heading={deliveryTicketData ? deliveryTicketData?.deliveryJobName : ""}
+                  heading={deliveryTicketData ? deliveryTicketData?.ticketName : ""}
                   mainPoints={deliveryTicketData ? getMainPoints : ""}
                   showHeading={true}
                 >
@@ -494,11 +512,13 @@ export default function DeliveryTicketDetail(props) {
                     // deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id && 
                     (deliveryTicketData?.status === "In-Transit" || deliveryTicketData?.status === "Delivered") ?
                       <Button
-                        variant="contained"
+                        variant={isMobile ? "text" : "contained"}
                         color="primary"
                         size="small"
-                        onClick={() => setOpenSigns(true)}>
-                        View Signatures
+                        onClick={() => setOpenSigns(true)}
+                        style={isMobile ? { color: "var(--info-darken)" } : {}}
+                      >
+                        {isMobile ? <FaFileSignature size={20} /> : "View Signatures"}
                       </Button> : null
                   }
                 </DetailsPageHeader>
@@ -761,9 +781,6 @@ export default function DeliveryTicketDetail(props) {
         ) : null}
         {openUpdateDialog && (
           <ManageDeliveryTicket
-            rentalData={deliveryTicketData?.type === "Rental Job" ? deliveryTicketData?.rental?.optionValue : null}
-            repairJobData={deliveryTicketData?.type === "Repair Job" ? deliveryTicketData?.repairJob?.optionValue : null}
-            transferData={deliveryTicketData?.type === "Transfer Asset" ? transferData : null}
             deliveryTicketId={deliveryTicketData?._id}
             open={openUpdateDialog}
             onClose={() => setOpenUpdateDialog(false)}

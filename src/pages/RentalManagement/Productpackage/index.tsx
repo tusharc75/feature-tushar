@@ -84,7 +84,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                                 size="small"
                                 aria-label="Details"
                                 onClick={() => {
-                                    window.open(`${row.original.type === "product" ? routes.productDetail.path : routes.packages.path}/${row.original.materialId}`);
+                                    window.open(`${row.original.type === "product" ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`);
                                 }}
                             >
                                 <InfoIcon fontSize="small" />
@@ -190,7 +190,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             const inventory = data.inventory;
             const rows = data.material.filter((e) => e.parentId === null)
             rows.forEach((parent, i) => {
-                parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageDescription}`
+                parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
                 parent.qtyDisplay = parent.qty;
                 parent.isValid = parent["finalPrice_" + rentalManagementData?.currency?.toLowerCase()] ? true : false;
                 parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
@@ -204,6 +204,9 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                         _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
                         _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
                     })
+                    if (subRows.length === 0) {
+                        parent.isValid = false
+                    }
                     parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
                     parent.subRows = subRows
                 }
@@ -457,6 +460,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}
                 productInventory={[]}
                 type={addExistingProductDialog.type}
+                rentalManagementData={rentalManagementData}
             />
         }
     </Fragment>

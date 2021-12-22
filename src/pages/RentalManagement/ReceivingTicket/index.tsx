@@ -15,7 +15,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import {
-  gridLoadingTimeout, receivingTicket, rentalManagement,
+  gridLoadingTimeout, deliveryTicket, rentalManagement,
   sidebarResource, productInventory as productInventoryHelperObject
 } from "../../../constants/helpers";
 import { groupBy } from "lodash";
@@ -30,7 +30,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { isMobile } from "react-device-detect";
 import { useHistory } from "react-router-dom";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
-import ManageReceivingTicket from '../../ReceivingTicket/ManageReceivingTicket';
+import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 
 const renderedFrom = "rentalManagementDetailsPageReceivingTicket"
 
@@ -92,39 +92,30 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             data.data.map(obj => {
               productAssets.map((d, index) => {
                 if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                  productAssets[index]["deliveryTicket"] = obj?.deliveryJobName
-                  productAssets[index]["deliveryTicketId"] = obj?._id
+                  productAssets[index]["type"] = obj?.type
+                  if (obj.ticketType === "Loading") {
+                    productAssets[index]["deliveryTicket"] = obj?.ticketName
+                    productAssets[index]["deliveryTicketId"] = obj?._id
+                  }
+                  if (obj.ticketType === "Receiving") {
+                    productAssets[index]["receivingTicket"] = obj?.ticketName
+                    productAssets[index]["receivingTicketId"] = obj?._id
+                  }
                 }
               })
-            })
-            axiosInstance()
-              .get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/receiving-ticket`)
-              .then(({ data }) => {
-                data.data.map(obj => {
-                  productAssets.map((d, index) => {
-                    if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                      productAssets[index]["type"] = obj?.type
-                      productAssets[index]["receivingTicket"] = obj?.receivingJobName
-                      productAssets[index]["receivingTicketId"] = obj?._id
-                    }
-                  })
-                })
-                productAssets.forEach((d) => {
-                  d["hideSelection"] = d.status === "In-Transit";
-                })
-                if (productAssets.filter((e) => ["Under Review", "Scrap", "Lost"].includes(e.status)).length === productAssets.length) {
-                  setNextStep(true)
-                }
-                dispatch({
-                  type: "initialize", data: productAssets, count: productAssets.length
-                });
-                setTimeout(() => {
-                  dispatch({ type: "loading", loading: false });
-                }, gridLoadingTimeout);
+              productAssets.forEach((d) => {
+                d["hideSelection"] = d.status === "In-Transit";
               })
-              .catch((err) => {
-                toastConfig.setToastConfig(err);
+              if (productAssets.filter((e) => ["Under Review", "Scrap", "Lost"].includes(e.status)).length === productAssets.length) {
+                setNextStep(true)
+              }
+              dispatch({
+                type: "initialize", data: productAssets, count: productAssets.length
               });
+              setTimeout(() => {
+                dispatch({ type: "loading", loading: false });
+              }, gridLoadingTimeout);
+            })
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
@@ -156,7 +147,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   );
   const ReceivingTicketRenderer = (params) => (
     params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.receivingTicketDetail.path}/${params.data.receivingTicketId}`}>
+      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`}>
         {params.value}
       </Link>
     ) : (
@@ -367,18 +358,17 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       }
     </Grid>
     {showReceivingTicketDialog && (
-      <ManageReceivingTicket
-        open={showReceivingTicketDialog}
-        isClone={false}
-        receivingTicketId={null}
-        productInventoryForReceivingTicket={productInventoryForReceivingTicket}
-        rentalData={rentalManagementData}
+      <ManageDeliveryTicket
+        ticketType="Receiving"
+        refrenceType="Rental Job"
+        refrenceData={rentalManagementData}
+        productInventory={productInventoryForReceivingTicket}
         onClose={() => setShowReceivingTicketDialog(false)}
         onSuccess={() => {
           setShowReceivingTicketDialog(false);
           fetchRecords();
         }}
-        isRedirectToDetailPage={false}
+        warehouseId={rentalManagementData?.warehouse}
       />
     )}
     {showRemoveAssetFromReceivingTicketDialog && (
@@ -393,7 +383,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           const groupByCalls = groupBy(selectedRecords, "receivingTicketId");
           let apiCalls = [];
           Object.keys(groupByCalls).forEach((key) => {
-            apiCalls.push(axiosInstance().put(`${receivingTicket.receivingTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
+            apiCalls.push(axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
           })
           Promise.all(apiCalls).then(() => {
             toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged ${sidebarResource.receivingTicket}(s)` });
