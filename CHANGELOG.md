@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.24.0](https://github.com/vebholic/oms_frontend/compare/v2.23.0...v2.24.0) (2021-12-22)
+
+
+### Features
+
+* - Making Repair job changes ([3f0ff6c](https://github.com/vebholic/oms_frontend/commit/3f0ff6c43ff18932a3a3da37d17d7c1a2a335c73))
+* - Repair job changes done ([0e4b832](https://github.com/vebholic/oms_frontend/commit/0e4b8322611c933cc1e29e8eb86897e29528a524))
+* **.:** - Repair job issue fixed ([51aace3](https://github.com/vebholic/oms_frontend/commit/51aace3d75f4d30bb402fe5c2a931ab876b297c7))
+* change table in PO receiving asset ([288288e](https://github.com/vebholic/oms_frontend/commit/288288eb70cc4887e2b5fe44f1d64ff387f3fcd3))
+
+
+### Bug Fixes
+
+* delivery ticket ([a821100](https://github.com/vebholic/oms_frontend/commit/a82110039a099f4ace3786d28703a7b21c438a66))
+* delivery ticket ([7c9ac07](https://github.com/vebholic/oms_frontend/commit/7c9ac07e3f62689c990605db87eb097649f15f3b))
+* doa add button insert PUAT-58 ([2410232](https://github.com/vebholic/oms_frontend/commit/241023288ae91718a2f8f352c5596fe3dca96d12))
+* package assign product add button on below ([b6461ac](https://github.com/vebholic/oms_frontend/commit/b6461aca69690cf262382345726582c7935ecb12))
+* pO receiving asset changes ([b4dd9b1](https://github.com/vebholic/oms_frontend/commit/b4dd9b129dd0b20a008caa74a6a23b0eae58d143))
+* **transfer assets:** Added limit in transfer assets add assets dialog ([0a3e743](https://github.com/vebholic/oms_frontend/commit/0a3e743e78adefcbd4620d0f117e96f2b5647d51))
+* **transferasset:** changes in create/update dialog ([ee911bb](https://github.com/vebholic/oms_frontend/commit/ee911bb2ac6e74697fcc407bec5b78ecaf48f3cc))
+* **transferasset:** lINK ISSUE ([4597792](https://github.com/vebholic/oms_frontend/commit/4597792a0bf1aaab0803b79e1b3b8a270621b527))
+* **transferasset:** make receiving and loading ticket one ([5f57f50](https://github.com/vebholic/oms_frontend/commit/5f57f505d9e2ac490e3ff12522c3615410cd1ff5))
+* **transferasset:** remove delete button from details ([02bb5ef](https://github.com/vebholic/oms_frontend/commit/02bb5ef44d0a85fe1920a15c7a9361661651dc52))
+
 ## [2.23.0](https://github.com/vebholic/oms_frontend/compare/v2.22.2...v2.23.0) (2021-12-21)
 
 
