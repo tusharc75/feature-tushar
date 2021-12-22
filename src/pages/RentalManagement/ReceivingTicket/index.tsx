@@ -368,9 +368,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           setShowReceivingTicketDialog(false);
           fetchRecords();
         }}
-        productInventoryForDeliveryTicket={productInventoryForReceivingTicket}
         warehouseId={rentalManagementData?.warehouse}
-        rentalData={rentalManagementData}
       />
     )}
     {showRemoveAssetFromReceivingTicketDialog && (
