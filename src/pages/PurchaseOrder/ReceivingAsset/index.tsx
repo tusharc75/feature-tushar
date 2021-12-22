@@ -407,7 +407,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                         setFullScreen((prevState) => !prevState);
                     }}
                     showManimizeMaximize={true}
-                    fromPurchaseOrder={true}
+                    refrenceType="purchaseOrder"
                 />
             </Dialog>
         )}
