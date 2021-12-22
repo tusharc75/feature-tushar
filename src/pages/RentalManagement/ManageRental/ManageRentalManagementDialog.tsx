@@ -397,8 +397,10 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
         }
         let actualStartDate = moment(values?.actualStartDate);
         let actualEndDate = moment(values?.actualEndDate);
-        if (actualEndDate.diff(actualStartDate, 'days') < 0) {
-            errors['actualEndDate'] = 'Please enter valid actual end date';
+        if (actualStartDate.format("MM-DD-YYYY") !== actualEndDate.format("MM-DD-YYYY")) {
+            if (actualEndDate.diff(actualStartDate, 'days') <= 0) {
+                errors['actualEndDate'] = 'Please enter valid actual end date';
+            }
         }
         return errors;
     }
