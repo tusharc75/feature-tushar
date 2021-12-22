@@ -207,7 +207,9 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                 <Button
                                     size="small"
                                     color="primary"
-                                    onClick={() => addProductInventory(selectedRecords)}
+                                    onClick={() => addProductInventory(materialList.filter((data) =>
+                                        selectedRecords.some((rec) => rec.id === data._id)
+                                    ))}
                                     variant="contained"
                                     disabled={!Boolean(selectedRecords.length) || isAddingProducts}
                                     endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
