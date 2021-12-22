@@ -19,10 +19,16 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import { startCase } from "lodash";
+import { getColumnData, getFrameworkComponents, getStaticFields } from "../../../constants/columns";
+import routes from "../../../components/Helpers/Routes";
+import { useData } from "../../../StateProvider/Provider";
 
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts }) => {
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, rentalManagementData }) => {
 
     const toastConfig = useContext(CustomToastContext)
+    const {
+        state: { selectedEntity }
+    }: any = useData();
     const [packageDialog, setPackageDialog] = useState(false);
     const [productData, setProductData] = useState([]);
     const [packageProductData, setPackageProductData] = useState([]);
@@ -30,12 +36,19 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-
+    const [columns, setColumns] = useState([
+        { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+    ]);
+    const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [materialList, setMaterialList] = useState([]);
 
     useEffect(() => {
         fetchMaterial()
     }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+
+    useEffect(() => {
+        fetchGridColumns()
+    }, [])
 
     const fetchMaterial = () => {
         dispatch({ type: "loading", loading: true });
@@ -43,17 +56,21 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        axiosInstance().get(`${type === "product" ? product.api : packages.packageApi}${queryString}`).then(({ data: { data, count } }) => {
+        axiosInstance().get(`${type === "product" ? `/rental-management/product-with-inventory` : packages.packageApi}${queryString}`).then(({ data: { data, count } }) => {
             setMaterialList(JSON.parse(JSON.stringify(data)));
-            data = data?.map((u) => ({
-                ...u,
-                id: u._id,
-                type: type,
-                qty: 0,
-                productCategory: u.productCategory?.optionLabel,
-                priceTemplate: u.priceTemplate?.optionLabel,
-            }));
-            dispatch({ type: "initialize", data: data, count: count });
+            let rows = data.map((u) => {
+                let finalObject = prepareDataForGrid(u);
+                finalObject["id"] = u._id;
+                finalObject["type"] = type;
+                finalObject["qty"] = 0;
+                finalObject["productCategory"] = u.productCategory?.optionLabel;
+                finalObject["priceTemplate"] = u.priceTemplate?.optionLabel
+                return {
+                    ...finalObject,
+                };
+            });
+
+            dispatch({ type: "initialize", data: rows, count: count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
@@ -62,7 +79,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     };
 
     const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}`;
+        let deepFilter = type === "product" ? `?warehouse=${rentalManagementData?.warehouse?.optionValue}&page=${page}&limit=${limit}` : `?page=${page}&limit=${limit}`;
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
             Object.keys(filters).forEach(field => {
@@ -82,17 +99,39 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         return deepFilter;
     };
 
-    const columns = type === "product" ?
-        [
-            { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-            { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
-            { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
-            { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        ] : [
-            { field: "packageName", headerName: "Package Name", show: true, cellRenderer: "nameRenderer" },
-            { field: "packageDescription", headerName: "Package Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-            { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        ];
+
+
+    const fetchGridColumns = () => {
+        axiosInstance()
+            .get(type === "product" ? "/field?resource=Product&view=true" : `/field?resource=Packages&entity=${selectedEntity}&view=true`)
+            .then(({ data: { data } }) => {
+                let columns = []
+                let rendererNames = []
+                data.forEach(o => {
+                    let currentColumn = type === "product" ?
+                        getColumnData(routes.product?.title, o?.fieldData, routes.productDetail.path)
+                        : getColumnData(routes.packages?.title, o?.fieldData, routes.packagesDetail.path)
+                    if (currentColumn !== null) {
+                        columns = [...columns, currentColumn?.columnData]
+                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                            rendererNames.push(currentColumn?.rendererName)
+                        }
+                    }
+
+                })
+                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+                tempFrameworkComponent = {
+                    ...tempFrameworkComponent,
+                }
+                setFrameWorkComponent({ ...tempFrameworkComponent })
+                columns = [...columns, ...getStaticFields()]
+                // setColumns([...columns])
+                setColumns((prevState) => ([
+                    ...columns,
+                    ...prevState
+                ]))
+            })
+    }
 
     const fetchPackageProduct = (packageId) => {
         if (type === "package") {
@@ -118,13 +157,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
 
     const handleSearch = (e) => {
         dispatch({ type: "search", search: e.target.value });
-    };
-
-    const frameworkComponents = {
-        createdByRenderer: CreatedByRenderer,
-        updatedByRenderer: UpdatedByRenderer,
-        nameRenderer: NameRenderer,
-        commonRenderer: CommonRenderer,
     };
 
     const onCellValueChanged = (row) => {
@@ -181,7 +213,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                     <CustomAgGridEditable
                         columns={columns}
                         dataRows={dataRows}
-                        frameworkComponents={frameworkComponents}
+                        frameworkComponents={frameWorkComponent}
                         setGridApi={setGridApi}
                         dispatch={dispatch}
                         rowCount={rowCount}

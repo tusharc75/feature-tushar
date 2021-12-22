@@ -457,6 +457,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}
                 productInventory={[]}
                 type={addExistingProductDialog.type}
+                rentalManagementData={rentalManagementData}
             />
         }
     </Fragment>
