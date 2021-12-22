@@ -391,7 +391,8 @@ const ProductCategory = () => {
   }
 
   const isContrastRatioLow = (hexColor) => {
-    let rgb = hexToRgb(hexColor);
+   
+    let rgb = hexToRgb(hexColor.length === 0 ? '#E0E0E0' : hexColor  );
     let splitRgb = rgb.split(",");
     let rgbNum = splitRgb.map(function (x) {
       return parseInt(x, 10);
@@ -412,6 +413,7 @@ const ProductCategory = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
+    
 
     axiosInstance()
       .get(`/product-category${queryString}`)
@@ -422,9 +424,10 @@ const ProductCategory = () => {
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions.productCategory.isUpdate;
           finalObject['isLowContrast'] = isContrastRatioLow(u.chipColour);
+        
           return {
             ...finalObject
-
+           
           };
         });
         setIsAllChecked(false);
