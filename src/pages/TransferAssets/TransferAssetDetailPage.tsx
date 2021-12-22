@@ -117,8 +117,8 @@ const TransferAssetDetailPage = () => {
         data.forEach((field: any) => {
           if (transferType === 'Internal') {
             if (
-              field.fieldData.fieldName !== 'transferToSupplier' &&
-              field.fieldData.fieldName !== 'transferToCustomer' &&
+              field.fieldData.fieldName !== 'transfertoSupplier' &&
+              field.fieldData.fieldName !== 'transfertoCustomer' &&
               field.fieldData.fieldName !== 'supplierShipTo' &&
               field.fieldData.fieldName !== 'customerShipTo'
             ) {
@@ -126,8 +126,8 @@ const TransferAssetDetailPage = () => {
             }
           } else if (transferType === 'External Supplier') {
             if (
-              field.fieldData.fieldName !== 'transferToPlant' &&
-              field.fieldData.fieldName !== 'transferToCustomer' &&
+              field.fieldData.fieldName !== 'transfertoPlant' &&
+              field.fieldData.fieldName !== 'transfertoCustomer' &&
               field.fieldData.fieldName !== 'plantShipTo' &&
               field.fieldData.fieldName !== 'customerShipTo'
             ) {
@@ -135,8 +135,8 @@ const TransferAssetDetailPage = () => {
             }
           } else if (transferType === 'External Customer') {
             if (
-              field.fieldData.fieldName !== 'transferToSupplier' &&
-              field.fieldData.fieldName !== 'transferToPlant' &&
+              field.fieldData.fieldName !== 'transfertoSupplier' &&
+              field.fieldData.fieldName !== 'transfertoPlant' &&
               field.fieldData.fieldName !== 'plantShipTo' &&
               field.fieldData.fieldName !== 'supplierShipTo'
             ) {
@@ -322,7 +322,7 @@ const TransferAssetDetailPage = () => {
                     <MdEdit size={24} />
                   </Button>
                 )}
-                <HideWhenOffline>
+                {/* <HideWhenOffline>
                   {permissions?.transferAsset?.isDelete && transferAssetData?.user === user?.user._id ? (
                     <DeleteButton
                       disabled={transferAssetData?.status !== 'New'}
@@ -331,8 +331,8 @@ const TransferAssetDetailPage = () => {
                       onClick={() => setShowConfirmBox(true)}
                     />
                   ) : null}
-                </HideWhenOffline>
-                <HideWhenOffline>
+                </HideWhenOffline> */}
+                {/* <HideWhenOffline>
                   {permissions?.transferAsset?.isDelete && transferAssetData?.user === user?.user._id ? (
                     <Button
                       disabled={transferAssetData?.status !== 'New'}
@@ -342,7 +342,7 @@ const TransferAssetDetailPage = () => {
                       <MdDelete size={24} />
                     </Button>
                   ) : null}
-                </HideWhenOffline>
+                </HideWhenOffline> */}
               </DetailsPageHeader>
             )}
 

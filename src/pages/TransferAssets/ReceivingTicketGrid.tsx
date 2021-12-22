@@ -90,7 +90,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   const ReceivingTicketRenderer = (params) =>
     params.value ? (
-      <Link className="link cursor-pointer" to={`${routes.receivingTicketDetail.path}/${params.data.receivingTicketId}`}>
+      <Link className="link cursor-pointer" to={`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`}>
         <p title={params.value}>{params.value}</p>
       </Link>
     ) : (
@@ -129,27 +129,28 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
     try {
       let assetData = await fetchAssets(forceRefresh);
-      let ticketData: any = await fetchReceivingTickets();
-      let loadingTicketData: any = await fetchLoadingTickets();
+      let ticketData: any = await fetchLoadingTickets();
+      const loadingTicket = ticketData.filter((ticket: any) => ticket.ticketType === "Loading")
+      const receivingTicket = ticketData.filter((ticket: any) => ticket.ticketType === "Receiving")
 
-      for (let i = 0; i < ticketData.length; i++) {
+      for (let i = 0; i < receivingTicket.length; i++) {
         for (let j = 0; j < assetData.length; j++) {
-          if (ticketData[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
-            assetData[j].receivingTicket = ticketData[i].receivingJobName;
-            assetData[j].receivingTicketId = ticketData[i]._id;
-            assetData[j].receivingTicketStatus = ticketData[i].status;
+          if (receivingTicket[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
+            assetData[j].receivingTicket = receivingTicket[i].ticketName;
+            assetData[j].receivingTicketId = receivingTicket[i]._id;
+            assetData[j].receivingTicketStatus = receivingTicket[i].status;
           }
         }
       }
 
-      for (let i = 0; i < loadingTicketData.length; i++) {
+      for (let i = 0; i < loadingTicket.length; i++) {
         for (let j = 0; j < assetData.length; j++) {
           if (
-            loadingTicketData[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))
+            loadingTicket[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))
           ) {
-            assetData[j].deliveryTicket = loadingTicketData[i].ticketName;
-            assetData[j].deliveryTicketId = loadingTicketData[i]._id;
-            assetData[j].deliveryTicketStatus = loadingTicketData[i].status;
+            assetData[j].deliveryTicket = loadingTicket[i].ticketName;
+            assetData[j].deliveryTicketId = loadingTicket[i]._id;
+            assetData[j].deliveryTicketStatus = loadingTicket[i].status;
           }
         }
       }
@@ -167,18 +168,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     }
   };
 
-  const fetchReceivingTickets = () =>
-    new Promise((resolve, reject) => {
-      axiosInstance()
-        .get(`${routes.transferAsset.path}/${transferAssetId}/receiving-ticket`)
-        .then(({ data: { data } }) => {
-          resolve(data);
-          setTickets(data);
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
   const fetchLoadingTickets = () =>
     new Promise((resolve, reject) => {
       axiosInstance()
@@ -291,7 +280,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         </Box>
 
         <Box marginTop={isMobile ? 2 : 0}>
-          {permissions?.transferAsset.isUpdate && permissions?.receivingTicket.isCreate && (
+          {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isCreate && (
             <Button
               variant="contained"
               size="small"
@@ -308,7 +297,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             </Button>
           )}
           <Box component="span" mx={1} />
-          {permissions?.transferAsset.isUpdate && permissions?.receivingTicket.isUpdate && (
+          {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isUpdate && (
             <Button
               variant="contained"
               size="small"
@@ -386,7 +375,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           refrenceData={transferAssetData}
           onClose={() => setOpenReceivingTicketDialog(false)}
           productInventory={assetWithNoTicket}
-          transferData={transferAssetData}
           warehouseId={transferAssetData?.transferFromPlant?.optionValue}
           onSuccess={() => {
             setOpenReceivingTicketDialog(false);

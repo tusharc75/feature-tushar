@@ -81,7 +81,15 @@ function RepairJobHeader(props) {
 
           <Grid style={{ display: "flex", gap: "5px" }}>
             {RepairJobPermissions?.isCreate && RepairJobPermissions?.isUpdate && (
-              <Button variant={isMobile ? "text" : "contained"} color="primary" size="small" className={isMobile ? "mobile_button" : styles.add_submit_btn} onClick={onCreate} >
+              <Button
+                variant={isMobile ? "text" : "contained"}
+                color="primary"
+                size="small"
+                // className={styles.add_submit_btn}
+                onClick={onCreate}
+                className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                startIcon={isMobile ? null : <AddOutlined />}
+              >
                 {isMobile ? <MdAdd size={23} /> : "Add"}
               </Button>
             )}

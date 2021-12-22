@@ -118,6 +118,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     try {
       let assetData = await fetchAssets(forceRefresh);
       let ticketData: any = await fetchLoadingTickets();
+      ticketData = ticketData.filter((ticket: any) => ticket.ticketType === "Loading")
 
       for (let i = 0; i < ticketData.length; i++) {
         for (let j = 0; j < assetData.length; j++) {
@@ -352,7 +353,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           refrenceData={transferAssetData}
           onClose={() => setOpenLoadingTicketDialog(false)}
           productInventory={assetWithNoTicket}
-          transferData={transferAssetData}
           warehouseId={transferAssetData?.transferFromPlant?.optionValue}
           onSuccess={() => {
             setOpenLoadingTicketDialog(false);
