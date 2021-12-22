@@ -115,10 +115,6 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
     });
   };
 
-  const onSendEmailSuccess = () => {
-
-  };
-
   const handlePDF = (type) => {
     setDownlodingFile(type);
     axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/pdf`).then(({ data }) => {
@@ -180,6 +176,21 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
     };
   };
 
+  const fetchEmailsData = () => {
+    let ownerCollaboratorEmails = [];
+    if (rentalManagementData?.collaborator && rentalManagementData.collaborator.length) {
+      ownerCollaboratorEmails = rentalManagementData.collaborator.filter((o) => o?.email).map((o) => o?.email);
+    }
+    if (rentalManagementData?.owner?.email) {
+      ownerCollaboratorEmails.push(rentalManagementData.owner.email);
+    }
+    let toEmails = [];
+    if (rentalManagementData?.customerAccount?.email) {
+      toEmails.push(rentalManagementData.customerAccount.email);
+    }
+    setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
+  }
+
   return (<>
     <Box display="flex" justifyContent="space-between" m={1}>
       <Box display="flex" alignItems="center">
@@ -217,6 +228,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
           size="small"
           disabled={downlodingFile === "Email" ? true : false}
           onClick={() => {
+            fetchEmailsData()
             handlePDF("Email")
           }}
         >
@@ -259,6 +271,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
         maxWidth="md"
         onClose={() => {
           setSendEmail(false);
+          setDownlodingFile(null);
           setFullScreen(false);
         }}
         fullWidth
@@ -267,9 +280,14 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
           generatingFile={generatingPdfFile}
           handleClose={() => {
             setSendEmail(false);
+            setDownlodingFile(null);
             setFullScreen(false);
           }}
-          fetchData={onSendEmailSuccess}
+          fetchData={() => {
+            setSendEmail(false);
+            setDownlodingFile(null);
+            setFullScreen(false);
+          }}
           id={rentalManagementData._id}
           showESign={true}
           isQuoteBuilder={true}
@@ -284,7 +302,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             setFullScreen((prevState) => !prevState);
           }}
           showManimizeMaximize={true}
-          fromPurchaseOrder={true}
+          refrenceType="rentalJob"
         />
       </Dialog>
     )}
