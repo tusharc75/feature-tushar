@@ -86,7 +86,7 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
       gridApi.setRowData([]);
     }
 
-    let queryString = `?&filterById=${JSON.stringify([{ field: 'warehouse', term: plantId }])}&repairable=true&filterByIdType=or&limit=111`;
+    let queryString = getQueryString();
 
     axiosInstance()
       .get(`${productInventory.api}${queryString}`)
@@ -111,10 +111,55 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
 
   useEffect(() => {
     fetchProductInventory();
-  }, []);
+  }, [page, limit, filters, sorting, search]);
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
+  };
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    let filterById = [];
+
+    if (filterById.length > 0) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+    }
+
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+
+      Object.keys(filters).forEach((field) => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter
+        });
+      });
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+
+    return `${deepFilter}&filterById=${JSON.stringify([{ field: 'warehouse', term: plantId }])}&repairable=true&filterByIdType=or`;
+  };
+
+  const replaceFieldName = (field) => {
+    switch (field) {
+      case 'createdBy':
+        return 'createdBy.user.concatedName';
+
+      case 'updatedBy':
+        return 'updatedBy.user.concatedName';
+
+      default:
+        return field;
+    }
   };
 
   const getRowStyleScheduled = (params) => {
@@ -196,7 +241,7 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
                   allowAction={false}
                   loading={loading}
                   customGridOptions={{ getRowStyle: getRowStyleScheduled }}
-                  isClientSideGrid={true}
+                  isClientSideGrid={false}
                   renderedFrom={addSerializedAssetsRenderedFrom}
                 />
               ) : (
