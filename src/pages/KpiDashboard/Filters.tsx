@@ -68,12 +68,6 @@ const Filters = (props) => {
   };
 
   useEffect(() => {
-    if (user && user?.user) {
-      setDashboardType(user.user?.dashboards[0])
-    }
-  }, [user])
-
-  useEffect(() => {
     switch (timeFrame) {
       case '1-month':
         setSalesFilter({
