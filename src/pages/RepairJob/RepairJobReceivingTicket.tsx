@@ -190,7 +190,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
 
     const DeliveryTicketRenderer = (params) => (
         params?.value ? (
-            <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
+            <Link className="link text-truncate" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
                 {params.value}
             </Link>
         ) : (
@@ -200,7 +200,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
 
     const ReceivingTicketRenderer = (params) => (
         params?.value ? (
-            <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`}>
+            <Link className="link text-truncate" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`}>
                 {params.value}
             </Link>
         ) : (

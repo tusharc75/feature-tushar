@@ -275,9 +275,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         refrenceData={rentalManagementData}
         onClose={() => setShowDeliveryTicketDialog(false)}
         productInventory={productInventoryForDeliveryTicket}
-        productInventoryForDeliveryTicket={productInventoryForDeliveryTicket}
         warehouseId={rentalManagementData?.warehouse}
-        rentalData={rentalManagementData}
         onSuccess={() => {
           setShowDeliveryTicketDialog(false);
           fetchRecords();

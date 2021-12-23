@@ -375,7 +375,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           refrenceData={transferAssetData}
           onClose={() => setOpenReceivingTicketDialog(false)}
           productInventory={assetWithNoTicket}
-          transferData={transferAssetData}
           warehouseId={transferAssetData?.transferFromPlant?.optionValue}
           onSuccess={() => {
             setOpenReceivingTicketDialog(false);
