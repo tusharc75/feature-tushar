@@ -19,7 +19,6 @@ import { purchaseOrder, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { useHistory } from "react-router-dom";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
@@ -30,12 +29,15 @@ import { MdAccountCircle } from "react-icons/md";
 import { AiFillCrown, MdAdd } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
+import { useHistory } from "react-router-dom";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
 const PurchaseOrder = () => {
 
     const toastConfig = useContext(CustomToastContext)
+    const history = useHistory();
+
     const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
@@ -49,11 +51,11 @@ const PurchaseOrder = () => {
     const [clonedData, setClonedData] = useState([])
     const localStorageSelectedRecords = `${routes.purchaseOrder?.title}_selected`;
 
+    const [fromRental, setFromRental] = useState(history.location?.state?.rental);
     const {
         state: { user, permissions, selectedEntity },
     }: any = useData();
     const { getColumnData } = useColumns();
-    const history = useHistory();
 
     useEffect(() => {
         fetchGridColumns()
@@ -61,7 +63,7 @@ const PurchaseOrder = () => {
 
     useEffect(() => {
         fetchPurchaseOrder()
-    }, [page, limit, filters, sorting, search, selectedEntity]);
+    }, [page, limit, filters, sorting, search, selectedEntity, fromRental]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -173,6 +175,14 @@ const PurchaseOrder = () => {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
+        let filterById = [];
+
+        if (fromRental) {
+            filterById.push({ field: "rentalJob", term: fromRental?._id });
+        }
+        if (filterById.length > 0) {
+            deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
+        }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
@@ -316,6 +326,16 @@ const PurchaseOrder = () => {
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
                         <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
                         <span className="listingHeader">{routes.purchaseOrder?.title} </span>
+                        {fromRental && (
+                            <Chip
+                                className="ml-3"
+                                color="primary"
+                                label={`Product : ${fromRental?.rentalJobName}`}
+                                onDelete={() => {
+                                    setFromRental(null);
+                                }}
+                            />
+                        )}
                     </Grid>
                     <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side} >
                         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >

@@ -419,7 +419,7 @@ const Entity: FC = () => {
             <ResourceTransferDialog
               open={true}
               fromResource={{ ...deleteEntity, name: deleteEntity.entityName ?? '' }}
-              allResourceData={JSON.parse(localStorage.getItem("mappedEntities"))}
+              allResourceData={JSON.parse(localStorage.getItem("mappedEntities")).filter(entity => entity.optionValue !== deleteEntity?._id)}
               onClose={() => {
                 setDeleteEntity({})
                 setShowDeleteDialog(false)

@@ -729,7 +729,7 @@ const User: FC = () => {
             <ResourceTransferDialog
               open={true}
               fromResource={{ ...deleteUser, name: deleteUser?.concatedName ?? '' }}
-              allResourceData={allUsers}
+              allResourceData={allUsers.filter(user => user.optionValue !== deleteUser?._id)}
               onClose={() => {
                 setDeleteUser({})
                 setShowDeleteDialog(false)
