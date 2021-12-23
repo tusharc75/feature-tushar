@@ -33,9 +33,13 @@ import TopDashboardTable from './TopDashboardTable';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
 import Countries from "../../constants/Country.json"
 
+import { useData } from '../../StateProvider/Provider';
 
 const TopDashboard = (props) => {
-  const { moment, currency, filterCurrency, selectedEntity, salesFilter, getExchangeRates, setCurrency, marketSegments,
+  const {
+    state: { selectedEntity }
+  } = useData();
+  const { moment, currency, filterCurrency, salesFilter, getExchangeRates, setCurrency, marketSegments,
     subMarketSegments,
     productCategory,
     setSubMarketSegments,
