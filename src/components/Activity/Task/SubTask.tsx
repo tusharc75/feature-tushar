@@ -1,47 +1,34 @@
-import React, { useContext, useState } from "react";
-import Box from "@material-ui/core/Box";
-import { makeStyles } from "@material-ui/core/styles";
-import {
-  Typography,
-  Button,
-  Grid,
-  Chip,
-  IconButton,
-  TextField,
-  CircularProgress,
-} from "@material-ui/core";
-import { DeleteOutline } from "@material-ui/icons";
+import React, { useContext, useState } from 'react';
+import Box from '@material-ui/core/Box';
+import { makeStyles } from '@material-ui/core/styles';
+import { Typography, Button, Grid, Chip, IconButton, TextField, CircularProgress } from '@material-ui/core';
+import { DeleteOutline } from '@material-ui/icons';
 
-import axiosInstance from "../../../axios/axiosInstance";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import ConfirmationDialog from "../../Helpers/ConfirmationDialog";
+import axiosInstance from '../../../axios/axiosInstance';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 
 const useStyles = makeStyles(() => ({
   marginLeft: {
-    marginLeft: 10,
+    marginLeft: 10
   },
   boldFont: {
-    fontWeight: 500,
+    fontWeight: 500
   },
   childBtn: {
-    position: "absolute",
-    top: "-16px",
-    right: "0",
-  },
+    position: 'absolute',
+    top: '-16px',
+    right: '0'
+  }
 }));
 
-export const SubTask = ({
-  setId,
-  openAddSub,
-  setOpenAddSub,
-  fetchTaskDetail,
-  data,
-}) => {
+export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, data }) => {
   const { setToastConfig } = useContext(CustomToastContext);
 
   const [childTasks, setChildTasks] = useState(data.childTask || null);
+  const [parentTasks, setParentTask] = useState(data.parent || null);
   const [isSubmitting, setSubmitting] = useState(false);
-  const [taskName, setTaskName] = useState("");
+  const [taskName, setTaskName] = useState('');
   const [isError, setError] = useState(false);
   const [deleteTaskId, setDeleteTaskId] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -52,11 +39,11 @@ export const SubTask = ({
       const values = { ...data };
       delete values._id;
       values.parentId = data._id;
-      values.description = "";
+      values.description = '';
       values.name = taskName;
 
       axiosInstance()
-        .post("/task", values)
+        .post('/task', values)
         .then(() => {
           setOpenAddSub(false);
           setSubmitting(false);
@@ -76,20 +63,21 @@ export const SubTask = ({
   };
 
   const deleteTask = () => {
-
     if (!deleteTaskId) return;
 
-    setTimeout(() => {
-      const updTasks = childTasks?.filter((t) => t._id !== deleteTaskId);
-      setChildTasks(updTasks);
-    }, 500);
+    // setTimeout(() => {
+    //   const updTasks = childTasks?.filter((t) => t._id !== deleteTaskId);
+    //   setChildTasks(updTasks || null);
+    // }, 500);
 
     axiosInstance()
       .delete(`/task/${deleteTaskId}`)
       .then(() => {
         setShowConfirmBox(false);
-        setDeleteTaskId(null)
-       })
+        setDeleteTaskId(null);
+        const updTasks = childTasks?.filter((t) => t._id !== deleteTaskId);
+        setChildTasks(updTasks || null);
+      })
       .catch((err) => {
         setToastConfig(err);
       });
@@ -100,13 +88,59 @@ export const SubTask = ({
   return (
     <>
       <Box>
+        {parentTasks && parentTasks.length > 0 && (
+          <Box mb={1}>
+            <div className="position-relative">
+              <h4 className="form-label-style" title="Add Terms & Conditions">
+                Parent Task
+              </h4>
+            </div>
+          </Box>
+        )}
+        {parentTasks &&
+          parentTasks.map((element, index) => (
+            <Box
+              key={index}
+              border={1}
+              onClick={() => handleOpenActivity(element._id)}
+              borderColor="grey.300"
+              p={1.5}
+              mb={1}
+              boxShadow={1}
+              borderRadius={4}
+              style={{ cursor: 'pointer' }}
+            >
+              <Grid container spacing={1}>
+                <Grid item xs={6}>
+                  <Typography variant="body1" color="primary">
+                    {element.name}
+                  </Typography>
+                </Grid>
+                <Grid item xs={6} container justify="flex-end" alignItems="center">
+                  <Chip size="small" label={element.status} color="primary" />
+                  <Box mr={1} />
+                  {/* <IconButton
+                    size="small"
+                    color="default"
+                    onClick={(e) => {
+                      setShowConfirmBox(true);
+                      setDeleteTaskId(element._id);
+                      e.stopPropagation();
+                      // deleteTask(e, element._id)
+                    }}
+                  >
+                    <DeleteOutline color="error" />
+                  </IconButton> */}
+                </Grid>
+              </Grid>
+            </Box>
+          ))}
+      </Box>
+      <Box>
         {((childTasks && childTasks.length > 0) || openAddSub === true) && (
           <Box mb={1}>
             <div className="position-relative">
-              <h4
-                className="form-label-style"
-                title="Add Terms & Conditions"
-              >
+              <h4 className="form-label-style" title="Add Terms & Conditions">
                 Child Task
               </h4>
             </div>
@@ -123,7 +157,7 @@ export const SubTask = ({
               mb={1}
               boxShadow={1}
               borderRadius={4}
-              style={{ cursor: "pointer" }}
+              style={{ cursor: 'pointer' }}
             >
               <Grid container spacing={1}>
                 <Grid item xs={6}>
@@ -131,22 +165,16 @@ export const SubTask = ({
                     {element.name}
                   </Typography>
                 </Grid>
-                <Grid
-                  item
-                  xs={6}
-                  container
-                  justify="flex-end"
-                  alignItems="center"
-                >
+                <Grid item xs={6} container justify="flex-end" alignItems="center">
                   <Chip size="small" label={element.status} color="primary" />
                   <Box mr={1} />
                   <IconButton
                     size="small"
                     color="default"
                     onClick={(e) => {
-                    setShowConfirmBox(true)
-                    setDeleteTaskId(element._id)
-                    e.stopPropagation();
+                      setShowConfirmBox(true);
+                      setDeleteTaskId(element._id);
+                      e.stopPropagation();
                       // deleteTask(e, element._id)
                     }}
                   >
@@ -168,48 +196,30 @@ export const SubTask = ({
               margin="dense"
               onChange={(e) => setTaskName(e.target.value)}
               error={isError && taskName.length < 3}
-              helperText={
-                isError &&
-                taskName.length < 3 &&
-                "Task name must be at least 3 letters"
-              }
+              helperText={isError && taskName.length < 3 && 'Task name must be at least 3 letters'}
             />
             <Box mt={1}>
-              <Button
-                color="primary"
-                size="small"
-                variant="contained"
-                disabled={!taskName || isSubmitting}
-                onClick={handleSave}
-              >
-                {isSubmitting ? <CircularProgress size={18} /> : "Create"}
+              <Button color="primary" size="small" variant="contained" disabled={!taskName || isSubmitting} onClick={handleSave}>
+                {isSubmitting ? <CircularProgress size={18} /> : 'Create'}
               </Button>
-              <Button
-                variant="contained"
-                size="small"
-                className={classes.marginLeft}
-                disableElevation
-                onClick={() => setOpenAddSub(false)}
-              >
-                {" "}
+              <Button variant="contained" size="small" className={classes.marginLeft} disableElevation onClick={() => setOpenAddSub(false)}>
+                {' '}
                 Cancel
               </Button>
             </Box>
           </Box>
         )}
       </Box>
-      {
-        showConfirmBox && (
-          <ConfirmationDialog
-            open={showConfirmBox}
-            message={ `Are you sure you want to delete ${childTasks?.find((t) => t._id === deleteTaskId).name} ?` }
-            onClose={() => {
-              setShowConfirmBox(false);
-            }}
-            onOk={deleteTask}
-          />
-        )
-      }
+      {showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete ${childTasks?.find((t) => t._id === deleteTaskId)?.name} ?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={deleteTask}
+        />
+      )}
     </>
   );
 };

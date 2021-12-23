@@ -31,8 +31,8 @@ import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridCo
 import { AddOutlined } from '@material-ui/icons';
 import { displayDate } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
-import { MdAccountCircle } from "react-icons/md";
-import {AiFillCrown, MdAdd} from "react-icons/all";
+import { MdAccountCircle } from 'react-icons/md';
+import { AiFillCrown, MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 
 const tabs = {
@@ -69,10 +69,10 @@ const Email = () => {
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([])
-  const localStorageSelectedRecords = "emailPage_selected";
+  const [clonedData, setClonedData] = useState([]);
+  const localStorageSelectedRecords = 'emailPage_selected';
 
-  const [columns,] = useState([
+  const [columns] = useState([
     { field: 'to', headerName: 'Recipient', show: true, disabled: true, cellRenderer: 'recipentRenderer' },
     {
       field: 'subject',
@@ -118,7 +118,7 @@ const Email = () => {
         .then(({ data }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     }
   }, [referenceId]);
 
@@ -147,8 +147,9 @@ const Email = () => {
             createdByUser: obj?.createdBy?.user,
             isCreatedByMe
           };
-          if (isCreatedByMe) sentEmails.push(currentObject);
-          else inboxEmailsData.push(currentObject);
+          inboxEmailsData.push(currentObject);
+          // if (isCreatedByMe) sentEmails.push(currentObject);
+          // else inboxEmailsData.push(currentObject);
         });
         dispatch({
           type: 'initialize',
@@ -157,6 +158,7 @@ const Email = () => {
         });
         setSentEmails(sentEmails);
         setInboxEmails(inboxEmailsData);
+
         dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
@@ -349,121 +351,113 @@ const Email = () => {
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} sm={6} md={6} className="d-flex align-items-center gap-1">
               <HiOutlineMail className="headerLogo" /> <span className="listingHeader">{routes.activityEmail.title}</span>
-              <ToggleButtonGroup size="small" className="ml-8" value={currentTab} exclusive onChange={handleTab}>
+              {/* <ToggleButtonGroup size="small" className="ml-8" value={currentTab} exclusive onChange={handleTab}>
                 {Object.keys(tabs).map((k, index) => (
                   <ToggleButton value={tabs[k]} key={index} className="l-2">
                     {k} {currentTab === tabs[k] ? `(${rowCount})` : ''}
                   </ToggleButton>
                 ))}
-              </ToggleButtonGroup>
+              </ToggleButtonGroup> */}
             </Grid>
-            <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side} >
+            <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side}>
               <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                  <Grid style={{width:"100%" , display:"flex"}}>
-                  <SearchFilter
-                    handleChangeFilter={handleChangeFilter}
-                    filter={filter}
-                    chip={{ size: 'large' }}
-                    activityName="email"
-
-
-                  />
-
-                  </Grid>
-                <Grid style={{display: "flex" , gap:"5px"}}>
-                    {<Button
-                        variant={isMobile ? "text" : "contained"}
+                <Grid style={{ width: '100%', display: 'flex' }}>
+                  <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'large' }} activityName="email" />
+                </Grid>
+                <Grid style={{ display: 'flex', gap: '5px' }}>
+                  {
+                    <Button
+                      variant={isMobile ? 'text' : 'contained'}
                       color="primary"
                       size="small"
                       onClick={() => {
                         setOpen(true);
                       }}
-                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                        startIcon={isMobile ? null : <AddOutlined />}
+                      className={isMobile ? 'mobile_button' : styles.add_submit_btn}
+                      startIcon={isMobile ? null : <AddOutlined />}
                     >
-                      {isMobile ? <MdAdd size={23}/> : "Add"}
+                      {isMobile ? <MdAdd size={23} /> : 'Add'}
                     </Button>
-                    }
-                    {/* </Box> */}
-                    <Button
-                        variant={isMobile ? "text" : "contained"}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      aria-controls="action-menu"
-                      disabled={selectedRecords.length > 0 ? false : true}
-                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
-                    >
-                      {isMobile ? "" :  "Actions" } <ExpandMore/>
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
+                  }
+                  {/* </Box> */}
+                  <Button
+                    variant={isMobile ? 'text' : 'contained'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                    disabled={selectedRecords.length > 0 ? false : true}
+                    className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                  >
+                    {isMobile ? '' : 'Actions'} <ExpandMore />
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      onClick={() => {
+                        showConfirmBox(null);
+                        closeActions();
                       }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
                     >
-                      <MenuItem
-                        onClick={() => {
-                          showConfirmBox(null);
-                          closeActions();
-                        }}
-                      >
-                        Delete
-                      </MenuItem>
-                    </Menu>
+                      Delete
+                    </MenuItem>
+                  </Menu>
                 </Grid>
               </Box>
             </Grid>
           </Grid>
         </div>
-        {
-          isMobile ?
-            <CustomSwipableList
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions.note}
-              primaryField={columns?.find(d => d.primaryField)}
-              onClick={(data) => {
-              } }
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(data) => {
-              } }
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                showConfirmBox(data);
-              } }
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              onCreate={false}
-              showClone={false}
-              onClone={() => { } }
-              renderedFrom={"emailPage"} chips={undefined}            />
-            :
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={150}
-              loading={loading}
-              renderedFrom="emailPage"
-              refreshGrid={fetchEmails}
-            />
-        }
+        {isMobile ? (
+          <CustomSwipableList
+            allowSelection={true}
+            allowSwipe={true}
+            permissions={permissions.note}
+            primaryField={columns?.find((d) => d.primaryField)}
+            onClick={(data) => {}}
+            dataRows={dataRows}
+            selectedRecords={selectedRecords}
+            dispatch={dispatch}
+            onEdit={(data) => {}}
+            extraParamsToCheckDelete={true}
+            onDelete={(data) => {
+              showConfirmBox(data);
+            }}
+            rowCount={rowCount}
+            page={page}
+            loading={loading}
+            onCreate={false}
+            showClone={false}
+            onClone={() => {}}
+            renderedFrom={'emailPage'}
+            chips={undefined}
+          />
+        ) : (
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={150}
+            loading={loading}
+            renderedFrom="emailPage"
+            refreshGrid={fetchEmails}
+          />
+        )}
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -486,12 +480,12 @@ const Email = () => {
         {open ? (
           <Dialog
             open={open}
-            fullScreen={fullScreen || (isMobile || isTablet)}
+            fullScreen={fullScreen || isMobile || isTablet}
             TransitionComponent={CustomDialogTransition}
             aria-labelledby="customized-dialog-title"
             maxWidth="md"
             onClose={() => {
-              handleClose()
+              handleClose();
               setFullScreen(false);
             }}
             fullWidth
@@ -499,7 +493,7 @@ const Email = () => {
             <CreateEmail
               emailId={emailId}
               handleClose={() => {
-                handleClose()
+                handleClose();
                 setFullScreen(false);
               }}
               fetchData={fetchEmails}
@@ -507,7 +501,7 @@ const Email = () => {
               options={emailUsersOptions}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
-                setFullScreen(prevState => !prevState)
+                setFullScreen((prevState) => !prevState);
               }}
               showManimizeMaximize={true}
             />
