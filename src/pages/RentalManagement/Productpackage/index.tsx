@@ -204,6 +204,9 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                         _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
                         _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
                     })
+                    if (subRows.length === 0) {
+                        parent.isValid = false
+                    }
                     parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
                     parent.subRows = subRows
                 }
@@ -225,8 +228,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
         const material: any = []
         rows.forEach(d => {
             const element: any = {};
-            element.materialId = d.id;
-            element.type = d.type.toLowerCase();
+            element.materialId = d._id;
+            element.type = addExistingProductDialog.type;
             element.unit = d.unit && d.unit.length ? d.unit[0] : "";
             element.pricingMethod = d.pricingMethod && d.pricingMethod.length ? d.pricingMethod[0] : "";
             element.qty = d.qty ? parseFloat(d.qty) : 1;
@@ -457,6 +460,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}
                 productInventory={[]}
                 type={addExistingProductDialog.type}
+                rentalManagementData={rentalManagementData}
             />
         }
     </Fragment>

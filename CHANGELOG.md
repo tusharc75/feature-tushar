@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.25.0](https://github.com/vebholic/oms_frontend/compare/v2.24.0...v2.25.0) (2021-12-23)
+
+
+### Features
+
+* disable issue PO receiving asset ([33f8a62](https://github.com/vebholic/oms_frontend/commit/33f8a62fd0079ccfb721816336762e6b9e103a38))
+
+
+### Bug Fixes
+
+* **address:** fix not letting add address info ([165a59c](https://github.com/vebholic/oms_frontend/commit/165a59cb13ee009db2fe36943c9ec8f69bf1c5fb))
+* asset available in rental add product /package ([62c3164](https://github.com/vebholic/oms_frontend/commit/62c31642db45952dde2ec39c2cf63c813f461931))
+* bug fix ([354a737](https://github.com/vebholic/oms_frontend/commit/354a737a000d0b0b7d8aaa0c453810cd7d59cf0e))
+* bug fix ([cf35aec](https://github.com/vebholic/oms_frontend/commit/cf35aec83115d484aa3affff77b252a8f61fa103))
+* **customeraccount:** fix not showing checked box when click check all ([cdec21b](https://github.com/vebholic/oms_frontend/commit/cdec21ba8d768a38a5d8de53ab546ddf7f3bc4d0))
+* **customeraccunt:** fix account name error not appearing in clone ([6c7394e](https://github.com/vebholic/oms_frontend/commit/6c7394e76436e2e1d999d6981810ae898a8720dd))
+* delivery ticket ([3e7560e](https://github.com/vebholic/oms_frontend/commit/3e7560e9fb3e77529a6fe1381ac0c442642e556b))
+* email bug fix ([a8adc36](https://github.com/vebholic/oms_frontend/commit/a8adc36724dd315c916aad540b0ec214f3d04d33))
+* grid changes in add product/package in rental ([d579623](https://github.com/vebholic/oms_frontend/commit/d57962331bd9a2cab1fc358ae3200a9e25edab4d))
+* no color selected ([5d18c20](https://github.com/vebholic/oms_frontend/commit/5d18c20ad0c426ca66c1d80f269c1d07ef540905))
+* retal bug fix ([36dc21c](https://github.com/vebholic/oms_frontend/commit/36dc21c812c432208fe45a62aa2c89da14feff2f))
+
 ## [2.24.0](https://github.com/vebholic/oms_frontend/compare/v2.23.0...v2.24.0) (2021-12-22)
 
 

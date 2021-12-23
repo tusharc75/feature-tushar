@@ -388,6 +388,23 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
         }))
     }
 
+    function validate(values) {
+        const errors = {};
+        let estimateStartDate = moment(values?.estimateStartDate);
+        let estimateEndDate = moment(values?.estimateEndDate);
+        if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+            errors['estimateEndDate'] = 'Please enter valid estimate end date';
+        }
+        let actualStartDate = moment(values?.actualStartDate);
+        let actualEndDate = moment(values?.actualEndDate);
+        if (actualStartDate.format("YYYY-MM-DD") !== actualEndDate.format("YYYY-MM-DD")) {
+            if (actualEndDate.diff(actualStartDate, 'days') <= 0) {
+                errors['actualEndDate'] = 'Please enter valid actual end date';
+            }
+        }
+        return errors;
+    }
+
     return (
         <>
             <Dialog
@@ -446,6 +463,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                         initialValues={rentalData.initialValues}
                         validationSchema={yupSchema(rentalData.fields)}
                         validateOnMount
+                        validate={validate}
                         onSubmit={() => { }}
                     >
                         {({
@@ -489,10 +507,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                         type={field.type}
                                                                                         options={accountData}
                                                                                         disabled={!isClone ? (rentalManagementId && field.disableOnEdit) : false}
-                                                                                        // setFieldValue={(name, value) => {
-                                                                                        //   handleValuesChange({ [name]: value })
-                                                                                        //   setFieldValue(name, value)
-                                                                                        // }}
                                                                                         required={field.required}
                                                                                         fullWidth
                                                                                         isTooltip={
@@ -761,6 +775,28 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 tooltipMessage={field?.tooltipMessage}
                                                                                 size="small"
                                                                                 minDate={moment(values["estimateStartDate"]).add(1, "day")}
+                                                                            />
+                                                                        ) : ["actualStartDate", "actualEndDate"].includes(field.fieldName) ? (
+                                                                            <FormTypes
+                                                                                {...field}
+                                                                                disabled={values["status"] === "Ready to Invoice" ? false : true}
+                                                                                fieldData={field}
+                                                                                values={values}
+                                                                                errors={errors}
+                                                                                touched={touched}
+                                                                                label={field.fieldLabel}
+                                                                                name={field.fieldName}
+                                                                                type={field.type}
+                                                                                options={field.option}
+                                                                                setFieldValue={(name, value) => {
+                                                                                    handleValuesChange({ [name]: value })
+                                                                                    setFieldValue(name, value)
+                                                                                }}
+                                                                                required={field.required}
+                                                                                fullWidth
+                                                                                isTooltip={field?.isTooltip || false}
+                                                                                tooltipMessage={field?.tooltipMessage}
+                                                                                size="small"
                                                                             />
                                                                         )
                                                                             : field.fieldName === "billingAddress" ? (

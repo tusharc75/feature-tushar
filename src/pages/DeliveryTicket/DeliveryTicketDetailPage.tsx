@@ -182,12 +182,12 @@ export default function DeliveryTicketDetail(props) {
             }
           }
           if (ticket?.typeDetails?.transferType.includes("External Supplier")) {
-            if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Plant")) {
+            if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes(ticket?.ticketType === "Loading" ? "Receiving Plant" : "Pickup Plant")) {
               return false
             }
           }
           if (ticket?.typeDetails?.transferType.includes("External Customer")) {
-            if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Plant")) {
+            if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes(ticket?.ticketType === "Loading" ? "Receiving Plant" : "Pickup Plant")) {
               return false
             }
           }
@@ -781,9 +781,6 @@ export default function DeliveryTicketDetail(props) {
         ) : null}
         {openUpdateDialog && (
           <ManageDeliveryTicket
-            rentalData={deliveryTicketData?.type === "Rental Job" ? deliveryTicketData?.rental?.optionValue : null}
-            repairJobData={deliveryTicketData?.type === "Repair Job" ? deliveryTicketData?.repairJob?.optionValue : null}
-            transferData={deliveryTicketData?.type === "Transfer Asset" ? deliveryTicketData?.transferAsset?.optionValue : null}
             deliveryTicketId={deliveryTicketData?._id}
             open={openUpdateDialog}
             onClose={() => setOpenUpdateDialog(false)}

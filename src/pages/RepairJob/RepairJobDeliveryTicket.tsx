@@ -435,7 +435,6 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
         onClose={() => setShowDeliveryTicketDialog({ open: false, selectedAssets: [] })}
         productInventory={showDeliveryTicketDialog.selectedAssets}
         warehouseId={repairJobData?.plant?.optionValue ?? repairJobData?.warehouse?.optionValue}
-        repairJobData={repairJobData}
         onSuccess={() => {
           setShowDeliveryTicketDialog({ open: false, selectedAssets: [] })
           fetchRecords();
