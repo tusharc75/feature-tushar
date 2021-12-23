@@ -36,12 +36,18 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-    const [columns, setColumns] = useState([
-        { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-    ]);
+    const [columns, setColumns] = useState([]);
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [materialList, setMaterialList] = useState([]);
 
+    const defaultColumns = type === "product" ?
+        [
+            { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+            { field: "inventoryInWarehouseCount", headerName: "Available Asset", show: true, disabled: true, cellRenderer: "commonRenderer", editable: false }
+        ]
+        : [
+            { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
+        ]
     useEffect(() => {
         fetchMaterial()
     }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
@@ -80,6 +86,11 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
 
     const getQueryString = () => {
         let deepFilter = type === "product" ? `?warehouse=${rentalManagementData?.warehouse?.optionValue}&page=${page}&limit=${limit}` : `?page=${page}&limit=${limit}`;
+
+        if (type !== "product") {
+            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify([{ field: 'packageType', term: 'product' }]))}&filterType=and`
+        }
+
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
             Object.keys(filters).forEach(field => {
@@ -126,10 +137,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 setFrameWorkComponent({ ...tempFrameworkComponent })
                 columns = [...columns, ...getStaticFields()]
                 // setColumns([...columns])
-                setColumns((prevState) => ([
-                    ...columns,
-                    ...prevState
-                ]))
+                setColumns([...columns, ...defaultColumns])
             })
     }
 
@@ -199,7 +207,9 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                 <Button
                                     size="small"
                                     color="primary"
-                                    onClick={() => addProductInventory(selectedRecords)}
+                                    onClick={() => addProductInventory(materialList.filter((data) =>
+                                        selectedRecords.some((rec) => rec.id === data._id)
+                                    ))}
                                     variant="contained"
                                     disabled={!Boolean(selectedRecords.length) || isAddingProducts}
                                     endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
