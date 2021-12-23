@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { Box, Avatar } from "@material-ui/core";
+import { Box, Avatar, makeStyles } from "@material-ui/core";
 import { Rating } from "@material-ui/lab";
 import styles from './product-card.module.scss'
 import { useHistory } from "react-router-dom";
@@ -7,49 +7,30 @@ import { formatAmountWithCurrency } from "../../../constants/helpers";
 import { BsImage } from 'react-icons/bs';
 import { MdAddShoppingCart } from 'react-icons/md';
 import routes from "../../Helpers/Routes";
-import { Carousel } from 'react-responsive-carousel';
+import Carousel from "react-material-ui-carousel";
+
+const useStyles = makeStyles(() => ({
+  imageContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  img: {
+    maxWidth: "500px",
+  }
+}));
 
 const ProductCard = (props: { product: any, onAddItem: any }) => {
   const { product, onAddItem } = props;
-
+  const classes = useStyles();
   const history = useHistory()
 
-  const createCarouselItemImage = (image, options = {}) => (
-    <div key={image}>
-      <img src={image} />
-      {/* <p className="legend">Legend</p> */}
-    </div>
-  );
-
+  //  replace below images variable with the array of images of the product
   const images = [
     "https://images.unsplash.com/photo-1506467493604-25d7861a6703?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTF8fHxlbnwwfHx8fA%3D%3D&w=1000&q=80",
     "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2016/10/colima_volcano/16186851-1-eng-GB/Colima_volcano.jpg",
     "https://news.cornell.edu/sites/default/files/styles/full_size/public/2020-10/1012_nasa.jpg?itok=KJ3jzpto"
   ]
-
-  //  replace below images variable with the array of images of the product
-  const baseChildren = <div>{images.map(createCarouselItemImage)}</div>;
-
-  const getConfigurableProps = () => ({
-    showArrows: true,
-    showStatus: false,
-    // showIndicators: boolean('showIndicators', true, tooglesGroupId),
-    // infiniteLoop: boolean('infiniteLoop', true, tooglesGroupId),
-    showThumbs: false,
-    // useKeyboardArrows: boolean('useKeyboardArrows', true, tooglesGroupId),
-    // autoPlay: boolean('autoPlay', true, tooglesGroupId),
-    // stopOnHover: boolean('stopOnHover', true, tooglesGroupId),
-    // swipeable: boolean('swipeable', true, tooglesGroupId),
-    // dynamicHeight: boolean('dynamicHeight', true, tooglesGroupId),
-    // emulateTouch: boolean('emulateTouch', true, tooglesGroupId),
-    // autoFocus: boolean('autoFocus', false, tooglesGroupId),
-    // thumbWidth: number('thumbWidth', 100, {}, valuesGroupId),
-    // selectedItem: number('selectedItem', 0, {}, valuesGroupId),
-    // interval: number('interval', 2000, {}, valuesGroupId),
-    // transitionTime: number('transitionTime', 500, {}, valuesGroupId),
-    // swipeScrollTolerance: number('swipeScrollTolerance', 5, {}, valuesGroupId),
-    // ariaLabel: text('ariaLabel', undefined),
-  });
 
   return (
     <div className={styles.product_card}>
@@ -74,10 +55,28 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
       // }}
       >
         {images
-          ? <Carousel
-            // autoFocus={true} showThumbs={false} showStatus={false} useKeyboardArrows className="presentation-mode"
-            {...getConfigurableProps()}>
-            {baseChildren.props.children}
+          ?
+          <Carousel
+            strictIndexing
+            animation="slide"
+            autoPlay={false}
+            navButtonsAlwaysVisible
+            // indicators={false}
+            cycleNavigation={false}
+            navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
+              style: {
+                top: "38%",
+                opacity: 0.3,
+                padding: 5,
+                borderRadius: "50%"
+              }
+            }}
+          >
+            {images.map((image: any, i) => (
+              <div key={i} className={classes.imageContainer}>
+                <img className={classes.img} src={image} />
+              </div>
+            ))}
           </Carousel>
           : <BsImage className={`${styles.no_image} cursor-pointer`} />}
       </Box>

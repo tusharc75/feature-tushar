@@ -9,7 +9,7 @@ import AzureInstance from './AzureInstance';
 import { init } from '@sentry/react';
 import 'ag-grid-community/dist/styles/ag-grid.min.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
+// import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import './styles/index.scss';
 import './styles/custom-react-table.scss';
 import './styles/common-styles.scss';
