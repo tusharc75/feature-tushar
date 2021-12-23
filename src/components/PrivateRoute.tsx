@@ -34,7 +34,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
       }
     } else if (
       pathname === '/' ||
-      [
+      ['dashboards',
         'case',
         'task',
         'attachment',
