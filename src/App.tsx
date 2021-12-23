@@ -254,7 +254,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, []);
 
   const conditionalRedirect = (Comp, location) => {
@@ -485,9 +485,9 @@ function App() {
             <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>
               <QuoteDetail />
             </PrivateRoute>
-            <Route exact path={'/dashboards'}>
+            <PrivateRoute exact path={'/dashboards'}>
               <KpiDashboards />
-            </Route>
+            </PrivateRoute>
             {/* <Route exact path={"/dashboards"}>
               <KpiDashboard />
             </Route>
