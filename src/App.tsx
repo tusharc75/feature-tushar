@@ -510,10 +510,10 @@ function App() {
             <PrivateRoute exact path={routes.quoteBuilder.path}>
               <QuoteBuilderCombined />
             </PrivateRoute>
-            <PrivateRoute exact path="/product-list">
+            <PrivateRoute exact path={routes.eCommerce.path}>
               <Products />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.productDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes.eCommerceDetail.path}/:id`}>
               <ProductDetails />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.productDetail.path}/:id/bom`}>

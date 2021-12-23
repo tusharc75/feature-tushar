@@ -6,11 +6,50 @@ import { useHistory } from "react-router-dom";
 import { formatAmountWithCurrency } from "../../../constants/helpers";
 import { BsImage } from 'react-icons/bs';
 import { MdAddShoppingCart } from 'react-icons/md';
+import routes from "../../Helpers/Routes";
+import { Carousel } from 'react-responsive-carousel';
 
 const ProductCard = (props: { product: any, onAddItem: any }) => {
   const { product, onAddItem } = props;
 
   const history = useHistory()
+
+  const createCarouselItemImage = (image, options = {}) => (
+    <div key={image}>
+      <img src={image} />
+      {/* <p className="legend">Legend</p> */}
+    </div>
+  );
+
+  const images = [
+    "https://images.unsplash.com/photo-1506467493604-25d7861a6703?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTF8fHxlbnwwfHx8fA%3D%3D&w=1000&q=80",
+    "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2016/10/colima_volcano/16186851-1-eng-GB/Colima_volcano.jpg",
+    "https://news.cornell.edu/sites/default/files/styles/full_size/public/2020-10/1012_nasa.jpg?itok=KJ3jzpto"
+  ]
+
+  //  replace below images variable with the array of images of the product
+  const baseChildren = <div>{images.map(createCarouselItemImage)}</div>;
+
+  const getConfigurableProps = () => ({
+    showArrows: true,
+    showStatus: false,
+    // showIndicators: boolean('showIndicators', true, tooglesGroupId),
+    // infiniteLoop: boolean('infiniteLoop', true, tooglesGroupId),
+    showThumbs: false,
+    // useKeyboardArrows: boolean('useKeyboardArrows', true, tooglesGroupId),
+    // autoPlay: boolean('autoPlay', true, tooglesGroupId),
+    // stopOnHover: boolean('stopOnHover', true, tooglesGroupId),
+    // swipeable: boolean('swipeable', true, tooglesGroupId),
+    // dynamicHeight: boolean('dynamicHeight', true, tooglesGroupId),
+    // emulateTouch: boolean('emulateTouch', true, tooglesGroupId),
+    // autoFocus: boolean('autoFocus', false, tooglesGroupId),
+    // thumbWidth: number('thumbWidth', 100, {}, valuesGroupId),
+    // selectedItem: number('selectedItem', 0, {}, valuesGroupId),
+    // interval: number('interval', 2000, {}, valuesGroupId),
+    // transitionTime: number('transitionTime', 500, {}, valuesGroupId),
+    // swipeScrollTolerance: number('swipeScrollTolerance', 5, {}, valuesGroupId),
+    // ariaLabel: text('ariaLabel', undefined),
+  });
 
   return (
     <div className={styles.product_card}>
@@ -19,9 +58,9 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
       )}
       <div className={styles.title}>
         <h4
-            className={"cursor-pointer"}
+          className={"cursor-pointer"}
           onClick={() => {
-            history.push(`product/details/${product._id}`);
+            history.push(`${routes.eCommerceDetail.path}/${product._id}`);
           }}
         >{`${product.productName}, ${product.productCategory.optionLabel} `}</h4>
         <Avatar className={styles.product_less}>-10%</Avatar>
@@ -30,11 +69,17 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        onClick={() => {
-          history.push(`product/details/${product._id}`);
-        }}
+      // onClick={() => {
+      //   history.push(`${routes.eCommerceDetail.path}/${product._id}`);
+      // }}
       >
-        {product.productImage ? <img src={product.productImage} alt={product.productName} /> : <BsImage className={`${styles.no_image} cursor-pointer`} />}
+        {images
+          ? <Carousel
+            // autoFocus={true} showThumbs={false} showStatus={false} useKeyboardArrows className="presentation-mode"
+            {...getConfigurableProps()}>
+            {baseChildren.props.children}
+          </Carousel>
+          : <BsImage className={`${styles.no_image} cursor-pointer`} />}
       </Box>
 
       <div className={styles.text}>
@@ -58,18 +103,18 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
               </>
             }
           </div>
-          <div >
+          <div>
 
-              <Avatar className={`${styles.cart_icon} cursor-pointer`} onClick={() => onAddItem(product)}>
-                  <MdAddShoppingCart size={18} />
-              </Avatar>
+            <Avatar className={`${styles.cart_icon} cursor-pointer`} onClick={() => onAddItem(product)}>
+              <MdAddShoppingCart size={18} />
+            </Avatar>
           </div>
         </Box>
         <div className={styles.rating}>
-            <Rating name="size-small" value={product.rating} defaultValue={4} readOnly size="small" />
-            <span>
-              <h5>4.1 out of 5.0</h5>
-            </span>
+          <Rating name="size-small" value={product.rating} defaultValue={4} readOnly size="small" />
+          <span>
+            <h5>4.1 out of 5.0</h5>
+          </span>
         </div>
       </div>
     </div>

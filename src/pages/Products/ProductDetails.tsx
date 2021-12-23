@@ -154,7 +154,7 @@ export default function ProductDetails() {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[routes.productList, { title: productDetails?.productName }]} />
+        <CustomBreadCrumbs routes={[routes.eCommerce, { title: productDetails?.productName }]} />
       </Grid>
       <Box className="main-container">
         {showCreateQuoteDialog && (

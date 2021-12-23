@@ -53,7 +53,7 @@ const ProductList = ({ products, fetchData, count }) => {
 
     return (<>
         <Grid container className="headerbox">
-            <CustomBreadCrumbs routes={[{ title: routes.productList.title }]} />
+            <CustomBreadCrumbs routes={[{ title: routes.eCommerce.title }]} />
         </Grid>
         <div className="detail-container grid-product-category pr-0">
             <div>
