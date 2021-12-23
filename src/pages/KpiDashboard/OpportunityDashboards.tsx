@@ -7,9 +7,13 @@ import OpportunityTable from './OpportunityDashboardTable';
 import { FilterList } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
 import Countries from "../../constants/Country.json"
+import { useData } from '../../StateProvider/Provider';
 
 const OpportunityDashboards = (props) => {
-  const { moment, currency, filterCurrency, selectedEntity, salesFilter, getExchangeRates, setCurrency, marketSegments,
+  const {
+    state: { selectedEntity }
+  } = useData();
+  const { moment, currency, filterCurrency, salesFilter, getExchangeRates, setCurrency, marketSegments,
     subMarketSegments,
     productCategory,
     setSubMarketSegments,
