@@ -7,6 +7,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CircularProgress from "@material-ui/core/CircularProgress"
+import routes from '../../Helpers/Routes';
 
 function FrequentlyBought({ id }) {
   const history = useHistory();
@@ -58,7 +59,7 @@ function FrequentlyBought({ id }) {
           })
           .then(({ data }) => {
             setLoading(false)
-            history.push("/product-list");
+            history.push(routes.eCommerce.path);
           }).catch((error) => {
             setLoading(false)
             toastConfig.setToastConfig(error);
