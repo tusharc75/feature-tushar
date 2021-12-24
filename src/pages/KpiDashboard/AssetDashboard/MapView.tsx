@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography, CircularProgress } from '@material-ui/core';
-import { GoogleMap, Marker, MarkerClusterer, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, Marker, MarkerClusterer, InfoWindow, } from '@react-google-maps/api';
 import axiosInstance from '../../../axios/axiosInstance';
 
 type locationType = {
@@ -33,7 +33,7 @@ const MapView = (props: MapViewProps) => {
     setMap(map);
   }, []);
 
-  const onUnmount = React.useCallback(function callback(map) {
+  const onUnmount = React.useCallback(() => {
     setMap(null);
   }, []);
 
@@ -43,7 +43,8 @@ const MapView = (props: MapViewProps) => {
   };
 
   const containerStyle = {
-    height: smallScreen ? '500px' : '700px',
+    minHeight: smallScreen ? '500px' : '700px',
+    height: "100%",
     maxWidth: '600px',
     minWidth: '100%'
   };
@@ -71,9 +72,7 @@ const MapView = (props: MapViewProps) => {
       <Box height={smallScreen ? '500px' : '700px'} borderRadius={8} overflow="hidden">
         <GoogleMap
           options={{
-            zoom: 3,
-            center: center,
-            disableDoubleClickZoom: true,
+            zoom: 4,
             mapTypeId: google.maps.MapTypeId.ROADMAP,
             mapTypeControlOptions: {
               style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
@@ -100,6 +99,7 @@ const MapView = (props: MapViewProps) => {
           mapContainerStyle={containerStyle}
           onLoad={onLoad}
           onUnmount={onUnmount}
+          center={center}
         >
           <MarkerClusterer>
             {(clusterer) =>
@@ -138,7 +138,7 @@ const MapView = (props: MapViewProps) => {
                   </Typography>
                   <Box my={1} />
                   <Typography color="textPrimary" variant="body2">
-                    <strong>Total: </strong>
+                    <strong>Total Asset: </strong>
                     {selectedBase?.count}
                   </Typography>
                   {selectedAsset.map((d: { count: number, status: string }) => (
