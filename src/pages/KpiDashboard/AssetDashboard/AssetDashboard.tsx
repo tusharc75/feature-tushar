@@ -68,6 +68,20 @@ const AssetDashboard = () => {
       });
   };
 
+  // const fetchAssetsData = () => {
+  //   axiosInstance()
+  //     .get(`/dashboard/assets-total-in-use?limit=5&page=0&between={"from":"2020-08-22","to":"2021-12-24"}`)
+  //     .then(({ data }) => {
+  //       setAssetLocationData(data.data);
+  //       setLoading(false);
+  //     })
+  //     .catch(() => {
+  //       setLoading(false);
+  //     });
+  // };
+
+
+
   return (
     <div>
       <Box mb={1} minWidth={'300px'}>
