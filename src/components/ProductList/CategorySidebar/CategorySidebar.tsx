@@ -101,11 +101,11 @@ const CategorySidebar = ({ fetchData, setCategory }) => {
 
   return (
     <div className={styles.sidebar_nav}>
-      <Paper component="form" className={classes.root}>
+      {/* <Paper component="form" className={classes.root}>
         <IconButton type="submit" className={classes.iconButton} aria-label="search">
           <SearchIcon />
         </IconButton>
-      </Paper>
+      </Paper> */}
 
       <div className="d-flex align-items-center justify-content-space-between my-2 px-1">
         <h3>Categories</h3>
