@@ -26,6 +26,7 @@ const AssetDashboard = () => {
   });
 
   React.useEffect(() => {
+    setLoading(true);
 
     let timeout: ReturnType<typeof setTimeout> = null;
 
@@ -38,6 +39,7 @@ const AssetDashboard = () => {
 
     return () => {
       timeout = null
+      setLoading(false)
     }
 
   }, [filter, selectedEntity]);
@@ -45,7 +47,6 @@ const AssetDashboard = () => {
 
 
   const fetchLocationBase = () => {
-    setLoading(true);
     let url = '?';
     Object.keys(filter).forEach((key) => {
       if (Array.isArray(filter[key]) && filter[key].length > 0) {
@@ -95,7 +96,7 @@ const AssetDashboard = () => {
             <MapView smallScreen={smallScreen} data={assetLocationData} loading={loading} />
           </Grid>
           <Grid item xs={12} md={6}>
-            <AssetChart smallScreen={smallScreen} />
+            <AssetChart loading={loading} data={assetLocationData} />
           </Grid>
         </Grid>
       </Box>

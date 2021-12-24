@@ -3,7 +3,7 @@ import { CircularProgress } from "@material-ui/core";
 
 import PropTypes from "prop-types";
 
-const Loader = ({ text, ...rest }) => {
+const Loader = ({ noLoader = false, text, ...rest }) => {
   return (
     <Box
       display="flex"
@@ -12,7 +12,7 @@ const Loader = ({ text, ...rest }) => {
       justifyContent="center"
       {...rest}
     >
-      <CircularProgress />
+      {!noLoader && <CircularProgress />}
       <Box marginY={1} />
       {text && <Typography variant="caption">{text}</Typography>}
     </Box>
