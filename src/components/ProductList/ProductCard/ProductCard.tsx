@@ -74,7 +74,11 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
           >
             {images.map((image: any, i) => (
               <div key={i} className={classes.imageContainer}>
-                <img className={classes.img} src={image} />
+                <img className={classes.img} src={image}
+                  onClick={() => {
+                    history.push(`${routes.eCommerceDetail.path}/${product._id}`);
+                  }}
+                />
               </div>
             ))}
           </Carousel>
