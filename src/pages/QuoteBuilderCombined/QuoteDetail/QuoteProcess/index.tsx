@@ -63,6 +63,8 @@ import { MdDelete } from 'react-icons/md';
 import { AiOutlineFileExcel, AiOutlineFilePdf } from 'react-icons/ai';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
+import CustomDialogFooter from '../../../../components/CustomDialog/CustomDialogFooter';
+import CustomButton from '../../../../components/Helpers/CustomButton';
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
@@ -1795,21 +1797,12 @@ export default function QuoteProcess(props) {
                     onChange={(e, val) => {
                       if (val.includes("Select All") && ["Select All", ...ColumnName].sort().toString() !== val.sort().toString()) {
                         showPDFArrangeColumns ? setVisibleColumns(ColumnName) : setVisibleColumnsExcel(ColumnName);
-                        showPDFArrangeColumns
-                          ? handleVersionUpdate(ColumnName, visibleColumnsExcel, versionStatus, state?.selectedRecords)
-                          : handleVersionUpdate(visibleColumns, ColumnName, versionStatus, state?.selectedRecords);
                       }
                       else if (["Select All", ...ColumnName].sort().toString() === val.sort().toString()) {
-                        showPDFArrangeColumns ? setVisibleColumns(defaultSelectColumns) : setVisibleColumnsExcel(defaultSelectColumns);
-                        showPDFArrangeColumns
-                          ? handleVersionUpdate(defaultSelectColumns, visibleColumnsExcel, versionStatus, state?.selectedRecords)
-                          : handleVersionUpdate(visibleColumns, defaultSelectColumns, versionStatus, state?.selectedRecords);
+                        showPDFArrangeColumns ? setVisibleColumns([]) : setVisibleColumnsExcel([]);
                       }
                       else {
                         showPDFArrangeColumns ? setVisibleColumns(val) : setVisibleColumnsExcel(val);
-                        showPDFArrangeColumns
-                          ? handleVersionUpdate(val, visibleColumnsExcel, versionStatus, state?.selectedRecords)
-                          : handleVersionUpdate(visibleColumns, val, versionStatus, state?.selectedRecords);
                       }
                     }}
                     options={["Select All", ...ColumnName]}
@@ -1844,6 +1837,25 @@ export default function QuoteProcess(props) {
               </Grid>
             </Grid>
           </CustomDialogContent>
+          <CustomDialogFooter>
+            <CustomButton
+              loading={loading}
+              variant="contained"
+              color="primary"
+              size="small"
+              disabled={
+                showPDFArrangeColumns ? visibleColumns.length === 0 : visibleColumnsExcel.length === 0
+              }
+              onClick={(e) => {
+                e.preventDefault();
+                handleVersionUpdate(visibleColumns, visibleColumnsExcel, versionStatus, state?.selectedRecords);
+                setShowPDFArrangeColumns(false);
+                setShowExcelArrangeColumns(false);
+              }}
+            >
+              Save
+            </CustomButton>
+          </CustomDialogFooter>
         </Dialog>
       )}
     </>
