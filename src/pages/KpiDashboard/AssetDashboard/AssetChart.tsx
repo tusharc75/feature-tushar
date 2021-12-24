@@ -2,7 +2,9 @@ import React from 'react';
 import { Box, Grid } from '@material-ui/core';
 import Chart from 'react-chartjs-2';
 
-const data = {
+import Loader from '../../../components/Loader'
+
+const data_chart = {
   labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
   datasets: [
     {
@@ -30,7 +32,12 @@ const data = {
   type: ''
 };
 
-const AssetChart = ({ smallScreen }) => {
+const AssetChart = ({ loading, data }) => {
+
+  if (loading) return <Loader noLoader minHeight={'100%'} text={'Loading chart data...'} />
+
+  if (!data || data.length === 0) return <Loader noLoader minHeight={'100%'} text={'No data available'} />
+
   return (
     <React.Fragment>
       <Grid container spacing={1} alignItems='flex-end'>
@@ -41,7 +48,7 @@ const AssetChart = ({ smallScreen }) => {
                 maintainAspectRatio: false
               }}
               type="pie"
-              data={data}
+              data={data_chart}
             />
           </Box>
         </Grid>
@@ -52,7 +59,7 @@ const AssetChart = ({ smallScreen }) => {
                 maintainAspectRatio: false
               }}
               type="bar"
-              data={data}
+              data={data_chart}
             />
           </Box>
         </Grid>
