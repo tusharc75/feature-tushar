@@ -98,9 +98,9 @@ const ProductList = ({ products, fetchData, count, loadMoreData, loading }) => {
                                 ))
                             }
                         </div> : <div className="p-5 d-flex align-items-center justify-content-center" style={{ background: "white" }}>
-                            <h2>
+                            <h2 className={loading ? "loading-dots" : ""}>
                                 {
-                                    loading ? "Loading product(s)..." : "No product(s) found"
+                                    loading ? "Loading product(s)" : "No product(s) found"
                                 }
                             </h2>
                         </div>
