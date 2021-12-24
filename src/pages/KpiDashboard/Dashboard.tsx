@@ -4,7 +4,6 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import moment from 'moment';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import Layout from '../../components/Layout';
 import axiosInstance from '../../axios/axiosInstance';
 import { marketSegment, customerAccount } from '../../constants/helpers';
 import OpportunityDashboards from './OpportunityDashboards';

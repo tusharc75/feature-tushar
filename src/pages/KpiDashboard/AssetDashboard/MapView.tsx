@@ -24,7 +24,7 @@ const MapView = (props: MapViewProps) => {
 
   const [isFetching, setFetching] = React.useState(false);
   const [map, setMap] = React.useState(null);
-  const [selectedAsset, setSelectedAsset] = React.useState(null);
+  const [selectedAsset, setSelectedAsset] = React.useState([]);
   const [selectedBase, setSelectedBase] = React.useState(null);
 
   const onLoad = React.useCallback(function callback(map) {
@@ -56,7 +56,7 @@ const MapView = (props: MapViewProps) => {
         data: { data }
       } = await axiosInstance().get(`dashboard/location-base-status-count?location=${id}`);
       if (data) {
-        setSelectedAsset(data[0]);
+        setSelectedAsset(data);
       }
       setFetching(false);
     } catch (error) {
@@ -71,6 +71,9 @@ const MapView = (props: MapViewProps) => {
       <Box height={smallScreen ? '500px' : '700px'} borderRadius={8} overflow="hidden">
         <GoogleMap
           options={{
+            zoom: 3,
+            center: center,
+            disableDoubleClickZoom: true,
             mapTypeId: google.maps.MapTypeId.ROADMAP,
             mapTypeControlOptions: {
               style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
@@ -95,8 +98,6 @@ const MapView = (props: MapViewProps) => {
             ]
           }}
           mapContainerStyle={containerStyle}
-          center={center}
-          zoom={5}
           onLoad={onLoad}
           onUnmount={onUnmount}
         >
@@ -111,7 +112,7 @@ const MapView = (props: MapViewProps) => {
                         text: asset.count.toString(),
                         fontWeight: 'bold',
                         color: 'white',
-                        fontSize: '20px'
+                        fontSize: '18px'
                       }}
                       onClick={() => fetchLocationData(asset._id, asset)}
                       position={new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude)}
@@ -127,22 +128,25 @@ const MapView = (props: MapViewProps) => {
               position={new google.maps.LatLng(selectedBase?.location.latitude, selectedBase?.location.longitude)}
               onCloseClick={() => {
                 setSelectedBase(null)
-                setSelectedAsset(null)
+                setSelectedAsset([])
               }}
             >
-              {selectedAsset || !isFetching ? (
-                <Box textAlign={'center'}>
+              {selectedAsset.length > 0 || !isFetching ? (
+                <Box textAlign={'left'} maxWidth={250}>
                   <Typography color="textPrimary" variant="body1">
-                    {selectedBase?.location.concatedName}
+                    {`"${selectedBase?.location.concatedName}"`}
                   </Typography>
+                  <Box my={1} />
                   <Typography color="textPrimary" variant="body2">
-                    <strong>Asset Count: </strong>
+                    <strong>Total: </strong>
                     {selectedBase?.count}
                   </Typography>
-                  <Typography color="textPrimary" variant="body2">
-                    <strong>Status: </strong>
-                    {selectedAsset?.status}
-                  </Typography>
+                  {selectedAsset.map((d: { count: number, status: string }) => (
+                    <Typography color="textPrimary" variant="body2">
+                      <strong>{`${d.status}: `}</strong>
+                      {d.count}
+                    </Typography>
+                  ))}
                 </Box>
               ) : (
                 <Box width={100} p={2} display={'flex'} justifyContent={'center'}>

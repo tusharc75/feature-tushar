@@ -5,6 +5,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import MapView from './MapView';
 import AssetFilters from './AssetFilters';
 import AssetChart from './AssetChart';
+import { useData } from '../../../StateProvider/Provider';
 
 export type FilterType = {
   productCategory: { id: string; title: string }[];
@@ -13,6 +14,7 @@ export type FilterType = {
 };
 
 const AssetDashboard = () => {
+  const { state: { selectedEntity } } = useData()
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [assetLocationData, setAssetLocationData] = React.useState([]);
@@ -38,7 +40,7 @@ const AssetDashboard = () => {
       timeout = null
     }
 
-  }, [filter]);
+  }, [filter, selectedEntity]);
 
 
 
