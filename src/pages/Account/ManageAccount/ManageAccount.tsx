@@ -56,7 +56,7 @@ export default function ManageAccount(props) {
   const [disableOwnerSelection] = useState(
     !isNew && user.user._id !== accountData.initialValues.owner
   );
- 
+
 
   //  Owner, Collaborator Code - Start
   const [formsData, setFormsData] = useState([]);
@@ -333,7 +333,7 @@ export default function ManageAccount(props) {
               `Clone ${accountNameForClone}`
               :
               isNew
-                ?  accountResource === "customerAccount" ? "Add Customer Account" : "Add Supplier Account"
+                ? accountResource === "customerAccount" ? "Add Customer Account" : "Add Supplier Account"
                 : `Editing ${accountData.initialValues.accountName
                   ? accountData.initialValues.accountName
                   : ""
@@ -515,8 +515,7 @@ export default function ManageAccount(props) {
                                           setFieldValue("collaborator", []);
                                         }}
                                       />
-                                    ) : field.fieldName ===
-                                      "isShippingAddressSameAsBillingAddress" ? (
+                                    ) : field.fieldName.includes("isShippingAddressSameAsBillingAddress") ? (
                                       <FormTypes
                                         isNew={isNew}
                                         {...field}
@@ -1071,7 +1070,7 @@ export default function ManageAccount(props) {
                       loading={loading}
                       disabled={
                         loading ||
-                        uploadingImageOrFileProgress > 0 
+                        uploadingImageOrFileProgress > 0
                         // isFieldNotTouched(accountData, values)
                         // || Object.keys(errors).length > 0 ? true : false
                       }

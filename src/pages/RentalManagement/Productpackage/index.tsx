@@ -228,8 +228,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
         const material: any = []
         rows.forEach(d => {
             const element: any = {};
-            element.materialId = d.id;
-            element.type = d.type.toLowerCase();
+            element.materialId = d._id;
+            element.type = addExistingProductDialog.type;
             element.unit = d.unit && d.unit.length ? d.unit[0] : "";
             element.pricingMethod = d.pricingMethod && d.pricingMethod.length ? d.pricingMethod[0] : "";
             element.qty = d.qty ? parseFloat(d.qty) : 1;
@@ -460,6 +460,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}
                 productInventory={[]}
                 type={addExistingProductDialog.type}
+                rentalManagementData={rentalManagementData}
             />
         }
     </Fragment>
