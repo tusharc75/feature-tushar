@@ -68,13 +68,6 @@ const Filters = (props) => {
   };
 
   useEffect(() => {
-    if (user && user.user) {
-      setDashboardType(user.user?.dashboards[0])
-
-    }
-  }, [])
-
-  useEffect(() => {
     switch (timeFrame) {
       case '1-month':
         setSalesFilter({
@@ -268,8 +261,8 @@ const Filters = (props) => {
               <Grid item xs={6} sm={4} md={3}>
                 <FormControl fullWidth size="small" variant="outlined">
                   <InputLabel id="dashboard-type">Dashboard</InputLabel>
-                  <Select labelId="dashboard-type" id="type" value={dashboardType ? dashboardType : user.user?.dashboards[0]} onChange={(e) => setDashboardType(e.target.value)}>
-                    {user && user.user?.dashboards.map(type => (
+                  <Select labelId="dashboard-type" id="type" value={dashboardType} onChange={(e) => setDashboardType(e.target.value)}>
+                    {user && user?.user?.dashboards.map(type => (
                       <MenuItem value={type}>{type}</MenuItem>
                     ))}
                   </Select>

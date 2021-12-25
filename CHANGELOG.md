@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.26.0](https://github.com/vebholic/oms_frontend/compare/v2.25.0...v2.26.0) (2021-12-24)
+
+
+### Features
+
+* - Carousel added in e-commerce list and details screen ([cf210f3](https://github.com/vebholic/oms_frontend/commit/cf210f36dea34fac55883d7ec65ff87895e9c0e2))
+* - Carousel added in e-commerce list screen ([9d76dcf](https://github.com/vebholic/oms_frontend/commit/9d76dcf488cd5b5163a7a759d7fe40a44e7a0ec9))
+* - Carousel added in product details screen ([14c52d0](https://github.com/vebholic/oms_frontend/commit/14c52d0cb3f5499f64ffef7fd448e1d07351fa43))
+* - Project sales routing issue fixed ([60df287](https://github.com/vebholic/oms_frontend/commit/60df287c2b67155a25e0f4825785bc920df9dbbd))
+* - Repair job repair completed code done for internal ([2c35131](https://github.com/vebholic/oms_frontend/commit/2c351314e0f1625bd0f1b3e8dc476817e0bf600c))
+* **add address icon and it functionalities:** add address icon and it functionalities ([0f39b27](https://github.com/vebholic/oms_frontend/commit/0f39b27265fceaca94f65120cabb7cc84f95c5e4))
+* **dashboard:** new asset dashboard ([07d72c0](https://github.com/vebholic/oms_frontend/commit/07d72c09bd2b7dc36cd2d90736ccab6a24f593dc))
+
+
+### Bug Fixes
+
+* create date initial date min today PO-678 ([7d5653b](https://github.com/vebholic/oms_frontend/commit/7d5653bf3cb538488550c9c834e5b7af19f03f02))
+* **dashboard:** dashboard fix ([3957ddc](https://github.com/vebholic/oms_frontend/commit/3957ddc92022f54c3b9f646708128f8eebedd8f5))
+* from rental to PO ([1d7cfc7](https://github.com/vebholic/oms_frontend/commit/1d7cfc7aebfb80f7df2e248cca6600f8f0101b8b))
+* if child on in Progress, then parent can't change status PO-681 ([eb67112](https://github.com/vebholic/oms_frontend/commit/eb671121a126498f0ab9c9eabf8b5c2aadad913f))
+* mail reflection problem fixed PO-683 ([2bbed5d](https://github.com/vebholic/oms_frontend/commit/2bbed5dc821970c8392f7928b778eae8d7e41ddd))
+* task parent and child show PO-680 ([872d11b](https://github.com/vebholic/oms_frontend/commit/872d11ba7ac3f142112a8ab721975973553296a5))
+* task roadmap not showing proper in month and week PO-682 ([74d09ff](https://github.com/vebholic/oms_frontend/commit/74d09ffa7f7d550cd2424d329a9a9d5a9abf35d4))
+
 ## [2.25.0](https://github.com/vebholic/oms_frontend/compare/v2.24.0...v2.25.0) (2021-12-23)
 
 
