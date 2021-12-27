@@ -262,7 +262,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                                   fullWidth
                                   margin="dense"
                                   format={dateFormat}
-                                  minDate={values.startDate}
+                                  minDate={new Date()}
                                   maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                                 />
                               </Grid>
