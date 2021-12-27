@@ -263,6 +263,10 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                                   margin="dense"
                                   format={dateFormat}
                                   minDate={new Date()}
+                                  onChange={(value) => {
+                                    setFieldValue('dueDate', value);
+                                    setFieldValue('startDate', value);
+                                  }}
                                   maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                                 />
                               </Grid>
