@@ -552,7 +552,8 @@ const User: FC = () => {
             fetchUsers={() => fetchUsers()}
             userList={userList}
             selectedRecords={selectedRecords}
-          />
+            isRoleSetUpPermission = {permissions?.role?.isCreate && permissions?.entity?.isCreate && permissions?.user?.isCreate}
+            />
         )
       }
       {globalRolesDialogOpen && (
