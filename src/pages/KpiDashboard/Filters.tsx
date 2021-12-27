@@ -263,7 +263,7 @@ const Filters = (props) => {
                   <InputLabel id="dashboard-type">Dashboard</InputLabel>
                   <Select labelId="dashboard-type" id="type" value={dashboardType} onChange={(e) => setDashboardType(e.target.value)}>
                     {user && user?.user?.dashboards.map(type => (
-                      <MenuItem value={type}>{type}</MenuItem>
+                      <MenuItem key={type} value={type}>{type}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>

@@ -32,11 +32,42 @@ const data_chart = {
   type: ''
 };
 
-const AssetChart = ({ loading, data }) => {
+interface ChartProps {
+  loading: boolean;
+  data: any[];
+}
+
+const AssetChart = (props: ChartProps) => {
+  const { loading, data } = props
+  const [barData, setBarData] = React.useState(null)
+
+  const msToH = (msTime: number) => {
+    if (!msTime && msTime === 0) return 0
+    return msTime / (1000 * 60 * 60)
+  }
+
+  React.useEffect(() => {
+    if (data.length > 0) {
+      const labels = data.map((_d) => _d?.assetNumber)
+      const dataSet = data.map((_d) => msToH(_d?.useTime))
+
+      setBarData({
+        labels,
+        datasets: [{
+          label: "Utilization in hours",
+          data: dataSet,
+          backgroundColor: 'rgb(54, 162, 235)',
+          fill: true,
+          // borderColor: 'rgb(254, 162, 35)',
+          // borderWidth: 2,
+        }]
+      })
+    }
+  }, [data])
 
   if (loading) return <Loader noLoader minHeight={'100%'} text={'Loading chart data...'} />
 
-  if (!data || data.length === 0) return <Loader noLoader minHeight={'100%'} text={'No data available'} />
+  if (!barData) return <Loader noLoader minHeight={'100%'} text={'No data available'} />
 
   return (
     <React.Fragment>
@@ -59,7 +90,7 @@ const AssetChart = ({ loading, data }) => {
                 maintainAspectRatio: false
               }}
               type="bar"
-              data={data_chart}
+              data={barData}
             />
           </Box>
         </Grid>
