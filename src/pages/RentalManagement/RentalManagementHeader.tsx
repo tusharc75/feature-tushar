@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import SearchBox from "../../components/Helpers/SearchBox";
 import {
   AddOutlined,
@@ -18,9 +18,35 @@ import HideWhenOffline from "../../components/HideWhenOffline";
 import routes from "../../components/Helpers/Routes";
 import { isMobile } from 'react-device-detect';
 import { MdAdd } from "react-icons/all";
+import { objectStore, insertUpdate } from '../../constants/indexdbhelper';
+import { rentalManagement } from '../../constants/helpers';
+import axiosInstance from '../../axios/axiosInstance';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { sidebarResource } from '../../constants/helpers';
+import { useData } from "../../StateProvider/Provider";
 
 function RentalManagementHeader(props) {
+  const {
+    selectedRecords,
+    onTypeChange,
+    options,
+    onSearch,
+    searchVal,
+    onCreate,
+    RentalManagementPermissions,
+    showConfirmBox,
+    canDelete,
+    icon,
+    heading,
+    children,
+    showTransferEntityDialog,
+    selectedType
+    // showCloneRentalManagementDialog
+  } = props;
+
+  const { state: { selectedEntity } }: any = useData();
   const [anchorEl, setAnchorEl] = useState(null);
+  const toastConfig = useContext(CustomToastContext);
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -39,24 +65,36 @@ function RentalManagementHeader(props) {
     }
   };
 
-  const {
-    selectedRecords,
-    onTypeChange,
-    options,
-    onSearch,
-    searchVal,
-    onCreate,
-    RentalManagementPermissions,
-    showConfirmBox,
-    canDelete,
-    icon,
-    heading,
-    children,
-    showTransferEntityDialog,
-    selectedType
-    // showCloneRentalManagementDialog
+  const handleAddOffline = () => {
+    const data: any = []
+    selectedRecords.forEach(element => {
+      data.push(element._id)
+    });
+    axiosInstance().post(`${rentalManagement.rentalManagementApi}/get-all-offline-data`, { ids: data }).then(({ data: { data } }) => {
+      data?.rentalManagement?.forEach(element => {
+        insertUpdate(objectStore.rentalManagement, element._id, element);
+      });
+      data?.deliveryTicket?.forEach(element => {
+        insertUpdate(objectStore.deliveryTicket, element._id, element);
+      });
+      closeActions()
+      axiosInstance().get("/field/child?resource=Rental Management Product").then(({ data: { data } }) => {
+        insertUpdate(objectStore.resource, "rentalManagementProduct", data);
+      })
+      axiosInstance().get("/field/child?resource=Rental Management Cost").then(({ data: { data } }) => {
+        insertUpdate(objectStore.resource, "rentalManagementCost", data);
+      })
+      axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}&entity=${selectedEntity}&view=true&showHiddenFields=true`).then(({ data: { data } }) => {
+        insertUpdate(objectStore.resource, objectStore.deliveryTicket, data);
+      })
+      axiosInstance().get(`/field?resource=Product Inventory&view=true`).then(({ data: { data } }) => {
+        insertUpdate(objectStore.resource, "productInventory", data);
+      })
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  }
 
-  } = props;
   return (
     <Grid container className={styles.rental_header_layout}>
       <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
@@ -80,7 +118,6 @@ function RentalManagementHeader(props) {
             </ToggleButtonGroup>
           )}
         </HideWhenOffline>
-
         {children}
       </Grid>
       <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
@@ -96,10 +133,7 @@ function RentalManagementHeader(props) {
                 style={isMobile ? { flex: 1 } : {}}
               />
             </HideWhenOffline>
-
           </Grid>
-
-
           <Grid style={{ display: "flex", gap: "5px" }}>
             {RentalManagementPermissions.isCreate && RentalManagementPermissions.isUpdate && (
               <Button
@@ -160,15 +194,12 @@ function RentalManagementHeader(props) {
                           }}
                         >Transfer Entity</MenuItem>
                       }
-                      {/* <MenuItem
-                  disabled={selectedRecords.length !== 1}
-                  onClick={() => {
-                    closeActions();
-                    showCloneRentalManagementDialog()
-                  }}
-                >
-                  Clone
-                </MenuItem> */}
+                      {
+                        <MenuItem
+                          disabled={selectedRecords.find((d) => d.canDelete === false)}
+                          onClick={() => handleAddOffline()}
+                        >Add Offline</MenuItem>
+                      }
                     </Menu>
                   </>
                 )

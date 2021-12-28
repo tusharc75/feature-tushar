@@ -33,16 +33,29 @@ import TopDashboardTable from './TopDashboardTable';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
 import Countries from "../../constants/Country.json"
 
+import { useData } from '../../StateProvider/Provider';
 
 const TopDashboard = (props) => {
-  const { moment, currency, filterCurrency, selectedEntity, salesFilter, getExchangeRates, setCurrency, marketSegments,
+  const {
+    state: { selectedEntity }
+  } = useData();
+  const { moment, currency, filterCurrency, salesFilter, getExchangeRates, setCurrency, marketSegments,
     subMarketSegments,
     productCategory,
     setSubMarketSegments,
-    setSalesFilter,
     salesReps,
     customerAccounts, } = props;
   const [anchorElChart, setAnchorElChart] = useState(null);
+
+  const [filter, setFilter] = useState<any>({
+    marketSegment: {},
+    salesRep: {},
+    customerAccount: {},
+    subMarketSegment: {},
+    productCategory: {},
+    countrySellTo: {},
+    countryBillTo: {}
+  });
 
   const [filterAnchor, setFilterAnchor] = useState(null);
   const [openFilter, setOpenFilter] = useState(false);
@@ -65,15 +78,17 @@ const TopDashboard = (props) => {
   });
 
   const fetchSalesData = useCallback(() => {
+    setLoadingChart(true);
+
     let params = {
       entity: selectedEntity || "",
-      marketSegment: salesFilter.marketSegment ? salesFilter.marketSegment['id'] : '',
-      subMarketSegment: salesFilter.subMarketSegment ? salesFilter.subMarketSegment['id'] : '',
-      productCategory: salesFilter.productCategory ? salesFilter.productCategory['id'] : '',
-      salesRep: salesFilter.salesRep ? salesFilter.salesRep['id'] : '',
-      customerAccount: salesFilter.customerAccount ? salesFilter.customerAccount['id'] : '',
-      countrySellTo: salesFilter.countrySellTo ? salesFilter.countrySellTo["optionValue"] : '',
-      countryBillTo: salesFilter.countryBillTo ? salesFilter.countryBillTo["optionValue"] : '',
+      marketSegment: filter.marketSegment ? filter.marketSegment['id'] : '',
+      subMarketSegment: filter.subMarketSegment ? filter.subMarketSegment['id'] : '',
+      productCategory: filter.productCategory ? filter.productCategory['id'] : '',
+      salesRep: filter.salesRep ? filter.salesRep['id'] : '',
+      customerAccount: filter.customerAccount ? filter.customerAccount['id'] : '',
+      countrySellTo: filter.countrySellTo ? filter.countrySellTo["optionValue"] : '',
+      countryBillTo: filter.countryBillTo ? filter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -92,7 +107,6 @@ const TopDashboard = (props) => {
       }
     }
 
-    setLoadingChart(true);
 
     axiosInstance()
       .get(`dashboard/sales${url}`)
@@ -177,7 +191,7 @@ const TopDashboard = (props) => {
       .catch((err) => {
         setLoadingChart(false);
       });
-  }, [salesFilter, filterCurrency, selectedEntity]);
+  }, [salesFilter, filter, filterCurrency, selectedEntity]);
 
   useEffect(() => {
     fetchSalesData();
@@ -302,11 +316,11 @@ const TopDashboard = (props) => {
               fullWidth
               options={salesReps}
               autoHighlight
-              value={salesFilter.salesRep}
+              value={filter.salesRep}
               getOptionLabel={(option) => option.name || ''}
               getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
               onChange={(_, val) => {
-                setSalesFilter({ ...salesFilter, salesRep: val });
+                setFilter({ ...filter, salesRep: val });
               }}
               renderInput={(params) => <TextField {...params} label="Sales Rep" variant="outlined" />}
             />
@@ -316,11 +330,11 @@ const TopDashboard = (props) => {
               fullWidth
               options={customerAccounts}
               autoHighlight
-              value={salesFilter.customerAccount}
+              value={filter.customerAccount}
               getOptionLabel={(option) => option.name || ''}
               getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
               onChange={(_, val) => {
-                let data = { ...salesFilter, customerAccount: val }
+                let data = { ...filter, customerAccount: val }
                 if (val?.countryBillTo) {
                   let foundCountry = Countries.find(o => o.optionValue === val?.countryBillTo)
                   if (foundCountry) {
@@ -333,7 +347,7 @@ const TopDashboard = (props) => {
                     data.countrySellTo = foundCountry
                   }
                 }
-                setSalesFilter({ ...data });
+                setFilter({ ...data });
               }}
               renderInput={(params) => <TextField {...params} label="Customer Account" variant="outlined" />}
             />
@@ -343,11 +357,11 @@ const TopDashboard = (props) => {
               fullWidth
               options={marketSegments}
               autoHighlight
-              value={salesFilter.marketSegment}
+              value={filter.marketSegment}
               getOptionLabel={(option) => option.name || ''}
               getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
               onChange={(_, val) => {
-                setSalesFilter({ ...salesFilter, marketSegment: val });
+                setFilter({ ...filter, marketSegment: val });
                 if (val) {
                   setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
                 } else {
@@ -362,10 +376,10 @@ const TopDashboard = (props) => {
               fullWidth
               options={subMarketSegments}
               autoHighlight
-              value={salesFilter.subMarketSegment}
+              value={filter.subMarketSegment}
               getOptionLabel={(option) => option.name || ''}
               getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-              onChange={(_, val) => setSalesFilter({ ...salesFilter, subMarketSegment: val })}
+              onChange={(_, val) => setFilter({ ...filter, subMarketSegment: val })}
               renderInput={(params) => <TextField {...params} label="Sub-Market Segment" variant="outlined" />}
             />
             <Box mt={1} />
@@ -374,10 +388,10 @@ const TopDashboard = (props) => {
               fullWidth
               options={productCategory}
               autoHighlight
-              value={salesFilter.productCategory}
+              value={filter.productCategory}
               getOptionLabel={(option) => option.name || ''}
               getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-              onChange={(_, val) => setSalesFilter({ ...salesFilter, productCategory: val })}
+              onChange={(_, val) => setFilter({ ...filter, productCategory: val })}
               renderInput={(params) => <TextField {...params} label="Product Category" variant="outlined" />}
             />
             <Box mt={1} />
@@ -387,10 +401,10 @@ const TopDashboard = (props) => {
               fullWidth
               options={Countries}
               autoHighlight
-              value={salesFilter.countrySellTo}
+              value={filter.countrySellTo}
               getOptionLabel={(option) => option.optionLabel || ''}
               getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
-              onChange={(_, val) => setSalesFilter({ ...salesFilter, countrySellTo: val })}
+              onChange={(_, val) => setFilter({ ...filter, countrySellTo: val })}
               renderInput={(params) => <TextField {...params} label="Country Sell To" variant="outlined" />}
             />
             <Box mt={1} />
@@ -400,10 +414,10 @@ const TopDashboard = (props) => {
               fullWidth
               options={Countries}
               autoHighlight
-              value={salesFilter?.countryBillTo}
+              value={filter?.countryBillTo}
               getOptionLabel={(option) => option.optionLabel || ''}
               getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
-              onChange={(_, val) => setSalesFilter({ ...salesFilter, countryBillTo: val })}
+              onChange={(_, val) => setFilter({ ...filter, countryBillTo: val })}
               renderInput={(params) => <TextField {...params} label="Country Bill To" variant="outlined" />}
             />
           </Box>

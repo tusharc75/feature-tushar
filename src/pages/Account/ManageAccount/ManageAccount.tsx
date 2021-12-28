@@ -56,7 +56,7 @@ export default function ManageAccount(props) {
   const [disableOwnerSelection] = useState(
     !isNew && user.user._id !== accountData.initialValues.owner
   );
- 
+
 
   //  Owner, Collaborator Code - Start
   const [formsData, setFormsData] = useState([]);
@@ -83,6 +83,7 @@ export default function ManageAccount(props) {
   const [isAccDialogVisible, setIsAccDialogVisible] = useState(false)
   const [addressDataSource, setAddressDataSource] = useState([]);
   const [addressType, setAddressType] = useState(null);
+  const [isShippingSameAsBilling, setIsShippingSameAsBilling] =useState(false)
   useEffect(() => {
     if (isNew) {
       const processSteps = accountData.fields.find(
@@ -333,7 +334,7 @@ export default function ManageAccount(props) {
               `Clone ${accountNameForClone}`
               :
               isNew
-                ?  accountResource === "customerAccount" ? "Add Customer Account" : "Add Supplier Account"
+                ? accountResource === "customerAccount" ? "Add Customer Account" : "Add Supplier Account"
                 : `Editing ${accountData.initialValues.accountName
                   ? accountData.initialValues.accountName
                   : ""
@@ -515,8 +516,7 @@ export default function ManageAccount(props) {
                                           setFieldValue("collaborator", []);
                                         }}
                                       />
-                                    ) : field.fieldName ===
-                                      "isShippingAddressSameAsBillingAddress" ? (
+                                    ) : field.fieldName.includes("isShippingAddressSameAsBillingAddress") ? (
                                       <FormTypes
                                         isNew={isNew}
                                         {...field}
@@ -542,6 +542,13 @@ export default function ManageAccount(props) {
                                             field.fieldName,
                                             e.target.checked
                                           );
+                                          if(isShippingSameAsBilling === false){
+                                            setIsShippingSameAsBilling(true)
+                                          }else{
+                                            setIsShippingSameAsBilling(false)
+                                          }
+                                         
+                                            
                                           if (
                                             e.target.checked &&
                                             values.billingAddress
@@ -1023,6 +1030,15 @@ export default function ManageAccount(props) {
                               order: addressDataSource.length + 1,
                             }]);
                             setFieldValue(addressType.address, [...values[`${addressType.address}`], obj._id]);
+                            if(isShippingSameAsBilling === true){
+                              if(addressType.address === "billingAddress"){
+                                setFieldValue("shippingAddress", [...values[`${addressType.address}`], obj._id]);
+                              }else{
+                                setFieldValue("billingAddress", [...values[`${addressType.address}`], obj._id]);
+                              }
+                             
+                            }
+                            
                           }
                         }}
                       />
@@ -1071,7 +1087,7 @@ export default function ManageAccount(props) {
                       loading={loading}
                       disabled={
                         loading ||
-                        uploadingImageOrFileProgress > 0 
+                        uploadingImageOrFileProgress > 0
                         // isFieldNotTouched(accountData, values)
                         // || Object.keys(errors).length > 0 ? true : false
                       }

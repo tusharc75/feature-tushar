@@ -71,6 +71,7 @@ const RepairJobDetails = () => {
 
   const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
 
+  const [steps, setSteps] = useState([...repairJobProcessSteps.filter(f => f !== "End")])
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [currentStep, setCurrentStep] = useState(0);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
@@ -200,6 +201,26 @@ const RepairJobDetails = () => {
           return prepareDataForGrid(u, user);
         });
 
+        if (repairJobData.processStatus) {
+          if (repairJobData["typeOfRepair"] === "Internal" && repairJobData["plant"].optionValue === repairJobData["repairPlant"].optionValue) {
+            setCurrentStep(0)
+          } else if (repairJobData["typeOfRepair"] === "Internal" && repairJobData["plant"].optionValue !== repairJobData["repairPlant"].optionValue && rows.some(s => s["repaired"] === true)) {
+            setSteps([...repairJobProcessSteps.filter(f => f === "Serialized Assets" || f === "Loading Ticket")])
+            setCurrentStep(1)
+          }
+          else {
+            const step = repairJobProcessSteps.findIndex(f => f === repairJobData.processStatus);
+
+            if (step > -1) {
+              if (repairJobData.processStatus === "End") {
+                setCurrentStep(step - 1);
+              } else {
+                setCurrentStep(step);
+              }
+            }
+          }
+        }
+
         let foundBlankValue = false;
 
         if (passedColumns) {
@@ -222,7 +243,12 @@ const RepairJobDetails = () => {
           }
         }
 
-        setDisableNextStep(data.length === 0 ? true : foundBlankValue);
+        setDisableNextStep(data.length === 0
+          ? true
+          : (repairJobData["typeOfRepair"] === "Internal" && repairJobData["plant"].optionValue === repairJobData["repairPlant"].optionValue && rows.some(s => !s.hasOwnProperty("repaired") || s["repaired"] === false)
+            ? true
+            : foundBlankValue)
+        );
         step1Dispatch({
           type: "initialize", data: [...rows], count: rows.length
         });
@@ -328,7 +354,7 @@ const RepairJobDetails = () => {
       .get(`/field?resource=${sidebarResource.repairJob}`)
       .then(({ data: { data } }) => {
         if (repairJobData["typeOfRepair"] === "Internal") {
-          setRepairJobFields(data.filter(f => ["vendor", "supplierShipTo"].indexOf(f?.fieldData?.fieldName) === -1));
+          setRepairJobFields(data.filter(f => ["supplier", "supplierShipTo"].indexOf(f?.fieldData?.fieldName) === -1));
         }
         else if (repairJobData["typeOfRepair"] === "External") {
           setRepairJobFields(data.filter(f => ["repairPlant", "plantShipTo"].indexOf(f?.fieldData?.fieldName) === -1));
@@ -348,23 +374,34 @@ const RepairJobDetails = () => {
       .get(`${routes.repairJob.path}/${id}`)
       .then(({ data: { data } }) => {
 
-        setRepairJobData({ ...data })
-        if (data.processStatus) {
-          if (data["typeOfRepair"] === "Internal" && data["plant"].optionValue === data["repairPlant"].optionValue) {
-            setCurrentStep(0)
-          }
-          else {
-            const step = repairJobProcessSteps.findIndex(f => f === data.processStatus);
-
-            if (step > -1) {
-              if (data.processStatus === "End") {
-                setCurrentStep(step - 1);
-              } else {
-                setCurrentStep(step);
-              }
-            }
-          }
+        if (data.hasOwnProperty("plant")) {
+          data["warehouse"] = data["plant"]
+        } else if (data.hasOwnProperty("warehouse")) {
+          data["plant"] = data["warehouse"]
         }
+
+        setRepairJobData({ ...data })
+
+        if (data["typeOfRepair"] === "Internal" && data["plant"].optionValue === data["repairPlant"].optionValue) {
+          setSteps([...repairJobProcessSteps.filter(f => f === "Serialized Assets")])
+        }
+
+        // if (data.processStatus) {
+        //   if (data["typeOfRepair"] === "Internal" && data["plant"].optionValue === data["repairPlant"].optionValue) {
+        //     setCurrentStep(0)
+        //   }
+        //   else {
+        //     const step = repairJobProcessSteps.findIndex(f => f === data.processStatus);
+
+        //     if (step > -1) {
+        //       if (data.processStatus === "End") {
+        //         setCurrentStep(step - 1);
+        //       } else {
+        //         setCurrentStep(step);
+        //       }
+        //     }
+        //   }
+        // }
         setHeadingLabel(data.repairJobName);
         setCustomizedRoutes([routes.repairJob, { title: data.repairJobName }]);
         getResourceFields(data);
@@ -562,7 +599,7 @@ const RepairJobDetails = () => {
                       <CustomCommonSteps
                         disableNextStep={disableNextStep}
                         disablePreviousStep={false}
-                        steps={repairJobData && repairJobData["typeOfRepair"] === "Internal" && repairJobData["plant"].optionValue === repairJobData["repairPlant"].optionValue ? repairJobProcessSteps.filter(f => f === "Serialized Assets") : repairJobProcessSteps.filter(f => f !== "End")}
+                        steps={steps}
                         currentStep={currentStep}
                         setCurrentStep={setCurrentStep}
                         onNextButtonClick={onNextButtonClick}
@@ -704,6 +741,11 @@ const RepairJobDetails = () => {
                               repairJobData={repairJobData}
                               setNextButtonDisabled={setDisableNextStep}
                               setPreviousButtonDisabled={setDisablePreviousStep}
+                              hideReceivingTicketStep={(hide) => {
+                                if (hide) {
+                                  setSteps([...repairJobProcessSteps.filter(f => f === "Serialized Assets" || f === "Loading Ticket")])
+                                }
+                              }}
                             />
                           )}
 

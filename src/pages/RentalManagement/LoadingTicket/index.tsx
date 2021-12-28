@@ -14,7 +14,6 @@ import NoDataCell from "../../../components/Helpers/NoDataCell";
 import {
   deliveryTicket,
   gridLoadingTimeout,
-  quoteStepColors,
   rentalManagement,
   sidebarResource
 } from "../../../constants/helpers";
@@ -27,6 +26,9 @@ import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import { FaSuitcase } from "react-icons/fa";
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
+import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
+import { getRentalProductAssets, getRentalDeliveryTicket } from './../rentalOfflineHelper';
+
 
 const renderedFrom = "rentalManagementDetailsPageDeliveryTicket"
 
@@ -46,52 +48,60 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
 
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchRecords();
   }, []);
 
-  const fetchRecords = () => {
+  const fetchRecords = async () => {
     setNextStep(false)
-    if (gridApi) {
-      gridApi.deselectAll();
-    }
-    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`).then(({ data }) => {
-      setAssignedSerializedAsset(data.data)
-      let productAssets = data.data.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
+    try {
+      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+      if (gridApi) {
+        gridApi.deselectAll();
+      }
+      var productAssets: any = []
+      var deliveryTicketList: any = []
       dispatch({ type: "loading", loading: true });
-      axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/delivery-ticket`).then(({ data }) => {
-        data.data.map(obj => {
-          if (obj.ticketType === "Loading") {
-            productAssets.map((d, index) => {
-              if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                productAssets[index]["type"] = obj?.type
-                productAssets[index]["deliveryTicket"] = obj?.ticketName
-                productAssets[index]["deliveryTicketId"] = obj?._id
-              }
-            })
-          }
-        })
-        productAssets.forEach((d) => {
-          d["hideSelection"] = ["In-Use", "In-Transit", "Repair", "Scrap", "Lost", "Under Review"].includes(d.status);
-        })
-        if (productAssets.filter((e) => ["In-Use", "Repair", "Scrap", "Lost", "In-Transit", "Under Review"].includes(e.status)).length === productAssets.length) {
-          setNextStep(true)
+      if (isOffline) {
+        productAssets = await getRentalProductAssets(rentalManagementData._id)
+        productAssets = productAssets?.map(u => ({ ...u, productName: u?.product?.optionLabel }))
+        deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id)
+      }
+      else {
+        const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`)
+        setAssignedSerializedAsset(response?.data?.data)
+        productAssets = response?.data?.data
+        productAssets = productAssets.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
+
+        const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=Rental Job&refrenceId=${rentalManagementData._id}`)
+        deliveryTicketList = result?.data?.data
+      }
+      deliveryTicketList.map(obj => {
+        if (obj.ticketType === "Loading") {
+          productAssets.map((d, index) => {
+            if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
+              productAssets[index]["type"] = obj?.type
+              productAssets[index]["deliveryTicket"] = obj?.ticketName
+              productAssets[index]["deliveryTicketId"] = obj?._id
+            }
+          })
         }
-        dispatch({
-          type: "initialize", data: productAssets, count: productAssets.length
-        });
-        setTimeout(() => {
-          dispatch({ type: "loading", loading: false });
-        }, gridLoadingTimeout);
       })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error)
-    });
+      productAssets.forEach((d) => {
+        d["hideSelection"] = ["In-Use", "In-Transit", "Repair", "Scrap", "Lost", "Under Review"].includes(d.status);
+      })
+      if (productAssets.filter((e) => ["In-Use", "Repair", "Scrap", "Lost", "In-Transit", "Under Review", "Ready to ship"].includes(e.status)).length === productAssets.length) {
+        setNextStep(true)
+      }
+      dispatch({ type: "initialize", data: productAssets, count: productAssets.length });
+      setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
+    }
+    catch (error) {
+      dispatch({ type: "loading", loading: false });
+      toastConfig.setToastConfig(error);
+    }
   }
 
   const TicketRenderer = (params) => (
@@ -275,9 +285,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         refrenceData={rentalManagementData}
         onClose={() => setShowDeliveryTicketDialog(false)}
         productInventory={productInventoryForDeliveryTicket}
-        productInventoryForDeliveryTicket={productInventoryForDeliveryTicket}
         warehouseId={rentalManagementData?.warehouse}
-        rentalData={rentalManagementData}
         onSuccess={() => {
           setShowDeliveryTicketDialog(false);
           fetchRecords();

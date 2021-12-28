@@ -676,6 +676,7 @@ const FormTypes = (props) => {
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
+        disabled={fieldData?.isUneditable || rest?.disabled}
         variant="outlined"
         type="text"
         label={getLabel(label)}
@@ -781,6 +782,7 @@ const FormTypes = (props) => {
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
         {...rest}
+        disabled={fieldData?.isUneditable || rest?.disabled}
         variant="outlined"
         type={fieldData.returnType === 'decimal' ? 'number' : 'text'}
         label={getLabel(label)}

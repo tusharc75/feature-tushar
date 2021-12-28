@@ -29,13 +29,25 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const CategorySidebar = ({ fetchData }) => {
+const CategorySidebar = ({ fetchData, setCategory }) => {
   const classes = useStyles();
   const [productCategories, setProductCategories] = useState([]);
   const [valueSafety, setValueSafety] = useState(2);
   const [valueRes, setValueRes] = useState(2);
   const [valueQuality, setValueQuality] = useState(2);
   const [valueTech, setValueTech] = useState(2);
+  const [selected, setSelected] = useState([]);
+  const [categoryDataSource, setCategoryDataSource] = useState([]);
+
+  const handleSelect = (event, nodeId) => {
+    if (selected.length === 0 || (selected.length !== 0 && selected[0] !== nodeId)) {
+      const category = categoryDataSource.find(o => o._id === nodeId);
+
+      setSelected([nodeId]);
+      fetchData(category.name);
+      setCategory(category.name);
+    }
+  }
 
   useEffect(() => {
     let queryString = `?limit=0`;
@@ -44,6 +56,7 @@ const CategorySidebar = ({ fetchData }) => {
       .get(`/product-category${queryString}`)
       .then(({ data: { data } }) => {
 
+        setCategoryDataSource([...data])
         let parentCategories = {}
         data.map(o => {
           if (o?.parentCategory) {
@@ -75,31 +88,54 @@ const CategorySidebar = ({ fetchData }) => {
 
   const renderTree = (nodes) => (
     <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name}
-      onClick={() => { fetchData(nodes.name) }}>
+    // onClick={() => {
+    //   if (Array.isArray(nodes.children) && nodes.children.length === 0) {
+    //     debugger;
+    //     fetchData(nodes.name)
+    //   }
+    // }}
+    >
       {Array.isArray(nodes.children) ? nodes.children.map((node) => renderTree(node)) : null}
     </TreeItem>
   );
 
   return (
     <div className={styles.sidebar_nav}>
-      <Paper component="form" className={classes.root}>
+      {/* <Paper component="form" className={classes.root}>
         <IconButton type="submit" className={classes.iconButton} aria-label="search">
           <SearchIcon />
         </IconButton>
-      </Paper>
-      {
-        productCategories.map(obj => {
-          return <TreeView
-            className={classes.root}
-            defaultCollapseIcon={<ExpandMoreIcon />}
-            defaultExpanded={['root']}
-            defaultExpandIcon={<ChevronRightIcon />}
-          >
-            {renderTree(obj)}
-          </TreeView>
-        })
-      }
-      <h3 className={styles.single_category_name}>Ratings</h3>
+      </Paper> */}
+
+      <div className="d-flex align-items-center justify-content-space-between my-2 px-1">
+        <h3>Categories</h3>
+        {
+          selected && selected.length !== 0 ? <span className="link cursor-pointer" onClick={() => {
+            setSelected([]);
+            fetchData(null);
+            setCategory("")
+          }}>Clear</span> : <></>
+        }
+      </div>
+
+      <hr />
+
+      <TreeView
+        className={classes.root}
+        selected={selected}
+        onNodeSelect={handleSelect}
+        defaultCollapseIcon={<ExpandMoreIcon />}
+        defaultExpanded={['root']}
+        defaultExpandIcon={<ChevronRightIcon />}
+      >
+        {
+          productCategories.map(obj => {
+            return renderTree(obj)
+          })
+        }
+      </TreeView>
+
+      {/* <h3 className={styles.single_category_name}>Ratings</h3>
       <div className={styles.rating}>
         <p className={styles.single_category_name}>Safety</p>
         <Rating
@@ -139,8 +175,8 @@ const CategorySidebar = ({ fetchData }) => {
             setValueTech(newValueTech);
           }}
         />
-      </div>
-    </div >
+      </div> */}
+    </div>
   );
 }
 

@@ -245,10 +245,10 @@ const routes = {
     title: storedRoutes ? storedRoutes.note?.title : RESOURCE_LABEL.note,
     path: "/note",
   },
-  productList: {
-    title: "Products",
-    path: "/product-list",
-  },
+  // productList: {
+  //   title: "Products",
+  //   path: "/product-list",
+  // },
   warehouse: {
     title: (storedRoutes && storedRoutes.warehouse && storedRoutes.warehouse.title) ? storedRoutes.warehouse.title : RESOURCE_LABEL.warehouse,
     path: "/warehouse",
@@ -316,7 +316,15 @@ const routes = {
   address: {
     title: storedRoutes ? storedRoutes.address?.title : RESOURCE_LABEL.address,
     path: "/address",
-  }
+  },
+  eCommerce: {
+    title: storedRoutes ? storedRoutes.eCommerce?.title : RESOURCE_LABEL.eCommerce,
+    path: "/e-commerce",
+  },
+  eCommerceDetail: {
+    title: storedRoutes ? storedRoutes.eCommerce?.title : RESOURCE_LABEL.eCommerce,
+    path: "/e-commerce/detail",
+  },
 };
 
 export default routes;

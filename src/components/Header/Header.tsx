@@ -170,7 +170,7 @@ const Header = ({ toggleDrawer }) => {
   const account = useAccount(accounts[0] || {});
 
   const {
-    state: { user, selectedEntity, cartCount },
+    state: { user, selectedEntity, cartCount, permissions },
     dispatch
   }: any = useData();
 
@@ -210,10 +210,10 @@ const Header = ({ toggleDrawer }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-    saveEntity()
+      saveEntity()
     }
-  },[selectedEntity])
-  
+  }, [selectedEntity])
+
   const fetchCart = () => {
     axiosInstance()
       .get(`/user/cart`)
@@ -228,10 +228,10 @@ const Header = ({ toggleDrawer }) => {
     axiosInstance()
       .put(`/user/save-selected-entity?selectedEntity=${selectedEntity}`)
       .then(({ data }) => {
-  })
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-  });
+      });
   }
 
   const handleFullScreenNotificationClick = (event) => {
@@ -856,20 +856,22 @@ const Header = ({ toggleDrawer }) => {
         <p>Help</p>
       </MenuItem>
 
-      <MenuItem
-        id="shoppingCartButton"
-        onClick={() => {
-          history.push({
-            pathname: '/product/my-cart'
-          });
-        }}
-      >
-        <Badge color="secondary" badgeContent={cartCount}>
-          <ShoppingCartIcon className="setIcon" />
-        </Badge>
-        <Box component="span" mx={1} />
-        <p>Cart</p>
-      </MenuItem>
+      {
+        permissions?.eCommerce?.isRead && <MenuItem
+          id="shoppingCartButton"
+          onClick={() => {
+            history.push({
+              pathname: '/product/my-cart'
+            });
+          }}
+        >
+          <Badge color="secondary" badgeContent={cartCount}>
+            <ShoppingCartIcon className="setIcon" />
+          </Badge>
+          <Box component="span" mx={1} />
+          <p>Cart</p>
+        </MenuItem>
+      }
     </Menu>
   );
 
@@ -915,25 +917,25 @@ const Header = ({ toggleDrawer }) => {
       history.push({ pathname: routes.purchaseOrder.path });
     }
     if (history.location.pathname.includes(routes.transferAssetDetail.path)) {
-      history.push({pathname: routes.transferAsset.path})
+      history.push({ pathname: routes.transferAsset.path })
     }
     if (history.location.pathname.includes(routes.rentalManagementDetail.path)) {
-      history.push({pathname: routes.rentalManagement.path})
+      history.push({ pathname: routes.rentalManagement.path })
     }
     if (history.location.pathname.includes(routes.repairJobDetail.path)) {
-      history.push({pathname: routes.repairJob.path })
+      history.push({ pathname: routes.repairJob.path })
     }
     if (history.location.pathname.includes(routes.deliveryTicketDetail.path)) {
-      history.push({pathname: routes.deliveryTicket.path})
+      history.push({ pathname: routes.deliveryTicket.path })
     }
     if (history.location.pathname.includes(routes.receivingTicketDetail.path)) {
-      history.push({pathname: routes.receivingTicket.path})
+      history.push({ pathname: routes.receivingTicket.path })
     }
     if (history.location.pathname.includes(routes.productInventoryDetail.path)) {
-      history.push({pathname: routes.productInventory.path})
+      history.push({ pathname: routes.productInventory.path })
     }
     if (history.location.pathname.includes(routes.pricingConditionDetail.path)) {
-      history.push({pathname: routes.pricingCondition.path})
+      history.push({ pathname: routes.pricingCondition.path })
     }
   }
 
@@ -1066,25 +1068,27 @@ const Header = ({ toggleDrawer }) => {
               )}
 
               {/*Only show cart icon if environment is local || development*/}
-              {['local', 'development'].includes(process.env.REACT_APP_ENV) && (
-                <IconButton
-                  id="shoppingCartButton"
-                  title={'My Cart'}
-                  aria-describedby={fullScreenNotificationId}
-                  aria-label="settings"
-                  color="inherit"
-                  onClick={() => {
-                    history.push({
-                      pathname: '/product/my-cart'
-                    });
-                  }}
-                  className="showIconLayout"
-                >
-                  <Badge color="secondary" badgeContent={cartCount}>
-                    <ShoppingCartIcon className="setIcon" />
-                  </Badge>
-                </IconButton>
-              )}
+              {
+                permissions?.eCommerce?.isRead && (
+                  <IconButton
+                    id="shoppingCartButton"
+                    title={'My Cart'}
+                    aria-describedby={fullScreenNotificationId}
+                    aria-label="settings"
+                    color="inherit"
+                    onClick={() => {
+                      history.push({
+                        pathname: '/product/my-cart'
+                      });
+                    }}
+                    className="showIconLayout"
+                  >
+                    <Badge color="secondary" badgeContent={cartCount}>
+                      <ShoppingCartIcon className="setIcon" />
+                    </Badge>
+                  </IconButton>
+                )
+              }
 
               <IconButton
                 id="notificationButton"

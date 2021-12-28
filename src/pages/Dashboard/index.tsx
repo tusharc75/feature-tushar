@@ -1,5 +1,5 @@
 import { useEffect, useState, Fragment } from 'react';
-import { Container, Grid, Paper, Box, Typography, Button, List, ListItem, ListItemText, ListSubheader, ListItemIcon } from '@material-ui/core';
+import { Container, Grid, Paper, Box, Typography, Button, List, ListItem, ListItemText, ListSubheader } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { kebabCase } from 'lodash';
@@ -10,12 +10,10 @@ import { MdNavigateNext, MdLocalActivity } from 'react-icons/md';
 import { RiAccountPinCircleFill, RiFolderSettingsFill } from 'react-icons/ri';
 import { BsCalendarFill } from 'react-icons/bs';
 import { FaRegistered } from 'react-icons/fa';
-import { AiFillAccountBook, AiFillSetting, AiOutlineTransaction } from 'react-icons/ai';
+import { AiFillAccountBook } from 'react-icons/ai';
 import { TextField, InputAdornment } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
-import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
-import axiosInstance from '../../axios/axiosInstance';
-import { SET_GRID_METADATA, SET_SELECTED_ENTITY, SET_USER } from '../../StateProvider/actionTypes';
+import routes from '../../components/Helpers/Routes';
 
 function Dashboard() {
   const history = useHistory();
@@ -139,7 +137,7 @@ function Dashboard() {
 
   const handleRoutes = (item) => {
     if (item.name === 'Product List') {
-      return '/product-list';
+      return routes.eCommerce.path;
     }
 
     return `/${kebabCase(item.name)}`;

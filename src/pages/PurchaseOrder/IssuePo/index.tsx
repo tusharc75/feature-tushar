@@ -295,7 +295,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         loading={loading}
                         allowSelection={false}
                         isClientSideGrid={true}
-                        renderedFrom="purchaseOrderDetailsPageService"
+                        renderedFrom="purchaseOrderDetailsPageIssuePO"
                         onCellValueChanged={(row) => {
                         }}
                         fromPurchaseOrderGrid={true}
@@ -338,7 +338,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         setFullScreen((prevState) => !prevState);
                     }}
                     showManimizeMaximize={true}
-                    fromPurchaseOrder={true}
+                    refrenceType="purchaseOrder"
                 />
             </Dialog>
         )}

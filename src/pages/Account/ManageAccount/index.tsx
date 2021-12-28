@@ -62,6 +62,12 @@ export default function ManageAccountDialog(props) {
           axiosInstance()
             .get(`/${accountApi}/clone/${id}`)
             .then(({ data: dataToClone }) => {
+              if (dataToClone) {
+                dataToClone.data.accountName = "";
+                dataToClone.data.billingAddress = [];
+                dataToClone.data.shippingAddress = [];
+                
+              }
               setAccountData({
                 fields: newFields,
                 initialValues: dataToClone.data

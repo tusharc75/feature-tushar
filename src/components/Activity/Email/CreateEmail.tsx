@@ -30,7 +30,7 @@ import {
   useMsal,
 } from "@azure/msal-react";
 import getAzureAcessToken from "../../Azure/getAzureAccessToken";
-import { purchaseOrder, validations } from "../../../constants/helpers";
+import { purchaseOrder, validations, rentalManagement } from "../../../constants/helpers";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { GoArrowDown } from "react-icons/go";
 import emailStyles from "../../../pages/Activity/Email/email.module.scss";
@@ -102,7 +102,7 @@ export const CreateEmail = ({
   isMinimized,
   onMinimizeMaximize,
   showManimizeMaximize,
-  fromPurchaseOrder = false
+  refrenceType = ""
 }) => {
   const {
     state: { user },
@@ -267,7 +267,9 @@ export const CreateEmail = ({
       attachments: [...stateQuoteBuilderAttachments, ...quoteBuilderOtherAttachments],
       eSign: toogle["e-Sign"],
     };
-    const api = fromPurchaseOrder ? `${purchaseOrder.api}/${id}/send-email` : `/quote-builder/sendQuoteEmail`
+    const api = refrenceType === "purchaseOrder" ? `${purchaseOrder.api}/${id}/send-email` :
+      refrenceType === "rentalJob" ? `${rentalManagement.api}/${id}/send-email` :
+        `/quote-builder/sendQuoteEmail`
     axiosInstance()
       .post(api, body)
       .then(() => {

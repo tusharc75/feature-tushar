@@ -17,6 +17,7 @@ type DialogProps = {
   title: string;
   label: string;
   resourceData: any[];
+  text?: string;
 };
 
 interface FormData {
@@ -34,7 +35,7 @@ interface ResourceType {
 }
 
 const AssignQuantityDialog: FC<DialogProps> = (props) => {
-  const { ids, onClose, onSuccess, title, label, resource, resourceData: existingResourceData } = props;
+  const { ids, onClose, onSuccess, title, label, resource, resourceData: existingResourceData, text } = props;
   const { setToastConfig } = useContext(CustomToastContext);
   const [resourceData, setResourceData] = useState<ResourceType[]>([]);
   const [allResourceData, setAllResourceData] = useState<ResourceType[]>([]);
@@ -97,7 +98,7 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
         allResourceData.length > 0
           ? allResourceData.filter((d) => !customFormArr.includes(d?.id))
           : resourceData.filter((d) => !customFormArr.includes(d?.id));
-      console.log(customFormArr, filteredData)
+      console.log(customFormArr, filteredData);
       setResourceData(filteredData);
     }
   }, [formData]);
@@ -199,7 +200,6 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
       return updatedState;
     });
   };
-
   return (
     <Dialog open fullWidth maxWidth="md" onClose={onClose}>
       <CustomDialogHeader title={title} onClose={onClose} />
@@ -243,16 +243,6 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
                 </Grid>
                 <Grid item xs={2} sm={2}>
                   <Box display="flex" justifyContent="flex-end" alignItems="center">
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      disabled={!Boolean(form.resource) || !Boolean(form.qty)}
-                      onClick={() => {
-                        setFormData((prevState) => [...prevState, { id: generateUniqueId(), resource: null, qty: 0 }]);
-                      }}
-                    >
-                      <Add color={!Boolean(form.resource) || !Boolean(form.qty) ? 'disabled' : `primary`} />
-                    </IconButton>
                     {/* {indx !== 0 && ( */}
                     <Box ml={2}>
                       <IconButton
@@ -273,6 +263,33 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
             ))}
           </Grid>
         </Box>
+        {typeof text !== 'undefined' ? (
+          <Button
+            size="small"
+            color="primary"
+            // disabled={!Boolean(form.resource) || !Boolean(form.qty)}
+            variant="outlined"
+            onClick={() => {
+              setFormData((prevState) => [...prevState, { id: generateUniqueId(), resource: null, qty: 0 }]);
+            }}
+          >
+            {`${text}`}
+            <Add color={`primary`} />
+          </Button>
+        ) : (
+          <Button
+            size="small"
+            color="primary"
+            // disabled={!Boolean(form.resource) || !Boolean(form.qty)}
+            variant="outlined"
+            onClick={() => {
+              setFormData((prevState) => [...prevState, { id: generateUniqueId(), resource: null, qty: 0 }]);
+            }}
+          >
+            Add Products
+            <Add color={`primary`} />
+          </Button>
+        )}
       </CustomDialogContent>
       <CustomDialogFooter>
         <Button variant="outlined" disabled={isSubmitting} color="primary" onClick={onClose}>
