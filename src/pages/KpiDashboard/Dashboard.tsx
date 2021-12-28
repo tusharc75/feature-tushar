@@ -251,7 +251,7 @@ const Dashboard = () => {
               )}
               {dashboardType && dashboardType.includes('Asset') && (
                 <Box p={1}>
-                  <AssetDashboard />
+                  <AssetDashboard salesFilter={salesFilter} />
                 </Box>
               )}
             </div>

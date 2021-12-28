@@ -41,22 +41,6 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const mappedVariablesNames = {
-    entity: "Entity",
-    customerAccountName: "Customer Account Name",
-    quoteDate: "Quote Date",
-    quoteName: "Quote Name",
-    version: "Version",
-    quoteId: "Quote Id",
-    currency: "Currency",
-    expiryDate: "Expiry Date",
-    owner: "Owner",
-    currentDate: "Current Date",
-    customerContactName: "Customer Contact",
-    collaborator: "Collaborator",
-    incoTerms: "Inco Terms"
-}
-
 const toBase64 = file => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
