@@ -6,54 +6,74 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 
 export default function Products() {
 
+    const limit = 21;
+    const toastConfig = useContext(CustomToastContext);
+
     const [page, setPage] = useState(0);
     const [totalCount, setTotalCount] = useState(0);
     const [products, setProducts] = useState([]);
     const [categoryId, setCategoryId] = useState(null);
-    const limit = 21;
-    const toastConfig = useContext(CustomToastContext);
+    const [loading, setLoading] = useState(false)
 
-    const fetchData = useCallback(() => {
+    useEffect(() => {
+        fetchData(null, 0)
+    }, [])
+
+    const fetchData = (categoryId, page) => {
+        setLoading(true);
+
         if (categoryId) {
             axiosInstance().get(`${product.api}?page=${page}&limit=${limit}&deepFilter=[{"field":"productCategory","term":"${categoryId}"}]&filterType=and`).then(({ data: { data, count } }) => {
                 setTotalCount(count);
                 setProducts(prevState => [...prevState, ...data]);
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
+            }).finally(() => {
+                setLoading(false);
             });
         }
-        else {
+        else if (page !== 0) {
             axiosInstance().get(`${product.api}?page=${page}&limit=${limit}`).then(({ data: { data, count } }) => {
                 setTotalCount(count);
                 setProducts(prevState => [...prevState, ...data]);
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
+            }).finally(() => {
+                setLoading(false);
+            });
+        } else {
+            axiosInstance().get(`${product.api}?page=0&limit=${limit}`).then(({ data: { data, count } }) => {
+                setTotalCount(count);
+                setProducts([...data]);
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            }).finally(() => {
+                setLoading(false);
             });
         }
-    }, [page])
-
-    useEffect(() => {
-        fetchData();
-    }, [fetchData])
-
-    useEffect(() => {
-        setPage(0);
-        setTotalCount(0);
-        setProducts([]);
-    }, [categoryId])
+    }
 
     return (
         <Fragment>
             {
                 products && <ProductList
                     products={products}
+                    loading={loading}
                     fetchData={(categoryId) => {
                         if (categoryId) {
-                            setCategoryId(categoryId)
+                            setPage(0);
+                            setTotalCount(0);
+                            setProducts([]);
+
+                            fetchData(categoryId, 0)
                         }
                         else {
-                            setPage(prevState => prevState + 1)
+                            fetchData(null, 0)
                         }
+                    }}
+                    loadMoreData={() => {
+                        fetchData(categoryId, page + 1)
+                        setPage(prevState => prevState + 1)
                     }}
                     count={totalCount}
                 />

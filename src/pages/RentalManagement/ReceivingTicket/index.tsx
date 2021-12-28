@@ -31,6 +31,8 @@ import { isMobile } from "react-device-detect";
 import { useHistory } from "react-router-dom";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
+import { getRentalProductAssets, getRentalDeliveryTicket } from './../rentalOfflineHelper';
+import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 
 const renderedFrom = "rentalManagementDetailsPageReceivingTicket"
 
@@ -47,6 +49,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => {
+
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -63,6 +66,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   const [productInventoryForReceivingTicket, setProductInventoryForReceivingTicket] = useState<any[]>([]);
   const [showReceivingTicketDialog, setShowReceivingTicketDialog] = useState(false);
 
+  const { isOffline } = useContext(CustomOfflineContext);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -73,56 +78,61 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
 
   useEffect(() => {
     fetchRecords();
-    // eslint-disable-next-line
   }, []);
 
-  const fetchRecords = () => {
-    setNextStep(false)
-    if (gridApi) {
-      gridApi.deselectAll();
+  const fetchRecords = async () => {
+
+
+    try {
+      setNextStep(false)
+      if (gridApi) {
+        gridApi.deselectAll();
+      }
+      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+      var productAssets: any = []
+      var deliveryTicketList: any = []
+      if (isOffline) {
+        productAssets = await getRentalProductAssets(rentalManagementData._id)
+        productAssets = productAssets?.map(u => ({ ...u, productName: u?.product?.optionLabel }))
+        deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id)
+      }
+      else {
+        const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`)
+        productAssets = response?.data?.data
+        productAssets = productAssets.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
+
+        const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=Rental Job&refrenceId=${rentalManagementData._id}`)
+        deliveryTicketList = result?.data?.data
+      }
+      deliveryTicketList?.map(obj => {
+        productAssets?.map((d, index) => {
+          if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
+            productAssets[index]["type"] = obj?.type
+            if (obj.ticketType === "Loading") {
+              productAssets[index]["deliveryTicket"] = obj?.ticketName
+              productAssets[index]["deliveryTicketId"] = obj?._id
+            }
+            if (obj.ticketType === "Receiving") {
+              productAssets[index]["receivingTicket"] = obj?.ticketName
+              productAssets[index]["receivingTicketId"] = obj?._id
+            }
+          }
+        })
+
+      })
+      productAssets.forEach((d) => {
+        d["hideSelection"] = d.status === "In-Transit";
+      })
+      if (productAssets.filter((e) => ["Under Review", "Scrap", "Lost"].includes(e.status)).length === productAssets.length) {
+        setNextStep(true)
+      }
+      dispatch({ type: "initialize", data: productAssets, count: productAssets.length });
+      setTimeout(() => { dispatch({ type: "loading", loading: false }) }, gridLoadingTimeout);
     }
-    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`)
-      .then(({ data }) => {
-        let productAssets = data.data.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
-        dispatch({ type: "loading", loading: true });
-        axiosInstance()
-          .get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/delivery-ticket`)
-          .then(({ data }) => {
-            data.data.map(obj => {
-              productAssets.map((d, index) => {
-                if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                  productAssets[index]["type"] = obj?.type
-                  if (obj.ticketType === "Loading") {
-                    productAssets[index]["deliveryTicket"] = obj?.ticketName
-                    productAssets[index]["deliveryTicketId"] = obj?._id
-                  }
-                  if (obj.ticketType === "Receiving") {
-                    productAssets[index]["receivingTicket"] = obj?.ticketName
-                    productAssets[index]["receivingTicketId"] = obj?._id
-                  }
-                }
-              })
-              productAssets.forEach((d) => {
-                d["hideSelection"] = d.status === "In-Transit";
-              })
-              if (productAssets.filter((e) => ["Under Review", "Scrap", "Lost"].includes(e.status)).length === productAssets.length) {
-                setNextStep(true)
-              }
-              dispatch({
-                type: "initialize", data: productAssets, count: productAssets.length
-              });
-              setTimeout(() => {
-                dispatch({ type: "loading", loading: false });
-              }, gridLoadingTimeout);
-            })
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-          });
-      }).catch((error) => {
-        toastConfig.setToastConfig(error)
-      });
+    catch (error) {
+      dispatch({ type: "loading", loading: false });
+      toastConfig.setToastConfig(error);
+    }
   }
 
 

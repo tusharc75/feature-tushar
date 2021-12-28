@@ -5,7 +5,7 @@ import { formatAmountWithCurrency, product, review } from "../../constants/helpe
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { Rating } from "@material-ui/lab";
 import styles from "./product-detail-page.module.scss";
-import { Button, Box, Grid } from "@material-ui/core";
+import { Button, Box, Grid, makeStyles } from "@material-ui/core";
 import FrequentlyBought from "../../components/ProductList/FrequentlyBought/FrequentlyBought";
 import SimilarItems from "../../components/ProductList/SimilarItems/SimilarItems";
 import AddShoppingCartIcon from "@material-ui/icons/AddShoppingCart";
@@ -18,9 +18,22 @@ import { useHistory } from "react-router-dom";
 import routes from "../../components/Helpers/Routes";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { SET_CART_COUNT } from "../../StateProvider/actionTypes"
+import Carousel from "react-material-ui-carousel";
+
+const useStyles = makeStyles(() => ({
+  imageContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  img: {
+    maxWidth: "500px",
+  }
+}));
 
 export default function ProductDetails() {
 
+  const classes = useStyles();
   const [reviews, setReviews] = useState([])
   const [productDetails, setProductDetails] = useState(null);
   const [similarItems, setSimilarItems] = useState([]);
@@ -108,7 +121,13 @@ export default function ProductDetails() {
     axiosInstance()
       .get(`/product/` + id)
       .then(({ data: { data } }) => {
-        setProductDetails(data.productData);
+        setProductDetails({
+          ...data.productData, images: [
+            "https://images.unsplash.com/photo-1506467493604-25d7861a6703?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTF8fHxlbnwwfHx8fA%3D%3D&w=1000&q=80",
+            "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2016/10/colima_volcano/16186851-1-eng-GB/Colima_volcano.jpg",
+            "https://news.cornell.edu/sites/default/files/styles/full_size/public/2020-10/1012_nasa.jpg?itok=KJ3jzpto"
+          ]
+        });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -154,7 +173,7 @@ export default function ProductDetails() {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[routes.productList, { title: productDetails?.productName }]} />
+        <CustomBreadCrumbs routes={[routes.eCommerce, { title: productDetails?.productName }]} />
       </Grid>
       <Box className="main-container">
         {showCreateQuoteDialog && (
@@ -184,12 +203,30 @@ export default function ProductDetails() {
             <div className={styles.product_container}>
               <div className={styles.product_image}>
                 <Box display="flex" justifyContent="center" alignItems="center" >
-                  {productDetails.productImage ? (
-                    <img
-                      src={productDetails.productImage}
-                      alt={productDetails.productName}
-                      width="100%"
-                    />
+
+                  {productDetails.images ? (
+                    <Carousel
+                      strictIndexing
+                      animation="slide"
+                      autoPlay={false}
+                      navButtonsAlwaysVisible
+                      // indicators={false}
+                      cycleNavigation={false}
+                      timeout={150}
+                      navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
+                        style: {
+                          opacity: 0.4,
+                          padding: 5,
+                          borderRadius: "50%"
+                        }
+                      }}
+                    >
+                      {productDetails.images.map((image: any, i) => (
+                        <div key={i} className={classes.imageContainer}>
+                          <img className={classes.img} src={image} />
+                        </div>
+                      ))}
+                    </Carousel>
                   ) : (
                     <BsImage className={styles.product_no_image} />
                   )}

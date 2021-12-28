@@ -11,9 +11,10 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { SET_CART_COUNT } from "../../../StateProvider/actionTypes"
 import { useData } from "../../../StateProvider/Provider";
 
-const ProductList = ({ products, fetchData, count }) => {
+const ProductList = ({ products, fetchData, count, loadMoreData, loading }) => {
 
     const [addedCartItems, setAddedCartItems] = useState([])
+    const [category, setCategory] = useState("");
     const { dispatch }: any = useData();
 
     useEffect(() => {
@@ -53,41 +54,58 @@ const ProductList = ({ products, fetchData, count }) => {
 
     return (<>
         <Grid container className="headerbox">
-            <CustomBreadCrumbs routes={[{ title: routes.productList.title }]} />
+            <CustomBreadCrumbs routes={[{ title: routes.eCommerce.title }]} />
         </Grid>
         <div className="detail-container grid-product-category pr-0">
             <div>
                 <Paper>
-                    <CategorySidebar fetchData={fetchData} />
+                    <CategorySidebar fetchData={fetchData} setCategory={setCategory} />
                 </Paper>
             </div>
 
             <div className="position-relative">
+                {/* {
+                    category && <div className="w-100 p-2 mb-2" style={{ background: "white", borderRadius: 5 }}>
+                        <span className="font-weight-bold font-size-3">
+                            Category: {category}
+                        </span>
+                    </div>
+                } */}
+
                 <InfiniteScroll
                     dataLength={count}
                     height="calc(100vh - 115px)"
                     next={() => {
                         setTimeout(() => {
-                            fetchData();
+                            loadMoreData()
+                            // fetchData();
                         }, 1500)
                     }}
                     hasMore={products.length !== count}
                     loader={
-                        <h3 className="text-center border mt-3 p-3 loading-dots">
-                            Loading more items
-                        </h3>
+                        <h4 className="text-center border mt-3 p-3 loading-dots">
+                            Loading more product(s)
+                        </h4>
                     }
                 >
-                    <div className={`${styles.product_list_container}`}>
+                    {
+                        products.length !== 0 ? <div className={`${styles.product_list_container}`}>
+                            {
+                                products.map((product, index: number) => (
+                                    <Product key={index} product={product}
+                                        onAddItem={onAddToCartItem}
+                                    />
+                                ))
+                            }
+                        </div> : <div className="p-5 d-flex align-items-center justify-content-center" style={{ background: "white" }}>
+                            <h2 className={loading ? "loading-dots" : ""}>
+                                {
+                                    loading ? "Loading product(s)" : "No product(s) found"
+                                }
+                            </h2>
+                        </div>
+                    }
 
-                        {
-                            products.map((product, index: number) => (
-                                <Product key={index} product={product}
-                                    onAddItem={onAddToCartItem}
-                                />
-                            ))
-                        }
-                    </div>
 
                 </InfiniteScroll>
             </div>

@@ -727,10 +727,10 @@ export default function Contact(props) {
               </Grid>
             </Grid>
             <Grid item md={6} sm={6} xs={12} className={styles.filter_side}>
-              <Box id="resourceOperations" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" style={{ flex: 1 }}>
+              <Box id="resourceOperations" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{display: "flex", flex:1}}>
                   <SearchBox
-                      onSearch={handleSearch}
+                    onSearch={handleSearch}
                     searchbox={styles.search_box_input}
                     value={search}
                     size="small"

@@ -66,7 +66,7 @@ import { MdDeleteSweep } from 'react-icons/md';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { AiFillPlusCircle } from 'react-icons/ai';
 import { MdLibraryAdd } from 'react-icons/md';
-import {IoArrowDownCircleSharp} from "react-icons/all";
+import { IoArrowDownCircleSharp } from "react-icons/all";
 import contactClass from "../../Contact/contact.module.scss";
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -252,18 +252,16 @@ export default function QuoteDetail() {
   }, [currentVersion]);
 
   const fetchDoaLimit = () => {
-    if (quoteData) {
-      axiosInstance()
-        .post('doa-request/limit', { entity: selectedEntity })
-        .then(({ data: { data } }) => {
-          setDOAsetup(data.doasetup);
-          setDOALimit(data.limit ? data.limit : data.minLimit);
-          // setLastUser(data.lastUser);
-        })
-        .catch((err) => {
-          // toastConfig.setToastConfig(err);
-        });
-    }
+    axiosInstance()
+      .post('doa-request/limit', { entity: selectedEntity })
+      .then(({ data: { data } }) => {
+        setDOAsetup(data.doasetup);
+        setDOALimit(data.limit ? data.limit : data.minLimit);
+        // setLastUser(data.lastUser);
+      })
+      .catch((err) => {
+        // toastConfig.setToastConfig(err);
+      });
   };
 
   const fetchRelatedTo = () => {
@@ -731,14 +729,14 @@ export default function QuoteDetail() {
                         variant={isMobile ? "text" : "outlined"}
                         color="primary"
                         size="small"
-                        className={isMobile ? contactClass.mobile_button_layout :  "mx-1"}
+                        className={isMobile ? contactClass.mobile_button_layout : "mx-1"}
                         onClick={() => {
                           setShowAllVersionStatus(true);
                         }}
-                        style={isMobile ? {color:"#43aeaa"} : {}}
+                        style={isMobile ? { color: "#43aeaa" } : {}}
                         startIcon={isMobile ? null : <VscVersions />}
                       >
-                        {isMobile ? <VscVersions size={20}/> : `Version : ${currentVersion}`}
+                        {isMobile ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
                       </Button>
                     </Tooltip>
                     {DOAApproved && versionStatus === 'Sent for DOA' && (
@@ -779,13 +777,13 @@ export default function QuoteDetail() {
                         variant={isMobile ? "text" : "outlined"}
                         color="default"
                         size="small"
-                        className={isMobile ? contactClass.mobile_button_layout :  "mx-1"}
+                        className={isMobile ? contactClass.mobile_button_layout : "mx-1"}
                         endIcon={isMobile ? null : <ExpandMore />}
                         onClick={openActions}
                         // className={styles.action_submit_btn}
                         aria-controls="action-menu"
                       >
-                        {isMobile ? <IoArrowDownCircleSharp size={20}/> : 'Actions '}
+                        {isMobile ? <IoArrowDownCircleSharp size={20} /> : 'Actions '}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}

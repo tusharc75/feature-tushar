@@ -254,7 +254,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, []);
 
   const conditionalRedirect = (Comp, location) => {
@@ -497,7 +497,7 @@ function App() {
             <Route exact path={"/dashboard/:id"}>
               <EditDashboard edit={false} />
             </Route> */}
-            //Route available for customers to Accept Reject Quote
+            {/* //Route available for customers to Accept Reject Quote */}
             <Route exact path={'/quote-approval/:id'}>
               <QuoteApproval />
             </Route>
@@ -510,10 +510,10 @@ function App() {
             <PrivateRoute exact path={routes.quoteBuilder.path}>
               <QuoteBuilderCombined />
             </PrivateRoute>
-            <PrivateRoute exact path="/product-list">
+            <PrivateRoute exact path={routes.eCommerce.path}>
               <Products />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.productDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes.eCommerceDetail.path}/:id`}>
               <ProductDetails />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.productDetail.path}/:id/bom`}>

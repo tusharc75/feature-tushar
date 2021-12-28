@@ -23,7 +23,7 @@ const InputField = (props) => {
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(fieldsData));
     const addressOption = fieldsData.filter((obj) => obj?.fieldName==="address")
-    setAddressOptions(addressOption[0].option);
+    setAddressOptions(addressOption[0]?.option);
     // eslint-disable-next-line
   }, [fieldsData]);
 

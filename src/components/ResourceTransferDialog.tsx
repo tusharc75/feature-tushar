@@ -118,7 +118,7 @@ export default function ResourceTransferDialog(props) {
                 color="primary"
                 size="small"
                 onClick={handleTransfer}
-                disabled={loading}
+                disabled={loading || !toResource}
             >
                 {loading ? <CircularProgress size={22} /> : "Submit"}
             </Button>

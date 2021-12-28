@@ -68,12 +68,6 @@ const Filters = (props) => {
   };
 
   useEffect(() => {
-    if (user && user?.user) {
-      setDashboardType(user.user?.dashboards[0])
-    }
-  }, [user])
-
-  useEffect(() => {
     switch (timeFrame) {
       case '1-month':
         setSalesFilter({
@@ -269,7 +263,7 @@ const Filters = (props) => {
                   <InputLabel id="dashboard-type">Dashboard</InputLabel>
                   <Select labelId="dashboard-type" id="type" value={dashboardType} onChange={(e) => setDashboardType(e.target.value)}>
                     {user && user?.user?.dashboards.map(type => (
-                      <MenuItem value={type}>{type}</MenuItem>
+                      <MenuItem key={type} value={type}>{type}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
