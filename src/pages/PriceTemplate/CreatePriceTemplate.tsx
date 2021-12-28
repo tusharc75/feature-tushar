@@ -1,8 +1,16 @@
 import { useState, useEffect, useContext, Fragment, useRef } from "react";
-import Box from "@material-ui/core/Box";
-import Grid from "@material-ui/core/Grid";
-import Button from "@material-ui/core/Button";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import {
+  Box,
+  Grid,
+  Typography,
+  Button,
+  CircularProgress,
+  Menu,
+  MenuItem,
+  IconButton,
+  makeStyles,
+  useMediaQuery
+} from "@material-ui/core";
 import { useParams, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { FormBuilder } from "../../components/FormBuilder";
@@ -22,6 +30,37 @@ import HistoryButton from "../../components/Helpers/HistoryButton";
 import HistoryDialog from "../../components/Activity/History"
 import { priceTemplate } from "../../constants/helpers"
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
+import { IoIosArrowDropdown } from "react-icons/io";
+
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+      width: "100%",
+      flexGrow: 1,
+      display: "flex",
+      justifyContent: "flex-end",
+  },
+  linksContainer: {
+      display: "flex",
+      justifyContent: "flex-end",
+      ["@media (max-width: 960px)"]: {
+          display: "none",
+      },
+  },
+  menuButtonList:{
+      alignItems:"flex-start",
+      padding: "1px"
+  },
+  delBtn: {
+      color: "red",
+  },
+  expandIcon: {
+      position: "absolute",
+      right: "0",
+      color: "white"
+  }
+
+}));
 
 const PriceTemplateSchema = object().shape({
   name: string()
@@ -53,6 +92,10 @@ const PriceTemplate = () => {
   const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
   const ref = useRef(null);
 
+  const classes = useStyles();
+  const isMobile = useMediaQuery("(max-width: 960px)");
+
+
   const {
     state: { user, permissions, selectedEntity },
   }: any = useData();
@@ -81,6 +124,20 @@ const PriceTemplate = () => {
       }
     }
   }
+
+  
+
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleClick = (event) => {
+      setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+      setAnchorEl(null);
+  };
+
 
   useEffect(() => {
     window.history.pushState(null, null, window.location.pathname);
@@ -319,7 +376,9 @@ const PriceTemplate = () => {
             }}
           />
         </Grid>
-        <Grid container justify="flex-end" item md={8} sm={1} xs={2}>
+        <Grid container justify="flex-end" item md={8} sm={1} xs={2} className="pr-3">
+
+        <div className={classes.linksContainer}>
           <label
             htmlFor="importField"
             style={{ color: "white" }}
@@ -347,6 +406,50 @@ const PriceTemplate = () => {
             Export Fields
           </label>
           <a id="downloadAnchorElem" style={{ display: "none" }}></a>
+          </div>
+
+          <Menu
+                    id="importField"
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                >
+                    <MenuItem
+                    >
+                        <label
+                            htmlFor="importField"
+                            className="cursor-pointer"
+                        >
+                            Import Fields
+                            <input
+                                onClick={(e: any) => (e.target.value = null)}
+                                id="importField"
+                                name="importField"
+                                onChange={handleImportFields}
+                                style={{
+                                    opacity: "0",
+                                    position: "absolute",
+                                    zIndex: -1,
+                                }}
+                                type="file"
+                            />
+                        </label>
+
+                    </MenuItem>
+                    <MenuItem
+                        onClick={handleExportFields}
+                    >
+                        Export Fields
+                    </MenuItem>
+                    {/* <MenuItem>Email a Link</MenuItem> */}
+                </Menu>
+                {isMobile && (
+                    <IconButton onClick={handleClick} className={classes.menuButtonList}>
+                        <IoIosArrowDropdown className={classes.expandIcon} />
+                    </IconButton>
+                )}
+
         </Grid>
       </Grid>
       <div className="main-container">
