@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useReducer, useState } from 'react'
 import { List, ListItem, ListItemText, Typography } from '@material-ui/core';
 import { DataGrid } from '@material-ui/data-grid'
 import CustomDataGridNoDataFound from '../../components/Helpers/CustomDataGridNoDataFound'
@@ -6,16 +6,70 @@ import { useHistory } from 'react-router-dom';
 import routes from '../../components/Helpers/Routes';
 import { quoteStepColors } from '../../constants/helpers';
 import { isMobile } from 'react-device-detect';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import { CommonRenderer, DateRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import NoDataCell from '../../components/Helpers/NoDataCell';
 
 export default function VersionStatus({ loadingVersions, versionStatusData }) {
 
     const history = useHistory();
+    //  Grid Variables - Start
+    const [gridApi, setGridApi] = useState(null);
+    const [state, dispatch] = useReducer(reducer, intialState);
+    const {
+        dataRows,
+        rowCount,
+        loading,
+        page,
+        limit,
+        pageSizes,
+    } = state;
+
+    useEffect(() => {
+
+        dispatch({
+            type: "initialize", data: versionStatusData,
+            count: versionStatusData?.length
+        });
+    }, [])
+
+    const NameRenderer = (params) =>
+        params.value ? (
+            <span
+                title={params.value}
+                className="text-truncate link"
+                onClick={() => {
+                    history.push(`quotes/detail/${params.data.quoteId}`, {
+                        versionNumber: `${params.data.versionNumber}`,
+                        tabValue: 1
+                    })
+                }}
+            >
+                {params.value}
+            </span>
+        ) : (
+            <NoDataCell />
+        );
+    const columns = [
+        { field: 'versionNumber', headerName: 'Version #', show: true, cellRenderer: 'commonRenderer' },
+        { field: 'status', headerName: 'Status', show: true, cellRenderer: 'nameRenderer' },
+        { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
+        { field: 'processStatus', headerName: 'Current Step', show: true, cellRenderer: 'commonRenderer' },
+        { field: 'totalCost', headerName: 'Total Cost', show: true, cellRenderer: 'commonRenderer' },
+        { field: 'totalSalesPrice', headerName: 'Total Sales Price', show: true, cellRenderer: 'commonRenderer' },
+    ]
+
+    const frameworkComponents = {
+        nameRenderer: NameRenderer,
+        commonRenderer: CommonRenderer,
+        dateRenderer: DateRenderer
+    };
 
     return (
         isMobile ? <>
             <List className="p-0">
                 {
-                    versionStatusData?.data?.map(d => (
+                    versionStatusData?.map(d => (
                         <ListItem alignItems="flex-start" key={d.versionNumber} className="mb-2 border border-radius-2" button
                             style={{
                                 backgroundColor: quoteStepColors[d.status?.toLowerCase()]?.backgroundColor ?? quoteStepColors["__default__"].backgroundColor,
@@ -60,21 +114,25 @@ export default function VersionStatus({ loadingVersions, versionStatusData }) {
 
                 {/* <Divider variant="inset" component="li" /> */}
             </List>
-        </> : <div style={{ maxHeight: 500, width: "100%" }} className="mt-2">
-            <DataGrid
-                components={{
-                    NoRowsOverlay: CustomDataGridNoDataFound,
-                }}
-                loading={loadingVersions}
-                autoHeight
-                density="compact"
-                rows={loadingVersions ? [] : versionStatusData.data}
-                columns={versionStatusData.columns}
-                disableSelectionOnClick
-                disableMultipleSelection
-                disableColumnFilter
-                hideFooter
-            />
-        </div>
+        </> : Object.keys(frameworkComponents).length > 0 ?
+            <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameworkComponents}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                actionWidth={100}
+                allowAction={false}
+                allowSelection={false}
+                loading={loading}
+                renderedFrom={"quoteResourceVersionStatus"}
+                refreshGrid={() => { }}
+                isClientSideGrid={true}
+            /> : null
+
     )
 }
