@@ -27,6 +27,9 @@ const ProtectedRoute = ({ children, ...rest }) => {
     if (path === 'quotes') {
       path = 'quoteBuilder';
     }
+    if (path === "projectSales") {
+      path = "projectStrategy"
+    }
     if (permissions && permissions[path]) {
       if (permissions[path].isRead) {
         setAccess(true);
@@ -34,7 +37,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
       }
     } else if (
       pathname === '/' ||
-      [
+      ['dashboards',
         'case',
         'task',
         'attachment',
@@ -51,8 +54,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'brand-configuration',
         'project-sales',
         'doa-request',
-        'product-list',
-        'product/details',
+        'e-commerce',
+        'e-commerce/details',
         'quote-pdf-template',
         'product-inventory',
         'equiptment-rental-master',

@@ -18,10 +18,15 @@ import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { uniqBy } from 'lodash';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
+import HtmlTooltip from "../../../components/CustomTooltipTitle";
+import { useHistory } from "react-router-dom";
+import InfoIcon from '@material-ui/icons/Info';
 
 const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
 
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
+
   const [deleting, setDeleting] = useState(false)
   const [isAdding, setAdding] = useState(false)
   const [showConfirmBox, setShowConfirmBox] = useState(false)
@@ -395,6 +400,15 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             >
               {`Create ${routes.purchaseOrder.title}`}
             </Button>
+            <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
+              <IconButton size="small" onClick={() => {
+                history.push(routes.purchaseOrder.path, {
+                  rental: rentalManagementData,
+                })
+              }}>
+                <InfoIcon color="disabled" />
+              </IconButton>
+            </HtmlTooltip>
             <Box mx={1} component="span" />
             <Button
               variant="contained"
