@@ -94,6 +94,7 @@ export default function Account(props) {
   const [selectedType, setselectedType] = useState(1);
   const [accountId, setAccountId] = useState(null);
   const [showEntityDialog, setShowEntityDialog] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
 
   const [singleAccountDelete, setSingleAccountDelete] = useState({
     id: null,
@@ -877,7 +878,8 @@ export default function Account(props) {
   };
 
   const approveDisapproveAccounts = () => {
-    const selectedAccountIds = selectedRecords.filter((d) => d.approved === !multipleApproveDisapproveAccount.approved).map((m) => m._id);
+    const selectedAccountIds = selectedRecords.map((m) => m._id);
+    setIsApproving(true)
 
     axiosInstance()
       .post(`/${accountApi}/approve`, {
@@ -895,6 +897,7 @@ export default function Account(props) {
           approved: false,
           selectedRecords: 0
         });
+        setIsApproving(true)
         fetchAccounts();
       })
       .catch((error) => {
@@ -904,6 +907,7 @@ export default function Account(props) {
           approved: false,
           selectedRecords: 0
         });
+        setIsApproving(true)
       });
   };
 
@@ -1108,7 +1112,7 @@ export default function Account(props) {
                           setMultipleApproveDisapproveAccount({
                             show: true,
                             approved: true,
-                            selectedRecords: selectedRecords.filter((d) => !d.approved).length
+                            selectedRecords: selectedRecords.filter((d) => !d.approved)
                           });
                         }}
                       >
@@ -1123,7 +1127,7 @@ export default function Account(props) {
                           setMultipleApproveDisapproveAccount({
                             show: true,
                             approved: false,
-                            selectedRecords: selectedRecords.filter((d) => d.approved).length
+                            selectedRecords: selectedRecords.filter((d) => d.approved)
                           });
                         }}
                       >
@@ -1312,7 +1316,7 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords.length
               } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
@@ -1321,6 +1325,7 @@ export default function Account(props) {
                 selectedRecords: 0
               })
             }
+            okBtnLoading={isApproving}
             onOk={approveDisapproveAccounts}
           />
         ) : null}
