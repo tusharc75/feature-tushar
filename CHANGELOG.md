@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.28.0](https://github.com/vebholic/oms_frontend/compare/v2.27.2...v2.28.0) (2021-12-28)
+
+
+### Features
+
+* **address detail:** address detail ([bee4e5d](https://github.com/vebholic/oms_frontend/commit/bee4e5df4c6cfd612e9661a53382520f49416298))
+* **address listing:** address listing ([5a2cdd4](https://github.com/vebholic/oms_frontend/commit/5a2cdd419c5de59c526b831ad22ed68a500cac84))
+* **address:** address ([b6147a3](https://github.com/vebholic/oms_frontend/commit/b6147a388203aa93274336bb4b3c688aa3647f58))
+
+
+### Bug Fixes
+
+* **address error:** address error ([a7bf395](https://github.com/vebholic/oms_frontend/commit/a7bf395c8422c5a0cd9cb055ae11ea9c37a78e77))
+* assignQuantityProduct text field add PO-708 ([d35c2cd](https://github.com/vebholic/oms_frontend/commit/d35c2cd879d8a8ae54763d05cf7690e3225a1e95))
+* **bugs:** bugs ([523c019](https://github.com/vebholic/oms_frontend/commit/523c0197ce891a46332d38779fb06764c5b2d4d0))
+* date field edit not showing today date fixed ([65482d4](https://github.com/vebholic/oms_frontend/commit/65482d49234862c4deebb102e7f2fc4b2991f03a))
+* due date issue fixed in case and task ([2a22150](https://github.com/vebholic/oms_frontend/commit/2a22150a6732840729604eb77fa3c3b98faefb5b))
+* **error:** error ([1faa928](https://github.com/vebholic/oms_frontend/commit/1faa92882b369f0e113b441ed9b5839d28ec34b1))
+* on child task parent name showing on top (code comented) ([6d0ea46](https://github.com/vebholic/oms_frontend/commit/6d0ea4662395e73c678ba187b6b3ab77aa4e3577))
+* quote doa setup issue ([79cd6e6](https://github.com/vebholic/oms_frontend/commit/79cd6e643a1047b345332e0fa80e5b2104c5583d))
+
 ### [2.27.2](https://github.com/vebholic/oms_frontend/compare/v2.27.1...v2.27.2) (2021-12-27)
 
 ### [2.27.1](https://github.com/vebholic/oms_frontend/compare/v2.27.0...v2.27.1) (2021-12-26)

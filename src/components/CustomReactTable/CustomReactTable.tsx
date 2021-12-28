@@ -41,7 +41,8 @@ export default function CustomReactTable({
     isInValidCheck = null,
     childrenProperty,
     uniqueKey,
-    height = "100%"
+    height = "100%",
+    hideSelection = false
     // rowCount,
     // customPageSize = 20,
 }) {
@@ -170,7 +171,8 @@ export default function CustomReactTable({
             data,
             onSelect,
             initialState: {
-                autoResetExpanded: true
+                autoResetExpanded: true,
+                hiddenColumns: hideSelection ? ["selection"] : []
             },
             defaultColumn
         },
