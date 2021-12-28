@@ -150,7 +150,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                   <Box padding={1}>
                     <MuiPickersUtilsProvider utils={MomentUtils}>
                       <Box mb={2}>
-                        <Breadcrumbs separator="/" aria-label="breadcrumb">
+                        {/* <Breadcrumbs separator="/" aria-label="breadcrumb">
                           {initialValues.parent &&
                             initialValues.parent.map((_p, index) => {
                               return (
@@ -159,7 +159,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                                 </Button>
                               );
                             })}
-                        </Breadcrumbs>
+                        </Breadcrumbs> */}
                       </Box>
                       <Grid container spacing={3}>
                         <Grid item xs={12} md={7} sm={6}>
@@ -262,7 +262,11 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                                   fullWidth
                                   margin="dense"
                                   format={dateFormat}
-                                  minDate={values.startDate}
+                                  minDate={new Date()}
+                                  onChange={(value) => {
+                                    setFieldValue('dueDate', value);
+                                    setFieldValue('startDate', value);
+                                  }}
                                   maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                                 />
                               </Grid>

@@ -1,5 +1,5 @@
-import { useState, useEffect, Fragment } from "react";
-import PropTypes from "prop-types";
+import { useState, useEffect, Fragment } from 'react';
+import PropTypes from 'prop-types';
 import {
   Breadcrumbs,
   Typography,
@@ -11,56 +11,51 @@ import {
   FormControl,
   TextField,
   Divider,
-  CircularProgress,
-} from "@material-ui/core";
-import { UserDropdown } from "../Helpers/userDropdown";
-import statusList from "../Helpers/statusList";
-import { TextField as TextFieldFormik, Select } from "formik-material-ui";
-import { Formik, Form, Field } from "formik";
-import { KeyboardDatePicker } from "formik-material-ui-pickers";
-import { MuiPickersUtilsProvider } from "@material-ui/pickers";
-import MomentUtils from "@date-io/moment";
-import { object, string } from "yup";
-import moment from "moment";
+  CircularProgress
+} from '@material-ui/core';
+import { UserDropdown } from '../Helpers/userDropdown';
+import statusList from '../Helpers/statusList';
+import { TextField as TextFieldFormik, Select } from 'formik-material-ui';
+import { Formik, Form, Field } from 'formik';
+import { KeyboardDatePicker } from 'formik-material-ui-pickers';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import MomentUtils from '@date-io/moment';
+import { object, string } from 'yup';
+import moment from 'moment';
 
-import {
-  GetCaseDetail,
-  CreateNewCase,
-  UpdateCase,
-} from "../../../axios/activity";
-import { Comment } from "../Comment";
-import { RelatedToDispay } from "../Helpers/RelatedToDispay";
-import TableChartIcon from "@material-ui/icons/TableChart";
-import { SubCase } from "./SubCase";
-import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
-import { useData } from "../../../StateProvider/Provider";
-import Loader from "../../Loader";
-import { dateFormat } from "../../../constants/helpers"
-import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
-
+import { GetCaseDetail, CreateNewCase, UpdateCase } from '../../../axios/activity';
+import { Comment } from '../Comment';
+import { RelatedToDispay } from '../Helpers/RelatedToDispay';
+import TableChartIcon from '@material-ui/icons/TableChart';
+import { SubCase } from './SubCase';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import { useData } from '../../../StateProvider/Provider';
+import Loader from '../../Loader';
+import { dateFormat } from '../../../constants/helpers';
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 
 const CaseSchema = object().shape({
-  name: string().required("Please enter case name"),
-  assignee: string().required("Please select assignee"),
+  name: string().required('Please enter case name'),
+  assignee: string().required('Please select assignee'),
   reporter: string().required(),
-  startDate: string().required("Please enter start date"),
-  dueDate: string().required("Please enter due date"),
+  startDate: string().required('Please enter start date'),
+  dueDate: string().required('Please enter due date')
 });
 
 export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized, onMinimizeMaximize, showManimizeMaximize }) => {
   const {
     state: {
-      user: { user },
-    },
+      user: { user }
+    }
   } = useData();
   const [id, setId] = useState(caseId);
   const [initialValues, setInitialValues] = useState(null);
   const [openAddSub, setOpenAddSub] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-  const [formValues, setFormValues] = useState({})
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [formValues, setFormValues] = useState({});
 
   useEffect(() => {
     fetchCaseDetail();
@@ -72,21 +67,21 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
         .then(({ data }) => {
           setInitialValues(null);
           setInitialValues(data);
-          setFormValues(data)
+          setFormValues(data);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       let initialData = {
-        name: "",
-        description: "",
-        status: status || "To Do",
-        assignee: "",
+        name: '',
+        description: '',
+        status: status || 'To Do',
+        assignee: '',
         reporter: user._id,
         startDate: new Date(),
-        dueDate: new Date(),
-      }
+        dueDate: new Date()
+      };
       setInitialValues(initialData);
-      setFormValues(initialData)
+      setFormValues(initialData);
     }
   };
 
@@ -118,46 +113,42 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
   function validate(values) {
     const errors = {};
     if (moment(values.startDate) > moment(values.dueDate)) {
-      errors["dueDate"] = "Due date must greater then start date";
+      errors['dueDate'] = 'Due date must greater then start date';
     }
     return errors;
   }
 
   const isFieldNotTouched = (initialValues, values) => {
-    return (Object.values(initialValues).toString() === Object.values(values).toString())
-
-  }
+    return Object.values(initialValues).toString() === Object.values(values).toString();
+  };
   const handleValuesChange = (data) => {
     setFormValues((prevState) => ({
       ...prevState,
       ...data
-    }))
-  }
+    }));
+  };
 
   return (
     <>
       <CustomDialogHeader
-        title={`${id ? "Edit" : "New"} Case`}
+        title={`${id ? 'Edit' : 'New'} Case`}
         onClose={() => {
-          if (isFieldNotTouched(initialValues, formValues)) handleClose()
-          else setShowConfirmDialog(true)
+          if (isFieldNotTouched(initialValues, formValues)) handleClose();
+          else setShowConfirmDialog(true);
         }}
         isMinimized={isMinimized}
         onMinimizeMaximize={onMinimizeMaximize}
         showManimizeMaximize={showManimizeMaximize}
       ></CustomDialogHeader>
       {initialValues ? (
-        <Formik
-          initialValues={initialValues}
-          validationSchema={CaseSchema}
-          onSubmit={handleSave}
-          validate={validate}
-        >
+        <Formik initialValues={initialValues} validationSchema={CaseSchema} onSubmit={handleSave} validate={validate}>
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                  <h2 className="form-label-style" style={{ borderBottom: 'none' }}>
+                    * Required Fields
+                  </h2>
                   <MuiPickersUtilsProvider utils={MomentUtils}>
                     <Box padding={1}>
                       <Box mb={2}>
@@ -165,13 +156,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                           {initialValues.parent &&
                             initialValues.parent.map((_p, index) => {
                               return (
-                                <Button
-                                  key={index}
-                                  size="small"
-                                  className="cursor-pointer"
-                                  onClick={() => setId(_p._id)}
-                                  color="primary"
-                                >
+                                <Button key={index} size="small" className="cursor-pointer" onClick={() => setId(_p._id)} color="primary">
                                   {_p.name}
                                 </Button>
                               );
@@ -188,12 +173,12 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                             name="name"
                             fullWidth
                             margin="dense"
-                            value={values["name"]}
-                            error={touched["name"] && Boolean(errors["name"])}
-                            helperText={touched["name"] && errors["name"]}
+                            value={values['name']}
+                            error={touched['name'] && Boolean(errors['name'])}
+                            helperText={touched['name'] && errors['name']}
                             onChange={(e) => {
-                              setFieldValue("name", e.target.value.trimStart())
-                              handleValuesChange({ name: e.target.value.trimStart() })
+                              setFieldValue('name', e.target.value.trimStart());
+                              handleValuesChange({ name: e.target.value.trimStart() });
                             }}
                           />
                           <Box pt={1}>
@@ -208,8 +193,8 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                               name="description"
                               variant="outlined"
                               onChange={(e) => {
-                                setFieldValue("description", e.target.value)
-                                handleValuesChange({ description: e.target.value })
+                                setFieldValue('description', e.target.value);
+                                handleValuesChange({ description: e.target.value });
                               }}
                             />
                           </Box>
@@ -223,7 +208,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                                   onClick={() => setOpenAddSub(true)}
                                   startIcon={<TableChartIcon />}
                                 >
-                                  {" "}
+                                  {' '}
                                   Add a child Case
                                 </Button>
                               </Box>
@@ -236,14 +221,11 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                                   setId={setId}
                                 />
                               </Box>
-                              {
-                                initialValues?.relatedTo && initialValues.relatedTo.length ?
-                                  <Box mt={2}>
-                                    <RelatedToDispay
-                                      relatedTo={initialValues.relatedTo}
-                                    />
-                                  </Box> : null
-                              }
+                              {initialValues?.relatedTo && initialValues.relatedTo.length ? (
+                                <Box mt={2}>
+                                  <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                                </Box>
+                              ) : null}
                               <Box mt={2}>
                                 <Divider />
                                 <Box mt={1}>
@@ -256,9 +238,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                         <Grid item xs={12} md={5} sm={6}>
                           <Box pt={1}>
                             <FormControl variant="outlined" fullWidth>
-                              <InputLabel id="demo-simple-select-outlined-label">
-                                Status
-                              </InputLabel>
+                              <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
                               <Field
                                 component={Select}
                                 labelId="demo-simple-select-outlined-label"
@@ -283,11 +263,11 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                               touched={touched}
                               required={true}
                               setFieldValue={(name, value) => {
-                                handleValuesChange({ [name]: value })
-                                setFieldValue(name, value)
+                                handleValuesChange({ [name]: value });
+                                setFieldValue(name, value);
                               }}
                               multiple={false}
-                              value={values["assignee"]}
+                              value={values['assignee']}
                             />
                           </Box>
                           <Box pt={1}>
@@ -298,11 +278,11 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                               touched={touched}
                               required={true}
                               setFieldValue={(name, value) => {
-                                handleValuesChange({ [name]: value })
-                                setFieldValue(name, value)
+                                handleValuesChange({ [name]: value });
+                                setFieldValue(name, value);
                               }}
                               multiple={false}
-                              value={values["reporter"]}
+                              value={values['reporter']}
                             />
                           </Box>
                           <Box pt={1}>
@@ -316,14 +296,12 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                               fullWidth
                               margin="dense"
                               format={dateFormat}
-                              minDate={
-                                initialValues.parentData &&
-                                initialValues.parentData.startDate
-                              }
-                              maxDate={
-                                initialValues.parentData &&
-                                initialValues.parentData.dueDate
-                              }
+                              minDate={new Date()}
+                              onChange={(value) => {
+                                setFieldValue('startDate', value);
+                                setFieldValue('dueDate', value);
+                              }}
+                              maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                             />
                           </Box>
                           <Box pt={1}>
@@ -338,36 +316,25 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                               margin="dense"
                               format={dateFormat}
                               minDate={values.startDate}
-                              maxDate={
-                                initialValues.parentData &&
-                                initialValues.parentData.dueDate
-                              }
+                              maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                             />
                           </Box>
                           {id && (
                             <Fragment>
-                              {initialValues.createdBy &&
-                                initialValues.createdBy.date && (
-                                  <Box mt={1} color="text.secondary">
-                                    <Typography variant="body2">
-                                      Created{" "}
-                                      {moment(
-                                        initialValues.createdBy.date
-                                      ).format("MMM DD YYYY hh:mm A")}
-                                    </Typography>
-                                  </Box>
-                                )}
-                              {initialValues.updatedBy &&
-                                initialValues.updatedBy.date && (
-                                  <Box mt={1} color="text.secondary">
-                                    <Typography variant="body2">
-                                      Updated{" "}
-                                      {moment(
-                                        initialValues.updatedBy.date
-                                      ).format("MMM DD YYYY hh:mm A")}
-                                    </Typography>
-                                  </Box>
-                                )}
+                              {initialValues.createdBy && initialValues.createdBy.date && (
+                                <Box mt={1} color="text.secondary">
+                                  <Typography variant="body2">
+                                    Created {moment(initialValues.createdBy.date).format('MMM DD YYYY hh:mm A')}
+                                  </Typography>
+                                </Box>
+                              )}
+                              {initialValues.updatedBy && initialValues.updatedBy.date && (
+                                <Box mt={1} color="text.secondary">
+                                  <Typography variant="body2">
+                                    Updated {moment(initialValues.updatedBy.date).format('MMM DD YYYY hh:mm A')}
+                                  </Typography>
+                                </Box>
+                              )}
                             </Fragment>
                           )}
                         </Grid>
@@ -382,37 +349,29 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                   color="primary"
                   size="small"
                   onClick={() => {
-                    if (isFieldNotTouched(initialValues, values)) handleClose()
-                    else setShowConfirmDialog(true)
+                    if (isFieldNotTouched(initialValues, values)) handleClose();
+                    else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
                 </Button>
-                <Button
-                  disabled={isSubmitting}
-                  type="button"
-                  size="small"
-                  color="primary"
-                  variant="contained"
-                  onClick={submitForm}
-                >
-                  {isSubmitting ? <CircularProgress size={22} /> : "Save"}
+                <Button disabled={isSubmitting} type="button" size="small" color="primary" variant="contained" onClick={submitForm}>
+                  {isSubmitting ? <CircularProgress size={22} /> : 'Save'}
                 </Button>
               </CustomDialogFooter>
-              {
-                showConfirmDialog ?
-                  <ConfirmCancelDialog
-                    open={showConfirmDialog}
-                    onSave={() => {
-                      setShowConfirmDialog(false)
-                      submitForm()
-                    }}
-                    onClose={() => {
-                      setShowConfirmDialog(false)
-                      handleClose()
-                    }}
-                  /> : null
-              }
+              {showConfirmDialog ? (
+                <ConfirmCancelDialog
+                  open={showConfirmDialog}
+                  onSave={() => {
+                    setShowConfirmDialog(false);
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmDialog(false);
+                    handleClose();
+                  }}
+                />
+              ) : null}
             </>
           )}
         </Formik>
@@ -429,5 +388,5 @@ CreateCase.propTypes = {
   relatedTo: PropTypes.any,
   taskId: PropTypes.any,
   status: PropTypes.any,
-  handleClose: PropTypes.any,
+  handleClose: PropTypes.any
 };

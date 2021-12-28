@@ -13,11 +13,13 @@ export type FilterType = {
   country: { default: boolean; order: number; optionValue: string; optionLabel: string } | any;
 };
 
-const AssetDashboard = () => {
+const AssetDashboard = ({ salesFilter }) => {
   const { state: { selectedEntity } } = useData()
+  const { between: { from, to } } = salesFilter
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [assetLocationData, setAssetLocationData] = React.useState([]);
+  const [assetUtilizationData, setAssetUtilizationData] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [filter, setFilter] = React.useState<FilterType>({
     productCategory: [],
@@ -35,7 +37,7 @@ const AssetDashboard = () => {
     }
     timeout = setTimeout(() => {
       fetchLocationBase();
-    }, 500)
+    }, 200)
 
     return () => {
       timeout = null
@@ -43,8 +45,6 @@ const AssetDashboard = () => {
     }
 
   }, [filter, selectedEntity]);
-
-
 
   const fetchLocationBase = () => {
     let url = '?';
@@ -68,17 +68,45 @@ const AssetDashboard = () => {
       });
   };
 
-  // const fetchAssetsData = () => {
-  //   axiosInstance()
-  //     .get(`/dashboard/assets-total-in-use?limit=5&page=0&between={"from":"2020-08-22","to":"2021-12-24"}`)
-  //     .then(({ data }) => {
-  //       setAssetLocationData(data.data);
-  //       setLoading(false);
-  //     })
-  //     .catch(() => {
-  //       setLoading(false);
-  //     });
-  // };
+
+
+
+  React.useEffect(() => {
+
+    fetchAssetsData();
+
+  }, [from, to, selectedEntity]);
+
+
+  const fetchAssetsData = () => {
+    let params = {
+      between: JSON.stringify({
+        from: new Date(from).toISOString().split('T')[0],
+        to: new Date(to).toISOString().split('T')[0]
+      })
+    };
+
+    let url = '';
+    for (const k of Object.keys(params)) {
+      if (params[k]) {
+        if (k === 'between' && from && to) {
+          url = `${url}${k}=${params[k]}&`;
+        }
+      }
+    }
+
+    setLoading(true);
+
+    axiosInstance()
+      .get(`/dashboard/assets-total-in-use?limit=5&page=0&${url}`)
+      .then(({ data: { data } }) => {
+        setAssetUtilizationData(data.data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  };
 
 
 
@@ -110,7 +138,7 @@ const AssetDashboard = () => {
             <MapView smallScreen={smallScreen} data={assetLocationData} loading={loading} />
           </Grid>
           <Grid item xs={12} md={6}>
-            <AssetChart loading={loading} data={assetLocationData} />
+            <AssetChart loading={loading} data={assetUtilizationData} />
           </Grid>
         </Grid>
       </Box>
