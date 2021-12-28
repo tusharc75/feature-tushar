@@ -302,19 +302,12 @@ const QuoteBuilders = () => {
     axiosInstance()
       .get(`/quote-builder/quote-hierarchy/${id}`)
       .then(({ data: { data } }) => {
-        //   toastConfig.setToastConfig({
-        //     open: true,
-        //     type: "success",
-        //     message: "Data Retreived successfully",
-        // });
-        // setShowVersionsDialog(true);
-        let quoteId = id;
         const newData = data.versions.map((d, index) => {
           return {
             ...d,
             id: index + 1,
             versionNumber: index + 1,
-            quoteId: quoteId,
+            quoteId: id,
             totalCost: formatAmountWithCurrency(
               currency,
               d?.productData?.totalCost

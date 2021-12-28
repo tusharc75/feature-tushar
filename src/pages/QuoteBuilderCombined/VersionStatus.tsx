@@ -39,7 +39,7 @@ export default function VersionStatus({ loadingVersions, versionStatusData }) {
                 title={params.value}
                 className="text-truncate link"
                 onClick={() => {
-                    history.push(`quotes/detail/${params.data._id}`, {
+                    history.push(`quotes/detail/${params.data.quoteId}`, {
                         versionNumber: `${params.data.versionNumber}`,
                         tabValue: 1
                     })
