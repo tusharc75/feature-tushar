@@ -29,7 +29,9 @@ const Header = (props) => {
     openUserSetupDialog,
     userSetupDisabled,
     selectedRecordsLength = 0,
-    manageDeleteUser
+    manageDeleteUser,
+    isAssignBrandAdmin,
+    handleAssignBrandAdmin
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -118,6 +120,15 @@ const Header = (props) => {
                     Delete
                   </MenuItem>
                 )}
+
+                {
+                  isAssignBrandAdmin && selectedRecordsLength > 0 &&
+                    <MenuItem
+                      onClick = {handleAssignBrandAdmin}
+                    >
+                      Assign Brand Admin
+                    </MenuItem>
+                }
 
                 {
                   userPermissions.isUpdate && <MenuItem

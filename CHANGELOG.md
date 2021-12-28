@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.27.2](https://github.com/vebholic/oms_frontend/compare/v2.27.1...v2.27.2) (2021-12-27)
+
+### [2.27.1](https://github.com/vebholic/oms_frontend/compare/v2.27.0...v2.27.1) (2021-12-26)
+
+## [2.27.0](https://github.com/vebholic/oms_frontend/compare/v2.26.0...v2.27.0) (2021-12-25)
+
+
+### Features
+
+* - PO-705 - pics will redirected to  the detailed screen ([95a8db4](https://github.com/vebholic/oms_frontend/commit/95a8db4a8edca69a86928d8a8b7b7b4ba717419a))
+* - PO-706 - categories on the left side should show by the parent name with child like amazon ([9995767](https://github.com/vebholic/oms_frontend/commit/9995767795698a5adba7c4d732a2d51c62c840fe))
+* - PO-706 - categories on the left side should show by the parent name with child like amazon ([d215bbe](https://github.com/vebholic/oms_frontend/commit/d215bbe7ec77f6299854b32617e048a17b7ef775))
+* - PO-707 - Cart icon in header should only be visible if user has permission of eCommerce ([213f667](https://github.com/vebholic/oms_frontend/commit/213f667346299081a94946c4832d538840ae7906))
+* **mapview:** fix marker click ([89e386a](https://github.com/vebholic/oms_frontend/commit/89e386a08704ba5eca524a1dcf9cec899e978f8a))
+
+
+### Bug Fixes
+
+* **dashboard:** chart loading placeholder ([909cc35](https://github.com/vebholic/oms_frontend/commit/909cc35c2a32b4989cee6a35e7e1786d280d9b45))
+* **dashboard:** minor ui fix ([fe03636](https://github.com/vebholic/oms_frontend/commit/fe036363109c162e7acce23ef909dcc01da8946f))
+* select all changes in quotes ([dd65281](https://github.com/vebholic/oms_frontend/commit/dd65281a7be2841fe990553cf621eedde7453b6a))
+
 ## [2.26.0](https://github.com/vebholic/oms_frontend/compare/v2.25.0...v2.26.0) (2021-12-24)
 
 

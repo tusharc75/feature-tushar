@@ -50,6 +50,8 @@ const User: FC = () => {
   const [regionalRolesDialogOpen, setRegionalRolesDialogOpen] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
+  const [showBrandAssignConfirmation, setShowBrandAssignConfirmation] = useState(false)
+  const [brandAssigningLoading, setBrandAssigningLoading] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [unAssignLoading, setUnAssignLoading] = useState(false);
@@ -345,7 +347,7 @@ const User: FC = () => {
       .get(`/user${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          const { createdBy, updatedBy, role, entities,  ...restProperties } = u;
+          const { createdBy, updatedBy, role, entities, ...restProperties } = u;
 
           const [firstCompanyWideRole, ...restCompanyWideRoles] = role;
           const allRegionalWideRoles = uniqBy(entities.map(d => d.role).flat(), "_id") as any[];
@@ -409,6 +411,32 @@ const User: FC = () => {
       }
     }
   };
+
+  const handleAssignBrandAdmin = () => {
+    setShowBrandAssignConfirmation(true)
+  }
+
+  const assignBrandAdmin = async () => {
+    setBrandAssigningLoading(true)
+    const records = selectedRecords.map((record) => record._id)
+    axiosInstance()
+    .put(`/user/make-user-admin`, {'users': records})
+    .then(({data}) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: "success",
+        message: data.message,
+      });
+      setShowBrandAssignConfirmation(false)
+      setBrandAssigningLoading(false)
+      fetchUsers()
+    })
+    .catch((error) => {
+      toastConfig.setToastConfig(error);
+      setShowBrandAssignConfirmation(false)
+      setBrandAssigningLoading(false)
+    });
+  }
 
   const handleDeleteUser = async () => {
     setDeleteLoading(true);
@@ -498,6 +526,7 @@ const User: FC = () => {
     }
   }
 
+
   return (
     <>
       {
@@ -523,7 +552,8 @@ const User: FC = () => {
             fetchUsers={() => fetchUsers()}
             userList={userList}
             selectedRecords={selectedRecords}
-          />
+            isRoleSetUpPermission = {permissions?.role?.isCreate && permissions?.entity?.isCreate && permissions?.user?.isCreate}
+            />
         )
       }
       {globalRolesDialogOpen && (
@@ -651,6 +681,8 @@ const User: FC = () => {
                   setShowDeleteDialog(true)
                 }
               }}
+              isAssignBrandAdmin={user?.user?.userType === userType.brandAdmin}
+              handleAssignBrandAdmin={handleAssignBrandAdmin}
             />
           </div>
 
@@ -724,6 +756,19 @@ const User: FC = () => {
                 : handleDeleteUser}
           />
         ) : null}
+        {showBrandAssignConfirmation &&
+          <ConfirmationDialog
+            open={showBrandAssignConfirmation}
+            message={`Are you sure you want to assign the selected user(s) Brand Admin?`}
+            onClose={() => {
+              setShowBrandAssignConfirmation(false)
+              fetchUsers()
+            }
+            }
+            okBtnLoading={brandAssigningLoading}
+            onOk={assignBrandAdmin}
+          />
+        }
         {
           showDeleteDialog ?
             <ResourceTransferDialog

@@ -32,12 +32,15 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-const stepsLabel = ["Set Approval Process", "Assign Roles"]
+const stepsLabel = ["Set Approval Process"]
 
-const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, userPermissions = null, fetchUsers, userList, selectedRecords }) => {
+const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, userPermissions = null, fetchUsers, userList, selectedRecords, isRoleSetUpPermission }) => {
     const { state: { user, permissions }, } = useData();
     const [activeStep, setActiveStep] = useState(0)
     const classes = useStyles();
+    useEffect(() => {
+        isRoleSetUpPermission && stepsLabel.push('Assign Role');
+    }, [])
 
 
 
@@ -49,7 +52,12 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                         openApprovalProcessDialog={open}
                         hasPermissionToUpdateApprovalProcess={permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin}
                         onSuccess={() => {
-                            setActiveStep((prevStep) => prevStep + 1)
+                            if (isRoleSetUpPermission) {
+                                setActiveStep((prevStep) => prevStep + 1)
+                            } else {
+                                close()
+                                fetchUsers()
+                            }
                         }
                         }
                         handleCloseDialog={close}
