@@ -34,6 +34,7 @@ import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField }
 import { camelCase } from "lodash";
 import { isMobile, isTablet } from 'react-device-detect'
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { setUpindexDB, objectStore, insertUpdate, findAll, findOne } from '../../constants/indexdbhelper';
 
 let rentalManagementTimeout;
 const RentalManagementType = [
@@ -51,16 +52,15 @@ const renderedFrom = "rental_management";
 const localStorageSelectedRecords = `${renderedFrom}_selected`
 
 const RentalManagement = () => {
+  
   const toastConfig = useContext(CustomToastContext);
-  const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const pageTitle = camelCase(`${routes.rentalManagement.title}`)
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
 
-  const {
-    state: { user, permissions, selectedEntity },
-  }: any = useData();
+  const { state: { user, permissions, selectedEntity } }: any = useData();
   const { getColumnData } = useColumns();
   const [locationKeys, setLocationKeys] = useState([])
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
@@ -93,22 +93,10 @@ const RentalManagement = () => {
   const { rentalManagementResource, rentalManagementApi } = rentalManagement;
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const {
-    dataRows,
-    rowCount,
-    loading,
-    page,
-    limit,
-    pageSizes,
-    search,
-    filters,
-    sorting,
-    selectedRecords,
-    appendRows,
-    showFilteredRecordsOnly
-  } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
 
   useEffect(() => {
+    setUpindexDB()
     fetchGridColumns()
   }, [])
 
@@ -132,25 +120,22 @@ const RentalManagement = () => {
         }
       }
     })
-  }, [locationKeys,])
+  }, [locationKeys])
 
   const fetchGridColumns = async () => {
     let data
     if (isOffline) {
-      data = offlineFieldsData["rentalManagement"] ?? []
+      data = await findOne(objectStore.resource, objectStore.rentalManagement)
     }
     else {
-      const response = await axiosInstance()
-        .get(`/field?resource=Rental Management&entity=${selectedEntity}&view=true`)
-
+      const response = await axiosInstance().get(`/field?resource=Rental Management&entity=${selectedEntity}&view=true`)
       data = response?.data?.data
       try {
-        updateFieldsData("rentalManagement", data);
+        insertUpdate(objectStore.resource, objectStore.rentalManagement, data);
       } catch (ex) {
         console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`)
       }
     }
-
     let columns = []
     let rendererNames = []
     data.forEach(o => {
@@ -167,7 +152,6 @@ const RentalManagement = () => {
       }
       return o?.fieldData
     })
-
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
@@ -180,6 +164,7 @@ const RentalManagement = () => {
     })
     setColumns([...columns])
   }
+
   const columnState = JSON.parse(localStorage.getItem("rentalManagementPage"));
   if (columnState) {
     columns.forEach((item) => {
@@ -369,20 +354,15 @@ const RentalManagement = () => {
       gridApi.setRowData([]);
     }
     try {
-      let data, count;
+      let data: any = [], count;
       if (!isOffline) {
         const response: any = await axiosInstance().get(`${rentalManagementApi}${queryString}`);
         data = response?.data?.data;
         count = response?.data?.count;
       }
       else {
-        data = offlineGridData?.rentalManagement || [];
-        count = offlineGridData?.rentalManagement?.length || 0;
-      }
-      try {
-        updateOfflineGridData("rentalManagement", data);
-      } catch (ex) {
-        console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`)
+        data = await findAll(objectStore.rentalManagement);
+        count = data?.length || 0;
       }
       let rows = data.map((u) => {
         let finalObject = prepareDataForGrid(u, user);
@@ -458,12 +438,6 @@ const RentalManagement = () => {
           ids: recordsToDelete,
         })
         .then(({ data }) => {
-          try {
-            updateOfflineGridData("rentalManagement", [], recordsToDelete);
-          } catch (ex) {
-            console.error(`Rental Management: Error while removing data for Offline context. Error: ${ex.message}`)
-          }
-
           toastConfig.setToastConfig({
             open: true,
             type: "success",

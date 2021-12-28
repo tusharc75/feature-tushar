@@ -28,6 +28,14 @@ export const CustomOfflineProvider = ({ children }) => {
         passDataToSave();
     }, [isOffline])
 
+    window.addEventListener('online', function (e) {
+        setIsOffline(false)
+    });
+
+    window.addEventListener('offline', function (e) {
+        setIsOffline(true)
+    });
+
     const passDataToSave = () => {
         if (!isOffline && localStorage.getItem("offlineDataToSave")) {
             try {
@@ -55,15 +63,7 @@ export const CustomOfflineProvider = ({ children }) => {
             }
         }
     }
-
-    window.addEventListener('online', function (e) {
-        setIsOffline(false)
-    });
-
-    window.addEventListener('offline', function (e) {
-        setIsOffline(true)
-    });
-
+  
     const updateFieldsData = (module, data) => {
         let initializeOfflineData = {}
         initializeOfflineData[module] = {
