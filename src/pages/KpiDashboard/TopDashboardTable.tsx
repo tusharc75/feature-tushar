@@ -12,6 +12,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import { makeStyles } from '@material-ui/core/styles';
 import { Skeleton } from '@material-ui/lab';
+import { useData } from '../../StateProvider/Provider';
 
 const useStyles = makeStyles((theme) => ({
   regionTable: {
@@ -24,6 +25,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates }) => {
+  const {
+    state: { selectedEntity }
+  } = useData();
   const classes = useStyles();
   const [anchorElTable, setAnchorElTable] = useState(null);
   const [regionSales, setRegionSales] = useState([]);
@@ -57,7 +61,7 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates 
 
   useEffect(() => {
     fetchRegionalSalesData();
-  }, [filterCurrency]);
+  }, [filterCurrency, selectedEntity]);
 
   const handleClickTable = (event) => {
     setAnchorElTable(event.currentTarget);

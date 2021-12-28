@@ -36,7 +36,7 @@ import CreateProductCategory from "../ProductCategory/CreateProductCategory";
 import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialog";
 import { useData } from "../../StateProvider/Provider";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
-import {FaDiceOne} from "react-icons/fa";
+import { FaDiceOne } from "react-icons/fa";
 
 const budgetMonths = ["januaryBudget", "februaryBudget", "marchBudget", "aprilBudget", "mayBudget", "juneBudget",
     "julyBudget", "augustBudget", "septemberBudget", "octoberBudget", "novemberBudget", "decemberBudget"]
@@ -64,6 +64,7 @@ export default function ManageBudgetDialog({
     const [formsData, setFormsData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [currencySymbol, setCurrencySymbol] = useState(null);
+    const [currency, setCurrency] = useState(null);
 
     const [showAddProductCategoryDialog, setShowAddProductCategoryDialog] = useState(false);
     const [productCategoryDataSource, setProductCategoryDataSource] = useState([]);
@@ -85,6 +86,7 @@ export default function ManageBudgetDialog({
 
     useEffect(() => {
         getBudgetFields();
+        setCurrency(user.entity.find(d => d._id === selectedEntity).currency);
         setCurrencySymbol(
             getUniqueCurrencies().find(
                 (d) => d.currencyCode === user.entity.find(d => d._id === selectedEntity).currency
@@ -94,7 +96,6 @@ export default function ManageBudgetDialog({
 
     useEffect(() => {
         setFormsData(setFieldsInAscendingOrder(entityData.fields));
-
         if (entityData.initialValues && entityData.initialValues["entity"]) {
             onSalesRepDropdownOpen(entityData.initialValues["entity"])
         }
@@ -374,7 +375,7 @@ export default function ManageBudgetDialog({
                                                 return form.name ? (
                                                     <div key={index1}>
                                                         <div className={"detail-box-content"}>
-                                                            <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                                            <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
                                                             <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
                                                         </div>
                                                         <Box marginY={2}>
@@ -447,7 +448,7 @@ export default function ManageBudgetDialog({
                                                                             ) : budgetMonths.some(d => d === field.fieldName.trim()) ? (
                                                                                 <FormTypes
                                                                                     // {...rest}
-                                                                                    selectedCurrencyCode={values["currency"]}
+                                                                                    selectedCurrencyCode={values["currency"] || currency}
                                                                                     startAdornment={
                                                                                         currencySymbol ? (
                                                                                             <InputAdornment position="start">

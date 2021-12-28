@@ -22,15 +22,15 @@ import { sidebarResource, prepareDataForGrid } from '../../constants/helpers';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { isMobile } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
+import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
 
 let deliveryTicketTimeout;
 
 const DeliveryTicket = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const {
-    state: { user, selectedEntity, permissions }
-  }: any = useData();
+  const { state: { user, selectedEntity, permissions } }: any = useData();
   const { getColumnData } = useColumns();
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -54,54 +54,85 @@ const DeliveryTicket = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
-
-  const fetchGridMetadata = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource['deliveryTicket']}&entity=${selectedEntity}&view=true&showHiddenFields=true`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(deliveryTicketResource, o?.fieldData, `${routes.deliveryTicket.path}/detail`);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-          return o?.fieldData;
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      });
-  };
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
-    fetchGridMetadata();
+    fetchGridColumns();
   }, []);
 
-  const columnState = JSON.parse(localStorage.getItem(deliveryTicketResource));
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId == item.field) {
-          item.show = !d.hide;
+  const fetchGridColumns = async () => {
+    let data;
+    if (isOffline) {
+      data = await findOne(objectStore.resource, objectStore.deliveryTicket)
+    }
+    else {
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}&entity=${selectedEntity}&view=true&showHiddenFields=true`)
+      data = response?.data?.data
+    }
+    let columns = [];
+    let rendererNames = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(deliveryTicketResource, o?.fieldData, `${routes.deliveryTicket.path}/detail`);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName);
         }
-      });
+      }
+      return o?.fieldData;
     });
-  }
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      actionsRenderer: ActionsRenderer
+    };
+    setFrameWorkComponent({ ...tempFrameworkComponent });
+    columns = [...columns, ...getStaticFields()];
+    setColumns([...columns]);
+  };
+
+  const fetchDeliveryTicket = async () => {
+    try {
+      if (selectedEntity) {
+        dispatch({ type: 'loading', loading: true });
+        if (gridApi) {
+          gridApi.setRowData([]);
+        }
+        let data: any = [], count;
+        if (!isOffline) {
+          const queryString = getQueryString();
+          const response: any = await axiosInstance().get(`${deliveryTicketApi}${queryString}`);
+          data = response?.data?.data;
+          count = response?.data?.count;
+        }
+        else {
+          data = await findAll(objectStore.deliveryTicket);
+          count = data?.length || 0;
+        }
+        let rows = data.map((u) => {
+          let res = {
+            ...prepareDataForGrid(u, user)
+          };
+          return res;
+        });
+        if (appendRows) {
+          dispatch({ type: 'initialize', data: [...dataRows, ...rows], count: count });
+        } else {
+          dispatch({ type: 'initialize', data: rows, count: count });
+        }
+        setTimeout(() => { dispatch({ type: 'loading', loading: false }); }, gridLoadingTimeout);
+      }
+    }
+    catch (error) {
+      dispatch({ type: 'loading', loading: false });
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   useEffect(() => {
     if (permissions && permissions.deliveryTicket) {
       setdeliveryPermissions(permissions.deliveryTicket);
     }
-
     return () => {
       setdeliveryPermissions(null);
     };
@@ -112,7 +143,6 @@ const DeliveryTicket = () => {
     if (deliveryTicketTimeout) {
       clearTimeout(deliveryTicketTimeout);
     }
-
     deliveryTicketTimeout = setTimeout(() => {
       fetchDeliveryTicket();
     }, millisec);
@@ -123,6 +153,7 @@ const DeliveryTicket = () => {
       fetchDeliveryTicket();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, filters, sorting, selectedEntity]);
+
 
   const ActionsRenderer = (params) => (
     <>
@@ -143,10 +174,8 @@ const DeliveryTicket = () => {
     switch (field) {
       case 'createdBy':
         return 'createdBy.user.concatedName';
-
       case 'updatedBy':
         return 'updatedBy.user.concatedName';
-
       default:
         return field;
     }
@@ -154,13 +183,10 @@ const DeliveryTicket = () => {
 
   const replaceFieldNameForSorting = (field) => {
     const updatedField = replaceFieldName(field);
-
     if (field !== updatedField) return updatedField;
-
     switch (field) {
       case 'customerAccount':
         return 'customerAccount.optionLabel';
-
       default:
         return field;
     }
@@ -168,14 +194,11 @@ const DeliveryTicket = () => {
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
-
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
-
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
@@ -184,53 +207,16 @@ const DeliveryTicket = () => {
       });
       deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
     }
-
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
-
     return deepFilter;
   };
 
-  const fetchDeliveryTicket = async () => {
-    if (selectedEntity) {
-      dispatch({ type: 'loading', loading: true });
-      const queryString = getQueryString();
 
-      if (gridApi) {
-        gridApi.setRowData([]);
-      }
-
-      axiosInstance()
-        .get(`${deliveryTicketApi}${queryString}`)
-        .then(({ data: { data, count } }) => {
-          let rows = data.map((u) => {
-            let res = {
-              ...prepareDataForGrid(u, user)
-              //  Commenting canDelete because right now we are neither showing checkbox for multiple delete nor delete icon in row
-              //  canDelete: u?.createdBy?.user?._id === user?.user._id,
-            };
-            return res;
-          });
-          if (appendRows) {
-            dispatch({ type: 'initialize', data: [...dataRows, ...rows], count: count });
-          } else {
-            dispatch({ type: 'initialize', data: rows, count: count });
-          }
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
-        })
-        .catch((error) => {
-          dispatch({ type: 'loading', loading: false });
-          toastConfig.setToastConfig(error);
-        });
-    }
-  };
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
@@ -389,9 +375,9 @@ const DeliveryTicket = () => {
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
-              onEdit={() => {}}
+              onEdit={() => { }}
               extraParamsToCheckDelete={true}
-              onDelete={() => {}}
+              onDelete={() => { }}
               rowCount={rowCount}
               page={page}
               loading={loading}
@@ -407,7 +393,7 @@ const DeliveryTicket = () => {
               ]}
               onCreate={null}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={deliveryTicketResource}
             />
           ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -440,9 +426,8 @@ const DeliveryTicket = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : 'Delivery Tickets'}   ${
-                deleteRecord.ticketName || ''
-              }?`}
+              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : 'Delivery Tickets'}   ${deleteRecord.ticketName || ''
+                }?`}
               onClose={() => {
                 if (deleteRecord) setDeleteRecord({});
                 setIsConformDialogVisible(false);

@@ -127,7 +127,7 @@ export default function NewCreateQuotePdfTemplate() {
                 axiosInstance().get(`/field?resource=${resource}`)
                     .then(({ data: { data } }) => {
                         const vars = data.map(field => field.fieldData.fieldName)
-                        setVariables(vars)
+                        setVariables(["entity", ...vars])
                     }).catch(err => {
                         toastConfig.setToastConfig(err)
                     })
