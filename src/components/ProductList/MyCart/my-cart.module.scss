@@ -29,8 +29,8 @@
 .card {
   background: var(--theme-text);
   display: grid;
-  grid-template-columns: minmax(150px, 220px) 1fr;
-  grid-template-rows: minmax(120px, 235px);
+  grid-template-columns: 350px 1fr;
+  // grid-template-rows: minmax(120px, 235px);
   align-items: center;
   // border-radius: 6px;
   // border-bottom: 1px solid lightgray;

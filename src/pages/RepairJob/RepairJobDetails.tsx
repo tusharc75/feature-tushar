@@ -171,7 +171,7 @@ const RepairJobDetails = () => {
     })
   }
 
-  const fetchAssignedSerializedAssets = (passedColumns = null) => {
+  const fetchAssignedSerializedAssets = (passedColumns = null, checkSteps = true) => {
 
     if (passedColumns === null) {
       passedColumns = [...unmodifiedColumns]
@@ -201,7 +201,7 @@ const RepairJobDetails = () => {
           return prepareDataForGrid(u, user);
         });
 
-        if (repairJobData.processStatus) {
+        if (checkSteps && repairJobData.processStatus) {
           if (repairJobData["typeOfRepair"] === "Internal" && repairJobData["plant"].optionValue === repairJobData["repairPlant"].optionValue) {
             setCurrentStep(0)
           } else if (repairJobData["typeOfRepair"] === "Internal" && repairJobData["plant"].optionValue !== repairJobData["repairPlant"].optionValue && rows.some(s => s["repaired"] === true)) {
@@ -487,7 +487,7 @@ const RepairJobDetails = () => {
       .then(() => {
         setDisableNextStep(false)
         if (previousStep === 0) {
-          fetchAssignedSerializedAssets();
+          fetchAssignedSerializedAssets(false);
         }
 
       }).catch((error) => {
