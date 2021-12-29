@@ -546,6 +546,7 @@ export default function ManageAccount(props) {
                                             setIsShippingSameAsBilling(true)
                                           }else{
                                             setIsShippingSameAsBilling(false)
+                                            setFieldValue("shippingAddress",[]);
                                           }
                                          
                                             

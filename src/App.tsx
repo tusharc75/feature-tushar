@@ -102,9 +102,10 @@ import PurchaseOrderDetailsPage from './pages/PurchaseOrder/PurchaseOrderDetails
 import { entity } from './constants/helpers';
 import TransferAsset from './pages/TransferAssets/Index';
 import TransferAssetDetailPage from './pages/TransferAssets/TransferAssetDetailPage';
+import Address from "./pages/Address";
+import AddressDetailPage from './pages/Address/AddressDetailPage'
 import Logout from './pages/Auth/Logout';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
-import Address from './pages/Address';
 
 var notificationInterval: any = null;
 
@@ -554,6 +555,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.address.path}`}>
               <Address />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.addressDetail.path}/:id`}>
+              <AddressDetailPage />
             </PrivateRoute>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
