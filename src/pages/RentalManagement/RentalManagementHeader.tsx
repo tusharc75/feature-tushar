@@ -18,7 +18,7 @@ import HideWhenOffline from "../../components/HideWhenOffline";
 import routes from "../../components/Helpers/Routes";
 import { isMobile } from 'react-device-detect';
 import { MdAdd } from "react-icons/all";
-import { objectStore, insertUpdate } from '../../constants/indexdbhelper';
+import { objectStore, insertUpdate, clearAll } from '../../constants/indexdbhelper';
 import { rentalManagement } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -35,7 +35,6 @@ function RentalManagementHeader(props) {
     onCreate,
     RentalManagementPermissions,
     showConfirmBox,
-    canDelete,
     icon,
     heading,
     children,
@@ -84,7 +83,7 @@ function RentalManagementHeader(props) {
       axiosInstance().get("/field/child?resource=Rental Management Cost").then(({ data: { data } }) => {
         insertUpdate(objectStore.resource, "rentalManagementCost", data);
       })
-      axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}&entity=${selectedEntity}&view=true&showHiddenFields=true`).then(({ data: { data } }) => {
+      axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}&showHiddenFields=true`).then(({ data: { data } }) => {
         insertUpdate(objectStore.resource, objectStore.deliveryTicket, data);
       })
       axiosInstance().get(`/field?resource=Product Inventory&view=true`).then(({ data: { data } }) => {
@@ -93,6 +92,12 @@ function RentalManagementHeader(props) {
     }).catch((error) => {
       toastConfig.setToastConfig(error);
     });
+  }
+
+  const handleRemoveoffline = async () => {
+    await clearAll(objectStore.rentalManagement)
+    await clearAll(objectStore.deliveryTicket)
+    closeActions()
   }
 
   return (
@@ -135,26 +140,25 @@ function RentalManagementHeader(props) {
             </HideWhenOffline>
           </Grid>
           <Grid style={{ display: "flex", gap: "5px" }}>
-            {RentalManagementPermissions.isCreate && RentalManagementPermissions.isUpdate && (
-              <Button
-                variant={isMobile ? "text" : "contained"}
-                color="primary"
-                size="small"
-                // className={styles.add_submit_btn}
-                onClick={onCreate}
-                className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                startIcon={isMobile ? null : <AddOutlined />}
-              >
-                {isMobile ? <MdAdd size={23} /> : "Add"}
-              </Button>
-            )}
-
             <HideWhenOffline>
+              {RentalManagementPermissions.isCreate && RentalManagementPermissions.isUpdate && (
+                <Button
+                  variant={isMobile ? "text" : "contained"}
+                  color="primary"
+                  size="small"
+                  // className={styles.add_submit_btn}
+                  onClick={onCreate}
+                  className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                  startIcon={isMobile ? null : <AddOutlined />}
+                >
+                  {isMobile ? <MdAdd size={23} /> : "Add"}
+                </Button>
+              )}
               {
                 RentalManagementPermissions.isDelete && (
                   <>
                     <Button
-                      disabled={canDelete}
+                      //disabled={canDelete}
                       variant={isMobile ? "text" : "outlined"}
                       color="default"
                       size="small"
@@ -187,7 +191,7 @@ function RentalManagementHeader(props) {
                       </MenuItem> */}
                       {
                         RentalManagementPermissions.isUpdate && <MenuItem
-                          disabled={selectedRecords.find((d) => d.canDelete === false)}
+                          disabled={!selectedRecords.length || selectedRecords.find((d) => d.canDelete === false)}
                           onClick={() => {
                             closeActions();
                             showTransferEntityDialog();
@@ -196,9 +200,14 @@ function RentalManagementHeader(props) {
                       }
                       {
                         <MenuItem
-                          disabled={selectedRecords.find((d) => d.canDelete === false)}
+                          disabled={!selectedRecords.length || selectedRecords.find((d) => d.canDelete === false)}
                           onClick={() => handleAddOffline()}
                         >Add Offline</MenuItem>
+                      }
+                      {
+                        <MenuItem
+                          onClick={() => handleRemoveoffline()}
+                        >Clear All Offline Data</MenuItem>
                       }
                     </Menu>
                   </>
@@ -206,7 +215,6 @@ function RentalManagementHeader(props) {
               }
             </HideWhenOffline>
           </Grid>
-
         </Box>
       </Grid>
     </Grid>
