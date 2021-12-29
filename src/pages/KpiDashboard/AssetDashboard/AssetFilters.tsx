@@ -63,7 +63,7 @@ const AssetFilters = (props: FilterProps) => {
   };
 
   return (
-    <div>
+    <Box>
       <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
         Filters
       </Button>
@@ -164,7 +164,7 @@ const AssetFilters = (props: FilterProps) => {
           </Box>
         </Box>
       </Popover>
-    </div>
+    </Box>
   );
 };
 

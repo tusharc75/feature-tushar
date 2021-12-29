@@ -1,5 +1,6 @@
 import React from 'react';
-import { Grid, Box, useMediaQuery, useTheme, CircularProgress, Typography } from '@material-ui/core';
+import { Grid, Box, useMediaQuery, useTheme, CircularProgress, Typography, TextField } from '@material-ui/core';
+import { Autocomplete } from '@material-ui/lab';
 
 import axiosInstance from '../../../axios/axiosInstance';
 import MapView from './MapView';
@@ -14,13 +15,19 @@ export type FilterType = {
 };
 
 const AssetDashboard = ({ salesFilter }) => {
-  const { state: { selectedEntity } } = useData()
-  const { between: { from, to } } = salesFilter
+  const {
+    state: { selectedEntity }
+  } = useData();
+  const {
+    between: { from, to }
+  } = salesFilter;
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [assetLocationData, setAssetLocationData] = React.useState([]);
   const [assetUtilizationData, setAssetUtilizationData] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
+  const [loadingChartData, setLoadingChartData] = React.useState(false);
+  const [limit, setLimit] = React.useState('10');
   const [filter, setFilter] = React.useState<FilterType>({
     productCategory: [],
     productDescription: [],
@@ -33,17 +40,16 @@ const AssetDashboard = ({ salesFilter }) => {
     let timeout: ReturnType<typeof setTimeout> = null;
 
     if (timeout) {
-      clearTimeout(timeout)
+      clearTimeout(timeout);
     }
     timeout = setTimeout(() => {
       fetchLocationBase();
-    }, 200)
+    }, 200);
 
     return () => {
-      timeout = null
-      setLoading(false)
-    }
-
+      timeout = null;
+      setLoading(false);
+    };
   }, [filter, selectedEntity]);
 
   const fetchLocationBase = () => {
@@ -68,15 +74,9 @@ const AssetDashboard = ({ salesFilter }) => {
       });
   };
 
-
-
-
   React.useEffect(() => {
-
     fetchAssetsData();
-
-  }, [from, to, selectedEntity]);
-
+  }, [from, to, selectedEntity, limit]);
 
   const fetchAssetsData = () => {
     let params = {
@@ -95,25 +95,35 @@ const AssetDashboard = ({ salesFilter }) => {
       }
     }
 
-    setLoading(true);
+    setLoadingChartData(true);
 
     axiosInstance()
-      .get(`/dashboard/assets-total-in-use?limit=5&page=0&${url}`)
+      .get(`/dashboard/assets-total-in-use?limit=${limit}&page=0&${url}`)
       .then(({ data: { data } }) => {
         setAssetUtilizationData(data.data);
-        setLoading(false);
+        setLoadingChartData(false);
       })
       .catch(() => {
-        setLoading(false);
+        setLoadingChartData(false);
       });
   };
 
-
-
   return (
     <div>
-      <Box mb={1} minWidth={'300px'}>
+      <Box mb={1} display="flex" justifyContent="space-between" alignItems={'center'} height={50}>
         <AssetFilters filter={filter} setFilter={setFilter} loading={loading} />
+        <Box>
+          <Autocomplete
+            options={['10', '20', '50', '100', '200']}
+            value={limit}
+            onChange={(_, val) => setLimit(val ? val : "10")}
+            style={{ width: 100 }}
+            loading={loadingChartData}
+            getOptionSelected={(option, val) => option === val}
+            getOptionLabel={(option) => option}
+            renderInput={(params) => <TextField {...params} variant="outlined" label="Limit" size="small" />}
+          />
+        </Box>
       </Box>
       <Box position={'relative'} width={'100%'}>
         {loading && (
@@ -138,7 +148,7 @@ const AssetDashboard = ({ salesFilter }) => {
             <MapView smallScreen={smallScreen} data={assetLocationData} loading={loading} />
           </Grid>
           <Grid item xs={12} md={6}>
-            <AssetChart loading={loading} data={assetUtilizationData} />
+            <AssetChart loading={loading || loadingChartData} data={assetUtilizationData} />
           </Grid>
         </Grid>
       </Box>
