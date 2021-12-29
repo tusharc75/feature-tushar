@@ -14,7 +14,6 @@ Object.keys(sidebarResource).forEach((key) => {
     })
 })
 
-// This context provider is passed to any component requiring the context
 export const CustomOfflineProvider = ({ children }) => {
 
     const toastConfig = useContext(CustomToastContext);
@@ -27,6 +26,18 @@ export const CustomOfflineProvider = ({ children }) => {
     useEffect(() => {
         passDataToSave();
     }, [isOffline])
+
+    window.addEventListener(
+        'load',
+        function (e) {
+            if (navigator.onLine) {
+                if (isOffline) setIsOffline(false);
+            } else {
+                setIsOffline(true);
+            }
+        },
+        false
+    );
 
     window.addEventListener('online', function (e) {
         setIsOffline(false)
@@ -63,7 +74,7 @@ export const CustomOfflineProvider = ({ children }) => {
             }
         }
     }
-  
+
     const updateFieldsData = (module, data) => {
         let initializeOfflineData = {}
         initializeOfflineData[module] = {

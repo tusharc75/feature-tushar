@@ -24,7 +24,6 @@ import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
-import { FaSuitcase } from "react-icons/fa";
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { getRentalProductAssets, getRentalDeliveryTicket } from './../rentalOfflineHelper';
@@ -190,7 +189,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         color="primary"
         type="button"
         size="small"
-        disabled={downlodingFile}
+        disabled={downlodingFile || isOffline}
         startIcon={<AiFillFilePdf />}
       >
         {downlodingFile ? "Please wait..." : "Preview"}

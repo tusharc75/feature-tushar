@@ -1321,7 +1321,6 @@ export function treeToFlatArray(array, childrenProperty) {
   return result;
 }
 
-
 export const arrayToDropwdownOption = (array) => {
   const option: any = []
   array?.forEach((element, index) => {
@@ -1333,3 +1332,19 @@ export const arrayToDropwdownOption = (array) => {
   });
   return option;
 }
+
+export const INVENTORY_STATUS = {
+  customer: 'With Customer',
+  supplier: 'With Supplier',
+  reserved: 'Reserved',
+  inSale: 'In Sale',
+  inUse: 'In-Use',
+  indTransit: 'In-Transit',
+  underRevives: 'Under Review',
+  repair: 'Repair',
+  available: 'Available',
+  readyToShip: 'Ready to ship',
+  new: 'New',
+  scrap: 'Scrap',
+  lost: 'Lost',
+};

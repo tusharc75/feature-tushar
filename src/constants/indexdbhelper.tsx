@@ -4,7 +4,8 @@ const DB_NAME = "OMS";
 export const objectStore = {
     rentalManagement: 'rentalManagement',
     deliveryTicket: 'deliveryTicket',
-    resource: 'resource'
+    resource: 'resource',
+    offlineDataSync: 'offlineDataSync'
 };
 
 export const setUpindexDB = () => {
@@ -58,5 +59,14 @@ export const deleteOne = (store, key) => {
         var db = event.target.result;
         var transaction = db.transaction([store], "readwrite");
         transaction.objectStore(store).delete(key);
+    };
+};
+
+export const clearAll = (store) => {
+    var db = indexedDB.open(DB_NAME, 1);
+    db.onsuccess = function (event: any) {
+        var db = event.target.result;
+        var transaction = db.transaction([store], "readwrite");
+        transaction.objectStore(store).clear();
     };
 };
