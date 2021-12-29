@@ -156,6 +156,7 @@ export default function CustomAgGridEditable({
   saveColumnOptions = false,
   showOnlyShowFilteredRecordSwitch = false,
   priceTemplateField = [],
+  fromPurchaseOrderGridReceivingAsset = false
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -389,7 +390,7 @@ export default function CustomAgGridEditable({
                 }
                 return false;
               }}
-              pinnedBottomRowData={fromProductGrid || forProductBuilder || fromPurchaseOrderGrid ? createdPinnedData() : []}
+              pinnedBottomRowData={fromProductGrid || forProductBuilder || fromPurchaseOrderGrid || fromPurchaseOrderGridReceivingAsset ? createdPinnedData() : []}
               enableCellChangeFlash={false}
               defaultColDef={{
                 resizable: true,
