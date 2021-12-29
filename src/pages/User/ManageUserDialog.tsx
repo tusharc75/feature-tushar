@@ -151,7 +151,7 @@ export default function ManageUserDialog({
           // if (redirectToDetailsScreen) {
           history.push({
             pathname: `/user/detail/${newId}`,
-            search: user?.user?.userType === userType.brandAdmin ? '?userSetup=true' : '',
+            search: '?userSetup=true',
             state: { location: location },
           });
           close();

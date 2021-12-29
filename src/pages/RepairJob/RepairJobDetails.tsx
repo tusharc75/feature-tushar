@@ -120,7 +120,6 @@ const RepairJobDetails = () => {
 
         } else {
           setLocationKeys((keys) => [location.key, ...keys])
-          console.log(tab)
           // Handle back event
           setTabValue(tab ? parseInt(tab) : 1)
 

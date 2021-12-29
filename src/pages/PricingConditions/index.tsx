@@ -77,8 +77,6 @@ const PricingConditions = () => {
           return o?.fieldData;
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        console.log(rendererNames);
-        console.log(columns);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
           actionsRenderer: ActionsRenderer

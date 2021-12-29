@@ -509,6 +509,7 @@ const PurchaseOrderDetailsPage = () => {
                         setOpenUpdateDialog(false);
                         fetchPurchaseOrderData()
                     }}
+                    currencyDisable={Boolean(purchaseOrderProduct.length > 0) || Boolean(currentStep > 0)}
                 />
             }
         </>

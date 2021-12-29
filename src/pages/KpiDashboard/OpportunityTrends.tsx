@@ -2,8 +2,13 @@ import { useState, useCallback, useEffect } from 'react';
 import Chart from 'react-chartjs-2';
 import { Grid, Box, Paper, Typography } from '@material-ui/core';
 import axiosInstance from '../../axios/axiosInstance';
+import { useData } from '../../StateProvider/Provider';
+
 
 const OpportunityTrends = (props) => {
+  const {
+    state: { selectedEntity }
+  } = useData();
   const { salesFilter, moment } = props;
   const [oppTrends, setOppTrends] = useState({
     labels: [],
@@ -16,7 +21,7 @@ const OpportunityTrends = (props) => {
 
   const fetchOppTrends = useCallback(() => {
     let params = {
-      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
+      entity: selectedEntity || '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -98,8 +103,8 @@ const OpportunityTrends = (props) => {
           ]
         });
       })
-      .catch((err) => {});
-  }, [salesFilter.entity, salesFilter.between]);
+      .catch((err) => { });
+  }, [salesFilter, selectedEntity]);
 
   useEffect(() => {
     fetchOppTrends();
@@ -107,7 +112,7 @@ const OpportunityTrends = (props) => {
 
   const fetctCreatedLeads = useCallback(() => {
     let params = {
-      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
+      entity: selectedEntity || '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -158,8 +163,8 @@ const OpportunityTrends = (props) => {
           ]
         });
       })
-      .catch((err) => {});
-  }, [salesFilter.entity, salesFilter.between]);
+      .catch((err) => { });
+  }, [selectedEntity, salesFilter.between]);
 
   useEffect(() => {
     fetctCreatedLeads();

@@ -46,6 +46,8 @@ import { CustomOfflineContext } from '../../StateProvider/OfflineContext/Offline
 import { GridApi } from 'ag-grid-community';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { MdAdd } from 'react-icons/all';
+import {IoFilterCircle,  MdFilterList, MdSort} from "react-icons/all";
+import { FaSuitcase } from 'react-icons/fa';
 
 const AccTypes = [
   {
@@ -965,6 +967,35 @@ export default function Account(props) {
                 <span id="resourceHeader" className="listingHeader">
                   {routes[accountResource].title}
                 </span>
+                {isMobile && <>
+        <Button
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        color="secondary"
+        variant="text"
+        disableElevation
+        startIcon={<MdSort />}
+        style={{marginLeft:"50px"}}
+      >
+        Sort 
+        </Button>
+
+        <Button
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        variant="text"
+        color="secondary"
+        disableElevation
+        startIcon={<MdFilterList />}
+      >
+        Filter 
+        </Button>
+        </>}
+        
                 {isOffline ? (
                   <></>
                 ) : (
@@ -1043,6 +1074,9 @@ export default function Account(props) {
               </div>
             </Grid>
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1 " justify={isMobile ? 'flex-start' : 'flex-end'}>
+              
+          
+              
               <div
                 id="resourceOperations"
                 className={`${isMobile ? accountClass.mobile_filter_side_header : accountClass.account_header} ${accountClass['account_header-mobile']
@@ -1220,16 +1254,37 @@ export default function Account(props) {
               rowCount={rowCount}
               page={page}
               loading={loading}
-              additionalDetails={[]}
+              additionalDetails={[
+                {
+                  icon: <FaSuitcase size={18} />,
+                  field: "parentAccount"
+                },
+                
+
+              ]}
               chips={
                 [
+                  {
+                      label: "Website:",
+                      field: "website",
+                  },
                   // {
-                  //     label: "Serial Number : ",
-                  //     field: "serialNumber",
+
+                  //     logo: "accountLogo:",
+                  //     field: "accountLogo",
+
                   // },
                 ]
               }
-              owerCollaboratorInitialsOrImages=""
+              // avatarLogo={[
+              //   {
+
+              //     label: "accountLogo:",
+              //     field: "accountLogo",
+
+              // }
+              // ]}
+              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={true}
               onClone={(data) => {

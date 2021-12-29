@@ -2,6 +2,51 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.29.0](https://github.com/vebholic/oms_frontend/compare/v2.28.0...v2.29.0) (2021-12-29)
+
+
+### Features
+
+* **dashboard:** changes for in charts ([212e93d](https://github.com/vebholic/oms_frontend/commit/212e93df8b1567b4d10e21c5ebedc29cbeb59a02))
+* renal offline ([5e90640](https://github.com/vebholic/oms_frontend/commit/5e90640a5ac34d2f9b02475ec2f8a98b8ba53b12))
+* rental offline ([87a8f29](https://github.com/vebholic/oms_frontend/commit/87a8f2912a92abedac45b2bc6b8e7a211ec240ba))
+* version status grid change ([bd4e327](https://github.com/vebholic/oms_frontend/commit/bd4e3275839998e0611c316f189a95be937c9c43))
+
+
+### Bug Fixes
+
+* **account bugs:** account bugs ([b878252](https://github.com/vebholic/oms_frontend/commit/b8782526c90f7fdb4bdf4a323d4dcde7e3f95668))
+* **accounts:** multiple approive bug fix ([4c39c4c](https://github.com/vebholic/oms_frontend/commit/4c39c4cd2c8fe6cff8519f5e532d971e37cb1334))
+* budget fix ([e913ed7](https://github.com/vebholic/oms_frontend/commit/e913ed763f89c5d7af34d8ccc47a23399b5f28d4))
+* bug fix ([74f439f](https://github.com/vebholic/oms_frontend/commit/74f439f351c45013c49f91a39185c2a27a348a5b))
+* **dashboard:** chart fix ([c2c569b](https://github.com/vebholic/oms_frontend/commit/c2c569bf4b6176192f958431817b0dd98eae9690))
+* **dashboard:** entity change fix ([686a0af](https://github.com/vebholic/oms_frontend/commit/686a0af0689cf8343085692923b1eeeceff1cd5d))
+* **dashboard:** font size fix ([48306eb](https://github.com/vebholic/oms_frontend/commit/48306eb33203e8760941b6c223b5451f5951e2af))
+* **pdftemplate:** entity variable in options ([0502e4f](https://github.com/vebholic/oms_frontend/commit/0502e4ff46f2e6af87700715eb7a0fd92c529661))
+* purchase order reciving asset step color ([814c61a](https://github.com/vebholic/oms_frontend/commit/814c61ae7b259046826d5636d87de23605597b3f))
+* viersion grid changes ([badc65e](https://github.com/vebholic/oms_frontend/commit/badc65e71570bd994874a87fae1988b287f6ec01))
+
+## [2.28.0](https://github.com/vebholic/oms_frontend/compare/v2.27.2...v2.28.0) (2021-12-28)
+
+
+### Features
+
+* **address detail:** address detail ([bee4e5d](https://github.com/vebholic/oms_frontend/commit/bee4e5df4c6cfd612e9661a53382520f49416298))
+* **address listing:** address listing ([5a2cdd4](https://github.com/vebholic/oms_frontend/commit/5a2cdd419c5de59c526b831ad22ed68a500cac84))
+* **address:** address ([b6147a3](https://github.com/vebholic/oms_frontend/commit/b6147a388203aa93274336bb4b3c688aa3647f58))
+
+
+### Bug Fixes
+
+* **address error:** address error ([a7bf395](https://github.com/vebholic/oms_frontend/commit/a7bf395c8422c5a0cd9cb055ae11ea9c37a78e77))
+* assignQuantityProduct text field add PO-708 ([d35c2cd](https://github.com/vebholic/oms_frontend/commit/d35c2cd879d8a8ae54763d05cf7690e3225a1e95))
+* **bugs:** bugs ([523c019](https://github.com/vebholic/oms_frontend/commit/523c0197ce891a46332d38779fb06764c5b2d4d0))
+* date field edit not showing today date fixed ([65482d4](https://github.com/vebholic/oms_frontend/commit/65482d49234862c4deebb102e7f2fc4b2991f03a))
+* due date issue fixed in case and task ([2a22150](https://github.com/vebholic/oms_frontend/commit/2a22150a6732840729604eb77fa3c3b98faefb5b))
+* **error:** error ([1faa928](https://github.com/vebholic/oms_frontend/commit/1faa92882b369f0e113b441ed9b5839d28ec34b1))
+* on child task parent name showing on top (code comented) ([6d0ea46](https://github.com/vebholic/oms_frontend/commit/6d0ea4662395e73c678ba187b6b3ab77aa4e3577))
+* quote doa setup issue ([79cd6e6](https://github.com/vebholic/oms_frontend/commit/79cd6e643a1047b345332e0fa80e5b2104c5583d))
+
 ### [2.27.2](https://github.com/vebholic/oms_frontend/compare/v2.27.1...v2.27.2) (2021-12-27)
 
 ### [2.27.1](https://github.com/vebholic/oms_frontend/compare/v2.27.0...v2.27.1) (2021-12-26)

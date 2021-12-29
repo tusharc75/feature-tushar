@@ -30,6 +30,7 @@ import { isMobile } from "react-device-detect";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { GrStatusInfo } from "react-icons/all";
 import MenuItem from "@material-ui/core/MenuItem"
+import { objectStore, insertUpdate, findAll, findOne } from '../../constants/indexdbhelper';
 
 import Productpackage from './Productpackage';
 import AdditionalCost from './AdditionalCost';
@@ -41,8 +42,9 @@ import Invoice from './Invoice';
 const rentalProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Ready To Invoice'];
 
 const RentalManagementDetailsPage = () => {
+
   const toastConfig = useContext(CustomToastContext);
-  const { isOffline, offlineFieldsData, offlineGridData, updateOfflineGridData } = useContext(CustomOfflineContext);
+  const { isOffline, updateOfflineGridData } = useContext(CustomOfflineContext);
 
   const { id } = useParams();
   const history = useHistory();
@@ -86,14 +88,12 @@ const RentalManagementDetailsPage = () => {
 
         } else {
           setLocationKeys((keys) => [location.key, ...keys])
-          console.log(tab)
           // Handle back event
           setTabValue(tab ? parseInt(tab) : 0)
-
         }
       }
     })
-  }, [locationKeys,])
+  }, [locationKeys])
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity);
@@ -119,7 +119,7 @@ const RentalManagementDetailsPage = () => {
   }, [id]);
 
   useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
+    if (!isOffline && currentStep !== null && currentStep >= 0 && currentStep <= 5) {
       updateProcessStatus(rentalProcessSteps[currentStep])
     }
   }, [currentStep]);
@@ -142,19 +142,19 @@ const RentalManagementDetailsPage = () => {
         const response: any = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}`);
         data = response?.data?.data;
       } else {
-        data = offlineGridData?.rentalManagement?.find((d) => d._id === id);
+        data = await findOne(objectStore.rentalManagement, id)
       }
-      if (localStorage.getItem('offlineDataToSave')) {
-        const offlineDataToSave = JSON.parse(localStorage.getItem('offlineDataToSave'));
-        if (offlineDataToSave['rentalManagement']) {
-          setIsInOfflineSaveQueue(offlineDataToSave['rentalManagement'].some((d) => d.values._id === id));
-        }
-      }
-      try {
-        updateOfflineGridData('rentalManagement', [data], []);
-      } catch (ex) {
-        console.error(`Rental Management: Error while adding/updating data for Offline context. Error: ${ex.message}`);
-      }
+      // if (localStorage.getItem('offlineDataToSave')) {
+      //   const offlineDataToSave = JSON.parse(localStorage.getItem('offlineDataToSave'));
+      //   if (offlineDataToSave['rentalManagement']) {
+      //     setIsInOfflineSaveQueue(offlineDataToSave['rentalManagement'].some((d) => d.values._id === id));
+      //   }
+      // }
+      // try {
+      //   updateOfflineGridData('rentalManagement', [data], []);
+      // } catch (ex) {
+      //   console.error(`Rental Management: Error while adding/updating data for Offline context. Error: ${ex.message}`);
+      // }
       setCurrentStep(rentalProcessSteps.indexOf(data?.processStatus) !== -1 ? rentalProcessSteps.indexOf(data?.processStatus) : 0);
       handleMainPoints(data);
       setHeadingLbl(data.rentalJobName);
@@ -188,7 +188,8 @@ const RentalManagementDetailsPage = () => {
         })
         setRentalManagementFields(response?.data?.data);
       } else {
-        setRentalManagementFields(offlineFieldsData?.rentalManagement);
+        const response: any = await findOne(objectStore.resource, objectStore.rentalManagement)
+        setRentalManagementFields(response);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -203,11 +204,6 @@ const RentalManagementDetailsPage = () => {
     axiosInstance()
       .put(`${rentalManagement.rentalManagementApi}/remove`, { ids: [rentalManagementData._id] })
       .then(() => {
-        try {
-          updateOfflineGridData('rentalManagement', [], [rentalManagementData._id]);
-        } catch (ex) {
-          console.error(`Rental Management: Error while removing data for Offline context. Error: ${ex.message}`);
-        }
         setShowConfirmBox(false);
         history.goBack();
       })
@@ -274,12 +270,12 @@ const RentalManagementDetailsPage = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={headingLbl} mainPoints={mainPoints} showHeading={true}>
-                  {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
+                  {(permissions?.rentalManagement?.isUpdate && allowedToEdit && !isOffline) && (
                     <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                       Edit
                     </Button>
                   )}
-                  {permissions?.rentalManagement?.isUpdate && allowedToEdit && (
+                  {(permissions?.rentalManagement?.isUpdate && allowedToEdit && !isOffline) && (
                     <Button className="buttonStyleSmallScreen" variant="text" color="primary" size="small" onClick={handleOpenUpdateDialog} style={isMobile ? { color: "#43aeaa" } : {}}>
                       <BiEdit size={20} />
                     </Button>

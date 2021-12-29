@@ -22,6 +22,8 @@ import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { prepareDataForGrid } from "../../../constants/helpers";
 import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "../../../constants/columns"
 import { GrBusinessService } from "react-icons/all";
+import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
+import { objectStore, findOne } from '../../../constants/indexdbhelper';
 
 const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
 
@@ -36,33 +38,50 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
 
     const [showCostDialog, setShowCostDialog] = useState(false)
     const [selectedCostData, setSelectedCostData] = useState(null)
+    const { isOffline } = useContext(CustomOfflineContext);
 
     useEffect(() => {
-        fetchAdditionalCost();
+        fetchFields()
     }, []);
 
-    useEffect(() => {
-        axiosInstance().get("/field/child?resource=Rental Management Cost").then(({ data: { data } }) => {
-            const fields = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
-            let rendererNames = [];
-            genrateColoum(fields, columns, rendererNames, false);
-            let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-            tempFrameworkComponent = {
-                commonRenderer: CommonRenderer,
-                actionsRenderer: ActionsRenderer,
-                ...tempFrameworkComponent,
-            }
-            setFrameWorkComponent({ ...tempFrameworkComponent })
-            setColumns([...columns])
-        })
-    }, []);
-
-    const fetchAdditionalCost = () => {
-        dispatch({ type: "loading", loading: true });
-        if (gridApi) {
-            gridApi.setRowData([]);
+    const fetchFields = async () => {
+        var data = []
+        if (isOffline) {
+            data = await findOne(objectStore.resource, "rentalManagementCost")
         }
-        axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`).then(({ data: { data } }) => {
+        else {
+            const response = await axiosInstance().get(`/field/child?resource=Rental Management Cost`)
+            data = response?.data?.data
+        }
+        const fields = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
+        let rendererNames = [];
+        genrateColoum(fields, columns, rendererNames, false);
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+            commonRenderer: CommonRenderer,
+            actionsRenderer: ActionsRenderer,
+            ...tempFrameworkComponent,
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        setColumns([...columns])
+        fetchAdditionalCost();
+    }
+
+    const fetchAdditionalCost = async () => {
+        try {
+            dispatch({ type: "loading", loading: true });
+            if (gridApi) {
+                gridApi.setRowData([]);
+            }
+            var data: any = []
+            if (isOffline) {
+                data = await findOne(objectStore.rentalManagement, rentalManagementData._id)
+                data = data?.additionalCost
+            }
+            else {
+                const response = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`)
+                data = response?.data?.data
+            }
             let rows = data?.map((item) => {
                 let res: any = {
                     ...prepareDataForGrid(item),
@@ -72,14 +91,15 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
             setNextStep(true)
             dispatch({ type: "initialize", data: rows, count: rows.length });
             dispatch({ type: "loading", loading: false });
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
+        }
+        catch (error) {
             dispatch({ type: "loading", loading: false });
-        });
+            toastConfig.setToastConfig(error);
+        }
     };
 
     const ActionsRenderer = (params) => (
-        <>
+        !isOffline && <Fragment>
             <HtmlTooltip title="Edit">
                 <IconButton
                     size="small"
@@ -101,7 +121,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                 }}
                 entity="rentalManagement"
             />
-        </>
+        </Fragment>
     );
 
     const handleAddCost = (rows) => {
@@ -141,6 +161,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                         variant={isMobile ? "outlined" : "contained"}
                         color="primary"
                         size="small"
+                        disabled={isOffline}
                         onClick={() => {
                             setShowCostDialog(true);
                             setSelectedCostData(null)

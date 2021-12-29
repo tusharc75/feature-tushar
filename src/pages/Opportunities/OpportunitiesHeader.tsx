@@ -1,5 +1,6 @@
-import { useState } from "react";
+import React ,{ useState, useRef, useEffect } from "react";
 import SearchBox from "../../components/Helpers/SearchBox";
+import MobileFilterDialog from "../../components/MobileFilterDialog";
 import {
   AddOutlined,
 } from "@material-ui/icons";
@@ -11,8 +12,20 @@ import {
   Menu,
   MenuProps,
   styled, 
-  alpha
+  alpha,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Slide,
+  Divider,
+  Radio,
+  RadioGroup,
+  FormControl,
+  FormControlLabel
 } from "@material-ui/core";
+import { TransitionProps } from '@material-ui/core/transitions';
 import { ExpandMore } from "@material-ui/icons";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
@@ -35,16 +48,47 @@ const StyledMenu = styled((props: MenuProps) => (
   />
 ))
 
-function OpportunitiesHeader(props) {
-  const [anchorEl, setAnchorEl] = useState(null);
 
-  const open = Boolean(anchorEl);
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement<any, any>;
+  },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
+
+function OpportunitiesHeader(props) {
+  const ref = useRef(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleClose = () => {
-    setAnchorEl(null);
+
+  const [isOpenDialog, setisOpenDialog] = useState(false)
+
+
+
+  const handleOpen = () => {
+    setisOpenDialog(true);
   };
+
+  const handleClose = () => {
+    setisOpenDialog(false);
+  };
+
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClickClose = () => {
+    setOpen(false);
+  };
+
+
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -53,6 +97,25 @@ function OpportunitiesHeader(props) {
   const closeActions = () => {
     setAnchorEl(null);
   };
+  const [show, setShow] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  useEffect(() => {
+    const checkIfClickedOutside = e => {
+      // If the menu is open and the clicked target is not within the menu,
+      // then close the menu
+      if (isMenuOpen && ref.current && !ref.current.contains(e.target)) {
+        setIsMenuOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", checkIfClickedOutside)
+
+    return () => {
+      // Cleanup the event listener
+      document.removeEventListener("mousedown", checkIfClickedOutside)
+    }
+  }, [isMenuOpen])
 
   const [filter, setFilter] = useState("All Opportunities");
 
@@ -79,18 +142,38 @@ function OpportunitiesHeader(props) {
     children,
     showTransferEntityDialog
   } = props;
+
+
+  let toggleInner = options && (
+    <ToggleButtonGroup
+      size="small"
+      className=" toggle-button-layout"
+      value={filter}
+      exclusive
+      onChange={handleFilter}
+    >
+      {options.map((k, index) => {
+        return (
+          <ToggleButton value={k.key} key={index}>
+            {k.key}
+          </ToggleButton>
+        );
+      })}
+    </ToggleButtonGroup>
+  );
   return (
-    <Grid className={styles.filter_side_container} container>
+    <Grid className={styles.filter_side_container} container >
       <Grid item xs={12} md={6} sm={6} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
         <div className="d-flex align-items-center">
         {icon} <span className="listingHeader">{heading}</span>
         </div>
         {isMobile ? <div className="d-flex ">
         <Button
+        onClick={handleClickOpen}
         id="demo-customized-button"
         aria-controls="demo-customized-menu"
         aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
+        // aria-expanded={open ? 'true' : undefined}
         color="secondary"
         variant="text"
         disableElevation
@@ -98,19 +181,66 @@ function OpportunitiesHeader(props) {
       >
         Sort 
         </Button>
+        <Dialog
+        open={open}
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={handleClickClose}
+        aria-describedby="alert-dialog-slide-description"
+        className="mobile-filter-root"
+      >
+        <div className={styles.mobile_filter_content}>
+        <DialogTitle className={styles.sort_title}>{"Sort By"}</DialogTitle>
+        <Divider/>
+        <DialogContent >
+        <FormControl component="fieldset">
+       <RadioGroup
+        aria-label="sort"
+        name="radio-buttons-group"
+        className={styles.radio_label}
+      >
+        <FormControlLabel  value="Owner" control={<Radio />} label={<h5 style={{paddingBottom:"1px" , color:"#5F5F5F"}}>Owner/Collaborater</h5>}  />
+        <FormControlLabel value="Date by" control={<Radio />} label={<h5 style={{paddingBottom:"1px" , color:"#5F5F5F"}}>Date By</h5>} />
+        <FormControlLabel value="Customer Account" control={<Radio />} label={<h5 style={{paddingBottom:"1px" , color:"#5F5F5F"}}>Account</h5>}/>
+        <FormControlLabel value="Status" control={<Radio />} label={<h5 style={{paddingBottom:"1px" , color:"#5F5F5F"}}>Status</h5>} />
+      </RadioGroup>
+    </FormControl>     
+                 
+   
+        </DialogContent>
+        </div>
+      </Dialog>
 
         <Button
         id="demo-customized-button"
         aria-controls="demo-customized-menu"
         aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
+        // aria-expanded={open ? 'true' : undefined}
         variant="text"
         color="secondary"
         disableElevation
         startIcon={<MdFilterList />}
+        onClick={handleOpen}
       >
         Filter 
         </Button>
+
+
+        <MobileFilterDialog
+        isOpen={isOpenDialog}
+        handleClose={handleClose}
+        contentPart={toggleInner}
+        secHeading={["Select Opportunities"]}
+        />
+
+
+   
+   
+        
+
+      
+
+
         </div> : options && (
           <ToggleButtonGroup
             size="small"

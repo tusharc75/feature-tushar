@@ -79,22 +79,23 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
             >
                 {params.value}
             </Link>
+            <Box padding={1}></Box>
             <HtmlTooltip title="Serialized Asset">
-            {
-                (params.data.actualReceived !== 0 || params.data.actualReceived !== undefined) &&
-                <span className="d-flex align-items-center gap-2">
-                    <Chip label="Asset"
-                        size="small"
-                        color="primary"
-                        onClick={() => history.push(`${routes.productInventory.path}`, {
-                            productId: params.data?.productId,
-                            productName: params.data?.productDescription,
-                            pOId: purchaseOrderData?._id,
-                            pOName: purchaseOrderData?.purchaseOrderNumber,
-                        })}
-                    />
-                </span>
-            }
+                {
+                    (params.data.actualReceived !== 0 || params.data.actualReceived !== undefined) &&
+                    <span className="d-flex align-items-center gap-2">
+                        <Chip label="Asset"
+                            size="small"
+                            color="primary"
+                            onClick={() => history.push(`${routes.productInventory.path}`, {
+                                productId: params.data?.productId,
+                                productName: params.data?.productDescription,
+                                pOId: purchaseOrderData?._id,
+                                pOName: purchaseOrderData?.purchaseOrderNumber,
+                            })}
+                        />
+                    </span>
+                }
             </HtmlTooltip>
 
         </>
@@ -343,8 +344,8 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                             renderedFrom="purchaseOrderDetailsPageReceivingAsset"
                             onCellValueChanged={(row) => {
                             }}
-                            fromPurchaseOrderGrid={true}
                             currency={purchaseOrderData?.currency?.toLowerCase()}
+                            fromPurchaseOrderGridReceivingAsset={true}
                         />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                     }

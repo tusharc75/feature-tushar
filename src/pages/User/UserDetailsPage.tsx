@@ -1317,6 +1317,7 @@ const UserDetailsPage = () => {
           fetchUsers={() => fetchUsers()}
           userList={userList}
           selectedRecords={[{ ...userData }]}
+          isRoleSetUpPermission = {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && permissions?.user?.isUpdate}
         />
       }
       {

@@ -42,7 +42,6 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
     const [charge, setCharge] = useState([]);
 
     const [initialData, setInitialData] = useState(null);
-    console.log(conditionData)
     useEffect(() => {
         if (isBulkedit) {
             let unitArray: any = []
@@ -112,7 +111,6 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
         }
         delete values.productDetail;
         delete values.packageDetail;
-        console.log(values)
         if (isBulkedit) {
             conditionData.forEach(element => {
                 data.push({ ...element, ...values })

@@ -49,9 +49,10 @@ import { isMobile } from 'react-device-detect';
 import { quoteStepColors } from '../../constants/helpers';
 import InfiniteScroll from "react-infinite-scroll-component";
 import { FaSuitcase } from "react-icons/fa";
-import { AiFillCrown } from "react-icons/all";
+import { AiFillCrown, BiDollar } from "react-icons/all";
 import IconButton from "@material-ui/core/IconButton";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { styles } from "@material-ui/pickers/views/Calendar/Calendar";
 
 let quoteTimeout;
 const QuoteType = [
@@ -119,80 +120,7 @@ const QuoteBuilders = () => {
   const [clonedData, setClonedData] = useState([])
   const [clonedId, setClonedId] = useState(null)
 
-  const [versionStatusData, setVersionStatusData] = useState({
-    columns: [
-      {
-        field: "versionNumber", headerName: "Version #", flex: .75,
-        renderCell: (params: any) => (
-          <span
-            title={params.value}
-          >
-            {params.value}
-          </span>
-        ),
-      },
-      {
-        field: "status", headerName: "Status", flex: 1,
-        renderCell: (params: any) => (
-          <span
-            title={params.value}
-            className="text-truncate link"
-            onClick={() => {
-              history.push(`quotes/detail/${params.row._id}`, {
-                versionNumber: `${params.row.versionNumber}`,
-                tabValue: 1
-              })
-            }}
-          >
-            {params.value}
-          </span>
-        ),
-      },
-      {
-        field: "comment", headerName: "Comment", flex: 1,
-        renderCell: (params: any) => (
-          <Typography
-            title={params.value}
-            className="text-truncate"
-          >
-            {params.value}
-          </Typography>
-        ),
-      },
-      {
-        field: "processStatus", headerName: "Current Step", flex: 1,
-        renderCell: (params: any) => (
-          <Typography
-            title={params.value}
-          >
-            {params.value}
-          </Typography>
-        ),
-      },
-
-      {
-        field: "totalCost", headerName: "Total Cost", flex: 1,
-        renderCell: (params: any) => (
-          <span>
-            {params.value}
-          </span>
-        ),
-      },
-      {
-        field: "totalSalesPrice",
-        headerName: "Total Sales Price",
-        flex: 1,
-        renderCell: (params: any) => (
-          <span
-          >
-            {params.value}
-          </span>
-        ),
-      },
-      // { field: "processStatus", headerName: "ProcessStatus" }
-    ],
-    data: [],
-  });
+  const [versionStatusData, setVersionStatusData] = useState([]);
 
   const { qbApi } = quoteBuilder;
 
@@ -375,38 +303,25 @@ const QuoteBuilders = () => {
     axiosInstance()
       .get(`/quote-builder/quote-hierarchy/${id}`)
       .then(({ data: { data } }) => {
-        //   toastConfig.setToastConfig({
-        //     open: true,
-        //     type: "success",
-        //     message: "Data Retreived successfully",
-        // });
-        // setShowVersionsDialog(true);
-        let quoteId = id;
         const newData = data.versions.map((d, index) => {
           return {
             ...d,
             id: index + 1,
             versionNumber: index + 1,
-            _id: quoteId,
+            quoteId: id,
             totalCost: formatAmountWithCurrency(
               currency,
-              d.productData.totalCost
+              d?.productData?.totalCost
             ).fullFormatAmount,
             totalSalesPrice: formatAmountWithCurrency(
               currency,
-              d.productData.totalSalesPrice
+              d?.productData?.totalSalesPrice
             ).fullFormatAmount,
-            comment: d.comment ? d.comment : "",
+            comment: d.comment || "",
           };
         });
 
-        setVersionStatusData((prevState) => {
-          return {
-            ...prevState,
-            data: newData,
-          }
-
-        });
+        setVersionStatusData(newData);
         setLoadingVersions(false);
         // setAllVersionStatusButtonText("All Version Status");
       })
@@ -974,6 +889,10 @@ const QuoteBuilders = () => {
                     icon: <FaSuitcase size={18} />,
                     field: "customerAccountName"
                   },
+                  { 
+                    icon: <BiDollar size={18} />,
+                    field:"estimatedAmount"
+                  }
                 ]}
                 chips={[
                   {
@@ -988,7 +907,16 @@ const QuoteBuilders = () => {
                     label: "Status: ",
                     field: "status",
                     chipColorVariable: quoteStepColors
-                  }
+                  },
+                  {
+                    label:"Market:",
+                    field:"marketSegment"
+                  },
+                  {
+                    label:"Sub-Market:",
+                    field:"subMarketSegment"
+                  },
+
                 ]}
                 owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                 onCreate={false}
@@ -1084,11 +1012,11 @@ const QuoteBuilders = () => {
           open={showVersionsDialog}
           onClose={() => {
             setShowVersionsDialog(false);
-            setVersionStatusData((prevState) => ({ ...prevState, data: [] }))
+            setVersionStatusData([])
           }}
         >
           {
-            versionStatusData.data.length === 0 ?
+            versionStatusData.length === 0 ?
               <CommonSkeleton lenArray={arr} />
               :
               <VersionStatus loadingVersions={loadingVersions} versionStatusData={versionStatusData} />

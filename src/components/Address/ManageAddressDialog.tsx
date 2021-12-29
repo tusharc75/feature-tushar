@@ -19,7 +19,7 @@ import { FaDiceOne } from 'react-icons/fa';
 
 const ManageAddressDialog = (props) => {
   const toastConfig = useContext(CustomToastContext);
-  const { onClose, onSuccess } = props;
+  const { onClose, onSuccess, isEdit, isClone, addressData: oldData, title } = props;
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [formsData, setFormsData] = useState([]);
@@ -41,11 +41,39 @@ const ManageAddressDialog = (props) => {
     axiosInstance()
       .get(`/field?resource=Address`)
       .then(({ data: { data } }) => {
-        const fieldsData = data.filter((d) => d.isCreate).map((d: any) => d.fieldData);
-        setInitialData({
-          fields: fieldsData,
-          values: getObjKeys('', fieldsData)
-        });
+        const fieldsCreateData = data.filter((d) => d.isCreate).map((d: any) => d.fieldData);
+        const fieldsEditData = data.filter((d) => d.isUpdate).map((d: any) => d.fieldData);
+        let dataAddress: any = {}
+        if ((isEdit || isClone) && oldData) {
+          dataAddress = {
+            fullAddress: oldData.fullAddress ?? "",
+            streetAddress: oldData.streetAddress ?? "",
+            additionalComments: oldData.additionalComments ?? "",
+            city: oldData.city ?? "",
+            country: oldData.country ?? "",
+            ["state/Province"]: oldData["state/Province"] ?? "",
+            ["zipCode/PostalCode"]: oldData["zipCode/PostalCode"] ?? "",
+            longitude: oldData.longitude ?? "",
+            latitude: oldData.latitude ?? "",
+          }
+        }
+
+        if (isEdit) {
+          setInitialData({
+            fields: fieldsEditData,
+            values: getObjKeysWithValues(dataAddress, fieldsEditData)
+          })
+        } else if (isClone) {
+          setInitialData({
+            fields: fieldsCreateData,
+            values: getObjKeysWithValues(dataAddress, fieldsCreateData)
+          });
+        } else {
+          setInitialData({
+            fields: fieldsCreateData,
+            values: getObjKeys('', fieldsCreateData)
+          });
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -187,7 +215,7 @@ const ManageAddressDialog = (props) => {
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={'Add Address'}
+                title={title}
                 onClose={() => {
                   if (
                     isFieldNotTouched(
@@ -197,9 +225,8 @@ const ManageAddressDialog = (props) => {
                       },
                       values
                     )
-                  )
-                    onClose();
-                  else setShowConfirmDialog(true);
+                  ) { onClose(); }
+                  else { setShowConfirmDialog(true); }
                 }}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -294,9 +321,8 @@ const ManageAddressDialog = (props) => {
                         },
                         values
                       )
-                    )
-                      onClose();
-                    else setShowConfirmDialog(true);
+                    ) { onClose(); }
+                    else { setShowConfirmDialog(true); }
                   }}
                 >
                   Cancel

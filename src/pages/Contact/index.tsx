@@ -42,6 +42,7 @@ import { isMobile } from 'react-device-detect';
 import { MdEmail } from 'react-icons/md';
 import queryString from 'query-string';
 import {MdAdd} from "react-icons/all";
+import {IoFilterCircle,  MdFilterList, MdSort} from "react-icons/all";
 
 const ContactTypes = [
   {
@@ -75,6 +76,7 @@ export default function Contact(props) {
   } = props;
   const [selectedType, setSelectedType] = useState(1);
   const [count, setCount] = useState(0);
+  const [open, setOpen] = useState(false);
   const [checkColName, setCheckColName] = useState('');
   const [checkColValue, setCheckColValue] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
@@ -697,6 +699,35 @@ export default function Contact(props) {
                   <span id="resourceHeader" className="listingHeader">
                     {routes[contactResource].title}
                   </span>
+                  {isMobile && <>
+        <Button
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        color="secondary"
+        variant="text"
+        disableElevation
+        startIcon={<MdSort />}
+        style={{marginLeft:"40px"}}
+      >
+        Sort 
+        </Button>
+
+        <Button
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        variant="text"
+        color="secondary"
+        disableElevation
+        startIcon={<MdFilterList />}
+      >
+        Filter 
+        </Button>
+        </>}
+        
                 </Grid>
                 <Grid>
                   {ContactTypes && (
@@ -727,10 +758,10 @@ export default function Contact(props) {
               </Grid>
             </Grid>
             <Grid item md={6} sm={6} xs={12} className={styles.filter_side}>
-              <Box id="resourceOperations" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" style={{ flex: 1 }}>
+              <Box id="resourceOperations" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{display: "flex", flex:1}}>
                   <SearchBox
-                      onSearch={handleSearch}
+                    onSearch={handleSearch}
                     searchbox={styles.search_box_input}
                     value={search}
                     size="small"
