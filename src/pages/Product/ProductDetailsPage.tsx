@@ -317,12 +317,12 @@ const ProductDetailsPage = () => {
         if (activeTable === "parent") {
             rowsData = parent ? parent.map(product => ({
                 ...product,
-                serializedProduct: product.serializedProduct ? "Yes" : "No",
-                productType: product.productType,
-                createdBy: product.createdBy.user.concatedName,
-                createdByDate: product.createdBy.date,
-                updatedBy: product.updatedBy.user.concatedName,
-                updatedByDate: product.updatedBy.date,
+                serializedProduct: product?.serializedProduct ? "Yes" : "No",
+                productType: product?.productType,
+                createdBy: product?.createdBy?.user?.concatedName,
+                createdByDate: product?.createdBy?.date,
+                updatedBy: product?.updatedBy?.user?.concatedName,
+                updatedByDate: product?.updatedBy?.date,
             })) : []
             newColumns = [
                 { field: "productName", headerName: "Product Description", show: true, disabled: false, cellRenderer: "productNameRenderer" },
