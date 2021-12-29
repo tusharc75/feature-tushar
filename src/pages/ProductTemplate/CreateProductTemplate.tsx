@@ -1,8 +1,18 @@
 import { useState, useEffect, useContext, Fragment, useRef } from "react";
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import CircularProgress from '@material-ui/core/CircularProgress';
+
+import {
+    Box,
+    Grid,
+    Typography,
+    Button,
+    Menu,
+    MenuItem,
+    IconButton,
+    CircularProgress,
+    makeStyles,
+    useMediaQuery
+} from "@material-ui/core";
+
 import { useParams, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { FormBuilder } from "../../components/FormBuilder";
@@ -26,6 +36,37 @@ import { productTemplate } from "../../constants/helpers"
 import HistoryButton from "../../components/Helpers/HistoryButton";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { isEqual } from "lodash";
+import { IoIosArrowDropdown } from "react-icons/io";
+import { isMobile } from "react-device-detect";
+ 
+
+
+
+const useStyles = makeStyles((theme) => ({
+    linksContainer: {
+        display: "flex",
+        justifyContent: "flex-end",
+        ["@media (max-width: 960px)"]: {
+            display: "none",
+        },
+    },
+    menuButtonList:{
+        alignItems:"flex-start",
+        padding: "1px"
+    },
+    delBtn: {
+        color: "red",
+    },
+    expandIcon: {
+        position: "absolute",
+        right: "0",
+        color: "white"
+    }
+
+}));
+
+
+
 
 const ProductTemplateSchema = object().shape({
     name: string()
@@ -40,6 +81,9 @@ const ProductTemplate = () => {
     const history = useHistory();
     const { id } = useParams();
     const toastConfig = useContext(CustomToastContext)
+
+    const classes = useStyles();
+    const isMobile = useMediaQuery("(max-width: 960px)");
 
     const [isClone] = useState(history.location.state?.isClone ? true : false);
     const [isUpdating, setIsUpdating] = useState(false);
@@ -56,6 +100,16 @@ const ProductTemplate = () => {
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
     const ref = useRef(null);
+
+    const [anchorEl, setAnchorEl] = useState(null);
+
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
     const {
         state: { user, permissions, selectedEntity },
@@ -275,7 +329,7 @@ const ProductTemplate = () => {
 
     return (<Fragment>
         <Grid container className="headerbox">
-            <Grid item md={4} sm={11} xs={10}>
+            <Grid item md={6} sm={11} xs={10}>
                 <CustomBreadCrumbs
                     routes={[{ title: routes.productTemplate.title, path: routes.productTemplate.path }, { title: id === "0" || isClone ? "New" : initialValues && initialValues.name }]}
                     isConfirmBeforeClick={hasPermissionToUpdate}
@@ -292,7 +346,9 @@ const ProductTemplate = () => {
                     }}
                 />
             </Grid>
-            <Grid container justify="flex-end" item md={8} sm={1} xs={2}>
+            <Grid container justify="flex-end" item md={6} sm={1} xs={2} className="pr-3">
+
+            <div className={classes.linksContainer}>
                 <label htmlFor="importField" style={{ color: "white" }} className="cursor-pointer mr-3">
                     Import Fields
                     <input
@@ -308,11 +364,61 @@ const ProductTemplate = () => {
                         type="file"
                     />
                 </label>
-                <label style={{ color: "white" }} className="cursor-pointer" onClick={handleExportFields}>
+                <label 
+                    style={{ color: "white" }} 
+                    className="cursor-pointer" 
+                    onClick={handleExportFields}
+                    >
                     Export Fields
                 </label>
                 <a id="downloadAnchorElem" style={{ display: "none" }}></a>
+
+
+                </div>
+
+                <Menu
+                    id="importField"
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                >
+                    <MenuItem
+                    >
+                        <label
+                            htmlFor="importField"
+                            className="cursor-pointer"
+                        >
+                            Import Fields
+                            <input
+                                onClick={(e: any) => (e.target.value = null)}
+                                id="importField"
+                                name="importField"
+                                onChange={handleImportFields}
+                                style={{
+                                    opacity: "0",
+                                    position: "absolute",
+                                    zIndex: -1,
+                                }}
+                                type="file"
+                            />
+                        </label>
+
+                    </MenuItem>
+                    <MenuItem
+                        onClick={handleExportFields}
+                    >
+                        Export Fields
+                    </MenuItem>
+                    {/* <MenuItem>Email a Link</MenuItem> */}
+                </Menu>
+                {isMobile && (
+                    <IconButton onClick={handleClick} className={classes.menuButtonList}>
+                        <IoIosArrowDropdown className={classes.expandIcon} />
+                    </IconButton>
+                )}
             </Grid>
+           
         </Grid>
         <CustomContainer>
             {(initialValues && productCategory) ?

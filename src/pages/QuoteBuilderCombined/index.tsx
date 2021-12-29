@@ -49,9 +49,10 @@ import { isMobile } from 'react-device-detect';
 import { quoteStepColors } from '../../constants/helpers';
 import InfiniteScroll from "react-infinite-scroll-component";
 import { FaSuitcase } from "react-icons/fa";
-import { AiFillCrown } from "react-icons/all";
+import { AiFillCrown, BiDollar } from "react-icons/all";
 import IconButton from "@material-ui/core/IconButton";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { styles } from "@material-ui/pickers/views/Calendar/Calendar";
 
 let quoteTimeout;
 const QuoteType = [
@@ -888,6 +889,10 @@ const QuoteBuilders = () => {
                     icon: <FaSuitcase size={18} />,
                     field: "customerAccountName"
                   },
+                  { 
+                    icon: <BiDollar size={18} />,
+                    field:"estimatedAmount"
+                  }
                 ]}
                 chips={[
                   {
@@ -902,7 +907,16 @@ const QuoteBuilders = () => {
                     label: "Status: ",
                     field: "status",
                     chipColorVariable: quoteStepColors
-                  }
+                  },
+                  {
+                    label:"Market:",
+                    field:"marketSegment"
+                  },
+                  {
+                    label:"Sub-Market:",
+                    field:"subMarketSegment"
+                  },
+
                 ]}
                 owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                 onCreate={false}

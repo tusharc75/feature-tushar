@@ -1,0 +1,17 @@
+.mobile-filter-root{
+    top: unset !important;
+    margin: 0px !important;
+    width: 100%;
+    
+    & .MuiDialog-paper{
+        margin: 0 !important;
+        border-radius: 20px 20px 0 0 ;
+        width: 100%;
+    }
+}
+.mobile-filter-content{
+    height: 400px;
+}
+.sub-filter-heading{
+    color: var(--secondary);
+}

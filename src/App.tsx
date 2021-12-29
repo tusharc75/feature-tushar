@@ -105,6 +105,7 @@ import TransferAssetDetailPage from './pages/TransferAssets/TransferAssetDetailP
 import Logout from './pages/Auth/Logout';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 var notificationInterval: any = null;
+import Address from './pages/Address';
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -548,6 +549,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.transferAssetDetail.path}/:id`}>
               <TransferAssetDetailPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.address.path}`}>
+              <Address />
             </PrivateRoute>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}

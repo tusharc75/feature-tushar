@@ -68,7 +68,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
           setInitialValues(data);
           setFormValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       let initialData = {
         name: '',
@@ -329,9 +329,12 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                           )}
                         </Grid>
                       </Grid>
-                      <Box mt={2}>
-                        <RelatedToDispay relatedTo={initialValues.relatedTo} />
-                      </Box>
+                      {
+                        id &&
+                        (<Box mt={2}>
+                          <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                        </Box>)
+                      }
                       {id && (
                         <Box mt={2}>
                           <Divider />

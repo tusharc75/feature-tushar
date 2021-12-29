@@ -70,6 +70,7 @@ export const quoteStepColors = {
   "__default__": { backgroundColor: "#023e7d", color: "#fff" }
 }
 
+
 export const roleTypes = [
   {
     key: 'Global',
