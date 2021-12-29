@@ -17,7 +17,7 @@ const CustomBreadCrumbs = ({
         : <Link to="/" className={`${"cursor-pointer"} ${"setLink"}`}>
           Home
         </Link>
-    }
+    } 
 
     {
       routes.map((route, index) => {
@@ -25,7 +25,7 @@ const CustomBreadCrumbs = ({
           isConfirmBeforeClick ?
             <Typography
               key={index}
-              className={`${"cursor-pointer"} ${"setLink"}`}
+              className={`${"cursor-pointer"} ${"setLink"} `}
               onClick={() => onBreadCrumbClick(route.path)}>
               {route.title}
             </Typography>
@@ -33,7 +33,7 @@ const CustomBreadCrumbs = ({
             <Link
               key={index}
               to={route.path}
-              className={`${"cursor-pointer"} ${"setLink"}`} >
+              className={`${"cursor-pointer"} ${"setLink"} `} >
               {route.title}
             </Link>
 
@@ -42,7 +42,7 @@ const CustomBreadCrumbs = ({
             if (route?.hasOnClick) {
               onRouteClick()
             }
-          }} key={index} className={`${"cursor-pointer"} ${"setLink"} ${'text-truncate'}`} >
+          }} key={index} className={`${"cursor-pointer"} ${"setLink"} ${'text-truncate'} ${'detail-heading-bread-crumb'}`} >
           {route.title}
         </Typography>
 

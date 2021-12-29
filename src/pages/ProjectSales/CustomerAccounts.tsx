@@ -126,8 +126,8 @@ const useStyles = makeStyles((theme) => ({
     // borderRadius:"40px !important",
     // backgroundColor:"#F5F5F5 !important",
     "&.Mui-selected":{
-      borderRight: "5px solid #047D1C !important",
-      color:"#047D1C !important",
+      backgroundColor: "#43AEAA !important",
+      color:"#ffff !important",
         borderBottom:"0px solid #808080 !important",
       borderTop:"0px solid #808080 !important"
 
