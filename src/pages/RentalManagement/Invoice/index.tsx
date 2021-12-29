@@ -109,7 +109,6 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
     try {
       if (isOffline) {
         const result= await findOne(objectStore.rentalManagement, rentalManagementData._id);
-        console.log(result)
         material = result?.material;
         additionalcost = result?.additionalCost;
       }
