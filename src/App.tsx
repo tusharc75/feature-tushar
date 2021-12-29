@@ -104,8 +104,10 @@ import TransferAsset from './pages/TransferAssets/Index';
 import TransferAssetDetailPage from './pages/TransferAssets/TransferAssetDetailPage';
 import Logout from './pages/Auth/Logout';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
-var notificationInterval: any = null;
 import Address from './pages/Address';
+
+var notificationInterval: any = null;
+
 
 function App() {
   const toast = useContext(CustomToastContext);
