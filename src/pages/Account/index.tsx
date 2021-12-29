@@ -1224,13 +1224,22 @@ export default function Account(props) {
               rowCount={rowCount}
               page={page}
               loading={loading}
-              additionalDetails={[]}
+              additionalDetails={[
+                 {
+                  //  field:"accountLogo"
+                 }
+
+              ]}
               chips={
                 [
-                  // {
-                  //     label: "Serial Number : ",
-                  //     field: "serialNumber",
-                  // },
+                  {
+                      label: "Website : ",
+                      field: "website",
+                  },
+                  {
+                    label: "Parent Account: ",
+                    field: "parentAccount",
+                },
                 ]
               }
               owerCollaboratorInitialsOrImages=""

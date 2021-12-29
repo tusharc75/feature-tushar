@@ -83,6 +83,7 @@ export default function ManageAccount(props) {
   const [isAccDialogVisible, setIsAccDialogVisible] = useState(false)
   const [addressDataSource, setAddressDataSource] = useState([]);
   const [addressType, setAddressType] = useState(null);
+  const [isShippingSameAsBilling, setIsShippingSameAsBilling] =useState(false)
   useEffect(() => {
     if (isNew) {
       const processSteps = accountData.fields.find(
@@ -541,6 +542,13 @@ export default function ManageAccount(props) {
                                             field.fieldName,
                                             e.target.checked
                                           );
+                                          if(isShippingSameAsBilling === false){
+                                            setIsShippingSameAsBilling(true)
+                                          }else{
+                                            setIsShippingSameAsBilling(false)
+                                          }
+                                         
+                                            
                                           if (
                                             e.target.checked &&
                                             values.billingAddress
@@ -1022,6 +1030,15 @@ export default function ManageAccount(props) {
                               order: addressDataSource.length + 1,
                             }]);
                             setFieldValue(addressType.address, [...values[`${addressType.address}`], obj._id]);
+                            if(isShippingSameAsBilling === true){
+                              if(addressType.address === "billingAddress"){
+                                setFieldValue("shippingAddress", [...values[`${addressType.address}`], obj._id]);
+                              }else{
+                                setFieldValue("billingAddress", [...values[`${addressType.address}`], obj._id]);
+                              }
+                             
+                            }
+                            
                           }
                         }}
                       />

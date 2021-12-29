@@ -183,6 +183,65 @@ a {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.detail-heading-bread-crumb{
+  max-width: 185px;
+}
+
+.filter-list-layout{
+  background-color:  rgba(0, 0, 0, 0.3);
+  position: absolute;
+  top: 0;
+  width: 100%;
+  right: 0;
+  height: 100%;
+  z-index: 15;
+}
+.sub-filter-layout{
+  position: relative;
+  top:50%;
+  height: 400px;
+  background-color: var(--white);
+  border-radius: 20px 20px 0 0;
+  padding: 15px 20px;
+  
+}
+.filter-item-1{
+  background-color: #C7E7E6;
+  border: 1px solid #43AEAA;
+  border-radius: 10px;
+  color: var(--primary);
+  font-weight: 600;
+}
+.filter-item-2{
+  background-color: #F4F4F4;
+  border-radius: 10px;
+  color: var(--primary);
+  font-weight: 600;
+}
+.toggle-button-layout{
+  .MuiToggleButton-sizeSmall{
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    padding: 8px 16px !important;
+    border-radius: 10px !important;
+    background-color: #F4F4F4;
+    color: var(--primary);
+  }
+  .MuiToggleButton-root.Mui-selected{
+     margin: 0 5px  ;
+     padding: 8px 16px !important;
+     background-color: #C7E7E6 !important;
+  border: 1px solid #43AEAA !important;
+  }
+  .MuiToggleButtonGroup-groupedHorizontal:not(:first-child){
+    margin: 0 5px  ;
+    padding: 8px 16px !important;
+  }
+  .MuiToggleButtonGroup-groupedHorizontal:not(:last-child){
+    margin: 0 5px  ;
+    padding: 8px 16px !important;
+  }
+}
 
 #img-avatar {
   vertical-align: middle;
@@ -679,7 +738,8 @@ body::-webkit-scrollbar-thumb {
 
 }
 .dynamic-vertical-tab{
-  border: 1px solid grey;
+  border: 2px solid #43AEAA;
+  border-radius: 10px 0 0 10px;
   padding:15px 0 ;
   margin-right: -1px ;
  
@@ -939,6 +999,10 @@ body::-webkit-scrollbar-thumb {
 .search_box_layout{
   margin-left: 5px ;
   justify-content: flex-end;
+}
+.chip-color{
+  background-color: burlywood;
+  color: rgb(141, 141, 141);
 }
 
 @supports (not (gap: 0.25rem)) and (not (-webkit-gap: 0.25rem)) {
@@ -1244,7 +1308,8 @@ body::-webkit-scrollbar-thumb {
 .tabpanel_layout{
   flex:1;
   padding: 0 10px;
-  border: 1px solid #808080 ;
+  border: 2px solid #43AEAA ;
+  border-radius: 0 10px 10px 0;
   margin-left: -0.4px;
 
 }
