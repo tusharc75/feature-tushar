@@ -129,7 +129,7 @@ function PricingConditionsDetailsPage() {
     //     data.customer = [];
     //     data.warehouse = [];
     //     axiosInstance().post(pricingConditionApi + `/calculatePrice`, data).then(({ data: { data } }) => {
-    //         console.log(data)
+    //         
     //     })
     // }, []);
 
