@@ -1,6 +1,7 @@
 import React from 'react';
-import { Grid, Box, useMediaQuery, useTheme, CircularProgress, Typography, TextField } from '@material-ui/core';
+import { Grid, Box, useMediaQuery, useTheme, CircularProgress, Typography, TextField, Paper, Card, CardContent } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
+import { startCase } from 'lodash';
 
 import axiosInstance from '../../../axios/axiosInstance';
 import MapView from './MapView';
@@ -28,6 +29,7 @@ const AssetDashboard = ({ salesFilter }) => {
   const [loading, setLoading] = React.useState(false);
   const [loadingChartData, setLoadingChartData] = React.useState(false);
   const [limit, setLimit] = React.useState('10');
+  const [assetStats, setAssetStats] = React.useState(null);
   const [filter, setFilter] = React.useState<FilterType>({
     productCategory: [],
     productDescription: [],
@@ -76,6 +78,7 @@ const AssetDashboard = ({ salesFilter }) => {
 
   React.useEffect(() => {
     fetchAssetsData();
+    loadAssetsData();
   }, [from, to, selectedEntity, limit]);
 
   const fetchAssetsData = () => {
@@ -108,6 +111,17 @@ const AssetDashboard = ({ salesFilter }) => {
       });
   };
 
+  const loadAssetsData = () => {
+    axiosInstance()
+      .post('product-inventory/inventory-stats', {
+        ids: []
+      })
+      .then(({ data: { data } }) => {
+        setAssetStats(data);
+      })
+      .catch((err) => {});
+  };
+
   return (
     <div>
       <Box mb={1} display="flex" justifyContent="space-between" alignItems={'center'} height={50}>
@@ -116,7 +130,7 @@ const AssetDashboard = ({ salesFilter }) => {
           <Autocomplete
             options={['10', '20', '50', '100', '200']}
             value={limit}
-            onChange={(_, val) => setLimit(val ? val : "10")}
+            onChange={(_, val) => setLimit(val ? val : '10')}
             style={{ width: 100 }}
             loading={loadingChartData}
             getOptionSelected={(option, val) => option === val}
@@ -151,6 +165,31 @@ const AssetDashboard = ({ salesFilter }) => {
             <AssetChart loading={loading || loadingChartData} data={assetUtilizationData} />
           </Grid>
         </Grid>
+        <Box my={2} bgcolor={"#f5f5f5"} px={1}>
+          <Grid container spacing={2}>
+            {assetStats &&
+              Object.keys(assetStats).map((stat: any) => (
+                <Grid item xs={12} sm={4} md={3}>
+                  <Card>
+                    <CardContent>
+                      <Typography color="textSecondary" gutterBottom>
+                        {startCase(stat)}
+                      </Typography>
+                      <Typography variant="h5" component="h2">
+                        {assetStats[stat] ?? 0}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                  {/* <Paper elevation={2}>
+                   <Box p={1} height={150}>
+                    <Typography color='textSecondary' variant='h6'>{startCase(stat)}:</Typography>
+                    <Typography color='primary' variant='h5'>{assetStats[stat] ?? 0}</Typography>
+                   </Box>
+                 </Paper> */}
+                </Grid>
+              ))}
+          </Grid>
+        </Box>
       </Box>
     </div>
   );
