@@ -189,7 +189,7 @@ function RentalManagementHeader(props) {
                       >
                         Delete
                       </MenuItem> */}
-                      {
+                      {/* {
                         RentalManagementPermissions.isUpdate && <MenuItem
                           disabled={!selectedRecords.length || selectedRecords.find((d) => d.canDelete === false)}
                           onClick={() => {
@@ -197,7 +197,7 @@ function RentalManagementHeader(props) {
                             showTransferEntityDialog();
                           }}
                         >Transfer Entity</MenuItem>
-                      }
+                      } */}
                       {
                         <MenuItem
                           disabled={!selectedRecords.length || selectedRecords.find((d) => d.canDelete === false)}

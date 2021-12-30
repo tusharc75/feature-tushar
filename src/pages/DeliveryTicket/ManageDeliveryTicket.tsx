@@ -398,7 +398,8 @@ const ManageDeliveryTicket = (props) => {
         if (isOffline) {
             setSubmitting(true);
             const data: any = restoreObjKeysWithValues(values, initialData.fields)
-            await createDeliveryTicketOffline(data)
+            const oridata = JSON.parse(JSON.stringify(values));
+            await createDeliveryTicketOffline(data, oridata)
             onSuccess()
             setSubmitting(false);
         }
@@ -486,7 +487,8 @@ const ManageDeliveryTicket = (props) => {
                                     onClose()
                                 }
                             }}
-                            title={`${deliveryTicketId ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ""}` : "Create Delivery Ticket"}`}
+                            title={`${deliveryTicketId ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ""}` 
+                            : `Create ${initialData.values?.ticketType} Ticket`}`}
                             isMinimized={!fullScreen}
                             onMinimizeMaximize={() => {
                                 setFullScreen(prevState => !prevState)
