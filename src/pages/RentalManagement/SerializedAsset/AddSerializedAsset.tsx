@@ -44,7 +44,6 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
 
     const fetchGridColumns = () => {
         axiosInstance().get("/field?resource=Product Inventory").then(({ data: { data } }) => {
-            console.log(data)
             let columns = []
             let rendererNames = []
             data.forEach(o => {
@@ -65,7 +64,6 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
             }
             setFrameWorkComponent({ ...tempFrameworkComponent })
             columns = [...columns, ...getStaticFields()]
-            console.log(columns)
             setColumns([...columns])
         })
     }
